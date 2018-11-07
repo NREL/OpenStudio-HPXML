@@ -522,13 +522,13 @@ class EnergyPlusValidator
         
             ## [HWDistType=Standard]
             '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Standard' => {
-                'PipingLength' => zero_or_one, # Uses Reference Home if not provided
+                'PipingLength' => zero_or_one, # Uses ERI Reference Home if not provided
             },
             
             ## [HWDistType=Recirculation]
             '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation' => {
                 'ControlType' => one,
-                'RecirculationPipingLoopLength' => zero_or_one, # Uses Reference Home if not provided
+                'RecirculationPipingLoopLength' => zero_or_one, # Uses ERI Reference Home if not provided
                 'BranchPipingLoopLength' => one,
                 'PumpPower' => one,
             },
@@ -568,7 +568,7 @@ class EnergyPlusValidator
         # [ClothesWasher]
         '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => {
             'SystemIdentifier' => one, # Required by HPXML schema
-            '[ModifiedEnergyFactor | IntegratedModifiedEnergyFactor]' => zero_or_one, # Uses Reference Home if neither provided; otherwise see [CWType=UserSpecified]
+            '[ModifiedEnergyFactor | IntegratedModifiedEnergyFactor]' => zero_or_one, # Uses ERI Reference Home if neither provided; otherwise see [CWType=UserSpecified]
         },
         
             ## [CWType=UserSpecified]
@@ -586,7 +586,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => {
             'SystemIdentifier' => one, # Required by HPXML schema
             '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity"]' => one,
-            '[EnergyFactor | CombinedEnergyFactor]' => zero_or_one, # Uses Reference Home if neither provided; otherwise see [CDType=UserSpecified]
+            '[EnergyFactor | CombinedEnergyFactor]' => zero_or_one, # Uses ERI Reference Home if neither provided; otherwise see [CDType=UserSpecified]
         },
         
             ## [CDType=UserSpecified]
@@ -599,7 +599,7 @@ class EnergyPlusValidator
         # [Dishwasher]
         '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => {
             'SystemIdentifier' => one, # Required by HPXML schema
-            '[EnergyFactor | RatedAnnualkWh]' => zero_or_one, # Uses Reference Home if neither provided; otherwise see [DWType=UserSpecified]
+            '[EnergyFactor | RatedAnnualkWh]' => zero_or_one, # Uses ERI Reference Home if neither provided; otherwise see [DWType=UserSpecified]
         },
         
             ## [DWType=UserSpecified]
@@ -612,7 +612,7 @@ class EnergyPlusValidator
         # [Refrigerator]
         '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => {
             'SystemIdentifier' => one, # Required by HPXML schema
-            'RatedAnnualkWh' => zero_or_one, # Uses Reference Home if not provided
+            'RatedAnnualkWh' => zero_or_one, # Uses ERI Reference Home if not provided
         },
         
         
@@ -621,7 +621,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => {
             'SystemIdentifier' => one, # Required by HPXML schema
             '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity"]' => one,
-            'IsInduction' => zero_or_one, # Uses Reference Home if not provided; otherwise see [CRType=UserSpecified]
+            'IsInduction' => zero_or_one, # Uses ERI Reference Home if not provided; otherwise see [CRType=UserSpecified]
         },
         
             ## [CRType=UserSpecified]
@@ -633,7 +633,7 @@ class EnergyPlusValidator
         
         # [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting' => {
-            'LightingFractions' => zero_or_one, # Uses Reference Home if not provided; otherwise see [LtgType=UserSpecified]
+            'LightingFractions' => zero_or_one, # Uses ERI Reference Home if not provided; otherwise see [LtgType=UserSpecified]
         },
         
             ## [LtgType=UserSpecified]

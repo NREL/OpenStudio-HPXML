@@ -3,23 +3,27 @@ require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils'
+require 'json'
 
 class HPXMLTranslatorTest < MiniTest::Test
 
   def test_valid_simulations
-    Dir["#{File.dirname(__FILE__)}/valid*.xml"].sort.each do |xml|
-      puts xml
-      _test_measure(xml)
+    this_dir = File.dirname(__FILE__)
+    
+    args_hash = {}
+    args_hash['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
+    args_hash['epw_output_path'] = File.absolute_path(File.join(this_dir, "in.epw"))
+    args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
+    
+    Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
+      puts "Testing #{xml}..."
+      args_hash['hpxml_path'] = File.absolute_path(File.join(this_dir, xml))
+      _test_measure(args_hash)
+      _test_simulation(args_hash)
     end
   end
 
-  def _test_measure(hpxml_name)
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(File.dirname(__FILE__), hpxml_name))
-    args_hash['weather_dir'] = File.join(File.dirname(__FILE__), "..", "weather")
-    args_hash['epw_output_path'] = File.join(File.dirname(__FILE__), "in.epw")
-    args_hash['osm_output_path'] = File.join(File.dirname(__FILE__), "in.osm")
-    
+  def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLTranslator.new
     
@@ -53,8 +57,45 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   end
   
-  def _test_simulation
+  def _test_simulation(args_hash)
   
+    # Get EPW path
+    hpxml_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
+    weather_wmo = XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO")
+    epw_path = nil
+    CSV.foreach(File.join(args_hash['weather_dir'], "data.csv"), headers:true) do |row|
+      next if row["wmo"] != weather_wmo
+      epw_path = File.absolute_path(File.join(args_hash['weather_dir'], row["filename"]))
+      break
+    end
+    refute_nil(epw_path)
+        
+    # Create osw
+    osw_path = File.join(File.dirname(__FILE__), "in.osw")
+    workflow = OpenStudio::WorkflowJSON.new
+    workflow.setWeatherFile(epw_path)
+    workflow.addMeasurePath("../../")
+    steps = OpenStudio::WorkflowStepVector.new
+    measure_dirname = File.absolute_path(File.dirname("../../")).split('/')[-1]
+    step = OpenStudio::MeasureStep.new(measure_dirname)
+    args_hash.each do |arg, val|
+      step.setArgument(arg, val)
+    end
+    steps.push(step)
+    workflow.setWorkflowSteps(steps)
+    workflow.saveAs(osw_path)
+    
+    cli_path = OpenStudio.getOpenStudioCLI
+    cmd = "\"#{cli_path}\" --no-ssl run -w \"#{osw_path}\""
+    system(cmd)
+    
+    # Ensure success
+    out_osw = File.join(File.dirname(__FILE__), "out.osw")
+    assert(File.exists?(out_osw))
+    
+    data_hash = JSON.parse(File.read(out_osw))
+    assert_equal(data_hash["completed_status"], "Success")
+    
   end
   
 end
