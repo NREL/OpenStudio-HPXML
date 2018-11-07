@@ -17,9 +17,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     
     Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
       puts "Testing #{xml}..."
-      args_hash['hpxml_path'] = File.absolute_path(File.join(this_dir, xml))
+      args_hash['hpxml_path'] = File.absolute_path(xml)
       _test_measure(args_hash)
-      _test_simulation(args_hash)
+      _test_simulation(args_hash, this_dir)
     end
   end
 
@@ -57,7 +57,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   end
   
-  def _test_simulation(args_hash)
+  def _test_simulation(args_hash, this_dir)
   
     # Get EPW path
     hpxml_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
@@ -71,13 +71,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     refute_nil(epw_path)
         
     # Create osw
-    osw_path = File.join(File.dirname(__FILE__), "in.osw")
+    osw_path = File.join(this_dir, "in.osw")
     workflow = OpenStudio::WorkflowJSON.new
     workflow.setWeatherFile(epw_path)
-    workflow.addMeasurePath("../../")
+    measure_path = File.absolute_path(File.join(this_dir, "..", ".."))
+    workflow.addMeasurePath(measure_path)
     steps = OpenStudio::WorkflowStepVector.new
-    measure_dirname = File.absolute_path(File.dirname("../../")).split('/')[-1]
-    step = OpenStudio::MeasureStep.new(measure_dirname)
+    step = OpenStudio::MeasureStep.new(File.absolute_path(File.join(this_dir, "..")).split('/')[-1])
     args_hash.each do |arg, val|
       step.setArgument(arg, val)
     end
@@ -90,7 +90,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     system(cmd)
     
     # Ensure success
-    out_osw = File.join(File.dirname(__FILE__), "out.osw")
+    out_osw = File.join(this_dir, "out.osw")
     assert(File.exists?(out_osw))
     
     data_hash = JSON.parse(File.read(out_osw))
