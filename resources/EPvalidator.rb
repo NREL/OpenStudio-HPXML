@@ -259,7 +259,6 @@ class EnergyPlusValidator
             'SHGC' => one,
             'Overhangs' => zero_or_one, # See [WindowOverhang]
             'AttachedToWall' => one,
-            'extension/Height' => one,
             'extension/InteriorShadingFactorSummer' => zero_or_one, # Uses ERI assumption if not provided
             'extension/InteriorShadingFactorWinter' => zero_or_one, # Uses ERI assumption if not provided
         },
