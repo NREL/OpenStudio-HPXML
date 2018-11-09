@@ -25,19 +25,18 @@ end
 
 class WeatherProcess
 
-  def initialize(model, runner, measure_dir)
+  def initialize(model, runner)
   
     @error = false
     
     @model = model
     @runner = runner
-    @measure_dir = measure_dir
-    
+        
     @header = WeatherHeader.new
     @data = WeatherData.new
     @design = WeatherDesign.new
     
-    @epw_path = WeatherProcess.get_epw_path(@model, @runner, @measure_dir)
+    @epw_path = WeatherProcess.get_epw_path(@model, @runner)
     if @epw_path.nil?
       @error = true
       return
@@ -50,6 +49,7 @@ class WeatherProcess
     end
 
     @epw_file = OpenStudio::EpwFile.new(@epw_path, true)
+    puts "@epw_file #{@epw_file}"
 
     cached = get_cached_weather(@model)
     return if cached or @error
@@ -179,7 +179,7 @@ class WeatherProcess
   
   private
   
-      def self.get_epw_path(model, runner, measure_dir)
+      def self.get_epw_path(model, runner)
         if model.weatherFile.is_initialized
         
           wf = model.weatherFile.get
@@ -189,11 +189,8 @@ class WeatherProcess
           else
             epw_path = wf.url.to_s.sub("file:///","").sub("file://","").sub("file:","")
           end
-          if not File.exist? epw_path # Handle relative paths for unit tests
-            epw_path2 = File.join(measure_dir, "resources", epw_path)
-            if File.exist? epw_path2
-                epw_path = epw_path2
-            end
+          if not File.exists? epw_path
+            epw_path = File.absolute_path(File.join(File.dirname(__FILE__), epw_path))
           end
           return epw_path
         end
@@ -502,7 +499,7 @@ class WeatherProcess
             
         # Sets the WSF value.
         
-        ashrae_csv = File.join(@measure_dir, 'ASHRAE622WSF.csv')
+        ashrae_csv = File.join(File.dirname(__FILE__), 'ASHRAE622WSF.csv')
         if not File.exists?(ashrae_csv)
           return nil
         end
