@@ -49,7 +49,6 @@ class WeatherProcess
     end
 
     @epw_file = OpenStudio::EpwFile.new(@epw_path, true)
-    puts "@epw_file #{@epw_file}"
 
     cached = get_cached_weather(@model)
     return if cached or @error
