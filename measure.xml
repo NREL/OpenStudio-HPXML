@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>604700fd-7b60-40da-bb32-9e56164c624f</version_id>
-  <version_modified>20181112T181010Z</version_modified>
+  <version_id>a3a28653-aaf4-4ea6-a7be-2250a3a68666</version_id>
+  <version_modified>20181112T230638Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -201,12 +201,6 @@
       <checksum>FCD61328</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>BE760A09</checksum>
-    </file>
-    <file>
       <filename>hotwater_appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -391,12 +385,6 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>3FDF9BCC</checksum>
-    </file>
-    <file>
-      <filename>valid-foundation-conditioned-basement.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A2AAB753</checksum>
     </file>
     <file>
       <filename>valid-foundation-pier-beam.xml</filename>
@@ -807,17 +795,6 @@
       <checksum>09CC7096</checksum>
     </file>
     <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>2FD0A924</checksum>
-    </file>
-    <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -834,6 +811,41 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>1EBDE224</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>396A3B5F</checksum>
+    </file>
+    <file>
+      <filename>valid-foundation-conditioned-basement.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3A3FB401</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>18075CBE</checksum>
+    </file>
+    <file>
+      <filename>valid-foundation-unvented-crawlspace.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5FBF238B</checksum>
+    </file>
+    <file>
+      <filename>valid-misc-ceiling-fans.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C89111C7</checksum>
     </file>
   </files>
 </measure>
