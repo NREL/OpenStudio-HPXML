@@ -2877,7 +2877,7 @@ class OSModel
                       duct_supply_frac, duct_return_frac, duct_ah_supply_frac, duct_ah_return_frac, duct_location_frac, 
                       duct_num_returns, duct_location)
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, ducts, File.dirname(__FILE__))
+    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, ducts)
     return false if not success
     
     return true
