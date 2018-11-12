@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>987be778-3c00-4a8b-b015-88cb9f68c684</version_id>
-  <version_modified>20181109T041147Z</version_modified>
+  <version_id>604700fd-7b60-40da-bb32-9e56164c624f</version_id>
+  <version_modified>20181112T181010Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -135,12 +135,6 @@
       <checksum>B8804B95</checksum>
     </file>
     <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>24BF70D4</checksum>
-    </file>
-    <file>
       <filename>hvac_sizing.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -183,12 +177,6 @@
       <checksum>AB2185AD</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E8841A48</checksum>
-    </file>
-    <file>
       <filename>constructions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -229,12 +217,6 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>863346F3</checksum>
-    </file>
-    <file>
-      <filename>in.epw</filename>
-      <filetype>epw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E23378AA</checksum>
     </file>
     <file>
       <filename>invalid-bad-wmo.xml</filename>
@@ -836,28 +818,22 @@
       <checksum>2FD0A924</checksum>
     </file>
     <file>
-      <filename>in.osm</filename>
-      <filetype>osm</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2E4E821D</checksum>
-    </file>
-    <file>
-      <filename>in.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1AF239E7</checksum>
-    </file>
-    <file>
-      <filename>out.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>949429CD</checksum>
-    </file>
-    <file>
       <filename>weather.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>97708D6B</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>05548135</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>1EBDE224</checksum>
     </file>
   </files>
 </measure>
