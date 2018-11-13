@@ -46,7 +46,7 @@ class Constants
   end
 
   # Strings --------------------
-  
+
   def self.AirFilm
     return 'AirFilm'
   end
@@ -359,6 +359,9 @@ class Constants
   def self.ObjectNameBuildingUnit(unit_num=1)
     return "unit #{unit_num}"
   end
+  def self.ObjectNameCarpet
+    return 'residential carpet'
+  end
   def self.ObjectNameCeilingFan(unit_name=self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
@@ -441,7 +444,10 @@ class Constants
       s_unit = "|#{unit_name}"
     end
     return "residential baseboard#{s_unit}"
-  end    
+  end
+  def self.ObjectNameEMPD
+    return 'residential empd'
+  end
   def self.ObjectNameExtraRefrigerator(unit_name=self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
@@ -603,6 +609,9 @@ class Constants
     end
     return "residential overhangs#{facade}"
   end
+  def self.ObjectNamePartitionWall
+    return 'residential partition wall'
+  end
   def self.ObjectNamePhotovoltaics(unit_name=self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
@@ -700,6 +709,9 @@ class Constants
       s_unit = "|#{unit_name}"
     end
     return "residential well pump#{s_unit}"
+  end
+  def self.ObjectNameWoodTrim
+    return 'residential wood trim'
   end
   def self.OptionTypeLightingFractions
     return 'Lamp Fractions'

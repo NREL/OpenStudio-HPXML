@@ -9,7 +9,16 @@ class Material
     # rho - Density [lb/ft^3]
     # cp - Specific heat [Btu/lb*F]
     # rvalue - R-value [h-ft^2-F/Btu]
-    def initialize(name=nil, thick_in=nil, mat_base=nil, k_in=nil, rho=nil, cp=nil, tAbs=nil, sAbs=nil, vAbs=nil, rvalue=nil)
+    # wDiff - Water vapor diffusion resistance factor [dimenionless]
+    # coefA - Moisture equation coefficient a [dimensionless]
+    # coefB - Moisture equation coefficient b [dimensionless]
+    # coefC - Moisture equation coefficient c [dimensionless]
+    # coefD - Moisture equation coefficient d [dimensionless]
+    # sDepth - Surface layer penetration depth [m]
+    # dDepth - Deep layer penetration depth [m]
+    # cThick - Coating layer thickness [m]
+    # cDiff - Coating layer water vapor diffusion resistance factor [dimensionless]
+    def initialize(name=nil, thick_in=nil, mat_base=nil, k_in=nil, rho=nil, cp=nil, tAbs=nil, sAbs=nil, vAbs=nil, rvalue=nil, wDiff=nil, coefA=nil, coefB=nil, coefC=nil, coefD=nil, sDepth=nil, dDepth=nil, cThick=nil, cDiff=nil)
         @name = name
         
         if not thick_in.nil?
@@ -26,13 +35,23 @@ class Material
             end
             @rho = mat_base.rho
             @cp = mat_base.cp
-        else
+        elsif mat_base.nil?
             @k_in = nil
             @k = nil
             @rho = nil
             @cp = nil
         end
-        
+
+        @wDiff = wDiff
+        @coefA = coefA
+        @coefB = coefB
+        @coefC = coefC
+        @coefD = coefD
+        @sDepth = sDepth
+        @dDepth = dDepth
+        @cThick = cThick
+        @cDiff = cDiff
+
         # Override the base material if both are included
         if not k_in.nil?
             @k_in = k_in # Btu-in/h-ft^2-F
@@ -61,8 +80,8 @@ class Material
         end
     end
     
-    attr_accessor :name, :thick, :thick_in, :k, :k_in, :rho, :cp, :rvalue, :tAbs, :sAbs, :vAbs
-    
+    attr_accessor :name, :thick, :thick_in, :k, :k_in, :rho, :cp, :rvalue, :tAbs, :sAbs, :vAbs, :wDiff, :coefA, :coefB, :coefC, :coefC, :coefD, :sDepth, :dDepth, :cThick, :cDiff
+
     def self.AirCavityClosed(thick_in)
         rvalue = Gas.AirGapRvalue
         return self.new(name=nil, thick_in=thick_in, mat_base=nil, k_in=thick_in/rvalue, rho=Gas.Air.rho, cp=Gas.Air.cp)
@@ -165,7 +184,7 @@ class Material
     def self.CoveringBare(floorFraction=0.8, rvalue=2.08)
         # Combined layer of, e.g., carpet and bare floor
         thickness = 0.5 # in
-        return self.new(name="Floor Covering", thick_in=thickness, mat_base=nil, k_in=thickness / (rvalue * floorFraction), rho=3.4, cp=0.32, tAbs=0.9, sAbs=0.9)
+        return self.new(name="Floor Covering", thick_in=thickness, mat_base=nil, k_in=thickness / (rvalue * floorFraction), rho=3.4, cp=0.32, tAbs=0.9, sAbs=0.9, vAbs=nil, rvalue=nil)
     end
 
     def self.Concrete(thick_in)
@@ -221,11 +240,11 @@ class Material
     end
     
     def self.GypsumWall(thick_in)
-        return self.new(name="Drywall #{thick_in.to_s} in.", thick_in=thick_in, mat_base=BaseMaterial.Gypsum, k_in=nil, rho=nil, cp=nil, tAbs=0.9, sAbs=0.5, vAbs=0.1)
+        return self.new(name="Drywall #{thick_in.to_s} in.", thick_in=thick_in, mat_base=BaseMaterial.Gypsum)
     end
 
     def self.GypsumCeiling(thick_in)
-        return self.new(name="Drywall #{thick_in.to_s} in.", thick_in=thick_in, mat_base=BaseMaterial.Gypsum, k_in=nil, rho=nil, cp=nil, tAbs=0.9, sAbs=0.3, vAbs=0.1)
+        return self.new(name="Drywall #{thick_in.to_s} in.", thick_in=thick_in, mat_base=BaseMaterial.Gypsum)
     end
     
     def self.RoofingAsphaltShinglesDark
@@ -325,11 +344,11 @@ class BaseMaterial
     attr_accessor :rho, :cp, :k_in
 
     def self.Gypsum
-        return self.new(rho=50.0, cp=0.2, k_in=1.1112)
+      return self.new(rho=50.0, cp=0.2, k_in=1.1112)
     end
 
     def self.Wood
-        return self.new(rho=32.0, cp=0.29, k_in=0.8004)
+      return self.new(rho=32.0, cp=0.29, k_in=0.8004)
     end
     
     def self.Concrete
@@ -339,6 +358,14 @@ class BaseMaterial
     def self.Gypcrete
         # http://www.maxxon.com/gyp-crete/data
         return self.new(rho=100.0, cp=0.223, k_in=4.7424)
+    end
+
+    def self.Furniture
+      return self.new(rho=nil, cp=nil, k_in=nil)
+    end
+
+    def self.Carpet
+      return self.new(rho=nil, cp=nil, k_in=nil)
     end
 
     def self.InsulationRigid

@@ -129,6 +129,8 @@ class UnitConversions
         return x / 1.8
       
       # Specific Heat
+      elsif from == 'j/(kg*k)' and to == 'btu/(lbm*r)' # by mass
+        return x / 4187.0
       elsif from == 'btu/(lbm*r)' and to == 'j/(kg*k)' # by mass
         return x * 4187.0
       elsif from == 'btu/(ft^3*f)' and to == 'j/(m^3*k)' # by volume
@@ -303,6 +305,8 @@ class UnitConversions
         return x / 1.731
       elsif from == 'btu/(hr*ft*r)' and to == 'w/(m*k)'
         return x * 1.731
+      elsif from == 'w/(m*k)' and to == 'btu*in/(hr*ft^2*r)'
+        return x / 0.14425
       elsif from == 'btu*in/(hr*ft^2*r)' and to == 'w/(m*k)'
         return x * 0.14425
       

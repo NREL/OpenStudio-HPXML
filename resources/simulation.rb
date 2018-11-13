@@ -19,7 +19,7 @@ class Simulation
         insurf.setAlgorithm('TARP')
         
         zonecap = model.getZoneCapacitanceMultiplierResearchSpecial
-        zonecap.setHumidityCapacityMultiplier(15)
+        zonecap.setHumidityCapacityMultiplier(1) # set to 1, not 15, because we're using EMPD
 
         if not min_system_timestep_mins.nil?
           convlim = model.getConvergenceLimits
@@ -31,6 +31,9 @@ class Simulation
         run_period.setBeginDayOfMonth(begin_day_of_month)
         run_period.setEndMonth(end_month)
         run_period.setEndDayOfMonth(end_day_of_month)
+
+        heat_bal_alg = model.getHeatBalanceAlgorithm
+        heat_bal_alg.setAlgorithm("MoisturePenetrationDepthConductionTransferFunction") # EMPD
         
         return true
     end

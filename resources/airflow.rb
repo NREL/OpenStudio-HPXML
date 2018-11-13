@@ -6,6 +6,7 @@ require "#{File.dirname(__FILE__)}/util"
 require "#{File.dirname(__FILE__)}/psychrometrics"
 require "#{File.dirname(__FILE__)}/unit_conversions"
 require "#{File.dirname(__FILE__)}/hvac"
+require "#{File.dirname(__FILE__)}/constructions"
 
 class Airflow
 
@@ -78,9 +79,9 @@ class Airflow
     wout_sensor.setName("#{Constants.ObjectNameNaturalVentilation} wt s")
     
     # Adiabatic construction for ducts
-    
-    adiabatic_mat = OpenStudio::Model::MasslessOpaqueMaterial.new(model, "Rough", 176.1)
-    adiabatic_mat.setName("Adiabatic")
+
+    mat = SimpleMaterial.Adiabatic
+    adiabatic_mat = Construction.create_os_material(model, runner, mat)
     adiabatic_const = OpenStudio::Model::Construction.new(model)
     adiabatic_const.setName("AdiabaticConst")
     adiabatic_const.insertLayer(0, adiabatic_mat)
@@ -1315,6 +1316,8 @@ class Airflow
       surface_property_convection_coefficients.setConvectionCoefficient1Type("Value")
       surface_property_convection_coefficients.setConvectionCoefficient1(999)
     end
+
+    MoistureConstructions.apply_dummy(runner, model, 1.0, [ra_space])
 
     if has_forced_air_equipment
 
