@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d29bb84d-2869-4488-94a3-987c0f14ee9b</version_id>
-  <version_modified>20181113T005857Z</version_modified>
+  <version_id>cbc53905-2bfe-4ca7-9d54-4cfb31c99a6b</version_id>
+  <version_modified>20181113T051156Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -834,12 +834,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>2A1540E8</checksum>
-    </file>
-    <file>
-      <filename>in.epw</filename>
-      <filetype>epw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E23378AA</checksum>
     </file>
     <file>
       <filename>valid-foundation-unvented-crawlspace.xml</filename>
