@@ -1313,9 +1313,9 @@ class HVAC
             program.addLine("Set #{vrf_fbsmt_sensor.name} = 0")
             program.addLine("If #{vrf_sensor.name} > 0 || #{vrf_fbsmt_sensor.name} > 0")
           end          
-          program.addLine("If #{tout_sensor.name} <= #{UnitConversions.convert(32.0,"F","C").round(3)}")
-          program.addLine("Set #{pan_heater_actuator.name} = #{pan_heater_power}")
-          program.addLine("EndIf")
+          program.addLine("  If #{tout_sensor.name} <= #{UnitConversions.convert(32.0,"F","C").round(3)}")
+          program.addLine("    Set #{pan_heater_actuator.name} = #{pan_heater_power}")
+          program.addLine("  EndIf")
           program.addLine("EndIf")
          
           program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
