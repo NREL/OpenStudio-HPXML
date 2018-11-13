@@ -745,6 +745,9 @@ class Constants
   def self.RecircTypeNone
     return 'none'
   end
+  def self.RetailElectricityCost
+    return 'retail electricity cost'
+  end
   def self.RoofMaterialAsphaltShingles
     return 'asphalt shingles'
   end
@@ -1069,6 +1072,9 @@ class Constants
   end
   def self.TiltLatitude
     return 'latitude'
+  end
+  def self.UserSpecified
+    return 'user-specified'
   end
   def self.VentTypeExhaust
     return 'exhaust'
