@@ -215,24 +215,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       end
     end
     
-    # FIXME: Temporary code
-    skip_add = XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/Systems/HVAC/extension/SkipAddHeatCoolSystem")
-    if skip_add.nil?
-      skip_add = false
-    else
-      skip_add = Boolean(skip_add)
-    end
-    
-    if not skip_add
-      if clg_objs.size == 0
-        runner.registerError("Could not identify cooling object.")
-        return false
-      elsif htg_objs.size == 0
-        runner.registerError("Could not identify heating object.")
-        return false
-      end
-    end
-    
     # TODO: Make variables specific to the equipment
     add_output_variables(model, Constants.LoadVarsSpaceHeating, htg_objs)
     add_output_variables(model, Constants.LoadVarsSpaceCooling, clg_objs)
