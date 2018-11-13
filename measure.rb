@@ -2524,6 +2524,9 @@ class OSModel
       pan_heater_power = 0.0
       fan_power = 0.07
       is_ducted = false
+      if XMLHelper.has_element(hp, "DistributionSystem")
+        is_ducted = true
+      end
       supplemental_efficiency = 1.0
       success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
                                 min_cooling_capacity, max_cooling_capacity,
@@ -2751,10 +2754,6 @@ class OSModel
   
   def self.add_airflow(runner, model, building, unit)
   
-    # Infiltration
-    infiltration = building.elements["BuildingDetails/Enclosure/AirInfiltration"]
-    infil_ach50 = Float(XMLHelper.get_value(infiltration, "AirInfiltrationMeasurement[HousePressure='50']/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage"))
-    
     # Vented crawl SLA
     vented_crawl_area = 0.0
     vented_crawl_sla_area = 0.0
@@ -2783,6 +2782,9 @@ class OSModel
       attic_sla = 0.0
     end
     
+    # Infiltration
+    infiltration = building.elements["BuildingDetails/Enclosure/AirInfiltration"]
+    infil_ach50 = Float(XMLHelper.get_value(infiltration, "AirInfiltrationMeasurement[HousePressure='50']/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage"))
     living_ach50 = infil_ach50
     garage_ach50 = infil_ach50
     finished_basement_ach = 0 # TODO: Need to handle above-grade basement
@@ -2816,8 +2818,12 @@ class OSModel
         mech_vent_type = Constants.VentTypeSupply
       elsif fan_type == "exhaust only"
         mech_vent_type = Constants.VentTypeExhaust
-      else
+      elsif fan_type == "energy recovery ventilator" or fan_type == "heat recovery ventilator" or fan_type == "balanced"
         mech_vent_type = Constants.VentTypeBalanced
+      elsif fan_type == "central fan integrated supply"
+        # FIXME
+        #mech_vent_type = Constants.VentTypeCFIS
+        mech_vent_type = Constants.VentTypeSupply
       end
       mech_vent_total_efficiency = 0.0
       mech_vent_sensible_efficiency = 0.0
@@ -2865,6 +2871,12 @@ class OSModel
                                       nat_vent_max_oa_hr, nat_vent_max_oa_rh)
   
     # Ducts
+    ducts = []
+    location_map = {'unconditioned basement' => Constants.SpaceTypeUnfinishedBasement,
+                    'crawlspace' => Constants.SpaceTypeCrawl,
+                    'unconditioned attic' => Constants.SpaceTypeUnfinishedAttic,
+                    'garage' => Constants.SpaceTypeGarage,
+                    'conditioned space' => Constants.SpaceTypeLiving}
     hvac_distribution = building.elements["BuildingDetails/Systems/HVAC/HVACDistribution"]
     air_distribution = nil
     if not hvac_distribution.nil?
@@ -2872,41 +2884,32 @@ class OSModel
     end
     if not air_distribution.nil?
       # Ducts
-      supply_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      return_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      supply_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctInsulationRValue"))
-      return_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctInsulationRValue"))
-      supply_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctSurfaceArea"))
-      return_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctSurfaceArea"))
-      # FIXME: Values below
-      duct_location = Constants.Auto
-      duct_total_leakage = 0.3
-      duct_supply_frac = 0.6
-      duct_return_frac = 0.067
-      duct_ah_supply_frac = 0.067
-      duct_ah_return_frac = 0.267
-      duct_location_frac = Constants.Auto
-      duct_num_returns = 1
-      duct_supply_area_mult = 1.0
-      duct_return_area_mult = 1.0
-      duct_r = 4.0
+      duct_supply_leakage_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
+      duct_return_leakage_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
+      duct_supply_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctInsulationRValue"))
+      duct_return_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctInsulationRValue"))
+      duct_supply_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctSurfaceArea"))
+      duct_return_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctSurfaceArea"))
+      duct_supply_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctLocation")]
+      duct_return_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctLocation")]
+      if duct_supply_location != duct_return_location
+        supplyDuct = Duct.new(duct_supply_location, nil, duct_supply_leakage_cfm25, duct_supply_area, duct_supply_r, nil, nil, nil, nil)
+        returnDuct = Duct.new(duct_return_location, nil, nil, nil, nil, nil, duct_return_leakage_cfm25, duct_return_area, duct_return_r)
+        ducts << supplyDuct
+        ducts << returnDuct
+      else
+        duct = Duct.new(duct_supply_location, nil, duct_supply_leakage_cfm25, duct_supply_area, duct_supply_r, nil, duct_return_leakage_cfm25, duct_return_area, duct_return_r)
+        ducts << duct
+      end
     else
-      duct_location = "none"
-      duct_total_leakage = 0.0
-      duct_supply_frac = 0.0
-      duct_return_frac = 0.0
-      duct_ah_supply_frac = 0.0
-      duct_ah_return_frac = 0.0
-      duct_location_frac = Constants.Auto
-      duct_num_returns = Constants.Auto
-      duct_supply_area_mult = 1.0
-      duct_return_area_mult = 1.0
-      duct_r = 0.0
+      duct_supply_location = "none"
+      duct_supply_leakage_cfm25 = 0.0
+      duct_return_leakage_cfm25 = 0.0
+      duct_supply_area = 0.0
+      duct_return_area = 0.0
+      duct_supply_r = 0.0
+      duct_return_r = 0.0
     end
-    duct_norm_leakage_25pa = nil
-    ducts = Ducts.new(duct_total_leakage, duct_norm_leakage_25pa, duct_supply_area_mult, duct_return_area_mult, duct_r, 
-                      duct_supply_frac, duct_return_frac, duct_ah_supply_frac, duct_ah_return_frac, duct_location_frac, 
-                      duct_num_returns, duct_location)
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, ducts)
     return false if not success

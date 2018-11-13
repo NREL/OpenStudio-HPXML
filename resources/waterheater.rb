@@ -626,27 +626,27 @@ class Waterheater
             hpwh_ducting_program.addLine("Set HPWH_now_#{unit_index} = #{on_off_trend_var.name}")
             hpwh_ducting_program.addLine("Set num = (@Ln 2)")
             hpwh_ducting_program.addLine("If (HPWH_last_#{unit_index} == 0) && (HPWH_now_#{unit_index}<>0)") #HPWH just turned on
-            hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = 0")
-            hpwh_ducting_program.addLine("Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
-            hpwh_ducting_program.addLine("Set exponent = (@Exp exp)")
-            hpwh_ducting_program.addLine("Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
-            hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} + #{timestep_minutes}")
+            hpwh_ducting_program.addLine("  Set HPWHOn_#{unit_index} = 0")
+            hpwh_ducting_program.addLine("  Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
+            hpwh_ducting_program.addLine("  Set exponent = (@Exp exp)")
+            hpwh_ducting_program.addLine("  Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
+            hpwh_ducting_program.addLine("  Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} + #{timestep_minutes}")
             hpwh_ducting_program.addLine("ElseIf (HPWH_last_#{unit_index} <> 0) && (HPWH_now_#{unit_index}<>0)") #HPWH has been running for more than 1 timestep
-            hpwh_ducting_program.addLine("Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
-            hpwh_ducting_program.addLine("Set exponent = (@Exp exp)")
-            hpwh_ducting_program.addLine("Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
-            hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} + #{timestep_minutes}")
+            hpwh_ducting_program.addLine("  Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
+            hpwh_ducting_program.addLine("  Set exponent = (@Exp exp)")
+            hpwh_ducting_program.addLine("  Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
+            hpwh_ducting_program.addLine("  Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} + #{timestep_minutes}")
             hpwh_ducting_program.addLine("Else")
-            hpwh_ducting_program.addLine("If (Hour == 0) && (DayOfYear == 1)")
-            hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = 0") #Assume HPWH starts off for initial conditions
-            hpwh_ducting_program.addLine("EndIF")
-            hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} - #{timestep_minutes}")
-            hpwh_ducting_program.addLine("If HPWHOn_#{unit_index} < 0")
-            hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = 0")
-            hpwh_ducting_program.addLine("EndIf")
-            hpwh_ducting_program.addLine("Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
-            hpwh_ducting_program.addLine("Set exponent = (@Exp exp)")
-            hpwh_ducting_program.addLine("Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
+            hpwh_ducting_program.addLine("  If (Hour == 0) && (DayOfYear == 1)")
+            hpwh_ducting_program.addLine("    Set HPWHOn_#{unit_index} = 0") #Assume HPWH starts off for initial conditions
+            hpwh_ducting_program.addLine("  EndIF")
+            hpwh_ducting_program.addLine("  Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} - #{timestep_minutes}")
+            hpwh_ducting_program.addLine("  If HPWHOn_#{unit_index} < 0")
+            hpwh_ducting_program.addLine("    Set HPWHOn_#{unit_index} = 0")
+            hpwh_ducting_program.addLine("  EndIf")
+            hpwh_ducting_program.addLine("  Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
+            hpwh_ducting_program.addLine("  Set exponent = (@Exp exp)")
+            hpwh_ducting_program.addLine("  Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
             hpwh_ducting_program.addLine("EndIf")
             hpwh_ducting_program.addLine("Set T_hpwh_inlet_#{unit_index} = #{amb_temp_sensor.name} + T_dep")
         else
@@ -704,9 +704,9 @@ class Waterheater
             else
                 hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp,"F","C").round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp,"F","C").round(2)})")
             end
-            hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = #{tset_C}")
+            hpwh_ctrl_program.addLine("  Set #{leschedoverride_actuator.name} = #{tset_C}")
             hpwh_ctrl_program.addLine("Else")
-            hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
+            hpwh_ctrl_program.addLine("  Set #{leschedoverride_actuator.name} = 0")
             hpwh_ctrl_program.addLine("EndIf")
             
         else #hpwh_param == 50
@@ -749,11 +749,11 @@ class Waterheater
             hpwh_ctrl_program.addLine("Set LEMax_#{unit_index} = (@TrendMax #{letrend_trend_var.name} 2)")
             hpwh_ctrl_program.addLine("Set ElemOn_#{unit_index} = (@Max UEMax_#{unit_index} LEMax_#{unit_index})")
             hpwh_ctrl_program.addLine("If (#{t_ctrl_sensor.name}<#{t_ems_control1}) || ((ElemOn_#{unit_index}>0) && (#{t_ctrl_sensor.name}<#{t_ems_control2}))") #Small offset in second value is to prevent the element overshooting the setpoint due to mixing
-            hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 70")
-            hpwh_ctrl_program.addLine("Set #{hpschedoverride_actuator.name} = 0")
+            hpwh_ctrl_program.addLine("  Set #{leschedoverride_actuator.name} = 70")
+            hpwh_ctrl_program.addLine("  Set #{hpschedoverride_actuator.name} = 0")
             hpwh_ctrl_program.addLine("Else")
-            hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
-            hpwh_ctrl_program.addLine("Set #{hpschedoverride_actuator.name} = #{tset_C}")
+            hpwh_ctrl_program.addLine("  Set #{leschedoverride_actuator.name} = 0")
+            hpwh_ctrl_program.addLine("  Set #{hpschedoverride_actuator.name} = #{tset_C}")
             hpwh_ctrl_program.addLine("EndIf")
             
         end

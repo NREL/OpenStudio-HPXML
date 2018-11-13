@@ -1418,9 +1418,8 @@ class HVACSizing
     
     return nil if mj8.nil? or zones_loads.nil?
     
-    # TODO: Ideally this would require an iterative procedure.
+    # TODO: Ideally this would use an iterative procedure.
     
-    # TODO ASKJON: Ask about where max(0,foo) should be used below
     unit_init = UnitInitialValues.new
     unit_init.Heat_Load = 0
     unit_init.Cool_Load_Sens = 0
@@ -1494,7 +1493,7 @@ class HVACSizing
     unit_final = process_cooling_equipment_adjustments(runner, mj8, unit, unit_init, unit_final, weather, hvac)
     unit_final = process_fixed_equipment(runner, unit_final, hvac)
     unit_final = process_finalize(runner, mj8, unit, zones_loads, unit_init, unit_final, weather, hvac, ducts, nbeds, unit_ffa, unit_shelter_class)
-    unit_final = process_slave_zone_flow_ratios(runner, zones_loads, ducts, unit_final)
+    unit_final = process_slave_zone_flow_ratios(runner, zones_loads, ducts, unit_init, mj8, hvac, unit_final)
     unit_final = process_efficient_capacity_derate(runner, hvac, unit_final)
     unit_final = process_dehumidifier_sizing(runner, mj8, unit_init, unit_final, weather, hvac)
     return unit_init, unit_final
@@ -1503,86 +1502,89 @@ class HVACSizing
   def self.process_duct_regain_factors(runner, unit, unit_final, ducts)
     return nil if unit_final.nil?
   
-    unit_final.dse_Fregain = nil
+    unit_final.dse_Fregains = {}
     
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    if ducts.Has and ducts.NotInLiving
+    ducts.each do |duct|
+        next if Geometry.is_living(duct.LocationSpace)
+        
         # dse_Fregain values comes from MJ8 pg 204 and Walker (1998) "Technical background for default 
         # values used for forced air systems in proposed ASHRAE Std. 152"
         
-        if Geometry.is_unfinished_basement(ducts.LocationSpace) or Geometry.is_finished_basement(ducts.LocationSpace)
+        if Geometry.is_unfinished_basement(duct.LocationSpace) or Geometry.is_finished_basement(duct.LocationSpace)
         
-            walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, ducts.LocationSpace)
+            walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
             return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
-            infiltration_cfm = get_feature(runner, ducts.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
+            infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
             infiltration_cfm = 0 if infiltration_cfm.nil?
             
             if not ceiling_insulated
                 if not walls_insulated
                     if infiltration_cfm == 0
-                        unit_final.dse_Fregain = 0.55     # Uninsulated ceiling, uninsulated walls, no infiltration                            
+                        unit_final.dse_Fregains[duct.LocationSpace] = 0.55     # Uninsulated ceiling, uninsulated walls, no infiltration                            
                     else # infiltration_cfm > 0
-                        unit_final.dse_Fregain = 0.51     # Uninsulated ceiling, uninsulated walls, with infiltration
+                        unit_final.dse_Fregains[duct.LocationSpace] = 0.51     # Uninsulated ceiling, uninsulated walls, with infiltration
                     end
                 else # walls_insulated
                     if infiltration_cfm == 0
-                        unit_final.dse_Fregain = 0.78    # Uninsulated ceiling, insulated walls, no infiltration
+                        unit_final.dse_Fregains[duct.LocationSpace] = 0.78     # Uninsulated ceiling, insulated walls, no infiltration
                     else # infiltration_cfm > 0
-                        unit_final.dse_Fregain = 0.74    # Uninsulated ceiling, insulated walls, with infiltration                        
+                        unit_final.dse_Fregains[duct.LocationSpace] = 0.74     # Uninsulated ceiling, insulated walls, with infiltration                        
                     end
                 end
             else # ceiling_insulated
                 if walls_insulated
                     if infiltration_cfm == 0
-                        unit_final.dse_Fregain = 0.32     # Insulated ceiling, insulated walls, no infiltration
+                        unit_final.dse_Fregains[duct.LocationSpace] = 0.32     # Insulated ceiling, insulated walls, no infiltration
                     else # infiltration_cfm > 0
-                        unit_final.dse_Fregain = 0.27     # Insulated ceiling, insulated walls, with infiltration                            
+                        unit_final.dse_Fregains[duct.LocationSpace] = 0.27     # Insulated ceiling, insulated walls, with infiltration                            
                     end
                 else # not walls_insulated
-                    unit_final.dse_Fregain = 0.06    # Insulated ceiling and uninsulated walls
+                    unit_final.dse_Fregains[duct.LocationSpace] = 0.06         # Insulated ceiling and uninsulated walls
                 end
             end
             
-        elsif Geometry.is_crawl(ducts.LocationSpace) or Geometry.is_pier_beam(ducts.LocationSpace)
+        elsif Geometry.is_crawl(duct.LocationSpace) or Geometry.is_pier_beam(duct.LocationSpace)
             
-            walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, ducts.LocationSpace)
+            walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
             return nil if walls_insulated.nil? or ceiling_insulated.nil?
             
-            infiltration_cfm = get_feature(runner, ducts.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
+            infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
             infiltration_cfm = 0 if infiltration_cfm.nil?
             
             if infiltration_cfm > 0
                 if ceiling_insulated
-                    unit_final.dse_Fregain = 0.12    # Insulated ceiling and uninsulated walls
+                    unit_final.dse_Fregains[duct.LocationSpace] = 0.12         # Insulated ceiling and uninsulated walls
                 else
-                    unit_final.dse_Fregain = 0.50    # Uninsulated ceiling and uninsulated walls
+                    unit_final.dse_Fregains[duct.LocationSpace] = 0.50         # Uninsulated ceiling and uninsulated walls
                 end
             else # infiltration_cfm == 0
                 if not ceiling_insulated and not walls_insulated
-                    unit_final.dse_Fregain = 0.60    # Uninsulated ceiling and uninsulated walls
+                    unit_final.dse_Fregains[duct.LocationSpace] = 0.60         # Uninsulated ceiling and uninsulated walls
                 elsif ceiling_insulated and not walls_insulated
-                    unit_final.dse_Fregain = 0.16    # Insulated ceiling and uninsulated walls
+                    unit_final.dse_Fregains[duct.LocationSpace] = 0.16         # Insulated ceiling and uninsulated walls
                 elsif not ceiling_insulated and walls_insulated
-                    unit_final.dse_Fregain = 0.76    # Uninsulated ceiling and insulated walls (not explicitly included in A152)
+                    unit_final.dse_Fregains[duct.LocationSpace] = 0.76         # Uninsulated ceiling and insulated walls (not explicitly included in A152)
                 else
-                    unit_final.dse_Fregain = 0.30    # Insulated ceiling and insulated walls (option currently not included in BEopt)
+                    unit_final.dse_Fregains[duct.LocationSpace] = 0.30         # Insulated ceiling and insulated walls
                 end
             end
             
-        elsif Geometry.is_unfinished_attic(ducts.LocationSpace)
-            unit_final.dse_Fregain = 0.10          # This would likely be higher for unvented attics with roof insulation
+        elsif Geometry.is_unfinished_attic(duct.LocationSpace)
+            unit_final.dse_Fregains[duct.LocationSpace] = 0.10                 # This would likely be higher for unvented attics with roof insulation
             
-        elsif Geometry.is_garage(ducts.LocationSpace)
-            unit_final.dse_Fregain = 0.05
+        elsif Geometry.is_garage(duct.LocationSpace)
+            unit_final.dse_Fregains[duct.LocationSpace] = 0.05
             
-        elsif Geometry.is_living(ducts.LocationSpace) or Geometry.is_finished_attic(ducts.LocationSpace)
-            unit_final.dse_Fregain = 1.0
+        elsif Geometry.is_living(duct.LocationSpace) or Geometry.is_finished_attic(duct.LocationSpace)
+            unit_final.dse_Fregains[duct.LocationSpace] = 1.0
             
         else
-            runner.registerError("Unexpected duct location: #{ducts.LocationSpace.name.to_s}")        
+            runner.registerError("Unexpected duct location: #{duct.LocationSpace.name.to_s}")        
             return nil
         end
+    
     end
     
     return unit_final
@@ -1592,18 +1594,19 @@ class HVACSizing
     return nil if mj8.nil? or unit_final.nil?
     
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    if ducts.Has and ducts.NotInLiving and hvac.HasDuctedHeating
-        dse_Tamb_heating = mj8.heat_design_temps[ducts.LocationSpace]
-        unit_final.Heat_Load_Ducts = calc_heat_duct_load(ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregain, heatingLoad, hvac.HtgSupplyAirTemp, dse_Tamb_heating)
-        if Geometry.space_is_finished(ducts.LocationSpace)
-            # Ducts in finished spaces shouldn't affect the total heating capacity
-            unit_final.Heat_Load = heatingLoad
-        else
-            unit_final.Heat_Load = heatingLoad + unit_final.Heat_Load_Ducts
+    unit_final.Heat_Load_Ducts = 0
+    unit_final.Heat_Load = heatingLoad
+    if hvac.HasDuctedHeating
+        unit_final.Heat_Load_Ducts = calc_heat_duct_load(ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregains, heatingLoad, hvac.HtgSupplyAirTemp, mj8.heat_design_temps)
+        
+        # Ducts in finished spaces shouldn't affect the total heating load
+        finished_frac = 0.0
+        ducts.each do |duct|
+            next if Geometry.space_is_finished(duct.LocationSpace)
+            finished_frac += calc_heat_duct_load_frac(duct, ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregains, heatingLoad, hvac.HtgSupplyAirTemp, mj8.heat_design_temps)
         end
-    else
-        unit_final.Heat_Load = heatingLoad
-        unit_final.Heat_Load_Ducts = 0
+        
+        unit_final.Heat_Load += unit_final.Heat_Load_Ducts * (1.0 - finished_frac)
     end
     
     return unit_final
@@ -1617,47 +1620,20 @@ class HVACSizing
     return nil if mj8.nil? or zones_loads.nil? or unit_init.nil? or unit_final.nil?
     
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    if ducts.Has and ducts.NotInLiving and hvac.HasDuctedCooling and unit_init.Cool_Load_Sens > 0
+    if hvac.HasDuctedCooling and unit_init.Cool_Load_Sens > 0
+
+        dse_As, dse_Ar = calc_ducts_areas(ducts)
+        supply_r, return_r = calc_ducts_rvalues(ducts)
+        dse_Tamb_cooling_s, dse_Tamb_cooling_r = calc_ducts_area_weighted_average(ducts, mj8.cool_design_temps, mj8.cool_design_temps)
+        dse_Tamb_dehumid_s, dse_Tamb_dehumid_r = calc_ducts_area_weighted_average(ducts, mj8.dehum_design_temps, mj8.dehum_design_temps)
         
-        dse_Tamb_cooling = mj8.cool_design_temps[ducts.LocationSpace]
-        dse_Tamb_dehumid = mj8.dehum_design_temps[ducts.LocationSpace]
+        # ASHRAE 152 6.5.2
+        # For systems with ducts in several locations, Fregain shall be weighted by the fraction of exposed duct area
+        # in each space. Fregain shall be calculated separately for supply and return locations.
+        dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(ducts, unit_final.dse_Fregains, unit_final.dse_Fregains)
         
         # Calculate the air enthalpy in the return duct location for DSE calculations
-        dse_h_Return_Cooling = (1.006 * UnitConversions.convert(dse_Tamb_cooling, "F", "C") + weather.design.CoolingHumidityRatio * (2501 + 1.86 * UnitConversions.convert(dse_Tamb_cooling, "F", "C"))) * UnitConversions.convert(1, "kJ", "Btu") * UnitConversions.convert(1, "lbm", "kg")
-        
-        # Supply and return duct surface areas located outside conditioned space
-        dse_As = ducts.SupplySurfaceArea * ducts.LocationFrac
-        dse_Ar = ducts.ReturnSurfaceArea
-    
-        iterate_Tattic = false
-        if Geometry.is_unfinished_attic(ducts.LocationSpace)
-            iterate_Tattic = true
-            
-            attic_UAs = get_space_ua_values(runner, ducts.LocationSpace, weather, unit)
-            return nil if attic_UAs.nil?
-            
-            # Get area-weighted average roofing material absorptance
-            roofAbsorptance = 0.0
-            total_area = 0.0
-            ducts.LocationSpace.surfaces.each do |surface|
-                next if surface.surfaceType.downcase != "roofceiling"
-                surf_area = UnitConversions.convert(surface.netArea,"m^2","ft^2")
-                surf_abs = surface.construction.get.to_LayeredConstruction.get.getLayer(0).to_StandardOpaqueMaterial.get.solarAbsorptance
-                roofAbsorptance += (surf_area * surf_abs)
-                total_area += surf_area
-            end
-            roofAbsorptance = roofAbsorptance / total_area
-            
-            roofPitch = Geometry.get_roof_pitch(ducts.LocationSpace.surfaces)
-            
-            t_solair = calculate_t_solair(weather, roofAbsorptance, roofPitch) # Sol air temperature on outside of roof surface # 1)
-             
-            # Calculate starting attic temp (ignoring duct losses)
-            unit_final.Cool_Load_Ducts_Sens = 0
-            t_attic_iter = calculate_t_attic_iter(runner, attic_UAs, t_solair, mj8.cool_setpoint, unit_final.Cool_Load_Ducts_Sens)
-            return nil if t_attic_iter.nil?
-            dse_Tamb_cooling = t_attic_iter
-        end
+        dse_h_cooling_r = (1.006 * UnitConversions.convert(dse_Tamb_cooling_r, "F", "C") + weather.design.CoolingHumidityRatio * (2501 + 1.86 * UnitConversions.convert(dse_Tamb_cooling_r, "F", "C"))) * UnitConversions.convert(1, "kJ", "Btu") * UnitConversions.convert(1, "lbm", "kg")
         
         # Initialize for the iteration
         delta = 1
@@ -1665,15 +1641,17 @@ class HVACSizing
         coolingLoad_Tot_Next = unit_init.Cool_Load_Tot
         unit_final.Cool_Load_Tot  = unit_init.Cool_Load_Tot
         unit_final.Cool_Load_Sens = unit_init.Cool_Load_Sens
+
+        supply_leakage_cfm, return_leakage_cfm = calc_ducts_leakages(ducts, unit_init.Cool_Airflow)
         
-        unit_final.Cool_Load_Lat, unit_final.Cool_Load_Sens = calculate_sensible_latent_split(mj8.cool_design_grains, mj8.grains_indoor_cooling, mj8.acf, ducts.ReturnLoss, coolingLoad_Tot_Next, unit_init.Cool_Load_Lat, unit_init.Cool_Airflow)
+        unit_final.Cool_Load_Lat, unit_final.Cool_Load_Sens = calculate_sensible_latent_split(mj8.cool_design_grains, mj8.grains_indoor_cooling, mj8.acf, return_leakage_cfm, coolingLoad_Tot_Next, unit_init.Cool_Load_Lat)
         
         for _iter in 1..50
             break if delta.abs <= 0.001
 
             coolingLoad_Tot_Prev = coolingLoad_Tot_Next
             
-            unit_final.Cool_Load_Lat, unit_final.Cool_Load_Sens = calculate_sensible_latent_split(mj8.cool_design_grains, mj8.grains_indoor_cooling, mj8.acf, ducts.ReturnLoss, coolingLoad_Tot_Next, unit_init.Cool_Load_Lat, unit_init.Cool_Airflow)
+            unit_final.Cool_Load_Lat, unit_final.Cool_Load_Sens = calculate_sensible_latent_split(mj8.cool_design_grains, mj8.grains_indoor_cooling, mj8.acf, return_leakage_cfm, coolingLoad_Tot_Next, unit_init.Cool_Load_Lat)
             unit_final.Cool_Load_Tot = unit_final.Cool_Load_Lat + unit_final.Cool_Load_Sens
             
             # Calculate the new cooling air flow rate
@@ -1681,52 +1659,16 @@ class HVACSizing
 
             unit_final.Cool_Load_Ducts_Sens = unit_final.Cool_Load_Sens - unit_init.Cool_Load_Sens
             unit_final.Cool_Load_Ducts_Tot = coolingLoad_Tot_Next - unit_init.Cool_Load_Tot
+            
+            dse_Qs, dse_Qr = calc_ducts_leakages(ducts, unit_init.Cool_Airflow)
 
-            dse_DEcorr_cooling, dse_dTe_cooling, unit_final.Cool_Load_Ducts_Sens = calc_dse_cooling(ducts, mj8.acf, mj8.enthalpy_indoor_cooling, unit_init.LAT, unit_init.Cool_Airflow, unit_final.Cool_Load_Sens, dse_Tamb_cooling, dse_As, dse_Ar, mj8.cool_setpoint, unit_final.dse_Fregain, unit_final.Cool_Load_Tot, dse_h_Return_Cooling)
+            dse, dse_dTe_cooling, unit_final.Cool_Load_Ducts_Sens = calc_dse_cooling(dse_Qs, dse_Qr, mj8.acf, mj8.enthalpy_indoor_cooling, unit_init.LAT, unit_init.Cool_Airflow, unit_final.Cool_Load_Sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, mj8.cool_setpoint, dse_Fregain_s, dse_Fregain_r, unit_final.Cool_Load_Tot, dse_h_cooling_r, supply_r, return_r)
             dse_precorrect = 1 - (unit_final.Cool_Load_Ducts_Sens / unit_final.Cool_Load_Sens)
         
-            if iterate_Tattic # Iterate attic temperature based on duct losses
-                delta_attic = 1
-                
-                for _iter_attic in 1..20
-                    break if delta_attic.abs <= 0.001
+            coolingLoad_Tot_Next = unit_init.Cool_Load_Tot / dse    
                     
-                    t_attic_old = t_attic_iter
-                    t_attic_iter = calculate_t_attic_iter(runner, attic_UAs, t_solair, mj8.cool_setpoint, unit_final.Cool_Load_Ducts_Sens)
-                    return nil if t_attic_iter.nil?
-                    
-                    mj8.cool_design_temps[ducts.LocationSpace] = t_attic_iter
-                    
-                    # Calculate the change since the last iteration
-                    delta_attic = (t_attic_iter - t_attic_old) / t_attic_old                  
-                    
-                    # Calculate enthalpy in attic using new Tattic
-                    dse_h_Return_Cooling = (1.006 * UnitConversions.convert(t_attic_iter,"F","C") + weather.design.CoolingHumidityRatio * (2501 + 1.86 * UnitConversions.convert(t_attic_iter,"F","C"))) * UnitConversions.convert(1,"kJ","Btu") * UnitConversions.convert(1,"lbm","kg")
-                    
-                    # Calculate duct efficiency using new Tattic:
-                    dse_DEcorr_cooling, dse_dTe_cooling, unit_final.Cool_Load_Ducts_Sens = calc_dse_cooling(ducts, mj8.acf, mj8.enthalpy_indoor_cooling, unit_init.LAT, unit_init.Cool_Airflow, unit_final.Cool_Load_Sens, dse_Tamb_cooling, dse_As, dse_Ar, mj8.cool_setpoint, unit_final.dse_Fregain, unit_final.Cool_Load_Tot, dse_h_Return_Cooling)
-                    
-                    dse_precorrect = 1 - (unit_final.Cool_Load_Ducts_Sens / unit_final.Cool_Load_Sens)
-                end
-                
-                dse_Tamb_cooling = t_attic_iter
-                Geometry.get_thermal_zones_from_spaces(unit.spaces).each do |thermal_zone|
-                    next if not Geometry.zone_is_finished(thermal_zone)
-                    zones_loads[thermal_zone] = process_load_floors(runner, mj8, unit, thermal_zone, zones_loads[thermal_zone], weather, mj8.htd)
-                end
-                unit_init = process_intermediate_total_loads(runner, mj8, zones_loads, weather, hvac)
-        
-                # Calculate the increase in total cooling load due to ducts (conservatively to prevent overshoot)
-                coolingLoad_Tot_Next = unit_init.Cool_Load_Tot + coolingLoad_Tot_Prev * (1 - dse_precorrect)
-                
-                # Calculate unmet zone load:
-                delta = unit_init.Cool_Load_Tot - (unit_final.Cool_Load_Tot * dse_precorrect)
-            else
-                coolingLoad_Tot_Next = unit_init.Cool_Load_Tot / dse_DEcorr_cooling    
-                        
-                # Calculate the change since the last iteration
-                delta = (coolingLoad_Tot_Next - coolingLoad_Tot_Prev) / coolingLoad_Tot_Prev
-            end
+            # Calculate the change since the last iteration
+            delta = (coolingLoad_Tot_Next - coolingLoad_Tot_Prev) / coolingLoad_Tot_Prev
         end # _iter
         
         # Calculate the air flow rate required for design conditions
@@ -1734,33 +1676,12 @@ class HVACSizing
 
         # Dehumidification duct loads
         
-        dse_Qs_Dehumid = ducts.SupplyLoss * unit_final.Cool_Airflow
-        dse_Qr_Dehumid = ducts.ReturnLoss * unit_final.Cool_Airflow
+        dse_Qs_Dehumid, dse_Qr_Dehumid = calc_ducts_leakages(ducts, unit_final.Cool_Airflow)
         
-        # Supply and return conduction functions, Bs and Br
-        dse_Bs_dehumid = Math.exp((-1.0 * dse_As) / (60 * unit_final.Cool_Airflow * @inside_air_dens * Gas.Air.cp * ducts.SupplyRvalue))
-        dse_Br_dehumid = Math.exp((-1.0 * dse_Ar) / (60 * unit_final.Cool_Airflow * @inside_air_dens * Gas.Air.cp * ducts.ReturnRvalue))
-            
-        dse_a_s_dehumid = (unit_final.Cool_Airflow - dse_Qs_Dehumid) / unit_final.Cool_Airflow
-        dse_a_r_dehumid = (unit_final.Cool_Airflow - dse_Qr_Dehumid) / unit_final.Cool_Airflow
-        
-        dse_dTe_dehumid = dse_dTe_cooling
-        dse_dT_dehumid = mj8.cool_setpoint - dse_Tamb_dehumid
-        
-        # Calculate the delivery effectiveness (Equation 6-23)
-        dse_DE_dehumid = dse_a_s_dehumid * dse_Bs_dehumid - dse_a_s_dehumid * dse_Bs_dehumid * \
-                         (1 - dse_a_r_dehumid * dse_Br_dehumid) * (dse_dT_dehumid / dse_dTe_dehumid) - \
-                         dse_a_s_dehumid * (1 - dse_Bs_dehumid) * (dse_dT_dehumid / dse_dTe_dehumid)
-                         
-        # Calculate the delivery effectiveness corrector for regain (Equation 6-40)
-        dse_DEcorr_dehumid = dse_DE_dehumid + unit_final.dse_Fregain * (1 - dse_DE_dehumid) + dse_Br_dehumid * \
-                             (dse_a_r_dehumid * unit_final.dse_Fregain - unit_final.dse_Fregain) * (dse_dT_dehumid / dse_dTe_dehumid)
-
-        # Limit the DE to a reasonable value to prevent negative values and huge equipment
-        dse_DEcorr_dehumid = [dse_DEcorr_dehumid, 0.25].max
+        dse = calc_dse_dehumid(dse_Qs_Dehumid, dse_Qr_Dehumid, mj8.acf, unit_init.Cool_Airflow, unit_final.Cool_Load_Sens, dse_Tamb_dehumid_s, dse_Tamb_dehumid_r, dse_As, dse_Ar, mj8.cool_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
         
         # Calculate the increase in sensible dehumidification load due to ducts
-        unit_final.Dehumid_Load_Sens = unit_init.Dehumid_Load_Sens / dse_DEcorr_dehumid
+        unit_final.Dehumid_Load_Sens = unit_init.Dehumid_Load_Sens / dse
 
         # Calculate the latent duct leakage load (Manual J accounts only for return duct leakage)
         unit_final.Dehumid_Load_Ducts_Lat = 0.68 * mj8.acf * dse_Qr_Dehumid * (mj8.dehum_design_grains - mj8.grains_indoor_dehumid)
@@ -2011,7 +1932,9 @@ class HVACSizing
     
     # Override Manual J sizes if Fixed sizes are being used
     if not hvac.FixedCoolingCapacity.nil?
+        prev_capacity = unit_final.Cool_Capacity
         unit_final.Cool_Capacity = UnitConversions.convert(hvac.FixedCoolingCapacity,"ton","Btu/hr")
+        unit_final.Cool_Airflow = unit_final.Cool_Airflow * unit_final.Cool_Capacity / prev_capacity
     end
     if not hvac.FixedSuppHeatingCapacity.nil?
         unit_final.Heat_Load = UnitConversions.convert(hvac.FixedSuppHeatingCapacity,"ton","Btu/hr")
@@ -2310,19 +2233,16 @@ class HVACSizing
         return nil if min_temp_unit_init.nil?
             
         # TODO: Combine with code in process_duct_loads_heating
-        if ducts.Has and ducts.NotInLiving
-            if not Geometry.is_unfinished_basement(ducts.LocationSpace)
-                dse_Tamb_heating = mj8.heat_design_temps[ducts.LocationSpace]
-                duct_load_heating = calc_heat_duct_load(ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregain, min_temp_unit_init.Heat_Load, hvac.HtgSupplyAirTemp, dse_Tamb_heating)
-            else
-                #Ducts in the finished basement does not impact equipment capacity
-                duct_load_heating = 0
-            end
-        else
-            duct_load_heating = 0
+        heatingLoad_ducts, finished_frac = calc_heat_duct_load(ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregains, min_temp_unit_init.Heat_Load, hvac.HtgSupplyAirTemp, mj8.heat_design_temps)
+        
+        # Ducts in finished spaces shouldn't affect the total heating load
+        finished_frac = 0.0
+        ducts.each do |duct|
+            next if Geometry.space_is_finished(duct.LocationSpace)
+            finished_frac += calc_heat_duct_load_frac(duct, ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregains, min_temp_unit_init.Heat_Load, hvac.HtgSupplyAirTemp, mj8.heat_design_temps)
         end
         
-        heat_pump_load = min_temp_unit_init.Heat_Load + duct_load_heating
+        heat_pump_load = min_temp_unit_init.Heat_Load + heatingLoad_ducts * (1.0 - finished_frac)
     end
     
     heatCap_Rated = (heat_pump_load / MathTools.biquadratic(mj8.heat_setpoint, heat_db, coefficients)) / capacity_ratio
@@ -2373,7 +2293,7 @@ class HVACSizing
     return unit_final
   end
   
-  def self.process_slave_zone_flow_ratios(runner, zones_loads, ducts, unit_final)
+  def self.process_slave_zone_flow_ratios(runner, zones_loads, ducts, unit_init, mj8, hvac, unit_final)
     '''
     Flow Ratios for Slave Zones
     '''
@@ -2382,12 +2302,12 @@ class HVACSizing
     
     zone_heat_loads = {}
     zones_loads.each do |thermal_zone, zone_loads|
-        zone_heat_loads[thermal_zone] = [zone_loads.Heat_Windows + zone_loads.Heat_Skylights + 
-                                         zone_loads.Heat_Doors + zone_loads.Heat_Walls + 
-                                         zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0].max + 
-                                        zone_loads.Heat_Infil
-        if !ducts.LocationSpace.nil? and thermal_zone.spaces.include?(ducts.LocationSpace)
-            zone_heat_loads[thermal_zone] -= unit_final.Heat_Load_Ducts
+        zone_heat_loads[thermal_zone] = unit_init.Heat_Load
+        
+        ducts.each do |duct|
+          next if not thermal_zone.spaces.include?(duct.LocationSpace)
+          duct_load_frac = calc_heat_duct_load_frac(duct, ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregains, unit_init.Heat_Load, hvac.HtgSupplyAirTemp, mj8.heat_design_temps)
+          zone_heat_loads[thermal_zone] -= unit_final.Heat_Load_Ducts * duct_load_frac
         end
     end
     
@@ -2737,11 +2657,16 @@ class HVACSizing
     return load / (1.1 * acf * (htg_supply_air_temp - heat_setpoint))
   end
   
-  def self.calc_heat_duct_load(ducts, acf, heat_setpoint, dse_Fregain, heatingLoad, htg_supply_air_temp, t_amb)
+  def self.calc_heat_duct_load(ducts, acf, heat_setpoint, dse_Fregains, heatingLoad, htg_supply_air_temp, heat_design_temps)
 
-    # Supply and return duct surface areas located outside conditioned space
-    dse_As = ducts.SupplySurfaceArea * ducts.LocationFrac
-    dse_Ar = ducts.ReturnSurfaceArea
+    dse_As, dse_Ar = calc_ducts_areas(ducts)
+    supply_r, return_r = calc_ducts_rvalues(ducts)
+    dse_Tamb_heating_s, dse_Tamb_heating_r = calc_ducts_area_weighted_average(ducts, heat_design_temps, heat_design_temps)
+    
+    # ASHRAE 152 6.5.2
+    # For systems with ducts in several locations, Fregain shall be weighted by the fraction of exposed duct area
+    # in each space. Fregain shall be calculated separately for supply and return locations.
+    dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(ducts, dse_Fregains, dse_Fregains)
     
     # Initialize for the iteration
     delta = 1
@@ -2750,11 +2675,13 @@ class HVACSizing
     
     for _iter in 0..19
         break if delta.abs <= 0.001
+        
+        dse_Qs, dse_Qr = calc_ducts_leakages(ducts, heat_cfm)
 
-        dse_DEcorr_heating, _dse_dTe_heating = calc_dse_heating(ducts, acf, heat_cfm, heatingLoad_Prev, t_amb, dse_As, dse_Ar, heat_setpoint, dse_Fregain)
+        dse = calc_dse_heating(dse_Qs, dse_Qr, acf, heat_cfm, heatingLoad_Prev, dse_Tamb_heating_s, dse_Tamb_heating_r, dse_As, dse_Ar, heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
         
         # Calculate the increase in heating load due to ducts (Approach: DE = Qload/Qequip -> Qducts = Qequip-Qload)
-        heatingLoad_Next = heatingLoad / dse_DEcorr_heating
+        heatingLoad_Next = heatingLoad / dse
         
         # Calculate the change since the last iteration
         delta = (heatingLoad_Next - heatingLoad_Prev) / heatingLoad_Prev
@@ -2762,89 +2689,111 @@ class HVACSizing
         # Update the flow rate for the next iteration
         heatingLoad_Prev = heatingLoad_Next
         heat_cfm = calc_heat_cfm(heatingLoad_Next, acf, heat_setpoint, htg_supply_air_temp)
-        
     end
-
-    return heatingLoad_Next - heatingLoad
-
-  end
-  
-  def self.calc_dse_heating(ducts, acf, cfm_inter, load_Inter_Sens, dse_Tamb, dse_As, dse_Ar, t_setpoint, dse_Fregain)
-    '''
-    Calculate the Distribution System Efficiency using the method of ASHRAE Standard 152 (used for heating and cooling).
-    '''
-    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT = _calc_dse_init(ducts, acf, cfm_inter, load_Inter_Sens, dse_Tamb, dse_As, dse_Ar, t_setpoint)
-    dse_DE = _calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT, dse_dTe)
-    dse_DEcorr = _calc_dse_DEcorr(ducts, dse_DE, dse_Fregain, dse_Br, dse_a_r)
     
-    return dse_DEcorr, dse_dTe
+    duct_load = heatingLoad_Next - heatingLoad
+    
+    return duct_load
+
   end
   
-  def self.calc_dse_cooling(ducts, acf, enthalpy_indoor_cooling, leavingAirTemp, cfm_inter, load_Inter_Sens, dse_Tamb, dse_As, dse_Ar, t_setpoint, dse_Fregain, coolingLoad_Tot, dse_h_Return_Cooling)
+  def self.calc_heat_duct_load_frac(duct, ducts, acf, heat_setpoint, dse_Fregains, heatingLoad, htg_supply_air_temp, heat_design_temps)
+  
+    # Calculate fraction of duct load for duct of interest
+
+    # Calculate duct load
+    duct_load = calc_heat_duct_load([duct], acf, heat_setpoint, dse_Fregains, heatingLoad, htg_supply_air_temp, heat_design_temps)
+      
+    # Calculate other duct load
+    other_duct_load = 0.0
+    ducts.each do |other_duct|
+      next if other_duct == duct
+      other_duct_load += calc_heat_duct_load([other_duct], acf, heat_setpoint, dse_Fregains, heatingLoad, htg_supply_air_temp, heat_design_temps)
+    end
+    
+    duct_frac = duct_load / (duct_load + other_duct_load)
+    
+    return duct_frac
+  end
+  
+  def self.calc_dse_heating(dse_Qs, dse_Qr, acf, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
     '''
-    Calculate the Distribution System Efficiency using the method of ASHRAE Standard 152 (used for heating and cooling).
+    Calculate the Distribution System Efficiency for heating (using the method of ASHRAE Standard 152).
+    '''
+    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(acf, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+    dse_DE = _calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
+    dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
+    
+    return dse_DEcorr
+  end
+  
+  def self.calc_dse_cooling(dse_Qs, dse_Qr, acf, indoor_enthalpy, leavingAirTemp, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, load_total, dse_h_r, supply_r, return_r)
+    '''
+    Calculate the Distribution System Efficiency for cooling (using the method of ASHRAE Standard 152).
     '''
   
-    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT = _calc_dse_init(ducts, acf, cfm_inter, load_Inter_Sens, dse_Tamb, dse_As, dse_Ar, t_setpoint)
-    dse_DE, coolingLoad_Ducts_Sens = _calc_dse_DE_cooling(dse_a_s, cfm_inter, coolingLoad_Tot, dse_a_r, dse_h_Return_Cooling, enthalpy_indoor_cooling, dse_Br, dse_dT, dse_Bs, leavingAirTemp, dse_Tamb, load_Inter_Sens)
-    dse_DEcorr = _calc_dse_DEcorr(ducts, dse_DE, dse_Fregain, dse_Br, dse_a_r)
+    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(acf, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+    dse_DE, coolingLoad_Ducts_Sens = _calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, indoor_enthalpy, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens)
+    dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
     
     return dse_DEcorr, dse_dTe, coolingLoad_Ducts_Sens
   end
   
-  def self._calc_dse_init(ducts, acf, cfm_inter, load_Inter_Sens, dse_Tamb, dse_As, dse_Ar, t_setpoint)
+  def self.calc_dse_dehumid(dse_Qs, dse_Qr, acf, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
+    '''
+    Calculate the Distribution System Efficiency for dehumidification.
+    '''
+  
+    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(acf, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+    dse_DE = _calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
+    dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
     
-    dse_Qs = ducts.SupplyLoss * cfm_inter
-    dse_Qr = ducts.ReturnLoss * cfm_inter
-
-    # Supply and return conduction functions, Bs and Br
-    if ducts.NotInLiving
-        dse_Bs = Math.exp((-1.0 * dse_As) / (60 * cfm_inter * @inside_air_dens * Gas.Air.cp * ducts.SupplyRvalue))
-        dse_Br = Math.exp((-1.0 * dse_Ar) / (60 * cfm_inter * @inside_air_dens * Gas.Air.cp * ducts.ReturnRvalue))
-
-    else
-        dse_Bs = 1
-        dse_Br = 1
-    end
-
-    dse_a_s = (cfm_inter - dse_Qs) / cfm_inter
-    dse_a_r = (cfm_inter - dse_Qr) / cfm_inter
-
-    dse_dTe = load_Inter_Sens / (1.1 * acf * cfm_inter)
-    dse_dT = t_setpoint - dse_Tamb
-    
-    return dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT
+    return dse_DEcorr
   end
   
-  def self._calc_dse_DE_cooling(dse_a_s, cfm_inter, coolingLoad_Tot, dse_a_r, dse_h_Return_Cooling, enthalpy_indoor_cooling, dse_Br, dse_dT, dse_Bs, leavingAirTemp, dse_Tamb, load_Inter_Sens)
-    # Calculate the delivery effectiveness (Equation 6-23) 
-    # NOTE: This equation is for heating but DE equation for cooling requires psychrometric calculations. This should be corrected.
-    dse_DE = ((dse_a_s * 60 * cfm_inter * @inside_air_dens) / (-1 * coolingLoad_Tot)) * \
-              (((-1 * coolingLoad_Tot) / (60 * cfm_inter * @inside_air_dens)) + \
-               (1 - dse_a_r) * (dse_h_Return_Cooling - enthalpy_indoor_cooling) + \
-               dse_a_r * Gas.Air.cp * (dse_Br - 1) * dse_dT + \
-               Gas.Air.cp * (dse_Bs - 1) * (leavingAirTemp - dse_Tamb))
+  def self._calc_dse_init(acf, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+    
+    # Supply and return conduction functions, Bs and Br
+    dse_Bs = Math.exp((-1.0 * dse_As) / (60 * system_cfm * @inside_air_dens * Gas.Air.cp * supply_r))
+    dse_Br = Math.exp((-1.0 * dse_Ar) / (60 * system_cfm * @inside_air_dens * Gas.Air.cp * return_r))
+
+    dse_a_s = (system_cfm - dse_Qs) / system_cfm
+    dse_a_r = (system_cfm - dse_Qr) / system_cfm
+
+    dse_dTe = load_sens / (1.1 * acf * system_cfm)
+    dse_dT_s = t_setpoint - dse_Tamb_s
+    dse_dT_r = t_setpoint - dse_Tamb_r
+    
+    return dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r
+  end
+  
+  def self._calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, indoor_enthalpy, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens)
+    # Calculate the delivery effectiveness (Equation 6-25) 
+    dse_DE = ((dse_a_s * 60 * system_cfm * @inside_air_dens) / (-1 * load_total)) * \
+              (((-1 * load_total) / (60 * system_cfm * @inside_air_dens)) + \
+               (1 - dse_a_r) * (dse_h_r - indoor_enthalpy) + \
+               dse_a_r * Gas.Air.cp * (dse_Br - 1) * dse_dT_r + \
+               Gas.Air.cp * (dse_Bs - 1) * (leavingAirTemp - dse_Tamb_s))
     
     # Calculate the sensible heat transfer from surroundings
-    coolingLoad_Ducts_Sens = (1 - [dse_DE,0].max) * load_Inter_Sens
+    coolingLoad_Ducts_Sens = (1 - [dse_DE,0].max) * load_sens
     
     return dse_DE, coolingLoad_Ducts_Sens
   end
   
-  def self._calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT, dse_dTe)
+  def self._calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
     # Calculate the delivery effectiveness (Equation 6-23) 
-    # NOTE: This equation is for heating but DE equation for cooling requires psychrometric calculations. This should be corrected.
     dse_DE = (dse_a_s * dse_Bs - 
-              dse_a_s * dse_Bs * (1 - dse_a_r * dse_Br) * (dse_dT / dse_dTe) - 
-              dse_a_s * (1 - dse_Bs) * (dse_dT / dse_dTe))
+              dse_a_s * dse_Bs * (1 - dse_a_r * dse_Br) * (dse_dT_r / dse_dTe) - 
+              dse_a_s * (1 - dse_Bs) * (dse_dT_s / dse_dTe))
     
     return dse_DE
   end
   
-  def self._calc_dse_DEcorr(ducts, dse_DE, dse_Fregain, dse_Br, dse_a_r)
+  def self._calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
     # Calculate the delivery effectiveness corrector for regain (Equation 6-40)
-    dse_DEcorr = (dse_DE + dse_Fregain * (1 - dse_DE) + 
-                  dse_Br * (dse_a_r * dse_Fregain - dse_Fregain))
+    dse_DEcorr = (dse_DE + dse_Fregain_s * (1 - dse_DE) - (dse_Fregain_s - dse_Fregain_r - 
+                  dse_Br * (dse_a_r * dse_Fregain_s - dse_Fregain_r))*dse_dT_r/dse_dTe)
 
     # Limit the DE to a reasonable value to prevent negative values and huge equipment
     dse_DEcorr = [dse_DEcorr, 0.25].max
@@ -2853,9 +2802,9 @@ class HVACSizing
     return dse_DEcorr
   end
   
-  def self.calculate_sensible_latent_split(cool_design_grains, grains_indoor_cooling, acf, return_duct_loss, cool_load_tot, coolingLoadLat, cool_Airflow)
+  def self.calculate_sensible_latent_split(cool_design_grains, grains_indoor_cooling, acf, return_leakage_cfm, cool_load_tot, coolingLoadLat)
     # Calculate the latent duct leakage load (Manual J accounts only for return duct leakage)
-    dse_Cool_Load_Latent = [0, 0.68 * acf * return_duct_loss * cool_Airflow * 
+    dse_Cool_Load_Latent = [0, 0.68 * acf * return_leakage_cfm * 
                              (cool_design_grains - grains_indoor_cooling)].max
     
     # Calculate final latent and load
@@ -2866,50 +2815,157 @@ class HVACSizing
   end
   
   def self.get_ducts_for_unit(runner, model, unit, hvac, unit_ffa)
-    ducts = DuctsInfo.new
+    ducts = []
     
-    ducts.Has = false
     if hvac.HasDuctedHeating or hvac.HasDuctedCooling
-        ducts.Has = true
-        ducts.NotInLiving = false # init
         
-        ducts.SupplySurfaceArea = get_feature(runner, unit, Constants.SizingInfoDuctsSupplySurfaceArea, 'double')
-        ducts.ReturnSurfaceArea = get_feature(runner, unit, Constants.SizingInfoDuctsReturnSurfaceArea, 'double')
-        return nil if ducts.SupplySurfaceArea.nil? or ducts.ReturnSurfaceArea.nil?
-        
-        ducts.LocationFrac = get_feature(runner, unit, Constants.SizingInfoDuctsLocationFrac, 'double')
-        return nil if ducts.LocationFrac.nil?
-        
-        ducts.SupplyLoss = get_feature(runner, unit, Constants.SizingInfoDuctsSupplyLoss, 'double')
-        ducts.ReturnLoss = get_feature(runner, unit, Constants.SizingInfoDuctsReturnLoss, 'double')
-        return nil if ducts.SupplyLoss.nil? or ducts.ReturnLoss.nil?
+        supply_leakage_fracs = get_feature(runner, unit, Constants.SizingInfoDuctsSupplyLeakageFracs, 'string')
+        return_leakage_fracs = get_feature(runner, unit, Constants.SizingInfoDuctsReturnLeakageFracs, 'string')
+        supply_leakage_cfm25s = get_feature(runner, unit, Constants.SizingInfoDuctsSupplyLeakageCFM25s, 'string')
+        return_leakage_cfm25s = get_feature(runner, unit, Constants.SizingInfoDuctsReturnLeakageCFM25s, 'string')
+        return nil if supply_leakage_fracs.nil? or return_leakage_fracs.nil? or supply_leakage_cfm25s.nil? or return_leakage_cfm25s.nil?
+        supply_leakage_fracs = supply_leakage_fracs.split(",").map(&:to_f)
+        return_leakage_fracs = return_leakage_fracs.split(",").map(&:to_f)
+        supply_leakage_cfm25s = supply_leakage_cfm25s.split(",").map(&:to_f)
+        return_leakage_cfm25s = return_leakage_cfm25s.split(",").map(&:to_f)
+        if supply_leakage_fracs.inject{ |sum, n| sum + n } == 0.0 and return_leakage_fracs.inject{ |sum, n| sum + n } == 0.0
+          supply_leakage_fracs = [nil]*supply_leakage_fracs.size
+          return_leakage_fracs = [nil]*return_leakage_fracs.size
+        else
+          supply_leakage_cfm25s = [nil]*supply_leakage_cfm25s.size
+          return_leakage_cfm25s = [nil]*return_leakage_cfm25s.size
+        end
 
-        ducts.SupplyRvalue = get_feature(runner, unit, Constants.SizingInfoDuctsSupplyRvalue, 'double')
-        ducts.ReturnRvalue = get_feature(runner, unit, Constants.SizingInfoDuctsReturnRvalue, 'double')
-        return nil if ducts.SupplyRvalue.nil? or ducts.ReturnRvalue.nil?
+        supply_areas = get_feature(runner, unit, Constants.SizingInfoDuctsSupplyAreas, 'string')
+        return_areas = get_feature(runner, unit, Constants.SizingInfoDuctsReturnAreas, 'string')
+        return nil if supply_areas.nil? or return_areas.nil?
+        supply_areas = supply_areas.split(",").map(&:to_f)
+        return_areas = return_areas.split(",").map(&:to_f)
         
-        locationZoneName = get_feature(runner, unit, Constants.SizingInfoDuctsLocationZone, 'string')
-        return nil if locationZoneName.nil?
+        supply_rs = get_feature(runner, unit, Constants.SizingInfoDuctsSupplyRvalues, 'string')
+        return_rs = get_feature(runner, unit, Constants.SizingInfoDuctsReturnRvalues, 'string')
+        return nil if supply_rs.nil? or return_rs.nil?
+        supply_rs = supply_rs.split(",").map(&:to_f)
+        return_rs = return_rs.split(",").map(&:to_f)
         
-        # Get arbitrary space from zone
-        ducts.LocationSpace = nil
+        locations = get_feature(runner, unit, Constants.SizingInfoDuctsLocationZones, 'string')
+        return nil if locations.nil?
+        locations = locations.split(",")
+        
+        location_spaces = []
         unit_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
         adjacent_common_spaces = Geometry.get_unit_adjacent_common_spaces(unit)
         adjacent_common_zones = Geometry.get_thermal_zones_from_spaces(adjacent_common_spaces)
-        (unit_zones + adjacent_common_zones).each do |zone|
-            next if not zone.name.to_s.start_with?(locationZoneName)
-            ducts.LocationSpace = zone.spaces[0]
+        locations.each do |location|
+            location_space = nil
+            (unit_zones + adjacent_common_zones).each do |zone|
+                next if not zone.handle.to_s.start_with?(location)
+                location_space = zone.spaces[0] # Get arbitrary space from zone
+                break
+            end
+            if location_space.nil?
+                runner.registerError("Could not determine duct location.")
+                return nil
+            end
+            location_spaces << location_space
         end
-        if ducts.LocationSpace.nil?
-            runner.registerError("Could not determine duct location.")
-            return nil
+        
+        location_spaces.each_with_index do |location_space, index|
+          d = DuctInfo.new
+          d.LocationSpace = location_space
+          d.SupplyLeakageFrac = supply_leakage_fracs[index]
+          d.SupplyLeakageCFM25 = supply_leakage_cfm25s[index]
+          d.SupplyArea = supply_areas[index]
+          d.SupplyR = supply_rs[index]
+          d.ReturnLeakageFrac = return_leakage_fracs[index]
+          d.ReturnLeakageCFM25 = return_leakage_cfm25s[index]
+          d.ReturnArea = return_areas[index]
+          d.ReturnR = return_rs[index]
+          ducts << d
         end
-        if not Geometry.is_living(ducts.LocationSpace)
-            ducts.NotInLiving = true
-        end
+        
     end
     
     return ducts
+  end
+  
+  def self.calc_ducts_area_weighted_average(ducts, supply_values, return_values)
+    '''
+    Calculate area-weighted average values for unconditioned duct(s)
+    '''
+    
+    uncond_supply_area = 0.0
+    uncond_return_area = 0.0
+    ducts.each do |duct|
+      next if Geometry.is_living(duct.LocationSpace)
+      uncond_supply_area += duct.SupplyArea
+      uncond_return_area += duct.ReturnArea
+    end
+  
+    value_supply = 0.0
+    value_return = 0.0
+    ducts.each do |duct|
+      next if Geometry.is_living(duct.LocationSpace)
+      value_supply += supply_values[duct.LocationSpace] * duct.SupplyArea / uncond_supply_area
+      value_return += return_values[duct.LocationSpace] * duct.ReturnArea / uncond_return_area
+    end
+    
+    return value_supply, value_return
+  end
+  
+  def self.calc_ducts_areas(ducts)
+    '''
+    Calculate total supply & return duct areas in unconditioned space
+    '''
+    
+    supply_area = 0.0
+    return_area = 0.0
+    ducts.each do |duct|
+      next if Geometry.is_living(duct.LocationSpace)
+      supply_area += duct.SupplyArea
+      return_area += duct.ReturnArea
+    end
+    
+    return supply_area, return_area
+  end
+  
+  def self.calc_ducts_leakages(ducts, system_cfm)
+    '''
+    Calculate total supply & return duct leakage in cfm.
+    '''
+  
+    supply_cfm = 0.0
+    return_cfm = 0.0
+    ducts.each do |duct|
+      next if Geometry.is_living(duct.LocationSpace)
+      if not duct.SupplyLeakageFrac.nil?
+        supply_cfm += duct.SupplyLeakageFrac * system_cfm
+        return_cfm += duct.ReturnLeakageFrac * system_cfm
+      elsif not duct.SupplyLeakageCFM25.nil?
+        supply_cfm += duct.SupplyLeakageCFM25
+        return_cfm += duct.ReturnLeakageCFM25
+      end
+    end
+    
+    return supply_cfm, return_cfm
+  end
+  
+  def self.calc_ducts_rvalues(ducts)
+    '''
+    Calculate UA-weighted average R-value for supply & return ducts.
+    '''
+    
+    supply_u_factors = {}
+    return_u_factors = {}
+    ducts.each do |duct|
+      next if Geometry.is_living(duct.LocationSpace)
+      supply_u_factors[duct.LocationSpace] = 1.0 / duct.SupplyR
+      return_u_factors[duct.LocationSpace] = 1.0 / duct.ReturnR
+    end
+    
+    supply_u, return_u = calc_ducts_area_weighted_average(ducts, supply_u_factors, return_u_factors)
+    
+    return 1.0/supply_u, 1.0/return_u
   end
   
   def self.get_hvac_for_unit(runner, model, unit)
@@ -3408,58 +3464,6 @@ class HVACSizing
         true_azimuth = true_azimuth - 360
     end
     return true_azimuth
-  end
-  
-  def self.calculate_t_attic_iter(runner, attic_UAs, t_solair, cool_setpoint, coolingLoad_Ducts_Sens)
-    # Calculate new value for Tattic based on updated duct losses
-    sum_uat = -coolingLoad_Ducts_Sens
-    attic_UAs.each do |ua_type, ua|
-        if ua_type == "outdoors" or ua_type == "infil"
-            sum_uat += ua * t_solair
-        elsif ua_type == "surface" # adjacent to finished
-            sum_uat += ua * cool_setpoint
-        elsif ua_type == "total" or ua_type == "foundation"
-            # skip
-        else
-            runner.registerError("Unexpected ua_type: '#{ua_type}'.")
-            return nil
-        end
-    end
-    t_attic_iter = sum_uat / attic_UAs["total"]
-    t_attic_iter = [t_attic_iter, t_solair].min # Prevent attic from being hotter than T_solair
-    t_attic_iter = [t_attic_iter, cool_setpoint].max # Prevent attic from being colder than cool_setpoint
-    return t_attic_iter
-  end
-  
-  def self.calculate_t_solair(weather, roofAbsorptance, roofPitch)
-    # Calculates Tsolair under design conditions
-    # Uses equation (30) from 2009 ASHRAE Handbook-Fundamentals (IP), p 18.22:
-    
-    t_outdoor = weather.design.CoolingDrybulb # Design outdoor air temp (F)
-    i_b = weather.design.CoolingDirectNormal
-    i_d = weather.design.CoolingDiffuseHorizontal
-    
-    # Use max summer direct normal plus diffuse solar radiation, adjusted for roof pitch
-    # (Not calculating max coincident i_b + i_d because that requires knowing roofPitch in advance; will typically coincide with peak i_b though.)
-    i_T = UnitConversions.convert(i_b + i_d * (1 + Math::cos(roofPitch.deg2rad))/2,"W/m^2","Btu/(hr*ft^2)") # total solar radiation incident on surface (Btu/h/ft2)
-    # Adjust diffuse horizontal for roof pitch using isotropic diffuse model (Liu and Jordan 1963) from Duffie and Beckman eq 2.15.1
-    
-    h_o = 4 # coefficient of heat transfer for long-wave radiation and convection at outer surface (Btu/h-ft2-F)
-            # Value of 4.0 for 7.5 mph wind (summer design) from 2009 ASHRAE H-F (IP) p 26.1
-            # p 18.22 assumes h_o = 3.0 Btu/hft2F for horizontal surfaces, but we found 4.0 gives 
-            # more realistic sol air temperatures and is more realistic for residential roofs. 
-    
-    emittance = 1.0 # hemispherical emittance of surface = 1 for horizontal surface, from 2009 ASHRAE H-F (IP) p 18.22
-    
-    deltaR = 20 # difference between long-wave radiation incident on surface from sky and surroundings
-                # and radiation emitted by blackbody at outdoor air temperature
-                # 20 Btu/h-ft2 appropriate for horizontal surfaces, from ASHRAE H-F (IP) p 18.22
-                
-    deltaR_inclined = deltaR * Math::cos(roofPitch.deg2rad) # Correct deltaR for inclined surface,
-    # from eq. 2.32 in  Castelino, R.L. 1992. "Implementation of the Revised Transfer Function Method and Evaluation of the CLTD/SCL/CLF Method" (Thesis) Oklahoma State University 
-    
-    t_solair = t_outdoor + (roofAbsorptance * i_T - emittance * deltaR_inclined) / h_o
-    return t_solair
   end
   
   def self.get_space_ua_values(runner, space, weather, unit)
@@ -4637,7 +4641,7 @@ class UnitFinalValues
                 :Dehumid_Load_Sens, :Dehumid_Load_Ducts_Lat, 
                 :Heat_Load, :Heat_Load_Ducts, 
                 :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
-                :dse_Fregain, :Dehumid_WaterRemoval, 
+                :dse_Fregains, :Dehumid_WaterRemoval, 
                 :TotalCap_CurveValue, :SensibleCap_CurveValue, :BypassFactor_CurveValue,
                 :Zone_Ratios, :EER_Multiplier, :COP_Multiplier,
                 :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
@@ -4663,13 +4667,12 @@ class HVACInfo
 
 end
 
-class DuctsInfo
+class DuctInfo
   # Model info for ducts
-  def initial
+  def initialize
   end
-  attr_accessor(:Has, :NotInLiving, :SupplySurfaceArea, :ReturnSurfaceArea, 
-                :SupplyLoss, :ReturnLoss, :SupplyRvalue, :ReturnRvalue,
-                :Location, :LocationSpace, :LocationFrac)
+  attr_accessor(:SupplyLeakageFrac, :SupplyLeakageCFM25, :SupplyArea, :SupplyR, 
+                :ReturnLeakageFrac, :ReturnLeakageCFM25, :ReturnArea, :ReturnR, :LocationSpace)
 end
 
 class Numeric
