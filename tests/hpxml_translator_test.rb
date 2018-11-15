@@ -6,15 +6,14 @@ require 'fileutils'
 require 'json'
 
 class HPXMLTranslatorTest < MiniTest::Test
-
   def test_valid_simulations
     this_dir = File.dirname(__FILE__)
-    
+
     args_hash = {}
     args_hash['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args_hash['epw_output_path'] = File.absolute_path(File.join(this_dir, "in.epw"))
     args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
-    
+
     Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
       puts "Testing #{xml}..."
       args_hash['hpxml_path'] = File.absolute_path(xml)
@@ -26,7 +25,7 @@ class HPXMLTranslatorTest < MiniTest::Test
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HPXMLTranslator.new
-    
+
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
@@ -48,28 +47,27 @@ class HPXMLTranslatorTest < MiniTest::Test
     # run the measure
     measure.run(model, runner, argument_map)
     result = runner.result
-    
+
     # show the output
     show_output(result)
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)
-
   end
-  
+
   def _test_simulation(args_hash, this_dir)
-  
     # Get EPW path
     hpxml_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
     weather_wmo = XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO")
     epw_path = nil
-    CSV.foreach(File.join(args_hash['weather_dir'], "data.csv"), headers:true) do |row|
+    CSV.foreach(File.join(args_hash['weather_dir'], "data.csv"), headers: true) do |row|
       next if row["wmo"] != weather_wmo
+
       epw_path = File.absolute_path(File.join(args_hash['weather_dir'], row["filename"]))
       break
     end
     refute_nil(epw_path)
-        
+
     # Create osw
     osw_path = File.join(this_dir, "in.osw")
     workflow = OpenStudio::WorkflowJSON.new
@@ -84,18 +82,16 @@ class HPXMLTranslatorTest < MiniTest::Test
     steps.push(step)
     workflow.setWorkflowSteps(steps)
     workflow.saveAs(osw_path)
-    
+
     cli_path = OpenStudio.getOpenStudioCLI
     cmd = "\"#{cli_path}\" --no-ssl run -w \"#{osw_path}\""
     system(cmd)
-    
+
     # Ensure success
     out_osw = File.join(this_dir, "out.osw")
     assert(File.exists?(out_osw))
-    
+
     data_hash = JSON.parse(File.read(out_osw))
     assert_equal(data_hash["completed_status"], "Success")
-    
   end
-  
 end
