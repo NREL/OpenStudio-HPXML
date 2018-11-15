@@ -71,11 +71,11 @@ class Psychrometrics
     t_abs = UnitConversions.convert(tdb, "F", "R")
     t_frz_abs = UnitConversions.convert(Liquid.H2O_l.t_frz, "F", "R")
 
-    # If below freezing, calculate saturation pressure over ice
     if t_abs < t_frz_abs
+      # If below freezing, calculate saturation pressure over ice
       psat = Math.exp(c1 / t_abs + c2 + t_abs * (c3 + t_abs * (c4 + t_abs * (c5 + c6 * t_abs))) + c7 * Math.log(t_abs))
-    # If above freezing, calculate saturation pressure over liquid water
-    elsif
+    else
+      # If above freezing, calculate saturation pressure over liquid water
       psat = Math.exp(c8 / t_abs + c9 + t_abs * (c10 + t_abs * (c11 + c12 * t_abs)) + c13 * Math.log(t_abs))
     end
     return psat

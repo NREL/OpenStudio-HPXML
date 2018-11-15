@@ -392,7 +392,7 @@ class Geometry
       building_type = model.getBuilding.standardsBuildingType.get.downcase
     end
     return building_type
- end
+  end
 
   def self.space_is_unfinished(space)
     return !self.space_is_finished(space)
@@ -1010,16 +1010,16 @@ class Geometry
       elsif (n.x + 1).abs < tol and (n.y).abs < tol
         facade = Constants.FacadeLeft
       end
-    elsif
-        if (n.x).abs < tol and n.y < 0
-          facade = Constants.FacadeFront
-        elsif n.x > 0 and (n.y).abs < tol
-          facade = Constants.FacadeRight
-        elsif (n.x).abs < tol and n.y > 0
-          facade = Constants.FacadeBack
-        elsif n.x < 0 and (n.y).abs < tol
-          facade = Constants.FacadeLeft
-        end
+    else
+      if (n.x).abs < tol and n.y < 0
+        facade = Constants.FacadeFront
+      elsif n.x > 0 and (n.y).abs < tol
+        facade = Constants.FacadeRight
+      elsif (n.x).abs < tol and n.y > 0
+        facade = Constants.FacadeBack
+      elsif n.x < 0 and (n.y).abs < tol
+        facade = Constants.FacadeLeft
+      end
     end
     return facade
   end

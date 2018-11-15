@@ -2819,14 +2819,6 @@ class OSModel
         duct = Duct.new(duct_supply_location, nil, duct_supply_leakage_cfm25, duct_supply_area, duct_supply_r, nil, duct_return_leakage_cfm25, duct_return_area, duct_return_r)
         ducts << duct
       end
-    else
-      duct_supply_location = "none"
-      duct_supply_leakage_cfm25 = 0.0
-      duct_return_leakage_cfm25 = 0.0
-      duct_supply_area = 0.0
-      duct_return_area = 0.0
-      duct_supply_r = 0.0
-      duct_return_r = 0.0
     end
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, ducts)
