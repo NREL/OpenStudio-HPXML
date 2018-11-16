@@ -17,6 +17,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
       puts "Testing #{xml}..."
       args_hash['hpxml_path'] = File.absolute_path(xml)
+      _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
       _test_simulation(args_hash, this_dir)
     end
@@ -94,4 +95,16 @@ class HPXMLTranslatorTest < MiniTest::Test
     data_hash = JSON.parse(File.read(out_osw))
     assert_equal(data_hash["completed_status"], "Success")
   end
+
+  def _test_schema_validation(parent_dir, xml)
+    # TODO: Remove this when schema validation is included with CLI calls
+    schemas_dir = File.absolute_path(File.join(parent_dir, "..", "hpxml_schemas"))
+    hpxml_doc = REXML::Document.new(File.read(xml))
+    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
+    if errors.size > 0
+      puts "#{xml}: #{errors.to_s}"
+    end
+    assert_equal(0, errors.size)
+  end
+  
 end
