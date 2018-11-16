@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>7b9a39be-a0d0-44b6-8283-a89b26465f69</version_id>
-  <version_modified>20181116T150842Z</version_modified>
+  <version_id>6310a9cc-a70e-4ef4-b418-9ba3ce6d0863</version_id>
+  <version_modified>20181116T214534Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -265,12 +265,6 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>1730A695</checksum>
-    </file>
-    <file>
-      <filename>valid-enclosure-overhangs.xml</filename>
-      <filetype>xml</filetype>
-      <usage_type>test</usage_type>
-      <checksum>71BF74A8</checksum>
     </file>
     <file>
       <filename>valid-enclosure-skylights.xml</filename>
@@ -795,23 +789,6 @@
       <checksum>40073B34</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>2CA80548</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>D263C770</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -846,6 +823,29 @@
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
       <checksum>F846FCE1</checksum>
+    </file>
+    <file>
+      <filename>valid-enclosure-overhangs.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AC6035A9</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>723D03C1</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>6F5CB11F</checksum>
     </file>
   </files>
 </measure>

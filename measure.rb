@@ -1608,8 +1608,16 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_id = window.elements["SystemIdentifier"].attributes["id"]
 
+      window_height = 4.0 # ft, default
+      overhang_depth = nil
+      if not window.elements["Overhangs"].nil?
+        overhang_depth = Float(XMLHelper.get_value(window, "Overhangs/Depth"))
+        overhang_distance_to_top = Float(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
+        overhang_distance_to_bottom = Float(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
+        window_height = overhang_distance_to_bottom - overhang_distance_to_top
+      end
+
       window_area = Float(window.elements["Area"].text)
-      window_height = 4.0 # ft
       window_width = window_area / window_height
       window_azimuth = Float(window.elements["Azimuth"].text)
       z_origin = 0
@@ -1655,12 +1663,8 @@ class OSModel
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType("FixedWindow")
 
-      overhang_depth = 0
-      overhang_offset = 0
-      if not window.elements["Overhangs"].nil?
-        overhang_depth = Float(XMLHelper.get_value(window, "Overhangs/Depth"))
-        overhang_offset = Float(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
-        overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, "ft", "m"), UnitConversions.convert(overhang_offset, "ft", "m"))
+      if not overhang_depth.nil?
+        overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, "ft", "m"), UnitConversions.convert(overhang_distance_to_top, "ft", "m"))
         overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
       end
 
