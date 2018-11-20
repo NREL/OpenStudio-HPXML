@@ -1,11 +1,11 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <name>he_score_ruleset</name>
+  <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>f41e34d6-3114-4ebe-a71b-02390617c21c</version_id>
-  <version_modified>20181120T183603Z</version_modified>
+  <version_id>1262a513-05a9-4451-a998-7d942e2706b1</version_id>
+  <version_modified>20181120T234928Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
-  <class_name>HEScoreRuleset</class_name>
+  <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
   <description>TODO</description>
   <modeler_description>TODO</modeler_description>
@@ -22,6 +22,14 @@
       <name>schemas_dir</name>
       <display_name>HPXML Schemas Directory</display_name>
       <description>Absolute path of the hpxml schemas directory.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>hpxml_output_path</name>
+      <display_name>HPXML Output File Path</display_name>
+      <description>Absolute (or relative) path of the output HPXML file.</description>
       <type>String</type>
       <required>false</required>
       <model_dependent>false</model_dependent>
@@ -83,19 +91,31 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>2D10DB81</checksum>
+      <checksum>4CC46170</checksum>
     </file>
     <file>
       <filename>test_hescore_ruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>83DE53F7</checksum>
+      <checksum>22C6311E</checksum>
     </file>
     <file>
       <filename>HESvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>49B85D16</checksum>
+      <checksum>DFF7925A</checksum>
+    </file>
+    <file>
+      <filename>HESruleset.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3B8F0FE5</checksum>
+    </file>
+    <file>
+      <filename>hvac_equipment_efficiency.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>C6C76B80</checksum>
     </file>
   </files>
 </measure>

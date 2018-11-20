@@ -60,10 +60,8 @@ class HEScoreValidator
         '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window' => one_or_more, # See [Window]
         '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight' => zero_or_more, # See [Skylight]
 
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => zero_or_one, # See [HeatingSystem]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => zero_or_one, # See [CoolingSystem]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump' => zero_or_one, # See [HeatPump]
-        '/HPXML/Building/BuildingDetails/Systems/WaterHeating' => zero_or_one, # See [WaterHeatingSystem]
+        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant[HeatingSystem | CoolingSystem | HeatPump]' => zero_or_one, # See [HeatingSystem] or [CoolingSystem] or [HeatPump]
+        '/HPXML/Building/BuildingDetails/Systems/WaterHeating' => one_or_more, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/Photovoltaics' => zero_or_one, # See [PVSystem]
       },
 
@@ -71,7 +69,6 @@ class HEScoreValidator
       'BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '[[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="CFM"]/AirLeakage] | [LeakinessDescription="tight" or LeakinessDescription="average"]' => one,
-        '[TypeOfInfiltrationMeasurement="blower door" or TypeOfInfiltrationMeasurement="estimate"]' => one,
       },
 
       # [Roof]

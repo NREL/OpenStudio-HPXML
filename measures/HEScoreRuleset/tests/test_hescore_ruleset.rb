@@ -11,8 +11,9 @@ class HEScoreRulesetTest < MiniTest::Test
     args_hash = {}
 
     Dir["#{this_dir}/../../../workflow/sample_files/*.xml"].sort.each do |xml|
-      puts "Testing #{xml}..."
+      puts "Testing #{File.absolute_path(xml)}..."
       args_hash['hpxml_path'] = File.absolute_path(xml)
+      args_hash['hpxml_output_path'] = File.absolute_path(xml).gsub('.xml', '.xml.out')
       _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
     end
@@ -20,7 +21,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
   def _test_measure(args_hash)
     # create an instance of the measure
-    measure = HEScoreRuleset.new
+    measure = HEScoreMeasure.new
 
     # create an instance of a runner
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)

@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2018-11-12T16:22:19-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2018-11-20T10:11:09-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -75,13 +75,13 @@
               <AtticFloorInsulation>
                 <SystemIdentifier id="roof1_floor_insulation"/>
                 <Layer>
-                  <NominalRValue>00</NominalRValue>
+                  <NominalRValue>19</NominalRValue>
                 </Layer>
               </AtticFloorInsulation>
               <AtticRoofInsulation>
                 <SystemIdentifier id="roof1_roof_insulation"/>
                 <Layer>
-                  <NominalRValue>19</NominalRValue>
+                  <NominalRValue>00</NominalRValue>
                 </Layer>
               </AtticRoofInsulation>
               <Area>600</Area>
@@ -90,14 +90,11 @@
               <SystemIdentifier id="attic2"/>
               <AttachedToRoof idref="roof2"/>
               <AtticType>cathedral ceiling</AtticType>
-              <AtticFloorInsulation>
-                <SystemIdentifier id="roof2_floor_insulation"/>
+              <AtticRoofInsulation>
+                <SystemIdentifier id="roof2_roof_insulation"/>
                 <Layer>
                   <NominalRValue>19</NominalRValue>
                 </Layer>
-              </AtticFloorInsulation>
-              <AtticRoofInsulation>
-                <SystemIdentifier id="roof2_roof_insulation"/>
               </AtticRoofInsulation>
               <Area>400</Area>
             </Attic>
@@ -289,3 +286,4 @@
     </BuildingDetails>
   </Building>
 </HPXML>
+

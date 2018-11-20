@@ -5,11 +5,12 @@ require 'openstudio'
 require 'rexml/document'
 require 'rexml/xpath'
 require 'pathname'
+require "#{File.dirname(__FILE__)}/resources/HESruleset"
 require "#{File.dirname(__FILE__)}/resources/HESvalidator"
 require "#{File.dirname(__FILE__)}/../HPXMLtoOpenStudio/resources/xmlhelper"
 
 # start the measure
-class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
+class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
     # Measure name should be the title case of the class name.
@@ -40,6 +41,11 @@ class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Absolute path of the hpxml schemas directory.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument("hpxml_output_path", false)
+    arg.setDisplayName("HPXML Output File Path")
+    arg.setDescription("Absolute (or relative) path of the output HPXML file.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument("skip_validation", true)
     arg.setDisplayName("Skip HPXML validation")
     arg.setDescription("If true, only checks for and reports HPXML validation issues if an error occurs during processing. Used for faster runtime.")
@@ -61,6 +67,7 @@ class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue("hpxml_path", user_arguments)
     schemas_dir = runner.getOptionalStringArgumentValue("schemas_dir", user_arguments)
+    hpxml_output_path = runner.getOptionalStringArgumentValue("hpxml_output_path", user_arguments)
     skip_validation = runner.getBoolArgumentValue("skip_validation", user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
@@ -80,7 +87,27 @@ class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    # TODO...
+    begin
+      # Apply HEScore ruleset on HPXML object
+      HEScoreRuleset.apply_ruleset(hpxml_doc)
+    rescue Exception => e
+      if skip_validation
+        # Something went wrong, check for invalid HPXML file now. This was previously
+        # skipped to reduce runtime (see https://github.com/NREL/OpenStudio-ERI/issues/47).
+        original_hpxml_doc = REXML::Document.new(File.read(hpxml_path))
+        validate_hpxml(runner, hpxml_path, original_hpxml_doc, schemas_dir)
+      end
+
+      # Report exception
+      runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
+      return false
+    end
+
+    # Write new HPXML file
+    if hpxml_output_path.is_initialized
+      XMLHelper.write_file(hpxml_doc, hpxml_output_path.get)
+      runner.registerInfo("Wrote file: #{hpxml_output_path.get}")
+    end
 
     return true
   end
@@ -125,4 +152,4 @@ class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
 end
 
 # register the measure to be used by the application
-HEScoreRuleset.new.registerWithApplication
+HEScoreMeasure.new.registerWithApplication
