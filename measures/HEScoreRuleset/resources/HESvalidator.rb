@@ -32,16 +32,16 @@ class HEScoreValidator
         '/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy' => one, # Required by HPXML schema
         '/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime' => one, # Required by HPXML schema
         '/HPXML/XMLTransactionHeaderInformation/Transaction' => one, # Required by HPXML schema
-        
+
         '/HPXML/SoftwareInfo/SoftwareProgramUsed' => one,
         '/HPXML/SoftwareInfo/SoftwareProgramVersion' => one,
-        
+
         '/HPXML/Building' => one,
         '/HPXML/Building/BuildingID' => one, # Required by HPXML schema
         '/HPXML/Building/Site/SiteID' => one, # Required by HPXML schema
-        
+
         '/HPXML/Building/ProjectStatus/EventType' => one, # Required by HPXML schema
-        
+
         '/HPXML/Building/BuildingDetails/BuildingSummary/Site[Surroundings="stand-alone" or Surroundings="attached on one side" or Surroundings="attached on two sides"]' => one,
         '/HPXML/Building/BuildingDetails/BuildingSummary/Site/OrientationOfFrontOfHome' => one,
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/YearBuilt' => one,
@@ -52,7 +52,7 @@ class HEScoreValidator
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea' => one,
 
         '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement' => one, # See [AirInfiltration]
-        
+
         '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof' => one_or_more, # See [Roof]
         '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic' => one_or_more, # See [Attic]
         '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation' => one_or_more, # See [Foundation]
@@ -66,14 +66,14 @@ class HEScoreValidator
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating' => zero_or_one, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/Photovoltaics' => zero_or_one, # See [PVSystem]
       },
-      
+
       # [AirInfiltration]
       'BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '[[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="CFM"]/AirLeakage] | [LeakinessDescription="tight" or LeakinessDescription="average"]' => one,
         '[TypeOfInfiltrationMeasurement="blower door" or TypeOfInfiltrationMeasurement="estimate"]' => one,
       },
-      
+
       # [Roof]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -83,39 +83,39 @@ class HEScoreValidator
         'RadiantBarrier' => one,
         '/HPXML/Building/BuildingDetails/Enclosure/Skylights' => zero_or_one, # See [Skylight]
       },
-      
+
       # [Attic]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'AttachedToRoof' => one,
         '[AtticType="vented attic" or AtticType="cape cod" or AtticType="cathedral ceiling"]' => one, # See [AtticType=Vented] or [AtticType=Cape] or [AtticType=Cathedral]
       },
-      
+
       ## [AtticType=Vented]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="vented attic"]' => {
         'AtticFloorInsulation/Layer/NominalRValue' => one,
         'AtticRoofInsulation/Layer/NominalRValue' => one,
         'Area' => one,
       },
-      
+
       ## [AtticType=Cape]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cape cod"]' => {
         'AtticFloorInsulation/Layer/NominalRValue' => one,
         'AtticRoofInsulation/Layer/NominalRValue' => one,
         'Area' => one,
       },
-      
+
       ## [AtticType=Cathedral]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cathedral ceiling"]' => {
         'AtticRoofInsulation/Layer/NominalRValue' => one,
       },
-      
+
       # [Foundation]
       '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'FoundationType[Basement | Crawlspace | SlabOnGrade]' => one, # See [FoundationType=Basement] or [FoundationType=Crawl] or [FoundationType=Slab]
       },
-      
+
       ## [FoundationType=Basement]
       '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement]' => {
         'FoundationType/Basement/Conditioned' => one,
@@ -135,7 +135,7 @@ class HEScoreValidator
         'Area' => one,
         'PerimeterInsulation/Layer/NominalRValue' => one,
       },
-      
+
       # [Wall]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -144,18 +144,18 @@ class HEScoreValidator
         '[count(Siding)=0 or Siding="wood siding" or Siding="stucco" or Siding="vinyl siding" or Siding="aluminum siding" or Siding="brick veneer"]' => one,
         'Insulation/Layer/NominalRValue' => one,
       },
-      
+
       ## [WallType=WoodStud]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/WoodStud]' => {
         'Insulation/Layer[InstallationType="cavity" or InstallationType="continuous"]' => one,
         'OptimumValueEngineering' => one,
       },
-      
+
       ## [WallType=NotWoodStud]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructuralBrick | WallType/ConcreteMasonryUnit | WallType/StrawBale]' => {
         'Insulation/Layer[InstallationType="cavity"]' => one,
       },
-      
+
       # [Window]
       '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -172,12 +172,12 @@ class HEScoreValidator
         '[count(GlassType)=0 or GlassType="tinted/reflective" or GlassType="reflective" or GlassType="low-e"]' => one,
         '[count(GasFill)=0 or GasFill="air" or GasFill="argon"]' => one,
       },
-      
+
       ## [WindowType=Simple]
       '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window[UFactor]' => {
         'SHGC' => one,
       },
-      
+
       # [Skylight]
       '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -185,7 +185,7 @@ class HEScoreValidator
         'AttachedToRoof' => one,
         '[FrameType | UFactor]' => one, # See [SkylightType=Detailed] or [SkylightType=Simple]
       },
-      
+
       ## [SkylightType=Detailed]
       '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight[FrameType]' => {
         '[FrameType/Aluminum/ThermalBreak | FrameType/Wood]' => one,
@@ -193,19 +193,19 @@ class HEScoreValidator
         '[count(GlassType)=0 or GlassType="tinted/reflective" or GlassType="reflective" or GlassType="low-e"]' => one,
         '[count(GasFill)=0 or GasFill="air" or GasFill="argon"]' => one,
       },
-      
+
       ## [SkylightType=Simple]
       '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight[UFactor]' => {
         'SHGC' => one,
       },
-      
+
       # [HeatingSystem]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove]' => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove]
         'FractionHeatLoadServed' => one,
       },
-      
+
       ## [HeatingType=Resistance]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/ElectricResistance]' => {
         'DistributionSystem' => zero,
@@ -237,7 +237,7 @@ class HEScoreValidator
         'DistributionSystem' => zero,
         '[HeatingSystemFuel="wood" or HeatingSystemFuel="wood pellets"]' => one,
       },
-      
+
       # [CoolingSystem]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -256,7 +256,7 @@ class HEScoreValidator
         'DistributionSystem' => zero,
         '[YearInstalled | AnnualCoolingEfficiency[Units="EER"]/Value]' => one,
       },
-      
+
       ## [CoolingType=EvapCooler]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler"]' => {
         'DistributionSystem' => zero,
@@ -269,7 +269,7 @@ class HEScoreValidator
         'FractionHeatLoadServed' => one,
         'FractionCoolLoadServed' => one,
       },
-      
+
       ## [HeatPumpType=ASHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
         'DistributionSystem' => one, # See [HVACDistribution]
@@ -297,20 +297,20 @@ class HEScoreValidator
         'DistributionSystemType/AirDistribution/Ducts' => one_or_more, # See [HVACDuct]
         'HVACDistributionImprovement/DuctSystemSealed' => one,
       },
-      
+
       ## [HVACDuct]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts' => {
         '[DuctLocation="conditioned space" or DuctLocation="unconditioned basement" or DuctLocation="unvented crawlspace" or DuctLocation="vented crawlspace" or DuctLocation="unconditioned attic"]' => one,
         'FractionDuctArea' => one,
         'extension/hescore_ducts_insulated' => one,
       },
-      
+
       # [WaterHeatingSystem]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '[WaterHeaterType="storage water heater" or WaterHeaterType="heat pump water heater"]' => one, # See [WHType=Tank] or [WHType=HeatPump]
       },
-      
+
       ## [WHType=Tank]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]' => {
         '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity"]' => one, # If not electricity, see [WHType=FuelTank]

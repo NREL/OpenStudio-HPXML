@@ -9,7 +9,7 @@ class HEScoreRulesetTest < MiniTest::Test
     this_dir = File.dirname(__FILE__)
 
     args_hash = {}
-    
+
     Dir["#{this_dir}/../../../workflow/sample_files/*.xml"].sort.each do |xml|
       puts "Testing #{xml}..."
       args_hash['hpxml_path'] = File.absolute_path(xml)
@@ -17,7 +17,7 @@ class HEScoreRulesetTest < MiniTest::Test
       _test_measure(args_hash)
     end
   end
-  
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HEScoreRuleset.new
@@ -50,7 +50,7 @@ class HEScoreRulesetTest < MiniTest::Test
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)
   end
-  
+
   def _test_schema_validation(parent_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
     schemas_dir = File.absolute_path(File.join(parent_dir, "..", "hpxml_schemas"))
@@ -61,5 +61,4 @@ class HEScoreRulesetTest < MiniTest::Test
     end
     assert_equal(0, errors.size)
   end
-
 end

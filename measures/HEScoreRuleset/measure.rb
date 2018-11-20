@@ -34,7 +34,7 @@ class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName("HPXML File Path")
     arg.setDescription("Absolute (or relative) path of the HPXML file.")
     args << arg
-    
+
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("schemas_dir", false)
     arg.setDisplayName("HPXML Schemas Directory")
     arg.setDescription("Absolute path of the hpxml schemas directory.")
@@ -57,7 +57,7 @@ class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
     if !runner.validateUserArguments(arguments(model), user_arguments)
       return false
     end
-    
+
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue("hpxml_path", user_arguments)
     schemas_dir = runner.getOptionalStringArgumentValue("schemas_dir", user_arguments)
@@ -72,19 +72,19 @@ class HEScoreRuleset < OpenStudio::Measure::ModelMeasure
     end
 
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
-    
+
     # Check for invalid HPXML file up front?
     if not skip_validation
       if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
         return false
       end
     end
-    
+
     # TODO...
 
     return true
   end
-  
+
   def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
     is_valid = true
 
