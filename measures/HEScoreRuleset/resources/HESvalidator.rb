@@ -102,6 +102,8 @@ class HEScoreValidator
       ## [FoundationType=Basement]
       '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement]' => {
         'FoundationType/Basement/Conditioned' => one,
+        'FrameFloor/Area' => one,
+        'FrameFloor/Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one, # FIXME: Basement too?
         'FoundationWall/Insulation/Layer[InstallationType="continuous"]/NominalRValue' => one,
       },
 
@@ -110,7 +112,7 @@ class HEScoreValidator
         'FoundationType/Crawlspace/Vented' => one,
         'FrameFloor/Area' => one,
         'FrameFloor/Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one, # FIXME: Basement too?
-        'FoundationWall/Insulation/Layer/NominalRValue' => one,
+        'FoundationWall/Insulation/Layer[InstallationType="continuous"]/NominalRValue' => one,
       },
 
       ## [FoundationType=Slab]

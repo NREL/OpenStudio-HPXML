@@ -130,6 +130,17 @@
                 <Conditioned>true</Conditioned>
               </Basement>
             </FoundationType>
+            <FrameFloor>
+              <SystemIdentifier id="floor2_framefloor"/>
+              <Area>1000</Area>
+              <Insulation>
+                <SystemIdentifier id="floor2_framefloor_insulation"/>
+                <Layer>
+                  <InstallationType>cavity</InstallationType>
+                  <NominalRValue>00</NominalRValue>
+                </Layer>
+              </Insulation>
+            </FrameFloor>
             <FoundationWall>
               <SystemIdentifier id="floor2_fndwall"/>
               <Insulation>

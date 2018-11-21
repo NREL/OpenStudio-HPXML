@@ -108,7 +108,104 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_foundations(new_enclosure, orig_details)
-    # TODO
+    new_foundations = XMLHelper.add_element(new_enclosure, "Foundations")
+
+    orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
+      fnd_type = orig_foundation.elements["FoundationType"].elements[1].name
+      if fnd_type == "Basement"
+        if Boolean(XMLHelper.get_value(orig_foundation, "FoundationType/Basement/Conditioned"))
+          fnd_type = "ConditionedBasement"
+        else
+          fnd_type = "UnconditionedBasement"
+        end
+      elsif fnd_type == "Crawlspace"
+        if Boolean(XMLHelper.get_value(orig_foundation, "FoundationType/Crawlspace/Vented"))
+          fnd_type = "VentedCrawlspace"
+        else
+          fnd_type = "UnventedCrawlspace"
+        end
+      end
+
+      new_foundation = XMLHelper.add_element(new_foundations, "Foundation")
+      XMLHelper.copy_element(new_foundation, orig_foundation, "SystemIdentifier")
+      XMLHelper.copy_element(new_foundation, orig_foundation, "FoundationType")
+
+      # FrameFloor
+      if ["UnconditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
+        floor_r_cavity = Float(XMLHelper.get_value(orig_foundation, "FrameFloor/Insulation/Layer[InstallationType='cavity']/NominalRValue"))
+
+        floor_r = get_floor_assembly_r(floor_r_cavity)
+
+        new_framefloor = XMLHelper.add_element(new_foundation, "FrameFloor")
+        XMLHelper.copy_element(new_framefloor, orig_foundation, "FrameFloor/SystemIdentifier")
+        XMLHelper.copy_element(new_framefloor, "Area")
+        new_framefloor_ins = XMLHelper.add_element(new_framefloor, "Insulation")
+        XMLHelper.copy_element(new_framefloor_ins, orig_foundation, "FrameFloor/Insulation/SystemIdentifier")
+        XMLHelper.add_element(new_framefloor_ins, "AssemblyEffectiveRValue", floor_r)
+        extension = XMLHelper.add_element(new_framefloor, "extension")
+        XMLHelper.add_element(extension, "ExteriorAdjacentTo", "living space")
+      end
+
+      # FoundationWall
+      if ["UnconditionedBasement", "ConditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
+        wall_r = 10 # FIXME: Hard-coded
+
+        new_fndwall = XMLHelper.add_element(new_foundation, "FoundationWall")
+        XMLHelper.copy_element(new_fndwall, orig_foundation, "FoundationWall/SystemIdentifier")
+        XMLHelper.add_element(new_fndwall, "Height", 8) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Area", 100) # FIXME: Hard-coded
+        XMLHelper.add_element(new_fndwall, "Thickness", 8) # FIXME: Hard-coded
+        XMLHelper.add_element(new_fndwall, "DepthBelowGrade", 8) # FIXME: Verify
+        new_fndwall_ins = XMLHelper.add_element(new_fndwall, "Insulation")
+        XMLHelper.copy_element(new_fndwall_ins, orig_foundation, "FoundationWall/Insulation/SystemIdentifier")
+        XMLHelper.add_element(new_fndwall_ins, "AssemblyEffectiveRValue", wall_r)
+        extension = XMLHelper.add_element(new_fndwall, "extension")
+        XMLHelper.add_element(extension, "ExteriorAdjacentTo", "ground")
+      end
+
+      # Slab
+      if fnd_type == "SlabOnGrade"
+        slab_perim_r = Float(XMLHelper.get_value(orig_foundation, "Slab/PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue"))
+        slab_area = Float(XMLHelper.get_value(orig_foundation, "Slab/Area"))
+        fnd_id = orig_foundation.elements["SystemIdentifier"].attributes["id"]
+        slab_id = orig_foundation.elements["Slab/SystemIdentifier"].attributes["id"]
+        slab_perim_id = orig_foundation.elements["Slab/PerimeterInsulation/SystemIdentifier"].attributes["id"]
+        slab_under_id = "#{fnd_id}_slab_under_insulation"
+      else
+        slab_perim_r = 0
+        slab_area = Float(XMLHelper.get_value(orig_foundation, "FrameFloor/Area"))
+        fnd_id = orig_foundation.elements["SystemIdentifier"].attributes["id"]
+        slab_id = "#{fnd_id}_slab"
+        slab_perim_id = "#{fnd_id}_slab_perim_insulation"
+        slab_under_id = "#{fnd_id}_slab_under_insulation"
+      end
+      new_slab = XMLHelper.add_element(new_foundation, "Slab")
+      sys_id = XMLHelper.add_element(new_slab, "SystemIdentifier")
+      XMLHelper.add_attribute(sys_id, "id", slab_id)
+      XMLHelper.add_element(new_slab, "Area", 100) # FIXME: Hard-coded
+      XMLHelper.add_element(new_slab, "Thickness", 4) # FIXME: Hard-coded
+      XMLHelper.add_element(new_slab, "ExposedPerimeter", 100) # FIXME: Hard-coded
+      XMLHelper.add_element(new_slab, "PerimeterInsulationDepth", 4) # FIXME: Hard-coded
+      XMLHelper.add_element(new_slab, "UnderSlabInsulationWidth", 0) # FIXME: Verify
+      XMLHelper.add_element(new_slab, "DepthBelowGrade", 0) # FIXME: Verify
+      new_slab_perim_ins = XMLHelper.add_element(new_slab, "PerimeterInsulation")
+      new_slab_perim_sys_id = XMLHelper.add_element(new_slab_perim_ins, "SystemIdentifier")
+      XMLHelper.add_attribute(new_slab_perim_sys_id, "id", slab_perim_id)
+      new_slab_perim_layer = XMLHelper.add_element(new_slab_perim_ins, "Layer")
+      XMLHelper.add_element(new_slab_perim_layer, "InstallationType", "continuous")
+      XMLHelper.add_element(new_slab_perim_layer, "NominalRValue", slab_perim_r)
+      new_slab_under_ins = XMLHelper.add_element(new_slab, "UnderSlabInsulation")
+      new_slab_under_sys_id = XMLHelper.add_element(new_slab_under_ins, "SystemIdentifier")
+      XMLHelper.add_attribute(new_slab_under_sys_id, "id", slab_under_id)
+      new_slab_under_layer = XMLHelper.add_element(new_slab_under_ins, "Layer")
+      XMLHelper.add_element(new_slab_under_layer, "InstallationType", "continuous")
+      XMLHelper.add_element(new_slab_under_layer, "NominalRValue", 0)
+      extension = XMLHelper.add_element(new_slab, "extension")
+      XMLHelper.add_element(extension, "CarpetFraction", 0.5) # FIXME: Hard-coded
+      XMLHelper.add_element(extension, "CarpetRValue", 2) # FIXME: Hard-coded
+
+      # Uses ERI Reference Home for vented crawlspace specific leakage area
+    end
   end
 
   def self.set_enclosure_rim_joists(new_enclosure, orig_details)
