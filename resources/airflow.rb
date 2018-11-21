@@ -181,6 +181,7 @@ class Airflow
             next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
 
             obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
+            next unless duct_lks.keys.include? obj_name_ducts
             duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var = duct_lks[obj_name_ducts]
             duct_lk_supply_fan_equiv_var.remove
             duct_lk_return_fan_equiv_var.remove
