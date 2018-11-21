@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>688fa679-d4b0-4edf-8190-d6b44bc10ff1</version_id>
-  <version_modified>20181115T221357Z</version_modified>
+  <version_id>7920c090-e7e3-45ce-b2a7-fca91ed16cf1</version_id>
+  <version_modified>20181121T183324Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -807,12 +807,6 @@
       <checksum>2E21EDA8</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>443F2B51</checksum>
-    </file>
-    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -846,6 +840,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>EF1FF398</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>86242877</checksum>
     </file>
   </files>
 </measure>
