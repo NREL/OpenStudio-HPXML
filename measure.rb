@@ -1800,7 +1800,7 @@ class OSModel
       door_width = door_area / door_height
       z_origin = 0
       
-      door_azimuth = XMLHelper.get_value(door, "Azimuth"])
+      door_azimuth = XMLHelper.get_value(door, "Azimuth"))
       if not door_azimuth.nil?
         door_azimuth = Float(door_azimuth)
       else
