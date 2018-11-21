@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>2d0cdc30-df88-4aea-9bff-0e405104a78b</version_id>
-  <version_modified>20181121T202335Z</version_modified>
+  <version_id>299ee70c-7acc-4f61-8d6e-3089667b011d</version_id>
+  <version_modified>20181121T213213Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -855,12 +855,6 @@
       <checksum>7295F18F</checksum>
     </file>
     <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4921C07E</checksum>
-    </file>
-    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -870,6 +864,12 @@
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
       <checksum>9C736873</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>DFC560CF</checksum>
     </file>
   </files>
 </measure>

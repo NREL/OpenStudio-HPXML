@@ -84,7 +84,7 @@ class EnergyPlusValidator
 
       # [Attic]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic' => {
-        '[AtticType="unvented attic" or AtticType="vented attic" or AtticType="flat roof" or AtticType="cathedral ceiling" or AtticType="cape cod"]' => one, # See [AtticType=Unvented] or [AtticType=Vented] or [AtticType=Cape]
+        '[AtticType="unvented attic" or AtticType="vented attic" or AtticType="flat roof" or AtticType="cathedral ceiling" or AtticType="cape cod"]' => one, # See [AtticType=Unvented] or [AtticType=Vented]
         'Roofs' => one, # See [AtticRoof]
         'Walls' => zero_or_one, # See [AtticWall]
       },
@@ -98,11 +98,6 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="vented attic"]' => {
         'Floors' => one, # See [AtticFloor]
         'extension/AtticSpecificLeakageArea' => zero_or_one, # Uses ERI Reference Home if not provided
-      },
-
-      ## [AtticType=Cape]
-      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cape cod"]' => {
-        'Floors' => one, # See [AtticFloor]
       },
 
       ## [AtticRoof]
