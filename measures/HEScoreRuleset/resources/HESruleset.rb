@@ -6,6 +6,10 @@ class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
     hpxml_doc.elements["/HPXML"].attributes["schemaVersion"] = '3.0'
 
+    # Add ERI version
+    software_info = hpxml_doc.elements["/HPXML/SoftwareInfo"]
+    XMLHelper.add_element(software_info, "extension/ERICalculation/Version", "2014AEG") # FIXME: Verify
+
     # Create new BuildingDetails element
     building = hpxml_doc.elements["/HPXML/Building"]
     orig_details = XMLHelper.delete_element(building, "BuildingDetails")
@@ -28,12 +32,13 @@ class HEScoreRuleset
 
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
-    cfa_basement = 0.0
+    # FIXME: Verify. How does this change for single-family detached homes?
+    @cfa_basement = 0.0
     orig_details.elements.each("Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |cond_basement|
-      cfa_basement += Float(XMLHelper.get_value(cond_basement, "FrameFloor/Area"))
+      @cfa_basement += Float(XMLHelper.get_value(cond_basement, "FrameFloor/Area"))
     end
-    footprint_area = (@cfa - cfa_basement) / @ncfl_ag
-    @bldg_length = (3.0 * footprint_area / 5.0)**0.5
+    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag
+    @bldg_length = (3.0 * @bldg_footprint / 5.0)**0.5
     @bldg_width = (5.0 / 3.0) * @bldg_length
     @bldg_perimeter = 2.0 * @bldg_length + 2.0 * @bldg_width
 
@@ -42,7 +47,8 @@ class HEScoreRuleset
     set_summary(new_summary, orig_details)
 
     # ClimateAndRiskZones
-    XMLHelper.copy_element(new_details, orig_details, "ClimateandRiskZones")
+    # FIXME: Need weather file and IECC climate zone
+    XMLHelper.add_element(new_details, "ClimateandRiskZones")
 
     # Enclosure
     new_enclosure = XMLHelper.add_element(new_details, "Enclosure")
@@ -80,7 +86,8 @@ class HEScoreRuleset
   def self.set_summary(new_summary, orig_details)
     new_site = XMLHelper.add_element(new_summary, "Site")
     orig_site = orig_details.elements["BuildingSummary/Site"]
-    XMLHelper.copy_element(new_site, orig_site, "FuelTypesAvailable") # FIXME: Need assumption
+    fuel_types = XMLHelper.add_element(new_site, "FuelTypesAvailable")
+    XMLHelper.add_element(fuel_types, "Fuel", "electricity")
     extension = XMLHelper.add_element(new_site, "extension")
     XMLHelper.add_element(extension, "ShelterCoefficient", Airflow.get_default_shelter_coefficient())
 
@@ -129,7 +136,7 @@ class HEScoreRuleset
       XMLHelper.copy_element(new_attic, orig_attic, "SystemIdentifier")
       XMLHelper.copy_element(new_attic, orig_attic, "AtticType")
 
-      # Roofs
+      # Roof
       roof_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='cavity']/NominalRValue"))
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
       roof_material = XMLHelper.get_value(orig_roof, "RoofType")
@@ -149,7 +156,7 @@ class HEScoreRuleset
       XMLHelper.copy_element(new_roof_ins, orig_attic, "AtticRoofInsulation/SystemIdentifier")
       XMLHelper.add_element(new_roof_ins, "AssemblyEffectiveRValue", roof_r)
 
-      # Floors
+      # Floor
       if ["unvented attic", "vented attic"].include? attic_type
         floor_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticFloorInsulation/Layer[InstallationType='cavity']/NominalRValue"))
 
@@ -163,6 +170,8 @@ class HEScoreRuleset
         new_floor_ins = XMLHelper.add_element(new_floor, "Insulation")
         XMLHelper.copy_element(new_floor_ins, orig_attic, "AtticFloorInsulation/SystemIdentifier")
         XMLHelper.add_element(new_floor_ins, "AssemblyEffectiveRValue", floor_r)
+        extension = XMLHelper.add_element(new_floor, "extension")
+        XMLHelper.add_element(extension, "ExteriorAdjacentTo", "living space")
       end
 
       # FIXME: Verify no gable walls assumed

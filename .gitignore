@@ -1,1 +1,3 @@
 /workflow/sample_files/*.out
+/workflow/results
+/workflow/HEScoreDesign
