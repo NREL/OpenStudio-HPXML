@@ -271,10 +271,10 @@ class EnergyPlusValidator
       # [Door]
       '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door' => {
         'SystemIdentifier' => one, # Required by HPXML schema
+        'AttachedToWall' => one,
         'Area' => one,
         'Azimuth' => one,
         'RValue' => one,
-        'AttachedToWall' => one,
       },
 
       # [AirInfiltration]
@@ -416,7 +416,7 @@ class EnergyPlusValidator
       ## [HVACDuct]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]' => {
         'DuctInsulationRValue' => one,
-        'DuctLocation' => one, # TODO: Restrict values
+        '[DuctLocation="conditioned space" or DuctLocation="unconditioned basement" or DuctLocation="unvented crawlspace" or DuctLocation="vented crawlspace" or DuctLocation="unconditioned attic"]' => one,
         'DuctSurfaceArea' => one,
       },
 

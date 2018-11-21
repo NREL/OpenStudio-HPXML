@@ -63,7 +63,7 @@ class HEScoreRulesetTest < MiniTest::Test
     end
     assert_equal(0, errors.size)
   end
-  
+
   def _test_output_schema_validation(parent_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
     schemas_dir = File.absolute_path(File.join(parent_dir, "..", "..", "HPXMLtoOpenStudio", "hpxml_schemas"))

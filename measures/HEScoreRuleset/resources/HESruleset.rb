@@ -117,10 +117,10 @@ class HEScoreRuleset
 
   def self.set_enclosure_walls(new_enclosure, orig_details)
     new_walls = XMLHelper.add_element(new_enclosure, "Walls")
-    
+
     orig_details.elements.each("Enclosure/Walls/Wall") do |orig_wall|
       wall_type = orig_wall.elements["WallType"].elements[1].name
-      
+
       if wall_type == "WoodStud"
         wall_siding = XMLHelper.get_value(orig_wall, "Siding")
         wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
@@ -135,14 +135,14 @@ class HEScoreRuleset
       elsif wall_type == "ConcreteMasonryUnit"
         wall_siding = XMLHelper.get_value(orig_wall, "Siding")
         wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
-        
+
         wall_r = get_concrete_block_wall_assembly_r(wall_r_cavity, wall_siding)
       elsif wall_type == "StrawBale"
         wall_siding = XMLHelper.get_value(orig_wall, "Siding")
-      
+
         wall_r = get_straw_bale_wall_assembly_r(wall_siding)
       end
-      
+
       new_wall = XMLHelper.add_element(new_walls, "Wall")
       XMLHelper.copy_element(new_wall, orig_wall, "SystemIdentifier")
       XMLHelper.copy_element(new_wall, orig_wall, "WallType")
@@ -160,11 +160,11 @@ class HEScoreRuleset
 
   def self.set_enclosure_windows(new_enclosure, orig_details)
     new_windows = XMLHelper.add_element(new_enclosure, "Windows")
-    
+
     orig_details.elements.each("Enclosure/Windows/Window") do |orig_window|
       win_orient = "north" # FIXME: Get from roof
       win_ufactor = XMLHelper.get_value(orig_window, "UFactor")
-      
+
       if not win_ufactor.nil?
         win_ufactor = Float(win_ufactor)
         win_shgc = Float(XMLHelper.get_value(orig_window, "SHGC"))
@@ -174,18 +174,17 @@ class HEScoreRuleset
         win_glass_layers = "single-pane"
         win_glass_type = nil
         win_gas_fill = nil
-        #win_frame_type = orig_window.elements["FrameType"].elements[1].name
-        #if win_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_window, "FrameType/Aluminum"))
+        # win_frame_type = orig_window.elements["FrameType"].elements[1].name
+        # if win_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_window, "FrameType/Aluminum"))
         #  win_frame_type += "ThermalBreak"
-        #end
-        #win_glass_layers = XMLHelper.get_value(orig_window, "GlassLayers")
-        #win_glass_type = XMLHelper.get_value(orig_window, "GlassType")
-        #win_gas_fill = XMLHelper.get_value(orig_window, "GasFill")
-        
-        
+        # end
+        # win_glass_layers = XMLHelper.get_value(orig_window, "GlassLayers")
+        # win_glass_type = XMLHelper.get_value(orig_window, "GlassType")
+        # win_gas_fill = XMLHelper.get_value(orig_window, "GasFill")
+
         win_ufactor, win_shgc = get_window_ufactor_shgc(win_frame_type, win_glass_layers, win_glass_type, win_gas_fill)
       end
-    
+
       new_window = XMLHelper.add_element(new_windows, "Window")
       XMLHelper.copy_element(new_window, orig_window, "SystemIdentifier")
       XMLHelper.copy_element(new_window, orig_window, "Area")
@@ -200,12 +199,13 @@ class HEScoreRuleset
 
   def self.set_enclosure_skylights(new_enclosure, orig_details)
     return if not XMLHelper.has_element(new_enclosure, "Skylights")
+
     new_skylights = XMLHelper.add_element(new_enclosure, "Skylights")
-    
+
     orig_details.elements.each("Enclosure/Skylights/Skylight") do |orig_skylight|
       sky_orient = "north" # FIXME: Get from roof
       sky_ufactor = XMLHelper.get_value(orig_skylight, "UFactor")
-      
+
       if not sky_ufactor.nil?
         sky_ufactor = Float(sky_ufactor)
         sky_shgc = Float(XMLHelper.get_value(orig_skylight, "SHGC"))
@@ -215,17 +215,17 @@ class HEScoreRuleset
         sky_glass_layers = "single-pane"
         sky_glass_type = nil
         sky_gas_fill = nil
-        #sky_frame_type = orig_skylight.elements["FrameType"].elements[1].name
-        #if sky_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_skylight, "FrameType/Aluminum"))
+        # sky_frame_type = orig_skylight.elements["FrameType"].elements[1].name
+        # if sky_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_skylight, "FrameType/Aluminum"))
         #  sky_frame_type += "ThermalBreak"
-        #end
-        #sky_glass_layers = XMLHelper.get_value(orig_skylight, "GlassLayers")
-        #sky_glass_type = XMLHelper.get_value(orig_skylight, "GlassType")
-        #sky_gas_fill = XMLHelper.get_value(orig_skylight, "GasFill")
-        
+        # end
+        # sky_glass_layers = XMLHelper.get_value(orig_skylight, "GlassLayers")
+        # sky_glass_type = XMLHelper.get_value(orig_skylight, "GlassType")
+        # sky_gas_fill = XMLHelper.get_value(orig_skylight, "GasFill")
+
         sky_ufactor, sky_shgc = get_skylight_ufactor_shgc(sky_frame_type, sky_glass_layers, sky_glass_type, sky_gas_fill)
       end
-    
+
       new_skylight = XMLHelper.add_element(new_skylights, "Skylight")
       XMLHelper.copy_element(new_skylight, orig_skylight, "SystemIdentifier")
       XMLHelper.copy_element(new_skylight, orig_skylight, "Area")
