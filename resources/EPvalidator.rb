@@ -97,7 +97,7 @@ class EnergyPlusValidator
       ## [AtticType=Vented]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="vented attic"]' => {
         'Floors' => one, # See [AtticFloor]
-        'extension/AtticSpecificLeakageArea' => one,
+        'extension/AtticSpecificLeakageArea' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       ## [AtticType=Cape]
@@ -166,7 +166,7 @@ class EnergyPlusValidator
 
       ## [FoundationType=VentedCrawl]
       '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]' => {
-        'extension/CrawlspaceSpecificLeakageArea' => one,
+        'extension/CrawlspaceSpecificLeakageArea' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       ## [FoundationType=Slab]

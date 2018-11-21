@@ -2728,7 +2728,13 @@ class OSModel
     vented_crawl_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
       area = REXML::XPath.first(vented_crawl, "sum(FrameFloor/Area/text())")
-      vented_crawl_sla_area += (Float(XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")) * area)
+      vented_crawl_sla = XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")
+      if not vented_crawl_sla.nil?
+        vented_crawl_sla = Float(vented_crawl_sla)
+      else
+        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
+      end
+      vented_crawl_sla_area += (vented_crawl_sla * area)
       vented_crawl_area += area
     end
     if vented_crawl_area > 0
@@ -2742,7 +2748,13 @@ class OSModel
     vented_attic_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType='vented attic']") do |vented_attic|
       area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area/text())")
-      vented_attic_sla_area += (Float(XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")) * area)
+      vented_attic_sla = XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")
+      if not vented_attic_sla.nil?
+        vented_attic_sla = Float(vented_attic_sla)
+      else
+        vented_attic_sla = Airflow.get_default_vented_attic_sla()
+      end
+      vented_attic_sla_area += (vented_attic_sla * area)
       vented_attic_area += area
     end
     if vented_attic_area > 0
