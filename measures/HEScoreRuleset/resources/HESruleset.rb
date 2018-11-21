@@ -246,9 +246,9 @@ class HEScoreRuleset
     XMLHelper.add_attribute(sys_id, "id", "Door")
     attwall = XMLHelper.add_element(new_door, "AttachedToWall")
     XMLHelper.add_attribute(attwall, "idref", "FIXME") # FIXME
-    XMLHelper.add_element(new_door, "Area", 40.0)
-    XMLHelper.add_element(new_door, "Azimuth", orientation_to_azimuth("north"))
-    XMLHelper.add_element(new_door, "RValue", 2) # FIXME: Hard-coded
+    # Uses ERI Reference Home for Area
+    # Uses ERI Reference Home for Azimuth
+    # Uses ERI Reference Home for RValue
   end
 
   def self.set_systems_hvac(new_systems, orig_details)
@@ -312,7 +312,6 @@ class HEScoreRuleset
       XMLHelper.add_element(new_cooling, "CoolingSystemFuel", "electricity")
       XMLHelper.add_element(new_cooling, "CoolingCapacity", -1) # Use Manual J auto-sizing
       XMLHelper.copy_element(new_cooling, orig_cooling, "FractionCoolLoadServed")
-      cool_eff = XMLHelper.add_element(new_cooling, "AnnualCoolingEfficiency")
       if hvac_type == "central air conditioning"
         hvac_year = XMLHelper.get_value(orig_cooling, "YearInstalled")
         hvac_seer = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='SEER']/Value")
@@ -323,6 +322,7 @@ class HEScoreRuleset
           hvac_seer = Float(hvac_seer)
         end
 
+        cool_eff = XMLHelper.add_element(new_cooling, "AnnualCoolingEfficiency")
         XMLHelper.add_element(cool_eff, "Units", "SEER")
         XMLHelper.add_element(cool_eff, "Value", hvac_seer)
       elsif hvac_type == "room air conditioning"
@@ -335,6 +335,7 @@ class HEScoreRuleset
           hvac_eer = Float(hvac_eer)
         end
 
+        cool_eff = XMLHelper.add_element(new_cooling, "AnnualCoolingEfficiency")
         XMLHelper.add_element(cool_eff, "Units", "EER")
         XMLHelper.add_element(cool_eff, "Value", hvac_eer)
       end
@@ -402,6 +403,7 @@ class HEScoreRuleset
       # Leakage fraction of total air handler flow
       # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/thermal-distribution-efficiency/thermal-distribution-efficiency
       # FIXME: Verify. Total or to the outside?
+      # FIXME: Or 10%/25%? See https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI/edit#gid=1042407563
       if ducts_sealed
         leakage_frac = 0.03
       else
@@ -437,9 +439,16 @@ class HEScoreRuleset
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
         duct_location = XMLHelper.get_value(orig_duct, "DuctLocation")
         duct_frac_area = Float(XMLHelper.get_value(orig_duct, "FractionDuctArea"))
-        duct_rvalue = Float(XMLHelper.get_value(orig_duct, "extension/hescore_ducts_insulated")) # FIXME: Why not use DuctInsulationRValue?
+        duct_insulated = Boolean(XMLHelper.get_value(orig_duct, "extension/hescore_ducts_insulated"))
 
         next if duct_location == "conditioned space"
+
+        # FIXME: Verify. Includes air film?
+        if duct_insulated
+          duct_rvalue = 6
+        else
+          duct_rvalue = 0
+        end
 
         # Supply duct
         new_supply_duct = XMLHelper.add_element(new_air_dist, "Ducts")

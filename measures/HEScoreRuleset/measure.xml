@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>he_score_measure</name>
   <uid>013ca589-73ab-451f-afae-dbeb5304dea8</uid>
-  <version_id>1262a513-05a9-4451-a998-7d942e2706b1</version_id>
-  <version_modified>20181120T234928Z</version_modified>
+  <version_id>40da9f2b-abaf-4712-b638-cf430a61b0d5</version_id>
+  <version_modified>20181121T183433Z</version_modified>
   <xml_checksum>2AF3A68E</xml_checksum>
   <class_name>HEScoreMeasure</class_name>
   <display_name>Apply Home Energy Score Ruleset</display_name>
@@ -83,6 +83,12 @@
   </attributes>
   <files>
     <file>
+      <filename>HESvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>BBC32096</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.7.0</identifier>
@@ -97,25 +103,13 @@
       <filename>test_hescore_ruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>22C6311E</checksum>
-    </file>
-    <file>
-      <filename>HESvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>DFF7925A</checksum>
+      <checksum>1A8DFD2C</checksum>
     </file>
     <file>
       <filename>HESruleset.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>3B8F0FE5</checksum>
-    </file>
-    <file>
-      <filename>hvac_equipment_efficiency.csv</filename>
-      <filetype>csv</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>C6C76B80</checksum>
+      <checksum>732EFBCB</checksum>
     </file>
   </files>
 </measure>

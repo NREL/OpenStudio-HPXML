@@ -46,6 +46,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume' => one,
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent' => one,
 
+        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year="2006"]' => one,
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/SystemIdentifiersInfo' => one, # Required by HPXML schema
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/Name' => one, # Required by HPXML schema
         '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
@@ -121,7 +122,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Area' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension[ExteriorAdjacentTo="living space" or ExteriorAdjacentTo="garage" or ExteriorAdjacentTo="ambient"]' => one,
       },
 
@@ -183,7 +184,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Area' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension[ExteriorAdjacentTo="living space" or ExteriorAdjacentTo="garage"]' => one,
       },
 
@@ -195,7 +196,7 @@ class EnergyPlusValidator
         'Thickness' => one,
         'DepthBelowGrade' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension[ExteriorAdjacentTo="ground" or ExteriorAdjacentTo="unconditioned basement" or ExteriorAdjacentTo="conditioned basement" or ExteriorAdjacentTo="crawlspace"]' => one,
       },
 
@@ -205,13 +206,13 @@ class EnergyPlusValidator
         'Area' => one,
         'Thickness' => one, # Use zero for dirt floor
         'ExposedPerimeter' => one,
-        'PerimeterInsulationDepth' => one,
-        'UnderSlabInsulationWidth' => one,
+        'PerimeterInsulationDepth' => zero_or_one, # Uses ERI Reference Home if not provided
+        'UnderSlabInsulationWidth' => zero_or_one, # Uses ERI Reference Home if not provided
         'DepthBelowGrade' => one,
         'PerimeterInsulation/SystemIdentifier' => one, # Required by HPXML schema
-        'PerimeterInsulation/Layer[InstallationType="continuous"]/NominalRValue' => one,
+        'PerimeterInsulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'UnderSlabInsulation/SystemIdentifier' => one, # Required by HPXML schema
-        'UnderSlabInsulation/Layer[InstallationType="continuous"]/NominalRValue' => one,
+        'UnderSlabInsulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/CarpetFraction' => one,
         'extension/CarpetRValue' => one,
       },
@@ -234,7 +235,7 @@ class EnergyPlusValidator
         'SolarAbsorptance' => one,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension[InteriorAdjacentTo="living space" or InteriorAdjacentTo="garage" or InteriorAdjacentTo="vented attic" or InteriorAdjacentTo="unvented attic" or InteriorAdjacentTo="cape cod"]' => one,
         'extension[ExteriorAdjacentTo="living space" or ExteriorAdjacentTo="garage" or ExteriorAdjacentTo="vented attic" or ExteriorAdjacentTo="unvented attic" or ExteriorAdjacentTo="cape cod" or ExteriorAdjacentTo="ambient"]' => one,
       },
@@ -272,9 +273,9 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'AttachedToWall' => one,
-        'Area' => one,
-        'Azimuth' => one,
-        'RValue' => one,
+        'Area' => zero_or_one, # Uses ERI Reference Home if not provided
+        'Azimuth' => zero_or_one, # Uses ERI Reference Home if not provided
+        'RValue' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       # [AirInfiltration]
