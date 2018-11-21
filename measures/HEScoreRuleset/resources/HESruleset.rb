@@ -214,12 +214,19 @@ class HEScoreRuleset
       if ["UnconditionedBasement", "ConditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
         wall_r = 10 # FIXME: Hard-coded
 
+        # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
+        if ["UnconditionedBasement", "ConditionedBasement"].include? fnd_type
+          wall_height = 8.0
+        else
+          wall_height = 2.5
+        end
+
         new_fndwall = XMLHelper.add_element(new_foundation, "FoundationWall")
         XMLHelper.copy_element(new_fndwall, orig_foundation, "FoundationWall/SystemIdentifier")
-        XMLHelper.add_element(new_fndwall, "Height", @ceil_height) # FIXME: Verify
-        XMLHelper.add_element(new_fndwall, "Area", @ceil_height * @bldg_perimeter) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Height", wall_height) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Area", wall_height * @bldg_perimeter) # FIXME: Verify
         XMLHelper.add_element(new_fndwall, "Thickness", 8) # FIXME: Verify
-        XMLHelper.add_element(new_fndwall, "DepthBelowGrade", @ceil_height) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "DepthBelowGrade", wall_height) # FIXME: Verify
         new_fndwall_ins = XMLHelper.add_element(new_fndwall, "Insulation")
         XMLHelper.copy_element(new_fndwall_ins, orig_foundation, "FoundationWall/Insulation/SystemIdentifier")
         XMLHelper.add_element(new_fndwall_ins, "AssemblyEffectiveRValue", wall_r)
