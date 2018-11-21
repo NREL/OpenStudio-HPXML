@@ -137,7 +137,7 @@ class Airflow
       duct_systems.each do |ducts, air_loops|
         air_loops.each do |air_loop|
           next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
-          next if ducts.location == Constants.SpaceTypeLiving or ducts.location == "none"
+          next if ducts.location == Constants.SpaceTypeLiving or ducts.location == "none" or not has_forced_air_equipment
 
           obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
           duct_lk_supply_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} lk sup fan equiv".gsub(" ", "_"))
@@ -157,10 +157,10 @@ class Airflow
       cfis_programs = {}
       if mech_vent.type == Constants.VentTypeCFIS
         cfis_systems.each do |cfis, air_loops|
-          success, cfis_output = process_cfis_for_unit(model, runner, cfis)
+          success, cfis_output = process_cfis_for_unit(model, runner, cfis, unit)
           return false if not success
 
-          cfis_programs = create_cfis_objects(model, runner, cfis, cfis_output, air_loops, cfis_programs, duct_lks)
+          cfis_programs = create_cfis_objects(model, runner, unit_living, cfis, cfis_output, air_loops, cfis_programs, duct_lks)
         end
       end
 
@@ -175,6 +175,18 @@ class Airflow
         return false if not success
 
         duct_programs = create_ducts_objects(model, runner, unit, unit_living, unit_finished_basement, mech_vent, ducts_output, tin_sensor, pbar_sensor, has_forced_air_equipment, unit_has_mshp, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_programs)
+
+        if ducts_output.location_name == unit_living.zone.name.to_s or ducts_output.location_name == "none" or not has_forced_air_equipment
+          air_loops.each do |air_loop|
+            next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
+
+            obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
+            duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var = duct_lks[obj_name_ducts]
+            duct_lk_supply_fan_equiv_var.remove
+            duct_lk_return_fan_equiv_var.remove
+            duct_lks.delete(obj_name_ducts)
+          end
+        end
       end
 
       infil_program = create_infil_mech_vent_objects(model, runner, obj_name_infil, obj_name_mech_vent, unit_living, infil, mech_vent, wind_speed, mv_output, infil_output, tin_sensor, tout_sensor, vwind_sensor, duct_lks, cfis_programs, nbeds)
@@ -1017,7 +1029,7 @@ class Airflow
     return true, nv_output
   end
 
-  def self.process_cfis_for_unit(model, runner, cfis)
+  def self.process_cfis_for_unit(model, runner, cfis, unit)
     # Validate Inputs
     if cfis.open_time < 0
       runner.registerError("Mechanical Ventilation: CFIS minimum damper open time must be greater than or equal to 0.")
@@ -1028,11 +1040,11 @@ class Airflow
       return false
     end
 
-    cfis_t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
-    cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
-    cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "cfis_f_damper_open") # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
+    cfis_t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{unit.name.to_s.gsub(" ", "_")}_cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
+    cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{unit.name.to_s.gsub(" ", "_")}_cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
+    cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{unit.name.to_s.gsub(" ", "_")}_cfis_f_damper_open") # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
     max_supply_fan_mfr = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
-    fan_rtf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "cfis_fan_rtf")
+    fan_rtf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{unit.name.to_s.gsub(" ", "_")}_cfis_fan_rtf")
     fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
     cfis_output = CFISOutput.new(cfis_t_sum_open_var, cfis_on_for_hour_var, cfis_f_damper_open_var, max_supply_fan_mfr, fan_rtf_var, fan_rtf_sensor)
     return true, cfis_output
@@ -1788,7 +1800,7 @@ class Airflow
     return duct_programs
   end
 
-  def self.create_cfis_objects(model, runner, cfis, cfis_output, air_loops, cfis_programs, duct_lks)
+  def self.create_cfis_objects(model, runner, unit_living, cfis, cfis_output, air_loops, cfis_programs, duct_lks)
     # CFIS Program
     cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     cfis_program.setName("cfis init program")
@@ -1798,6 +1810,8 @@ class Airflow
 
     clg_coil = nil
     air_loops.each do |air_loop|
+      next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
+
       air_loop.supplyComponents.each do |supply_component|
         next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
 
