@@ -1789,7 +1789,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
       door_id = door.elements["SystemIdentifier"].attributes["id"]
 
-      door_area = HPXML.get_value(door, "Area")
+      door_area = XMLHelper.get_value(door, "Area")
       if not door_area.nil?
         door_area = Float(door_area)
       else
@@ -1799,8 +1799,8 @@ class OSModel
       door_height = 6.67 # ft
       door_width = door_area / door_height
       z_origin = 0
-      
-      door_azimuth = XMLHelper.get_value(door, "Azimuth"))
+
+      door_azimuth = XMLHelper.get_value(door, "Azimuth")
       if not door_azimuth.nil?
         door_azimuth = Float(door_azimuth)
       else
