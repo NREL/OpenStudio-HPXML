@@ -804,6 +804,20 @@ class WallConstructions
     end
     return nil
   end
+
+  def self.get_default_frame_wall_ufactor(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Frame Wall U-Factor
+    if ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B"].include? iecc_zone_2006
+      return 0.082
+    elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C"].include? iecc_zone_2006
+      return 0.060
+    elsif ["7", "8"].include? iecc_zone_2006
+      return 0.057
+    else
+      return nil
+    end
+  end
 end
 
 class RoofConstructions
@@ -1306,6 +1320,34 @@ class FloorConstructions
 
     return true
   end
+
+  def self.get_default_floor_ufactor(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Floor Over Unconditioned Space U-Factor
+    if ["1A", "1B", "1C", "2A", "2B", "2C"].include? iecc_zone_2006
+      return 0.064
+    elsif ["3A", "3B", "3C", "4A", "4B"].include? iecc_zone_2006
+      return 0.047
+    elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
+      return 0.033
+    else
+      return nil
+    end
+  end
+
+  def self.get_default_ceiling_ufactor(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Ceiling U-Factor
+    if ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C"].include? iecc_zone_2006
+      return 0.035
+    elsif ["4A", "4B", "4C", "5A", "5B", "5C"].include? iecc_zone_2006
+      return 0.030
+    elsif ["6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
+      return 0.026
+    else
+      return nil
+    end
+  end
 end
 
 class FoundationConstructions
@@ -1480,6 +1522,36 @@ class FoundationConstructions
     surface.createSurfacePropertyExposedFoundationPerimeter("TotalExposedPerimeter", UnitConversions.convert(exposed_perimeter, "ft", "m"))
 
     return true
+  end
+
+  def self.get_default_basement_wall_ufactor(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Basement Wall U-Factor
+    if ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C"].include? iecc_zone_2006
+      return 0.360
+    elsif ["4A", "4B", "4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
+      return 0.059
+    else
+      return nil
+    end
+  end
+
+  def self.get_default_slab_perimeter_rvalue_depth(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Slab-on-Grade R-Value & Depth (ft)
+    if ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C"].include? iecc_zone_2006
+      return 0.0, 0.0
+    elsif ["4A", "4B", "4C", "5A", "5B", "5C"].include? iecc_zone_2006
+      return 10.0, 2.0
+    elsif ["6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
+      return 10.0, 4.0
+    else
+      return nil
+    end
+  end
+
+  def self.get_default_slab_under_rvalue_width()
+    return 0.0, 0.0
   end
 
   private
@@ -1699,8 +1771,6 @@ class SubsurfaceConstructions
     return true
   end
 
-  private
-
   def self.apply_window_skylight(runner, model, type, subsurfaces, constr_name, weather,
                                  cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
@@ -1837,6 +1907,35 @@ class SubsurfaceConstructions
     summer = 0.70
     winter = 0.85
     return summer, winter
+  end
+
+  def self.get_default_ufactor_shgc(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Fenestration and Opaque Door U-Factor
+    # Glazed Fenestration Assembly SHGC
+    if ["1A", "1B", "1C"].include? iecc_zone_2006
+      return 1.2, 0.40
+    elsif ["2A", "2B", "2C"].include? iecc_zone_2006
+      return 0.75, 0.40
+    elsif ["3A", "3B", "3C"].include? iecc_zone_2006
+      return 0.65, 0.40
+    elsif ["4A", "4B"].include? iecc_zone_2006
+      return 0.40, 0.40
+    elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
+      return 0.35, 0.40
+    else
+      return nil
+    end
+  end
+
+  def self.get_default_door_area()
+    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
+    return 40.0
+  end
+
+  def self.get_default_door_azimuth()
+    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
+    return 0 # North
   end
 end
 

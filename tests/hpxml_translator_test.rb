@@ -106,5 +106,4 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     assert_equal(0, errors.size)
   end
-  
 end
