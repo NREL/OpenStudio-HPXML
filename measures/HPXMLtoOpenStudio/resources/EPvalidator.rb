@@ -252,6 +252,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs' => {
         'Depth' => one,
         'DistanceToTopOfWindow' => one,
+        'DistanceToBottomOfWindow' => one,
       },
 
       # [Skylight]
