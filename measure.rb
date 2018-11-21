@@ -290,6 +290,7 @@ class OSModel
     @nbeds = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms"))
     @garage_present = Boolean(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent"))
     @has_uncond_bsmnt = (not building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"].nil?)
+    @iecc_zone_2006 = XMLHelper.get_value(building, "BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year='2006']/ClimateZone")
 
     # Geometry/Envelope
 
@@ -611,7 +612,7 @@ class OSModel
     spaces = {}
 
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic") do |attic|
-      attic_type = attic.elements["AtticType"].text
+      attic_type = XMLHelper.get_value(attic, "AtticType")
       if ["vented attic", "unvented attic"].include? attic_type
         create_space_and_zone(model, spaces, Constants.SpaceTypeUnfinishedAttic)
       elsif attic_type == "cape cod"
@@ -622,7 +623,7 @@ class OSModel
 
       floors = attic.elements["Floors"]
       floors.elements.each("Floor") do |floor|
-        exterior_adjacent_to = floor.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(floor, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
         elsif exterior_adjacent_to == "garage"
@@ -634,7 +635,7 @@ class OSModel
 
       walls = attic.elements["Walls"]
       walls.elements.each("Wall") do |wall|
-        exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
         elsif exterior_adjacent_to == "garage"
@@ -658,7 +659,7 @@ class OSModel
       end
 
       foundation.elements.each("FrameFloor") do |frame_floor|
-        exterior_adjacent_to = frame_floor.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(frame_floor, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
         elsif exterior_adjacent_to != "ambient" and exterior_adjacent_to != "ground"
@@ -667,7 +668,7 @@ class OSModel
       end
 
       foundation.elements.each("FoundationWall") do |foundation_wall|
-        exterior_adjacent_to = foundation_wall.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(foundation_wall, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "unconditioned basement"
           create_space_and_zone(model, spaces, Constants.SpaceTypeUnfinishedBasement)
         elsif exterior_adjacent_to == "conditioned basement"
@@ -681,7 +682,7 @@ class OSModel
     end
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
+      interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
       if interior_adjacent_to == "living space"
         create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
       elsif interior_adjacent_to == "garage"
@@ -690,7 +691,7 @@ class OSModel
         fail "Unhandled value (#{interior_adjacent_to})."
       end
 
-      exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+      exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
       if exterior_adjacent_to == "garage"
         create_space_and_zone(model, spaces, Constants.SpaceTypeGarage)
       elsif exterior_adjacent_to == "living space"
@@ -853,9 +854,9 @@ class OSModel
       foundation.elements.each("Slab") do |fnd_slab|
         slab_id = fnd_slab.elements["SystemIdentifier"].attributes["id"]
 
-        slab_perim = Float(fnd_slab.elements["ExposedPerimeter"].text)
+        slab_perim = Float(XMLHelper.get_value(fnd_slab, "ExposedPerimeter"))
         perim_exp += slab_perim
-        slab_area = Float(fnd_slab.elements["Area"].text)
+        slab_area = Float(XMLHelper.get_value(fnd_slab, "Area"))
         # Calculate length/width given perimeter/area
         sqrt_term = slab_perim**2 - 16.0 * slab_area
         if sqrt_term < 0
@@ -868,7 +869,7 @@ class OSModel
 
         z_origin = 0
         unless fnd_slab.elements["DepthBelowGrade"].nil?
-          z_origin = -1 * Float(fnd_slab.elements["DepthBelowGrade"].text)
+          z_origin = -1 * Float(XMLHelper.get_value(fnd_slab, "DepthBelowGrade"))
         end
 
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(UnitConversions.convert(slab_length, "ft", "m"),
@@ -897,6 +898,12 @@ class OSModel
         fnd_slab_perim = fnd_slab.elements["PerimeterInsulation/Layer[InstallationType='continuous']"]
         slab_ext_r = Float(XMLHelper.get_value(fnd_slab_perim, "NominalRValue"))
         slab_ext_depth = Float(XMLHelper.get_value(fnd_slab, "PerimeterInsulationDepth"))
+        if not slab_ext_r.nil? and not slab_ext_depth.nil?
+          slab_ext_r = Float(slab_ext_r)
+          slab_ext_depth = Float(slab_ext_depth)
+        else
+          slab_ext_r, slab_ext_depth = FloorConstructions.get_default_slab_perimeter_rvalue_depth(@iecc_zone_2006)
+        end
         if slab_ext_r == 0 or slab_ext_depth == 0
           slab_ext_r = 0
           slab_ext_depth = 0
@@ -905,6 +912,12 @@ class OSModel
         fnd_slab_under = fnd_slab.elements["UnderSlabInsulation/Layer[InstallationType='continuous']"]
         slab_perim_r = Float(XMLHelper.get_value(fnd_slab_under, "NominalRValue"))
         slab_perim_width = Float(XMLHelper.get_value(fnd_slab, "UnderSlabInsulationWidth"))
+        if not slab_perim_r.nil? and not slab_perim_width.nil?
+          slab_perim_r = Float(slab_perim_r)
+          slab_perim_width = Float(slab_perim_width)
+        else
+          slab_perim_r, slab_perim_width = FloorConstructions.get_default_slab_under_rvalue_width()
+        end
         if slab_perim_r == 0 or slab_perim_width == 0
           slab_perim_r = 0
           slab_perim_width = 0
@@ -921,10 +934,10 @@ class OSModel
       foundation.elements.each("FoundationWall") do |fnd_wall|
         wall_id = fnd_wall.elements["SystemIdentifier"].attributes["id"]
 
-        exterior_adjacent_to = fnd_wall.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(fnd_wall, "extension/ExteriorAdjacentTo")
 
-        wall_height = Float(fnd_wall.elements["Height"].text) # FIXME: Need to handle above-grade portion
-        wall_gross_area = Float(fnd_wall.elements["Area"].text)
+        wall_height = Float(XMLHelper.get_value(fnd_wall, "Height")) # FIXME: Need to handle above-grade portion
+        wall_gross_area = Float(XMLHelper.get_value(fnd_wall, "Area"))
         wall_net_area = net_wall_area(wall_gross_area, fenestration_areas, fnd_id)
         if wall_net_area <= 0
           fail "Calculated a negative net surface area for Wall '#{wall_id}'."
@@ -932,7 +945,7 @@ class OSModel
 
         wall_length = wall_net_area / wall_height
 
-        z_origin = -1 * Float(fnd_wall.elements["DepthBelowGrade"].text)
+        z_origin = -1 * Float(XMLHelper.get_value(fnd_wall, "DepthBelowGrade"))
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(UnitConversions.convert(wall_length, "ft", "m"),
                                                                   UnitConversions.convert(wall_height, "ft", "m"),
@@ -962,7 +975,12 @@ class OSModel
         end
         walls_filled_cavity = true
         walls_concrete_thick_in = Float(XMLHelper.get_value(fnd_wall, "Thickness"))
-        wall_assembly_r = Float(XMLHelper.get_value(fnd_wall, "Insulation/AssemblyEffectiveRValue"))
+        wall_assembly_r = XMLHelper.get_value(fnd_wall, "Insulation/AssemblyEffectiveRValue")
+        if not wall_assembly_r.nil?
+          wall_assembly_r = Float(wall_assembly_r)
+        else
+          wall_assembly_r = 1.0 / FoundationConstructions.get_default_basement_wall_ufactor(@iecc_zone_2006)
+        end
         wall_film_r = Material.AirFilmVertical.rvalue
         wall_cav_r = 0.0
         wall_cav_depth = 0.0
@@ -982,7 +1000,7 @@ class OSModel
       foundation.elements.each("FrameFloor") do |fnd_floor|
         floor_id = fnd_floor.elements["SystemIdentifier"].attributes["id"]
 
-        framefloor_area = Float(fnd_floor.elements["Area"].text)
+        framefloor_area = Float(XMLHelper.get_value(fnd_floor, "Area"))
         framefloor_width = Math::sqrt(framefloor_area)
         framefloor_length = framefloor_area / framefloor_width
 
@@ -1015,7 +1033,12 @@ class OSModel
 
         floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
 
-        floor_assembly_r = Float(XMLHelper.get_value(fnd_floor, "Insulation/AssemblyEffectiveRValue"))
+        floor_assembly_r = XMLHelper.get_value(fnd_floor, "Insulation/AssemblyEffectiveRValue")
+        if not floor_assembly_r.nil?
+          floor_assembly_r = Float(floor_assembly_r)
+        else
+          floor_assembly_r = 1.0 / FloorConstructions.get_default_floor_ufactor(@iecc_zone_2006)
+        end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare), # 2x4, 16" o.c.
@@ -1090,7 +1113,7 @@ class OSModel
   end
 
   def self.add_finished_floor_area(runner, model, building, spaces)
-    ffa = Float(building.elements["BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"].text).round(1)
+    ffa = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea")).round(1)
 
     # First check if we need to add a finished basement ceiling
 
@@ -1184,12 +1207,12 @@ class OSModel
 
   def self.add_walls(runner, model, building, spaces, fenestration_areas)
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
-      exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+      interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
+      exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
 
       wall_id = wall.elements["SystemIdentifier"].attributes["id"]
 
-      wall_gross_area = Float(wall.elements["Area"].text)
+      wall_gross_area = Float(XMLHelper.get_value(wall, "Area"))
       wall_net_area = net_wall_area(wall_gross_area, fenestration_areas, wall_id)
       if wall_net_area <= 0
         fail "Calculated a negative net surface area for Wall '#{wall_id}'."
@@ -1246,7 +1269,12 @@ class OSModel
 
       if XMLHelper.has_element(wall, "WallType/WoodStud")
 
-        assembly_r = Float(XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue"))
+        assembly_r = XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue")
+        if not assembly_r.nil?
+          assembly_r = Float(assembly_r)
+        else
+          assembly_r = 1.0 / WallConstructions.get_default_frame_wall_ufactor(@iecc_zone_2006)
+        end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R10
           WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 5.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c. + R5
@@ -1366,14 +1394,14 @@ class OSModel
 
   def self.add_attics(runner, model, building, spaces, fenestration_areas)
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic") do |attic|
-      attic_type = attic.elements["AtticType"].text
+      attic_type = XMLHelper.get_value(attic, "AtticType")
       interior_adjacent_to = attic_type
 
       attic.elements.each("Floors/Floor") do |floor|
         floor_id = floor.elements["SystemIdentifier"].attributes["id"]
-        exterior_adjacent_to = floor.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(floor, "extension/ExteriorAdjacentTo")
 
-        floor_area = Float(floor.elements["Area"].text)
+        floor_area = Float(XMLHelper.get_value(floor, "Area"))
         floor_width = Math::sqrt(floor_area)
         floor_length = floor_area / floor_width
         z_origin = 0
@@ -1407,7 +1435,12 @@ class OSModel
         end
         film_r = 2 * Material.AirFilmFloorAverage.rvalue
 
-        assembly_r = Float(XMLHelper.get_value(floor, "Insulation/AssemblyEffectiveRValue"))
+        assembly_r = XMLHelper.get_value(floor, "Insulation/AssemblyEffectiveRValue")
+        if not assembly_r.nil?
+          assembly_r = Float(assembly_r)
+        else
+          assembly_r = FloorConstructions.get_default_ceiling_ufactor(@iecc_zone_2006)
+        end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.11, 0.0, 0.0, drywall_thick_in, nil), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.24, 0.0, 0.0, drywall_thick_in, nil), # 2x4, 16" o.c.
@@ -1436,12 +1469,12 @@ class OSModel
       attic.elements.each("Roofs/Roof") do |roof|
         roof_id = roof.elements["SystemIdentifier"].attributes["id"]
 
-        roof_gross_area = Float(roof.elements["Area"].text)
+        roof_gross_area = Float(XMLHelper.get_value(roof, "Area"))
         roof_net_area = net_wall_area(roof_gross_area, fenestration_areas, roof_id)
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         z_origin = 0
-        roof_tilt = Float(roof.elements["Pitch"].text) / 12.0
+        roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
 
         surface = OpenStudio::Model::Surface.new(add_roof_polygon(UnitConversions.convert(roof_length, "ft", "m"),
                                                                   UnitConversions.convert(roof_width, "ft", "m"),
@@ -1509,11 +1542,11 @@ class OSModel
       end
 
       attic.elements.each("Walls/Wall") do |wall|
-        exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
 
         wall_id = wall.elements["SystemIdentifier"].attributes["id"]
 
-        wall_gross_area = Float(wall.elements["Area"].text)
+        wall_gross_area = Float(XMLHelper.get_value(wall, "Area"))
         wall_net_area = net_wall_area(wall_gross_area, fenestration_areas, wall_id)
         if wall_net_area <= 0
           fail "Calculated a negative net surface area for Wall '#{wall_id}'."
@@ -1617,9 +1650,9 @@ class OSModel
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
-      window_area = Float(window.elements["Area"].text)
+      window_area = Float(XMLHelper.get_value(window, "Area"))
       window_width = window_area / window_height
-      window_azimuth = Float(window.elements["Azimuth"].text)
+      window_azimuth = Float(XMLHelper.get_value(window, "Azimuth"))
       z_origin = 0
 
       if not fenestration_areas.keys.include? window.elements["AttachedToWall"].attributes["idref"]
@@ -1638,7 +1671,7 @@ class OSModel
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
         next unless wall.elements["SystemIdentifier"].attributes["id"] == window.elements["AttachedToWall"].attributes["idref"]
 
-        interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
+        interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
         if interior_adjacent_to == "living space"
           surface.setSpace(spaces[Constants.SpaceTypeLiving])
         elsif interior_adjacent_to == "garage"
@@ -1701,10 +1734,10 @@ class OSModel
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_id = skylight.elements["SystemIdentifier"].attributes["id"]
-      skylight_area = Float(skylight.elements["Area"].text)
+      skylight_area = Float(XMLHelper.get_value(skylight, "Area"))
       skylight_height = 5.0 # FIXME
       skylight_width = skylight_area / skylight_height
-      skylight_azimuth = Float(skylight.elements["Azimuth"].text)
+      skylight_azimuth = Float(XMLHelper.get_value(skylight, "Azimuth"))
       z_origin = 0
       if not fenestration_areas.keys.include? skylight.elements["AttachedToRoof"].attributes["idref"]
         fenestration_areas[skylight.elements["AttachedToRoof"].attributes["idref"]] = skylight_area
@@ -1713,11 +1746,11 @@ class OSModel
       end
       skylight_tilt = nil
       building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic") do |attic|
-        attic_type = attic.elements["AtticType"].text
+        attic_type = XMLHelper.get_value(attic, "AtticType")
         attic.elements.each("Roofs/Roof") do |roof|
           next unless roof.elements["SystemIdentifier"].attributes["id"] == skylight.elements["AttachedToRoof"].attributes["idref"]
 
-          skylight_tilt = Float(roof.elements["Pitch"].text) / 12.0
+          skylight_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
         end
       end
       surface = OpenStudio::Model::Surface.new(add_roof_polygon(UnitConversions.convert(skylight_width, "ft", "m") + 0.0001, # base surface must be at least slightly larger than subsurface
@@ -1760,11 +1793,23 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
       door_id = door.elements["SystemIdentifier"].attributes["id"]
 
-      door_area = Float(door.elements["Area"].text)
+      door_area = XMLHelper.get_value(door, "Area")
+      if not door_area.nil?
+        door_area = Float(door_area)
+      else
+        door_area = SubsurfaceConstructions.get_default_door_area()
+      end
+
       door_height = 6.67 # ft
       door_width = door_area / door_height
-      door_azimuth = Float(door.elements["Azimuth"].text)
       z_origin = 0
+
+      door_azimuth = XMLHelper.get_value(door, "Azimuth")
+      if not door_azimuth.nil?
+        door_azimuth = Float(door_azimuth)
+      else
+        door_azimuth = SubsurfaceConstructions.get_default_door_azimuth()
+      end
 
       if not fenestration_areas.keys.include? door.elements["AttachedToWall"].attributes["idref"]
         fenestration_areas[door.elements["AttachedToWall"].attributes["idref"]] = door_area
@@ -1782,7 +1827,7 @@ class OSModel
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
         next unless wall.elements["SystemIdentifier"].attributes["id"] == door.elements["AttachedToWall"].attributes["idref"]
 
-        interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
+        interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
         if interior_adjacent_to == "living space"
           surface.setSpace(spaces[Constants.SpaceTypeLiving])
         elsif interior_adjacent_to == "garage"
@@ -1809,7 +1854,12 @@ class OSModel
 
       # Apply construction
       name = door.elements["SystemIdentifier"].attributes["id"]
-      ufactor = 1.0 / Float(XMLHelper.get_value(door, "RValue"))
+      rvalue = XMLHelper.get_value(door, "RValue")
+      if not rvalue.nil?
+        ufactor = 1.0 / Float(rvalue)
+      else
+        ufactor, shgc = SubsurfaceConstructions.get_default_ufactor_shgc(@iecc_zone_2006)
+      end
 
       success = SubsurfaceConstructions.apply_door(runner, model, [sub_surface], "Door", ufactor)
       return false if not success
@@ -2682,7 +2732,13 @@ class OSModel
     vented_crawl_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
       area = REXML::XPath.first(vented_crawl, "sum(FrameFloor/Area/text())")
-      vented_crawl_sla_area += (Float(XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")) * area)
+      vented_crawl_sla = XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")
+      if not vented_crawl_sla.nil?
+        vented_crawl_sla = Float(vented_crawl_sla)
+      else
+        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
+      end
+      vented_crawl_sla_area += (vented_crawl_sla * area)
       vented_crawl_area += area
     end
     if vented_crawl_area > 0
@@ -2696,7 +2752,13 @@ class OSModel
     vented_attic_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType='vented attic']") do |vented_attic|
       area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area/text())")
-      vented_attic_sla_area += (Float(XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")) * area)
+      vented_attic_sla = XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")
+      if not vented_attic_sla.nil?
+        vented_attic_sla = Float(vented_attic_sla)
+      else
+        vented_attic_sla = Airflow.get_default_vented_attic_sla()
+      end
+      vented_attic_sla_area += (vented_attic_sla * area)
       vented_attic_area += area
     end
     if vented_attic_area > 0
