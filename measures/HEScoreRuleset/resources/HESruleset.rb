@@ -23,6 +23,19 @@ class HEScoreRuleset
     if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement").nil?
       @nfl += 1
     end
+    @ceil_height = Float(XMLHelper.get_value(orig_details, "BuildingSummary/BuildingConstruction/AverageCeilingHeight"))
+    @bldg_orient = XMLHelper.get_value(orig_details, "BuildingSummary/Site/OrientationOfFrontOfHome")
+
+    # Calculate geometry
+    # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
+    cfa_basement = 0.0
+    orig_details.elements.each("Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |cond_basement|
+      cfa_basement += Float(XMLHelper.get_value(cond_basement, "FrameFloor/Area"))
+    end
+    footprint_area = (@cfa - cfa_basement) / @ncfl_ag
+    @bldg_length = (3.0 * footprint_area / 5.0)**0.5
+    @bldg_width = (5.0 / 3.0) * @bldg_length
+    @bldg_perimeter = 2.0 * @bldg_length + 2.0 * @bldg_width
 
     # BuildingSummary
     new_summary = XMLHelper.add_element(new_details, "BuildingSummary")
@@ -81,7 +94,7 @@ class HEScoreRuleset
     XMLHelper.add_element(new_construction, "NumberofConditionedFloorsAboveGrade", @ncfl_ag)
     XMLHelper.add_element(new_construction, "NumberofBedrooms", Integer(@nbeds))
     XMLHelper.add_element(new_construction, "ConditionedFloorArea", @cfa)
-    XMLHelper.add_element(new_construction, "ConditionedBuildingVolume", @cfa * 8.0) # FIXME: Hard-coded
+    XMLHelper.add_element(new_construction, "ConditionedBuildingVolume", @cfa * @ceil_height) # FIXME: Verify
     XMLHelper.add_element(new_construction, "GaragePresent", false)
   end
 
@@ -127,7 +140,7 @@ class HEScoreRuleset
       new_roofs = XMLHelper.add_element(new_attic, "Roofs")
       new_roof = XMLHelper.add_element(new_roofs, "Roof")
       XMLHelper.copy_element(new_roof, orig_roof, "SystemIdentifier")
-      XMLHelper.add_element(new_roof, "Area", 1000) # FIXME: Hard-coded
+      XMLHelper.copy_element(new_roof, orig_roof, "Area", 1000) # FIXME: Hard-coded
       XMLHelper.copy_element(new_roof, orig_roof, "SolarAbsorptance")
       XMLHelper.add_element(new_roof, "Emittance", 0.9) # FIXME: Hard-coded
       XMLHelper.add_element(new_roof, "Pitch", 5) # FIXME: Hard-coded
@@ -146,7 +159,7 @@ class HEScoreRuleset
         new_floor = XMLHelper.add_element(new_floors, "Floor")
         sys_id = XMLHelper.add_element(new_floor, "SystemIdentifier")
         XMLHelper.add_attribute(sys_id, "id", "#{attic_id}_floor")
-        XMLHelper.copy_element(new_floor, orig_attic, "Area")
+        XMLHelper.copy_element(new_floor, orig_attic, "Area") # FIXME: Verify. This is the attic floor area and not the roof area?
         new_floor_ins = XMLHelper.add_element(new_floor, "Insulation")
         XMLHelper.copy_element(new_floor_ins, orig_attic, "AtticFloorInsulation/SystemIdentifier")
         XMLHelper.add_element(new_floor_ins, "AssemblyEffectiveRValue", floor_r)
@@ -203,10 +216,10 @@ class HEScoreRuleset
 
         new_fndwall = XMLHelper.add_element(new_foundation, "FoundationWall")
         XMLHelper.copy_element(new_fndwall, orig_foundation, "FoundationWall/SystemIdentifier")
-        XMLHelper.add_element(new_fndwall, "Height", 8) # FIXME: Verify
-        XMLHelper.add_element(new_fndwall, "Area", 100) # FIXME: Hard-coded
-        XMLHelper.add_element(new_fndwall, "Thickness", 8) # FIXME: Hard-coded
-        XMLHelper.add_element(new_fndwall, "DepthBelowGrade", 8) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Height", @ceil_height) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Area", @ceil_height * @bldg_perimeter) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Thickness", 8) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "DepthBelowGrade", @ceil_height) # FIXME: Verify
         new_fndwall_ins = XMLHelper.add_element(new_fndwall, "Insulation")
         XMLHelper.copy_element(new_fndwall_ins, orig_foundation, "FoundationWall/Insulation/SystemIdentifier")
         XMLHelper.add_element(new_fndwall_ins, "AssemblyEffectiveRValue", wall_r)
@@ -234,9 +247,9 @@ class HEScoreRuleset
       sys_id = XMLHelper.add_element(new_slab, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", slab_id)
       XMLHelper.add_element(new_slab, "Area", slab_area)
-      XMLHelper.add_element(new_slab, "Thickness", 4) # FIXME: Hard-coded
-      XMLHelper.add_element(new_slab, "ExposedPerimeter", 100) # FIXME: Hard-coded
-      XMLHelper.add_element(new_slab, "PerimeterInsulationDepth", 4) # FIXME: Hard-coded
+      XMLHelper.add_element(new_slab, "Thickness", 4) # FIXME: Verify
+      XMLHelper.add_element(new_slab, "ExposedPerimeter", @bldg_perimeter) # FIXME: Verify
+      XMLHelper.add_element(new_slab, "PerimeterInsulationDepth", 1) # FIXME: Hard-coded
       XMLHelper.add_element(new_slab, "UnderSlabInsulationWidth", 0) # FIXME: Verify
       XMLHelper.add_element(new_slab, "DepthBelowGrade", 0) # FIXME: Verify
       new_slab_perim_ins = XMLHelper.add_element(new_slab, "PerimeterInsulation")
@@ -268,6 +281,7 @@ class HEScoreRuleset
 
     orig_details.elements.each("Enclosure/Walls/Wall") do |orig_wall|
       wall_type = orig_wall.elements["WallType"].elements[1].name
+      wall_orient = XMLHelper.get_value(orig_wall, "Orientation")
 
       if wall_type == "WoodStud"
         wall_siding = XMLHelper.get_value(orig_wall, "Siding")
@@ -294,7 +308,11 @@ class HEScoreRuleset
       new_wall = XMLHelper.add_element(new_walls, "Wall")
       XMLHelper.copy_element(new_wall, orig_wall, "SystemIdentifier")
       XMLHelper.copy_element(new_wall, orig_wall, "WallType")
-      XMLHelper.add_element(new_wall, "Area", 100) # FIXME: Hard-coded
+      if @bldg_orient == wall_orient or @bldg_orient == reverse_orientation(wall_orient)
+        XMLHelper.add_element(new_wall, "Area", @ceil_height * @bldg_width) # FIXME: Verify
+      else
+        XMLHelper.add_element(new_wall, "Area", @ceil_height * @bldg_length) # FIXME: Verify
+      end
       XMLHelper.add_element(new_wall, "SolarAbsorptance", 0) # FIXME: Hard-coded
       XMLHelper.add_element(new_wall, "Emittance", 0) # FIXME: Hard-coded
       new_wall_ins = XMLHelper.add_element(new_wall, "Insulation")
@@ -380,13 +398,21 @@ class HEScoreRuleset
   def self.set_enclosure_doors(new_enclosure, orig_details)
     new_doors = XMLHelper.add_element(new_enclosure, "Doors")
 
+    front_wall = nil
+    orig_details.elements.each("Enclosure/Walls/Wall") do |wall|
+      next if XMLHelper.get_value(wall, "Orientation") != @bldg_orient
+
+      front_wall = wall
+      break
+    end
+
     new_door = XMLHelper.add_element(new_doors, "Door")
     sys_id = XMLHelper.add_element(new_door, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", "Door")
     attwall = XMLHelper.add_element(new_door, "AttachedToWall")
-    XMLHelper.add_attribute(attwall, "idref", "FIXME") # FIXME
+    XMLHelper.add_attribute(attwall, "idref", front_wall.elements["SystemIdentifier"].attributes["id"])
     # Uses ERI Reference Home for Area
-    # Uses ERI Reference Home for Azimuth
+    XMLHelper.add_element(new_door, "Azimuth", orientation_to_azimuth(@bldg_orient))
     # Uses ERI Reference Home for RValue
   end
 
@@ -676,7 +702,7 @@ class HEScoreRuleset
     XMLHelper.add_element(new_pv, "ModuleType", "standard") # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
     XMLHelper.add_element(new_pv, "ArrayType", "fixed roof mount") # FIXME: Verify. HEScore was using "fixed open rack"??
     XMLHelper.add_element(new_pv, "ArrayAzimuth", orientation_to_azimuth(pv_orientation))
-    XMLHelper.add_element(new_pv, "ArrayTilt", 30) # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+    XMLHelper.add_element(new_pv, "ArrayTilt", 30) # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
     XMLHelper.add_element(new_pv, "MaxPowerOutput", pv_power)
     XMLHelper.add_element(new_pv, "InverterEfficiency", 0.96) # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
     XMLHelper.add_element(new_pv, "SystemLossesFraction", 0.14) # FIXME: Verify
@@ -1099,4 +1125,19 @@ def get_attached(attached_name, orig_details, search_in)
     return other_element
   end
   fail "Could not find attached element for '#{attached_name}'."
+end
+
+def reverse_orientation(orientation)
+  reverse = orientation
+  if reverse.include? "north"
+    reverse = reverse.gsub("north", "south")
+  else
+    reverse = reverse.gsub("south", "north")
+  end
+  if reverse.include? "east"
+    reverse = reverse.gsub("east", "west")
+  else
+    reverse = reverse.gsub("west", "east")
+  end
+  return reverse
 end
