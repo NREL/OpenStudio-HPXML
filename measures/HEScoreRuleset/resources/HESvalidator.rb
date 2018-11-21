@@ -179,6 +179,7 @@ class HEScoreValidator
       # [Skylight]
       '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight' => {
         'Area' => one,
+        'Orientation' => one,
         'AttachedToRoof' => one,
         '[FrameType | UFactor]' => one, # See [SkylightType=Detailed] or [SkylightType=Simple]
       },

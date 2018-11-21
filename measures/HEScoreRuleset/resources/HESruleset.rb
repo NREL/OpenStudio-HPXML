@@ -104,7 +104,58 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_attics_roofs(new_enclosure, orig_details)
-    # TODO
+    new_attic_roof = XMLHelper.add_element(new_enclosure, "AtticAndRoof")
+    new_attics = XMLHelper.add_element(new_attic_roof, "Attics")
+
+    orig_details.elements.each("Enclosure/AtticAndRoof/Attics/Attic") do |orig_attic|
+      orig_roof = get_attached(orig_attic.elements["AttachedToRoof"].attributes["idref"], orig_details, "Enclosure/AtticAndRoof/Roofs/Roof")
+      attic_type = XMLHelper.get_value(orig_attic, "AtticType")
+      attic_id = orig_attic.elements["SystemIdentifier"].attributes["id"]
+
+      new_attic = XMLHelper.add_element(new_attics, "Attic")
+      XMLHelper.copy_element(new_attic, orig_attic, "SystemIdentifier")
+      XMLHelper.copy_element(new_attic, orig_attic, "AtticType")
+
+      # Roofs
+      roof_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='cavity']/NominalRValue"))
+      roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
+      roof_material = XMLHelper.get_value(orig_roof, "RoofType")
+      roof_has_radiant_barrier = Boolean(XMLHelper.get_value(orig_roof, "RadiantBarrier"))
+
+      roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, roof_material, roof_has_radiant_barrier)
+
+      new_roofs = XMLHelper.add_element(new_attic, "Roofs")
+      new_roof = XMLHelper.add_element(new_roofs, "Roof")
+      XMLHelper.copy_element(new_roof, orig_roof, "SystemIdentifier")
+      XMLHelper.add_element(new_roof, "Area", 1000) # FIXME: Hard-coded
+      XMLHelper.copy_element(new_roof, orig_roof, "SolarAbsorptance")
+      XMLHelper.add_element(new_roof, "Emittance", 0.9) # FIXME: Hard-coded
+      XMLHelper.add_element(new_roof, "Pitch", 5) # FIXME: Hard-coded
+      XMLHelper.add_element(new_roof, "RadiantBarrier", false) # FIXME: Verify. Setting to false because it's included in the assembly R-value
+      new_roof_ins = XMLHelper.add_element(new_roof, "Insulation")
+      XMLHelper.copy_element(new_roof_ins, orig_attic, "AtticRoofInsulation/SystemIdentifier")
+      XMLHelper.add_element(new_roof_ins, "AssemblyEffectiveRValue", roof_r)
+
+      # Floors
+      if ["unvented attic", "vented attic"].include? attic_type
+        floor_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticFloorInsulation/Layer[InstallationType='cavity']/NominalRValue"))
+
+        floor_r = get_ceiling_assembly_r(floor_r_cavity)
+
+        new_floors = XMLHelper.add_element(new_attic, "Floors")
+        new_floor = XMLHelper.add_element(new_floors, "Floor")
+        sys_id = XMLHelper.add_element(new_floor, "SystemIdentifier")
+        XMLHelper.add_attribute(sys_id, "id", "#{attic_id}_floor")
+        XMLHelper.copy_element(new_floor, orig_attic, "Area")
+        new_floor_ins = XMLHelper.add_element(new_floor, "Insulation")
+        XMLHelper.copy_element(new_floor_ins, orig_attic, "AtticFloorInsulation/SystemIdentifier")
+        XMLHelper.add_element(new_floor_ins, "AssemblyEffectiveRValue", floor_r)
+      end
+
+      # FIXME: Verify no gable walls assumed
+
+      # Uses ERI Reference Home for vented attic specific leakage area
+    end
   end
 
   def self.set_enclosure_foundations(new_enclosure, orig_details)
@@ -132,7 +183,7 @@ class HEScoreRuleset
 
       # FrameFloor
       if ["UnconditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
-        floor_r_cavity = Float(XMLHelper.get_value(orig_foundation, "FrameFloor/Insulation/Layer[InstallationType='cavity']/NominalRValue"))
+        floor_r_cavity = Integer(XMLHelper.get_value(orig_foundation, "FrameFloor/Insulation/Layer[InstallationType='cavity']/NominalRValue"))
 
         floor_r = get_floor_assembly_r(floor_r_cavity)
 
@@ -165,8 +216,8 @@ class HEScoreRuleset
 
       # Slab
       if fnd_type == "SlabOnGrade"
-        slab_perim_r = Float(XMLHelper.get_value(orig_foundation, "Slab/PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue"))
-        slab_area = Float(XMLHelper.get_value(orig_foundation, "Slab/Area"))
+        slab_perim_r = Integer(XMLHelper.get_value(orig_foundation, "Slab/PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue"))
+        slab_area = XMLHelper.get_value(orig_foundation, "Slab/Area")
         fnd_id = orig_foundation.elements["SystemIdentifier"].attributes["id"]
         slab_id = orig_foundation.elements["Slab/SystemIdentifier"].attributes["id"]
         slab_perim_id = orig_foundation.elements["Slab/PerimeterInsulation/SystemIdentifier"].attributes["id"]
@@ -182,7 +233,7 @@ class HEScoreRuleset
       new_slab = XMLHelper.add_element(new_foundation, "Slab")
       sys_id = XMLHelper.add_element(new_slab, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", slab_id)
-      XMLHelper.add_element(new_slab, "Area", 100) # FIXME: Hard-coded
+      XMLHelper.add_element(new_slab, "Area", slab_area)
       XMLHelper.add_element(new_slab, "Thickness", 4) # FIXME: Hard-coded
       XMLHelper.add_element(new_slab, "ExposedPerimeter", 100) # FIXME: Hard-coded
       XMLHelper.add_element(new_slab, "PerimeterInsulationDepth", 4) # FIXME: Hard-coded
@@ -259,25 +310,21 @@ class HEScoreRuleset
     new_windows = XMLHelper.add_element(new_enclosure, "Windows")
 
     orig_details.elements.each("Enclosure/Windows/Window") do |orig_window|
-      win_orient = "north" # FIXME: Get from roof
+      orig_wall = get_attached(orig_window.elements["AttachedToWall"].attributes["idref"], orig_details, "Enclosure/Walls/Wall")
+      win_orient = XMLHelper.get_value(orig_wall, "Orientation")
       win_ufactor = XMLHelper.get_value(orig_window, "UFactor")
 
       if not win_ufactor.nil?
         win_ufactor = Float(win_ufactor)
         win_shgc = Float(XMLHelper.get_value(orig_window, "SHGC"))
       else
-        # FIXME: Temporarily hard-coded due to bad XML
-        win_frame_type = "Aluminum"
-        win_glass_layers = "single-pane"
-        win_glass_type = nil
-        win_gas_fill = nil
-        # win_frame_type = orig_window.elements["FrameType"].elements[1].name
-        # if win_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_window, "FrameType/Aluminum"))
-        #  win_frame_type += "ThermalBreak"
-        # end
-        # win_glass_layers = XMLHelper.get_value(orig_window, "GlassLayers")
-        # win_glass_type = XMLHelper.get_value(orig_window, "GlassType")
-        # win_gas_fill = XMLHelper.get_value(orig_window, "GasFill")
+        win_frame_type = orig_window.elements["FrameType"].elements[1].name
+        if win_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_window, "FrameType/Aluminum/ThermalBreak"))
+          win_frame_type += "ThermalBreak"
+        end
+        win_glass_layers = XMLHelper.get_value(orig_window, "GlassLayers")
+        win_glass_type = XMLHelper.get_value(orig_window, "GlassType")
+        win_gas_fill = XMLHelper.get_value(orig_window, "GasFill")
 
         win_ufactor, win_shgc = get_window_ufactor_shgc(win_frame_type, win_glass_layers, win_glass_type, win_gas_fill)
       end
@@ -300,25 +347,20 @@ class HEScoreRuleset
     new_skylights = XMLHelper.add_element(new_enclosure, "Skylights")
 
     orig_details.elements.each("Enclosure/Skylights/Skylight") do |orig_skylight|
-      sky_orient = "north" # FIXME: Get from roof
+      sky_orient = XMLHelper.get_value(orig_skylight, "Orientation")
       sky_ufactor = XMLHelper.get_value(orig_skylight, "UFactor")
 
       if not sky_ufactor.nil?
         sky_ufactor = Float(sky_ufactor)
         sky_shgc = Float(XMLHelper.get_value(orig_skylight, "SHGC"))
       else
-        # FIXME: Temporarily hard-coded due to bad XML
-        sky_frame_type = "Aluminum"
-        sky_glass_layers = "single-pane"
-        sky_glass_type = nil
-        sky_gas_fill = nil
-        # sky_frame_type = orig_skylight.elements["FrameType"].elements[1].name
-        # if sky_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_skylight, "FrameType/Aluminum"))
-        #  sky_frame_type += "ThermalBreak"
-        # end
-        # sky_glass_layers = XMLHelper.get_value(orig_skylight, "GlassLayers")
-        # sky_glass_type = XMLHelper.get_value(orig_skylight, "GlassType")
-        # sky_gas_fill = XMLHelper.get_value(orig_skylight, "GasFill")
+        sky_frame_type = orig_skylight.elements["FrameType"].elements[1].name
+        if sky_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_skylight, "FrameType/Aluminum/ThermalBreak"))
+          sky_frame_type += "ThermalBreak"
+        end
+        sky_glass_layers = XMLHelper.get_value(orig_skylight, "GlassLayers")
+        sky_glass_type = XMLHelper.get_value(orig_skylight, "GlassType")
+        sky_gas_fill = XMLHelper.get_value(orig_skylight, "GasFill")
 
         sky_ufactor, sky_shgc = get_skylight_ufactor_shgc(sky_frame_type, sky_glass_layers, sky_glass_type, sky_gas_fill)
       end
@@ -709,7 +751,7 @@ def get_default_furnace_afue(year, fuel)
 
     return default_afue
   end
-  return nil
+  fail "Could not get default furnace AFUE for year '#{year}' and fuel '#{fuel}'"
 end
 
 def get_default_boiler_afue(year, fuel)
@@ -726,7 +768,7 @@ def get_default_boiler_afue(year, fuel)
 
     return default_afue
   end
-  return nil
+  fail "Could not get default boiler AFUE for year '#{year}' and fuel '#{fuel}'"
 end
 
 def get_default_central_ac_seer(year)
@@ -740,7 +782,7 @@ def get_default_central_ac_seer(year)
 
     return default_seer
   end
-  return nil
+  fail "Could not get default central air conditioner SEER for year '#{year}'"
 end
 
 def get_default_room_ac_eer(year)
@@ -754,7 +796,7 @@ def get_default_room_ac_eer(year)
 
     return default_eer
   end
-  return nil
+  fail "Could not get default room air conditioner EER for year '#{year}'"
 end
 
 def get_default_ashp_seer_hspf(year)
@@ -769,7 +811,7 @@ def get_default_ashp_seer_hspf(year)
 
     return default_seer, default_hspf
   end
-  return nil
+  fail "Could not get default air source heat pump SEER/HSPF for year '#{year}'"
 end
 
 def get_default_gshp_eer_cop(year)
@@ -784,7 +826,7 @@ def get_default_gshp_eer_cop(year)
 
     return default_eer, default_cop
   end
-  return nil
+  fail "Could not get default ground source heat pump EER/COP for year '#{year}'"
 end
 
 def get_default_water_heater_ef(year, fuel)
@@ -801,34 +843,43 @@ def get_default_water_heater_ef(year, fuel)
 
     return default_ef
   end
-  return nil
+  fail "Could not get default water heater EF for year '#{year}' and fuel '#{fuel}'"
 end
 
 def get_default_water_heater_volume(fuel)
   # FIXME: Verify
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
-  return { "electricity" => 50,
-           "natural gas" => 40,
-           "propane" => 40,
-           "fuel oil" => 32 }[fuel]
+  val = { "electricity" => 50,
+          "natural gas" => 40,
+          "propane" => 40,
+          "fuel oil" => 32 }[fuel]
+  return val if not val.nil?
+
+  fail "Could not get default water heater volume for fuel '#{fuel}'"
 end
 
 def get_default_water_heater_re(fuel)
   # FIXME: Verify
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
-  return { "electricity" => 0.98,
-           "natural gas" => 0.76,
-           "propane" => 0.76,
-           "fuel oil" => 0.76 }[fuel]
+  val = { "electricity" => 0.98,
+          "natural gas" => 0.76,
+          "propane" => 0.76,
+          "fuel oil" => 0.76 }[fuel]
+  return val if not val.nil?
+
+  fail "Could not get default water heater RE for fuel '#{fuel}'"
 end
 
 def get_default_water_heater_capacity(fuel)
   # FIXME: Verify
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
-  return { "electricity" => UnitConversions.convert(4.5, "kwh", "btu"),
-           "natural gas" => 38000,
-           "propane" => 38000,
-           "fuel oil" => UnitConversions.convert(0.65, "gal", "btu", Constants.FuelTypeOil) }[fuel]
+  val = { "electricity" => UnitConversions.convert(4.5, "kwh", "btu"),
+          "natural gas" => 38000,
+          "propane" => 38000,
+          "fuel oil" => UnitConversions.convert(0.65, "gal", "btu", Constants.FuelTypeOil) }[fuel]
+  return val if not val.nil?
+
+  fail "Could not get default water heater capacity for fuel '#{fuel}'"
 end
 
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
@@ -838,39 +889,45 @@ def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   sidings = ["wood siding", "stucco", "vinyl siding", "aluminum siding", "brick veneer"]
   siding_index = sidings.index(siding)
   if r_cont == 0 and not ove
-    return { 0 => [4.6, 3.2, 3.8, 3.7, 4.7],
-             3 => [7.0, 5.8, 6.3, 6.2, 7.1],
-             7 => [9.7, 8.5, 9.0, 8.8, 9.8],
-             11 => [11.5, 10.2, 10.8, 10.6, 11.6],
-             13 => [12.5, 11.1, 11.6, 11.5, 12.5],
-             15 => [13.3, 11.9, 12.5, 12.3, 13.3],
-             19 => [16.9, 15.4, 16.1, 15.9, 16.9],
-             21 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index]
+    val = { 0 => [4.6, 3.2, 3.8, 3.7, 4.7],
+            3 => [7.0, 5.8, 6.3, 6.2, 7.1],
+            7 => [9.7, 8.5, 9.0, 8.8, 9.8],
+            11 => [11.5, 10.2, 10.8, 10.6, 11.6],
+            13 => [12.5, 11.1, 11.6, 11.5, 12.5],
+            15 => [13.3, 11.9, 12.5, 12.3, 13.3],
+            19 => [16.9, 15.4, 16.1, 15.9, 16.9],
+            21 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index]
   elsif r_cont == 5 and not ove
-    return { 11 => [16.7, 15.4, 15.9, 15.9, 16.9],
-             13 => [17.9, 16.4, 16.9, 16.9, 17.9],
-             15 => [18.5, 17.2, 17.9, 17.9, 18.9],
-             19 => [22.2, 20.8, 21.3, 21.3, 22.2],
-             21 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index]
+    val = { 11 => [16.7, 15.4, 15.9, 15.9, 16.9],
+            13 => [17.9, 16.4, 16.9, 16.9, 17.9],
+            15 => [18.5, 17.2, 17.9, 17.9, 18.9],
+            19 => [22.2, 20.8, 21.3, 21.3, 22.2],
+            21 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index]
   elsif r_cont == 0 and ove
-    return { 19 => [19.2, 17.9, 18.5, 18.2, 19.2],
-             21 => [20.4, 18.9, 19.6, 19.6, 20.4],
-             27 => [25.6, 24.4, 25.0, 24.4, 25.6],
-             33 => [30.3, 29.4, 29.4, 29.4, 30.3],
-             38 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index]
+    val = { 19 => [19.2, 17.9, 18.5, 18.2, 19.2],
+            21 => [20.4, 18.9, 19.6, 19.6, 20.4],
+            27 => [25.6, 24.4, 25.0, 24.4, 25.6],
+            33 => [30.3, 29.4, 29.4, 29.4, 30.3],
+            38 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index]
   elsif r_cont == 5 and ove
-    return { 19 => [24.4, 23.3, 23.8, 23.3, 24.4],
-             21 => [25.6, 24.4, 25.0, 25.0, 25.6] }[r_cavity][siding_index]
+    val = { 19 => [24.4, 23.3, 23.8, 23.3, 24.4],
+            21 => [25.6, 24.4, 25.0, 25.0, 25.6] }[r_cavity][siding_index]
   end
+  return val if not val.nil?
+
+  fail "Could not get default wood stud wall assembly R-value for R-cavity '#{r_cavity}' and R-cont '#{r_cont}' and siding '#{siding}' and ove '#{ove}'"
 end
 
 def get_structural_block_wall_assembly_r(r_cavity)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  return { 0 => 2.9,
-           5 => 7.9,
-           10 => 12.8 }[r_cavity]
+  val = { 0 => 2.9,
+          5 => 7.9,
+          10 => 12.8 }[r_cavity]
+  return val if not val.nil?
+
+  fail "Could not get default structural block wall assembly R-value for R-cavity '#{r_cavity}'"
 end
 
 def get_concrete_block_wall_assembly_r(r_cavity, siding)
@@ -879,9 +936,12 @@ def get_concrete_block_wall_assembly_r(r_cavity, siding)
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   sidings = ["stucco", "brick veneer", nil]
   siding_index = sidings.index(siding)
-  return { 0 => [4.1, 5.6, 4.0],
-           3 => [5.7, 7.2, 5.6],
-           6 => [8.5, 10.0, 8.3] }[r_cavity][siding_index]
+  val = { 0 => [4.1, 5.6, 4.0],
+          3 => [5.7, 7.2, 5.6],
+          6 => [8.5, 10.0, 8.3] }[r_cavity][siding_index]
+  return val if not val.nil?
+
+  fail "Could not get default concrete block wall assembly R-value for R-cavity '#{r_cavity}' and siding '#{siding}'"
 end
 
 def get_straw_bale_wall_assembly_r(siding)
@@ -889,6 +949,8 @@ def get_straw_bale_wall_assembly_r(siding)
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   return 58.8 if siding == "stucco"
+
+  fail "Could not get default straw bale assembly R-value for siding '#{siding}'"
 end
 
 def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
@@ -902,64 +964,73 @@ def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
                "plastic/rubber/synthetic sheeting"]
   material_index = materials.index(material)
   if r_cont == 0 and not has_radiant_barrier
-    return { 0 => [3.3, 4.0, 3.4, 3.4, 3.7],
-             11 => [13.5, 14.3, 13.7, 13.5, 13.9],
-             13 => [14.9, 15.6, 15.2, 14.9, 15.4],
-             15 => [16.4, 16.9, 16.4, 16.4, 16.7],
-             19 => [20.0, 20.8, 20.4, 20.4, 20.4],
-             21 => [21.7, 22.2, 21.7, 21.3, 21.7],
-             27 => [nil, 27.8, 27.0, 27.0, 27.0] }[r_cavity][material_index]
+    val = { 0 => [3.3, 4.0, 3.4, 3.4, 3.7],
+            11 => [13.5, 14.3, 13.7, 13.5, 13.9],
+            13 => [14.9, 15.6, 15.2, 14.9, 15.4],
+            15 => [16.4, 16.9, 16.4, 16.4, 16.7],
+            19 => [20.0, 20.8, 20.4, 20.4, 20.4],
+            21 => [21.7, 22.2, 21.7, 21.3, 21.7],
+            27 => [nil, 27.8, 27.0, 27.0, 27.0] }[r_cavity][material_index]
   elsif r_cont == 0 and has_radiant_barrier
-    return { 0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index]
+    val = { 0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index]
   elsif r_cont == 5 and not has_radiant_barrier
-    return { 0 => [8.3, 9.0, 8.4, 8.3, 8.7],
-             11 => [18.5, 19.2, 18.5, 18.5, 18.9],
-             13 => [20.0, 20.8, 20.0, 20.0, 20.4],
-             15 => [21.3, 22.2, 21.3, 21.3, 21.7],
-             19 => [nil, 25.6, 25.6, 25.0, 25.6],
-             21 => [nil, 27.0, 27.0, 26.3, 27.0] }[r_cavity][material_index]
+    val = { 0 => [8.3, 9.0, 8.4, 8.3, 8.7],
+            11 => [18.5, 19.2, 18.5, 18.5, 18.9],
+            13 => [20.0, 20.8, 20.0, 20.0, 20.4],
+            15 => [21.3, 22.2, 21.3, 21.3, 21.7],
+            19 => [nil, 25.6, 25.6, 25.0, 25.6],
+            21 => [nil, 27.0, 27.0, 26.3, 27.0] }[r_cavity][material_index]
   end
+  return val if not val.nil?
+
+  fail "Could not get default roof assembly R-value for R-cavity '#{r_cavity}' and R-cont '#{r_cont}' and material '#{material}' and radiant barrier '#{has_radiant_barrier}'"
 end
 
 def get_ceiling_assembly_r(r_cavity)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/ceiling-construction-types
-  return { 0 => 2.2,
-           3 => 5.0,
-           6 => 7.6,
-           9 => 10.0,
-           11 => 10.9,
-           19 => 19.2,
-           21 => 21.3,
-           25 => 25.6,
-           30 => 30.3,
-           38 => 38.5,
-           44 => 43.5,
-           49 => 50.0,
-           60 => 58.8 }[r_cavity]
+  val = { 0 => 2.2,
+          3 => 5.0,
+          6 => 7.6,
+          9 => 10.0,
+          11 => 10.9,
+          19 => 19.2,
+          21 => 21.3,
+          25 => 25.6,
+          30 => 30.3,
+          38 => 38.5,
+          44 => 43.5,
+          49 => 50.0,
+          60 => 58.8 }[r_cavity]
+  return val if not val.nil?
+
+  fail "Could not get default ceiling assembly R-value for R-cavity '#{r_cavity}'"
 end
 
 def get_floor_assembly_r(r_cavity)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/floor-construction-types
-  return { 0 => 5.9,
-           11 => 15.6,
-           13 => 17.2,
-           15 => 18.5,
-           19 => 22.2,
-           21 => 23.8,
-           25 => 27.0,
-           30 => 31.3,
-           38 => 37.0 }[r_cavity]
+  val = { 0 => 5.9,
+          11 => 15.6,
+          13 => 17.2,
+          15 => 18.5,
+          19 => 22.2,
+          21 => 23.8,
+          25 => 27.0,
+          30 => 31.3,
+          38 => 37.0 }[r_cavity]
+  return val if not val.nil?
+
+  fail "Could not get default floor assembly R-value for R-cavity '#{r_cavity}'"
 end
 
 def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
   # FIXME: Verify
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/window-construction-types/window-skylight-construction-types
   key = [frame_type, glass_layers, glass_type, gas_fill]
-  return { ["Aluminum", "single-pane", nil, nil] => [1.19, 0.78],
+  vals = { ["Aluminum", "single-pane", nil, nil] => [1.19, 0.78],
            ["Wood", "single-pane", nil, nil] => [0.92, 0.72],
            ["Aluminum", "single-pane", "tinted/reflective", nil] => [1.19, 0.67],
            ["Wood", "single-pane", nil, nil] => [0.92, 0.72], # FIXME: Same as 2nd item?
@@ -977,6 +1048,9 @@ def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
            ["Wood", "double-pane", "reflective", "argon"] => [0.35, 0.24], # FIXME: Not labeled as argon, but should be? See https://docs.google.com/spreadsheets/d/1Tr8ajqz-p-BhS9cRx8H3566k8C5-OD68m-tiRtE5Wvg/edit#gid=2115766420
            ["Wood", "double-pane", "reflective", "argon"] => [0.26, 0.23],
            ["Wood", "triple-pane", "low-e", "argon"] => [0.17, 0.21] }[key]
+  return vals if not vals.nil?
+
+  fail "Could not get default window U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
 end
 
 def get_skylight_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
@@ -984,7 +1058,7 @@ def get_skylight_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
   # FIXME: Table says 20 deg but Scoring Tool roof pitch is 30 deg?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/window-construction-types/window-skylight-construction-types
   key = [frame_type, glass_layers, glass_type, gas_fill]
-  return { ["Aluminum", "single-pane", nil, nil] => [1.35, 0.78],
+  vals = { ["Aluminum", "single-pane", nil, nil] => [1.35, 0.78],
            ["Wood", "single-pane", nil, nil] => [1.08, 0.72],
            ["Aluminum", "single-pane", "tinted/reflective", nil] => [1.35, 0.68],
            ["Wood", "single-pane", nil, nil] => [1.08, 0.72], # FIXME: Same as 2nd item?
@@ -1002,6 +1076,9 @@ def get_skylight_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
            ["Wood", "double-pane", "reflective", "argon"] => [0.46, 0.24], # FIXME: Not labeled as argon, but should be? See https://docs.google.com/spreadsheets/d/1Tr8ajqz-p-BhS9cRx8H3566k8C5-OD68m-tiRtE5Wvg/edit#gid=2115766420
            ["Wood", "double-pane", "reflective", "argon"] => [0.36, 0.24],
            ["Wood", "triple-pane", "low-e", "argon"] => [0.2, 0.21] }[key]
+  return vals if not vals.nil?
+
+  fail "Could not get default skylight U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
 end
 
 def orientation_to_azimuth(orientation)
@@ -1013,4 +1090,13 @@ def orientation_to_azimuth(orientation)
            "west" => 270,
            "northwest" => 315,
            "north" => 0 }[orientation]
+end
+
+def get_attached(attached_name, orig_details, search_in)
+  orig_details.elements.each(search_in) do |other_element|
+    next if attached_name != other_element.elements["SystemIdentifier"].attributes["id"]
+
+    return other_element
+  end
+  fail "Could not find attached element for '#{attached_name}'."
 end
