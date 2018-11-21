@@ -1,12 +1,12 @@
 <measure>
   <schema_version>3.0</schema_version>
-  <error>C:/GitHub/OpenStudio-HEScore/measures/HPXMLtoOpenStudio/measure.rb:1803: syntax error, unexpected ']', expecting ')'
-      door_azimuth = XMLHelper.get_value(door, "Azimuth"])&#xd;
-                                                         ^</error>
+  <error>C:/GitHub/OpenStudio-HEScore/measures/HPXMLtoOpenStudio/measure.rb:1803: syntax error, unexpected ')', expecting keyword_end
+      door_azimuth = XMLHelper.get_value(door, "Azimuth"))&#xd;
+                                                          ^</error>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>23345cde-6fee-4010-91f9-35913ff1afff</version_id>
-  <version_modified>20181121T181619Z</version_modified>
+  <version_id>37985d7a-e8d3-4d64-a018-0beb529342cf</version_id>
+  <version_modified>20181121T184146Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -834,6 +834,12 @@
       <checksum>F3D04BD5</checksum>
     </file>
     <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>06757EBF</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -842,13 +848,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>CF5EA270</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>06757EBF</checksum>
+      <checksum>7D5D63E0</checksum>
     </file>
   </files>
 </measure>
