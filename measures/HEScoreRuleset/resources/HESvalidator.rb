@@ -86,25 +86,24 @@ class HEScoreValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'AttachedToRoof' => one,
         '[AtticType="vented attic" or AtticType="cape cod" or AtticType="cathedral ceiling"]' => one, # See [AtticType=Vented] or [AtticType=Cape] or [AtticType=Cathedral]
+        'AtticRoofInsulation[InstallationType="cavity"]/Layer/NominalRValue' => one,
+        'AtticRoofInsulation[InstallationType="continuous"]/Layer/NominalRValue' => zero_or_one,
       },
 
       ## [AtticType=Vented]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="vented attic"]' => {
         'AtticFloorInsulation/Layer/NominalRValue' => one,
-        'AtticRoofInsulation/Layer/NominalRValue' => one,
         'Area' => one,
       },
 
       ## [AtticType=Cape]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cape cod"]' => {
         'AtticFloorInsulation/Layer/NominalRValue' => one,
-        'AtticRoofInsulation/Layer/NominalRValue' => one,
         'Area' => one,
       },
 
       ## [AtticType=Cathedral]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cathedral ceiling"]' => {
-        'AtticRoofInsulation/Layer/NominalRValue' => one,
       },
 
       # [Foundation]
@@ -136,28 +135,43 @@ class HEScoreValidator
       # [Wall]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'WallType[WoodStud | StructuralBrick | ConcreteMasonryUnit | StrawBale]' => one, # See [WallType=WoodStud] or [WallType=NotWoodStud]
+        'WallType[WoodStud | StructuralBrick | ConcreteMasonryUnit | StrawBale]' => one, # See [WallType=WoodStud] or [WallType=Brick] or [WallType=CMU] or [WallType=StrawBale]
         'Orientation' => one,
-        '[count(Siding)=0 or Siding="wood siding" or Siding="stucco" or Siding="vinyl siding" or Siding="aluminum siding" or Siding="brick veneer"]' => one,
-        'Insulation/Layer/NominalRValue' => one,
       },
 
       ## [WallType=WoodStud]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/WoodStud]' => {
-        'Insulation/Layer[InstallationType="cavity" or InstallationType="continuous"]' => one,
+        '[Siding="wood siding" or Siding="stucco" or Siding="vinyl siding" or Siding="aluminum siding" or Siding="brick veneer"]' => one,
+        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
+        'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one,
         'OptimumValueEngineering' => one,
       },
 
-      ## [WallType=NotWoodStud]
-      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructuralBrick | WallType/ConcreteMasonryUnit | WallType/StrawBale]' => {
-        'Insulation/Layer[InstallationType="cavity"]' => one,
+      ## [WallType=Brick]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructuralBrick]' => {
+        'Siding' => zero,
+        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
+        'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero,
+      },
+
+      ## [WallType=CMU]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/ConcreteMasonryUnit]' => {
+        '[count(Siding)=0 or Siding="stucco" Siding="brick veneer"]' => one,
+        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
+        'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero,
+      },
+
+      ## [WallType=StrawBale]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StrawBale]' => {
+        '[Siding="stucco"]' => one,
+        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => zero,
+        'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero,
       },
 
       # [Window]
       '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Area' => one,
-        'Orientation' => one,
         'AttachedToWall' => one,
         '[FrameType | UFactor]' => one, # See [WindowType=Detailed] or [WindowType=Simple]
       },
