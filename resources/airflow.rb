@@ -1739,7 +1739,7 @@ class Airflow
     # CFIS Program
 
     cfis_program = nil
-    if mech_vent.type == Constants.VentTypeCFIS
+    if mech_vent.type == Constants.VentTypeCFIS and not ducts_output.location_name == unit_living.zone.name.to_s and not ducts_output.location_name == "none" and has_forced_air_equipment
       cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       cfis_program.setName(obj_name_ducts + " cfis init program")
       cfis_program.addLine("Set #{cfis_t_sum_open_var.name} = 0")
@@ -1917,7 +1917,8 @@ class Airflow
     infil_program.addLine("Set dT = @Abs Tdiff")
     infil_program.addLine("Set QWHV = #{wh_sch_sensor.name}*#{UnitConversions.convert(mv_output.whole_house_vent_rate, "cfm", "m^3/s").round(4)}")
 
-    if mech_vent.type == Constants.VentTypeCFIS
+    if mech_vent.type == Constants.VentTypeCFIS and not cfis_output.t_sum_open_var.nil? and not cfis_output.on_for_hour_var and not cfis_output.f_damper_open_var.nil? and not cfis_output.fan_rtf_var.nil? and not cfis_output.fan_rtf_sensor.nil? and not cfis_output.max_supply_fan_mfr.nil?
+
       cfis_outdoor_airflow = 0.0
       if mech_vent.cfis_open_time > 0.0
         cfis_outdoor_airflow = mv_output.whole_house_vent_rate * (60.0 / mech_vent.cfis_open_time)
