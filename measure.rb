@@ -621,8 +621,7 @@ class OSModel
         fail "Unhandled value (#{attic_type})."
       end
 
-      floors = attic.elements["Floors"]
-      floors.elements.each("Floor") do |floor|
+      attic.elements.each("Floors/Floor") do |floor|
         exterior_adjacent_to = XMLHelper.get_value(floor, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
@@ -633,8 +632,7 @@ class OSModel
         end
       end
 
-      walls = attic.elements["Walls"]
-      walls.elements.each("Wall") do |wall|
+      attic.elements.each("Walls/Wall") do |wall|
         exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)

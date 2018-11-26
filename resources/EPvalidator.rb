@@ -46,10 +46,8 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume' => one,
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent' => one,
 
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year="2006"]' => one,
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/SystemIdentifiersInfo' => one, # Required by HPXML schema
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/Name' => one, # Required by HPXML schema
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
+        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year="2006"]' => one, # See [ClimateZone]
+        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => one, # See [WeatherStation]
 
         '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics' => one, # See [Attic]
         '/HPXML/Building/BuildingDetails/Enclosure/Foundations' => one, # See [Foundation]
@@ -80,6 +78,18 @@ class EnergyPlusValidator
 
         '/HPXML/Building/BuildingDetails/Lighting' => one, # See [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
+      },
+
+      # [ClimateZone]
+      '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC' => {
+        '[ClimateZone="1A" or ClimateZone="1B" or ClimateZone="1C" or ClimateZone="2A" or ClimateZone="2B" or ClimateZone="2C" or ClimateZone="3A" or ClimateZone="3B" or ClimateZone="3C" or ClimateZone="4A" or ClimateZone="4B" or ClimateZone="4C" or ClimateZone="5A" or ClimateZone="5B" or ClimateZone="5C" or ClimateZone="6A" or ClimateZone="6B" or ClimateZone="6C" or ClimateZone="7" or ClimateZone="8"]' => one,
+      },
+
+      # [WeatherStation]
+      '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => {
+        'SystemIdentifiersInfo' => one, # Required by HPXML schema
+        'Name' => one, # Required by HPXML schema
+        'WMO' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
       },
 
       # [Attic]
