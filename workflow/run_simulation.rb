@@ -30,10 +30,10 @@ end
 
 def run_design(basedir, design, resultsdir, hpxml, debug, skip_validation)
   # Use print instead of puts in here (see https://stackoverflow.com/a/5044669)
-  print "[#{design}] Creating input...\n"
+  print "Creating input...\n"
   output_hpxml_path, rundir = create_idf(design, basedir, resultsdir, hpxml, debug, skip_validation)
 
-  print "[#{design}] Running simulation...\n"
+  print "Running simulation...\n"
   run_energyplus(design, rundir)
 
   return output_hpxml_path
@@ -163,6 +163,7 @@ rm_path(resultsdir)
 Dir.mkdir(resultsdir)
 
 # Run design
+puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
 designdir = get_designdir(basedir, design)
 rm_path(designdir)

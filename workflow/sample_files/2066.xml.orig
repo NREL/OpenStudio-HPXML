@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2018-11-12T16:06:37-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2018-11-20T10:11:09-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.1</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id='bid-2045'>
+    <BuildingID id='bid-2066'>
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,15 +19,15 @@
       <SiteID id='site1'/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>123 Utility Price Test</Address1>
-        <CityMunicipality>Brandon</CityMunicipality>
-        <StateCode>FL</StateCode>
-        <ZipCode>33508</ZipCode>
+        <Address1>1 Cyclotron Rd</Address1>
+        <CityMunicipality>Berkeley</CityMunicipality>
+        <StateCode>CA</StateCode>
+        <ZipCode>94707</ZipCode>
       </Address>
     </Site>
     <ProjectStatus>
-      <EventType>audit</EventType>
-      <Date>2018-10-26</Date>
+      <EventType>construction-period testing/daily test out</EventType>
+      <Date>2018-10-25</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -57,7 +57,12 @@
             <Roof>
               <SystemIdentifier id='roof1'/>
               <RoofColor>medium</RoofColor>
-              <SolarAbsorptance>0.9</SolarAbsorptance>
+              <RoofType>asphalt or fiberglass shingles</RoofType>
+              <RadiantBarrier>false</RadiantBarrier>
+            </Roof>
+            <Roof>
+              <SystemIdentifier id='roof2'/>
+              <RoofColor>reflective</RoofColor>
               <RoofType>asphalt or fiberglass shingles</RoofType>
               <RadiantBarrier>false</RadiantBarrier>
             </Roof>
@@ -70,18 +75,28 @@
               <AtticFloorInsulation>
                 <SystemIdentifier id='roof1_floor_insulation'/>
                 <Layer>
-                  <InstallationType>cavity</InstallationType>
-                  <NominalRValue>00</NominalRValue>
+                  <NominalRValue>19</NominalRValue>
                 </Layer>
               </AtticFloorInsulation>
               <AtticRoofInsulation>
                 <SystemIdentifier id='roof1_roof_insulation'/>
                 <Layer>
-                  <InstallationType>cavity</InstallationType>
+                  <NominalRValue>00</NominalRValue>
+                </Layer>
+              </AtticRoofInsulation>
+              <Area>600</Area>
+            </Attic>
+            <Attic>
+              <SystemIdentifier id='attic2'/>
+              <AttachedToRoof idref='roof2'/>
+              <AtticType>cathedral ceiling</AtticType>
+              <AtticRoofInsulation>
+                <SystemIdentifier id='roof2_roof_insulation'/>
+                <Layer>
                   <NominalRValue>19</NominalRValue>
                 </Layer>
               </AtticRoofInsulation>
-              <Area>1000</Area>
+              <Area>400</Area>
             </Attic>
           </Attics>
         </AtticAndRoof>
@@ -91,29 +106,23 @@
             <FoundationType>
               <SlabOnGrade/>
             </FoundationType>
-            <Slab>
-              <SystemIdentifier id='floor1_slab'/>
-              <Area>1000</Area>
-              <PerimeterInsulation>
-                <SystemIdentifier id='floor1_slab_insulation'/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>10</NominalRValue>
-                </Layer>
-              </PerimeterInsulation>
-            </Slab>
+          </Foundation>
+          <Foundation>
+            <SystemIdentifier id='floor2'/>
+            <FoundationType>
+              <Basement>
+                <Conditioned>true</Conditioned>
+              </Basement>
+            </FoundationType>
           </Foundation>
         </Foundations>
         <Walls>
           <Wall>
             <SystemIdentifier id='front_wall'/>
             <WallType>
-              <WoodStud>
-                <OptimumValueEngineering>false</OptimumValueEngineering>
-              </WoodStud>
+              <StructuralBrick/>
             </WallType>
             <Orientation>north</Orientation>
-            <Siding>wood siding</Siding>
             <Insulation>
               <SystemIdentifier id='front_wall_insulation'/>
               <Layer>
@@ -125,12 +134,9 @@
           <Wall>
             <SystemIdentifier id='back_wall'/>
             <WallType>
-              <WoodStud>
-                <OptimumValueEngineering>false</OptimumValueEngineering>
-              </WoodStud>
+              <StructuralBrick/>
             </WallType>
             <Orientation>south</Orientation>
-            <Siding>wood siding</Siding>
             <Insulation>
               <SystemIdentifier id='back_wall_insulation'/>
               <Layer>
@@ -142,12 +148,9 @@
           <Wall>
             <SystemIdentifier id='right_wall'/>
             <WallType>
-              <WoodStud>
-                <OptimumValueEngineering>false</OptimumValueEngineering>
-              </WoodStud>
+              <StructuralBrick/>
             </WallType>
             <Orientation>west</Orientation>
-            <Siding>wood siding</Siding>
             <Insulation>
               <SystemIdentifier id='right_wall_insulation'/>
               <Layer>
@@ -159,12 +162,9 @@
           <Wall>
             <SystemIdentifier id='left_wall'/>
             <WallType>
-              <WoodStud>
-                <OptimumValueEngineering>false</OptimumValueEngineering>
-              </WoodStud>
+              <StructuralBrick/>
             </WallType>
             <Orientation>east</Orientation>
-            <Siding>wood siding</Siding>
             <Insulation>
               <SystemIdentifier id='left_wall_insulation'/>
               <Layer>
@@ -178,48 +178,42 @@
           <Window>
             <SystemIdentifier id='front_window'/>
             <Area>70</Area>
+            <Orientation>north</Orientation>
             <FrameType>
               <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
+                <ThermalBreak>1</ThermalBreak>
               </Aluminum>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
-            <AttachedToWall idref='front_wall'/>
           </Window>
           <Window>
             <SystemIdentifier id='back_window'/>
             <Area>70</Area>
-            <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
-            </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
-            <AttachedToWall idref='back_wall'/>
+            <Orientation>south</Orientation>
           </Window>
           <Window>
             <SystemIdentifier id='right_window'/>
             <Area>35</Area>
-            <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
-            </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
-            <AttachedToWall idref='right_wall'/>
+            <Orientation>west</Orientation>
           </Window>
           <Window>
             <SystemIdentifier id='left_window'/>
             <Area>35</Area>
-            <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
-            </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
-            <AttachedToWall idref='left_wall'/>
+            <Orientation>east</Orientation>
           </Window>
         </Windows>
+        <Skylights>
+          <Skylight>
+            <SystemIdentifier id='roof1_skylight'/>
+            <Area>100</Area>
+            <GlassLayers>single-pane</GlassLayers>
+          </Skylight>
+          <Skylight>
+            <SystemIdentifier id='roof2_skylight'/>
+            <Area>50</Area>
+            <GlassLayers>single-pane</GlassLayers>
+          </Skylight>
+        </Skylights>
       </Enclosure>
       <Systems>
         <HVAC>
@@ -233,19 +227,17 @@
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.8</Value>
+                <Value>0.95</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.75</FractionHeatLoadServed>
+              <FloorAreaServed>1500</FloorAreaServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='hvac1_cool'/>
               <DistributionSystem idref='hvac1_dist'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>12</Value>
-              </AnnualCoolingEfficiency>
+              <CoolingSystemType>evaporative cooler</CoolingSystemType>
+              <FractionCoolLoadServed>0.75</FractionCoolLoadServed>
+              <FloorAreaServed>1500</FloorAreaServed>
             </CoolingSystem>
           </HVACPlant>
           <HVACDistribution>
@@ -254,9 +246,16 @@
               <AirDistribution>
                 <Ducts>
                   <DuctLocation>unconditioned attic</DuctLocation>
-                  <FractionDuctArea>1</FractionDuctArea>
+                  <FractionDuctArea>0.75</FractionDuctArea>
                   <extension>
-                    <hescore_ducts_insulated>true</hescore_ducts_insulated>
+                    <hescore_ducts_insulated>6</hescore_ducts_insulated>
+                  </extension>
+                </Ducts>
+                <Ducts>
+                  <DuctLocation>unconditioned basement</DuctLocation>
+                  <FractionDuctArea>0.25</FractionDuctArea>
+                  <extension>
+                    <hescore_ducts_insulated>6</hescore_ducts_insulated>
                   </extension>
                 </Ducts>
               </AirDistribution>
@@ -265,20 +264,22 @@
               <DuctSystemSealed>true</DuctSystemSealed>
             </HVACDistributionImprovement>
           </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='hvac2_dist'/>
+            <DistributionSystemType>
+              <AirDistribution/>
+            </DistributionSystemType>
+            <HVACDistributionImprovement>
+              <DuctSystemSealed>false</DuctSystemSealed>
+            </HVACDistributionImprovement>
+          </HVACDistribution>
         </HVAC>
-        <WaterHeating>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='wh1'/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <EnergyFactor>0.7</EnergyFactor>
-          </WaterHeatingSystem>
-        </WaterHeating>
         <Photovoltaics>
           <PVSystem>
             <SystemIdentifier id='pv1'/>
-            <ArrayOrientation>north</ArrayOrientation>
-            <MaxPowerOutput>3000</MaxPowerOutput>
+            <ArrayOrientation>south</ArrayOrientation>
+            <MaxPowerOutput>4000</MaxPowerOutput>
+            <YearModulesManufactured>2005</YearModulesManufactured>
           </PVSystem>
         </Photovoltaics>
       </Systems>

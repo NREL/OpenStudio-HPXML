@@ -129,10 +129,10 @@ class HEScoreValidator
 
       ## [WallType=WoodStud]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/WoodStud]' => {
+        'WallType/WoodStud/OptimumValueEngineering' => one,
         '[Siding="wood siding" or Siding="stucco" or Siding="vinyl siding" or Siding="aluminum siding" or Siding="brick veneer"]' => one,
         'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
         'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one,
-        'OptimumValueEngineering' => one,
       },
 
       ## [WallType=Brick]

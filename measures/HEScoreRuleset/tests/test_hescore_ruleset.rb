@@ -47,7 +47,7 @@ class HEScoreRulesetTest < MiniTest::Test
     result = runner.result
 
     # show the output
-    show_output(result)
+    # show_output(result)
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)

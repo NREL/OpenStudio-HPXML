@@ -41,14 +41,15 @@ class HEScoreRuleset
     @bldg_length = (3.0 * @bldg_footprint / 5.0)**0.5
     @bldg_width = (5.0 / 3.0) * @bldg_length
     @bldg_perimeter = 2.0 * @bldg_length + 2.0 * @bldg_width
+    @cvolume = @cfa * @ceil_height # FIXME: Verify
 
     # BuildingSummary
     new_summary = XMLHelper.add_element(new_details, "BuildingSummary")
     set_summary(new_summary, orig_details)
 
     # ClimateAndRiskZones
-    # FIXME: Need weather file and IECC climate zone
-    XMLHelper.add_element(new_details, "ClimateandRiskZones")
+    new_climate = XMLHelper.add_element(new_details, "ClimateandRiskZones")
+    set_climate(new_climate)
 
     # Enclosure
     new_enclosure = XMLHelper.add_element(new_details, "Enclosure")
@@ -97,12 +98,23 @@ class HEScoreRuleset
 
     new_construction = XMLHelper.add_element(new_summary, "BuildingConstruction")
     orig_construction = orig_details.elements["BuildingSummary/BuildingConstruction"]
-    XMLHelper.add_element(new_construction, "NumberofConditionedFloors", @ncfl)
-    XMLHelper.add_element(new_construction, "NumberofConditionedFloorsAboveGrade", @ncfl_ag)
+    XMLHelper.add_element(new_construction, "NumberofConditionedFloors", Integer(@ncfl))
+    XMLHelper.add_element(new_construction, "NumberofConditionedFloorsAboveGrade", Integer(@ncfl_ag))
     XMLHelper.add_element(new_construction, "NumberofBedrooms", Integer(@nbeds))
     XMLHelper.add_element(new_construction, "ConditionedFloorArea", @cfa)
-    XMLHelper.add_element(new_construction, "ConditionedBuildingVolume", @cfa * @ceil_height) # FIXME: Verify
+    XMLHelper.add_element(new_construction, "ConditionedBuildingVolume", @cvolume)
     XMLHelper.add_element(new_construction, "GaragePresent", false)
+  end
+
+  def self.set_climate(new_climate)
+    new_iecc = XMLHelper.add_element(new_climate, "ClimateZoneIECC")
+    XMLHelper.add_element(new_iecc, "Year", 2006)
+    XMLHelper.add_element(new_iecc, "ClimateZone", "1A") # FIXME: Hard-coded
+    new_weather = XMLHelper.add_element(new_climate, "WeatherStation")
+    sys_id = XMLHelper.add_element(new_weather, "SystemIdentifiersInfo")
+    XMLHelper.add_attribute(sys_id, "id", "WeatherStation")
+    XMLHelper.add_element(new_weather, "Name", "Miami, FL") # FIXME: Hard-coded
+    XMLHelper.add_element(new_weather, "WMO", 722020) # FIXME: Hard-coded
   end
 
   def self.set_enclosure_air_infiltration(new_enclosure, orig_details)
@@ -110,17 +122,25 @@ class HEScoreRuleset
     desc = XMLHelper.get_value(orig_details, "Enclosure/AirInfiltration/AirInfiltrationMeasurement/LeakinessDescription")
 
     if not cfm50.nil?
-      cfm50 = Float(cfm50)
+      ach50 = Float(cfm50) * 60.0 / @cvolume
     else
       # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/infiltration/infiltration
+      # TODO
       if desc == "tight"
-        # TODO
+        ach50 = 15.0 # FIXME: Hard-coded
       elsif desc == "average"
-        # TODO
+        ach50 = 5.0 # FIXME: Hard-coded
       end
     end
 
-    # TODO
+    new_air_infil = XMLHelper.add_element(new_enclosure, "AirInfiltration")
+    new_air_meas = XMLHelper.add_element(new_air_infil, "AirInfiltrationMeasurement")
+    sys_id = XMLHelper.add_element(new_air_meas, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", "AirInfiltrationMeasurement")
+    XMLHelper.add_element(new_air_meas, "HousePressure", 50)
+    new_leakage = XMLHelper.add_element(new_air_meas, "BuildingAirLeakage")
+    XMLHelper.add_element(new_leakage, "UnitofMeasure", "ACH")
+    XMLHelper.add_element(new_leakage, "AirLeakage", ach50)
   end
 
   def self.set_enclosure_attics_roofs(new_enclosure, orig_details)
@@ -303,7 +323,7 @@ class HEScoreRuleset
         wall_siding = XMLHelper.get_value(orig_wall, "Siding")
         wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
         wall_r_cont = XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='continuous']/NominalRValue").to_i
-        wall_ove = Boolean(XMLHelper.get_value(orig_wall, "OptimumValueEngineering"))
+        wall_ove = Boolean(XMLHelper.get_value(orig_wall, "WallType/WoodStud/OptimumValueEngineering"))
 
         wall_r = get_wood_stud_wall_assembly_r(wall_r_cavity, wall_r_cont, wall_siding, wall_ove)
       elsif wall_type == "StructuralBrick"
@@ -319,6 +339,8 @@ class HEScoreRuleset
         wall_siding = XMLHelper.get_value(orig_wall, "Siding")
 
         wall_r = get_straw_bale_wall_assembly_r(wall_siding)
+      else
+        fail "Unexpected wall type '#{wall_type}'."
       end
 
       new_wall = XMLHelper.add_element(new_walls, "Wall")
@@ -464,20 +486,24 @@ class HEScoreRuleset
 
         XMLHelper.add_element(heat_eff, "Units", "AFUE")
         XMLHelper.add_element(heat_eff, "Value", hvac_afue)
-      else
+      elsif hvac_type == "ElectricResistance"
         # FIXME: Verify
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
-        if hvac_type == "ElectricResistance"
-          XMLHelper.add_element(heat_eff, "Units", "Percent")
-          XMLHelper.add_element(heat_eff, "Value", 0.98)
-        elsif hvac_type == "Stove"
-          XMLHelper.add_element(heat_eff, "Units", "Percent")
-          if hvac_fuel == "wood"
-            XMLHelper.add_element(heat_eff, "Value", 0.60)
-          elsif hvac_fuel == "wood pellets"
-            XMLHelper.add_element(heat_eff, "Value", 0.78)
-          end
+        XMLHelper.add_element(heat_eff, "Units", "Percent")
+        XMLHelper.add_element(heat_eff, "Value", 0.98)
+      elsif hvac_type == "Stove"
+        # FIXME: Verify
+        # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
+        XMLHelper.add_element(heat_eff, "Units", "Percent")
+        if hvac_fuel == "wood"
+          XMLHelper.add_element(heat_eff, "Value", 0.60)
+        elsif hvac_fuel == "wood pellets"
+          XMLHelper.add_element(heat_eff, "Value", 0.78)
+        else
+          fail "Unexpected fuel type '#{hvac_fuel}' for stove heating system."
         end
+      else
+        fail "Unexpected heating system type '#{hvac_type}'."
       end
       XMLHelper.copy_element(new_heating, orig_heating, "FractionHeatLoadServed")
     end
@@ -506,7 +532,7 @@ class HEScoreRuleset
         cool_eff = XMLHelper.add_element(new_cooling, "AnnualCoolingEfficiency")
         XMLHelper.add_element(cool_eff, "Units", "SEER")
         XMLHelper.add_element(cool_eff, "Value", hvac_seer)
-      elsif hvac_type == "room air conditioning"
+      elsif hvac_type == "room air conditioner"
         hvac_year = XMLHelper.get_value(orig_cooling, "YearInstalled")
         hvac_eer = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='EER']/Value")
 
@@ -519,6 +545,8 @@ class HEScoreRuleset
         cool_eff = XMLHelper.add_element(new_cooling, "AnnualCoolingEfficiency")
         XMLHelper.add_element(cool_eff, "Units", "EER")
         XMLHelper.add_element(cool_eff, "Value", hvac_eer)
+      else
+        fail "Unexpected cooling system type '#{hvac_type}'."
       end
     end
 
@@ -568,6 +596,8 @@ class HEScoreRuleset
         XMLHelper.add_element(cool_eff, "Value", hvac_eer)
         XMLHelper.add_element(heat_eff, "Units", "COP")
         XMLHelper.add_element(heat_eff, "Value", hvac_cop)
+      else
+        fail "Unexpected peat pump system type '#{hvac_type}'."
       end
     end
 
