@@ -159,7 +159,7 @@ class Airflow
       duct_systems.each do |ducts, air_loops|
         success, ducts_output = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, has_forced_air_equipment)
         return false if not success
-        
+
         air_loops.each do |air_loop|
           next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
           next if ducts_output.location_name == unit_living.zone.name.to_s or ducts_output.location_name == "none" or not has_forced_air_equipment
@@ -1839,7 +1839,6 @@ class Airflow
           clg_coil = system.coolingCoil.get
         end
       end
-
     end
 
     cfis_programs[cfis] = [cfis_program, cfis_output, clg_coil]
