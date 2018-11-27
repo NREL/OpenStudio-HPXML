@@ -131,21 +131,6 @@ class Airflow
       tout_sensor.setName("#{obj_name_airflow} tt s")
       tout_sensor.setKeyName(unit_living.zone.name.to_s)
 
-      # Common global variables
-
-      duct_lks = {}
-      duct_systems.each do |ducts, air_loops|
-        air_loops.each do |air_loop|
-          next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
-          next if not has_forced_air_equipment
-
-          obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
-          duct_lk_supply_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} lk sup fan equiv".gsub(" ", "_"))
-          duct_lk_return_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} lk ret fan equiv".gsub(" ", "_"))
-          duct_lks[obj_name_ducts] = [duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var]
-        end
-      end
-
       # Update model
 
       success, infil_output = process_infiltration_for_unit(model, runner, obj_name_infil, infil, wind_speed, building, weather, unit_ag_ffa, unit_ag_ext_wall_area, unit_living, unit_finished_basement)
@@ -160,7 +145,7 @@ class Airflow
           success, cfis_output = process_cfis_for_unit(model, runner, cfis, unit, obj_name_mech_vent)
           return false if not success
 
-          cfis_programs = create_cfis_objects(model, runner, unit_living, cfis, cfis_output, air_loops, cfis_programs, duct_lks, obj_name_mech_vent)
+          cfis_programs = create_cfis_objects(model, runner, unit_living, cfis, cfis_output, air_loops, cfis_programs, obj_name_mech_vent)
         end
       end
 
@@ -170,26 +155,19 @@ class Airflow
       nv_program = create_nat_vent_objects(model, runner, obj_name_natvent, unit_living, nat_vent, nv_output, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wout_sensor)
 
       duct_programs = {}
+      duct_lks = {}
       duct_systems.each do |ducts, air_loops|
         success, ducts_output = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, has_forced_air_equipment)
         return false if not success
+        
+        air_loops.each do |air_loop|
+          next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
+          next if ducts_output.location_name == unit_living.zone.name.to_s or ducts_output.location_name == "none" or not has_forced_air_equipment
 
-        if ducts_output.location_name == unit_living.zone.name.to_s or ducts_output.location_name == "none" or not has_forced_air_equipment
-          air_loops.each do |air_loop|
-            next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
-
-            obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
-            next unless duct_lks.keys.include? obj_name_ducts
-
-            duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var = duct_lks[obj_name_ducts]
-            duct_lk_supply_fan_equiv_var.remove
-            duct_lk_return_fan_equiv_var.remove
-            duct_lks.delete(obj_name_ducts)
-          end
-        end
-
-        if duct_lks.empty? # can't have cfis without ducts
-          cfis_programs = {}
+          obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
+          duct_lk_supply_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} lk sup fan equiv".gsub(" ", "_"))
+          duct_lk_return_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} lk ret fan equiv".gsub(" ", "_"))
+          duct_lks[obj_name_ducts] = [duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var]
         end
 
         duct_programs, cfis_programs = create_ducts_objects(model, runner, unit, unit_living, unit_finished_basement, mech_vent, ducts_output, tin_sensor, pbar_sensor, has_forced_air_equipment, unit_has_mshp, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_programs)
@@ -1791,10 +1769,12 @@ class Airflow
 
         duct_program.addLine("If #{cfis_output.on_for_hour_var.name}")
         duct_program.addLine("   Set cfis_m3s = (#{max_supply_fan_mfr.name} / 1.16097654) * #{cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
-        duct_program.addLine("   Set #{ah_vfr_var.name} = (1.0 - #{fan_rtf_sensor.name})*#{cfis_output.f_damper_open_var.name}*cfis_m3s")
+        duct_program.addLine("   Set temp1 = 1.0 - #{fan_rtf_sensor.name}")
+        duct_program.addLine("   Set #{ah_vfr_var.name} = temp1*#{cfis_output.f_damper_open_var.name}*cfis_m3s")
         duct_program.addLine("   Set rho_in = (@RhoAirFnPbTdbW #{tin_sensor.name} #{win_sensor.name} #{pbar_sensor.name})")
         duct_program.addLine("   Set #{ah_mfr_var.name} = #{ah_vfr_sensor.name} * rho_in")
-        duct_program.addLine("   Set #{fan_rtf_var.name} = (1.0 - #{fan_rtf_sensor.name})*#{cfis_output.f_damper_open_var.name}")
+        duct_program.addLine("   Set temp2 = 1.0 - #{fan_rtf_sensor.name}")
+        duct_program.addLine("   Set #{fan_rtf_var.name} = temp2*#{cfis_output.f_damper_open_var.name}")
         duct_program.addLine("   Set #{ah_tout_var.name} = #{ra_t_sensor.name}")
         duct_program.addLine("   Set #{ah_wout_var.name} = #{ra_w_sensor.name}")
         duct_program.addLine("   Set #{ra_t_var.name} = #{ra_t_sensor.name}")
@@ -1839,7 +1819,7 @@ class Airflow
     return duct_programs, cfis_programs
   end
 
-  def self.create_cfis_objects(model, runner, unit_living, cfis, cfis_output, air_loops, cfis_programs, duct_lks, obj_name_mech_vent)
+  def self.create_cfis_objects(model, runner, unit_living, cfis, cfis_output, air_loops, cfis_programs, obj_name_mech_vent)
     # CFIS Program
     cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     cfis_program.setName(obj_name_mech_vent + " cfis init program")
@@ -1847,7 +1827,6 @@ class Airflow
     cfis_program.addLine("Set #{cfis_output.on_for_hour_var.name} = 0")
     cfis_program.addLine("Set #{cfis_output.f_damper_open_var.name} = 0")
 
-    htg_coil = nil
     clg_coil = nil
     air_loops.each do |air_loop|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
@@ -1861,9 +1840,6 @@ class Airflow
         end
       end
 
-      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
-      duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var = duct_lks[obj_name_ducts]
-      cfis_program.addLine("Set #{duct_lk_return_fan_equiv_var.name} = 0")
     end
 
     cfis_programs[cfis] = [cfis_program, cfis_output, clg_coil]
