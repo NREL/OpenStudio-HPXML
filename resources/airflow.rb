@@ -137,7 +137,7 @@ class Airflow
       duct_systems.each do |ducts, air_loops|
         air_loops.each do |air_loop|
           next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
-          next if ducts.location == Constants.SpaceTypeLiving or ducts.location == "none" or not has_forced_air_equipment
+          next if not has_forced_air_equipment
 
           obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
           duct_lk_supply_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} lk sup fan equiv".gsub(" ", "_"))
@@ -1366,18 +1366,50 @@ class Airflow
   end
 
   def self.create_ducts_objects(model, runner, unit, unit_living, unit_finished_basement, mech_vent, ducts_output, tin_sensor, pbar_sensor, has_forced_air_equipment, unit_has_mshp, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_programs)
+    max_supply_fan_mfrs = []
+    fan_rtf_sensors = []
+    air_loops.each do |air_loop|
+      next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
+
+      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
+
+      # Get the supply fan
+      supply_fan = nil
+      if air_loop.to_AirLoopHVAC.is_initialized
+        air_loop.supplyComponents.each do |supply_component|
+          next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
+
+          air_loop_unitary = supply_component.to_AirLoopHVACUnitarySystem.get
+          supply_fan = air_loop_unitary.supplyFan.get
+        end
+      end
+
+      if mech_vent.type == Constants.VentTypeCFIS
+        max_supply_fan_mfr = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
+        max_supply_fan_mfr.setName("#{obj_name_ducts} max supply fan mfr")
+        max_supply_fan_mfr.setInternalDataIndexKeyName(supply_fan.name.to_s)
+        max_supply_fan_mfrs << max_supply_fan_mfr.name
+      end
+
+      fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
+      fan_rtf_sensor.setName("#{obj_name_ducts} fan rtf s")
+      fan_rtf_sensor.setKeyName(supply_fan.name.to_s)
+      fan_rtf_sensors << fan_rtf_sensor.name
+    end
+
+    cfis_output = nil
+    cfis_airflow_frac = nil
+    cfis_programs.each do |cfis, value|
+      cfis_airflow_frac = cfis.airflow_frac
+      cfis_program, cfis_output, clg_coil = value
+      cfis_output.max_supply_fan_mfr = "(#{max_supply_fan_mfrs.join("+")})"
+      cfis_output.fan_rtf_sensor = "(#{fan_rtf_sensors.join("+")})"
+    end
+
     if ducts_output.location_name == unit_living.zone.name.to_s or ducts_output.location_name == "none" or not has_forced_air_equipment
       runner.registerInfo("Either no forced air equipment or ducts in conditioned space.")
       return duct_programs, cfis_programs
     end
-
-    cfis_airflow_frac = nil
-    cfis_output = nil
-    cfis_programs.each do |cfis, value|
-      cfis_program, cfis_output, clg_coil = value
-    end
-    max_supply_fan_mfrs = []
-    fan_rtf_sensors = []
 
     # Create one duct system per airloop or ducted mshp
     air_loops.each do |air_loop|
@@ -1387,23 +1419,30 @@ class Airflow
 
       duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var = duct_lks[obj_name_ducts]
 
+      max_supply_fan_mfr = nil
+      model.getEnergyManagementSystemInternalVariables.each do |v|
+        next if v.name.to_s != "#{obj_name_ducts} max supply fan mfr".gsub(" ", "_")
+
+        max_supply_fan_mfr = v
+      end
+
+      fan_rtf_sensor = nil
+      model.getEnergyManagementSystemSensors.each do |s|
+        next if s.name.to_s != "#{obj_name_ducts} fan rtf s".gsub(" ", "_")
+
+        fan_rtf_sensor = s
+      end
+
       win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Humidity Ratio")
       win_sensor.setName("#{obj_name_ducts} win s")
       win_sensor.setKeyName(unit_living.zone.name.to_s)
 
       ra_duct_zone = create_return_air_duct_zone(model, obj_name_ducts, ducts_output, adiabatic_const)
 
-      # Get the air demand inlet node and the supply fan
-      supply_fan = nil
+      # Get the air demand inlet node
       air_demand_inlet_node = nil
       if air_loop.to_AirLoopHVAC.is_initialized
         air_demand_inlet_node = air_loop.demandInletNode
-        air_loop.supplyComponents.each do |supply_component|
-          next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
-
-          air_loop_unitary = supply_component.to_AirLoopHVACUnitarySystem.get
-          supply_fan = air_loop_unitary.supplyFan.get
-        end
       end
 
       # Set the return plenums
@@ -1560,19 +1599,6 @@ class Airflow
       ah_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Mass Flow Rate")
       ah_mfr_sensor.setName("#{obj_name_ducts} ah mfr s")
       ah_mfr_sensor.setKeyName(air_demand_inlet_node.name.to_s)
-
-      max_supply_fan_mfr = nil
-      cfis_programs.each do |cfis, value|
-        max_supply_fan_mfr = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
-        max_supply_fan_mfr.setName("#{obj_name_ducts}_max_supply_fan_mfr")
-        max_supply_fan_mfr.setInternalDataIndexKeyName(supply_fan.name.to_s)
-        max_supply_fan_mfrs << max_supply_fan_mfr.name
-      end
-
-      fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
-      fan_rtf_sensor.setName("#{obj_name_ducts} fan rtf s")
-      fan_rtf_sensor.setKeyName(supply_fan.name.to_s)
-      fan_rtf_sensors << fan_rtf_sensor.name
 
       ah_vfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Current Density Volume Flow Rate")
       ah_vfr_sensor.setName("#{obj_name_ducts} ah vfr s")
@@ -1762,14 +1788,13 @@ class Airflow
         duct_program.addLine("Set dl_10 = #{return_duct_cond_to_ah_var.name}")
         duct_program.addLine("Set dl_11 = #{ah_to_liv_flow_rate_var.name}")
         duct_program.addLine("Set dl_12 = #{liv_to_ah_flow_rate_var.name}")
+
         duct_program.addLine("If #{cfis_output.on_for_hour_var.name}")
         duct_program.addLine("   Set cfis_m3s = (#{max_supply_fan_mfr.name} / 1.16097654) * #{cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
-        duct_program.addLine("   Set cfistemp1 = (1.0 - #{fan_rtf_sensor.name})")
-        duct_program.addLine("   Set #{ah_vfr_var.name} = cfistemp1*#{cfis_output.f_damper_open_var.name}*cfis_m3s")
+        duct_program.addLine("   Set #{ah_vfr_var.name} = (1.0 - #{fan_rtf_sensor.name})*#{cfis_output.f_damper_open_var.name}*cfis_m3s")
         duct_program.addLine("   Set rho_in = (@RhoAirFnPbTdbW #{tin_sensor.name} #{win_sensor.name} #{pbar_sensor.name})")
         duct_program.addLine("   Set #{ah_mfr_var.name} = #{ah_vfr_sensor.name} * rho_in")
-        duct_program.addLine("   Set cfistemp2 = (1.0 - #{fan_rtf_sensor.name})")
-        duct_program.addLine("   Set #{fan_rtf_var.name} = cfistemp2*#{cfis_output.f_damper_open_var.name}")
+        duct_program.addLine("   Set #{fan_rtf_var.name} = (1.0 - #{fan_rtf_sensor.name})*#{cfis_output.f_damper_open_var.name}")
         duct_program.addLine("   Set #{ah_tout_var.name} = #{ra_t_sensor.name}")
         duct_program.addLine("   Set #{ah_wout_var.name} = #{ra_w_sensor.name}")
         duct_program.addLine("   Set #{ra_t_var.name} = #{ra_t_sensor.name}")
@@ -1804,19 +1829,12 @@ class Airflow
         duct_program.addLine("   Set #{ah_to_liv_flow_rate_actuator.name} = dl_11")
         duct_program.addLine("   Set #{liv_to_ah_flow_rate_actuator.name} = dl_12")
         duct_program.addLine("EndIf")
-
       end
 
       duct_programs[obj_name_ducts] = duct_program
 
       runner.registerInfo("Created ducts for #{air_loop.name}.")
     end # end airloop loop
-
-    cfis_programs.each do |cfis, value|
-      cfis_program, cfis_output, clg_coil = value
-      cfis_output.max_supply_fan_mfr = "(#{max_supply_fan_mfrs.join("+")})"
-      cfis_output.fan_rtf_sensor = "(#{fan_rtf_sensors.join("+")})"
-    end
 
     return duct_programs, cfis_programs
   end
