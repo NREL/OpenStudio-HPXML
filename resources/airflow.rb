@@ -1380,8 +1380,8 @@ class Airflow
     cfis_programs.each do |cfis, value|
       cfis_airflow_frac = cfis.airflow_frac
       cfis_program, cfis_output, clg_coil = value
-      cfis_output.max_supply_fan_mfr = "(#{max_supply_fan_mfrs.join("+")})"
       cfis_output.fan_rtf_sensor = "(#{fan_rtf_sensors.join("+")})"
+      cfis_output.max_supply_fan_mfr = "(#{max_supply_fan_mfrs.join(" ")})"
     end
 
     if ducts_output.location_name == unit_living.zone.name.to_s or ducts_output.location_name == "none" or not has_forced_air_equipment
@@ -2054,7 +2054,7 @@ class Airflow
       infil_program.addLine("    Set QWHV = #{cfis_output.f_damper_open_var.name}*CFIS_Q_duct")
       infil_program.addLine("    Set cfistemp2 = #{cfis_output.f_damper_open_var.name}*(ZoneTimeStep*60)")
       infil_program.addLine("    Set #{cfis_output.t_sum_open_var.name} = #{cfis_output.t_sum_open_var.name}+cfistemp2")
-      infil_program.addLine("    Set mx_s_f_mfr = #{cfis_output.max_supply_fan_mfr}")
+      infil_program.addLine("    Set mx_s_f_mfr = @MAX#{cfis_output.max_supply_fan_mfr}")
       infil_program.addLine("    Set cfis_cfm = (mx_s_f_mfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
 
       infil_program.addLine("    Set cfistemp3 = (1-fan_rtf_var)")
