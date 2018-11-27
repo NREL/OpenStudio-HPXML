@@ -1835,9 +1835,11 @@ class Airflow
         next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
 
         system = supply_component.to_AirLoopHVACUnitarySystem.get
+
         if system.coolingCoil.is_initialized
           clg_coil = system.coolingCoil.get
         end
+
       end
     end
 
@@ -2019,13 +2021,21 @@ class Airflow
 
       next if clg_coil.nil?
 
+      rated_evaporator_fan_power_per_volume_flow_rate = nil
       clg_coil = HVAC.get_coil_from_hvac_component(clg_coil)
+      if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
+        rated_evaporator_fan_power_per_volume_flow_rate = clg_coil.ratedEvaporatorFanPowerPerVolumeFlowRate.get
+      elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
+        clg_coil.stages.each do |stage|
+          rated_evaporator_fan_power_per_volume_flow_rate = stage.ratedEvaporatorFanPowerPerVolumeFlowRate
+          break
+        end
+      end
+      cfis_fan_power = rated_evaporator_fan_power_per_volume_flow_rate / UnitConversions.convert(1.0, "m^3/s", "cfm") # W/cfms
 
       if cfis.open_time > 0.0
         cfis_outdoor_airflow = mv_output.whole_house_vent_rate * (60.0 / cfis.open_time)
       end
-
-      cfis_fan_power = clg_coil.ratedEvaporatorFanPowerPerVolumeFlowRate.get / UnitConversions.convert(1.0, "m^3/s", "cfm") # W/cfm
 
       infil_program.addLine("Set fan_rtf_var = #{cfis_output.fan_rtf_sensor}")
 
@@ -2053,8 +2063,8 @@ class Airflow
       infil_program.addLine("    Set QWHV = #{cfis_output.f_damper_open_var.name}*CFIS_Q_duct")
       infil_program.addLine("    Set cfistemp2 = #{cfis_output.f_damper_open_var.name}*(ZoneTimeStep*60)")
       infil_program.addLine("    Set #{cfis_output.t_sum_open_var.name} = #{cfis_output.t_sum_open_var.name}+cfistemp2")
-      infil_program.addLine("    Set mx_s_f_mfr = @MAX#{cfis_output.max_supply_fan_mfr}")
-      infil_program.addLine("    Set cfis_cfm = (mx_s_f_mfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
+      infil_program.addLine("    Set mxsfmfr=@MAX#{cfis_output.max_supply_fan_mfr}")
+      infil_program.addLine("    Set cfis_cfm = (mxsfmfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
 
       infil_program.addLine("    Set cfistemp3 = (1-fan_rtf_var)")
       infil_program.addLine("    Set #{whole_house_fan_actuator.name} = #{cfis_fan_power}*cfis_cfm*#{cfis_output.f_damper_open_var.name}*cfistemp3")
