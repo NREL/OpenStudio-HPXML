@@ -130,7 +130,7 @@ class Airflow
       success, infil_output = process_infiltration_for_unit(model, runner, obj_name_infil, infil, wind_speed, building, weather, unit_ag_ffa, unit_ag_ext_wall_area, unit_living, unit_finished_basement)
       return false if not success
 
-      success, mv_output = process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, infil.is_existing_home, infil_output.a_o, mech_vent, ducts, building, nbeds, nbaths, weather, unit_ffa, unit_living, units.size, has_forced_air_equipment)
+      success, mv_output = process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, infil.is_existing_home, infil_output.a_o, mech_vent, ducts, building, nbeds, nbaths, weather, unit_ffa, unit_living, units.size, has_forced_air_equipment, unit_has_mshp)
       return false if not success
 
       success, nv_output = process_nat_vent_for_unit(model, runner, obj_name_natvent, nat_vent, wind_speed, infil, building, weather, unit_window_area, unit_living)
@@ -676,9 +676,9 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, is_existing_home, ela, mech_vent, ducts, building, nbeds, nbaths, weather, unit_ffa, unit_living, num_units, has_forced_air_equipment)
+  def self.process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, is_existing_home, ela, mech_vent, ducts, building, nbeds, nbaths, weather, unit_ffa, unit_living, num_units, has_forced_air_equipment, unit_has_mshp)
     if mech_vent.type == Constants.VentTypeCFIS
-      if not has_forced_air_equipment
+      if not has_forced_air_equipment or unit_has_mshp
         runner.registerError("A CFIS ventilation system has been selected but the building does not have central, forced air equipment.")
         return false
       end
