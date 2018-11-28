@@ -144,7 +144,7 @@ class HEScoreValidator
 
       ## [WallType=CMU]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/ConcreteMasonryUnit]' => {
-        '[count(Siding)=0 or Siding="stucco" Siding="brick veneer"]' => one,
+        '[count(Siding)=0 or Siding="stucco" or Siding="brick veneer"]' => one,
         'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
         'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero,
       },
