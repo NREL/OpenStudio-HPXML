@@ -4,3 +4,4 @@
 /tests/out.osw
 /tests/reports
 /tests/run
+/.rubocop.yml

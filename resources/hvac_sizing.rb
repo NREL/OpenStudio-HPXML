@@ -1,9 +1,9 @@
-require "#{File.dirname(__FILE__)}/geometry"
-require "#{File.dirname(__FILE__)}/hvac"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/util"
-require "#{File.dirname(__FILE__)}/schedules"
-require "#{File.dirname(__FILE__)}/constructions"
+require_relative "geometry"
+require_relative "hvac"
+require_relative "unit_conversions"
+require_relative "util"
+require_relative "schedules"
+require_relative "constructions"
 
 class HVACSizing
   def self.apply(model, unit, runner, weather, show_debug_info)
@@ -3677,8 +3677,8 @@ class HVACSizing
       end
 
     elsif wall_type == 'CMU'
-      cmu_furring_ins_r = get_feature(runner, wall, Constants.SizingInfoCMUWallFurringInsRvalue, 'double')
-      return nil if cmu_furring_ins_r.nil?
+      cmu_furring_ins_r = get_feature(runner, wall, Constants.SizingInfoCMUWallFurringInsRvalue, 'double', false)
+      cmu_furring_ins_r = 0 if cmu_furring_ins_r.nil?
 
       # Manual J uses the same wall group for filled or hollow block
       if cmu_furring_ins_r < 2

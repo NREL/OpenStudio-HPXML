@@ -1,7 +1,7 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/materials"
-require "#{File.dirname(__FILE__)}/util"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "materials"
+require_relative "util"
 
 class Psychrometrics
   def self.H_fg_fT(t)
