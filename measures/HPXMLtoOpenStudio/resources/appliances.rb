@@ -1,8 +1,8 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/weather"
-require "#{File.dirname(__FILE__)}/schedules"
-require "#{File.dirname(__FILE__)}/waterheater"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "weather"
+require_relative "schedules"
+require_relative "waterheater"
 
 class Refrigerator
   def self.apply(model, unit, runner, rated_annual_energy, mult,

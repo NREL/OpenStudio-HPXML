@@ -134,7 +134,7 @@ class EnergyPlusValidator
       ## [AtticWall]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic/Walls/Wall' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'WallType/WoodStud' => one,
+        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]' => one,
         'Area' => one,
         'SolarAbsorptance' => one,
         'Emittance' => one,
@@ -235,14 +235,23 @@ class EnergyPlusValidator
       # [Wall]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'WallType/WoodStud' => one,
+        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]' => one, # See [WallType=WoodStud] or [WallType=NotWoodStud]
         'Area' => one,
         'SolarAbsorptance' => one,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension[InteriorAdjacentTo="living space" or InteriorAdjacentTo="garage" or InteriorAdjacentTo="vented attic" or InteriorAdjacentTo="unvented attic" or InteriorAdjacentTo="cape cod"]' => one,
         'extension[ExteriorAdjacentTo="living space" or ExteriorAdjacentTo="garage" or ExteriorAdjacentTo="vented attic" or ExteriorAdjacentTo="unvented attic" or ExteriorAdjacentTo="cape cod" or ExteriorAdjacentTo="ambient"]' => one,
+      },
+
+      # [WallType=WoodStud]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/WoodStud]' => {
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      # [WallType=NotWoodStud]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[not(WallType/WoodStud)]' => {
+        'Insulation/AssemblyEffectiveRValue' => one,
       },
 
       # [Window]

@@ -1,7 +1,7 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/materials"
-require "#{File.dirname(__FILE__)}/geometry"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "materials"
+require_relative "geometry"
 
 class WallConstructions
   # Container class for above-grade wall constructions

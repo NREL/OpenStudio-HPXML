@@ -1,6 +1,6 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/schedules"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "schedules"
 
 class MiscLoads
   def self.apply_plug(model, unit, runner, annual_energy, sens_frac, lat_frac,
