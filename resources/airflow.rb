@@ -117,8 +117,11 @@ class Airflow
 
       # Determine if forced air equipment
       has_forced_air_equipment = false
-      if unit_living.zone.airLoopHVACs.length > 0 or unit_has_mshp
+      if unit_living.zone.airLoopHVACs.length > 0
         has_forced_air_equipment = true
+      end
+      if unit_has_mshp and not HVAC.has_ducted_mshp(model, runner, unit_living.zone)
+        has_forced_air_equipment = false
       end
 
       # Common sensors
@@ -1364,7 +1367,7 @@ class Airflow
 
       if mech_vent.type == Constants.VentTypeCFIS
         max_supply_fan_mfr = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
-        max_supply_fan_mfr.setName("#{obj_name_ducts} max supply fan mfr")
+        max_supply_fan_mfr.setName("#{obj_name_ducts} max sup fan mfr")
         max_supply_fan_mfr.setInternalDataIndexKeyName(supply_fan.name.to_s)
         max_supply_fan_mfrs << max_supply_fan_mfr.name
       end
@@ -1399,7 +1402,7 @@ class Airflow
 
       max_supply_fan_mfr = nil
       model.getEnergyManagementSystemInternalVariables.each do |v|
-        next if v.name.to_s != "#{obj_name_ducts} max supply fan mfr".gsub(" ", "_")
+        next if v.name.to_s != "#{obj_name_ducts} max sup fan mfr".gsub(" ", "_")
 
         max_supply_fan_mfr = v
       end
@@ -1839,7 +1842,6 @@ class Airflow
         if system.coolingCoil.is_initialized
           clg_coil = system.coolingCoil.get
         end
-
       end
     end
 
