@@ -1,11 +1,11 @@
 # Add classes or functions here than can be used across a variety of our python classes and modules.
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/util"
-require "#{File.dirname(__FILE__)}/weather"
-require "#{File.dirname(__FILE__)}/geometry"
-require "#{File.dirname(__FILE__)}/schedules"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/psychrometrics"
+require_relative "constants"
+require_relative "util"
+require_relative "weather"
+require_relative "geometry"
+require_relative "schedules"
+require_relative "unit_conversions"
+require_relative "psychrometrics"
 
 class Waterheater
   def self.apply_tank(model, unit, runner, space, fuel_type, cap, vol, ef,

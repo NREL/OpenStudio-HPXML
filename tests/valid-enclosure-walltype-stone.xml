@@ -95,47 +95,15 @@
               </Floors>
               <Walls>
                 <Wall>
-                  <SystemIdentifier id='attic-wall-1-small'/>
+                  <SystemIdentifier id='attic-wall-1'/>
                   <WallType>
                     <WoodStud/>
                   </WallType>
-                  <Area>2</Area>
+                  <Area>32</Area>
                   <SolarAbsorptance>0.75</SolarAbsorptance>
                   <Emittance>0.9</Emittance>
                   <Insulation>
                     <SystemIdentifier id='Attic_Wall_Ins_ID1'/>
-                    <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-                  </Insulation>
-                  <extension>
-                    <ExteriorAdjacentTo>living space</ExteriorAdjacentTo>
-                  </extension>
-                </Wall>
-                <Wall>
-                  <SystemIdentifier id='attic-wall-1-medium'/>
-                  <WallType>
-                    <WoodStud/>
-                  </WallType>
-                  <Area>8</Area>
-                  <SolarAbsorptance>0.75</SolarAbsorptance>
-                  <Emittance>0.9</Emittance>
-                  <Insulation>
-                    <SystemIdentifier id='Attic_Wall_Ins_ID2'/>
-                    <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
-                  </Insulation>
-                  <extension>
-                    <ExteriorAdjacentTo>living space</ExteriorAdjacentTo>
-                  </extension>
-                </Wall>
-                <Wall>
-                  <SystemIdentifier id='attic-wall-1-large'/>
-                  <WallType>
-                    <WoodStud/>
-                  </WallType>
-                  <Area>22</Area>
-                  <SolarAbsorptance>0.75</SolarAbsorptance>
-                  <Emittance>0.9</Emittance>
-                  <Insulation>
-                    <SystemIdentifier id='Attic_Wall_Ins_ID3'/>
                     <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
                   </Insulation>
                   <extension>
@@ -195,50 +163,16 @@
         </RimJoists>
         <Walls>
           <Wall>
-            <SystemIdentifier id='agwall-small'/>
+            <SystemIdentifier id='agwall-1'/>
             <WallType>
-              <WoodStud/>
+              <Stone/>
             </WallType>
-            <Area>10</Area>
+            <Area>3796</Area>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='AGW_Ins_ID1'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-            <extension>
-              <ExteriorAdjacentTo>ambient</ExteriorAdjacentTo>
-              <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            </extension>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='agwall-medium'/>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>300</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
-            <Insulation>
-              <SystemIdentifier id='AGW_Ins_ID2'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-            <extension>
-              <ExteriorAdjacentTo>ambient</ExteriorAdjacentTo>
-              <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            </extension>
-          </Wall>
-          <Wall>
-            <SystemIdentifier id='agwall-large'/>
-            <WallType>
-              <WoodStud/>
-            </WallType>
-            <Area>3486</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
-            <Insulation>
-              <SystemIdentifier id='AGW_Ins_ID3'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>5.4</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
               <ExteriorAdjacentTo>ambient</ExteriorAdjacentTo>
@@ -253,7 +187,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='agwall-medium'/>
+            <AttachedToWall idref='agwall-1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window_ID2'/>
@@ -261,7 +195,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='agwall-large'/>
+            <AttachedToWall idref='agwall-1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window_ID3'/>
@@ -269,7 +203,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='agwall-large'/>
+            <AttachedToWall idref='agwall-1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window_ID4'/>
@@ -277,13 +211,13 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='agwall-large'/>
+            <AttachedToWall idref='agwall-1'/>
           </Window>
         </Windows>
         <Doors>
           <Door>
             <SystemIdentifier id='Door_ID1'/>
-            <AttachedToWall idref='agwall-large'/>
+            <AttachedToWall idref='agwall-1'/>
             <Area>80</Area>
             <Azimuth>270</Azimuth>
             <RValue>4.4</RValue>

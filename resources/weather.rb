@@ -1,6 +1,6 @@
-require "#{File.dirname(__FILE__)}/psychrometrics"
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
+require_relative "psychrometrics"
+require_relative "constants"
+require_relative "unit_conversions"
 
 class WeatherHeader
   def initialize
