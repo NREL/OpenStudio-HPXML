@@ -1,6 +1,6 @@
-require "#{File.dirname(__FILE__)}/schedules"
-require "#{File.dirname(__FILE__)}/geometry"
-require "#{File.dirname(__FILE__)}/unit_conversions"
+require_relative "schedules"
+require_relative "geometry"
+require_relative "unit_conversions"
 
 class Lighting
   def self.apply_interior(model, unit, runner, weather, sch, interior_ann)

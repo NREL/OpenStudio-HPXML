@@ -1,11 +1,11 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/schedules"
-require "#{File.dirname(__FILE__)}/weather"
-require "#{File.dirname(__FILE__)}/util"
-require "#{File.dirname(__FILE__)}/psychrometrics"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/hvac"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "schedules"
+require_relative "weather"
+require_relative "util"
+require_relative "psychrometrics"
+require_relative "unit_conversions"
+require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, ducts)
