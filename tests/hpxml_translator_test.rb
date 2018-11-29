@@ -119,10 +119,12 @@ class HPXMLTranslatorTest < MiniTest::Test
     bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
 
     # Conditioned Floor Area
-    hpxml_value = Float(XMLHelper.get_value(bldg_details, 'BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
-    sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
-    assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    if XMLHelper.has_element(bldg_details, "Systems/HVAC") # EnergyPlus will only report conditioned floor area if there is an HVAC system
+      hpxml_value = Float(XMLHelper.get_value(bldg_details, 'BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
+      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
 
     # Enclosure Roofs
     bldg_details.elements.each('Enclosure/AtticAndRoof/Attics/Attic/Roofs/Roof') do |roof|
