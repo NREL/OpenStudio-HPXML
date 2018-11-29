@@ -116,30 +116,68 @@ class HPXMLTranslatorTest < MiniTest::Test
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
 
-    # Exterior above-grade wall construction
-    hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="ambient"]]') do |wall|
-      wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
+    bldg_details = hpxml_doc.elements['/HPXML/Building/BuildingDetails']
 
-      # R-value
-      hpxml_value = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.03)
-
-      # Net area
-      hpxml_value = Float(XMLHelper.get_value(wall, 'Area'))
-      hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Enclosure/Windows/Window | /HPXML/Building/BuildingDetails/Enclosure/Doors/Door') do |subsystem|
-        next if subsystem.elements["AttachedToWall"].attributes["idref"].upcase != wall_id
-
-        hpxml_value -= Float(XMLHelper.get_value(subsystem, 'Area'))
-      end
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Net Area' AND Units='m2'"
+    # Conditioned Floor Area
+    if XMLHelper.has_element(bldg_details, "Systems/HVAC") # EnergyPlus will only report conditioned floor area if there is an HVAC system
+      hpxml_value = Float(XMLHelper.get_value(bldg_details, 'BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
       sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
-    # Exterior attic wall construction
-    hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic/Walls/Wall[extension[ExteriorAdjacentTo="ambient"]]') do |wall|
+    # Enclosure Roofs
+    bldg_details.elements.each('Enclosure/AtticAndRoof/Attics/Attic/Roofs/Roof') do |roof|
+      roof_id = roof.elements["SystemIdentifier"].attributes["id"].upcase
+
+      # R-value
+      hpxml_value = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      sql_value = 1.0 / UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      assert_in_epsilon(hpxml_value, sql_value, 0.07) # TODO: Higher due to outside air film?
+
+      # Net area
+      hpxml_value = Float(XMLHelper.get_value(roof, 'Area'))
+      bldg_details.elements.each('Enclosure/Skylights/Skylight') do |subsurface|
+        next if subsurface.elements["AttachedToRoof"].attributes["idref"].upcase != roof_id
+
+        hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
+      end
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Net Area' AND Units='m2'"
+      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Solar absorptance
+      hpxml_value = Float(XMLHelper.get_value(roof, 'SolarAbsorptance'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Reflectance'"
+      sql_value = 1.0 - _get_sql_query_result(sqlFile, query)
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Tilt
+      hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Tilt' AND Units='deg'"
+      sql_value = _get_sql_query_result(sqlFile, query)
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
+
+    # Enclosure Foundation Slabs
+    bldg_details.elements.each('Enclosure/Foundations/Foundation/Slab') do |slab|
+      slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
+
+      # Area
+      hpxml_value = Float(XMLHelper.get_value(slab, 'Area'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
+      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Tilt
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
+      sql_value = _get_sql_query_result(sqlFile, query)
+      assert_in_epsilon(180.0, sql_value, 0.01)
+    end
+
+    # Enclosure Walls
+    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="ambient"]] | Enclosure/AtticAndRoof/Attics/Attic/Walls/Wall[extension[ExteriorAdjacentTo="ambient"]]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -150,13 +188,86 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Net area
       hpxml_value = Float(XMLHelper.get_value(wall, 'Area'))
-      hpxml_doc.elements.each('/HPXML/Building/BuildingDetails/Enclosure/Windows/Window | /HPXML/Building/BuildingDetails/Enclosure/Doors/Door') do |subsystem|
-        next if subsystem.elements["AttachedToWall"].attributes["idref"].upcase != wall_id
+      bldg_details.elements.each('Enclosure/Windows/Window | Enclosure/Doors/Door') do |subsurface|
+        next if subsurface.elements["AttachedToWall"].attributes["idref"].upcase != wall_id
 
-        hpxml_value -= Float(XMLHelper.get_value(subsystem, 'Area'))
+        hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Solar absorptance
+      hpxml_value = Float(XMLHelper.get_value(wall, 'SolarAbsorptance'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Reflectance'"
+      sql_value = 1.0 - _get_sql_query_result(sqlFile, query)
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Tilt
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Tilt' AND Units='deg'"
+      sql_value = _get_sql_query_result(sqlFile, query)
+      assert_in_epsilon(90.0, sql_value, 0.01)
+    end
+
+    # Enclosure Windows/Skylights
+    bldg_details.elements.each('Enclosure/Windows/Window | Enclosure/Skylights/Skylight') do |subsurface|
+      subsurface_id = subsurface.elements["SystemIdentifier"].attributes["id"].upcase
+
+      # Area
+      hpxml_value = Float(XMLHelper.get_value(subsurface, 'Area'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Area of Multiplied Openings' AND Units='m2'"
+      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # U-Factor
+      hpxml_value = Float(XMLHelper.get_value(subsurface, 'UFactor'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
+      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # SHGC
+      # TODO: Affected by interior shading
+
+      # Azimuth
+      hpxml_value = Float(XMLHelper.get_value(subsurface, 'Azimuth'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Azimuth' AND Units='deg'"
+      sql_value = _get_sql_query_result(sqlFile, query)
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Tilt
+      if XMLHelper.has_element(subsurface, "AttachedToWall")
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
+        sql_value = _get_sql_query_result(sqlFile, query)
+        assert_in_epsilon(90.0, sql_value, 0.01)
+      elsif XMLHelper.has_element(subsurface, "AttachedToRoof")
+        hpxml_value = nil
+        bldg_details.elements.each('Enclosure/AtticAndRoof/Attics/Attic/Roofs/Roof') do |roof|
+          next if roof.elements["SystemIdentifier"].attributes["id"] != subsurface.elements["AttachedToRoof"].attributes["idref"]
+
+          hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")
+        end
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
+        sql_value = _get_sql_query_result(sqlFile, query)
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      else
+        flunk "Subsurface '#{subsurface_id}' should have either AttachedToWall or AttachedToRoof element."
+      end
+    end
+
+    # Enclosure Doors
+    bldg_details.elements.each('Enclosure/Doors/Door') do |door|
+      door_id = door.elements["SystemIdentifier"].attributes["id"].upcase
+
+      # Area
+      hpxml_value = Float(XMLHelper.get_value(door, 'Area'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
+      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # R-Value
+      hpxml_value = Float(XMLHelper.get_value(door, 'RValue'))
+      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      sql_value = 1.0 / UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
   end
