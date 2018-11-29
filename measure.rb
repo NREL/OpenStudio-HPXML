@@ -1509,6 +1509,8 @@ class OSModel
         end
 
         check_surface_assembly_rvalue(surface, film_r, assembly_r)
+
+        apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
       end
 
       # Attic walls
