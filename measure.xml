@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>63ffcee3-57e9-4156-9dcb-ba57f788b7b0</version_id>
-  <version_modified>20181115T160703Z</version_modified>
+  <version_id>dbff546c-296a-4fa9-8d2f-0d9833080d34</version_id>
+  <version_modified>20181129T194051Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -747,12 +747,6 @@
       <checksum>B637A780</checksum>
     </file>
     <file>
-      <filename>constructions.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>E6640027</checksum>
-    </file>
-    <file>
       <filename>appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -846,6 +840,12 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>1AB1DA2C</checksum>
+    </file>
+    <file>
+      <filename>constructions.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FF26A793</checksum>
     </file>
   </files>
 </measure>
