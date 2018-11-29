@@ -5,9 +5,9 @@ require 'openstudio'
 require 'rexml/document'
 require 'rexml/xpath'
 require 'pathname'
-require "#{File.dirname(__FILE__)}/resources/HESruleset"
-require "#{File.dirname(__FILE__)}/resources/HESvalidator"
-require "#{File.dirname(__FILE__)}/../HPXMLtoOpenStudio/resources/xmlhelper"
+require_relative "resources/HESruleset"
+require_relative "resources/HESvalidator"
+require_relative "../HPXMLtoOpenStudio/resources/xmlhelper"
 
 # start the measure
 class HEScoreMeasure < OpenStudio::Measure::ModelMeasure

@@ -1,6 +1,6 @@
-require "#{File.dirname(__FILE__)}/../../HPXMLtoOpenStudio/resources/airflow"
-require "#{File.dirname(__FILE__)}/../../HPXMLtoOpenStudio/resources/geometry"
-require "#{File.dirname(__FILE__)}/../../HPXMLtoOpenStudio/resources/xmlhelper"
+require_relative "../../HPXMLtoOpenStudio/resources/airflow"
+require_relative "../../HPXMLtoOpenStudio/resources/geometry"
+require_relative "../../HPXMLtoOpenStudio/resources/xmlhelper"
 
 class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
@@ -204,7 +204,7 @@ class HEScoreRuleset
     new_foundations = XMLHelper.add_element(new_enclosure, "Foundations")
 
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
-      fnd_type = orig_foundation.elements["FoundationType"].elements[1].name
+      fnd_type = XMLHelper.get_child_name(orig_foundation, "FoundationType")
       if fnd_type == "Basement"
         if Boolean(XMLHelper.get_value(orig_foundation, "FoundationType/Basement/Conditioned"))
           fnd_type = "ConditionedBasement"
@@ -316,7 +316,7 @@ class HEScoreRuleset
     new_walls = XMLHelper.add_element(new_enclosure, "Walls")
 
     orig_details.elements.each("Enclosure/Walls/Wall") do |orig_wall|
-      wall_type = orig_wall.elements["WallType"].elements[1].name
+      wall_type = XMLHelper.get_child_name(orig_wall, "WallType")
       wall_orient = XMLHelper.get_value(orig_wall, "Orientation")
 
       if wall_type == "WoodStud"
@@ -374,7 +374,7 @@ class HEScoreRuleset
         win_ufactor = Float(win_ufactor)
         win_shgc = Float(XMLHelper.get_value(orig_window, "SHGC"))
       else
-        win_frame_type = orig_window.elements["FrameType"].elements[1].name
+        win_frame_type = XMLHelper.get_child_name(orig_window, "FrameType")
         if win_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_window, "FrameType/Aluminum/ThermalBreak"))
           win_frame_type += "ThermalBreak"
         end
@@ -410,7 +410,7 @@ class HEScoreRuleset
         sky_ufactor = Float(sky_ufactor)
         sky_shgc = Float(XMLHelper.get_value(orig_skylight, "SHGC"))
       else
-        sky_frame_type = orig_skylight.elements["FrameType"].elements[1].name
+        sky_frame_type = XMLHelper.get_child_name(orig_skylight, "FrameType")
         if sky_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_skylight, "FrameType/Aluminum/ThermalBreak"))
           sky_frame_type += "ThermalBreak"
         end
@@ -460,7 +460,7 @@ class HEScoreRuleset
 
     # HeatingSystem
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |orig_heating|
-      hvac_type = orig_heating.elements["HeatingSystemType"].elements[1].name
+      hvac_type = XMLHelper.get_child_name(orig_heating, "HeatingSystemType")
       hvac_fuel = XMLHelper.get_value(orig_heating, "HeatingSystemFuel")
 
       new_heating = XMLHelper.add_element(new_hvac_plant, "HeatingSystem")
