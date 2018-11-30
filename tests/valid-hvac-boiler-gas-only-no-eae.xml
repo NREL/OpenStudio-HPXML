@@ -231,7 +231,7 @@
               <SystemIdentifier id='SpaceHeat_ID1'/>
               <DistributionSystem idref='HVAC_Dist_ID1'/>
               <HeatingSystemType>
-                <Furnace/>
+                <Boiler/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>64000</HeatingCapacity>
@@ -241,18 +241,6 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
             </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID1'/>
-              <DistributionSystem idref='HVAC_Dist_ID1'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>48000</CoolingCapacity>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>16</Value>
-              </AnnualCoolingEfficiency>
-            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
@@ -261,52 +249,10 @@
           <HVACDistribution>
             <SystemIdentifier id='HVAC_Dist_ID1'/>
             <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>75.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>25.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <Ducts>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>unconditioned attic</DuctLocation>
-                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>unconditioned attic</DuctLocation>
-                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
-                </Ducts>
-              </AirDistribution>
+              <HydronicDistribution/>
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='Mech_Vent_ID1'/>
-              <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate>247</RatedFlowRate>
-              <HoursInOperation>8</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>360.0</FanPower>
-              <AttachedToHVACDistributionSystem idref='HVAC_Dist_ID1'/>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='DHW_ID1'/>

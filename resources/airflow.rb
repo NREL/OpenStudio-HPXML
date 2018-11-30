@@ -1,11 +1,11 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/schedules"
-require "#{File.dirname(__FILE__)}/weather"
-require "#{File.dirname(__FILE__)}/util"
-require "#{File.dirname(__FILE__)}/psychrometrics"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/hvac"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "schedules"
+require_relative "weather"
+require_relative "util"
+require_relative "psychrometrics"
+require_relative "unit_conversions"
+require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)
@@ -391,6 +391,14 @@ class Airflow
 
   def self.get_default_shelter_coefficient()
     return 0.5 # Table 4.2.2(1)(g)
+  end
+
+  def self.get_default_vented_attic_sla()
+    return 1.0 / 300.0 # Table 4.2.2(1) - Attics
+  end
+
+  def self.get_default_vented_crawl_sla()
+    return 1.0 / 150.0 # Table 4.2.2(1) - Crawlspaces
   end
 
   private
@@ -1137,16 +1145,6 @@ class Airflow
       return_r = 0
     end
 
-    # Calculate Duct Volume
-    if location_name != unit_living.zone.name.to_s
-      # Assume ducts are 3 ft by 1 ft, (8 is the perimeter)
-      supply_volume = (unconditioned_duct_area / 8.0) * 3.0
-      return_volume = (return_surface_area / 8.0) * 3.0
-    else
-      supply_volume = 0
-      return_volume = 0
-    end
-
     # Only if using the Fractional Leakage Option Type:
     if ducts.norm_leakage_25pa.nil?
       supply_loss = location_frac_leakage * supply_leakage + ah_supply_leakage
@@ -1194,7 +1192,7 @@ class Airflow
     unit.additionalProperties.setFeature(Constants.SizingInfoDuctsLocationZone, location_name)
     unit.additionalProperties.setFeature(Constants.SizingInfoDuctsLocationFrac, location_frac_leakage.to_f)
 
-    ducts_output = DuctsOutput.new(location_name, location_zone, return_volume, supply_loss, return_loss, frac_oa, total_unbalance, unconditioned_ua, return_ua)
+    ducts_output = DuctsOutput.new(location_name, location_zone, supply_loss, return_loss, frac_oa, total_unbalance, unconditioned_ua, return_ua)
     return true, ducts_output
   end
 
@@ -1319,12 +1317,12 @@ class Airflow
     # Create the return air plenum zone, space
     ra_duct_zone = OpenStudio::Model::ThermalZone.new(model)
     ra_duct_zone.setName(obj_name_ducts + " ret air zone")
-    ra_duct_zone.setVolume(UnitConversions.convert(ducts_output.return_volume, "ft^3", "m^3"))
+    ra_duct_zone.setVolume(0.25)
 
     sw_point = OpenStudio::Point3d.new(0, 74, 0)
-    nw_point = OpenStudio::Point3d.new(0, 75, 0)
-    ne_point = OpenStudio::Point3d.new(1, 75, 0)
-    se_point = OpenStudio::Point3d.new(1, 74, 0)
+    nw_point = OpenStudio::Point3d.new(0, 74.1, 0)
+    ne_point = OpenStudio::Point3d.new(0.1, 74.1, 0)
+    se_point = OpenStudio::Point3d.new(0.1, 74, 0)
     ra_duct_polygon = Geometry.make_polygon(sw_point, nw_point, ne_point, se_point)
 
     ra_space = OpenStudio::Model::Space::fromFloorPrint(ra_duct_polygon, 1, model)
@@ -1643,6 +1641,16 @@ class Airflow
       return_lat_lkage_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} RetLatLk".gsub(" ", "_"))
       liv_to_ah_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} LivToAh".gsub(" ", "_"))
       ah_to_liv_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} AhToLiv".gsub(" ", "_"))
+
+      if mech_vent.type == Constants.VentTypeCFIS
+        cfis_t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} cfis t sum open".gsub(" ", "_")) # Sums the time during an hour the CFIS damper has been open
+        cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} cfis on for hour".gsub(" ", "_")) # Flag to open the CFIS damper for the remainder of the hour
+        cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} cfis_f_open".gsub(" ", "_")) # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
+
+        max_supply_fan_mfr = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
+        max_supply_fan_mfr.setName("#{obj_name_ducts} max_supply_fan_mfr".gsub(" ", "_"))
+        max_supply_fan_mfr.setInternalDataIndexKeyName(supply_fan.name.to_s)
+      end
 
       # Duct Subroutine
 
@@ -2392,10 +2400,9 @@ class Ducts
 end
 
 class DuctsOutput
-  def initialize(location_name, location_zone, return_volume, supply_loss, return_loss, frac_oa, total_unbalance, unconditioned_ua, return_ua)
+  def initialize(location_name, location_zone, supply_loss, return_loss, frac_oa, total_unbalance, unconditioned_ua, return_ua)
     @location_name = location_name
     @location_zone = location_zone
-    @return_volume = return_volume
     @supply_loss = supply_loss
     @return_loss = return_loss
     @frac_oa = frac_oa
@@ -2403,7 +2410,7 @@ class DuctsOutput
     @unconditioned_ua = unconditioned_ua
     @return_ua = return_ua
   end
-  attr_accessor(:location_name, :location_zone, :return_volume, :supply_loss, :return_loss, :frac_oa, :total_unbalance, :unconditioned_ua, :return_ua)
+  attr_accessor(:location_name, :location_zone, :supply_loss, :return_loss, :frac_oa, :total_unbalance, :unconditioned_ua, :return_ua)
 end
 
 class Infiltration

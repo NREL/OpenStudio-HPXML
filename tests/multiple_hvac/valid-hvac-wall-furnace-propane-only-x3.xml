@@ -229,84 +229,56 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='SpaceHeat_ID1'/>
-              <DistributionSystem idref='HVAC_Dist_ID1'/>
               <HeatingSystemType>
-                <Furnace/>
+                <WallFurnace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>64000</HeatingCapacity>
+              <HeatingSystemFuel>propane</HeatingSystemFuel>
+              <HeatingCapacity>16000</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.92</Value>
+                <Value>0.80</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>66.67</ElectricAuxiliaryEnergy>
             </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID1'/>
-              <DistributionSystem idref='HVAC_Dist_ID1'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>48000</CoolingCapacity>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>16</Value>
-              </AnnualCoolingEfficiency>
-            </CoolingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='SpaceHeat_ID2'/>
+              <HeatingSystemType>
+                <WallFurnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>propane</HeatingSystemFuel>
+              <HeatingCapacity>16000</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.80</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>66.67</ElectricAuxiliaryEnergy>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='SpaceHeat_ID3'/>
+              <HeatingSystemType>
+                <WallFurnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>propane</HeatingSystemFuel>
+              <HeatingCapacity>16000</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.80</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>66.67</ElectricAuxiliaryEnergy>
+            </HeatingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
-          <HVACDistribution>
-            <SystemIdentifier id='HVAC_Dist_ID1'/>
-            <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>75.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>25.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <Ducts>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>unconditioned attic</DuctLocation>
-                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>unconditioned attic</DuctLocation>
-                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
-                </Ducts>
-              </AirDistribution>
-            </DistributionSystemType>
-          </HVACDistribution>
+          <extension>
+            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
+            <SkipAddHeatCoolSystem>true</SkipAddHeatCoolSystem>
+          </extension>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='Mech_Vent_ID1'/>
-              <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate>247</RatedFlowRate>
-              <HoursInOperation>8</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>360.0</FanPower>
-              <AttachedToHVACDistributionSystem idref='HVAC_Dist_ID1'/>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='DHW_ID1'/>

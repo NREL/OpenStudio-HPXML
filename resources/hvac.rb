@@ -1,9 +1,9 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/geometry"
-require "#{File.dirname(__FILE__)}/util"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/psychrometrics"
-require "#{File.dirname(__FILE__)}/schedules"
+require_relative "constants"
+require_relative "geometry"
+require_relative "util"
+require_relative "unit_conversions"
+require_relative "psychrometrics"
+require_relative "schedules"
 
 class HVAC
   def self.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
@@ -3302,7 +3302,7 @@ class HVAC
     end
   end
 
-  def self.apply_eae_to_heating_fan(runner, loop, eae, fuel, dse, has_furnace, has_boiler)
+  def self.apply_eae_to_heating_fan(runner, hvac_loop, eae, fuel, dse, has_furnace, has_boiler, load_frac, htg_capacity)
     # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
 
     if has_boiler
@@ -3310,14 +3310,16 @@ class HVAC
       if eae.nil?
         # From ANSI/RESNET/ICC 301 Standard
         if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-          eae = 170.0
+          eae = 170.0 * load_frac
         elsif fuel == Constants.FuelTypeOil
-          eae = 330.0
+          eae = 330.0 * load_frac
         end
       end
-      elec_power = eae / 2.08 # W
 
-      loop.components.each do |plc|
+      # TODO: We shouldn't have to apply load_frac here, but it gives better results
+      elec_power = (eae / 2.08) * load_frac # W
+
+      hvac_loop.components.each do |plc|
         if plc.to_BoilerHotWater.is_initialized
           boiler = plc.to_BoilerHotWater.get
           boiler.setParasiticElectricLoad(0.0)
@@ -3335,7 +3337,7 @@ class HVAC
     else # Furnace/WallFurnace/Stove
 
       unitary_system = nil
-      loop.supplyComponents.each do |supply_component|
+      hvac_loop.supplyComponents.each do |supply_component|
         next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
 
         unitary_system = supply_component.to_AirLoopHVACUnitarySystem.get
@@ -3343,15 +3345,11 @@ class HVAC
 
       if eae.nil?
         if has_furnace
-          # Get heating capacity
-          htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-          htg_capacity_kbtuh = UnitConversions.convert(htg_coil.nominalCapacity.get, "W", "kBtu/hr")
-
           # From ANSI/RESNET/ICC 301 Standard
           if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-            eae = 149.0 + 10.3 * htg_capacity_kbtuh # kWh/yr
+            eae = (149.0 + 10.3 * htg_capacity) * load_frac # kWh/yr
           elsif fuel == Constants.FuelTypeOil
-            eae = 439.0 + 5.5 * htg_capacity_kbtuh # kWh/yr
+            eae = (439.0 + 5.5 * htg_capacity) * load_frac # kWh/yr
           end
         else
           eae = 0.0

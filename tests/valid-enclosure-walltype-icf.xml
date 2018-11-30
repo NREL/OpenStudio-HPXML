@@ -165,14 +165,14 @@
           <Wall>
             <SystemIdentifier id='agwall-1'/>
             <WallType>
-              <WoodStud/>
+              <InsulatedConcreteForms/>
             </WallType>
             <Area>3796</Area>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='AGW_Ins_ID1'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>21.0</AssemblyEffectiveRValue>
             </Insulation>
             <extension>
               <ExteriorAdjacentTo>ambient</ExteriorAdjacentTo>
@@ -294,19 +294,6 @@
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='Mech_Vent_ID1'/>
-              <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate>247</RatedFlowRate>
-              <HoursInOperation>8</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>360.0</FanPower>
-              <AttachedToHVACDistributionSystem idref='HVAC_Dist_ID1'/>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='DHW_ID1'/>

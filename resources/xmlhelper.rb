@@ -37,6 +37,15 @@ class XMLHelper
     return val.text
   end
 
+  # Returns the name of the first child element of the 'element_name'
+  # element on the parent element.
+  def self.get_child_name(parent, element_name)
+    begin
+      return parent.elements[element_name].elements[1].name
+    end
+    return nil
+  end
+
   # Returns true if the element exists.
   def self.has_element(parent, element_name)
     element_name.split("/").each do |name|
@@ -112,9 +121,11 @@ class XMLHelper
 end
 
 def Boolean(val)
-  if val.nil?
-    raise TypeError.new("can't convert nil into Boolean")
+  if val.downcase.to_s == "true"
+    return true
+  elsif val.downcase.to_s == "false"
+    return false
   end
 
-  return val.downcase.to_s == "true"
+  raise TypeError.new("can't convert '#{val}' to Boolean")
 end

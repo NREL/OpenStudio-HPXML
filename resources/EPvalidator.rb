@@ -47,9 +47,8 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume' => one,
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent' => one,
 
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/SystemIdentifiersInfo' => one, # Required by HPXML schema
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/Name' => one, # Required by HPXML schema
-        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
+        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year="2006"]' => one, # See [ClimateZone]
+        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => one, # See [WeatherStation]
 
         '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics' => one, # See [Attic]
         '/HPXML/Building/BuildingDetails/Enclosure/Foundations' => one, # See [Foundation]
@@ -80,6 +79,18 @@ class EnergyPlusValidator
 
         '/HPXML/Building/BuildingDetails/Lighting' => one, # See [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
+      },
+
+      # [ClimateZone]
+      '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC' => {
+        '[ClimateZone="1A" or ClimateZone="1B" or ClimateZone="1C" or ClimateZone="2A" or ClimateZone="2B" or ClimateZone="2C" or ClimateZone="3A" or ClimateZone="3B" or ClimateZone="3C" or ClimateZone="4A" or ClimateZone="4B" or ClimateZone="4C" or ClimateZone="5A" or ClimateZone="5B" or ClimateZone="5C" or ClimateZone="6A" or ClimateZone="6B" or ClimateZone="6C" or ClimateZone="7" or ClimateZone="8"]' => one,
+      },
+
+      # [WeatherStation]
+      '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => {
+        'SystemIdentifiersInfo' => one, # Required by HPXML schema
+        'Name' => one, # Required by HPXML schema
+        'WMO' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
       },
 
       # [Attic]
@@ -129,7 +140,7 @@ class EnergyPlusValidator
       ## [AtticWall]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic/Walls/Wall' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'WallType/WoodStud' => one,
+        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]' => one,
         'Area' => one,
         'SolarAbsorptance' => one,
         'Emittance' => one,
@@ -166,7 +177,7 @@ class EnergyPlusValidator
 
       ## [FoundationType=VentedCrawl]
       '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]' => {
-        'extension/CrawlspaceSpecificLeakageArea' => one,
+        'extension/CrawlspaceSpecificLeakageArea' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       ## [FoundationType=Slab]
@@ -184,7 +195,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Area' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension[ExteriorAdjacentTo="living space" or ExteriorAdjacentTo="garage"]' => one,
       },
 
@@ -196,7 +207,7 @@ class EnergyPlusValidator
         'Thickness' => one,
         'DepthBelowGrade' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension[ExteriorAdjacentTo="ground" or ExteriorAdjacentTo="unconditioned basement" or ExteriorAdjacentTo="conditioned basement" or ExteriorAdjacentTo="crawlspace"]' => one,
       },
 
@@ -206,13 +217,13 @@ class EnergyPlusValidator
         'Area' => one,
         'Thickness' => one, # Use zero for dirt floor
         'ExposedPerimeter' => one,
-        'PerimeterInsulationDepth' => one,
-        'UnderSlabInsulationWidth' => one,
+        'PerimeterInsulationDepth' => zero_or_one, # Uses ERI Reference Home if not provided
+        'UnderSlabInsulationWidth' => zero_or_one, # Uses ERI Reference Home if not provided
         'DepthBelowGrade' => one,
         'PerimeterInsulation/SystemIdentifier' => one, # Required by HPXML schema
-        'PerimeterInsulation/Layer[InstallationType="continuous"]/NominalRValue' => one,
+        'PerimeterInsulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'UnderSlabInsulation/SystemIdentifier' => one, # Required by HPXML schema
-        'UnderSlabInsulation/Layer[InstallationType="continuous"]/NominalRValue' => one,
+        'UnderSlabInsulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/CarpetFraction' => one,
         'extension/CarpetRValue' => one,
       },
@@ -230,14 +241,23 @@ class EnergyPlusValidator
       # [Wall]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'WallType/WoodStud' => one,
+        'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]' => one, # See [WallType=WoodStud] or [WallType=NotWoodStud]
         'Area' => one,
         'SolarAbsorptance' => one,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
         'extension[InteriorAdjacentTo="living space" or InteriorAdjacentTo="garage" or InteriorAdjacentTo="vented attic" or InteriorAdjacentTo="unvented attic" or InteriorAdjacentTo="cape cod"]' => one,
         'extension[ExteriorAdjacentTo="living space" or ExteriorAdjacentTo="garage" or ExteriorAdjacentTo="vented attic" or ExteriorAdjacentTo="unvented attic" or ExteriorAdjacentTo="cape cod" or ExteriorAdjacentTo="ambient"]' => one,
+      },
+
+      # [WallType=WoodStud]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/WoodStud]' => {
+        'Insulation/AssemblyEffectiveRValue' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      # [WallType=NotWoodStud]
+      '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[not(WallType/WoodStud)]' => {
+        'Insulation/AssemblyEffectiveRValue' => one,
       },
 
       # [Window]
@@ -257,6 +277,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs' => {
         'Depth' => one,
         'DistanceToTopOfWindow' => one,
+        'DistanceToBottomOfWindow' => one,
       },
 
       # [Skylight]
@@ -272,10 +293,10 @@ class EnergyPlusValidator
       # [Door]
       '/HPXML/Building/BuildingDetails/Enclosure/Doors/Door' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        'Area' => one,
-        'Azimuth' => one,
-        'RValue' => one,
         'AttachedToWall' => one,
+        'Area' => zero_or_one, # Uses ERI Reference Home if not provided
+        'Azimuth' => zero_or_one, # Uses ERI Reference Home if not provided
+        'RValue' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       # [AirInfiltration]
@@ -417,14 +438,14 @@ class EnergyPlusValidator
       ## [HVACDuct]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType="supply" or DuctType="return"]' => {
         'DuctInsulationRValue' => one,
-        'DuctLocation' => one, # TODO: Restrict values
+        '[DuctLocation="conditioned space" or DuctLocation="unconditioned basement" or DuctLocation="unvented crawlspace" or DuctLocation="vented crawlspace" or DuctLocation="unconditioned attic"]' => one,
         'DuctSurfaceArea' => one,
       },
 
       # [MechanicalVentilation]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[FanType="energy recovery ventilator" or FanType="heat recovery ventilator" or FanType="exhaust only" or FanType="supply only" or FanType="balanced" or FanType="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV]
+        '[FanType="energy recovery ventilator" or FanType="heat recovery ventilator" or FanType="exhaust only" or FanType="supply only" or FanType="balanced" or FanType="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
         'RatedFlowRate' => one,
         'HoursInOperation' => one,
         'UsedForWholeBuildingVentilation' => one,
@@ -440,6 +461,11 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="energy recovery ventilator"]' => {
         'TotalRecoveryEfficiency' => one,
         'SensibleRecoveryEfficiency' => one,
+      },
+
+      ## [MechVentType=CFIS]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="central fan integrated supply"]' => {
+        'AttachedToHVACDistributionSystem' => one,
       },
 
       # [WaterHeatingSystem]
