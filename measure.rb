@@ -2799,7 +2799,6 @@ class OSModel
       mech_vent_cfm = 0.0
     else
       # FIXME: HoursInOperation isn't hooked up
-      # FIXME: AttachedToHVACDistributionSystem isn't hooked up
       fan_type = XMLHelper.get_value(whole_house_fan, "FanType")
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
@@ -2831,9 +2830,11 @@ class OSModel
     bathroom_exhaust_hour = 5
     mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_infil_credit, mech_vent_total_efficiency,
                                           nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
-                                          mech_vent_ashrae_std, mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac,
-                                          clothes_dryer_exhaust, range_exhaust, range_exhaust_hour, bathroom_exhaust,
-                                          bathroom_exhaust_hour)
+                                          mech_vent_ashrae_std, clothes_dryer_exhaust, range_exhaust,
+                                          range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour)
+    # FIXME: AttachedToHVACDistributionSystem isn't hooked up
+    cfis = CFIS.new(mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac)
+    cfis_systems = { cfis => model.getAirLoopHVACs }
 
     # Natural Ventilation
     nat_vent_htg_offset = 1.0
@@ -2927,7 +2928,7 @@ class OSModel
 
     # FIXME: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems)
+    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)
     return false if not success
 
     return true

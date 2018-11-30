@@ -19,7 +19,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
 
     Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
-      puts "Testing #{xml}..."
+      puts "\nTesting #{xml}..."
       args_hash['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
@@ -38,7 +38,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
 
     Dir["#{this_dir}/multiple_hvac/valid*.xml"].sort.each do |xml|
-      puts "Testing #{xml}..."
+      puts "\nTesting #{xml}..."
       args_hash['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
@@ -47,7 +47,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Run complementary file with single HVAC
       xml_x1 = xml.gsub("-x3", "")
-      puts "Testing #{xml_x1}..."
+      puts "\nTesting #{xml_x1}..."
       args_hash['hpxml_path'] = File.absolute_path(File.join(File.dirname(xml_x1), "..", File.basename(xml_x1)))
       _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
