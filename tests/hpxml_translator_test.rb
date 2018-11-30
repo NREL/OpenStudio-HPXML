@@ -26,6 +26,64 @@ class HPXMLTranslatorTest < MiniTest::Test
       _test_simulation(args_hash, this_dir)
     end
   end
+  
+  def test_multiple_hvac
+    # Run HPXML files with 3 of the same HVAC system and compare results to files
+    # with one of that HVAC system.
+    this_dir = File.dirname(__FILE__)
+
+    args_hash = {}
+    args_hash['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
+    args_hash['epw_output_path'] = File.absolute_path(File.join(this_dir, "in.epw"))
+    args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
+
+    Dir["#{this_dir}/multiple_hvac/valid*.xml"].sort.each do |xml|
+      puts "Testing #{xml}..."
+      args_hash['hpxml_path'] = File.absolute_path(xml)
+      _test_schema_validation(this_dir, xml)
+      _test_measure(args_hash)
+      _test_simulation(args_hash, this_dir)
+      results_x3 = _get_results(this_dir)
+      
+      # Run complementary file with single HVAC
+      xml_x1 = xml.gsub("-x3","")
+      puts "Testing #{xml_x1}..."
+      args_hash['hpxml_path'] = File.absolute_path(File.join(File.dirname(xml_x1), "..", File.basename(xml_x1)))
+      _test_schema_validation(this_dir, xml)
+      _test_measure(args_hash)
+      _test_simulation(args_hash, this_dir)
+      results_x1 = _get_results(this_dir)
+      
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_x1.keys.each do |k|
+        result_x1 = results_x1[k].to_f
+        result_x3 = results_x3[k].to_f
+        next if result_x1 == 0.0 and result_x3 == 0.0
+        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
+        assert_in_delta(result_x1, result_x3, 0.1)
+      end
+      puts "\n"
+
+    end
+  end
+  
+  def _get_results(this_dir)
+    sql_path = File.join(this_dir, "run", "eplusout.sql")
+    sqlFile = OpenStudio::SqlFile.new(sql_path, false)
+    begin
+      enduses = sqlFile.endUses.get
+      results = {}
+      OpenStudio::EndUses.fuelTypes.each do |fueltype|
+        OpenStudio::EndUses.categories.each do |category|
+          results[[fueltype.valueName, category.valueName]] = enduses.getEndUse(fueltype, category)
+        end
+      end
+    ensure
+      sqlFile.close
+    end
+    return results
+  end
 
   def _test_measure(args_hash)
     # create an instance of the measure
@@ -54,7 +112,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     result = runner.result
 
     # show the output
-    show_output(result)
+    if result.value.valueName != "Success"
+      show_output(result)
+    end
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)
@@ -90,7 +150,6 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     cli_path = OpenStudio.getOpenStudioCLI
     cmd = "\"#{cli_path}\" --no-ssl run -w \"#{osw_path}\""
-    puts "Running command: #{cmd}"
     system(cmd)
 
     # Ensure success
