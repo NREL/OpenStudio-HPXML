@@ -440,7 +440,7 @@ class EnergyPlusValidator
       # [MechanicalVentilation]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[FanType="energy recovery ventilator" or FanType="heat recovery ventilator" or FanType="exhaust only" or FanType="supply only" or FanType="balanced" or FanType="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV]
+        '[FanType="energy recovery ventilator" or FanType="heat recovery ventilator" or FanType="exhaust only" or FanType="supply only" or FanType="balanced" or FanType="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
         'RatedFlowRate' => one,
         'HoursInOperation' => one,
         'UsedForWholeBuildingVentilation' => one,
@@ -456,6 +456,11 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="energy recovery ventilator"]' => {
         'TotalRecoveryEfficiency' => one,
         'SensibleRecoveryEfficiency' => one,
+      },
+
+      ## [MechVentType=CFIS]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="central fan integrated supply"]' => {
+        'AttachedToHVACDistributionSystem' => one,
       },
 
       # [WaterHeatingSystem]
