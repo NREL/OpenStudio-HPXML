@@ -3310,7 +3310,7 @@ class HVAC
           eae = 330.0 * load_frac
         end
       end
-      
+
       # TODO: We shouldn't have to apply load_frac here, but it gives better results
       elec_power = (eae / 2.08) * load_frac # W
 

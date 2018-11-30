@@ -2953,7 +2953,7 @@ class OSModel
       if not fuel_eae.nil?
         fuel_eae = Float(fuel_eae)
       end
-      
+
       load_frac = Float(XMLHelper.get_value(htgsys, "FractionHeatLoadServed"))
 
       dse_heat, dse_cool = get_dse(building, htgsys)
@@ -2963,9 +2963,9 @@ class OSModel
       if hvac_loops.keys.include? sys_id
         has_furnace = (htg_type == "Furnace")
         has_boiler = (htg_type == "Boiler")
-        
-        # If furnace, get total heating capacity for EAE calculation
-        htg_capacity =  nil
+
+        # If gas furnace, get total heating capacity for EAE calculation
+        htg_capacity = nil
         if has_furnace
           htg_capacity = 0.0
           hvac_loops.values.each do |hvac_loop|
@@ -2973,11 +2973,14 @@ class OSModel
               next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
 
               unitary_system = supply_component.to_AirLoopHVACUnitarySystem.get
-              htg_capacity += UnitConversions.convert(unitary_system.heatingCoil.get.to_CoilHeatingGas.get.nominalCapacity.get, "W", "kBtu/hr")
+              next unless unitary_system.heatingCoil.is_initialized
+
+              htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
+              htg_capacity += UnitConversions.convert(htg_coil.nominalCapacity.get, "W", "kBtu/hr")
             end
           end
         end
-        
+
         success = HVAC.apply_eae_to_heating_fan(runner, hvac_loops[sys_id][0], fuel_eae, fuel, dse_heat,
                                                 has_furnace, has_boiler, load_frac, htg_capacity)
         return false if not success
