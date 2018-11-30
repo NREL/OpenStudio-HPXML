@@ -1307,6 +1307,12 @@
 												<xs:element maxOccurs="unbounded" minOccurs="0"
 												name="ThirdPartyCertification"
 												type="VentilationFanThirdPartyCertification"/>
+												<xs:element name="AttachedToHVACDistributionSystem"
+												type="LocalReference" minOccurs="0" maxOccurs="1">
+												<xs:annotation>
+												<xs:documentation>For central fan integrated supply mechanical ventilation, specifies the HVAC distribution system it is attached to.</xs:documentation>
+												</xs:annotation>
+												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
 										</xs:complexType>

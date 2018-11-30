@@ -303,6 +303,7 @@
               <HoursInOperation>8</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>360.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVAC_Dist_ID1'/>
             </VentilationFan>
           </VentilationFans>
         </MechanicalVentilation>

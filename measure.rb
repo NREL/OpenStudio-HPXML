@@ -2733,7 +2733,8 @@ class OSModel
       mech_vent_fan_power = 0.0
       mech_vent_cfm = 0.0
     else
-      # FIXME: HoursInOperation isn't being used
+      # FIXME: HoursInOperation isn't hooked up
+      # FIXME: AttachedToHVACDistributionSystem isn't hooked up
       fan_type = XMLHelper.get_value(whole_house_fan, "FanType")
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
