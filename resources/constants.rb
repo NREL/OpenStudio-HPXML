@@ -49,6 +49,10 @@ class Constants
     return -10000
   end
 
+  def self.PartitionWallFracOfFFA
+    return 1.0
+  end
+
   def self.Patm
     return 14.696 # standard atmospheric pressure (psia)
   end
@@ -549,6 +553,10 @@ class Constants
     return "residential dishwasher#{s_unit}"
   end
 
+  def self.ObjectNameDrywall
+    return 'residential drywall'
+  end
+
   def self.ObjectNameDucts(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
@@ -573,7 +581,7 @@ class Constants
   end
 
   def self.ObjectNameEMPD
-    return 'residential empd'
+    return 'EMPD'
   end
 
   def self.ObjectNameExtraRefrigerator(unit_name = self.ObjectNameBuildingUnit)

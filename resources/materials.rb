@@ -239,11 +239,11 @@ class Material
   end
 
   def self.GypsumWall(thick_in)
-    return self.new(name = "Drywall #{thick_in.to_s} in.", thick_in = thick_in, mat_base = BaseMaterial.Gypsum)
+    return self.new(name = "Drywall #{thick_in.to_s} in.", thick_in = thick_in, mat_base = BaseMaterial.Gypsum, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.5, vAbs = 0.1)
   end
 
   def self.GypsumCeiling(thick_in)
-    return self.new(name = "Drywall #{thick_in.to_s} in.", thick_in = thick_in, mat_base = BaseMaterial.Gypsum)
+    return self.new(name = "Drywall #{thick_in.to_s} in.", thick_in = thick_in, mat_base = BaseMaterial.Gypsum, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.1)
   end
 
   def self.RoofingAsphaltShinglesDark
@@ -355,14 +355,6 @@ class BaseMaterial
   def self.Gypcrete
     # http://www.maxxon.com/gyp-crete/data
     return self.new(rho = 100.0, cp = 0.223, k_in = 4.7424)
-  end
-
-  def self.Furniture
-    return self.new(rho = nil, cp = nil, k_in = nil)
-  end
-
-  def self.Carpet
-    return self.new(rho = nil, cp = nil, k_in = nil)
   end
 
   def self.InsulationRigid

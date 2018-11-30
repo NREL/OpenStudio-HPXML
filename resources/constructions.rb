@@ -1840,244 +1840,11 @@ class SubsurfaceConstructions
   end
 end
 
-class MoistureConstructions
-  # Container class for decoupled internal mass with moisture properties
-
-  def self.apply(runner, model, partition_wall_frac_of_ffa = 1.0, wood_trim_mult = 0.31, carpet_frac_of_ffa = 0.8, furniture_mult = 0.75)
-    if not apply_partition_walls(runner, model, partition_wall_frac_of_ffa, Geometry.get_finished_spaces(model.getSpaces))
-      return false
-    end
-
-    if not apply_wood_trim(runner, model, wood_trim_mult, Geometry.get_finished_spaces(model.getSpaces))
-      return false
-    end
-
-    if not apply_carpet(runner, model, carpet_frac_of_ffa, Geometry.get_finished_spaces(model.getSpaces))
-      return false
-    end
-
-    if not apply_furniture(runner, model, furniture_mult, Geometry.get_finished_spaces(model.getSpaces))
-      return false
-    end
-  end
-
-  private
-
-  def self.remove(model, name)
-    # Remove any existing empd internal mass.
-    model.getInternalMasss.each do |im|
-      next if not im.name.get.to_s == name
-
-      md = im.internalMassDefinition
-      im.remove
-      md.remove
-    end
-  end
-
-  def self.apply_partition_walls(runner, model, partition_wall_frac_of_ffa, spaces)
-    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNamePartitionWall} drywall"
-
-    thick_in = 0.001
-    k_in = 0.1
-    rho = 800.0
-    cp = 100.0
-    wDiff = 9.14
-    coefA = 0.0069
-    coefB = 0.9066
-    coefC = 0.0404
-    coefD = 22.1121
-    sDepth = 0.01886
-    dDepth = 0.08642
-    cThick = 0.005
-    cDiff = 140.0
-
-    constr = create_material_and_construction(name, thick_in, k_in, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
-    imdefs = []
-    spaces.each do |space|
-      partition_wall_surface_area = space.floorArea * partition_wall_frac_of_ffa
-      exterior_wall_surface_area = 0
-      space.surfaces.each do |surface|
-        next if surface.surfaceType.downcase != "wall"
-        next unless (surface.outsideBoundaryCondition.downcase == "outdoors" or surface.outsideBoundaryCondition.downcase == "foundation")
-
-        exterior_wall_surface_area += surface.grossArea
-      end
-      ceiling_surface_area = space.floorArea
-      surface_area = partition_wall_surface_area + exterior_wall_surface_area + ceiling_surface_area
-      imdefs << create_internal_mass(runner, model, name, space, surface_area)
-    end
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions(imdefs, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  def self.apply_wood_trim(runner, model, mult, spaces)
-    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameWoodTrim}"
-
-    thick_in = 0.001
-    k_in = 0.1
-    rho = 512.0
-    cp = 100.0
-    wDiff = 320.0
-    coefA = 0.15
-    coefB = 8.51
-    coefC = 0.167
-    coefD = 0.965
-    sDepth = 0.00079
-    dDepth = 0.0036
-    cThick = 0.005
-    cDiff = 140.0
-
-    constr = create_material_and_construction(name, thick_in, k_in, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
-    imdefs = []
-    spaces.each do |space|
-      surface_area = space.floorArea * mult
-      imdefs << create_internal_mass(runner, model, name, space, surface_area)
-    end
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions(imdefs, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  def self.apply_carpet(runner, model, mult, spaces)
-    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameCarpet}"
-
-    thick_in = 0.001
-    k_in = 0.1
-    rho = 220.0
-    cp = 100.0
-    wDiff = 0.5
-    coefA = 0.019
-    coefB = 1.0
-    coefC = 0.0
-    coefD = 1.0
-    sDepth = 0.0341
-    dDepth = 0.156
-    cThick = 0.0
-    cDiff = 0.0
-
-    constr = create_material_and_construction(name, thick_in, k_in, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
-    imdefs = []
-    spaces.each do |space|
-      surface_area = space.floorArea * mult
-      imdefs << create_internal_mass(runner, model, name, space, surface_area)
-    end
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions(imdefs, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  def self.apply_furniture(runner, model, mult, spaces)
-    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameFurniture}"
-
-    thick_in = 0.001
-    k_in = 0.1
-    rho = 500.0
-    cp = 100.0
-    wDiff = 6.0
-    coefA = 0.02
-    coefB = 1.0
-    coefC = 0.0
-    coefD = 1.0
-    sDepth = nil
-    dDepth = nil
-    cThick = 0.0
-    cDiff = 0.0
-
-    constr = create_material_and_construction(name, thick_in, k_in, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
-    imdefs = []
-    spaces.each do |space|
-      surface_area = space.floorArea * mult
-      imdefs << create_internal_mass(runner, model, name, space, surface_area)
-    end
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions(imdefs, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  def self.apply_dummy(runner, model, mult, spaces)
-    name = "#{Constants.ObjectNameEMPD} dummy"
-
-    thick_in = 0.001
-    k_in = 0.1
-    rho = 100.0
-    cp = 100.0
-    wDiff = 500.0
-    coefA = 0.0069
-    coefB = 0.9066
-    coefC = 0.0404
-    coefD = 22.1121
-    sDepth = 0.1
-    dDepth = 0.0
-    cThick = 0.0
-    cDiff = 0.0
-
-    constr = create_material_and_construction(name, thick_in, k_in, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
-    imdefs = []
-    spaces.each do |space|
-      surface_area = space.floorArea * mult
-      imdefs << create_internal_mass(runner, model, name, space, surface_area)
-    end
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions(imdefs, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  def self.create_internal_mass(runner, model, name, space, surface_area)
-    remove(model, "#{name} #{space.name}")
-
-    imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-    imdef.setName("#{name} #{space.name}")
-    imdef.setSurfaceArea(surface_area)
-
-    im = OpenStudio::Model::InternalMass.new(imdef)
-    im.setName("#{name} #{space.name}")
-    im.setSpace(space)
-
-    return imdef
-  end
-
-  def self.create_material_and_construction(name, thick_in, k_in, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
-    thick_in = UnitConversions.convert(thick_in, "m", "in")
-    k_in = UnitConversions.convert(k_in, "w/(m*k)", "btu*in/(hr*ft^2*r)")
-    rho = UnitConversions.convert(rho, "kg/m^3", "lbm/ft^3")
-    cp = UnitConversions.convert(cp, "j/(kg*k)", "btu/(lbm*r)")
-
-    mat = Material.new(name = name, thick_in = thick_in, mat_base = nil, k_in = k_in, rho = rho, cp = cp, tAbs = 0.9, sAbs = 0.5, vAbs = 0.1, rvalue = nil, wDiff = wDiff, coefA = coefA, coefB = coefB, coefC = coefC, coefD = coefD, sDepth = sDepth, dDepth = dDepth, cThick = cThick, cDiff = cDiff)
-
-    # Define construction
-    constr = Construction.new(name, [1])
-    constr.add_layer(mat)
-
-    return constr
-  end
-end
-
 class ThermalMassConstructions
   # Container class for additional thermal mass (partition/furniture) constructions
 
   def self.apply(runner, model, walls_by_type, drywall_thick_in,
-                 partition_wall_frac_of_ffa = 1.0, furniture_frac_of_ffa = 0.4)
+                 partition_wall_frac_of_ffa = Constants.PartitionWallFracOfFFA, furniture_frac_of_ffa = 0.4)
 
     if not apply_partition_walls(runner, model,
                                  walls_by_type[Constants.SurfaceTypeWallIntFinUninsFin],
@@ -2122,7 +1889,6 @@ class ThermalMassConstructions
       addtl_surface_area = frac_of_ffa * space.floorArea - existing_surface_area * 2 / spaces.size.to_f
 
       # Remove any existing internal mass
-      partition_wall_removed = false
       space.internalMass.each do |im|
         next if not im.name.get.include?(Constants.ObjectNamePartitionWall)
 
@@ -2130,7 +1896,6 @@ class ThermalMassConstructions
         im.remove
         imdef.resetConstruction
         imdef.remove
-        partition_wall_removed = true
       end
 
       mass_obj_name_space = "#{Constants.ObjectNamePartitionWall} mass #{space.name.to_s}"
@@ -2237,6 +2002,225 @@ class ThermalMassConstructions
     end
 
     return true
+  end
+end
+
+class MoistureConstructions
+  # Container class for decoupled internal mass with moisture properties
+
+  def self.apply_drywall(runner, model, spaces, partition_wall_frac_of_ffa = Constants.PartitionWallFracOfFFA)
+    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameDrywall}"
+
+    thick = 0.001 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    k = 0.1 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    rho = 800.0
+    cp = 100.0 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    wDiff = 9.14
+    coefA = 0.0069
+    coefB = 0.9066
+    coefC = 0.0404
+    coefD = 22.1121
+    sDepth = 0.01886
+    dDepth = 0.08642
+    cThick = 0.005
+    cDiff = 140.0
+
+    constr = create_material_and_construction(name, thick, k, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
+    imdefs = []
+    spaces.each do |space|
+      partition_wall_surface_area = space.floorArea * partition_wall_frac_of_ffa
+      other_surface_area = 0
+      space.surfaces.each do |surface|
+        has_drywall = false
+        next unless surface.construction.is_initialized
+
+        surface.construction.get.to_LayeredConstruction.get.layers.each do |layer|
+          if layer.name.to_s.downcase.include? "drywall"
+            has_drywall = true
+          end
+        end
+        next unless has_drywall
+
+        other_surface_area += surface.grossArea # sum all surface areas that have drywall
+      end
+      surface_area = partition_wall_surface_area + other_surface_area
+      imdefs << create_internal_mass(runner, model, name, space, surface_area)
+    end
+
+    # Create and assign construction to surfaces
+    if not constr.create_and_assign_constructions(imdefs, runner, model)
+      return false
+    end
+
+    return true
+  end
+
+  def self.apply_wood_trim(runner, model, spaces, wood_trim_frac_of_ffa = 0.31)
+    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameWoodTrim}"
+
+    thick = 0.001 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    k = 0.1 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    rho = 512.0
+    cp = 100.0 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    wDiff = 320.0
+    coefA = 0.15
+    coefB = 8.51
+    coefC = 0.167
+    coefD = 0.965
+    sDepth = 0.00079
+    dDepth = 0.0036
+    cThick = 0.005
+    cDiff = 140.0
+
+    constr = create_material_and_construction(name, thick, k, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
+    imdefs = []
+    spaces.each do |space|
+      surface_area = space.floorArea * wood_trim_frac_of_ffa
+      imdefs << create_internal_mass(runner, model, name, space, surface_area)
+    end
+
+    # Create and assign construction to surfaces
+    if not constr.create_and_assign_constructions(imdefs, runner, model)
+      return false
+    end
+
+    return true
+  end
+
+  def self.apply_carpet(runner, model, spaces, carpet_frac_of_ffa = 0.8)
+    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameCarpet}"
+
+    thick = 0.001 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    k = 0.1 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    rho = 220.0
+    cp = 100.0 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    wDiff = 0.5
+    coefA = 0.019
+    coefB = 1.0
+    coefC = 0.0
+    coefD = 1.0
+    sDepth = 0.0341
+    dDepth = 0.156
+    cThick = 0.0
+    cDiff = 0.0
+
+    constr = create_material_and_construction(name, thick, k, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
+    imdefs = []
+    spaces.each do |space|
+      surface_area = space.floorArea * carpet_frac_of_ffa
+      imdefs << create_internal_mass(runner, model, name, space, surface_area)
+    end
+
+    # Create and assign construction to surfaces
+    if not constr.create_and_assign_constructions(imdefs, runner, model)
+      return false
+    end
+
+    return true
+  end
+
+  def self.apply_furniture(runner, model, spaces, furniture_frac_of_ffa = 0.75)
+    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameFurniture}"
+
+    thick = 0.001 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    k = 0.1 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    rho = 500.0
+    cp = 100.0 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    wDiff = 6.0
+    coefA = 0.02
+    coefB = 1.0
+    coefC = 0.0
+    coefD = 1.0
+    sDepth = nil
+    dDepth = nil
+    cThick = 0.0
+    cDiff = 0.0
+
+    constr = create_material_and_construction(name, thick, k, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
+    imdefs = []
+    spaces.each do |space|
+      surface_area = space.floorArea * furniture_frac_of_ffa
+      imdefs << create_internal_mass(runner, model, name, space, surface_area)
+    end
+
+    # Create and assign construction to surfaces
+    if not constr.create_and_assign_constructions(imdefs, runner, model)
+      return false
+    end
+
+    return true
+  end
+
+  def self.apply_dummy(runner, model, spaces, mult)
+    name = "#{Constants.ObjectNameEMPD} dummy"
+
+    thick = 0.001 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    k = 0.1 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    rho = 100.0
+    cp = 100.0 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
+    wDiff = 500.0
+    coefA = 0.0069
+    coefB = 0.9066
+    coefC = 0.0404
+    coefD = 22.1121
+    sDepth = 0.1
+    dDepth = 0.0
+    cThick = 0.0
+    cDiff = 0.0
+
+    constr = create_material_and_construction(name, thick, k, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
+    imdefs = []
+    spaces.each do |space|
+      surface_area = space.floorArea * mult
+      imdefs << create_internal_mass(runner, model, name, space, surface_area)
+    end
+
+    # Create and assign construction to surfaces
+    if not constr.create_and_assign_constructions(imdefs, runner, model)
+      return false
+    end
+
+    return true
+  end
+
+  def self.create_internal_mass(runner, model, name, space, surface_area)
+    remove_internal_mass(model, "#{name} #{space.name}")
+
+    imdef = OpenStudio::Model::InternalMassDefinition.new(model)
+    imdef.setName("#{name} #{space.name}")
+    imdef.setSurfaceArea(surface_area)
+
+    im = OpenStudio::Model::InternalMass.new(imdef)
+    im.setName("#{name} #{space.name}")
+    im.setSpace(space)
+
+    return imdef
+  end
+
+  def self.remove_internal_mass(model, name)
+    # Remove any existing empd internal mass.
+    model.getInternalMasss.each do |im|
+      next if not im.name.get.to_s == name
+
+      md = im.internalMassDefinition
+      im.remove
+      md.remove
+    end
+  end
+
+  def self.create_material_and_construction(name, thick, k, rho, cp, wDiff, coefA, coefB, coefC, coefD, sDepth, dDepth, cThick, cDiff)
+    thick_in = UnitConversions.convert(thick, "m", "in")
+    k_in = UnitConversions.convert(k, "w/(m*k)", "btu*in/(hr*ft^2*r)")
+    rho = UnitConversions.convert(rho, "kg/m^3", "lbm/ft^3")
+    cp = UnitConversions.convert(cp, "j/(kg*k)", "btu/(lbm*r)")
+
+    mat = Material.new(name = name, thick_in = thick_in, mat_base = nil, k_in = k_in, rho = rho, cp = cp, tAbs = 0.9, sAbs = 0.5, vAbs = 0.1, rvalue = nil, wDiff = wDiff, coefA = coefA, coefB = coefB, coefC = coefC, coefD = coefD, sDepth = sDepth, dDepth = dDepth, cThick = cThick, cDiff = cDiff)
+
+    # Define construction
+    constr = Construction.new(name, [1])
+    constr.add_layer(mat)
+
+    return constr
   end
 end
 

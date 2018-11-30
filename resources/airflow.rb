@@ -1308,7 +1308,7 @@ class Airflow
       surface_property_convection_coefficients.setConvectionCoefficient1(999)
     end
 
-    MoistureConstructions.apply_dummy(runner, model, 1.0, [ra_space])
+    MoistureConstructions.apply_dummy(runner, model, [ra_space], 1.0)
 
     if has_forced_air_equipment
 
