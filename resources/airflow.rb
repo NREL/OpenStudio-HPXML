@@ -1,11 +1,11 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/schedules"
-require "#{File.dirname(__FILE__)}/weather"
-require "#{File.dirname(__FILE__)}/util"
-require "#{File.dirname(__FILE__)}/psychrometrics"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/hvac"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "schedules"
+require_relative "weather"
+require_relative "util"
+require_relative "psychrometrics"
+require_relative "unit_conversions"
+require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems)
@@ -365,6 +365,14 @@ class Airflow
 
   def self.get_default_shelter_coefficient()
     return 0.5 # Table 4.2.2(1)(g)
+  end
+
+  def self.get_default_vented_attic_sla()
+    return 1.0 / 300.0 # Table 4.2.2(1) - Attics
+  end
+
+  def self.get_default_vented_crawl_sla()
+    return 1.0 / 150.0 # Table 4.2.2(1) - Crawlspaces
   end
 
   private

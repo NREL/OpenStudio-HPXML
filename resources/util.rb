@@ -1,6 +1,6 @@
 # Add classes or functions here than can be used across a variety of our python classes and modules.
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
+require_relative "constants"
+require_relative "unit_conversions"
 
 class HelperMethods
   def self.eplus_fuel_map(fuel)
