@@ -54,7 +54,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     result = runner.result
 
     # show the output
-    show_output(result)
+    if result.value.valueName != "Success"
+      show_output(result)
+    end
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)
@@ -106,6 +108,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def _get_sql_query_result(sqlFile, query)
     result = sqlFile.execAndReturnFirstDouble(query)
+    if not result.is_initialized
+      puts "No value returned for sql query: \"#{query}\"."
+    end
     assert(result.is_initialized)
     return result.get
   end
@@ -269,6 +274,28 @@ class HPXMLTranslatorTest < MiniTest::Test
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
+
+    # Heating Systems
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+      htg_sys_id = htg_sys.elements["SystemIdentifier"].attributes["id"].upcase
+
+      # Electric Auxiliary Energy
+      if XMLHelper.has_element(htg_sys, 'ElectricAuxiliaryEnergy')
+        htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
+        hpxml_value = Float(XMLHelper.get_value(htg_sys, 'ElectricAuxiliaryEnergy')) / 2.08
+        if htg_sys_type == "Boiler"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%BOILER%' AND ColumnName='Electric Power' AND Units='W'"
+        elsif htg_sys_type == "Furnace"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%FURNACE%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        elsif htg_sys_type == "Stove" or htg_sys_type == "WallFurnace"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%UNIT HEATER%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        else
+          flunk "Unexpected heating system type '#{htg_sys_type}'."
+        end
+        sql_value = _get_sql_query_result(sqlFile, query)
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
     end
   end
 

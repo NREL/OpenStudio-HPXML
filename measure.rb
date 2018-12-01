@@ -2863,8 +2863,8 @@ class OSModel
       fuel_eae = Float(fuel_eae)
     end
 
-    has_boiler = (htg_type == "Furnace")
-    has_furnace = (htg_type == "Boiler")
+    has_boiler = (htg_type == "Boiler")
+    has_furnace = (htg_type == "Furnace")
     success = HVAC.apply_eae_to_heating_fan(runner, model, fuel_eae, fuel, dse,
                                             has_boiler, has_boiler)
     return false if not success
