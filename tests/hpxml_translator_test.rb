@@ -38,18 +38,19 @@ class HPXMLTranslatorTest < MiniTest::Test
     args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
 
     Dir["#{this_dir}/multiple_hvac/valid*.xml"].sort.each do |xml|
+      # Run file with multiple HVAC
       puts "\nTesting #{xml}..."
       args_hash['hpxml_path'] = File.absolute_path(xml)
-      _test_schema_validation(this_dir, xml)
+      _test_schema_validation(this_dir, args_hash['hpxml_path'])
       _test_measure(args_hash)
       _test_simulation(args_hash, this_dir)
       results_x3 = _get_results(this_dir)
 
-      # Run complementary file with single HVAC
+      # Run file with single HVAC
       xml_x1 = xml.gsub("-x3", "")
       puts "\nTesting #{xml_x1}..."
       args_hash['hpxml_path'] = File.absolute_path(File.join(File.dirname(xml_x1), "..", File.basename(xml_x1)))
-      _test_schema_validation(this_dir, xml)
+      _test_schema_validation(this_dir, args_hash['hpxml_path'])
       _test_measure(args_hash)
       _test_simulation(args_hash, this_dir)
       results_x1 = _get_results(this_dir)
@@ -63,6 +64,51 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
         assert_in_delta(result_x1, result_x3, 0.1)
+      end
+      puts "\n"
+    end
+  end
+
+  def test_hvac_dse
+    # Run HPXML files with DSE; compares results to files with no ducts.
+    this_dir = File.dirname(__FILE__)
+
+    args_hash = {}
+    args_hash['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
+    args_hash['epw_output_path'] = File.absolute_path(File.join(this_dir, "in.epw"))
+    args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
+
+    Dir["#{this_dir}/dse/valid*.xml"].sort.each do |xml|
+      # Run file with DSE
+      puts "\nTesting #{xml}..."
+      args_hash['hpxml_path'] = File.absolute_path(xml)
+      _test_schema_validation(this_dir, args_hash['hpxml_path'])
+      _test_measure(args_hash)
+      _test_simulation(args_hash, this_dir)
+      results_dse = _get_results(this_dir)
+
+      # Run file with no ducts
+      xml_nodist = xml.gsub("-dse", "-no-distribution")
+      puts "\nTesting #{xml_nodist}..."
+      args_hash['hpxml_path'] = File.absolute_path(File.join(File.dirname(xml_nodist), "..", File.basename(xml_nodist)))
+      _test_schema_validation(this_dir, args_hash['hpxml_path'])
+      _test_measure(args_hash)
+      _test_simulation(args_hash, this_dir)
+      results_nodist = _get_results(this_dir)
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_dse.keys.each do |k|
+        next if not ["Heating", "Cooling"].include? k[1]
+
+        result_dse = results_dse[k].to_f
+        result_nodist = results_nodist[k].to_f
+        next if result_dse == 0.0 and result_nodist == 0.0
+
+        dse_actual = result_nodist / result_dse
+        dse_expect = 0.8
+        puts "dse: #{dse_actual.round(2)} #{k}"
+        assert_in_epsilon(dse_expect, dse_actual, 0.01)
       end
       puts "\n"
     end
