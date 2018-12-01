@@ -54,7 +54,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     result = runner.result
 
     # show the output
-    show_output(result)
+    if result.value.valueName != "Success"
+      show_output(result)
+    end
 
     # assert that it ran correctly
     assert_equal("Success", result.value.valueName)
@@ -280,11 +282,16 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Electric Auxiliary Energy
       if XMLHelper.has_element(htg_sys, 'ElectricAuxiliaryEnergy')
+        htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
         hpxml_value = Float(XMLHelper.get_value(htg_sys, 'ElectricAuxiliaryEnergy')) / 2.08
-        if XMLHelper.has_element(htg_sys, "HeatingSystemType/Boiler")
+        if htg_sys_type == "Boiler"
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%BOILER%' AND ColumnName='Electric Power' AND Units='W'"
-        elsif XMLHelper.has_element(htg_sys, "HeatingSystemType/Furnace")
+        elsif htg_sys_type == "Furnace"
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%FURNACE%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        elsif htg_sys_type == "Stove" or htg_sys_type == "WallFurnace"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%UNIT HEATER%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        else
+          flunk "Unexpected heating system type '#{htg_sys_type}'."
         end
         sql_value = _get_sql_query_result(sqlFile, query)
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
