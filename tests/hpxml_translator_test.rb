@@ -127,7 +127,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     update_args_hash(measures, measure_subdir, args)
 
     # Apply measure
-    measures_dir = File.join(this_dir, "../../")
+    measures_dir = File.absolute_path(File.join(this_dir, "../../"))
+    puts "measures_dir #{measures_dir}"
     success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
 
     # Write model to IDF
