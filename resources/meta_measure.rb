@@ -51,10 +51,7 @@ def apply_measures(measures_dir, measures, runner, model, workflow_json = nil, o
   # Call each measure in the specified order
   workflow_order.each do |measure_subdir|
     # Gather measure arguments and call measure
-    puts "measures_dir #{measures_dir}"
-    puts "measure_subdir #{measure_subdir}"
     full_measure_path = File.join(measures_dir, measure_subdir, "measure.rb")
-    puts "full_measure_path #{full_measure_path}"
     check_file_exists(full_measure_path, runner)
     measure_instance = get_measure_instance(full_measure_path)
     measures[measure_subdir].each do |args|
