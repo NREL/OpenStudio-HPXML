@@ -25,7 +25,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Standard tests
     results = {}
-    Dir["#{this_dir}/valid-addenda*.xml"].sort.each do |xml|
+    Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
       puts "\nTesting #{xml}..."
       args['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
