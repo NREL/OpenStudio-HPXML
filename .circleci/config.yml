@@ -10,4 +10,4 @@ jobs:
           command: |
             ruby tests/hpxml_translator_test.rb
       - store_artifacts:
-          path: /tests/results
+          path: tests/results
