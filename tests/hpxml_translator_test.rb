@@ -25,7 +25,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Standard tests
     results = {}
-    Dir["#{this_dir}/valid-hvac*.xml"].sort.each do |xml|
+    Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
       puts "\nTesting #{xml}..."
       args['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
@@ -341,7 +341,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       results.each do |xml, xml_results|
         csv_row = [xml]
         output_keys.each do |key|
-          csv_row << xml_results[key]
+          if xml_results[key].nil?
+            csv_row << 0
+          else
+            csv_row << xml_results[key]
+          end
         end
         csv << csv_row
       end
