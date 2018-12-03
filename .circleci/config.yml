@@ -11,3 +11,4 @@ jobs:
             ruby tests/hpxml_translator_test.rb
       - store_artifacts:
           path: tests/results
+          destination: results
