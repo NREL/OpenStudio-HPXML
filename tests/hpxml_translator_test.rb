@@ -118,6 +118,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _rm_path(rundir)
     Dir.mkdir(rundir)
 
+    workflow_start = Time.now
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
@@ -138,7 +139,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Run EnergyPlus
     ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
     command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
+    simulation_start = Time.now
     system(command, :err => File::NULL)
+    puts "Completed simulation in #{(Time.now - simulation_start).round(1)}, workflow in #{(Time.now - workflow_start).round(1)}s."
 
     # Verify simulation outputs
     _verify_simulation_outputs(this_dir, args['hpxml_path'])
