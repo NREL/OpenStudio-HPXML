@@ -6,104 +6,86 @@ require 'fileutils'
 require 'json'
 require 'rexml/document'
 require 'rexml/xpath'
+require_relative '../resources/constants'
+require_relative '../resources/meta_measure'
 require_relative '../resources/unit_conversions'
 require_relative '../resources/xmlhelper'
 
 class HPXMLTranslatorTest < MiniTest::Test
   def test_valid_simulations
+    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
+
     this_dir = File.dirname(__FILE__)
 
-    args_hash = {}
-    args_hash['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
-    args_hash['epw_output_path'] = File.absolute_path(File.join(this_dir, "in.epw"))
-    args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
+    args = {}
+    args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
+    args['epw_output_path'] = File.absolute_path(File.join(this_dir, "run", "in.epw"))
+    args['osm_output_path'] = File.absolute_path(File.join(this_dir, "run", "in.osm"))
+    args['skip_validation'] = false
 
+    # Standard tests
+    results = {}
     Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
-      puts "Testing #{xml}..."
-      args_hash['hpxml_path'] = File.absolute_path(xml)
+      puts "\nTesting #{xml}..."
+      args['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
-      _test_measure(args_hash)
-      _test_simulation(args_hash, this_dir)
+      _test_simulation(args, this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
     end
   end
 
-  def _test_measure(args_hash)
-    # create an instance of the measure
-    measure = HPXMLTranslator.new
+  def _get_results(this_dir)
+    sql_path = File.join(this_dir, "run", "eplusout.sql")
+    sqlFile = OpenStudio::SqlFile.new(sql_path, false)
+    begin
+      enduses = sqlFile.endUses.get
+      results = {}
+      OpenStudio::EndUses.fuelTypes.each do |fueltype|
+        OpenStudio::EndUses.categories.each do |category|
+          results[[fueltype.valueName, category.valueName]] = enduses.getEndUse(fueltype, category)
+        end
+      end
+    ensure
+      sqlFile.close
+    end
+    return results
+  end
 
-    # create an instance of a runner
+  def _test_simulation(args, this_dir)
+    # Uses meta_measure workflow for faster simulations
+
+    # Setup
+    rundir = File.join(this_dir, "run")
+    _rm_path(rundir)
+    Dir.mkdir(rundir)
+
+    workflow_start = Time.now
+    model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    model = OpenStudio::Model::Model.new
+    # Add measure to workflow
+    measures = {}
+    measure_subdir = File.absolute_path(File.join(this_dir, "..")).split('/')[-1]
+    update_args_hash(measures, measure_subdir, args)
 
-    # get arguments
-    arguments = measure.arguments(model)
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    # Apply measure
+    measures_dir = File.join(this_dir, "../../")
+    success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
 
-    # populate argument with specified hash value if specified
-    arguments.each do |arg|
-      temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
-        assert(temp_arg_var.setValue(args_hash[arg.name]))
-      end
-      argument_map[arg.name] = temp_arg_var
-    end
+    # Write model to IDF
+    forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
+    model_idf = forward_translator.translateModel(model)
+    File.open(File.join(rundir, "in.idf"), 'w') { |f| f << model_idf.to_s }
 
-    # run the measure
-    measure.run(model, runner, argument_map)
-    result = runner.result
-
-    # show the output
-    if result.value.valueName != "Success"
-      show_output(result)
-    end
-
-    # assert that it ran correctly
-    assert_equal("Success", result.value.valueName)
-  end
-
-  def _test_simulation(args_hash, this_dir)
-    # Get EPW path
-    hpxml_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
-    weather_wmo = XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO")
-    epw_path = nil
-    CSV.foreach(File.join(args_hash['weather_dir'], "data.csv"), headers: true) do |row|
-      next if row["wmo"] != weather_wmo
-
-      epw_path = File.absolute_path(File.join(args_hash['weather_dir'], row["filename"]))
-      break
-    end
-    refute_nil(epw_path)
-
-    # Create osw
-    osw_path = File.join(this_dir, "in.osw")
-    workflow = OpenStudio::WorkflowJSON.new
-    workflow.setWeatherFile(epw_path)
-    measure_path = File.absolute_path(File.join(this_dir, "..", ".."))
-    workflow.addMeasurePath(measure_path)
-    steps = OpenStudio::WorkflowStepVector.new
-    step = OpenStudio::MeasureStep.new(File.absolute_path(File.join(this_dir, "..")).split('/')[-1])
-    args_hash.each do |arg, val|
-      step.setArgument(arg, val)
-    end
-    steps.push(step)
-    workflow.setWorkflowSteps(steps)
-    workflow.saveAs(osw_path)
-
-    cli_path = OpenStudio.getOpenStudioCLI
-    cmd = "\"#{cli_path}\" --no-ssl run -w \"#{osw_path}\""
-    puts "Running command: #{cmd}"
-    system(cmd)
-
-    # Ensure success
-    out_osw = File.join(this_dir, "out.osw")
-    assert(File.exists?(out_osw))
-
-    data_hash = JSON.parse(File.read(out_osw))
-    assert_equal("Success", data_hash["completed_status"])
+    # Run EnergyPlus
+    ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
+    command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
+    simulation_start = Time.now
+    system(command, :err => File::NULL)
+    puts "Completed simulation in #{(Time.now - simulation_start).round(1)}, workflow in #{(Time.now - workflow_start).round(1)}s."
 
     # Verify simulation outputs
-    _verify_simulation_outputs(this_dir, args_hash['hpxml_path'])
+    _verify_simulation_outputs(this_dir, args['hpxml_path'])
   end
 
   def _get_sql_query_result(sqlFile, query)
@@ -117,6 +99,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def _verify_simulation_outputs(this_dir, hpxml_path)
     sql_path = File.join(this_dir, "run", "eplusout.sql")
+    assert(File.exists? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
@@ -285,11 +268,11 @@ class HPXMLTranslatorTest < MiniTest::Test
         htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
         hpxml_value = Float(XMLHelper.get_value(htg_sys, 'ElectricAuxiliaryEnergy')) / 2.08
         if htg_sys_type == "Boiler"
-          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%BOILER%' AND ColumnName='Electric Power' AND Units='W'"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%#{Constants.ObjectNameBoiler.upcase}%' AND ColumnName='Electric Power' AND Units='W'"
         elsif htg_sys_type == "Furnace"
-          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%FURNACE%' AND ColumnName='Rated Electric Power' AND Units='W'"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
         elsif htg_sys_type == "Stove" or htg_sys_type == "WallFurnace"
-          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%UNIT HEATER%' AND ColumnName='Rated Electric Power' AND Units='W'"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
         else
           flunk "Unexpected heating system type '#{htg_sys_type}'."
         end
@@ -297,6 +280,8 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
     end
+
+    sqlFile.close
   end
 
   def _test_schema_validation(parent_dir, xml)
@@ -308,5 +293,16 @@ class HPXMLTranslatorTest < MiniTest::Test
       puts "#{xml}: #{errors.to_s}"
     end
     assert_equal(0, errors.size)
+  end
+
+  def _rm_path(path)
+    if Dir.exists?(path)
+      FileUtils.rm_r(path)
+    end
+    while true
+      break if not Dir.exists?(path)
+
+      sleep(0.01)
+    end
   end
 end
