@@ -5,3 +5,4 @@
 /tests/reports
 /tests/run
 /.rubocop.yml
+/tests/results
