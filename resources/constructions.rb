@@ -2018,7 +2018,7 @@ class MoistureConstructions
   # Container class for decoupled internal mass with moisture properties
 
   def self.apply_drywall(runner, model, spaces, surface_type, partition_wall_frac_of_ffa = Constants.PartitionWallFracOfFFA)
-    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameDrywall}"
+    name = "#{Constants.ObjectNameEMPD} #{Constants.ObjectNameDrywall} #{surface_type}"
 
     thick = 0.001 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)
     k = 0.1 # not used by EMPD model; we want EMPD materials to have no impact on temperature (provide no sensible heat buffering)

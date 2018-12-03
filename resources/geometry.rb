@@ -948,6 +948,17 @@ class Geometry
     return finished_spaces
   end
 
+  def self.get_finished_spaces_below_grade(spaces)
+    finished_spaces_below_grade = []
+    spaces.each do |space|
+      next if self.space_is_unfinished(space)
+      next unless Geometry.space_is_below_grade(space)
+
+      finished_spaces_below_grade << space
+    end
+    return finished_spaces_below_grade
+  end
+
   def self.get_bedroom_spaces(spaces)
     bedroom_spaces = []
     spaces.each do |space|
