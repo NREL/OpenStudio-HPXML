@@ -41,7 +41,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       args['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
       _test_simulation(args, this_dir)
-      args['hpxml_path'] = _get_results(this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
 
       # Retrieve x1 results for comparison
       xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
@@ -49,9 +49,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       puts "\nResults for #{xml}:"
-      results_x1.keys.each do |k|
+      results[args['hpxml_path']].keys.each do |k|
         result_x1 = results_x1[k].to_f
-        result_x3 = args['hpxml_path'][k].to_f
+        result_x3 = results[args['hpxml_path']][k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
 
         puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
@@ -64,12 +64,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Run HPXML files with DSE; compare heating/cooling results to files
     # with no ducts.
     Dir["#{this_dir}/dse/valid*.xml"].sort.each do |xml|
-      # Run file with DSE
       puts "\nTesting #{xml}..."
       args['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, args['hpxml_path'])
       _test_simulation(args, this_dir)
-      args['hpxml_path'] = _get_results(this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
 
       # Retrieve no distribution results for comparison
       xml_nodist = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse", "-no-distribution"))))
@@ -77,10 +76,10 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       puts "\nResults for #{xml}:"
-      results_nodist.keys.each do |k|
+      results[args['hpxml_path']].keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
 
-        result_dse = args['hpxml_path'][k].to_f
+        result_dse = results[args['hpxml_path']][k].to_f
         result_nodist = results_nodist[k].to_f
         next if result_dse == 0.0 and result_nodist == 0.0
 
@@ -91,7 +90,29 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
       puts "\n"
     end
-    
+
+    # CFIS tests
+    # Run HPXML files with CFIS; verify non-zero mechanical ventilation energy.
+    Dir["#{this_dir}/cfis/valid*.xml"].sort.each do |xml|
+      puts "\nTesting #{xml}..."
+      args['hpxml_path'] = File.absolute_path(xml)
+      _test_schema_validation(this_dir, args['hpxml_path'])
+      _test_simulation(args, this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
+
+      # Verify results
+      puts "\nResults for #{xml}:"
+      found_mv = false
+      results[args['hpxml_path']].keys.each do |k|
+        next if k[0] != 'Electricity' or k[2] != Constants.EndUseMechVentFan
+
+        found_mv = true
+        puts "mech vent: #{results[args['hpxml_path']][k].round(2)} #{k}"
+        assert_operator(results[args['hpxml_path']][k], :>, 0)
+      end
+      assert(found_mv)
+    end
+
     _write_summary_results(this_dir, results)
   end
 
