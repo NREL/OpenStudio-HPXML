@@ -91,6 +91,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
       puts "\n"
     end
+    
+    _write_summary_results(this_dir, results)
   end
 
   def _get_results(this_dir)
@@ -100,8 +102,9 @@ class HPXMLTranslatorTest < MiniTest::Test
       enduses = sqlFile.endUses.get
       results = {}
       OpenStudio::EndUses.fuelTypes.each do |fueltype|
+        units = OpenStudio::EndUses.getUnitsForFuelType(fueltype)
         OpenStudio::EndUses.categories.each do |category|
-          results[[fueltype.valueName, category.valueName]] = enduses.getEndUse(fueltype, category)
+          results[[fueltype.valueName, category.valueName, units]] = enduses.getEndUse(fueltype, category)
         end
       end
     ensure
@@ -359,6 +362,27 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     sqlFile.close
+  end
+  
+  def _write_summary_results(this_dir, results)
+    csv_out = File.join(this_dir, 'results', 'results.csv')
+    _rm_path(File.dirname(csv_out))
+    Dir.mkdir(File.dirname(csv_out))
+    
+    column_headers = ['HPXML']
+    results[results.keys[0]].keys.each do |key|
+      column_headers << "#{key[0]}: #{key[1]} [#{key[2]}]"
+    end
+    
+    require 'csv'
+    CSV.open(csv_out, 'w') do |csv|
+      csv << column_headers
+      results.each do |xml, xml_results|
+        csv << [xml] + xml_results.values
+      end
+    end
+    
+    puts "Wrote results to #{csv_out}."
   end
 
   def _test_schema_validation(parent_dir, xml)
