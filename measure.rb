@@ -2476,7 +2476,7 @@ class OSModel
         cap_retention_temp = -5.0
         pan_heater_power = 0.0
         fan_power = 0.07
-        is_ducted = XMLHelper.has_element(hp, "DistributionSystem")
+        is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and dse_heat == 1.0)
         supplemental_efficiency = 1.0
         success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
@@ -2831,7 +2831,7 @@ class OSModel
         mech_vent_type = Constants.VentTypeExhaust
       elsif fan_type == "central fan integrated supply"
         mech_vent_type = Constants.VentTypeCFIS
-      elsif fan_type == "balanced"
+      elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
         mech_vent_type = Constants.VentTypeBalanced
       end
       mech_vent_total_efficiency = 0.0
@@ -2993,25 +2993,21 @@ class OSModel
 
       loop_hvac = nil
       zone_hvac = nil
+      loop_hvac_cool = nil
       if loop_hvacs.keys.include? sys_id
         loop_hvac = loop_hvacs[sys_id][0]
         has_furnace = (htg_type == "Furnace")
         has_boiler = (htg_type == "Boiler")
 
-        # If gas furnace, get total heating capacity for EAE calculation
-        htg_capacity = nil
         if has_furnace
-          htg_capacity = 0.0
-          loop_hvacs.values.each do |this_loop_hvac|
-            this_loop_hvac[0].supplyComponents.each do |supply_component|
-              next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
+          # Check for cooling system on the same supply fan
+          htgdist = htgsys.elements["DistributionSystem"]
+          building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
+            clgdist = clgsys.elements["DistributionSystem"]
+            next if htgdist.nil? or clgdist.nil?
+            next if clgdist.attributes["idref"] != htgdist.attributes["idref"]
 
-              unitary_system = supply_component.to_AirLoopHVACUnitarySystem.get
-              next unless unitary_system.heatingCoil.is_initialized
-
-              htg_coil = unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-              htg_capacity += UnitConversions.convert(htg_coil.nominalCapacity.get, "W", "kBtu/hr")
-            end
+            loop_hvac_cool = loop_hvacs[clgsys.elements["SystemIdentifier"].attributes["id"]][0]
           end
         end
       elsif zone_hvacs.keys.include? sys_id
@@ -3019,7 +3015,7 @@ class OSModel
       end
 
       success = HVAC.apply_eae_to_heating_fan(runner, loop_hvac, zone_hvac, fuel_eae, fuel, dse_heat,
-                                              has_furnace, has_boiler, load_frac, htg_capacity)
+                                              has_furnace, has_boiler, load_frac, loop_hvac_cool)
       return false if not success
     end
 

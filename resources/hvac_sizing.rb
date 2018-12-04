@@ -4103,14 +4103,22 @@ class HVACSizing
         next if system.nil?
 
         # Fan Airflow
-        if system.name.to_s.start_with? Constants.ObjectNameCentralAirConditioner
-          fan_airflow = unit_final.Cool_Airflow
-        elsif system.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump or
-              system.name.to_s.start_with? Constants.ObjectNameGroundSourceHeatPumpVerticalBore or
-              system.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
+        if system.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump or
+           system.name.to_s.start_with? Constants.ObjectNameGroundSourceHeatPumpVerticalBore or
+           system.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
           fan_airflow = [unit_final.Heat_Airflow, unit_final.Cool_Airflow].max
+        elsif system.name.to_s.start_with? Constants.ObjectNameCentralAirConditioner
+          if hvac.HasFurnace
+            fan_airflow = [unit_final.Heat_Airflow, unit_final.Cool_Airflow].max
+          else
+            fan_airflow = unit_final.Cool_Airflow
+          end
         elsif system.name.to_s.start_with? Constants.ObjectNameFurnace
-          fan_airflow = unit_final.Heat_Airflow
+          if hvac.HasCentralAirConditioner
+            fan_airflow = [unit_final.Heat_Airflow, unit_final.Cool_Airflow].max
+          else
+            fan_airflow = unit_final.Heat_Airflow
+          end
         else
           runner.registerError("Unexpected unitary system.")
           return false

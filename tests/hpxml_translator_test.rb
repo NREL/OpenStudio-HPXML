@@ -12,7 +12,7 @@ require_relative '../resources/unit_conversions'
 require_relative '../resources/xmlhelper'
 
 class HPXMLTranslatorTest < MiniTest::Test
-  def test_valid_simulations
+  def test_simulations
     OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
 
     this_dir = File.dirname(__FILE__)
@@ -408,17 +408,36 @@ class HPXMLTranslatorTest < MiniTest::Test
           end
           hpxml_value = HVAC.get_default_eae(htg_sys_type == 'Boiler', htg_sys_type == 'Furnace', htg_sys_fuel, 1.0, furnace_capacity_kbtuh) / (2.08 * htg_dse)
         end
-        if htg_sys_type == "Boiler"
+        if htg_sys_type == 'Boiler'
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%#{Constants.ObjectNameBoiler.upcase}%' AND ColumnName='Electric Power' AND Units='W'"
-        elsif htg_sys_type == "Furnace"
+        elsif htg_sys_type == 'Furnace'
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
-        elsif htg_sys_type == "Stove" or htg_sys_type == "WallFurnace"
+        elsif htg_sys_type == 'Stove' or htg_sys_type == 'WallFurnace'
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
         else
           flunk "Unexpected heating system type '#{htg_sys_type}'."
         end
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+        if htg_sys_type == 'Furnace'
+          # Also check supply fan of cooling system as needed
+          htg_dist = htg_sys.elements['DistributionSystem']
+          bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
+            clg_dist = clg_sys.elements['DistributionSystem']
+            next if htg_dist.nil? or clg_dist.nil?
+            next if clg_dist.attributes['idref'] != htg_dist.attributes['idref']
+
+            clg_sys_type = XMLHelper.get_value(clg_sys, 'CoolingSystemType')
+            if clg_sys_type == 'central air conditioning'
+              query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameCentralAirConditioner.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
+              sql_value = sqlFile.execAndReturnFirstDouble(query).get
+              assert_in_epsilon(hpxml_value, sql_value, 0.01)
+            else
+              flunk "Unexpected cooling system type: #{clg_sys_type}."
+            end
+          end
+        end
       end
     end
 
