@@ -2476,7 +2476,7 @@ class OSModel
         cap_retention_temp = -5.0
         pan_heater_power = 0.0
         fan_power = 0.07
-        is_ducted = false
+        is_ducted = XMLHelper.has_element(hp, "DistributionSystem")
         supplemental_efficiency = 1.0
         success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
@@ -2829,7 +2829,9 @@ class OSModel
         mech_vent_type = Constants.VentTypeSupply
       elsif fan_type == "exhaust only"
         mech_vent_type = Constants.VentTypeExhaust
-      else
+      elsif fan_type == "central fan integrated supply"
+        mech_vent_type = Constants.VentTypeCFIS
+      elsif fan_type == "balanced"
         mech_vent_type = Constants.VentTypeBalanced
       end
       mech_vent_total_efficiency = 0.0
@@ -2949,7 +2951,9 @@ class OSModel
         systems_for_no_duct << loop
       end
     end
-    duct_systems[no_ducts] = systems_for_no_duct
+    if not systems_for_no_duct.empty?
+      duct_systems[no_ducts] = systems_for_no_duct
+    end
 
     # FIXME: Throw error if, e.g., multiple heating systems connected to same distribution system?
 

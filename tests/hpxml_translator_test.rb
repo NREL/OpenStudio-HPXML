@@ -107,7 +107,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         next if k[0] != 'Electricity' or k[2] != Constants.EndUseMechVentFan
 
         found_mv = true
-        puts "mech vent: #{results[args['hpxml_path']][k].round(2)} #{k}"
+        puts "CFIS: #{results[args['hpxml_path']][k].round(2)} #{k}"
         assert_operator(results[args['hpxml_path']][k], :>, 0)
       end
       assert(found_mv)
@@ -191,6 +191,18 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Apply measure
     measures_dir = File.join(this_dir, "../../")
     success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
+
+    # Report warnings/errors
+    File.open(File.join(rundir, 'run.log'), 'w') do |f|
+      runner.result.stepWarnings.each do |s|
+        f << "Warning: #{s}\n"
+      end
+      runner.result.stepErrors.each do |s|
+        f << "Error: #{s}\n"
+      end
+    end
+
+    assert(success)
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new

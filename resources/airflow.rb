@@ -1380,7 +1380,7 @@ class Airflow
     cfis_airflow_frac = nil
     cfis_programs.each do |cfis, value|
       cfis_airflow_frac = cfis.airflow_frac
-      cfis_program, cfis_output, clg_coil = value
+      cfis_program, cfis_output, supply_fan = value
       cfis_output.fan_rtf_sensor = "(#{fan_rtf_sensors.join("+")})"
       cfis_output.max_supply_fan_mfr = "(#{max_supply_fan_mfrs.join(" ")})"
     end
@@ -1828,22 +1828,19 @@ class Airflow
     cfis_program.addLine("Set #{cfis_output.on_for_hour_var.name} = 0")
     cfis_program.addLine("Set #{cfis_output.f_damper_open_var.name} = 0")
 
-    clg_coil = nil
+    supply_fan = nil
     air_loops.each do |air_loop|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
 
       air_loop.supplyComponents.each do |supply_component|
         next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
 
-        system = supply_component.to_AirLoopHVACUnitarySystem.get
-
-        if system.coolingCoil.is_initialized
-          clg_coil = system.coolingCoil.get
-        end
+        air_loop_unitary = supply_component.to_AirLoopHVACUnitarySystem.get
+        supply_fan = air_loop_unitary.supplyFan.get
       end
     end
 
-    cfis_programs[cfis] = [cfis_program, cfis_output, clg_coil]
+    cfis_programs[cfis] = [cfis_program, cfis_output, supply_fan]
 
     runner.registerInfo("Created a CFIS system.")
 
@@ -2017,21 +2014,12 @@ class Airflow
 
     cfis_outdoor_airflow = 0.0
     cfis_programs.each do |cfis, value| # TODO: this assumes we always have exactly one cfis system
-      cfis_program, cfis_output, clg_coil = value
+      cfis_program, cfis_output, supply_fan = value
 
-      next if clg_coil.nil?
-
-      rated_evaporator_fan_power_per_volume_flow_rate = nil
-      clg_coil = HVAC.get_coil_from_hvac_component(clg_coil)
-      if clg_coil.to_CoilCoolingDXSingleSpeed.is_initialized
-        rated_evaporator_fan_power_per_volume_flow_rate = clg_coil.ratedEvaporatorFanPowerPerVolumeFlowRate.get
-      elsif clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
-        clg_coil.stages.each do |stage|
-          rated_evaporator_fan_power_per_volume_flow_rate = stage.ratedEvaporatorFanPowerPerVolumeFlowRate
-          break
-        end
-      end
-      cfis_fan_power = rated_evaporator_fan_power_per_volume_flow_rate / UnitConversions.convert(1.0, "m^3/s", "cfm") # W/cfms
+      supply_fan = supply_fan.to_FanOnOff.get
+      fan_pressure_rise = supply_fan.pressureRise # Pa
+      fan_eff = supply_fan.fanTotalEfficiency
+      cfis_fan_power = fan_pressure_rise / fan_eff * UnitConversions.convert(1.0, "cfm", "m^3/s")
 
       if cfis.open_time > 0.0
         cfis_outdoor_airflow = mv_output.whole_house_vent_rate * (60.0 / cfis.open_time)
@@ -2160,7 +2148,7 @@ class Airflow
     program_calling_manager.addProgram(nv_program)
 
     cfis_programs.each do |cfis, value|
-      cfis_program, cfis_output, clg_coil = value
+      cfis_program, cfis_output, supply_fan = value
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       program_calling_manager.setName(obj_name_mech_vent + " cfis init program 1 calling manager")
       program_calling_manager.setCallingPoint("BeginNewEnvironment")
