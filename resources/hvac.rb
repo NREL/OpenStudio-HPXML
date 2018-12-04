@@ -3302,24 +3302,19 @@ class HVAC
     end
   end
 
-  def self.apply_eae_to_heating_fan(runner, hvac_loop, eae, fuel, dse, has_furnace, has_boiler, load_frac, htg_capacity)
+  def self.apply_eae_to_heating_fan(runner, loop_hvac, zone_hvac, eae, fuel, dse, has_furnace, has_boiler, load_frac, htg_capacity)
     # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
 
     if has_boiler
 
       if eae.nil?
-        # From ANSI/RESNET/ICC 301 Standard
-        if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-          eae = 170.0 * load_frac
-        elsif fuel == Constants.FuelTypeOil
-          eae = 330.0 * load_frac
-        end
+        eae = get_default_eae(has_boiler, has_furnace, fuel, load_frac, htg_capacity)
       end
 
       # TODO: We shouldn't have to apply load_frac here, but it gives better results
       elec_power = (eae / 2.08) * load_frac # W
 
-      hvac_loop.components.each do |plc|
+      loop_hvac.components.each do |plc|
         if plc.to_BoilerHotWater.is_initialized
           boiler = plc.to_BoilerHotWater.get
           boiler.setParasiticElectricLoad(0.0)
@@ -3337,23 +3332,18 @@ class HVAC
     else # Furnace/WallFurnace/Stove
 
       unitary_system = nil
-      hvac_loop.supplyComponents.each do |supply_component|
-        next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
+      if has_furnace
+        loop_hvac.supplyComponents.each do |supply_component|
+          next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
 
-        unitary_system = supply_component.to_AirLoopHVACUnitarySystem.get
+          unitary_system = supply_component.to_AirLoopHVACUnitarySystem.get
+        end
+      else
+        unitary_system = zone_hvac.to_AirLoopHVACUnitarySystem.get
       end
 
       if eae.nil?
-        if has_furnace
-          # From ANSI/RESNET/ICC 301 Standard
-          if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-            eae = (149.0 + 10.3 * htg_capacity) * load_frac # kWh/yr
-          elsif fuel == Constants.FuelTypeOil
-            eae = (439.0 + 5.5 * htg_capacity) * load_frac # kWh/yr
-          end
-        else
-          eae = 0.0
-        end
+        eae = get_default_eae(has_boiler, has_furnace, fuel, load_frac, htg_capacity)
       end
       elec_power = eae / 2.08 # W
 
@@ -3377,6 +3367,27 @@ class HVAC
     end
 
     return true
+  end
+
+  def self.get_default_eae(has_boiler, has_furnace, fuel, load_frac, furnace_capacity_kbtuh)
+    # From ANSI/RESNET/ICC 301 Standard
+    eae = nil
+    if has_boiler
+      if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
+        eae = 170.0 * load_frac # kWh/yr
+      elsif fuel == Constants.FuelTypeOil
+        eae = 330.0 * load_frac # kWh/yr
+      end
+    elsif has_furnace
+      if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
+        eae = (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+      elsif fuel == Constants.FuelTypeOil
+        eae = (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+      end
+    else
+      eae = 0.0 # FIXME: Is this right?
+    end
+    return eae
   end
 
   private

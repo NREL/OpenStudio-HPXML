@@ -230,17 +230,17 @@
             <HeatPump>
               <SystemIdentifier id='SpaceHeatPump_ID1'/>
               <DistributionSystem idref='HVAC_Dist_ID1'/>
-              <HeatPumpType>mini-split</HeatPumpType>
+              <HeatPumpType>ground-to-air</HeatPumpType>
               <CoolingCapacity>48000</CoolingCapacity>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>19.0</Value>
+                <Units>EER</Units>
+                <Value>16.6</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
+                <Units>COP</Units>
+                <Value>3.6</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
@@ -251,37 +251,10 @@
           <HVACDistribution>
             <SystemIdentifier id='HVAC_Dist_ID1'/>
             <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>15.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>5.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <Ducts>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>unconditioned attic</DuctLocation>
-                  <DuctSurfaceArea>30.0</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>unconditioned attic</DuctLocation>
-                  <DuctSurfaceArea>10.0</DuctSurfaceArea>
-                </Ducts>
-              </AirDistribution>
+              <Other>DSE</Other>
             </DistributionSystemType>
+            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
+            <AnnualCoolingDistributionSystemEfficiency>0.8</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

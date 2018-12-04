@@ -6,59 +6,52 @@ require 'fileutils'
 require 'json'
 require 'rexml/document'
 require 'rexml/xpath'
+require_relative '../resources/constants'
+require_relative '../resources/meta_measure'
 require_relative '../resources/unit_conversions'
 require_relative '../resources/xmlhelper'
 
 class HPXMLTranslatorTest < MiniTest::Test
   def test_valid_simulations
+    OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
+
     this_dir = File.dirname(__FILE__)
 
-    args_hash = {}
-    args_hash['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
-    args_hash['epw_output_path'] = File.absolute_path(File.join(this_dir, "in.epw"))
-    args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
+    args = {}
+    args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
+    args['epw_output_path'] = File.absolute_path(File.join(this_dir, "run", "in.epw"))
+    args['osm_output_path'] = File.absolute_path(File.join(this_dir, "run", "in.osm"))
+    args['skip_validation'] = false
 
+    # Standard tests
+    results = {}
     Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
       puts "\nTesting #{xml}..."
-      args_hash['hpxml_path'] = File.absolute_path(xml)
+      args['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
-      _test_measure(args_hash)
-      _test_simulation(args_hash, this_dir)
+      _test_simulation(args, this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
     end
-  end
 
-  def test_multiple_hvac
-    # Run HPXML files with 3 of the same HVAC system and compare results to files
-    # with one of that HVAC system.
-    this_dir = File.dirname(__FILE__)
-
-    args_hash = {}
-    args_hash['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
-    args_hash['epw_output_path'] = File.absolute_path(File.join(this_dir, "in.epw"))
-    args_hash['osm_output_path'] = File.absolute_path(File.join(this_dir, "in.osm"))
-
+    # Multiple HVAC tests
+    # Run HPXML files with 3 of the same HVAC system; compare end use
+    # results to files with one of that HVAC system.
     Dir["#{this_dir}/multiple_hvac/valid*.xml"].sort.each do |xml|
       puts "\nTesting #{xml}..."
-      args_hash['hpxml_path'] = File.absolute_path(xml)
+      args['hpxml_path'] = File.absolute_path(xml)
       _test_schema_validation(this_dir, xml)
-      _test_measure(args_hash)
-      _test_simulation(args_hash, this_dir)
-      results_x3 = _get_results(this_dir)
+      _test_simulation(args, this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
 
-      # Run complementary file with single HVAC
-      xml_x1 = xml.gsub("-x3", "")
-      puts "\nTesting #{xml_x1}..."
-      args_hash['hpxml_path'] = File.absolute_path(File.join(File.dirname(xml_x1), "..", File.basename(xml_x1)))
-      _test_schema_validation(this_dir, xml)
-      _test_measure(args_hash)
-      _test_simulation(args_hash, this_dir)
-      results_x1 = _get_results(this_dir)
+      # Retrieve x1 results for comparison
+      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
+      results_x1 = results[xml_x1]
 
       # Compare results
       puts "\nResults for #{xml}:"
-      results_x1.keys.each do |k|
+      results[args['hpxml_path']].keys.each do |k|
         result_x1 = results_x1[k].to_f
-        result_x3 = results_x3[k].to_f
+        result_x3 = results[args['hpxml_path']][k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
 
         puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
@@ -66,111 +59,158 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
       puts "\n"
     end
+
+    # DSE tests
+    # Run HPXML files with DSE; compare heating/cooling results to files
+    # with no ducts.
+    Dir["#{this_dir}/dse/valid*.xml"].sort.each do |xml|
+      puts "\nTesting #{xml}..."
+      args['hpxml_path'] = File.absolute_path(xml)
+      _test_schema_validation(this_dir, args['hpxml_path'])
+      _test_simulation(args, this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
+
+      # Retrieve no distribution results for comparison
+      xml_nodist = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse", "-no-distribution"))))
+      results_nodist = results[xml_nodist]
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results[args['hpxml_path']].keys.each do |k|
+        next if not ["Heating", "Cooling"].include? k[1]
+
+        result_dse = results[args['hpxml_path']][k].to_f
+        result_nodist = results_nodist[k].to_f
+        next if result_dse == 0.0 and result_nodist == 0.0
+
+        dse_actual = result_nodist / result_dse
+        dse_expect = 0.8
+        puts "dse: #{dse_actual.round(2)} #{k}"
+        assert_in_epsilon(dse_expect, dse_actual, 0.01)
+      end
+      puts "\n"
+    end
+
+    # CFIS tests
+    # Run HPXML files with CFIS; verify non-zero mechanical ventilation energy.
+    Dir["#{this_dir}/cfis/valid*.xml"].sort.each do |xml|
+      puts "\nTesting #{xml}..."
+      args['hpxml_path'] = File.absolute_path(xml)
+      _test_schema_validation(this_dir, args['hpxml_path'])
+      _test_simulation(args, this_dir)
+      results[args['hpxml_path']] = _get_results(this_dir)
+
+      # Verify results
+      puts "\nResults for #{xml}:"
+      found_mv = false
+      results[args['hpxml_path']].keys.each do |k|
+        next if k[0] != 'Electricity' or k[2] != Constants.EndUseMechVentFan
+
+        found_mv = true
+        puts "mech vent: #{results[args['hpxml_path']][k].round(2)} #{k}"
+        assert_operator(results[args['hpxml_path']][k], :>, 0)
+      end
+      assert(found_mv)
+    end
+
+    _write_summary_results(this_dir, results)
   end
 
   def _get_results(this_dir)
     sql_path = File.join(this_dir, "run", "eplusout.sql")
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-    begin
-      enduses = sqlFile.endUses.get
-      results = {}
-      OpenStudio::EndUses.fuelTypes.each do |fueltype|
-        OpenStudio::EndUses.categories.each do |category|
-          results[[fueltype.valueName, category.valueName]] = enduses.getEndUse(fueltype, category)
-        end
-      end
-    ensure
-      sqlFile.close
+
+    tdws = 'TabularDataWithStrings'
+    abups = 'AnnualBuildingUtilityPerformanceSummary'
+    ef = 'Entire Facility'
+    eubs = 'End Uses By Subcategory'
+    s = 'Subcategory'
+
+    # Obtain fueltypes
+    query = "SELECT ColumnName FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' and ColumnName!='#{s}'"
+    fueltypes = sqlFile.execAndReturnVectorOfString(query).get
+
+    # Obtain units
+    query = "SELECT Units FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' and ColumnName!='#{s}'"
+    units = sqlFile.execAndReturnVectorOfString(query).get
+
+    # Obtain categories
+    query = "SELECT RowName FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' AND ColumnName='#{s}'"
+    categories = sqlFile.execAndReturnVectorOfString(query).get
+    # Fill in blanks based on previous non-blank value
+    full_categories = []
+    (0..categories.size - 1).each do |i|
+      full_categories << categories[i]
+      next if full_categories[i].size > 0
+
+      full_categories[i] = full_categories[i - 1]
     end
+    full_categories = full_categories * fueltypes.uniq.size # Expand to size of fueltypes
+
+    # Obtain subcategories
+    query = "SELECT Value FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' AND ColumnName='#{s}'"
+    subcategories = sqlFile.execAndReturnVectorOfString(query).get
+    subcategories = subcategories * fueltypes.uniq.size # Expand to size of fueltypes
+
+    # Obtain starting position of results
+    query = "SELECT MIN(TabularDataIndex) FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' AND ColumnName='#{fueltypes[0]}'"
+    starting_index = sqlFile.execAndReturnFirstInt(query).get
+
+    # TabularDataWithStrings table is positional, so we access results by position.
+    results = {}
+    fueltypes.zip(full_categories, subcategories, units).each_with_index do |(fueltype, category, subcategory, fuel_units), index|
+      query = "SELECT Value FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' AND TabularDataIndex='#{starting_index + index}'"
+      val = sqlFile.execAndReturnFirstDouble(query).get
+      next if val == 0
+
+      results[[fueltype, category, subcategory, fuel_units]] = val
+    end
+
+    sqlFile.close
+
     return results
   end
 
-  def _test_measure(args_hash)
-    # create an instance of the measure
-    measure = HPXMLTranslator.new
+  def _test_simulation(args, this_dir)
+    # Uses meta_measure workflow for faster simulations
 
-    # create an instance of a runner
+    # Setup
+    rundir = File.join(this_dir, "run")
+    _rm_path(rundir)
+    Dir.mkdir(rundir)
+
+    workflow_start = Time.now
+    model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
 
-    model = OpenStudio::Model::Model.new
+    # Add measure to workflow
+    measures = {}
+    measure_subdir = File.absolute_path(File.join(this_dir, "..")).split('/')[-1]
+    update_args_hash(measures, measure_subdir, args)
 
-    # get arguments
-    arguments = measure.arguments(model)
-    argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
+    # Apply measure
+    measures_dir = File.join(this_dir, "../../")
+    success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
 
-    # populate argument with specified hash value if specified
-    arguments.each do |arg|
-      temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
-        assert(temp_arg_var.setValue(args_hash[arg.name]))
-      end
-      argument_map[arg.name] = temp_arg_var
-    end
+    # Write model to IDF
+    forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
+    model_idf = forward_translator.translateModel(model)
+    File.open(File.join(rundir, "in.idf"), 'w') { |f| f << model_idf.to_s }
 
-    # run the measure
-    measure.run(model, runner, argument_map)
-    result = runner.result
-
-    # show the output
-    if result.value.valueName != "Success"
-      show_output(result)
-    end
-
-    # assert that it ran correctly
-    assert_equal("Success", result.value.valueName)
-  end
-
-  def _test_simulation(args_hash, this_dir)
-    # Get EPW path
-    hpxml_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
-    weather_wmo = XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO")
-    epw_path = nil
-    CSV.foreach(File.join(args_hash['weather_dir'], "data.csv"), headers: true) do |row|
-      next if row["wmo"] != weather_wmo
-
-      epw_path = File.absolute_path(File.join(args_hash['weather_dir'], row["filename"]))
-      break
-    end
-    refute_nil(epw_path)
-
-    # Create osw
-    osw_path = File.join(this_dir, "in.osw")
-    workflow = OpenStudio::WorkflowJSON.new
-    workflow.setWeatherFile(epw_path)
-    measure_path = File.absolute_path(File.join(this_dir, "..", ".."))
-    workflow.addMeasurePath(measure_path)
-    steps = OpenStudio::WorkflowStepVector.new
-    step = OpenStudio::MeasureStep.new(File.absolute_path(File.join(this_dir, "..")).split('/')[-1])
-    args_hash.each do |arg, val|
-      step.setArgument(arg, val)
-    end
-    steps.push(step)
-    workflow.setWorkflowSteps(steps)
-    workflow.saveAs(osw_path)
-
-    cli_path = OpenStudio.getOpenStudioCLI
-    cmd = "\"#{cli_path}\" --no-ssl run -w \"#{osw_path}\""
-    system(cmd)
-
-    # Ensure success
-    out_osw = File.join(this_dir, "out.osw")
-    assert(File.exists?(out_osw))
-
-    data_hash = JSON.parse(File.read(out_osw))
-    assert_equal("Success", data_hash["completed_status"])
+    # Run EnergyPlus
+    ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
+    command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
+    simulation_start = Time.now
+    system(command, :err => File::NULL)
+    puts "Completed simulation in #{(Time.now - simulation_start).round(1)}, workflow in #{(Time.now - workflow_start).round(1)}s."
 
     # Verify simulation outputs
-    _verify_simulation_outputs(this_dir, args_hash['hpxml_path'])
-  end
-
-  def _get_sql_query_result(sqlFile, query)
-    result = sqlFile.execAndReturnFirstDouble(query)
-    assert(result.is_initialized)
-    return result.get
+    _verify_simulation_outputs(this_dir, args['hpxml_path'])
   end
 
   def _verify_simulation_outputs(this_dir, hpxml_path)
     sql_path = File.join(this_dir, "run", "eplusout.sql")
+    assert(File.exists? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
@@ -181,7 +221,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if XMLHelper.has_element(bldg_details, "Systems/HVAC") # EnergyPlus will only report conditioned floor area if there is an HVAC system
       hpxml_value = Float(XMLHelper.get_value(bldg_details, 'BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='InputVerificationandResultsSummary' AND ReportForString='Entire Facility' AND TableName='Zone Summary' AND RowName='Conditioned Total' AND ColumnName='Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
@@ -192,7 +232,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       # R-value
       hpxml_value = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.07) # TODO: Higher due to outside air film?
 
       # Net area
@@ -203,19 +243,19 @@ class HPXMLTranslatorTest < MiniTest::Test
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Net Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
       hpxml_value = Float(XMLHelper.get_value(roof, 'SolarAbsorptance'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Reflectance'"
-      sql_value = 1.0 - _get_sql_query_result(sqlFile, query)
+      sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
       hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = _get_sql_query_result(sqlFile, query)
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
@@ -226,12 +266,12 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Area
       hpxml_value = Float(XMLHelper.get_value(slab, 'Area'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = _get_sql_query_result(sqlFile, query)
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(180.0, sql_value, 0.01)
     end
 
@@ -242,7 +282,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       # R-value
       hpxml_value = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.03)
 
       # Net area
@@ -253,18 +293,18 @@ class HPXMLTranslatorTest < MiniTest::Test
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Net Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
       hpxml_value = Float(XMLHelper.get_value(wall, 'SolarAbsorptance'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Reflectance'"
-      sql_value = 1.0 - _get_sql_query_result(sqlFile, query)
+      sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = _get_sql_query_result(sqlFile, query)
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(90.0, sql_value, 0.01)
     end
 
@@ -275,13 +315,13 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Area
       hpxml_value = Float(XMLHelper.get_value(subsurface, 'Area'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Area of Multiplied Openings' AND Units='m2'"
-      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # U-Factor
       hpxml_value = Float(XMLHelper.get_value(subsurface, 'UFactor'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Glass U-Factor' AND Units='W/m2-K'"
-      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # SHGC
@@ -290,13 +330,13 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Azimuth
       hpxml_value = Float(XMLHelper.get_value(subsurface, 'Azimuth'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Azimuth' AND Units='deg'"
-      sql_value = _get_sql_query_result(sqlFile, query)
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
       if XMLHelper.has_element(subsurface, "AttachedToWall")
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
-        sql_value = _get_sql_query_result(sqlFile, query)
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(90.0, sql_value, 0.01)
       elsif XMLHelper.has_element(subsurface, "AttachedToRoof")
         hpxml_value = nil
@@ -306,7 +346,7 @@ class HPXMLTranslatorTest < MiniTest::Test
           hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")
         end
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Fenestration' AND RowName='#{subsurface_id}' AND ColumnName='Tilt' AND Units='deg'"
-        sql_value = _get_sql_query_result(sqlFile, query)
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       else
         flunk "Subsurface '#{subsurface_id}' should have either AttachedToWall or AttachedToRoof element."
@@ -320,15 +360,96 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Area
       hpxml_value = Float(XMLHelper.get_value(door, 'Area'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'm^2', 'ft^2')
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # R-Value
       hpxml_value = Float(XMLHelper.get_value(door, 'RValue'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(_get_sql_query_result(sqlFile, query), 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
+
+    # Heating Systems
+    num_htg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatingSystem)']
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+      htg_sys_id = htg_sys.elements["SystemIdentifier"].attributes["id"].upcase
+      htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
+      htg_sys_fuel = to_beopt_fuel(XMLHelper.get_value(htg_sys, 'HeatingSystemFuel'))
+      htg_dse = XMLHelper.get_value(bldg_details, 'Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency')
+      if htg_dse.nil?
+        htg_dse = 1.0
+      else
+        htg_dse = Float(htg_dse)
+      end
+
+      # Electric Auxiliary Energy
+      # FIXME: For now, skip if multiple equipment
+      if num_htg_sys == 1 and ['Furnace', 'Boiler', 'WallFurnace', 'Stove'].include? htg_sys_type and htg_sys_fuel != Constants.FuelTypeElectric
+        if XMLHelper.has_element(htg_sys, 'ElectricAuxiliaryEnergy')
+          hpxml_value = Float(XMLHelper.get_value(htg_sys, 'ElectricAuxiliaryEnergy')) / (2.08 * htg_dse)
+        else
+          furnace_capacity_kbtuh = nil
+          if htg_sys_type == 'Furnace'
+            query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
+            furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
+          end
+          hpxml_value = HVAC.get_default_eae(htg_sys_type == 'Boiler', htg_sys_type == 'Furnace', htg_sys_fuel, 1.0, furnace_capacity_kbtuh) / (2.08 * htg_dse)
+        end
+        if htg_sys_type == "Boiler"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Pumps' AND RowName LIKE '%#{Constants.ObjectNameBoiler.upcase}%' AND ColumnName='Electric Power' AND Units='W'"
+        elsif htg_sys_type == "Furnace"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        elsif htg_sys_type == "Stove" or htg_sys_type == "WallFurnace"
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
+        else
+          flunk "Unexpected heating system type '#{htg_sys_type}'."
+        end
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
+    end
+
+    sqlFile.close
+  end
+
+  def _write_summary_results(this_dir, results)
+    csv_out = File.join(this_dir, 'results', 'results.csv')
+    _rm_path(File.dirname(csv_out))
+    Dir.mkdir(File.dirname(csv_out))
+
+    # Get all keys across simulations for output columns
+    output_keys = []
+    results.each do |xml, xml_results|
+      xml_results.keys.each do |key|
+        next if output_keys.include? key
+
+        output_keys << key
+      end
+    end
+
+    column_headers = ['HPXML']
+    output_keys.each do |key|
+      column_headers << "#{key[0]}: #{key[1]}: #{key[2]} [#{key[3]}]"
+    end
+
+    require 'csv'
+    CSV.open(csv_out, 'w') do |csv|
+      csv << column_headers
+      results.each do |xml, xml_results|
+        csv_row = [xml]
+        output_keys.each do |key|
+          if xml_results[key].nil?
+            csv_row << 0
+          else
+            csv_row << xml_results[key]
+          end
+        end
+        csv << csv_row
+      end
+    end
+
+    puts "Wrote results to #{csv_out}."
   end
 
   def _test_schema_validation(parent_dir, xml)
@@ -340,5 +461,16 @@ class HPXMLTranslatorTest < MiniTest::Test
       puts "#{xml}: #{errors.to_s}"
     end
     assert_equal(0, errors.size)
+  end
+
+  def _rm_path(path)
+    if Dir.exists?(path)
+      FileUtils.rm_r(path)
+    end
+    while true
+      break if not Dir.exists?(path)
+
+      sleep(0.01)
+    end
   end
 end

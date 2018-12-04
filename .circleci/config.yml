@@ -5,5 +5,10 @@ jobs:
       - image: nrel/openstudio:2.7.0
     steps:
       - checkout
-      - run: ruby tests/hpxml_translator_test.rb
-
+      - run: 
+          name: Run tests
+          command: |
+            ruby tests/hpxml_translator_test.rb
+      - store_artifacts:
+          path: tests/results
+          destination: results
