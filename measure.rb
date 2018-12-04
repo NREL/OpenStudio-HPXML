@@ -2831,7 +2831,7 @@ class OSModel
         mech_vent_type = Constants.VentTypeExhaust
       elsif fan_type == "central fan integrated supply"
         mech_vent_type = Constants.VentTypeCFIS
-      elsif fan_type == "balanced"
+      elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
         mech_vent_type = Constants.VentTypeBalanced
       end
       mech_vent_total_efficiency = 0.0
