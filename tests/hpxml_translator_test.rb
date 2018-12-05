@@ -436,6 +436,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         output_keys << key
       end
     end
+    output_keys.sort!
 
     column_headers = ['HPXML']
     output_keys.each do |key|
@@ -445,7 +446,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     require 'csv'
     CSV.open(csv_out, 'w') do |csv|
       csv << column_headers
-      results.each do |xml, xml_results|
+      results.sort.each do |xml, xml_results|
         csv_row = [xml]
         output_keys.each do |key|
           if xml_results[key].nil?
