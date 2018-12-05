@@ -6,6 +6,10 @@ jobs:
     steps:
       - checkout
       - run: 
+          name: Install gems
+          command: |
+            rm -f Gemfile.lock && bundle install
+      - run: 
           name: Run tests
           command: |
             ruby tests/hpxml_translator_test.rb

@@ -2274,7 +2274,7 @@ class OSModel
       oat_hwst_high = nil
       oat_hwst_low = nil
       design_temp = 180.0
-      is_modulating = false
+      is_modulating = true # FIXME: Temporary to get good results for x3 vs x1
       success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
                                   oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                                   heat_capacity_btuh, design_temp, is_modulating, dse)
@@ -2866,7 +2866,7 @@ class OSModel
     has_boiler = (htg_type == "Boiler")
     has_furnace = (htg_type == "Furnace")
     success = HVAC.apply_eae_to_heating_fan(runner, model, fuel_eae, fuel, dse,
-                                            has_boiler, has_boiler)
+                                            has_furnace, has_boiler)
     return false if not success
 
     return true
