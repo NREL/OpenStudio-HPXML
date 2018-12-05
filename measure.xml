@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>d276a111-8d0d-4fa8-aa44-e9833cd63883</version_id>
-  <version_modified>20181205T174931Z</version_modified>
+  <version_id>4023d3ac-5e53-4d1e-90dd-ad8c5947c428</version_id>
+  <version_modified>20181205T230959Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -711,12 +711,6 @@
       <checksum>CABAAEC4</checksum>
     </file>
     <file>
-      <filename>materials.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>007DF8AE</checksum>
-    </file>
-    <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -775,12 +769,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>A452A666</checksum>
-    </file>
-    <file>
-      <filename>EPvalidator.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>6831B7BB</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -951,12 +939,6 @@
       <checksum>61B34242</checksum>
     </file>
     <file>
-      <filename>hpxml_translator_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2916D0DF</checksum>
-    </file>
-    <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -975,6 +957,24 @@
       <checksum>3B865B8F</checksum>
     </file>
     <file>
+      <filename>materials.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>E93964BE</checksum>
+    </file>
+    <file>
+      <filename>EPvalidator.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>02DC77CF</checksum>
+    </file>
+    <file>
+      <filename>hpxml_translator_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F39F7BAF</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>2.1.1</identifier>
@@ -983,7 +983,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>9E6FF701</checksum>
+      <checksum>44A9C573</checksum>
     </file>
   </files>
 </measure>

@@ -343,27 +343,27 @@ class BaseMaterial
   end
 
   def self.InsulationCelluloseDensepack
-    return self.new(rho = 3.5, cp = 0.25, k = nil)
+    return self.new(rho = 3.5, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationCelluloseLoosefill
-    return self.new(rho = 1.5, cp = 0.25, k = nil)
+    return self.new(rho = 1.5, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationFiberglassDensepack
-    return self.new(rho = 2.2, cp = 0.25, k = nil)
+    return self.new(rho = 2.2, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationFiberglassLoosefill
-    return self.new(rho = 0.5, cp = 0.25, k = nil)
+    return self.new(rho = 0.5, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationGenericDensepack
-    return self.new(rho = (self.InsulationFiberglassDensepack.rho + self.InsulationCelluloseDensepack.rho) / 2.0, cp = 0.25, k = nil)
+    return self.new(rho = (self.InsulationFiberglassDensepack.rho + self.InsulationCelluloseDensepack.rho) / 2.0, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationGenericLoosefill
-    return self.new(rho = (self.InsulationFiberglassLoosefill.rho + self.InsulationCelluloseLoosefill.rho) / 2.0, cp = 0.25, k = nil)
+    return self.new(rho = (self.InsulationFiberglassLoosefill.rho + self.InsulationCelluloseLoosefill.rho) / 2.0, cp = 0.25, k_in = nil)
   end
 
   def self.Soil

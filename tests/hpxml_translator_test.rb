@@ -522,7 +522,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert(found_mv)
     end
   end
-  
+
   def _test_multiple_hvac(multiple_hvac_dir, all_results)
     # Multiple HVAC tests
     # Compare end use results to files with one of that HVAC system.
