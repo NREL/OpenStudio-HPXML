@@ -1410,6 +1410,9 @@ class FoundationConstructions
     # Define construction
     constr = Construction.new(walls_constr_name, [1])
     constr.add_layer(mat_concrete)
+    if walls_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(walls_drywall_thick_in))
+    end
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(wall_surfaces, runner, model)
@@ -1579,6 +1582,12 @@ class FoundationConstructions
       mat_framing = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.Wood)
       mat_gap = Material.AirCavityClosed(cavity_depth_in)
     end
+    mat_drywall = nil
+    drywall_r = 0
+    if drywall_thick_in > 0
+      mat_drywall = Material.GypsumWall(drywall_thick_in)
+      drywall_r = mat_drywall.rvalue
+    end
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
@@ -1591,8 +1600,8 @@ class FoundationConstructions
 
     # Define construction (only used to calculate assembly R-value)
     constr = Construction.new(nil, path_fracs)
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    if not mat_drywall.nil?
+      constr.add_layer(mat_drywall)
     end
     if not mat_framing.nil? and not mat_cavity.nil? and not mat_gap.nil?
       constr.add_layer(Material.AirFilmVertical)
@@ -1602,7 +1611,7 @@ class FoundationConstructions
       constr.add_layer(mat_rigid)
     end
 
-    return constr.assembly_rvalue(runner) - rigid_r
+    return constr.assembly_rvalue(runner) - rigid_r - drywall_r
   end
 
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
