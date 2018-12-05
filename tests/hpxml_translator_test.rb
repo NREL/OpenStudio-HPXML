@@ -532,7 +532,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Retrieve x1 results for comparison
       xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
-      results_x1 = results[xml_x1]
+      results_x1 = all_results[xml_x1]
 
       # Compare results
       puts "\nResults for #{xml}:"
