@@ -2299,11 +2299,9 @@ class OSModel
         oat_hwst_high = nil
         oat_hwst_low = nil
         design_temp = 180.0
-        is_modulating = true # FIXME: Temporary to get good results for x3 vs x1
         success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
                                     oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                    heat_capacity_btuh, design_temp, is_modulating, dse_heat,
-                                    load_frac)
+                                    heat_capacity_btuh, design_temp, dse_heat, load_frac)
         return false if not success
 
       elsif htg_type == "ElectricResistance"

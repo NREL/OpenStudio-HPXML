@@ -2097,28 +2097,13 @@ class HVAC
 
   def self.apply_boiler(model, unit, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                        capacity, design_temp, is_modulating, dse,
-                        frac_heat_load_served = 1.0)
-
-    boilerIsCondensing = false
-    if system_type == Constants.BoilerTypeCondensing
-      boilerIsCondensing = true
-    end
-
-    if fuel_type != Constants.FuelTypeElectric and boilerIsCondensing and not is_modulating
-      runner.registerWarning("A non modulating, condensing fuel boiler has been selected. These types of units are very uncommon, double check inputs.")
-    end
+                        capacity, design_temp, dse, frac_heat_load_served = 1.0)
 
     # _processHydronicSystem
 
     if system_type == Constants.BoilerTypeSteam
       runner.registerError("Cannot currently model steam boilers.")
       return false
-    end
-
-    if system_type == Constants.BoilerTypeCondensing
-      # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
-      condensingBlr_TE_FT_coefficients = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
     end
 
     if oat_reset_enabled
@@ -2137,7 +2122,7 @@ class HVAC
 
     # _processCurvesBoiler
 
-    boiler_eff_curve = get_boiler_curve(model, boilerIsCondensing)
+    boiler_eff_curve = get_boiler_curve(model, system_type == Constants.BoilerTypeCondensing)
 
     obj_name = Constants.ObjectNameBoiler(fuel_type, unit.name.to_s)
 
@@ -2180,37 +2165,21 @@ class HVAC
       plr_Rated = 1.0
       plr_Design = 1.0
       boiler_DesignHWRT = UnitConversions.convert(design_temp - 20.0 - 32.0, "R", "K")
-      condBlr_TE_Coeff = condensingBlr_TE_FT_coefficients # The coefficients are normalized at 80F HWRT
+      # Efficiency curves are normalized using 80F return water temperature, at 0.254PLR
+      condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
       boilerEff_Norm = afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
       boilerEff_Design = boilerEff_Norm * (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Design - condBlr_TE_Coeff[2] * plr_Design**2 - condBlr_TE_Coeff[3] * boiler_DesignHWRT + condBlr_TE_Coeff[4] * boiler_DesignHWRT**2 + condBlr_TE_Coeff[5] * boiler_DesignHWRT * plr_Design)
       boiler.setNominalThermalEfficiency(dse * boilerEff_Design)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable("EnteringBoiler")
-      boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
-      boiler.setDesignWaterOutletTemperature(UnitConversions.convert(design_temp - 32.0, "R", "K"))
-      if is_modulating
-        boiler.setMinimumPartLoadRatio(0.0)
-        boiler.setMaximumPartLoadRatio(1.0)
-        boiler.setBoilerFlowMode("LeavingSetpointModulated")
-      else
-        boiler.setMinimumPartLoadRatio(0.99)
-        boiler.setMaximumPartLoadRatio(1.0)
-        boiler.setBoilerFlowMode("ConstantFlow")
-      end
     else
       boiler.setNominalThermalEfficiency(dse * afue)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable("LeavingBoiler")
-      boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
-      boiler.setDesignWaterOutletTemperature(UnitConversions.convert(design_temp - 32.0, "R", "K"))
-      if is_modulating
-        boiler.setMinimumPartLoadRatio(0.0)
-        boiler.setMaximumPartLoadRatio(1.0)
-        boiler.setBoilerFlowMode("LeavingSetpointModulated")
-      else
-        boiler.setMinimumPartLoadRatio(0.99)
-        boiler.setMaximumPartLoadRatio(1.0)
-        boiler.setBoilerFlowMode("ConstantFlow")
-      end
     end
+    boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
+    boiler.setDesignWaterOutletTemperature(UnitConversions.convert(design_temp - 32.0, "R", "K"))
+    boiler.setMinimumPartLoadRatio(0.0)
+    boiler.setMaximumPartLoadRatio(1.0)
+    boiler.setBoilerFlowMode("LeavingSetpointModulated")
     boiler.setOptimumPartLoadRatio(1.0)
     boiler.setWaterOutletUpperTemperatureLimit(99.9)
     boiler.setParasiticElectricLoad(boiler_aux)

@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>66897ebd-9977-4308-a665-5718b18fd82a</version_id>
-  <version_modified>20181204T010151Z</version_modified>
+  <version_id>d276a111-8d0d-4fa8-aa44-e9833cd63883</version_id>
+  <version_modified>20181205T174931Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -723,12 +723,6 @@
       <checksum>665F8D5B</checksum>
     </file>
     <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F7944916</checksum>
-    </file>
-    <file>
       <filename>xmlhelper.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -753,12 +747,6 @@
       <checksum>E0BCAF0B</checksum>
     </file>
     <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>64FDF341</checksum>
-    </file>
-    <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -769,12 +757,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>3618DADC</checksum>
-    </file>
-    <file>
-      <filename>hpxml_translator_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2A75768E</checksum>
     </file>
     <file>
       <filename>location.rb</filename>
@@ -795,27 +777,10 @@
       <checksum>A452A666</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>FC4992ED</checksum>
-    </file>
-    <file>
       <filename>EPvalidator.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>6831B7BB</checksum>
-    </file>
-    <file>
-      <version>
-        <software_program>OpenStudio</software_program>
-        <identifier>2.1.1</identifier>
-        <min_compatible>2.1.1</min_compatible>
-      </version>
-      <filename>measure.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>script</usage_type>
-      <checksum>C694FACC</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -828,12 +793,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>296CE1A7</checksum>
-    </file>
-    <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>F329B5E6</checksum>
     </file>
     <file>
       <filename>psychrometrics.rb</filename>
@@ -978,6 +937,53 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>64835674</checksum>
+    </file>
+    <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>FA6BABB0</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>61B34242</checksum>
+    </file>
+    <file>
+      <filename>hpxml_translator_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2916D0DF</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>A835362E</checksum>
+    </file>
+    <file>
+      <filename>geometry.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4FC357C6</checksum>
+    </file>
+    <file>
+      <filename>valid-no-distribution.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3B865B8F</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>2.1.1</identifier>
+        <min_compatible>2.1.1</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>9E6FF701</checksum>
     </file>
   </files>
 </measure>
