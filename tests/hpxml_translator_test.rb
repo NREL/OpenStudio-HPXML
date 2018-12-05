@@ -375,6 +375,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         output_keys << key
       end
     end
+    output_keys.sort!
 
     column_headers = ['HPXML']
     output_keys.each do |key|
@@ -384,7 +385,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     require 'csv'
     CSV.open(csv_out, 'w') do |csv|
       csv << column_headers
-      results.each do |xml, xml_results|
+      results.sort.each do |xml, xml_results|
         csv_row = [xml]
         output_keys.each do |key|
           if xml_results[key].nil?
@@ -414,7 +415,7 @@ class HPXMLTranslatorTest < MiniTest::Test
   def _test_dse(dse_dir, all_results)
     # DSE tests
     # Compare heating/cooling results to files with no ducts.
-    Dir["#{dse_dir}/unvalid*.xml"].sort.each do |xml|
+    Dir["#{dse_dir}/valid*.xml"].sort.each do |xml|
       xml_dse = File.absolute_path(xml)
       results_dse = all_results[xml_dse]
 
