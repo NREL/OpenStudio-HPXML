@@ -28,7 +28,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     dse_dir = File.join(this_dir, "dse")
     cfis_dir = File.join(this_dir, "cfis")
-    test_dirs = [this_dir, dse_dir, cfis_dir]
+    autosize_dir = File.join(this_dir, "hvac_autosizing")
+    test_dirs = [this_dir, dse_dir, cfis_dir, autosize_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
