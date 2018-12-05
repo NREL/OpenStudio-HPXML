@@ -1,6 +1,6 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/util"
+require_relative "constants"
+require_relative "unit_conversions"
+require_relative "util"
 
 class Geometry
   def self.get_abs_azimuth(azimuth_type, relative_azimuth, building_orientation, offset = 180.0)

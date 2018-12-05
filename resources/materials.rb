@@ -1,5 +1,5 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/unit_conversions"
+require_relative "constants"
+require_relative "unit_conversions"
 
 class Material
   # thick_in - Thickness [in]
@@ -172,15 +172,15 @@ class Material
   end
 
   def self.ExtFinishStuccoMedDark
-    return self.new(name = "Stucco, Medium/Dark", thick_in = 1.0, mat_base = nil, k_in = 4.5, rho = 80.0, cp = 0.21, tAbs = 0.9, sAbs = 0.75, vAbs = 0.75)
+    return self.new(name = "Stucco, Medium/Dark", thick_in = 1.0, mat_base = BaseMaterial.Stucco, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.75, vAbs = 0.75)
   end
 
   def self.ExtFinishBrickLight
-    return self.new(name = "Brick, Light", thick_in = 4.0, mat_base = nil, k_in = 5.5, rho = 110.0, cp = 0.19, tAbs = 0.93, sAbs = 0.55, vAbs = 0.55)
+    return self.new(name = "Brick, Light", thick_in = 4.0, mat_base = BaseMaterial.Brick, k_in = nil, rho = nil, cp = nil, tAbs = 0.93, sAbs = 0.55, vAbs = 0.55)
   end
 
   def self.ExtFinishBrickMedDark
-    return self.new(name = "Brick, Medium/Dark", thick_in = 4.0, mat_base = nil, k_in = 5.5, rho = 110.0, cp = 0.19, tAbs = 0.96, sAbs = 0.88, vAbs = 0.88)
+    return self.new(name = "Brick, Medium/Dark", thick_in = 4.0, mat_base = BaseMaterial.Brick, k_in = nil, rho = nil, cp = nil, tAbs = 0.96, sAbs = 0.88, vAbs = 0.88)
   end
 
   def self.ExtFinishWoodLight
@@ -192,19 +192,19 @@ class Material
   end
 
   def self.ExtFinishAluminumLight
-    return self.new(name = "Aluminum, Light", thick_in = 0.375, mat_base = nil, k_in = 0.61, rho = 10.9, cp = 0.29, tAbs = 0.9, sAbs = 0.3, vAbs = 0.3)
+    return self.new(name = "Aluminum, Light", thick_in = 0.375, mat_base = BaseMaterial.Aluminum, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.3)
   end
 
   def self.ExtFinishAluminumMedDark
-    return self.new(name = "Aluminum, Medium/Dark", thick_in = 0.375, mat_base = nil, k_in = 0.61, rho = 10.9, cp = 0.29, tAbs = 0.94, sAbs = 0.75, vAbs = 0.75)
+    return self.new(name = "Aluminum, Medium/Dark", thick_in = 0.375, mat_base = BaseMaterial.Aluminum, k_in = nil, rho = nil, cp = nil, tAbs = 0.94, sAbs = 0.75, vAbs = 0.75)
   end
 
   def self.ExtFinishVinylLight
-    return self.new(name = "Vinyl, Light", thick_in = 0.375, mat_base = nil, k_in = 0.62, rho = 11.1, cp = 0.25, tAbs = 0.9, sAbs = 0.3, vAbs = 0.3)
+    return self.new(name = "Vinyl, Light", thick_in = 0.375, mat_base = BaseMaterial.Vinyl, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.3)
   end
 
   def self.ExtFinishVinylMedDark
-    return self.new(name = "Vinyl, Medium/Dark", thick_in = 0.375, mat_base = nil, k_in = 0.62, rho = 11.1, cp = 0.25, tAbs = 0.9, sAbs = 0.75, vAbs = 0.75)
+    return self.new(name = "Vinyl, Medium/Dark", thick_in = 0.375, mat_base = BaseMaterial.Vinyl, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.75, vAbs = 0.75)
   end
 
   def self.ExtFinishFiberCementLight
@@ -343,31 +343,55 @@ class BaseMaterial
   end
 
   def self.InsulationCelluloseDensepack
-    return self.new(rho = 3.5, cp = 0.25, k = nil)
+    return self.new(rho = 3.5, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationCelluloseLoosefill
-    return self.new(rho = 1.5, cp = 0.25, k = nil)
+    return self.new(rho = 1.5, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationFiberglassDensepack
-    return self.new(rho = 2.2, cp = 0.25, k = nil)
+    return self.new(rho = 2.2, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationFiberglassLoosefill
-    return self.new(rho = 0.5, cp = 0.25, k = nil)
+    return self.new(rho = 0.5, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationGenericDensepack
-    return self.new(rho = (self.InsulationFiberglassDensepack.rho + self.InsulationCelluloseDensepack.rho) / 2.0, cp = 0.25, k = nil)
+    return self.new(rho = (self.InsulationFiberglassDensepack.rho + self.InsulationCelluloseDensepack.rho) / 2.0, cp = 0.25, k_in = nil)
   end
 
   def self.InsulationGenericLoosefill
-    return self.new(rho = (self.InsulationFiberglassLoosefill.rho + self.InsulationCelluloseLoosefill.rho) / 2.0, cp = 0.25, k = nil)
+    return self.new(rho = (self.InsulationFiberglassLoosefill.rho + self.InsulationCelluloseLoosefill.rho) / 2.0, cp = 0.25, k_in = nil)
   end
 
   def self.Soil
     return self.new(rho = 115.0, cp = 0.1, k_in = 12.0)
+  end
+
+  def self.Brick
+    return self.new(rho = 110.0, cp = 0.19, k_in = 5.5)
+  end
+
+  def self.Vinyl
+    return self.new(rho = 11.1, cp = 0.25, k_in = 0.62)
+  end
+
+  def self.Aluminum
+    return self.new(rho = 10.9, cp = 0.29, k_in = 0.61)
+  end
+
+  def self.Stucco
+    return self.new(rho = 80.0, cp = 0.21, k_in = 4.5)
+  end
+
+  def self.Stone
+    return self.new(rho = 140.0, cp = 0.2, k_in = 12.5)
+  end
+
+  def self.StrawBale
+    return self.new(rho = 11.1652, cp = 0.2991, k_in = 0.4164)
   end
 end
 

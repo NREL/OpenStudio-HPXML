@@ -1,9 +1,9 @@
-require "#{File.dirname(__FILE__)}/constants"
-require "#{File.dirname(__FILE__)}/geometry"
-require "#{File.dirname(__FILE__)}/util"
-require "#{File.dirname(__FILE__)}/unit_conversions"
-require "#{File.dirname(__FILE__)}/psychrometrics"
-require "#{File.dirname(__FILE__)}/schedules"
+require_relative "constants"
+require_relative "geometry"
+require_relative "util"
+require_relative "unit_conversions"
+require_relative "psychrometrics"
+require_relative "schedules"
 
 class HVAC
   def self.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
