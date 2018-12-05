@@ -73,7 +73,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     _write_summary_results(results_dir, all_results)
-    # _test_dse(dse_dir, all_results)
+    _test_dse(dse_dir, all_results)
     _test_cfis(cfis_dir, all_results)
   end
 
