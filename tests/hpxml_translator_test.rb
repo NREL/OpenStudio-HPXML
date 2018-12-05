@@ -38,6 +38,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
+    num_proc = Parallel.processor_count - 1
+    if ENV['CI']
+      num_proc = 1 # Use 1 cpu on CircleCI
+    end
+
     # Test simulations (in parallel)
     puts "Running #{xmls.size} HPXML files..."
     if Process.respond_to?(:fork) # e.g., most Unix systems
@@ -49,7 +54,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       # Do runs in separate processes
-      Parallel.map(xmls, in_processes: Parallel.processor_count - 1) do |xml|
+      Parallel.map(xmls, in_processes: num_proc) do |xml|
         rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
         sim_results = _get_results(rundir)
         writers[xml].puts(Marshal.dump(sim_results)) # Provide output data to parent process
@@ -66,7 +71,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Do runs in separate threads
       all_results = {}
-      Parallel.map(xmls, in_threads: Parallel.processor_count - 1) do |xml|
+      Parallel.map(xmls, in_threads: num_proc) do |xml|
         rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
         all_results[xml] = _get_results(rundir)
       end
