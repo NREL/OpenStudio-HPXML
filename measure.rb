@@ -2281,10 +2281,9 @@ class OSModel
       oat_hwst_high = nil
       oat_hwst_low = nil
       design_temp = 180.0
-      is_modulating = false
       success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
                                   oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                  heat_capacity_btuh, design_temp, is_modulating, dse)
+                                  heat_capacity_btuh, design_temp, dse)
       return false if not success
 
     elsif XMLHelper.has_element(htgsys, "HeatingSystemType/ElectricResistance")
