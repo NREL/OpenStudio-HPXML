@@ -6,6 +6,8 @@ require 'fileutils'
 require 'json'
 require 'rexml/document'
 require 'rexml/xpath'
+require 'parallel'
+require 'etc'
 require_relative '../resources/constants'
 require_relative '../resources/meta_measure'
 require_relative '../resources/unit_conversions'
@@ -14,110 +16,88 @@ require_relative '../resources/xmlhelper'
 class HPXMLTranslatorTest < MiniTest::Test
   def test_simulations
     OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
+    # OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
 
     this_dir = File.dirname(__FILE__)
+    results_dir = File.join(this_dir, "results")
+    _rm_path(results_dir)
 
     args = {}
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
-    args['epw_output_path'] = File.absolute_path(File.join(this_dir, "run", "in.epw"))
-    args['osm_output_path'] = File.absolute_path(File.join(this_dir, "run", "in.osm"))
     args['skip_validation'] = false
 
-    # Standard tests
-    results = {}
-    Dir["#{this_dir}/valid*.xml"].sort.each do |xml|
-      puts "\nTesting #{xml}..."
-      args['hpxml_path'] = File.absolute_path(xml)
-      _test_schema_validation(this_dir, xml)
-      _test_simulation(args, this_dir)
-      results[args['hpxml_path']] = _get_results(this_dir)
-    end
+    dse_dir = File.join(this_dir, "dse")
+    cfis_dir = File.join(this_dir, "cfis")
+    multiple_hvac_dir = File.join(this_dir, "multiple_hvac")
+    autosize_dir = File.join(this_dir, "hvac_autosizing")
+    test_dirs = [this_dir, dse_dir, cfis_dir, multiple_hvac_dir, autosize_dir]
 
-    # Multiple HVAC tests
-    # Run HPXML files with 3 of the same HVAC system; compare end use
-    # results to files with one of that HVAC system.
-    Dir["#{this_dir}/multiple_hvac/valid*.xml"].sort.each do |xml|
-      puts "\nTesting #{xml}..."
-      args['hpxml_path'] = File.absolute_path(xml)
-      _test_schema_validation(this_dir, xml)
-      _test_simulation(args, this_dir)
-      results[args['hpxml_path']] = _get_results(this_dir)
-
-      # Retrieve x1 results for comparison
-      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
-      results_x1 = results[xml_x1]
-
-      # Compare results
-      puts "\nResults for #{xml}:"
-      results[args['hpxml_path']].keys.each do |k|
-        result_x1 = results_x1[k].to_f
-        result_x3 = results[args['hpxml_path']][k].to_f
-        next if result_x1 == 0.0 and result_x3 == 0.0
-
-        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
-        assert_in_delta(result_x1, result_x3, 0.1)
+    xmls = []
+    test_dirs.each do |test_dir|
+      Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
+        xmls << File.absolute_path(xml)
       end
-      puts "\n"
     end
 
-    # DSE tests
-    # Run HPXML files with DSE; compare heating/cooling results to files
-    # with no ducts.
-    Dir["#{this_dir}/dse/valid*.xml"].sort.each do |xml|
-      puts "\nTesting #{xml}..."
-      args['hpxml_path'] = File.absolute_path(xml)
-      _test_schema_validation(this_dir, args['hpxml_path'])
-      _test_simulation(args, this_dir)
-      results[args['hpxml_path']] = _get_results(this_dir)
+    num_proc = Parallel.processor_count - 1
+    if ENV['CI']
+      num_proc = 1 # Use 1 cpu on CircleCI
+    end
 
-      # Retrieve no distribution results for comparison
-      xml_nodist = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse", "-no-distribution"))))
-      results_nodist = results[xml_nodist]
+    # Test simulations (in parallel)
+    puts "Running #{xmls.size} HPXML files..."
+    if Process.respond_to?(:fork) # e.g., most Unix systems
 
-      # Compare results
-      puts "\nResults for #{xml}:"
-      results[args['hpxml_path']].keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-
-        result_dse = results[args['hpxml_path']][k].to_f
-        result_nodist = results_nodist[k].to_f
-        next if result_dse == 0.0 and result_nodist == 0.0
-
-        dse_actual = result_nodist / result_dse
-        dse_expect = 0.8
-        puts "dse: #{dse_actual.round(2)} #{k}"
-        assert_in_epsilon(dse_expect, dse_actual, 0.01)
+      # Setup IO.pipe to communicate output from child processes to this parent process
+      readers, writers = {}, {}
+      xmls.each do |xml|
+        readers[xml], writers[xml] = IO.pipe
       end
-      puts "\n"
-    end
 
-    # CFIS tests
-    # Run HPXML files with CFIS; verify non-zero mechanical ventilation energy.
-    Dir["#{this_dir}/cfis/valid*.xml"].sort.each do |xml|
-      puts "\nTesting #{xml}..."
-      args['hpxml_path'] = File.absolute_path(xml)
-      _test_schema_validation(this_dir, args['hpxml_path'])
-      _test_simulation(args, this_dir)
-      results[args['hpxml_path']] = _get_results(this_dir)
-
-      # Verify results
-      puts "\nResults for #{xml}:"
-      found_mv = false
-      results[args['hpxml_path']].keys.each do |k|
-        next if k[0] != 'Electricity' or k[2] != Constants.EndUseMechVentFan
-
-        found_mv = true
-        puts "CFIS: #{results[args['hpxml_path']][k].round(2)} #{k}"
-        assert_operator(results[args['hpxml_path']][k], :>, 0)
+      # Do runs in separate processes
+      Parallel.map(xmls, in_processes: num_proc) do |xml|
+        rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
+        sim_results = _get_results(rundir)
+        writers[xml].puts(Marshal.dump(sim_results)) # Provide output data to parent process
       end
-      assert(found_mv)
+
+      # Retrieve output data from child processes
+      all_results = {}
+      readers.each do |xml, reader|
+        writers[xml].close
+        all_results[xml] = Marshal.load(reader.read)
+      end
+
+    else # e.g., Windows
+
+      # Do runs in separate threads
+      all_results = {}
+      Parallel.map(xmls, in_threads: num_proc) do |xml|
+        rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
+        all_results[xml] = _get_results(rundir)
+      end
+
     end
 
-    _write_summary_results(this_dir, results)
+    _write_summary_results(results_dir, all_results)
+    _test_dse(dse_dir, all_results)
+    _test_cfis(cfis_dir, all_results)
+    _test_multiple_hvac(multiple_hvac_dir, all_results)
   end
 
-  def _get_results(this_dir)
-    sql_path = File.join(this_dir, "run", "eplusout.sql")
+  def _run_xml(xml, this_dir, args, worker_num)
+    print "Testing #{File.basename(xml)}...\n"
+    rundir = File.join(this_dir, "run#{worker_num}")
+    args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
+    args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
+    args['hpxml_path'] = xml
+    _test_schema_validation(this_dir, xml)
+    _test_simulation(args, this_dir, rundir)
+    return rundir
+  end
+
+  def _get_results(rundir)
+    sql_path = File.join(rundir, "eplusout.sql")
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
 
     tdws = 'TabularDataWithStrings'
@@ -171,11 +151,10 @@ class HPXMLTranslatorTest < MiniTest::Test
     return results
   end
 
-  def _test_simulation(args, this_dir)
+  def _test_simulation(args, this_dir, rundir)
     # Uses meta_measure workflow for faster simulations
 
     # Setup
-    rundir = File.join(this_dir, "run")
     _rm_path(rundir)
     Dir.mkdir(rundir)
 
@@ -214,14 +193,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
     simulation_start = Time.now
     system(command, :err => File::NULL)
-    puts "Completed simulation in #{(Time.now - simulation_start).round(1)}, workflow in #{(Time.now - workflow_start).round(1)}s."
+    puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{(Time.now - simulation_start).round(1)}, workflow in #{(Time.now - workflow_start).round(1)}s."
 
     # Verify simulation outputs
-    _verify_simulation_outputs(this_dir, args['hpxml_path'])
+    _verify_simulation_outputs(rundir, args['hpxml_path'])
   end
 
-  def _verify_simulation_outputs(this_dir, hpxml_path)
-    sql_path = File.join(this_dir, "run", "eplusout.sql")
+  def _verify_simulation_outputs(rundir, hpxml_path)
+    sql_path = File.join(rundir, "eplusout.sql")
     assert(File.exists? sql_path)
 
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
@@ -444,10 +423,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     sqlFile.close
   end
 
-  def _write_summary_results(this_dir, results)
-    csv_out = File.join(this_dir, 'results', 'results.csv')
-    _rm_path(File.dirname(csv_out))
-    Dir.mkdir(File.dirname(csv_out))
+  def _write_summary_results(results_dir, results)
+    Dir.mkdir(results_dir)
+    csv_out = File.join(results_dir, 'results.csv')
 
     # Get all keys across simulations for output columns
     output_keys = []
@@ -483,15 +461,90 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Wrote results to #{csv_out}."
   end
 
-  def _test_schema_validation(parent_dir, xml)
+  def _test_schema_validation(this_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(parent_dir, "..", "hpxml_schemas"))
+    schemas_dir = File.absolute_path(File.join(this_dir, "..", "hpxml_schemas"))
     hpxml_doc = REXML::Document.new(File.read(xml))
     errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
     if errors.size > 0
       puts "#{xml}: #{errors.to_s}"
     end
     assert_equal(0, errors.size)
+  end
+
+  def _test_dse(dse_dir, all_results)
+    # DSE tests
+    # Compare heating/cooling results to files with no ducts.
+    Dir["#{dse_dir}/valid*.xml"].sort.each do |xml|
+      xml_dse = File.absolute_path(xml)
+      results_dse = all_results[xml_dse]
+
+      # Retrieve no distribution results for comparison
+      xml_nodist = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse", "-no-distribution"))))
+      results_nodist = all_results[xml_nodist]
+
+      # Compare results
+      puts "\nResults for #{File.basename(xml)}:"
+      results_dse.keys.each do |k|
+        next if not ["Heating", "Cooling"].include? k[1]
+
+        result_dse = results_dse[k].to_f
+        result_nodist = results_nodist[k].to_f
+        next if result_dse == 0.0 and result_nodist == 0.0
+
+        dse_actual = result_nodist / result_dse
+        dse_expect = 0.8
+        puts "dse: #{dse_actual.round(2)} #{k}"
+        assert_in_epsilon(dse_expect, dse_actual, 0.025)
+      end
+      puts "\n"
+    end
+  end
+
+  def _test_cfis(cfis_dir, all_results)
+    # CFIS tests
+    # Verify non-zero mechanical ventilation energy.
+    Dir["#{cfis_dir}/valid*.xml"].sort.each do |xml|
+      xml_cfis = File.absolute_path(xml)
+      results_cfis = all_results[xml_cfis]
+
+      # Verify results
+      puts "\nResults for #{File.basename(xml)}:"
+      found_mv = false
+      results_cfis.keys.each do |k|
+        next if k[0] != 'Electricity' or k[2] != Constants.EndUseMechVentFan
+
+        found_mv = true
+        puts "CFIS: #{results_cfis[k].round(2)} #{k}"
+        assert_operator(results_cfis[k], :>, 0)
+      end
+      assert(found_mv)
+    end
+  end
+  
+  def _test_multiple_hvac(multiple_hvac_dir, all_results)
+    # Multiple HVAC tests
+    # Compare end use results to files with one of that HVAC system.
+    Dir["#{multiple_hvac_dir}/valid*.xml"].sort.each do |xml|
+      xml_x3 = File.absolute_path(xml)
+      results_x3 = all_results[xml_x3]
+
+      # Retrieve x1 results for comparison
+      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
+      results_x1 = results[xml_x1]
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_x3.keys.each do |k|
+        result_x1 = results_x1[k].to_f
+        result_x3 = results_x3[k].to_f
+        next if result_x1 == 0.0 and result_x3 == 0.0
+
+        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
+        assert_in_delta(result_x1, result_x3, 0.1)
+      end
+      puts "\n"
+    end
   end
 
   def _rm_path(path)
