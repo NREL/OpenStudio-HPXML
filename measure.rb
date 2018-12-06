@@ -2812,8 +2812,8 @@ class OSModel
       duct_ah_return_frac = 0.267
       duct_location_frac = Constants.Auto
       duct_num_returns = 1
-      duct_supply_area_mult = 1.0
-      duct_return_area_mult = 1.0
+      duct_supply_area_mult = supply_area / 100.0
+      duct_return_area_mult = return_area / 100.0
       duct_r = 4.0
     else
       duct_location = "none"
