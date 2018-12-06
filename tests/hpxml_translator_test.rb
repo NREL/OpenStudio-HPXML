@@ -79,8 +79,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     _write_summary_results(results_dir, all_results)
-    _test_dse(dse_dir, all_results)
-    _test_cfis(cfis_dir, all_results)
+    _test_dse(xmls, dse_dir, all_results)
+    _test_cfis(xmls, cfis_dir, all_results)
   end
 
   def _run_xml(xml, this_dir, args, worker_num)
@@ -412,27 +412,27 @@ class HPXMLTranslatorTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _test_dse(dse_dir, all_results)
-    # DSE tests
-    # Compare heating/cooling results to files with no ducts.
-    Dir["#{dse_dir}/valid*.xml"].sort.each do |xml|
-      xml_dse = File.absolute_path(xml)
-      results_dse = all_results[xml_dse]
-
-      # Retrieve no distribution results for comparison
-      xml_nodist = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse", "-no-distribution"))))
-      results_nodist = all_results[xml_nodist]
+  def _test_dse(xmls, dse_dir, all_results)
+    # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
+    xmls.sort.each do |xml|
+      next if not xml.include? dse_dir
+    
+      xml_dse80 = File.absolute_path(xml)
+      xml_dse100 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse-0.8", "-dse-1.0"))))
+      
+      results_dse80 = all_results[xml_dse80]
+      results_dse100 = all_results[xml_dse100]
 
       # Compare results
       puts "\nResults for #{File.basename(xml)}:"
-      results_dse.keys.each do |k|
+      results_dse80.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
 
-        result_dse = results_dse[k].to_f
-        result_nodist = results_nodist[k].to_f
-        next if result_dse == 0.0 and result_nodist == 0.0
+        result_dse80 = results_dse80[k].to_f
+        result_dse100 = results_dse100[k].to_f
+        next if result_dse80 == 0.0 and result_nodist == 0.0
 
-        dse_actual = result_nodist / result_dse
+        dse_actual = result_dse100 / result_dse80
         dse_expect = 0.8
         puts "dse: #{dse_actual.round(2)} #{k}"
         assert_in_epsilon(dse_expect, dse_actual, 0.025)
@@ -441,10 +441,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
-  def _test_cfis(cfis_dir, all_results)
-    # CFIS tests
+  def _test_cfis(xmls, cfis_dir, all_results)
     # Verify non-zero mechanical ventilation energy.
-    Dir["#{cfis_dir}/valid*.xml"].sort.each do |xml|
+    xmls.sort.each do |xml|
+      next if not xml.include? cfis_dir
+    
       xml_cfis = File.absolute_path(xml)
       results_cfis = all_results[xml_cfis]
 

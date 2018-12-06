@@ -1,8 +1,5 @@
 class EnergyPlusValidator
   def self.run_validator(hpxml_doc)
-    one = [1]
-    zero_or_one = [0, 1]
-    one_or_more = []
 
     # A hash of hashes that defines the XML elements used by the EnergyPlus HPXML Use Case.
     #
@@ -22,6 +19,11 @@ class EnergyPlusValidator
     # }
     #
 
+    zero = [0]
+    one = [1]
+    zero_or_one = [0, 1]
+    one_or_more = []
+    
     requirements = {
 
       # Root
@@ -314,32 +316,35 @@ class EnergyPlusValidator
 
       ## [HeatingType=Resistance]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/ElectricResistance]' => {
+        'DistributionSystem' => zero,
         '[HeatingSystemFuel="electricity"]' => one,
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
       },
 
       ## [HeatingType=Furnace]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
 
       ## [HeatingType=WallFurnace]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/WallFurnace]' => {
+        'DistributionSystem' => zero,
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
 
       ## [HeatingType=Boiler]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
 
       ## [HeatingType=Stove]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]' => {
+        'DistributionSystem' => zero,
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
       },
@@ -361,12 +366,13 @@ class EnergyPlusValidator
 
       ## [CoolingType=CentralAC]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioning"]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
       },
 
       ## [CoolingType=RoomAC]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioning"]' => {
+        'DistributionSystem' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
       },
 
@@ -382,7 +388,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=ASHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
       },
@@ -396,7 +402,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=GSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air"]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
       },

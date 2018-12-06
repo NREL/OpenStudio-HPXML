@@ -1934,8 +1934,10 @@ class Airflow
       end
 
       system, clg_coil, htg_coil, air_loop = HVAC.get_unitary_system_air_loop(model, runner, unit_living.zone)
-      clg_coil = HVAC.get_coil_from_hvac_component(clg_coil)
-      cfis_fan_power = clg_coil.ratedEvaporatorFanPowerPerVolumeFlowRate.get / UnitConversions.convert(1.0, "m^3/s", "cfm") # W/cfm
+      supply_fan = system.supplyFan.get.to_FanOnOff.get
+      fan_pressure_rise = supply_fan.pressureRise # Pa
+      fan_eff = supply_fan.fanTotalEfficiency
+      cfis_fan_power = fan_pressure_rise / fan_eff * UnitConversions.convert(1.0, "cfm", "m^3/s")
 
       infil_program.addLine("Set #{cfis_output.fan_rtf_var.name} = #{cfis_output.fan_rtf_sensor.name}")
 
