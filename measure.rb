@@ -2158,7 +2158,7 @@ class OSModel
 
       load_frac = Float(XMLHelper.get_value(clgsys, "FractionCoolLoadServed"))
 
-      dse_heat, dse_cool = get_dse(building, clgsys)
+      dse_heat, dse_cool, has_dse = get_dse(building, clgsys)
 
       orig_air_loops = model.getAirLoopHVACs
       orig_plant_loops = model.getPlantLoops
@@ -2262,7 +2262,7 @@ class OSModel
 
       load_frac = Float(XMLHelper.get_value(htgsys, "FractionHeatLoadServed"))
 
-      dse_heat, dse_cool = get_dse(building, htgsys)
+      dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
 
       orig_air_loops = model.getAirLoopHVACs
       orig_plant_loops = model.getPlantLoops
@@ -2352,7 +2352,7 @@ class OSModel
         backup_heat_capacity_btuh = Float(backup_heat_capacity_btuh)
       end
 
-      dse_heat, dse_cool = get_dse(building, hp)
+      dse_heat, dse_cool, has_dse = get_dse(building, hp)
       if dse_heat != dse_cool
         # TODO: Can we remove this since we use separate airloops for
         # heating and cooling?
@@ -2474,7 +2474,7 @@ class OSModel
         cap_retention_temp = -5.0
         pan_heater_power = 0.0
         fan_power = 0.07
-        is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and dse_heat == 1.0)
+        is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
         supplemental_efficiency = 1.0
         success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
@@ -2637,7 +2637,7 @@ class OSModel
 
   def self.get_dse(building, system)
     if system.elements["DistributionSystem"].nil? # No distribution system
-      return 1.0, 1.0
+      return 1.0, 1.0, false
     end
 
     # Get attached distribution system
@@ -2650,12 +2650,12 @@ class OSModel
       ducts = dist
     end
     if ducts.nil? # No attached DSEs for system
-      return 1.0, 1.0
+      return 1.0, 1.0, false
     end
 
     dse_cool = Float(XMLHelper.get_value(ducts, "AnnualCoolingDistributionSystemEfficiency"))
     dse_heat = Float(XMLHelper.get_value(ducts, "AnnualHeatingDistributionSystemEfficiency"))
-    return dse_heat, dse_cool
+    return dse_heat, dse_cool, true
   end
 
   def self.get_zone_hvacs(model)
@@ -2986,7 +2986,7 @@ class OSModel
 
       load_frac = Float(XMLHelper.get_value(htgsys, "FractionHeatLoadServed"))
 
-      dse_heat, dse_cool = get_dse(building, htgsys)
+      dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
 
       sys_id = htgsys.elements["SystemIdentifier"].attributes["id"]
 
