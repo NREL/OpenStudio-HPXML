@@ -55,8 +55,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Do runs in separate processes
       Parallel.map(xmls, in_processes: num_proc) do |xml|
-        rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
-        sim_results = _get_results(rundir)
+        rundir, sim_time, workflow_time = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
+        sim_results = _get_results(rundir, sim_time, workflow_time)
         writers[xml].puts(Marshal.dump(sim_results)) # Provide output data to parent process
       end
 
@@ -72,8 +72,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Do runs in separate threads
       all_results = {}
       Parallel.map(xmls, in_threads: num_proc) do |xml|
-        rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
-        all_results[xml] = _get_results(rundir)
+        rundir, sim_time, workflow_time = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
+        all_results[xml] = _get_results(rundir, sim_time, workflow_time)
       end
 
     end
@@ -90,11 +90,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     _test_schema_validation(this_dir, xml)
-    _test_simulation(args, this_dir, rundir)
-    return rundir
+    sim_time, workflow_time = _test_simulation(args, this_dir, rundir)
+    return rundir, sim_time, workflow_time
   end
 
-  def _get_results(rundir)
+  def _get_results(rundir, sim_time, workflow_time)
     sql_path = File.join(rundir, "eplusout.sql")
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
 
@@ -146,6 +146,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
+    results["Simulation Runtime"] = sim_time
+    results["Workflow Runtime"] = workflow_time
+
     return results
   end
 
@@ -191,10 +194,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
     simulation_start = Time.now
     system(command, :err => File::NULL)
-    puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{(Time.now - simulation_start).round(1)}, workflow in #{(Time.now - workflow_start).round(1)}s."
+    sim_time = (Time.now - simulation_start).round(1)
+    workflow_time = (Time.now - workflow_start).round(1)
+    puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{sim_time}, workflow in #{workflow_time}s."
 
     # Verify simulation outputs
     _verify_simulation_outputs(rundir, args['hpxml_path'])
+
+    return sim_time, workflow_time
   end
 
   def _verify_simulation_outputs(rundir, hpxml_path)
@@ -370,6 +377,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_keys = []
     results.each do |xml, xml_results|
       xml_results.keys.each do |key|
+        next if not key.is_a? Array
         next if output_keys.include? key
 
         output_keys << key
@@ -377,9 +385,17 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     output_keys.sort!
 
+    # Append runtimes at the end
+    output_keys << "Simulation Runtime"
+    output_keys << "Workflow Runtime"
+
     column_headers = ['HPXML']
     output_keys.each do |key|
-      column_headers << "#{key[0]}: #{key[1]}: #{key[2]} [#{key[3]}]"
+      if key.is_a? Array
+        column_headers << "#{key[0]}: #{key[1]}: #{key[2]} [#{key[3]}]"
+      else
+        column_headers << key
+      end
     end
 
     require 'csv'
@@ -416,9 +432,10 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
     xmls.sort.each do |xml|
       next if not xml.include? dse_dir
+      next if not xml.include? "-dse-0.8"
 
       xml_dse80 = File.absolute_path(xml)
-      xml_dse100 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse-0.8", "-dse-1.0"))))
+      xml_dse100 = xml_dse80.gsub("-dse-0.8", "-dse-1.0")
 
       results_dse80 = all_results[xml_dse80]
       results_dse100 = all_results[xml_dse100]
