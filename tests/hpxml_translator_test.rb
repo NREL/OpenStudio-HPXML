@@ -26,6 +26,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args['skip_validation'] = false
 
+    @simulation_runtime_key = "Simulation Runtime"
+    @workflow_runtime_key = "Workflow Runtime"
+
     dse_dir = File.absolute_path(File.join(this_dir, "dse"))
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     multiple_hvac_dir = File.absolute_path(File.join(this_dir, "multiple_hvac"))
@@ -148,8 +151,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
-    results["Simulation Runtime"] = sim_time
-    results["Workflow Runtime"] = workflow_time
+    results[@simulation_runtime_key] = sim_time
+    results[@workflow_runtime_key] = workflow_time
 
     return results
   end
@@ -458,8 +461,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_keys.sort!
 
     # Append runtimes at the end
-    output_keys << "Simulation Runtime"
-    output_keys << "Workflow Runtime"
+    output_keys << @simulation_runtime_key
+    output_keys << @workflow_runtime_key
 
     column_headers = ['HPXML']
     output_keys.each do |key|
@@ -566,6 +569,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Compare results
       puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
+        next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
