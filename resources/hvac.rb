@@ -3331,13 +3331,14 @@ class HVAC
       htg_coil = htg_unitary_system.heatingCoil.get.to_CoilHeatingGas.get
       htg_coil.setParasiticElectricLoad(0.0)
 
+      htg_cfm = UnitConversions.convert(htg_unitary_system.supplyAirFlowRateDuringHeatingOperation.get, "m^3/s", "cfm")
+
       [htg_unitary_system, clg_unitary_system].each do |unitary_system|
         next if unitary_system.nil?
 
         fan = unitary_system.supplyFan.get.to_FanOnOff.get
         if elec_power > 0
           fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-          htg_cfm = UnitConversions.convert(fan.maximumFlowRate.get, "m^3/s", "cfm")
           fan_w_cfm = elec_power / htg_cfm # W/cfm
           fan.setFanEfficiency(fan_eff)
           fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_w_cfm / dse))
