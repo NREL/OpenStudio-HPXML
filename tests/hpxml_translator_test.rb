@@ -26,9 +26,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args['skip_validation'] = false
 
-    dse_dir = File.join(this_dir, "dse")
-    cfis_dir = File.join(this_dir, "cfis")
-    autosize_dir = File.join(this_dir, "hvac_autosizing")
+    dse_dir = File.absolute_path(File.join(this_dir, "dse"))
+    cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
+    autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
     test_dirs = [this_dir, dse_dir, cfis_dir, autosize_dir]
 
     xmls = []
@@ -416,10 +416,10 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
     xmls.sort.each do |xml|
       next if not xml.include? dse_dir
-    
+
       xml_dse80 = File.absolute_path(xml)
       xml_dse100 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse-0.8", "-dse-1.0"))))
-      
+
       results_dse80 = all_results[xml_dse80]
       results_dse100 = all_results[xml_dse100]
 
@@ -445,7 +445,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Verify non-zero mechanical ventilation energy.
     xmls.sort.each do |xml|
       next if not xml.include? cfis_dir
-    
+
       xml_cfis = File.absolute_path(xml)
       results_cfis = all_results[xml_cfis]
 

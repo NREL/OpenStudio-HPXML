@@ -1,6 +1,5 @@
 class EnergyPlusValidator
   def self.run_validator(hpxml_doc)
-
     # A hash of hashes that defines the XML elements used by the EnergyPlus HPXML Use Case.
     #
     # Example:
@@ -23,7 +22,7 @@ class EnergyPlusValidator
     one = [1]
     zero_or_one = [0, 1]
     one_or_more = []
-    
+
     requirements = {
 
       # Root
