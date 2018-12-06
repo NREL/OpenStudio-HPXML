@@ -26,9 +26,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args['skip_validation'] = false
 
-    dse_dir = File.join(this_dir, "dse")
-    cfis_dir = File.join(this_dir, "cfis")
-    autosize_dir = File.join(this_dir, "hvac_autosizing")
+    dse_dir = File.absolute_path(File.join(this_dir, "dse"))
+    cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
+    autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
     test_dirs = [this_dir, dse_dir, cfis_dir, autosize_dir]
 
     xmls = []
@@ -55,8 +55,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Do runs in separate processes
       Parallel.map(xmls, in_processes: num_proc) do |xml|
-        rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
-        sim_results = _get_results(rundir)
+        rundir, sim_time, workflow_time = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
+        sim_results = _get_results(rundir, sim_time, workflow_time)
         writers[xml].puts(Marshal.dump(sim_results)) # Provide output data to parent process
       end
 
@@ -72,15 +72,15 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Do runs in separate threads
       all_results = {}
       Parallel.map(xmls, in_threads: num_proc) do |xml|
-        rundir = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
-        all_results[xml] = _get_results(rundir)
+        rundir, sim_time, workflow_time = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
+        all_results[xml] = _get_results(rundir, sim_time, workflow_time)
       end
 
     end
 
     _write_summary_results(results_dir, all_results)
-    _test_dse(dse_dir, all_results)
-    _test_cfis(cfis_dir, all_results)
+    _test_dse(xmls, dse_dir, all_results)
+    _test_cfis(xmls, cfis_dir, all_results)
   end
 
   def _run_xml(xml, this_dir, args, worker_num)
@@ -90,11 +90,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     _test_schema_validation(this_dir, xml)
-    _test_simulation(args, this_dir, rundir)
-    return rundir
+    sim_time, workflow_time = _test_simulation(args, this_dir, rundir)
+    return rundir, sim_time, workflow_time
   end
 
-  def _get_results(rundir)
+  def _get_results(rundir, sim_time, workflow_time)
     sql_path = File.join(rundir, "eplusout.sql")
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
 
@@ -146,6 +146,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
+    results["Simulation Runtime"] = sim_time
+    results["Workflow Runtime"] = workflow_time
+
     return results
   end
 
@@ -191,10 +194,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
     simulation_start = Time.now
     system(command, :err => File::NULL)
-    puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{(Time.now - simulation_start).round(1)}, workflow in #{(Time.now - workflow_start).round(1)}s."
+    sim_time = (Time.now - simulation_start).round(1)
+    workflow_time = (Time.now - workflow_start).round(1)
+    puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{sim_time}, workflow in #{workflow_time}s."
 
     # Verify simulation outputs
     _verify_simulation_outputs(rundir, args['hpxml_path'])
+
+    return sim_time, workflow_time
   end
 
   def _verify_simulation_outputs(rundir, hpxml_path)
@@ -370,6 +377,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_keys = []
     results.each do |xml, xml_results|
       xml_results.keys.each do |key|
+        next if not key.is_a? Array
         next if output_keys.include? key
 
         output_keys << key
@@ -377,9 +385,17 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     output_keys.sort!
 
+    # Append runtimes at the end
+    output_keys << "Simulation Runtime"
+    output_keys << "Workflow Runtime"
+
     column_headers = ['HPXML']
     output_keys.each do |key|
-      column_headers << "#{key[0]}: #{key[1]}: #{key[2]} [#{key[3]}]"
+      if key.is_a? Array
+        column_headers << "#{key[0]}: #{key[1]}: #{key[2]} [#{key[3]}]"
+      else
+        column_headers << key
+      end
     end
 
     require 'csv'
@@ -412,27 +428,28 @@ class HPXMLTranslatorTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _test_dse(dse_dir, all_results)
-    # DSE tests
-    # Compare heating/cooling results to files with no ducts.
-    Dir["#{dse_dir}/valid*.xml"].sort.each do |xml|
-      xml_dse = File.absolute_path(xml)
-      results_dse = all_results[xml_dse]
+  def _test_dse(xmls, dse_dir, all_results)
+    # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
+    xmls.sort.each do |xml|
+      next if not xml.include? dse_dir
+      next if not xml.include? "-dse-0.8"
 
-      # Retrieve no distribution results for comparison
-      xml_nodist = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-dse", "-no-distribution"))))
-      results_nodist = all_results[xml_nodist]
+      xml_dse80 = File.absolute_path(xml)
+      xml_dse100 = xml_dse80.gsub("-dse-0.8", "-dse-1.0")
+
+      results_dse80 = all_results[xml_dse80]
+      results_dse100 = all_results[xml_dse100]
 
       # Compare results
       puts "\nResults for #{File.basename(xml)}:"
-      results_dse.keys.each do |k|
+      results_dse80.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
 
-        result_dse = results_dse[k].to_f
-        result_nodist = results_nodist[k].to_f
-        next if result_dse == 0.0 and result_nodist == 0.0
+        result_dse80 = results_dse80[k].to_f
+        result_dse100 = results_dse100[k].to_f
+        next if result_dse80 == 0.0 and result_nodist == 0.0
 
-        dse_actual = result_nodist / result_dse
+        dse_actual = result_dse100 / result_dse80
         dse_expect = 0.8
         puts "dse: #{dse_actual.round(2)} #{k}"
         assert_in_epsilon(dse_expect, dse_actual, 0.025)
@@ -441,10 +458,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
-  def _test_cfis(cfis_dir, all_results)
-    # CFIS tests
+  def _test_cfis(xmls, cfis_dir, all_results)
     # Verify non-zero mechanical ventilation energy.
-    Dir["#{cfis_dir}/valid*.xml"].sort.each do |xml|
+    xmls.sort.each do |xml|
+      next if not xml.include? cfis_dir
+
       xml_cfis = File.absolute_path(xml)
       results_cfis = all_results[xml_cfis]
 

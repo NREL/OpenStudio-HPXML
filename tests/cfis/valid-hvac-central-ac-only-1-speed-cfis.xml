@@ -227,22 +227,18 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID1'/>
+            <CoolingSystem>
+              <SystemIdentifier id='SpaceCool_ID1'/>
               <DistributionSystem idref='HVAC_Dist_ID1'/>
-              <HeatPumpType>air-to-air</HeatPumpType>
+              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000</CoolingCapacity>
-              <FractionHeatLoadServed>1</FractionHeatLoadServed>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>19.0</Value>
+                <Value>13</Value>
               </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
-              </AnnualHeatingEfficiency>
-            </HeatPump>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
@@ -284,6 +280,19 @@
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
+        <MechanicalVentilation>
+          <VentilationFans>
+            <VentilationFan>
+              <SystemIdentifier id='Mech_Vent_ID1'/>
+              <FanType>central fan integrated supply</FanType>
+              <RatedFlowRate>247</RatedFlowRate>
+              <HoursInOperation>8</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>360.0</FanPower>
+              <AttachedToHVACDistributionSystem idref='HVAC_Dist_ID1'/>
+            </VentilationFan>
+          </VentilationFans>
+        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='DHW_ID1'/>
