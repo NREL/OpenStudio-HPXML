@@ -43,6 +43,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       num_proc = 1 # Use 1 cpu on CircleCI
     end
 
+    # Override to only use 1 processor for now; for some reason, simulations
+    # are giving different results when using multiple processors.
+    num_proc = 1 #
+
     # Test simulations (in parallel)
     puts "Running #{xmls.size} HPXML files..."
     if Process.respond_to?(:fork) # e.g., most Unix systems
