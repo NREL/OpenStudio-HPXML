@@ -2323,7 +2323,7 @@ class MoistureConstructions
     rho = UnitConversions.convert(rho, "kg/m^3", "lbm/ft^3")
     cp = UnitConversions.convert(cp, "j/(kg*k)", "btu/(lbm*r)")
 
-    mat = Material.new(name = name, thick_in = thick_in, mat_base = nil, k_in = k_in, rho = rho, cp = cp, tAbs = 0.9, sAbs = 0.5, vAbs = 0.1, rvalue = nil, wDiff = wDiff, coefA = coefA, coefB = coefB, coefC = coefC, coefD = coefD, sDepth = sDepth, dDepth = dDepth, cThick = cThick, cDiff = cDiff)
+    mat = Material.new(name = name, thick_in = thick_in, mat_base = nil, k_in = k_in, rho = rho, cp = cp, tAbs = 0.001, sAbs = 0.0, vAbs = 0.0, rvalue = nil, wDiff = wDiff, coefA = coefA, coefB = coefB, coefC = coefC, coefD = coefD, sDepth = sDepth, dDepth = dDepth, cThick = cThick, cDiff = cDiff)
 
     # Define construction
     constr = Construction.new(name, [1])
