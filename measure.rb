@@ -6,22 +6,22 @@ require 'rexml/document'
 require 'rexml/xpath'
 require 'pathname'
 require 'csv'
-require "#{File.dirname(__FILE__)}/resources/EPvalidator"
-require "#{File.dirname(__FILE__)}/resources/airflow"
-require "#{File.dirname(__FILE__)}/resources/constants"
-require "#{File.dirname(__FILE__)}/resources/constructions"
-require "#{File.dirname(__FILE__)}/resources/geometry"
-require "#{File.dirname(__FILE__)}/resources/hotwater_appliances"
-require "#{File.dirname(__FILE__)}/resources/hvac"
-require "#{File.dirname(__FILE__)}/resources/hvac_sizing"
-require "#{File.dirname(__FILE__)}/resources/lighting"
-require "#{File.dirname(__FILE__)}/resources/location"
-require "#{File.dirname(__FILE__)}/resources/misc_loads"
-require "#{File.dirname(__FILE__)}/resources/pv"
-require "#{File.dirname(__FILE__)}/resources/unit_conversions"
-require "#{File.dirname(__FILE__)}/resources/util"
-require "#{File.dirname(__FILE__)}/resources/waterheater"
-require "#{File.dirname(__FILE__)}/resources/xmlhelper"
+require_relative "resources/EPvalidator"
+require_relative "resources/airflow"
+require_relative "resources/constants"
+require_relative "resources/constructions"
+require_relative "resources/geometry"
+require_relative "resources/hotwater_appliances"
+require_relative "resources/hvac"
+require_relative "resources/hvac_sizing"
+require_relative "resources/lighting"
+require_relative "resources/location"
+require_relative "resources/misc_loads"
+require_relative "resources/pv"
+require_relative "resources/unit_conversions"
+require_relative "resources/util"
+require_relative "resources/waterheater"
+require_relative "resources/xmlhelper"
 
 # start the measure
 class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
@@ -290,6 +290,7 @@ class OSModel
     @nbeds = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms"))
     @garage_present = Boolean(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent"))
     @has_uncond_bsmnt = (not building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"].nil?)
+    @iecc_zone_2006 = XMLHelper.get_value(building, "BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year='2006']/ClimateZone")
 
     # Geometry/Envelope
 
@@ -308,14 +309,14 @@ class OSModel
 
     # HVAC
 
-    dse = get_dse(building)
+    dse, has_dse = get_dse(building)
     success = add_cooling_system(runner, model, building, unit, dse)
     return false if not success
 
     success = add_heating_system(runner, model, building, unit, dse)
     return false if not success
 
-    success = add_heat_pump(runner, model, building, unit, dse, weather)
+    success = add_heat_pump(runner, model, building, unit, dse, has_dse, weather)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather)
@@ -611,7 +612,7 @@ class OSModel
     spaces = {}
 
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic") do |attic|
-      attic_type = attic.elements["AtticType"].text
+      attic_type = XMLHelper.get_value(attic, "AtticType")
       if ["vented attic", "unvented attic"].include? attic_type
         create_space_and_zone(model, spaces, Constants.SpaceTypeUnfinishedAttic)
       elsif attic_type == "cape cod"
@@ -620,9 +621,8 @@ class OSModel
         fail "Unhandled value (#{attic_type})."
       end
 
-      floors = attic.elements["Floors"]
-      floors.elements.each("Floor") do |floor|
-        exterior_adjacent_to = floor.elements["extension/ExteriorAdjacentTo"].text
+      attic.elements.each("Floors/Floor") do |floor|
+        exterior_adjacent_to = XMLHelper.get_value(floor, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
         elsif exterior_adjacent_to == "garage"
@@ -632,9 +632,8 @@ class OSModel
         end
       end
 
-      walls = attic.elements["Walls"]
-      walls.elements.each("Wall") do |wall|
-        exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+      attic.elements.each("Walls/Wall") do |wall|
+        exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
         elsif exterior_adjacent_to == "garage"
@@ -658,7 +657,7 @@ class OSModel
       end
 
       foundation.elements.each("FrameFloor") do |frame_floor|
-        exterior_adjacent_to = frame_floor.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(frame_floor, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "living space"
           create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
         elsif exterior_adjacent_to != "ambient" and exterior_adjacent_to != "ground"
@@ -667,7 +666,7 @@ class OSModel
       end
 
       foundation.elements.each("FoundationWall") do |foundation_wall|
-        exterior_adjacent_to = foundation_wall.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(foundation_wall, "extension/ExteriorAdjacentTo")
         if exterior_adjacent_to == "unconditioned basement"
           create_space_and_zone(model, spaces, Constants.SpaceTypeUnfinishedBasement)
         elsif exterior_adjacent_to == "conditioned basement"
@@ -681,7 +680,7 @@ class OSModel
     end
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
+      interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
       if interior_adjacent_to == "living space"
         create_space_and_zone(model, spaces, Constants.SpaceTypeLiving)
       elsif interior_adjacent_to == "garage"
@@ -690,7 +689,7 @@ class OSModel
         fail "Unhandled value (#{interior_adjacent_to})."
       end
 
-      exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+      exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
       if exterior_adjacent_to == "garage"
         create_space_and_zone(model, spaces, Constants.SpaceTypeGarage)
       elsif exterior_adjacent_to == "living space"
@@ -853,9 +852,9 @@ class OSModel
       foundation.elements.each("Slab") do |fnd_slab|
         slab_id = fnd_slab.elements["SystemIdentifier"].attributes["id"]
 
-        slab_perim = Float(fnd_slab.elements["ExposedPerimeter"].text)
+        slab_perim = Float(XMLHelper.get_value(fnd_slab, "ExposedPerimeter"))
         perim_exp += slab_perim
-        slab_area = Float(fnd_slab.elements["Area"].text)
+        slab_area = Float(XMLHelper.get_value(fnd_slab, "Area"))
         # Calculate length/width given perimeter/area
         sqrt_term = slab_perim**2 - 16.0 * slab_area
         if sqrt_term < 0
@@ -868,7 +867,7 @@ class OSModel
 
         z_origin = 0
         unless fnd_slab.elements["DepthBelowGrade"].nil?
-          z_origin = -1 * Float(fnd_slab.elements["DepthBelowGrade"].text)
+          z_origin = -1 * Float(XMLHelper.get_value(fnd_slab, "DepthBelowGrade"))
         end
 
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(UnitConversions.convert(slab_length, "ft", "m"),
@@ -897,6 +896,12 @@ class OSModel
         fnd_slab_perim = fnd_slab.elements["PerimeterInsulation/Layer[InstallationType='continuous']"]
         slab_ext_r = Float(XMLHelper.get_value(fnd_slab_perim, "NominalRValue"))
         slab_ext_depth = Float(XMLHelper.get_value(fnd_slab, "PerimeterInsulationDepth"))
+        if not slab_ext_r.nil? and not slab_ext_depth.nil?
+          slab_ext_r = Float(slab_ext_r)
+          slab_ext_depth = Float(slab_ext_depth)
+        else
+          slab_ext_r, slab_ext_depth = FloorConstructions.get_default_slab_perimeter_rvalue_depth(@iecc_zone_2006)
+        end
         if slab_ext_r == 0 or slab_ext_depth == 0
           slab_ext_r = 0
           slab_ext_depth = 0
@@ -905,6 +910,12 @@ class OSModel
         fnd_slab_under = fnd_slab.elements["UnderSlabInsulation/Layer[InstallationType='continuous']"]
         slab_perim_r = Float(XMLHelper.get_value(fnd_slab_under, "NominalRValue"))
         slab_perim_width = Float(XMLHelper.get_value(fnd_slab, "UnderSlabInsulationWidth"))
+        if not slab_perim_r.nil? and not slab_perim_width.nil?
+          slab_perim_r = Float(slab_perim_r)
+          slab_perim_width = Float(slab_perim_width)
+        else
+          slab_perim_r, slab_perim_width = FloorConstructions.get_default_slab_under_rvalue_width()
+        end
         if slab_perim_r == 0 or slab_perim_width == 0
           slab_perim_r = 0
           slab_perim_width = 0
@@ -921,10 +932,10 @@ class OSModel
       foundation.elements.each("FoundationWall") do |fnd_wall|
         wall_id = fnd_wall.elements["SystemIdentifier"].attributes["id"]
 
-        exterior_adjacent_to = fnd_wall.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(fnd_wall, "extension/ExteriorAdjacentTo")
 
-        wall_height = Float(fnd_wall.elements["Height"].text) # FIXME: Need to handle above-grade portion
-        wall_gross_area = Float(fnd_wall.elements["Area"].text)
+        wall_height = Float(XMLHelper.get_value(fnd_wall, "Height")) # FIXME: Need to handle above-grade portion
+        wall_gross_area = Float(XMLHelper.get_value(fnd_wall, "Area"))
         wall_net_area = net_wall_area(wall_gross_area, fenestration_areas, fnd_id)
         if wall_net_area <= 0
           fail "Calculated a negative net surface area for Wall '#{wall_id}'."
@@ -932,7 +943,7 @@ class OSModel
 
         wall_length = wall_net_area / wall_height
 
-        z_origin = -1 * Float(fnd_wall.elements["DepthBelowGrade"].text)
+        z_origin = -1 * Float(XMLHelper.get_value(fnd_wall, "DepthBelowGrade"))
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(UnitConversions.convert(wall_length, "ft", "m"),
                                                                   UnitConversions.convert(wall_height, "ft", "m"),
@@ -962,7 +973,12 @@ class OSModel
         end
         walls_filled_cavity = true
         walls_concrete_thick_in = Float(XMLHelper.get_value(fnd_wall, "Thickness"))
-        wall_assembly_r = Float(XMLHelper.get_value(fnd_wall, "Insulation/AssemblyEffectiveRValue"))
+        wall_assembly_r = XMLHelper.get_value(fnd_wall, "Insulation/AssemblyEffectiveRValue")
+        if not wall_assembly_r.nil?
+          wall_assembly_r = Float(wall_assembly_r)
+        else
+          wall_assembly_r = 1.0 / FoundationConstructions.get_default_basement_wall_ufactor(@iecc_zone_2006)
+        end
         wall_film_r = Material.AirFilmVertical.rvalue
         wall_cav_r = 0.0
         wall_cav_depth = 0.0
@@ -982,7 +998,7 @@ class OSModel
       foundation.elements.each("FrameFloor") do |fnd_floor|
         floor_id = fnd_floor.elements["SystemIdentifier"].attributes["id"]
 
-        framefloor_area = Float(fnd_floor.elements["Area"].text)
+        framefloor_area = Float(XMLHelper.get_value(fnd_floor, "Area"))
         framefloor_width = Math::sqrt(framefloor_area)
         framefloor_length = framefloor_area / framefloor_width
 
@@ -1015,18 +1031,23 @@ class OSModel
 
         floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
 
-        floor_assembly_r = Float(XMLHelper.get_value(fnd_floor, "Insulation/AssemblyEffectiveRValue"))
+        floor_assembly_r = XMLHelper.get_value(fnd_floor, "Insulation/AssemblyEffectiveRValue")
+        if not floor_assembly_r.nil?
+          floor_assembly_r = Float(floor_assembly_r)
+        else
+          floor_assembly_r = 1.0 / FloorConstructions.get_default_floor_ufactor(@iecc_zone_2006)
+        end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare), # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
         ]
-        floor_constr_set, floor_cav_r = pick_construction_set(floor_assembly_r, constr_sets, floor_film_r, "foundation framefloor #{floor_id}")
+        floor_constr_set, floor_cav_r = pick_wood_stud_construction_set(floor_assembly_r, constr_sets, floor_film_r, "foundation framefloor #{floor_id}")
 
         mat_floor_covering = nil
         mat_carpet = floor_constr_set.exterior_material
         plywood_thick_in = floor_constr_set.osb_thick_in
-        floor_cav_depth = floor_constr_set.wood_stud_material.thick_in
+        floor_cav_depth = floor_constr_set.stud.thick_in
         floor_ff = floor_constr_set.framing_factor
         floor_cont_r = floor_constr_set.rigid_r
         floor_grade = 1
@@ -1090,7 +1111,7 @@ class OSModel
   end
 
   def self.add_finished_floor_area(runner, model, building, spaces)
-    ffa = Float(building.elements["BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"].text).round(1)
+    ffa = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea")).round(1)
 
     # First check if we need to add a finished basement ceiling
 
@@ -1184,12 +1205,12 @@ class OSModel
 
   def self.add_walls(runner, model, building, spaces, fenestration_areas)
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
-      exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+      interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
+      exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
 
       wall_id = wall.elements["SystemIdentifier"].attributes["id"]
 
-      wall_gross_area = Float(wall.elements["Area"].text)
+      wall_gross_area = Float(XMLHelper.get_value(wall, "Area"))
       wall_net_area = net_wall_area(wall_gross_area, fenestration_areas, wall_id)
       if wall_net_area <= 0
         fail "Calculated a negative net surface area for Wall '#{wall_id}'."
@@ -1228,6 +1249,8 @@ class OSModel
       end
 
       # Apply construction
+      # The code below constructs a reasonable wall construction based on the
+      # wall type while ensuring the correct assembly R-value.
 
       if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
         drywall_thick_in = 0.5
@@ -1243,38 +1266,11 @@ class OSModel
       end
       solar_abs = Float(XMLHelper.get_value(wall, "SolarAbsorptance"))
       emitt = Float(XMLHelper.get_value(wall, "Emittance"))
+      assembly_r = XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue")
+      wall_type = XMLHelper.get_child_name(wall, "WallType")
 
-      if XMLHelper.has_element(wall, "WallType/WoodStud")
-
-        assembly_r = Float(XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue"))
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 5.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c. + R5
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                          # Fallback
-        ]
-        constr_set, cavity_r = pick_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
-        install_grade = 1
-        cavity_filled = true
-
-        success = WallConstructions.apply_wood_stud(runner, model, [surface],
-                                                    "WallConstruction",
-                                                    cavity_r, install_grade, constr_set.wood_stud_material.thick_in,
-                                                    cavity_filled, constr_set.framing_factor,
-                                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                    constr_set.rigid_r, constr_set.exterior_material)
-        return false if not success
-
-        check_surface_assembly_rvalue(surface, film_r, assembly_r)
-
-        apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
-
-      else
-
-        fail "Unexpected wall type."
-
-      end
+      apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
+                              drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
     end
 
     return true
@@ -1344,7 +1340,7 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4
         WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, 0.0, nil),                           # Fallback
       ]
-      constr_set, cavity_r = pick_construction_set(assembly_r, constr_sets, film_r, "rim joist #{rim_joist_id}")
+      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "rim joist #{rim_joist_id}")
       install_grade = 1
 
       success = WallConstructions.apply_rim_joist(runner, model, [surface],
@@ -1366,14 +1362,15 @@ class OSModel
 
   def self.add_attics(runner, model, building, spaces, fenestration_areas)
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic") do |attic|
-      attic_type = attic.elements["AtticType"].text
+      attic_type = XMLHelper.get_value(attic, "AtticType")
       interior_adjacent_to = attic_type
 
+      # Attic floors
       attic.elements.each("Floors/Floor") do |floor|
         floor_id = floor.elements["SystemIdentifier"].attributes["id"]
-        exterior_adjacent_to = floor.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(floor, "extension/ExteriorAdjacentTo")
 
-        floor_area = Float(floor.elements["Area"].text)
+        floor_area = Float(XMLHelper.get_value(floor, "Area"))
         floor_width = Math::sqrt(floor_area)
         floor_length = floor_area / floor_width
         z_origin = 0
@@ -1407,15 +1404,20 @@ class OSModel
         end
         film_r = 2 * Material.AirFilmFloorAverage.rvalue
 
-        assembly_r = Float(XMLHelper.get_value(floor, "Insulation/AssemblyEffectiveRValue"))
+        assembly_r = XMLHelper.get_value(floor, "Insulation/AssemblyEffectiveRValue")
+        if not assembly_r.nil?
+          assembly_r = Float(assembly_r)
+        else
+          assembly_r = FloorConstructions.get_default_ceiling_ufactor(@iecc_zone_2006)
+        end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.11, 0.0, 0.0, drywall_thick_in, nil), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.24, 0.0, 0.0, drywall_thick_in, nil), # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
         ]
 
-        constr_set, ceiling_r = pick_construction_set(assembly_r, constr_sets, film_r, "attic floor #{floor_id}")
-        ceiling_joist_height_in = constr_set.wood_stud_material.thick_in
+        constr_set, ceiling_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "attic floor #{floor_id}")
+        ceiling_joist_height_in = constr_set.stud.thick_in
         ceiling_ins_thick_in = ceiling_joist_height_in
         ceiling_framing_factor = constr_set.framing_factor
         ceiling_drywall_thick_in = constr_set.drywall_thick_in
@@ -1433,15 +1435,16 @@ class OSModel
         check_surface_assembly_rvalue(surface, film_r, assembly_r)
       end
 
+      # Attic roofs
       attic.elements.each("Roofs/Roof") do |roof|
         roof_id = roof.elements["SystemIdentifier"].attributes["id"]
 
-        roof_gross_area = Float(roof.elements["Area"].text)
+        roof_gross_area = Float(XMLHelper.get_value(roof, "Area"))
         roof_net_area = net_wall_area(roof_gross_area, fenestration_areas, roof_id)
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         z_origin = 0
-        roof_tilt = Float(roof.elements["Pitch"].text) / 12.0
+        roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
 
         surface = OpenStudio::Model::Surface.new(add_roof_polygon(UnitConversions.convert(roof_length, "ft", "m"),
                                                                   UnitConversions.convert(roof_width, "ft", "m"),
@@ -1479,7 +1482,7 @@ class OSModel
           WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, drywall_thick_in, mat_roofing),   # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                        # Fallback
         ]
-        constr_set, roof_cavity_r = pick_construction_set(assembly_r, constr_sets, film_r, "attic roof #{roof_id}")
+        constr_set, roof_cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "attic roof #{roof_id}")
 
         roof_install_grade = 1
 
@@ -1487,7 +1490,7 @@ class OSModel
           success = RoofConstructions.apply_finished_roof(runner, model, [surface],
                                                           "RoofConstruction",
                                                           roof_cavity_r, roof_install_grade,
-                                                          constr_set.wood_stud_material.thick_in,
+                                                          constr_set.stud.thick_in,
                                                           true, constr_set.framing_factor,
                                                           constr_set.drywall_thick_in,
                                                           constr_set.osb_thick_in, constr_set.rigid_r,
@@ -1497,23 +1500,26 @@ class OSModel
           success = RoofConstructions.apply_unfinished_attic(runner, model, [surface],
                                                              "RoofConstruction",
                                                              roof_cavity_r, roof_install_grade,
-                                                             constr_set.wood_stud_material.thick_in,
+                                                             constr_set.stud.thick_in,
                                                              constr_set.framing_factor,
-                                                             constr_set.wood_stud_material.thick_in,
+                                                             constr_set.stud.thick_in,
                                                              constr_set.osb_thick_in, constr_set.rigid_r,
                                                              mat_roofing, has_radiant_barrier)
           return false if not success
         end
 
         check_surface_assembly_rvalue(surface, film_r, assembly_r)
+
+        apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
       end
 
+      # Attic walls
       attic.elements.each("Walls/Wall") do |wall|
-        exterior_adjacent_to = wall.elements["extension/ExteriorAdjacentTo"].text
+        exterior_adjacent_to = XMLHelper.get_value(wall, "extension/ExteriorAdjacentTo")
 
         wall_id = wall.elements["SystemIdentifier"].attributes["id"]
 
-        wall_gross_area = Float(wall.elements["Area"].text)
+        wall_gross_area = Float(XMLHelper.get_value(wall, "Area"))
         wall_net_area = net_wall_area(wall_gross_area, fenestration_areas, wall_id)
         if wall_net_area <= 0
           fail "Calculated a negative net surface area for Wall '#{wall_id}'."
@@ -1565,38 +1571,11 @@ class OSModel
         end
         solar_abs = Float(XMLHelper.get_value(wall, "SolarAbsorptance"))
         emitt = Float(XMLHelper.get_value(wall, "Emittance"))
+        wall_type = XMLHelper.get_child_name(wall, "WallType")
+        assembly_r = Float(XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue"))
 
-        if XMLHelper.has_element(wall, "WallType/WoodStud")
-
-          assembly_r = Float(XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue"))
-          constr_sets = [
-            WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R10
-            WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 5.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c. + R5
-            WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c.
-            WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
-            WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                          # Fallback
-          ]
-          constr_set, cavity_r = pick_construction_set(assembly_r, constr_sets, film_r, "attic wall #{wall_id}")
-          install_grade = 1
-          cavity_filled = true
-
-          success = WallConstructions.apply_wood_stud(runner, model, [surface],
-                                                      "WallConstruction",
-                                                      cavity_r, install_grade, constr_set.wood_stud_material.thick_in,
-                                                      cavity_filled, constr_set.framing_factor,
-                                                      constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                      constr_set.rigid_r, constr_set.exterior_material)
-          return false if not success
-
-          check_surface_assembly_rvalue(surface, film_r, assembly_r)
-
-          apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
-
-        else
-
-          fail "Unexpected wall type."
-
-        end
+        apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
+                                drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
       end
     end
 
@@ -1608,10 +1587,18 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_id = window.elements["SystemIdentifier"].attributes["id"]
 
-      window_area = Float(window.elements["Area"].text)
-      window_height = 4.0 # ft
+      window_height = 4.0 # ft, default
+      overhang_depth = nil
+      if not window.elements["Overhangs"].nil?
+        overhang_depth = Float(XMLHelper.get_value(window, "Overhangs/Depth"))
+        overhang_distance_to_top = Float(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
+        overhang_distance_to_bottom = Float(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
+        window_height = overhang_distance_to_bottom - overhang_distance_to_top
+      end
+
+      window_area = Float(XMLHelper.get_value(window, "Area"))
       window_width = window_area / window_height
-      window_azimuth = Float(window.elements["Azimuth"].text)
+      window_azimuth = Float(XMLHelper.get_value(window, "Azimuth"))
       z_origin = 0
 
       if not fenestration_areas.keys.include? window.elements["AttachedToWall"].attributes["idref"]
@@ -1630,7 +1617,7 @@ class OSModel
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
         next unless wall.elements["SystemIdentifier"].attributes["id"] == window.elements["AttachedToWall"].attributes["idref"]
 
-        interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
+        interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
         if interior_adjacent_to == "living space"
           surface.setSpace(spaces[Constants.SpaceTypeLiving])
         elsif interior_adjacent_to == "garage"
@@ -1655,12 +1642,8 @@ class OSModel
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType("FixedWindow")
 
-      overhang_depth = 0
-      overhang_offset = 0
-      if not window.elements["Overhangs"].nil?
-        overhang_depth = Float(XMLHelper.get_value(window, "Overhangs/Depth"))
-        overhang_offset = Float(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
-        overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, "ft", "m"), UnitConversions.convert(overhang_offset, "ft", "m"))
+      if not overhang_depth.nil?
+        overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, "ft", "m"), UnitConversions.convert(overhang_distance_to_top, "ft", "m"))
         overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
       end
 
@@ -1697,10 +1680,10 @@ class OSModel
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_id = skylight.elements["SystemIdentifier"].attributes["id"]
-      skylight_area = Float(skylight.elements["Area"].text)
+      skylight_area = Float(XMLHelper.get_value(skylight, "Area"))
       skylight_height = 5.0 # FIXME
       skylight_width = skylight_area / skylight_height
-      skylight_azimuth = Float(skylight.elements["Azimuth"].text)
+      skylight_azimuth = Float(XMLHelper.get_value(skylight, "Azimuth"))
       z_origin = 0
       if not fenestration_areas.keys.include? skylight.elements["AttachedToRoof"].attributes["idref"]
         fenestration_areas[skylight.elements["AttachedToRoof"].attributes["idref"]] = skylight_area
@@ -1709,11 +1692,11 @@ class OSModel
       end
       skylight_tilt = nil
       building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic") do |attic|
-        attic_type = attic.elements["AtticType"].text
+        attic_type = XMLHelper.get_value(attic, "AtticType")
         attic.elements.each("Roofs/Roof") do |roof|
           next unless roof.elements["SystemIdentifier"].attributes["id"] == skylight.elements["AttachedToRoof"].attributes["idref"]
 
-          skylight_tilt = Float(roof.elements["Pitch"].text) / 12.0
+          skylight_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
         end
       end
       surface = OpenStudio::Model::Surface.new(add_roof_polygon(UnitConversions.convert(skylight_width, "ft", "m") + 0.0001, # base surface must be at least slightly larger than subsurface
@@ -1756,11 +1739,23 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
       door_id = door.elements["SystemIdentifier"].attributes["id"]
 
-      door_area = Float(door.elements["Area"].text)
+      door_area = XMLHelper.get_value(door, "Area")
+      if not door_area.nil?
+        door_area = Float(door_area)
+      else
+        door_area = SubsurfaceConstructions.get_default_door_area()
+      end
+
       door_height = 6.67 # ft
       door_width = door_area / door_height
-      door_azimuth = Float(door.elements["Azimuth"].text)
       z_origin = 0
+
+      door_azimuth = XMLHelper.get_value(door, "Azimuth")
+      if not door_azimuth.nil?
+        door_azimuth = Float(door_azimuth)
+      else
+        door_azimuth = SubsurfaceConstructions.get_default_door_azimuth()
+      end
 
       if not fenestration_areas.keys.include? door.elements["AttachedToWall"].attributes["idref"]
         fenestration_areas[door.elements["AttachedToWall"].attributes["idref"]] = door_area
@@ -1778,7 +1773,7 @@ class OSModel
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
         next unless wall.elements["SystemIdentifier"].attributes["id"] == door.elements["AttachedToWall"].attributes["idref"]
 
-        interior_adjacent_to = wall.elements["extension/InteriorAdjacentTo"].text
+        interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
         if interior_adjacent_to == "living space"
           surface.setSpace(spaces[Constants.SpaceTypeLiving])
         elsif interior_adjacent_to == "garage"
@@ -1805,7 +1800,12 @@ class OSModel
 
       # Apply construction
       name = door.elements["SystemIdentifier"].attributes["id"]
-      ufactor = 1.0 / Float(XMLHelper.get_value(door, "RValue"))
+      rvalue = XMLHelper.get_value(door, "RValue")
+      if not rvalue.nil?
+        ufactor = 1.0 / Float(rvalue)
+      else
+        ufactor, shgc = SubsurfaceConstructions.get_default_ufactor_shgc(@iecc_zone_2006)
+      end
 
       success = SubsurfaceConstructions.apply_door(runner, model, [sub_surface], "Door", ufactor)
       return false if not success
@@ -1967,8 +1967,8 @@ class OSModel
     # Distribution
     if not wh.nil?
       dist = wh.elements["HotWaterDistribution"]
-      if XMLHelper.has_element(dist, "SystemType/Standard")
-        dist_type = "standard"
+      dist_type = XMLHelper.get_child_name(dist, "SystemType").downcase
+      if dist_type == "standard"
         std_pipe_length = XMLHelper.get_value(dist, "SystemType/Standard/PipingLength")
         if std_pipe_length.nil?
           std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
@@ -1979,8 +1979,7 @@ class OSModel
         recirc_branch_length = nil
         recirc_control_type = nil
         recirc_pump_power = nil
-      elsif XMLHelper.has_element(dist, "SystemType/Recirculation")
-        dist_type = "recirculation"
+      elsif dist_type == "recirculation"
         recirc_loop_length = XMLHelper.get_value(dist, "SystemType/Recirculation/RecirculationPipingLoopLength")
         if recirc_loop_length.nil?
           std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
@@ -2241,19 +2240,13 @@ class OSModel
     if heat_capacity_btuh <= 0.0
       heat_capacity_btuh = Constants.SizingAuto
     end
+    htg_type = XMLHelper.get_child_name(htgsys, "HeatingSystemType")
 
-    if XMLHelper.has_element(htgsys, "HeatingSystemType/Furnace")
+    if htg_type == "Furnace"
 
       # FIXME: THIS SHOULD NOT BE NEEDED
       # ==================================
-      objname = nil
-      if XMLHelper.has_element(htgsys, "HeatingSystemType/Furnace")
-        objname = Constants.ObjectNameFurnace
-      elsif XMLHelper.has_element(htgsys, "HeatingSystemType/Boiler")
-        objname = Constants.ObjectNameBoiler
-      elsif XMLHelper.has_element(htgsys, "HeatingSystemType/ElectricResistance")
-        objname = Constants.ObjectNameElectricBaseboard
-      end
+      objname = Constants.ObjectNameFurnace
       existing_objects = {}
       thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
       HVAC.get_control_and_slave_zones(thermal_zones).each do |control_zone, slave_zones|
@@ -2271,7 +2264,7 @@ class OSModel
                                    existing_objects)
       return false if not success
 
-    elsif XMLHelper.has_element(htgsys, "HeatingSystemType/Boiler")
+    elsif htg_type == "Boiler"
 
       system_type = Constants.BoilerTypeForcedDraft
       afue = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
@@ -2281,24 +2274,23 @@ class OSModel
       oat_hwst_high = nil
       oat_hwst_low = nil
       design_temp = 180.0
-      is_modulating = false
       success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
                                   oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                  heat_capacity_btuh, design_temp, is_modulating, dse)
+                                  heat_capacity_btuh, design_temp, dse)
       return false if not success
 
-    elsif XMLHelper.has_element(htgsys, "HeatingSystemType/ElectricResistance")
+    elsif htg_type == "ElectricResistance"
 
       efficiency = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='Percent']/Value"))
       success = HVAC.apply_electric_baseboard(model, unit, runner, efficiency,
                                               heat_capacity_btuh)
       return false if not success
 
-    elsif XMLHelper.has_element(htgsys, "HeatingSystemType/WallFurnace") or XMLHelper.has_element(htgsys, "HeatingSystemType/Stove")
+    elsif ["WallFurnace", "Stove"].include? htg_type
 
-      if XMLHelper.has_element(htgsys, "HeatingSystemType/WallFurnace")
+      if htg_type == "WallFurnace"
         efficiency = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
-      elsif XMLHelper.has_element(htgsys, "HeatingSystemType/Stove")
+      elsif htg_type == "Stove"
         efficiency = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='Percent']/Value"))
       end
       airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
@@ -2313,7 +2305,7 @@ class OSModel
     return true
   end
 
-  def self.add_heat_pump(runner, model, building, unit, dse, weather)
+  def self.add_heat_pump(runner, model, building, unit, dse, has_dse, weather)
     hp = building.elements["BuildingDetails/Systems/HVAC/HVACPlant/HeatPump"]
 
     return true if hp.nil?
@@ -2449,7 +2441,7 @@ class OSModel
       cap_retention_temp = -5.0
       pan_heater_power = 0.0
       fan_power = 0.07
-      is_ducted = false
+      is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
       supplemental_efficiency = 1.0
       success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
                                 min_cooling_capacity, max_cooling_capacity,
@@ -2610,8 +2602,7 @@ class OSModel
     dse_cool = XMLHelper.get_value(building, "BuildingDetails/Systems/HVAC/HVACDistribution/AnnualCoolingDistributionSystemEfficiency")
     dse_heat = XMLHelper.get_value(building, "BuildingDetails/Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency")
     if dse_cool.nil? and dse_heat.nil?
-      dse_cool = 1.0
-      dse_heat = 1.0
+      return 1.0, false
     elsif not dse_cool.nil? and not dse_heat.nil?
       dse_cool = Float(dse_cool)
       dse_heat = Float(dse_heat)
@@ -2620,7 +2611,7 @@ class OSModel
       fail "Cannot handle different distribution system efficiency (DSE) values for heating and cooling."
     end
 
-    return dse_cool
+    return dse_cool, true
   end
 
   def self.add_mels(runner, model, building, unit, living_space)
@@ -2678,7 +2669,13 @@ class OSModel
     vented_crawl_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
       area = REXML::XPath.first(vented_crawl, "sum(FrameFloor/Area/text())")
-      vented_crawl_sla_area += (Float(XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")) * area)
+      vented_crawl_sla = XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")
+      if not vented_crawl_sla.nil?
+        vented_crawl_sla = Float(vented_crawl_sla)
+      else
+        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
+      end
+      vented_crawl_sla_area += (vented_crawl_sla * area)
       vented_crawl_area += area
     end
     if vented_crawl_area > 0
@@ -2692,7 +2689,13 @@ class OSModel
     vented_attic_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType='vented attic']") do |vented_attic|
       area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area/text())")
-      vented_attic_sla_area += (Float(XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")) * area)
+      vented_attic_sla = XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")
+      if not vented_attic_sla.nil?
+        vented_attic_sla = Float(vented_attic_sla)
+      else
+        vented_attic_sla = Airflow.get_default_vented_attic_sla()
+      end
+      vented_attic_sla_area += (vented_attic_sla * area)
       vented_attic_area += area
     end
     if vented_attic_area > 0
@@ -2728,13 +2731,16 @@ class OSModel
       mech_vent_fan_power = 0.0
       mech_vent_cfm = 0.0
     else
-      # FIXME: HoursInOperation isn't being used
+      # FIXME: HoursInOperation isn't hooked up
+      # FIXME: AttachedToHVACDistributionSystem isn't hooked up
       fan_type = XMLHelper.get_value(whole_house_fan, "FanType")
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
       elsif fan_type == "exhaust only"
         mech_vent_type = Constants.VentTypeExhaust
-      else
+      elsif fan_type == "central fan integrated supply"
+        mech_vent_type = Constants.VentTypeCFIS
+      elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
         mech_vent_type = Constants.VentTypeBalanced
       end
       mech_vent_total_efficiency = 0.0
@@ -2805,8 +2811,8 @@ class OSModel
       duct_ah_return_frac = 0.267
       duct_location_frac = Constants.Auto
       duct_num_returns = 1
-      duct_supply_area_mult = 1.0
-      duct_return_area_mult = 1.0
+      duct_supply_area_mult = supply_area / 100.0
+      duct_return_area_mult = return_area / 100.0
       duct_r = 4.0
     else
       duct_location = "none"
@@ -2846,11 +2852,8 @@ class OSModel
     htgsys = building.elements["BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem"]
     return true if htgsys.nil?
 
-    has_furnace = XMLHelper.has_element(htgsys, "HeatingSystemType/Furnace")
-    has_wall_furnace = XMLHelper.has_element(htgsys, "HeatingSystemType/WallFurnace")
-    has_stove = XMLHelper.has_element(htgsys, "HeatingSystemType/Stove")
-    has_boiler = XMLHelper.has_element(htgsys, "HeatingSystemType/Boiler")
-    return true if not (has_furnace or has_wall_furnace or has_stove or has_boiler)
+    htg_type = XMLHelper.get_child_name(htgsys, "HeatingSystemType")
+    return true if not ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
 
     fuel = to_beopt_fuel(XMLHelper.get_value(htgsys, "HeatingSystemFuel"))
     return true if fuel == Constants.FuelTypeElectric
@@ -2860,6 +2863,8 @@ class OSModel
       fuel_eae = Float(fuel_eae)
     end
 
+    has_boiler = (htg_type == "Boiler")
+    has_furnace = (htg_type == "Furnace")
     success = HVAC.apply_eae_to_heating_fan(runner, model, fuel_eae, fuel, dse,
                                             has_furnace, has_boiler)
     return false if not success
@@ -2898,30 +2903,367 @@ class OSModel
     return true
   end
 
-  def self.pick_construction_set(assembly_r, constr_sets, film_r, surface_name)
-    # Picks a construction set from constr_sets for which a positive cavity insulation R-value can be calculated
+  def self.calc_non_cavity_r(film_r, constr_set)
+    # Calculate R-value for all non-cavity layers
+    non_cavity_r = film_r
+    if not constr_set.exterior_material.nil?
+      non_cavity_r += constr_set.exterior_material.rvalue
+    end
+    if not constr_set.rigid_r.nil?
+      non_cavity_r += constr_set.rigid_r
+    end
+    if not constr_set.osb_thick_in.nil?
+      non_cavity_r += Material.Plywood(constr_set.osb_thick_in).rvalue
+    end
+    if not constr_set.drywall_thick_in.nil?
+      non_cavity_r += Material.GypsumWall(constr_set.drywall_thick_in).rvalue
+    end
+    return non_cavity_r
+  end
+
+  def self.apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
+                                   drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
+    if wall_type == "WoodStud"
+      if not assembly_r.nil?
+        assembly_r = Float(assembly_r)
+      else
+        assembly_r = 1.0 / WallConstructions.get_default_frame_wall_ufactor(@iecc_zone_2006)
+      end
+      install_grade = 1
+      cavity_filled = true
+
+      constr_sets = [
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 5.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c. + R5
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.20, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                          # Fallback
+      ]
+      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      success = WallConstructions.apply_wood_stud(runner, model, [surface], "WallConstruction",
+                                                  cavity_r, install_grade, constr_set.stud.thick_in,
+                                                  cavity_filled, constr_set.framing_factor,
+                                                  constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                                  constr_set.rigid_r, constr_set.exterior_material)
+      return false if not success
+
+    elsif wall_type == "SteelFrame"
+      assembly_r = Float(assembly_r)
+      install_grade = 1
+      cavity_filled = true
+      corr_factor = 0.45
+
+      constr_sets = [
+        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 10.0, 0.5, drywall_thick_in, mat_ext_finish), # 2x6, 24" o.c. + R10
+        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 5.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c. + R5
+        SteelStudConstructionSet.new(5.5, corr_factor, 0.20, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x6, 24" o.c.
+        SteelStudConstructionSet.new(3.5, corr_factor, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
+        SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, 0.0, nil),                                  # Fallback
+      ]
+      constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      success = WallConstructions.apply_steel_stud(runner, model, [surface], "WallConstruction",
+                                                   cavity_r, install_grade, constr_set.cavity_thick_in,
+                                                   cavity_filled, constr_set.framing_factor,
+                                                   constr_set.corr_factor, constr_set.drywall_thick_in,
+                                                   constr_set.osb_thick_in, constr_set.rigid_r,
+                                                   constr_set.exterior_material)
+      return false if not success
+
+    elsif wall_type == "DoubleWoodStud"
+      assembly_r = Float(assembly_r)
+      install_grade = 1
+      is_staggered = false
+
+      constr_sets = [
+        DoubleStudConstructionSet.new(Material.Stud2x4, 0.23, 24.0, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 24" o.c.
+        DoubleStudConstructionSet.new(Material.Stud2x4, 0.01, 16.0, 0.0, 0.0, 0.0, nil),                          # Fallback
+      ]
+      constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      success = WallConstructions.apply_double_stud(runner, model, [surface], "WallConstruction",
+                                                    cavity_r, install_grade, constr_set.stud.thick_in,
+                                                    constr_set.stud.thick_in, constr_set.framing_factor,
+                                                    constr_set.framing_spacing, is_staggered,
+                                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                                    constr_set.rigid_r, constr_set.exterior_material)
+      return false if not success
+
+    elsif wall_type == "ConcreteMasonryUnit"
+      assembly_r = Float(assembly_r)
+      density = 119.0 # lb/ft^3
+      furring_r = 0
+      furring_cavity_depth_in = 0 # in
+      furring_spacing = 0
+
+      constr_sets = [
+        CMUConstructionSet.new(8.0, 1.4, 0.08, 0.5, drywall_thick_in, mat_ext_finish),  # 8" perlite-filled CMU
+        CMUConstructionSet.new(6.0, 5.29, 0.01, 0.0, 0.0, nil),                         # Fallback (6" hollow CMU)
+      ]
+      constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      success = WallConstructions.apply_cmu(runner, model, [surface], "WallConstruction",
+                                            constr_set.thick_in, constr_set.cond_in, density,
+                                            constr_set.framing_factor, furring_r,
+                                            furring_cavity_depth_in, furring_spacing,
+                                            constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                            rigid_r, constr_set.exterior_material)
+      return false if not success
+
+    elsif wall_type == "StructurallyInsulatedPanel"
+      assembly_r = Float(assembly_r)
+      sheathing_thick_in = 0.44
+      sheathing_type = Constants.MaterialOSB
+
+      constr_sets = [
+        SIPConstructionSet.new(10.0, 0.16, 0.0, sheathing_thick_in, 0.5, drywall_thick_in, mat_ext_finish), # 10" SIP core
+        SIPConstructionSet.new(5.0, 0.16, 0.0, sheathing_thick_in, 0.5, drywall_thick_in, mat_ext_finish),  # 5" SIP core
+        SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, 0.0, nil),                          # Fallback
+      ]
+      constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      success = WallConstructions.apply_sip(runner, model, [surface], "WallConstruction",
+                                            cavity_r, constr_set.thick_in, constr_set.framing_factor,
+                                            sheathing_type, constr_set.sheath_thick_in,
+                                            constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                            constr_set.rigid_r, constr_set.exterior_material)
+      return false if not success
+
+    elsif wall_type == "InsulatedConcreteForms"
+      assembly_r = Float(assembly_r)
+
+      constr_sets = [
+        ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, drywall_thick_in, mat_ext_finish), # ICF w/4" concrete and 2" rigid ins layers
+        ICFConstructionSet.new(1.0, 1.0, 0.01, 0.0, 0.0, 0.0, nil),                         # Fallback
+      ]
+      constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      success = WallConstructions.apply_icf(runner, model, [surface], "WallConstruction",
+                                            icf_r, constr_set.ins_thick_in,
+                                            constr_set.concrete_thick_in, constr_set.framing_factor,
+                                            constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                            constr_set.rigid_r, constr_set.exterior_material)
+      return false if not success
+
+    elsif ["SolidConcrete", "StructuralBrick", "StrawBale", "Stone", "LogWall"].include? wall_type
+      assembly_r = Float(assembly_r)
+
+      constr_sets = [
+        GenericConstructionSet.new(10.0, 0.5, drywall_thick_in, mat_ext_finish), # w/R-10 rigid
+        GenericConstructionSet.new(0.0, 0.5, drywall_thick_in, mat_ext_finish),  # Standard
+        GenericConstructionSet.new(0.0, 0.0, 0.0, nil),                          # Fallback
+      ]
+      constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      if wall_type == "SolidConcrete"
+        thick_in = 6.0
+        base_mat = BaseMaterial.Concrete
+      elsif wall_type == "StructuralBrick"
+        thick_in = 8.0
+        base_mat = BaseMaterial.Brick
+      elsif wall_type == "StrawBale"
+        thick_in = 23.0
+        base_mat = BaseMaterial.StrawBale
+      elsif wall_type == "Stone"
+        thick_in = 6.0
+        base_mat = BaseMaterial.Stone
+      elsif wall_type == "LogWall"
+        thick_in = 6.0
+        base_mat = BaseMaterial.Wood
+      end
+      thick_ins = [thick_in]
+      conds = [thick_in / layer_r]
+      denss = [base_mat.rho]
+      specheats = [base_mat.cp]
+
+      success = WallConstructions.apply_generic(runner, model, [surface], "WallConstruction",
+                                                thick_ins, conds, denss, specheats,
+                                                constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                                constr_set.rigid_r, constr_set.exterior_material)
+      return false if not success
+
+    else
+
+      fail "Unexpected wall type '#{wall_type}'."
+
+    end
+
+    check_surface_assembly_rvalue(surface, film_r, assembly_r)
+
+    apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
+  end
+
+  def self.pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, surface_name)
+    # Picks a construction set from supplied constr_sets for which a positive R-value
+    # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      # Calculate R-value for all non-cavity layers
-      non_cavity_r = film_r
-      if not constr_set.exterior_material.nil?
-        non_cavity_r += constr_set.exterior_material.rvalue
-      end
-      if not constr_set.rigid_r.nil?
-        non_cavity_r += constr_set.rigid_r
-      end
-      if not constr_set.osb_thick_in.nil?
-        non_cavity_r += Material.Plywood(constr_set.osb_thick_in).rvalue
-      end
-      if not constr_set.drywall_thick_in.nil?
-        non_cavity_r += Material.GypsumWall(constr_set.drywall_thick_in).rvalue
-      end
+      fail "Unexpected object." if not constr_set.is_a? WoodStudConstructionSet
 
-      cavity_r = (1.0 - constr_set.framing_factor) / (1.0 / assembly_r - constr_set.framing_factor / (constr_set.wood_stud_material.rvalue + non_cavity_r)) - non_cavity_r
+      non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
-      if cavity_r > 0
-        # Choose this construction set
+      # Calculate effective cavity R-value
+      # Assumes installation quality 1
+      cavity_frac = 1.0 - constr_set.framing_factor
+      cavity_r = cavity_frac / (1.0 / assembly_r - constr_set.framing_factor / (constr_set.stud.rvalue + non_cavity_r)) - non_cavity_r
+      if cavity_r > 0 # Choose this construction set
         return constr_set, cavity_r
+      end
+    end
+
+    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+  end
+
+  def self.pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, surface_name)
+    # Picks a construction set from supplied constr_sets for which a positive R-value
+    # can be calculated for the unknown insulation to achieve the assembly R-value.
+
+    constr_sets.each do |constr_set|
+      fail "Unexpected object." if not constr_set.is_a? SteelStudConstructionSet
+
+      non_cavity_r = calc_non_cavity_r(film_r, constr_set)
+
+      # Calculate effective cavity R-value
+      # Assumes installation quality 1
+      cavity_r = (assembly_r - non_cavity_r) / constr_set.corr_factor
+      if cavity_r > 0 # Choose this construction set
+        return constr_set, cavity_r
+      end
+    end
+
+    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+  end
+
+  def self.pick_double_stud_construction_set(assembly_r, constr_sets, film_r, surface_name)
+    # Picks a construction set from supplied constr_sets for which a positive R-value
+    # can be calculated for the unknown insulation to achieve the assembly R-value.
+
+    constr_sets.each do |constr_set|
+      fail "Unexpected object." if not constr_set.is_a? DoubleStudConstructionSet
+
+      non_cavity_r = calc_non_cavity_r(film_r, constr_set)
+
+      # Calculate effective cavity R-value
+      # Assumes installation quality 1, not staggered, gap depth == stud depth
+      # Solved in Wolfram Alpha: https://www.wolframalpha.com/input/?i=1%2FA+%3D+B%2F(2*C%2Bx%2BD)+%2B+E%2F(3*C%2BD)+%2B+(1-B-E)%2F(3*x%2BD)
+      stud_frac = 1.5 / constr_set.framing_spacing
+      misc_framing_factor = constr_set.framing_factor - stud_frac
+      cavity_frac = 1.0 - (2 * stud_frac + misc_framing_factor)
+      a = assembly_r
+      b = stud_frac
+      c = constr_set.stud.rvalue
+      d = non_cavity_r
+      e = misc_framing_factor
+      cavity_r = ((3 * c + d) * Math.sqrt(4 * a**2 * b**2 + 12 * a**2 * b * e + 4 * a**2 * b + 9 * a**2 * e**2 - 6 * a**2 * e + a**2 - 48 * a * b * c - 16 * a * b * d - 36 * a * c * e + 12 * a * c - 12 * a * d * e + 4 * a * d + 36 * c**2 + 24 * c * d + 4 * d**2) + 6 * a * b * c + 2 * a * b * d + 3 * a * c * e + 3 * a * c + 3 * a * d * e + a * d - 18 * c**2 - 18 * c * d - 4 * d**2) / (2 * (-3 * a * e + 9 * c + 3 * d))
+      cavity_r = 3 * cavity_r
+      if cavity_r > 0 # Choose this construction set
+        return constr_set, cavity_r
+      end
+    end
+
+    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+  end
+
+  def self.pick_sip_construction_set(assembly_r, constr_sets, film_r, surface_name)
+    # Picks a construction set from supplied constr_sets for which a positive R-value
+    # can be calculated for the unknown insulation to achieve the assembly R-value.
+
+    constr_sets.each do |constr_set|
+      fail "Unexpected object." if not constr_set.is_a? SIPConstructionSet
+
+      non_cavity_r = calc_non_cavity_r(film_r, constr_set)
+      non_cavity_r += Material.new(nil, constr_set.sheath_thick_in, BaseMaterial.Wood).rvalue
+
+      # Calculate effective SIP core R-value
+      # Solved in Wolfram Alpha: https://www.wolframalpha.com/input/?i=1%2FA+%3D+B%2F(C%2BD)+%2B+E%2F(2*F%2BG%2FH*x%2BD)+%2B+(1-B-E)%2F(x%2BD)
+      spline_thick_in = 0.5 # in
+      ins_thick_in = constr_set.thick_in - (2.0 * spline_thick_in) # in
+      framing_r = Material.new(nil, constr_set.thick_in, BaseMaterial.Wood).rvalue
+      spline_r = Material.new(nil, spline_thick_in, BaseMaterial.Wood).rvalue
+      spline_frac = 4.0 / 48.0 # One 4" spline for every 48" wide panel
+      cavity_frac = 1.0 - (spline_frac + constr_set.framing_factor)
+      a = assembly_r
+      b = constr_set.framing_factor
+      c = framing_r
+      d = non_cavity_r
+      e = spline_frac
+      f = spline_r
+      g = ins_thick_in
+      h = constr_set.thick_in
+      cavity_r = (Math.sqrt((a * b * c * g - a * b * d * h - 2 * a * b * f * h + a * c * e * g - a * c * e * h - a * c * g + a * d * e * g - a * d * e * h - a * d * g + c * d * g + c * d * h + 2 * c * f * h + d**2 * g + d**2 * h + 2 * d * f * h)**2 - 4 * (-a * b * g + c * g + d * g) * (a * b * c * d * h + 2 * a * b * c * f * h - a * c * d * h + 2 * a * c * e * f * h - 2 * a * c * f * h - a * d**2 * h + 2 * a * d * e * f * h - 2 * a * d * f * h + c * d**2 * h + 2 * c * d * f * h + d**3 * h + 2 * d**2 * f * h)) - a * b * c * g + a * b * d * h + 2 * a * b * f * h - a * c * e * g + a * c * e * h + a * c * g - a * d * e * g + a * d * e * h + a * d * g - c * d * g - c * d * h - 2 * c * f * h - g * d**2 - d**2 * h - 2 * d * f * h) / (2 * (-a * b * g + c * g + d * g))
+      if cavity_r > 0 # Choose this construction set
+        return constr_set, cavity_r
+      end
+    end
+
+    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+  end
+
+  def self.pick_cmu_construction_set(assembly_r, constr_sets, film_r, surface_name)
+    # Picks a construction set from supplied constr_sets for which a positive R-value
+    # can be calculated for the unknown insulation to achieve the assembly R-value.
+
+    constr_sets.each do |constr_set|
+      fail "Unexpected object." if not constr_set.is_a? CMUConstructionSet
+
+      non_cavity_r = calc_non_cavity_r(film_r, constr_set)
+
+      # Calculate effective other CMU R-value
+      # Assumes no furring strips
+      # Solved in Wolfram Alpha: https://www.wolframalpha.com/input/?i=1%2FA+%3D+B%2F(C%2BE%2Bx)+%2B+(1-B)%2F(D%2BE%2Bx)
+      a = assembly_r
+      b = constr_set.framing_factor
+      c = Material.new(nil, constr_set.thick_in, BaseMaterial.Wood).rvalue # Framing
+      d = Material.new(nil, constr_set.thick_in, BaseMaterial.Concrete, constr_set.cond_in).rvalue # Concrete
+      e = non_cavity_r
+      rigid_r = 0.5 * (Math.sqrt(a**2 - 4 * a * b * c + 4 * a * b * d + 2 * a * c - 2 * a * d + c**2 - 2 * c * d + d**2) + a - c - d - 2 * e)
+      if rigid_r > 0 # Choose this construction set
+        return constr_set, rigid_r
+      end
+    end
+
+    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+  end
+
+  def self.pick_icf_construction_set(assembly_r, constr_sets, film_r, surface_name)
+    # Picks a construction set from supplied constr_sets for which a positive R-value
+    # can be calculated for the unknown insulation to achieve the assembly R-value.
+
+    constr_sets.each do |constr_set|
+      fail "Unexpected object." if not constr_set.is_a? ICFConstructionSet
+
+      non_cavity_r = calc_non_cavity_r(film_r, constr_set)
+
+      # Calculate effective ICF rigid ins R-value
+      # Solved in Wolfram Alpha: https://www.wolframalpha.com/input/?i=1%2FA+%3D+B%2F(C%2BE)+%2B+(1-B)%2F(D%2BE%2B2*x)
+      a = assembly_r
+      b = constr_set.framing_factor
+      c = Material.new(nil, 2 * constr_set.ins_thick_in + constr_set.concrete_thick_in, BaseMaterial.Wood).rvalue # Framing
+      d = Material.new(nil, constr_set.concrete_thick_in, BaseMaterial.Concrete).rvalue # Concrete
+      e = non_cavity_r
+      icf_r = (a * b * c - a * b * d - a * c - a * e + c * d + c * e + d * e + e**2) / (2 * (a * b - c - e))
+      if icf_r > 0 # Choose this construction set
+        return constr_set, icf_r
+      end
+    end
+
+    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+  end
+
+  def self.pick_generic_construction_set(assembly_r, constr_sets, film_r, surface_name)
+    # Picks a construction set from supplied constr_sets for which a positive R-value
+    # can be calculated for the unknown insulation to achieve the assembly R-value.
+
+    constr_sets.each do |constr_set|
+      fail "Unexpected object." if not constr_set.is_a? GenericConstructionSet
+
+      non_cavity_r = calc_non_cavity_r(film_r, constr_set)
+
+      # Calculate effective ins layer R-value
+      layer_r = assembly_r - non_cavity_r
+      if layer_r > 0 # Choose this construction set
+        return constr_set, layer_r
       end
     end
 
@@ -2960,15 +3302,90 @@ class OSModel
 end
 
 class WoodStudConstructionSet
-  def initialize(wood_stud_material, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
-    @wood_stud_material = wood_stud_material
+  def initialize(stud, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+    @stud = stud
     @framing_factor = framing_factor
     @rigid_r = rigid_r
     @osb_thick_in = osb_thick_in
     @drywall_thick_in = drywall_thick_in
     @exterior_material = exterior_material
   end
-  attr_accessor(:wood_stud_material, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+  attr_accessor(:stud, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+end
+
+class SteelStudConstructionSet
+  def initialize(cavity_thick_in, corr_factor, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+    @cavity_thick_in = cavity_thick_in
+    @corr_factor = corr_factor
+    @framing_factor = framing_factor
+    @rigid_r = rigid_r
+    @osb_thick_in = osb_thick_in
+    @drywall_thick_in = drywall_thick_in
+    @exterior_material = exterior_material
+  end
+  attr_accessor(:cavity_thick_in, :corr_factor, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+end
+
+class DoubleStudConstructionSet
+  def initialize(stud, framing_factor, framing_spacing, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+    @stud = stud
+    @framing_factor = framing_factor
+    @framing_spacing = framing_spacing
+    @rigid_r = rigid_r
+    @osb_thick_in = osb_thick_in
+    @drywall_thick_in = drywall_thick_in
+    @exterior_material = exterior_material
+  end
+  attr_accessor(:stud, :framing_factor, :framing_spacing, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+end
+
+class SIPConstructionSet
+  def initialize(thick_in, framing_factor, rigid_r, sheath_thick_in, osb_thick_in, drywall_thick_in, exterior_material)
+    @thick_in = thick_in
+    @framing_factor = framing_factor
+    @rigid_r = rigid_r
+    @sheath_thick_in = sheath_thick_in
+    @osb_thick_in = osb_thick_in
+    @drywall_thick_in = drywall_thick_in
+    @exterior_material = exterior_material
+  end
+  attr_accessor(:thick_in, :framing_factor, :rigid_r, :sheath_thick_in, :osb_thick_in, :drywall_thick_in, :exterior_material)
+end
+
+class CMUConstructionSet
+  def initialize(thick_in, cond_in, framing_factor, osb_thick_in, drywall_thick_in, exterior_material)
+    @thick_in = thick_in
+    @cond_in = cond_in
+    @framing_factor = framing_factor
+    @osb_thick_in = osb_thick_in
+    @drywall_thick_in = drywall_thick_in
+    @exterior_material = exterior_material
+    @rigid_r = nil # solved for
+  end
+  attr_accessor(:thick_in, :cond_in, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+end
+
+class ICFConstructionSet
+  def initialize(ins_thick_in, concrete_thick_in, framing_factor, rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+    @ins_thick_in = ins_thick_in
+    @concrete_thick_in = concrete_thick_in
+    @framing_factor = framing_factor
+    @rigid_r = rigid_r
+    @osb_thick_in = osb_thick_in
+    @drywall_thick_in = drywall_thick_in
+    @exterior_material = exterior_material
+  end
+  attr_accessor(:ins_thick_in, :concrete_thick_in, :framing_factor, :rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
+end
+
+class GenericConstructionSet
+  def initialize(rigid_r, osb_thick_in, drywall_thick_in, exterior_material)
+    @rigid_r = rigid_r
+    @osb_thick_in = osb_thick_in
+    @drywall_thick_in = drywall_thick_in
+    @exterior_material = exterior_material
+  end
+  attr_accessor(:rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
 end
 
 def to_beopt_fuel(fuel)
