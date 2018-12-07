@@ -417,7 +417,7 @@ class OSModel
     success = add_finished_floor_area(runner, model, building, spaces)
     return false if not success
 
-    success = add_thermal_mass(runner, model, building)
+    success = add_thermal_mass_and_moisture(runner, model, building)
     return false if not success
 
     success = set_zone_volumes(runner, model, building)
@@ -1183,7 +1183,7 @@ class OSModel
     return true
   end
 
-  def self.add_thermal_mass(runner, model, building)
+  def self.add_thermal_mass_and_moisture(runner, model, building)
     drywall_thick_in = 0.5
     partition_frac_of_ffa = 1.0
     success = ThermalMassConstructions.apply_partition_walls(runner, model, [],
@@ -1198,6 +1198,29 @@ class OSModel
     mat = BaseMaterial.Wood
     success = ThermalMassConstructions.apply_furniture(runner, model, furniture_frac_of_ffa,
                                                        mass_lb_per_sqft, density_lb_per_cuft, mat)
+    return false if not success
+
+    # Moisture constructions for EMPD model
+    all_spaces = model.getSpaces
+    finished_spaces = Geometry.get_finished_spaces(all_spaces)
+    unfinished_spaces = all_spaces - finished_spaces
+
+    success = MoistureConstructions.apply_drywall(runner, model, finished_spaces, "wall")
+    return false if not success
+
+    success = MoistureConstructions.apply_drywall(runner, model, finished_spaces, "roofceiling")
+    return false if not success
+
+    success = MoistureConstructions.apply_carpet(runner, model, finished_spaces)
+    return false if not success
+
+    success = MoistureConstructions.apply_wood_trim(runner, model, finished_spaces)
+    return false if not success
+
+    success = MoistureConstructions.apply_furniture(runner, model, finished_spaces)
+    return false if not success
+
+    success = MoistureConstructions.apply_dummy(runner, model, unfinished_spaces, 1.0)
     return false if not success
 
     return true
