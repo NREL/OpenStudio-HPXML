@@ -1,9 +1,5 @@
 class EnergyPlusValidator
   def self.run_validator(hpxml_doc)
-    one = [1]
-    zero_or_one = [0, 1]
-    one_or_more = []
-
     # A hash of hashes that defines the XML elements used by the EnergyPlus HPXML Use Case.
     #
     # Example:
@@ -21,6 +17,11 @@ class EnergyPlusValidator
     #     }
     # }
     #
+
+    zero = [0]
+    one = [1]
+    zero_or_one = [0, 1]
+    one_or_more = []
 
     requirements = {
 
@@ -57,7 +58,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Enclosure/Skylights' => zero_or_one, # See [Skylight]
         '/HPXML/Building/BuildingDetails/Enclosure/Doors' => zero_or_one, # See [Door]
 
-        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement' => one, # see [AirInfiltration]
+        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="ACH"]/AirLeakage' => one, # ACH50; see [AirInfiltration]
 
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => zero_or_one, # See [HeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => zero_or_one, # See [CoolingSystem]
@@ -94,7 +95,7 @@ class EnergyPlusValidator
 
       # [Attic]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic' => {
-        '[AtticType="unvented attic" or AtticType="vented attic" or AtticType="flat roof" or AtticType="cathedral ceiling" or AtticType="cape cod"]' => one, # See [AtticType=Unvented] or [AtticType=Vented]
+        '[AtticType="unvented attic" or AtticType="vented attic" or AtticType="flat roof" or AtticType="cathedral ceiling" or AtticType="cape cod"]' => one, # See [AtticType=Unvented] or [AtticType=Vented] or [AtticType=Cape]
         'Roofs' => one, # See [AtticRoof]
         'Walls' => zero_or_one, # See [AtticWall]
       },
@@ -108,6 +109,11 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="vented attic"]' => {
         'Floors' => one, # See [AtticFloor]
         'extension/AtticSpecificLeakageArea' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      ## [AtticType=Cape]
+      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cape cod"]' => {
+        'Floors' => one, # See [AtticFloor]
       },
 
       ## [AtticRoof]
@@ -296,7 +302,6 @@ class EnergyPlusValidator
       # [AirInfiltration]
       'BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="ACH"]/AirLeakage' => one, # ACH50
       },
 
       # [HeatingSystem]
@@ -310,32 +315,35 @@ class EnergyPlusValidator
 
       ## [HeatingType=Resistance]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/ElectricResistance]' => {
+        'DistributionSystem' => zero,
         '[HeatingSystemFuel="electricity"]' => one,
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
       },
 
       ## [HeatingType=Furnace]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
 
       ## [HeatingType=WallFurnace]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/WallFurnace]' => {
+        'DistributionSystem' => zero,
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
 
       ## [HeatingType=Boiler]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="AFUE"]/Value' => one,
       },
 
       ## [HeatingType=Stove]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]' => {
+        'DistributionSystem' => zero,
         '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
       },
@@ -357,12 +365,13 @@ class EnergyPlusValidator
 
       ## [CoolingType=CentralAC]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioning"]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
       },
 
       ## [CoolingType=RoomAC]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioning"]' => {
+        'DistributionSystem' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
       },
 
@@ -378,7 +387,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=ASHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         'AnnualCoolingEfficiency[Units="SEER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="HSPF"]/Value' => one,
       },
@@ -392,7 +401,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=GSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air"]' => {
-        'DistributionSystem' => zero_or_one, # See [HVACDistribution]
+        'DistributionSystem' => one, # See [HVACDistribution]
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
         'AnnualHeatingEfficiency[Units="COP"]/Value' => one,
       },
@@ -440,7 +449,7 @@ class EnergyPlusValidator
       # [MechanicalVentilation]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
-        '[FanType="energy recovery ventilator" or FanType="heat recovery ventilator" or FanType="exhaust only" or FanType="supply only" or FanType="balanced" or FanType="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV]
+        '[FanType="energy recovery ventilator" or FanType="heat recovery ventilator" or FanType="exhaust only" or FanType="supply only" or FanType="balanced" or FanType="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
         'RatedFlowRate' => one,
         'HoursInOperation' => one,
         'UsedForWholeBuildingVentilation' => one,
@@ -456,6 +465,11 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="energy recovery ventilator"]' => {
         'TotalRecoveryEfficiency' => one,
         'SensibleRecoveryEfficiency' => one,
+      },
+
+      ## [MechVentType=CFIS]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="central fan integrated supply"]' => {
+        'AttachedToHVACDistributionSystem' => one,
       },
 
       # [WaterHeatingSystem]

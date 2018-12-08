@@ -309,14 +309,14 @@ class OSModel
 
     # HVAC
 
-    dse = get_dse(building)
+    dse, has_dse = get_dse(building)
     success = add_cooling_system(runner, model, building, unit, dse)
     return false if not success
 
     success = add_heating_system(runner, model, building, unit, dse)
     return false if not success
 
-    success = add_heat_pump(runner, model, building, unit, dse, weather)
+    success = add_heat_pump(runner, model, building, unit, dse, has_dse, weather)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather)
@@ -2274,10 +2274,9 @@ class OSModel
       oat_hwst_high = nil
       oat_hwst_low = nil
       design_temp = 180.0
-      is_modulating = false
       success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
                                   oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                  heat_capacity_btuh, design_temp, is_modulating, dse)
+                                  heat_capacity_btuh, design_temp, dse)
       return false if not success
 
     elsif htg_type == "ElectricResistance"
@@ -2306,7 +2305,7 @@ class OSModel
     return true
   end
 
-  def self.add_heat_pump(runner, model, building, unit, dse, weather)
+  def self.add_heat_pump(runner, model, building, unit, dse, has_dse, weather)
     hp = building.elements["BuildingDetails/Systems/HVAC/HVACPlant/HeatPump"]
 
     return true if hp.nil?
@@ -2442,7 +2441,7 @@ class OSModel
       cap_retention_temp = -5.0
       pan_heater_power = 0.0
       fan_power = 0.07
-      is_ducted = false
+      is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
       supplemental_efficiency = 1.0
       success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
                                 min_cooling_capacity, max_cooling_capacity,
@@ -2603,8 +2602,7 @@ class OSModel
     dse_cool = XMLHelper.get_value(building, "BuildingDetails/Systems/HVAC/HVACDistribution/AnnualCoolingDistributionSystemEfficiency")
     dse_heat = XMLHelper.get_value(building, "BuildingDetails/Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency")
     if dse_cool.nil? and dse_heat.nil?
-      dse_cool = 1.0
-      dse_heat = 1.0
+      return 1.0, false
     elsif not dse_cool.nil? and not dse_heat.nil?
       dse_cool = Float(dse_cool)
       dse_heat = Float(dse_heat)
@@ -2613,7 +2611,7 @@ class OSModel
       fail "Cannot handle different distribution system efficiency (DSE) values for heating and cooling."
     end
 
-    return dse_cool
+    return dse_cool, true
   end
 
   def self.add_mels(runner, model, building, unit, living_space)
@@ -2733,13 +2731,16 @@ class OSModel
       mech_vent_fan_power = 0.0
       mech_vent_cfm = 0.0
     else
-      # FIXME: HoursInOperation isn't being used
+      # FIXME: HoursInOperation isn't hooked up
+      # FIXME: AttachedToHVACDistributionSystem isn't hooked up
       fan_type = XMLHelper.get_value(whole_house_fan, "FanType")
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
       elsif fan_type == "exhaust only"
         mech_vent_type = Constants.VentTypeExhaust
-      else
+      elsif fan_type == "central fan integrated supply"
+        mech_vent_type = Constants.VentTypeCFIS
+      elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
         mech_vent_type = Constants.VentTypeBalanced
       end
       mech_vent_total_efficiency = 0.0
@@ -2810,8 +2811,8 @@ class OSModel
       duct_ah_return_frac = 0.267
       duct_location_frac = Constants.Auto
       duct_num_returns = 1
-      duct_supply_area_mult = 1.0
-      duct_return_area_mult = 1.0
+      duct_supply_area_mult = supply_area / 100.0
+      duct_return_area_mult = return_area / 100.0
       duct_r = 4.0
     else
       duct_location = "none"
@@ -2862,10 +2863,10 @@ class OSModel
       fuel_eae = Float(fuel_eae)
     end
 
-    has_boiler = (htg_type == "Furnace")
-    has_furnace = (htg_type == "Boiler")
+    has_boiler = (htg_type == "Boiler")
+    has_furnace = (htg_type == "Furnace")
     success = HVAC.apply_eae_to_heating_fan(runner, model, fuel_eae, fuel, dse,
-                                            has_boiler, has_boiler)
+                                            has_furnace, has_boiler)
     return false if not success
 
     return true
