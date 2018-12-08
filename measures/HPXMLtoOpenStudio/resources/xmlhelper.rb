@@ -110,9 +110,9 @@ class XMLHelper
 end
 
 def Boolean(val)
-  if val.downcase.to_s == "true"
+  if val.downcase.to_s == "true" or val == "1"
     return true
-  elsif val.downcase.to_s == "false"
+  elsif val.downcase.to_s == "false" or val == "0"
     return false
   end
 

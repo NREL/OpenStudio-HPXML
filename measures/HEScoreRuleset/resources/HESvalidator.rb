@@ -63,11 +63,15 @@ class HEScoreValidator
 
       # [Roof]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof' => {
-        '[RoofColor="light" or RoofColor="medium" or RoofColor="medium dark" or RoofColor="dark" or RoofColor="white" or RoofColor="reflective"]' => one,
-        'SolarAbsorptance' => one,
+        '[RoofColor="light" or RoofColor="medium" or RoofColor="medium dark" or RoofColor="dark" or RoofColor="white" or RoofColor="reflective"]' => one, # See [RoofColor=Reflective]
         '[RoofType="slate or tile shingles" or RoofType="wood shingles or shakes" or RoofType="asphalt or fiberglass shingles" or RoofType="plastic/rubber/synthetic sheeting" or RoofType="concrete"]' => one,
         'RadiantBarrier' => one,
         '/HPXML/Building/BuildingDetails/Enclosure/Skylights' => zero_or_one, # See [Skylight]
+      },
+      
+      # [RoofColor=Reflective]
+      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof[RoofColor="reflective"]' => {
+        'SolarAbsorptance' => one,
       },
 
       # [Attic]
@@ -179,7 +183,6 @@ class HEScoreValidator
       # [Skylight]
       '/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight' => {
         'Area' => one,
-        'Orientation' => one,
         'AttachedToRoof' => one,
         '[FrameType | UFactor]' => one, # See [SkylightType=Detailed] or [SkylightType=Simple]
       },
