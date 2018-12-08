@@ -1,9 +1,9 @@
 <?xml version='1.0'?>
-<HPXML xmlns='http://hpxmlonline.com/2014/6' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' schemaVersion='2.2'>
+<HPXML xmlns='http://hpxmlonline.com/2014/6' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' schemaVersion='2.3'>
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2018-11-12T16:06:37-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2018-12-07T11:33:49-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -58,10 +58,7 @@
               <SystemIdentifier id='roof1'/>
               <RoofColor>medium</RoofColor>
               <RoofType>asphalt or fiberglass shingles</RoofType>
-              <RadiantBarrier>false</RadiantBarrier>
-            </Roof>
-            <Roof>
-              <SystemIdentifier id='roof2'/>
+              <RoofArea>1000</RoofArea>
               <RadiantBarrier>false</RadiantBarrier>
             </Roof>
           </Roofs>
@@ -73,26 +70,16 @@
               <AtticFloorInsulation>
                 <SystemIdentifier id='roof1_floor_insulation'/>
                 <Layer>
-                  <NominalRValue>00</NominalRValue>
+                  <NominalRValue>19</NominalRValue>
                 </Layer>
               </AtticFloorInsulation>
               <AtticRoofInsulation>
                 <SystemIdentifier id='roof1_roof_insulation'/>
                 <Layer>
-                  <NominalRValue>19</NominalRValue>
+                  <NominalRValue>00</NominalRValue>
                 </Layer>
               </AtticRoofInsulation>
               <Area>1000</Area>
-            </Attic>
-            <Attic>
-              <SystemIdentifier id='attic2'/>
-              <AttachedToRoof idref='roof2'/>
-              <AtticFloorInsulation>
-                <SystemIdentifier id='roof2_floor_insulation'/>
-              </AtticFloorInsulation>
-              <AtticRoofInsulation>
-                <SystemIdentifier id='roof2_roof_insulation'/>
-              </AtticRoofInsulation>
             </Attic>
           </Attics>
         </AtticAndRoof>
@@ -102,6 +89,16 @@
             <FoundationType>
               <SlabOnGrade/>
             </FoundationType>
+            <Slab>
+              <SystemIdentifier id='slab1'/>
+              <Area>1000</Area>
+              <PerimeterInsulation>
+                <SystemIdentifier id='foundation1'/>
+                <Layer>
+                  <NominalRValue>0</NominalRValue>
+                </Layer>
+              </PerimeterInsulation>
+            </Slab>
           </Foundation>
         </Foundations>
         <Walls>
@@ -173,21 +170,43 @@
               </Aluminum>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
+            <AttachedToWall idref='front_wall'/>
           </Window>
           <Window>
             <SystemIdentifier id='back_window'/>
             <Area>70</Area>
             <Orientation>south</Orientation>
+            <FrameType>
+              <Aluminum>
+                <ThermalBreak>1</ThermalBreak>
+              </Aluminum>
+            </FrameType>
+            <GlassLayers>single-pane</GlassLayers>
+            <AttachedToWall idref='back_wall'/>
           </Window>
           <Window>
             <SystemIdentifier id='right_window'/>
             <Area>35</Area>
             <Orientation>west</Orientation>
+            <FrameType>
+              <Aluminum>
+                <ThermalBreak>1</ThermalBreak>
+              </Aluminum>
+            </FrameType>
+            <GlassLayers>single-pane</GlassLayers>
+            <AttachedToWall idref='right_wall'/>
           </Window>
           <Window>
             <SystemIdentifier id='left_window'/>
             <Area>35</Area>
             <Orientation>east</Orientation>
+            <FrameType>
+              <Aluminum>
+                <ThermalBreak>1</ThermalBreak>
+              </Aluminum>
+            </FrameType>
+            <GlassLayers>single-pane</GlassLayers>
+            <AttachedToWall idref='left_wall'/>
           </Window>
         </Windows>
       </Enclosure>
@@ -228,7 +247,7 @@
                   <DuctLocation>unconditioned attic</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                   <extension>
-                    <hescore_ducts_insulated>6</hescore_ducts_insulated>
+                    <hescore_ducts_insulated>1</hescore_ducts_insulated>
                   </extension>
                 </Ducts>
               </AirDistribution>
@@ -237,24 +256,16 @@
               <DuctSystemSealed>true</DuctSystemSealed>
             </HVACDistributionImprovement>
           </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='hvac2_dist'/>
-            <DistributionSystemType>
-              <AirDistribution/>
-            </DistributionSystemType>
-            <HVACDistributionImprovement>
-              <DuctSystemSealed>false</DuctSystemSealed>
-            </HVACDistributionImprovement>
-          </HVACDistribution>
         </HVAC>
-        <Photovoltaics>
-          <PVSystem>
-            <SystemIdentifier id='pv1'/>
-            <ArrayOrientation>north</ArrayOrientation>
-          </PVSystem>
-        </Photovoltaics>
+        <WaterHeating>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='water_heater1'/>
+            <FuelType>natural gas</FuelType>
+            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <EnergyFactor>0.55</EnergyFactor>
+          </WaterHeatingSystem>
+        </WaterHeating>
       </Systems>
     </BuildingDetails>
   </Building>
 </HPXML>
-

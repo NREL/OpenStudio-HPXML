@@ -155,12 +155,13 @@ class HEScoreRuleset
       new_attic = XMLHelper.add_element(new_attics, "Attic")
       XMLHelper.copy_element(new_attic, orig_attic, "SystemIdentifier")
       XMLHelper.copy_element(new_attic, orig_attic, "AtticType")
-
+      
       # Roof
       roof_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='cavity']/NominalRValue"))
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
       roof_material = XMLHelper.get_value(orig_roof, "RoofType")
       roof_has_radiant_barrier = Boolean(XMLHelper.get_value(orig_roof, "RadiantBarrier"))
+      roof_color = XMLHelper.get_value(orig_roof, "RoofColor")
 
       roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, roof_material, roof_has_radiant_barrier)
 
@@ -168,7 +169,7 @@ class HEScoreRuleset
       new_roof = XMLHelper.add_element(new_roofs, "Roof")
       XMLHelper.copy_element(new_roof, orig_roof, "SystemIdentifier")
       XMLHelper.copy_element(new_roof, orig_roof, "Area", 1000) # FIXME: Hard-coded
-      XMLHelper.copy_element(new_roof, orig_roof, "SolarAbsorptance")
+      XMLHelper.copy_element(new_roof, orig_roof, "SolarAbsorptance", get_roof_solar_absorptance(roof_color))
       XMLHelper.add_element(new_roof, "Emittance", 0.9) # FIXME: Hard-coded
       XMLHelper.add_element(new_roof, "Pitch", 5) # FIXME: Hard-coded
       XMLHelper.add_element(new_roof, "RadiantBarrier", false) # FIXME: Verify. Setting to false because it's included in the assembly R-value
@@ -351,8 +352,8 @@ class HEScoreRuleset
       else
         XMLHelper.add_element(new_wall, "Area", @ceil_height * @bldg_length) # FIXME: Verify
       end
-      XMLHelper.add_element(new_wall, "SolarAbsorptance", 0) # FIXME: Hard-coded
-      XMLHelper.add_element(new_wall, "Emittance", 0) # FIXME: Hard-coded
+      XMLHelper.add_element(new_wall, "SolarAbsorptance", get_wall_solar_absorptance("medium")) # FIXME: Hard-coded
+      XMLHelper.add_element(new_wall, "Emittance", 0.9) # FIXME: Hard-coded
       new_wall_ins = XMLHelper.add_element(new_wall, "Insulation")
       XMLHelper.copy_element(new_wall_ins, orig_wall, "Insulation/SystemIdentifier")
       XMLHelper.add_element(new_wall_ins, "AssemblyEffectiveRValue", wall_r)
@@ -403,7 +404,6 @@ class HEScoreRuleset
     new_skylights = XMLHelper.add_element(new_enclosure, "Skylights")
 
     orig_details.elements.each("Enclosure/Skylights/Skylight") do |orig_skylight|
-      sky_orient = XMLHelper.get_value(orig_skylight, "Orientation")
       sky_ufactor = XMLHelper.get_value(orig_skylight, "UFactor")
 
       if not sky_ufactor.nil?
@@ -424,7 +424,7 @@ class HEScoreRuleset
       new_skylight = XMLHelper.add_element(new_skylights, "Skylight")
       XMLHelper.copy_element(new_skylight, orig_skylight, "SystemIdentifier")
       XMLHelper.copy_element(new_skylight, orig_skylight, "Area")
-      XMLHelper.add_element(new_skylight, "Azimuth", orientation_to_azimuth(sky_orient))
+      XMLHelper.add_element(new_skylight, "Azimuth", orientation_to_azimuth(0)) # FIXME: Hard-coded
       XMLHelper.add_element(new_skylight, "UFactor", sky_ufactor)
       XMLHelper.add_element(new_skylight, "SHGC", sky_shgc)
       # No overhangs
@@ -731,6 +731,8 @@ class HEScoreRuleset
   end
 
   def self.set_systems_photovoltaics(new_systems, orig_details)
+    return if not XMLHelper.has_element(orig_details, "Systems/Photovoltaics")
+  
     pv_power = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/MaxPowerOutput")
     pv_num_panels = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/extension/hescore_num_panels")
     pv_orientation = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/ArrayOrientation")
@@ -738,7 +740,7 @@ class HEScoreRuleset
     if not pv_power.nil?
       pv_power = Float(pv_power)
     else
-      pv_power = 3000.0 # FIXME: Hard-coded
+      pv_power = Float(pv_num_panels)*300.0 # FIXME: Hard-coded
     end
 
     new_pvs = XMLHelper.add_element(new_systems, "Photovoltaics")
@@ -1151,6 +1153,34 @@ def get_skylight_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
   return vals if not vals.nil?
 
   fail "Could not get default skylight U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
+end
+
+def get_roof_solar_absorptance(roof_color)
+  # FIXME: Verify
+  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/doe2-inputs
+  val = { "reflective" => 0.40,
+          "white" => 0.50,
+          "light" => 0.65,
+          "medium" => 0.75,
+          "medium dark" => 0.85,
+          "dark" => 0.95 }[roof_color]
+  return val if not val.nil?
+  
+  fail "Could not get roof absorptance for color '#{roof_color}'"
+end
+
+def get_wall_solar_absorptance(wall_color)
+  # FIXME: Verify
+  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/doe2-inputs
+  val = { "reflective" => 0.40,
+          "white" => 0.50,
+          "light" => 0.65,
+          "medium" => 0.75,
+          "medium dark" => 0.85,
+          "dark" => 0.95 }[wall_color]
+  return val if not val.nil?
+  
+  fail "Could not get wall absorptance for color '#{wall_color}'"
 end
 
 def orientation_to_azimuth(orientation)
