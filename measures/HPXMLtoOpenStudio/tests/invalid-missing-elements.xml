@@ -248,7 +248,7 @@
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>16</Value>
+                <Value>13</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>

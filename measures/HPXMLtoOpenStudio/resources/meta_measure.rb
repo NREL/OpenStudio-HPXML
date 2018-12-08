@@ -89,7 +89,7 @@ def get_measure_instance(measure_rb_path)
   xmldoc = REXML::Document.new(File.read(measure_rb_path.sub(".rb", ".xml")))
   measure_class = REXML::XPath.first(xmldoc, "//measure/class_name").text
   # Create new instance
-  require (measure_rb_path)
+  require (File.absolute_path(measure_rb_path))
   measure = eval(measure_class).new
   return measure
 end
