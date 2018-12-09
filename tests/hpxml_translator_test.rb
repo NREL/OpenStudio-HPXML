@@ -153,22 +153,28 @@ class HPXMLTranslatorTest < MiniTest::Test
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       cooling_crankcase = sql_value.get
-      results[["Electricity", "Cooling", "General", "GJ"]] -= cooling_crankcase
-      results[["Electricity", "Cooling", "Crankcase", "GJ"]] = cooling_crankcase
+      if cooling_crankcase > 0
+        results[["Electricity", "Cooling", "General", "GJ"]] -= cooling_crankcase
+        results[["Electricity", "Cooling", "Crankcase", "GJ"]] = cooling_crankcase
+      end
     end
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       heating_crankcase = sql_value.get
-      results[["Electricity", "Heating", "General", "GJ"]] -= heating_crankcase
-      results[["Electricity", "Heating", "Crankcase", "GJ"]] = heating_crankcase
+      if heating_crankcase > 0
+        results[["Electricity", "Heating", "General", "GJ"]] -= heating_crankcase
+        results[["Electricity", "Heating", "Crankcase", "GJ"]] = heating_crankcase
+      end
     end
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
       heating_defrost = sql_value.get
-      results[["Electricity", "Heating", "General", "GJ"]] -= heating_defrost
-      results[["Electricity", "Heating", "Defrost", "GJ"]] = heating_defrost
+      if heating_defrost > 0
+        results[["Electricity", "Heating", "General", "GJ"]] -= heating_defrost
+        results[["Electricity", "Heating", "Defrost", "GJ"]] = heating_defrost
+      end
     end
 
     sqlFile.close
