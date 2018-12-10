@@ -153,6 +153,35 @@ class HPXMLTranslatorTest < MiniTest::Test
       results[[fueltype, category, subcategory, fuel_units]] = val
     end
 
+    # Disaggregate any crankcase and defrost energy from results (for DSE tests)
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
+    sql_value = sqlFile.execAndReturnFirstDouble(query)
+    if sql_value.is_initialized
+      cooling_crankcase = sql_value.get
+      if cooling_crankcase > 0
+        results[["Electricity", "Cooling", "General", "GJ"]] -= cooling_crankcase
+        results[["Electricity", "Cooling", "Crankcase", "GJ"]] = cooling_crankcase
+      end
+    end
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy')"
+    sql_value = sqlFile.execAndReturnFirstDouble(query)
+    if sql_value.is_initialized
+      heating_crankcase = sql_value.get
+      if heating_crankcase > 0
+        results[["Electricity", "Heating", "General", "GJ"]] -= heating_crankcase
+        results[["Electricity", "Heating", "Crankcase", "GJ"]] = heating_crankcase
+      end
+    end
+    query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy')"
+    sql_value = sqlFile.execAndReturnFirstDouble(query)
+    if sql_value.is_initialized
+      heating_defrost = sql_value.get
+      if heating_defrost > 0
+        results[["Electricity", "Heating", "General", "GJ"]] -= heating_defrost
+        results[["Electricity", "Heating", "Defrost", "GJ"]] = heating_defrost
+      end
+    end
+
     sqlFile.close
 
     results[@simulation_runtime_key] = sim_time
@@ -192,6 +221,16 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     assert(success)
+
+    # Add output variables for crankcase and defrost energy (for DSE tests)
+    vars = ["Cooling Coil Crankcase Heater Electric Energy",
+            "Heating Coil Crankcase Heater Electric Energy",
+            "Heating Coil Defrost Electric Energy"]
+    vars.each do |var|
+      output_var = OpenStudio::Model::OutputVariable.new(var, model)
+      output_var.setReportingFrequency('runperiod')
+      output_var.setKeyValue('*')
+    end
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
@@ -523,10 +562,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       puts "\nResults for #{File.basename(xml)}:"
       results_dse80.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
+        next if not ["General"].include? k[2] # Exclude crankcase/defrost
 
         result_dse80 = results_dse80[k].to_f
         result_dse100 = results_dse100[k].to_f
-        next if result_dse80 == 0.0 and result_nodist == 0.0
+        next if result_dse80 == 0.0 and result_dse100 == 0.0
 
         dse_actual = result_dse100 / result_dse80
         dse_expect = 0.8
