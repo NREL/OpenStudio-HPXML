@@ -3509,9 +3509,8 @@ class OSModel
     attached_to_multispeed_ac = false
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
       next unless XMLHelper.get_value(clgsys, "CoolingSystemType") == "central air conditioning"
-      next unless XMLHelper.has_element(clgsys, "DistributionSystem")
       next unless htgsys.elements["DistributionSystem"].attributes["idref"] == clgsys.elements["DistributionSystem"].attributes["idref"]
-      next unless get_ac_num_speeds(XMLHelper.get_value(clgsys, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f) != "1-Speed"
+      next unless get_ac_num_speeds(Float(XMLHelper.get_value(clgsys, "AnnualCoolingEfficiency[Units='SEER']/Value"))) != "1-Speed"
 
       attached_to_multispeed_ac = true
     end
