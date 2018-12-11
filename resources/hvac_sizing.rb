@@ -4127,15 +4127,15 @@ class HVACSizing
         # Unitary System
         system.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
         if not clg_coil.nil?
-          system.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert([unit_final.Cool_Airflow, 0.00001].max, "cfm", "m^3/s")) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(unit_final.Cool_Airflow, "cfm", "m^3/s"))
         else
-          system.setSupplyAirFlowRateDuringCoolingOperation(0.00001) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringCoolingOperation(0.0)
         end
         system.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
         if not htg_coil.nil?
-          system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert([unit_final.Heat_Airflow, 0.00001].max, "cfm", "m^3/s")) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(unit_final.Heat_Airflow, "cfm", "m^3/s"))
         else
-          system.setSupplyAirFlowRateDuringHeatingOperation(0.00001) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringHeatingOperation(0.0)
         end
 
         # Fan
@@ -4211,15 +4211,15 @@ class HVACSizing
         # Unitary System
         system.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
         if not clg_coil.nil?
-          system.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert([unit_final.Cool_Airflow * unit_final.Zone_Ratios[thermal_zone], 0.00001].max, "cfm", "m^3/s")) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(unit_final.Cool_Airflow * unit_final.Zone_Ratios[thermal_zone], "cfm", "m^3/s"))
         else
-          system.setSupplyAirFlowRateDuringCoolingOperation(0.00001) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringCoolingOperation(0.0)
         end
         system.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
         if not htg_coil.nil?
-          system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert([unit_final.Heat_Airflow * unit_final.Zone_Ratios[thermal_zone], 0.00001].max, "cfm", "m^3/s")) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(unit_final.Heat_Airflow * unit_final.Zone_Ratios[thermal_zone], "cfm", "m^3/s"))
         else
-          system.setSupplyAirFlowRateDuringHeatingOperation(0.00001) # A value of 0 does not change from autosize
+          system.setSupplyAirFlowRateDuringHeatingOperation(0.0)
         end
 
         # Fan

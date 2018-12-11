@@ -2026,9 +2026,6 @@ class Airflow
       end
 
       infil_program.addLine("Set fan_rtf_var = (#{cfis_output.fan_rtf_sensors.join('+')})")
-      infil_program.addLine("If fan_rtf_var > 1") # If, e.g., AC is before Furnace in the EquipmentList object, then AC RTF is sometimes 1 while Furnace RTF > 0
-      infil_program.addLine("  Set fan_rtf_var = fan_rtf_var - 1")
-      infil_program.addLine("EndIf")
 
       infil_program.addLine("If @ABS(Minute - ZoneTimeStep*60) < 0.1")
       infil_program.addLine("  Set #{cfis_output.t_sum_open_var.name} = 0") # New hour, time on summation re-initializes to 0
