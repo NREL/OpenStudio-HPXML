@@ -4237,7 +4237,7 @@ class HVACSizing
       ptacs.each do |ptac|
         # PTAC
         ptac.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(unit_final.Cool_Airflow, "cfm", "m^3/s"))
-        ptac.setSupplyAirFlowRateDuringHeatingOperation(0.0)
+        ptac.setSupplyAirFlowRateDuringHeatingOperation(0.00001)
         ptac.setSupplyAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
         ptac.setOutdoorAirFlowRateDuringCoolingOperation(0.0)
         ptac.setOutdoorAirFlowRateDuringHeatingOperation(0.0)
