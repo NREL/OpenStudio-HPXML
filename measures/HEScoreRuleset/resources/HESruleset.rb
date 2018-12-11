@@ -162,6 +162,7 @@ class HEScoreRuleset
       roof_material = XMLHelper.get_value(orig_roof, "RoofType")
       roof_has_radiant_barrier = Boolean(XMLHelper.get_value(orig_roof, "RadiantBarrier"))
       roof_color = XMLHelper.get_value(orig_roof, "RoofColor")
+      # TODO: Get roof area; is roof area for cathedral and ceiling area for attic
 
       roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, roof_material, roof_has_radiant_barrier)
 
@@ -370,6 +371,7 @@ class HEScoreRuleset
       orig_wall = get_attached(orig_window.elements["AttachedToWall"].attributes["idref"], orig_details, "Enclosure/Walls/Wall")
       win_orient = XMLHelper.get_value(orig_wall, "Orientation")
       win_ufactor = XMLHelper.get_value(orig_window, "UFactor")
+      # TODO: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
 
       if not win_ufactor.nil?
         win_ufactor = Float(win_ufactor)
