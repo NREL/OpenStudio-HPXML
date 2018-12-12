@@ -1424,9 +1424,9 @@ class HVAC
 
       if pan_heater_power > 0
 
-        vrf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "VRF Heat Pump Heating Electric Energy")
-        vrf_sensor.setName("#{obj_name} vrf energy sensor".gsub("|", "_"))
-        vrf_sensor.setKeyName(obj_name + " #{control_zone.name} ac vrf")
+        mshp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating Coil Electric Energy")
+        mshp_sensor.setName("#{obj_name} vrf energy sensor".gsub("|", "_"))
+        mshp_sensor.setKeyName(obj_name + " htg coil")
 
         equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
         equip_def.setName(obj_name + " pan heater equip")
@@ -1437,6 +1437,7 @@ class HVAC
         equip_def.setFractionLatent(0)
         equip_def.setFractionLost(1)
         equip.setSchedule(model.alwaysOnDiscreteSchedule)
+        equip.setEndUseSubcategory(obj_name + " pan heater")
 
         pan_heater_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, "ElectricEquipment", "Electric Power Level")
         pan_heater_actuator.setName("#{obj_name} pan heater actuator".gsub("|", "_"))
@@ -1462,10 +1463,10 @@ class HVAC
         end
         pan_heater_power = pan_heater_power * num_outdoor_units # W
         program.addLine("Set #{pan_heater_actuator.name} = 0")
-        program.addLine("If #{vrf_sensor.name} > 0")
-        program.addLine("If #{tout_sensor.name} <= #{UnitConversions.convert(32.0, "F", "C").round(3)}")
-        program.addLine("Set #{pan_heater_actuator.name} = #{pan_heater_power}")
-        program.addLine("EndIf")
+        program.addLine("If #{mshp_sensor.name} > 0")
+        program.addLine("  If #{tout_sensor.name} <= #{UnitConversions.convert(32.0, "F", "C").round(3)}")
+        program.addLine("    Set #{pan_heater_actuator.name} = #{pan_heater_power}")
+        program.addLine("  EndIf")
         program.addLine("EndIf")
 
         program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
