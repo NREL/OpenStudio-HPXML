@@ -942,6 +942,7 @@ class HVAC
 
       # Store info for HVAC Sizing measure
       clg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      htg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios.join(","))
       clg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityDerateFactorEER, eer_capacity_derates.join(","))
       htg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityDerateFactorCOP, cop_capacity_derates.join(","))
       htg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
@@ -1220,6 +1221,7 @@ class HVAC
 
       # Store info for HVAC Sizing measure
       clg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      htg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios.join(","))
       clg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityDerateFactorEER, eer_capacity_derates.join(","))
       htg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityDerateFactorCOP, cop_capacity_derates.join(","))
       htg_air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
@@ -4621,7 +4623,7 @@ class HVAC
     cfms_cooling = [0.0] * num_speeds
     shrs_rated = [0.0] * num_speeds
 
-    cap_nom_per = cap_max_per
+    cap_nom_per = 1.0
     cfm_ton_nom = ((cfm_ton_max - cfm_ton_min) / (cap_max_per - cap_min_per)) * (cap_nom_per - cap_min_per) + cfm_ton_min
 
     ao = Psychrometrics.CoilAoFactor(dB_rated, wB_rated, Constants.Patm, UnitConversions.convert(1, "ton", "kBtu/hr"), cfm_ton_nom, shr)

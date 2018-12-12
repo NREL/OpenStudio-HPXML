@@ -3214,8 +3214,12 @@ class HVACSizing
 
         elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
           hvac.NumSpeedsHeating = htg_coil.stages.size
-          hvac.CapacityRatioHeating = hvac.CapacityRatioCooling
           hvac.MinOutdoorTemp = UnitConversions.convert(htg_coil.minimumOutdoorDryBulbTemperatureforCompressorOperation, "C", "F")
+
+          capacityRatioHeating = get_feature(runner, htg_equip, Constants.SizingInfoHVACCapacityRatioHeating, 'string')
+          return nil if capacityRatioHeating.nil?
+
+          hvac.CapacityRatioHeating = capacityRatioHeating.split(",").map(&:to_f)
 
           curves = []
           htg_coil.stages.each_with_index do |stage, speed|
