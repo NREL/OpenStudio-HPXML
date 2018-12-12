@@ -93,7 +93,7 @@ class HVAC
         # Add the existing furnace back in
         air_loop_unitary.setHeatingCoil(htg_coil)
       else
-        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0000001) # this is when there is no heating present
+        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
       end
       air_loop_unitary.setSupplyFan(fan)
       air_loop_unitary.setFanPlacement("BlowThrough")
@@ -243,7 +243,7 @@ class HVAC
         # Add the existing furnace back in
         air_loop_unitary.setHeatingCoil(htg_coil)
       else
-        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0000001) # this is when there is no heating present
+        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
       end
       air_loop_unitary.setSupplyFan(fan)
       air_loop_unitary.setFanPlacement("BlowThrough")
@@ -404,7 +404,7 @@ class HVAC
         # Add the existing furnace back in
         air_loop_unitary.setHeatingCoil(htg_coil)
       else
-        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0000001) # this is when there is no heating present
+        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
       end
       air_loop_unitary.setSupplyFan(fan)
       air_loop_unitary.setFanPlacement("BlowThrough")
@@ -1672,11 +1672,22 @@ class HVAC
       end
 
       # _processSystemFan
+      attached_to_multispeed_ac = false
       if not clg_coil.nil?
         obj_name = Constants.ObjectNameFurnaceAndCentralAirConditioner(fuel_type, unit.name.to_s)
+        if clg_coil.to_CoilCoolingDXMultiSpeed.is_initialized
+          attached_to_multispeed_ac = true
+        end
       end
 
-      fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
+      if attached_to_multispeed_ac
+        fan_power_curve = create_curve_exponent(model, [0, 1, 3], obj_name + " fan power curve", -100, 100)
+        fan_eff_curve = create_curve_cubic(model, [0, 1, 0, 0], obj_name + " fan eff curve", 0, 1, 0.01, 1)
+
+        fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
+      else
+        fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
+      end
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory(Constants.EndUseHVACFan)
@@ -1695,7 +1706,7 @@ class HVAC
         # Add the existing DX central air back in
         air_loop_unitary.setCoolingCoil(clg_coil)
       else
-        air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(0.0000001) # this is when there is no cooling present
+        air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(0.0)
       end
       if not perf.nil?
         air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
@@ -1980,7 +1991,7 @@ class HVAC
         unitary_system.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
         unitary_system.setHeatingCoil(htg_coil)
         unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
-        unitary_system.setSupplyAirFlowRateDuringCoolingOperation(0.00001)
+        unitary_system.setSupplyAirFlowRateDuringCoolingOperation(0.0)
         unitary_system.setSupplyFan(fan)
         unitary_system.setFanPlacement("BlowThrough")
         unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)

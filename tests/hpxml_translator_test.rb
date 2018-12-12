@@ -26,6 +26,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args['skip_validation'] = false
 
+    @simulation_runtime_key = "Simulation Runtime"
+    @workflow_runtime_key = "Workflow Runtime"
+
     dse_dir = File.absolute_path(File.join(this_dir, "dse"))
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
@@ -179,8 +182,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
-    results["Simulation Runtime"] = sim_time
-    results["Workflow Runtime"] = workflow_time
+    results[@simulation_runtime_key] = sim_time
+    results[@workflow_runtime_key] = workflow_time
 
     return results
   end
@@ -429,8 +432,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_keys.sort!
 
     # Append runtimes at the end
-    output_keys << "Simulation Runtime"
-    output_keys << "Workflow Runtime"
+    output_keys << @simulation_runtime_key
+    output_keys << @workflow_runtime_key
 
     column_headers = ['HPXML']
     output_keys.each do |key|
@@ -495,6 +498,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         dse_actual = result_dse100 / result_dse80
         dse_expect = 0.8
+        if File.basename(xml) == "valid-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
+          dse_expect = 1.0 # TODO: Generalize this
+        end
         puts "dse: #{dse_actual.round(2)} #{k}"
         assert_in_epsilon(dse_expect, dse_actual, 0.025)
       end
