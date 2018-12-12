@@ -173,7 +173,7 @@ class Airflow
           duct_lks[obj_name_ducts] = [duct_lk_supply_fan_equiv_var, duct_lk_return_fan_equiv_var]
         end
 
-        duct_programs, cfis_programs = create_ducts_objects(model, runner, unit, unit_living, unit_finished_basement, mech_vent, ducts_output, tin_sensor, pbar_sensor, has_forced_air_equipment, unit_has_mshp, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_programs)
+        duct_programs, cfis_programs = create_ducts_objects(model, runner, unit, unit_living, unit_finished_basement, mech_vent, ducts_output, tin_sensor, pbar_sensor, has_forced_air_equipment, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_programs)
       end
 
       infil_program = create_infil_mech_vent_objects(model, runner, obj_name_infil, obj_name_mech_vent, unit_living, infil, mech_vent, wind_speed, mv_output, infil_output, tin_sensor, tout_sensor, vwind_sensor, duct_lks, cfis_programs, nbeds)
@@ -1344,7 +1344,7 @@ class Airflow
     return ra_duct_zone
   end
 
-  def self.create_ducts_objects(model, runner, unit, unit_living, unit_finished_basement, mech_vent, ducts_output, tin_sensor, pbar_sensor, has_forced_air_equipment, unit_has_mshp, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_programs)
+  def self.create_ducts_objects(model, runner, unit, unit_living, unit_finished_basement, mech_vent, ducts_output, tin_sensor, pbar_sensor, has_forced_air_equipment, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_programs)
     max_supply_fan_mfrs = []
     fan_rtf_sensors = []
     air_loops.each do |air_loop|
@@ -1497,7 +1497,7 @@ class Airflow
       other_equip.setName(other_equip_def.name.to_s)
       other_equip.setFuelType("None")
       other_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-      unit_has_mshp ? other_equip.setSpace(living_space) : other_equip.setSpace(ra_duct_zone.spaces[0]) # mini-split returns to the living space
+      other_equip.setSpace(ra_duct_zone.spaces[0])
       return_duct_cond_to_plenum_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, "OtherEquipment", "Power Level")
       return_duct_cond_to_plenum_actuator.setName("#{other_equip.name} act")
 
@@ -1541,7 +1541,7 @@ class Airflow
       other_equip.setName(other_equip_def.name.to_s)
       other_equip.setFuelType("None")
       other_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-      unit_has_mshp ? other_equip.setSpace(living_space) : other_equip.setSpace(ra_duct_zone.spaces[0]) # mini-split returns to the living space
+      other_equip.setSpace(ra_duct_zone.spaces[0])
       return_sens_lkage_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, "OtherEquipment", "Power Level")
       return_sens_lkage_actuator.setName("#{other_equip.name} act")
 
@@ -1552,7 +1552,7 @@ class Airflow
       other_equip.setName(other_equip_def.name.to_s)
       other_equip.setFuelType("None")
       other_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-      unit_has_mshp ? other_equip.setSpace(living_space) : other_equip.setSpace(ra_duct_zone.spaces[0]) # mini-split returns to the living space
+      other_equip.setSpace(ra_duct_zone.spaces[0])
       return_lat_lkage_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, "OtherEquipment", "Power Level")
       return_lat_lkage_actuator.setName("#{other_equip.name} act")
 
