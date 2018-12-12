@@ -3514,6 +3514,8 @@ class OSModel
 
       attached_to_multispeed_ac = true
     end
+    
+    return attached_to_multispeed_ac
   end
 end
 

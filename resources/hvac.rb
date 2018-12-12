@@ -80,7 +80,7 @@ class HVAC
       air_loop_unitary.setName(obj_name + " unitary system")
       air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       air_loop_unitary.setCoolingCoil(clg_coil)
-      air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0000001) # this is when there is no heating present
+      air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
       air_loop_unitary.setSupplyFan(fan)
       air_loop_unitary.setFanPlacement("BlowThrough")
       air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
@@ -214,7 +214,7 @@ class HVAC
       air_loop_unitary.setName(obj_name + " unitary system")
       air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       air_loop_unitary.setCoolingCoil(clg_coil)
-      air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0000001) # this is when there is no heating present
+      air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
       air_loop_unitary.setSupplyFan(fan)
       air_loop_unitary.setFanPlacement("BlowThrough")
       air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
@@ -359,7 +359,7 @@ class HVAC
       air_loop_unitary.setName(obj_name + " unitary system")
       air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       air_loop_unitary.setCoolingCoil(clg_coil)
-      air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0000001) # this is when there is no heating present
+      air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
       air_loop_unitary.setSupplyFan(fan)
       air_loop_unitary.setFanPlacement("BlowThrough")
       air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
@@ -2045,7 +2045,7 @@ class HVAC
       air_loop_unitary.setName(obj_name + " unitary system")
       air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
       air_loop_unitary.setHeatingCoil(htg_coil)
-      air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(0.0000001) # this is when there is no cooling present
+      air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(0.0)
       air_loop_unitary.setSupplyFan(fan)
       air_loop_unitary.setFanPlacement("BlowThrough")
       air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
@@ -2331,7 +2331,7 @@ class HVAC
         unitary_system.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
         unitary_system.setHeatingCoil(htg_coil)
         unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
-        unitary_system.setSupplyAirFlowRateDuringCoolingOperation(0.00001)
+        unitary_system.setSupplyAirFlowRateDuringCoolingOperation(0.0)
         unitary_system.setSupplyFan(fan)
         unitary_system.setFanPlacement("BlowThrough")
         unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
