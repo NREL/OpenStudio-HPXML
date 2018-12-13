@@ -2085,6 +2085,14 @@ class Airflow
       infil_program.addLine("  Set QWHV = 0")
       infil_program.addLine("  Set #{whole_house_fan_actuator.name} = 0")
       infil_program.addLine("EndIf")
+
+      # Create EMS output variable for CFIS tests
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "CFIS_fan_power")
+      ems_output_var.setName("CFIS_fan_power")
+      ems_output_var.setTypeOfDataInVariable("Averaged")
+      ems_output_var.setUpdateFrequency("ZoneTimestep")
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits("W/cfm")
     end
 
     infil_program.addLine("Set Qrange = #{range_sch_sensor.name}*#{UnitConversions.convert(mv_output.range_hood_hour_avg_exhaust, "cfm", "m^3/s").round(4)}")

@@ -232,6 +232,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       output_var.setKeyValue('*')
     end
 
+    # Add output variable for CFIS fan power
+    output_var = OpenStudio::Model::OutputVariable.new("CFIS_fan_power", model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('EMS')
+
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     model_idf = forward_translator.translateModel(model)
@@ -482,6 +487,55 @@ class HPXMLTranslatorTest < MiniTest::Test
           end
         end
       end
+    end
+
+    # Cooling Systems
+    num_clg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/CoolingSystem)']
+
+    # Heat Pumps
+    num_hp = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatPump)']
+
+    # HVAC fan power
+    if bldg_details.elements['count(Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution)'] == 1
+      
+      htg_fan_w_per_cfm = nil
+      if bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatingSystem | Systems/HVAC/HVACPlant/HeatPump)'] == 1
+        bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem | Systems/HVAC/HVACPlant/HeatPump') do |htg_sys|
+          next unless XMLHelper.has_element(htg_sys, "DistributionSystem")
+
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%HTG SUPPLY FAN%' AND ColumnName='Rated Power Per Max Air Flow Rate' AND Units='W-s/m3'"
+          htg_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get / UnitConversions.convert(1.0, "m^3/s", "cfm")
+        end
+      end
+      
+      clg_fan_w_per_cfm = nil
+      if bldg_details.elements['count(Systems/HVAC/HVACPlant/CoolingSystem | Systems/HVAC/HVACPlant/HeatPump)'] == 1
+        bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem | Systems/HVAC/HVACPlant/HeatPump') do |clg_sys|
+          next unless XMLHelper.has_element(clg_sys, "DistributionSystem")
+
+          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%CLG SUPPLY FAN%' AND ColumnName='Rated Power Per Max Air Flow Rate' AND Units='W-s/m3'"
+          clg_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get / UnitConversions.convert(1.0, "m^3/s", "cfm")
+        end
+      end
+      
+      if not htg_fan_w_per_cfm.nil? and not clg_fan_w_per_cfm.nil?
+        # Ensure associated heating & cooling systems have same fan power
+        assert_equal(htg_fan_w_per_cfm, clg_fan_w_per_cfm)
+      end
+      
+      # CFIS fan power
+      cfis_fan_w_per_airflow = nil
+      if XMLHelper.get_value(bldg_details, "Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']/FanType") == "central fan integrated supply"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='CFIS_fan_power')"
+        cfis_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get
+        # Ensure CFIS fan power equals heating/cooling fan power
+        if not htg_fan_w_per_cfm.nil?
+          assert_in_delta(htg_fan_w_per_cfm, cfis_fan_w_per_cfm, 0.001)
+        else
+          assert_in_delta(clg_fan_w_per_cfm, cfis_fan_w_per_cfm, 0.001)
+        end
+      end
+      
     end
 
     sqlFile.close
