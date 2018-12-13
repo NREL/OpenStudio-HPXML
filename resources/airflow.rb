@@ -2016,16 +2016,22 @@ class Airflow
     cfis_programs.each do |cfis, value| # TODO: this assumes we always have exactly one cfis system
       cfis_program, cfis_output, supply_fan = value
 
-      supply_fan = supply_fan.to_FanOnOff.get
-      fan_pressure_rise = supply_fan.pressureRise # Pa
-      fan_eff = supply_fan.fanTotalEfficiency
-      cfis_fan_power = fan_pressure_rise / fan_eff * UnitConversions.convert(1.0, "cfm", "m^3/s")
-
       if cfis.open_time > 0.0
         cfis_outdoor_airflow = mv_output.whole_house_vent_rate * (60.0 / cfis.open_time)
       end
 
+      supply_fan = supply_fan.to_FanOnOff.get
+
+      supply_fan_pressure_rise = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Pressure Rise")
+      supply_fan_pressure_rise.setName("#{obj_name_mech_vent} sup fan press".gsub(" ", "_"))
+      supply_fan_pressure_rise.setInternalDataIndexKeyName(supply_fan.name.to_s)
+
+      supply_fan_efficiency = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Total Efficiency")
+      supply_fan_efficiency.setName("#{obj_name_mech_vent} sup fan eff".gsub(" ", "_"))
+      supply_fan_efficiency.setInternalDataIndexKeyName(supply_fan.name.to_s)
+
       infil_program.addLine("Set fan_rtf_var = (#{cfis_output.fan_rtf_sensors.join('+')})")
+      infil_program.addLine("Set CFIS_fan_power = #{supply_fan_pressure_rise.name} / #{supply_fan_efficiency.name} * #{UnitConversions.convert(1.0, 'cfm', 'm^3/s').round(6)}") # W/cfm
 
       infil_program.addLine("If @ABS(Minute - ZoneTimeStep*60) < 0.1")
       infil_program.addLine("  Set #{cfis_output.t_sum_open_var.name} = 0") # New hour, time on summation re-initializes to 0
@@ -2055,7 +2061,7 @@ class Airflow
       infil_program.addLine("    Set cfis_cfm = (mxsfmfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
 
       infil_program.addLine("    Set cfistemp3 = (1-fan_rtf_var)")
-      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = #{cfis_fan_power.round(4)}*cfis_cfm*#{cfis_output.f_damper_open_var.name}*cfistemp3")
+      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*#{cfis_output.f_damper_open_var.name}*cfistemp3")
       infil_program.addLine("  Else")
       infil_program.addLine("    Set cfistemp4 = fan_rtf_var*ZoneTimeStep*60")
       infil_program.addLine("    If (#{cfis_output.t_sum_open_var.name}+cfistemp4) > CFIS_t_min_hr_open")
