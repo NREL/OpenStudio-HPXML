@@ -1363,9 +1363,17 @@ class Airflow
       cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} cfis on for hour".gsub(" ", "_")) # Flag to open the CFIS damper for the remainder of the hour
       cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} cfis_f_open".gsub(" ", "_")) # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
 
-      max_supply_fan_mfr = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
-      max_supply_fan_mfr.setName("#{obj_name_ducts} max_supply_fan_mfr".gsub(" ", "_"))
-      max_supply_fan_mfr.setInternalDataIndexKeyName(supply_fan.name.to_s)
+      supply_fan_max_mfr = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
+      supply_fan_max_mfr.setName("#{obj_name_ducts} supply_fan_max_mfr".gsub(" ", "_"))
+      supply_fan_max_mfr.setInternalDataIndexKeyName(supply_fan.name.to_s)
+
+      supply_fan_pressure_rise = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Pressure Rise")
+      supply_fan_pressure_rise.setName("#{obj_name_ducts} supply_fan_pressure_rise".gsub(" ", "_"))
+      supply_fan_pressure_rise.setInternalDataIndexKeyName(supply_fan.name.to_s)
+
+      supply_fan_efficiency = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Total Efficiency")
+      supply_fan_efficiency.setName("#{obj_name_ducts} supply_fan_efficiency".gsub(" ", "_"))
+      supply_fan_efficiency.setInternalDataIndexKeyName(supply_fan.name.to_s)
     end
 
     if ducts_output.location_name != unit_living.zone.name.to_s and ducts_output.location_name != "none" and has_forced_air_equipment
@@ -1693,7 +1701,7 @@ class Airflow
         duct_program.addLine("Set dl_12 = #{liv_to_ah_flow_rate_var.name}")
 
         duct_program.addLine("If #{cfis_on_for_hour_var.name}")
-        duct_program.addLine("   Set cfis_m3s = (#{max_supply_fan_mfr.name} / 1.16097654) * #{mech_vent.cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
+        duct_program.addLine("   Set cfis_m3s = (#{supply_fan_max_mfr.name} / 1.16097654) * #{mech_vent.cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
         duct_program.addLine("   Set #{ah_vfr_var.name} = (1.0 - #{fan_rtf_sensor.name})*#{cfis_f_damper_open_var.name}*cfis_m3s")
         duct_program.addLine("   Set rho_in = (@RhoAirFnPbTdbW #{tin_sensor.name} #{win_sensor.name} #{pbar_sensor.name})")
         duct_program.addLine("   Set #{ah_mfr_var.name} = #{ah_vfr_sensor.name} * rho_in")
@@ -1757,7 +1765,7 @@ class Airflow
       cfis_program.addLine("Set #{cfis_f_damper_open_var.name} = 0")
     end
 
-    cfis_output = CFISOutput.new(cfis_t_sum_open_var, cfis_on_for_hour_var, cfis_f_damper_open_var, max_supply_fan_mfr, fan_rtf_var, fan_rtf_sensor)
+    cfis_output = CFISOutput.new(cfis_t_sum_open_var, cfis_on_for_hour_var, cfis_f_damper_open_var, supply_fan_max_mfr, supply_fan_pressure_rise, supply_fan_efficiency, fan_rtf_var, fan_rtf_sensor)
     return duct_program, cfis_program, cfis_output
   end
 
@@ -1933,13 +1941,8 @@ class Airflow
         cfis_outdoor_airflow = mv_output.whole_house_vent_rate * (60.0 / mech_vent.cfis_open_time)
       end
 
-      system, clg_coil, htg_coil, air_loop = HVAC.get_unitary_system_air_loop(model, runner, unit_living.zone)
-      supply_fan = system.supplyFan.get.to_FanOnOff.get
-      fan_pressure_rise = supply_fan.pressureRise # Pa
-      fan_eff = supply_fan.fanTotalEfficiency
-      cfis_fan_power = fan_pressure_rise / fan_eff * UnitConversions.convert(1.0, "cfm", "m^3/s")
-
       infil_program.addLine("Set #{cfis_output.fan_rtf_var.name} = #{cfis_output.fan_rtf_sensor.name}")
+      infil_program.addLine("Set CFIS_fan_power = #{cfis_output.supply_fan_pressure_rise.name} / #{cfis_output.supply_fan_efficiency.name} * #{UnitConversions.convert(1.0, 'cfm', 'm^3/s').round(6)}") # W/cfm
 
       infil_program.addLine("If @ABS(Minute - ZoneTimeStep*60) < 0.1")
       infil_program.addLine("  Set #{cfis_output.t_sum_open_var.name} = 0") # New hour, time on summation re-initializes to 0
@@ -1963,8 +1966,8 @@ class Airflow
       infil_program.addLine("    EndIf")
       infil_program.addLine("    Set QWHV = #{cfis_output.f_damper_open_var.name}*CFIS_Q_duct")
       infil_program.addLine("    Set #{cfis_output.t_sum_open_var.name} = #{cfis_output.t_sum_open_var.name} + #{cfis_output.f_damper_open_var.name}*(ZoneTimeStep*60)")
-      infil_program.addLine("    Set cfis_cfm = (#{cfis_output.max_supply_fan_mfr.name} / 1.16097654) * #{mech_vent.cfis_airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
-      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = #{cfis_fan_power.round(4)} * cfis_cfm * #{cfis_output.f_damper_open_var.name}*(1-#{cfis_output.fan_rtf_var.name})")
+      infil_program.addLine("    Set cfis_cfm = (#{cfis_output.supply_fan_max_mfr.name} / 1.16097654) * #{mech_vent.cfis_airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
+      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power * cfis_cfm * #{cfis_output.f_damper_open_var.name}*(1-#{cfis_output.fan_rtf_var.name})")
       infil_program.addLine("  Else")
       infil_program.addLine("    If (#{cfis_output.t_sum_open_var.name} + (#{cfis_output.fan_rtf_var.name}*ZoneTimeStep*60)) > CFIS_t_min_hr_open")
       # Damper is only open for a portion of this time step to achieve target minutes per hour
@@ -2392,15 +2395,17 @@ class MechanicalVentilationOutput
 end
 
 class CFISOutput
-  def initialize(t_sum_open_var, on_for_hour_var, f_damper_open_var, max_supply_fan_mfr, fan_rtf_var, fan_rtf_sensor)
+  def initialize(t_sum_open_var, on_for_hour_var, f_damper_open_var, supply_fan_max_mfr, supply_fan_pressure_rise, supply_fan_efficiency, fan_rtf_var, fan_rtf_sensor)
     @t_sum_open_var = t_sum_open_var
     @on_for_hour_var = on_for_hour_var
     @f_damper_open_var = f_damper_open_var
-    @max_supply_fan_mfr = max_supply_fan_mfr
+    @supply_fan_max_mfr = supply_fan_max_mfr
+    @supply_fan_pressure_rise = supply_fan_pressure_rise
+    @supply_fan_efficiency = supply_fan_efficiency
     @fan_rtf_var = fan_rtf_var
     @fan_rtf_sensor = fan_rtf_sensor
   end
-  attr_accessor(:t_sum_open_var, :on_for_hour_var, :f_damper_open_var, :max_supply_fan_mfr, :fan_rtf_var, :fan_rtf_sensor)
+  attr_accessor(:t_sum_open_var, :on_for_hour_var, :f_damper_open_var, :supply_fan_max_mfr, :supply_fan_pressure_rise, :supply_fan_efficiency, :fan_rtf_var, :fan_rtf_sensor)
 end
 
 class ZoneInfo
