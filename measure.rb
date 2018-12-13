@@ -2813,12 +2813,16 @@ class OSModel
       fan_type = XMLHelper.get_value(whole_house_fan, "FanType")
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
+        num_fans = 1.0
       elsif fan_type == "exhaust only"
         mech_vent_type = Constants.VentTypeExhaust
+        num_fans = 1.0
       elsif fan_type == "central fan integrated supply"
         mech_vent_type = Constants.VentTypeCFIS
+        num_fans = 1.0
       elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
         mech_vent_type = Constants.VentTypeBalanced
+        num_fans = 2.0
       end
       mech_vent_total_efficiency = 0.0
       mech_vent_sensible_efficiency = 0.0
@@ -2830,7 +2834,7 @@ class OSModel
       end
       mech_vent_cfm = Float(XMLHelper.get_value(whole_house_fan, "RatedFlowRate"))
       mech_vent_w = Float(XMLHelper.get_value(whole_house_fan, "FanPower"))
-      mech_vent_fan_power = mech_vent_w / mech_vent_cfm
+      mech_vent_fan_power = mech_vent_w / mech_vent_cfm / num_fans
     end
     mech_vent_ashrae_std = '2013'
     mech_vent_infil_credit = true
