@@ -733,12 +733,16 @@ class Airflow
     # Fraction of fan heat that goes to the space
     if mech_vent.type == Constants.VentTypeExhaust
       frac_fan_heat = 0.0 # Fan heat does not enter space
+      num_fans = 1
     elsif mech_vent.type == Constants.VentTypeSupply or mech_vent.type == Constants.VentTypeCFIS
       frac_fan_heat = 1.0 # Fan heat does enter space
+      num_fans = 1
     elsif mech_vent.type == Constants.VentTypeBalanced
       frac_fan_heat = 0.5 # Assumes supply fan heat enters space
+      num_fans = 2
     else
       frac_fan_heat = 0.0
+      num_fans = 0
     end
 
     # Get the clothes washer so we can use the day shift for the clothes dryer
@@ -847,7 +851,7 @@ class Airflow
     unit.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, apparent_sensible_effectiveness.to_f)
     unit.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRate, whole_house_vent_rate.to_f)
 
-    mv_output = MechanicalVentilationOutput.new(frac_fan_heat, whole_house_vent_rate, bathroom_hour_avg_exhaust, range_hood_hour_avg_exhaust, spot_fan_power, latent_effectiveness, sensible_effectiveness, dryer_exhaust_day_shift, has_dryer)
+    mv_output = MechanicalVentilationOutput.new(frac_fan_heat, num_fans, whole_house_vent_rate, bathroom_hour_avg_exhaust, range_hood_hour_avg_exhaust, spot_fan_power, latent_effectiveness, sensible_effectiveness, dryer_exhaust_day_shift, has_dryer)
     return true, mv_output
   end
 
@@ -1803,21 +1807,19 @@ class Airflow
 
       supply_fan = OpenStudio::Model::FanOnOff.new(model)
       supply_fan.setName(obj_name_mech_vent + " erv supply fan")
-      supply_fan.setFanEfficiency(UnitConversions.convert(300.0 / mech_vent.fan_power, "cfm", "m^3/s"))
-      supply_fan.setPressureRise(300.0)
+      supply_fan.setFanEfficiency(1)
+      supply_fan.setPressureRise(0)
       supply_fan.setMaximumFlowRate(balanced_flow_rate)
       supply_fan.setMotorEfficiency(1)
       supply_fan.setMotorInAirstreamFraction(1)
-      supply_fan.setEndUseSubcategory(Constants.EndUseMechVentFan)
 
       exhaust_fan = OpenStudio::Model::FanOnOff.new(model)
       exhaust_fan.setName(obj_name_mech_vent + " erv exhaust fan")
-      exhaust_fan.setFanEfficiency(UnitConversions.convert(300.0 / mech_vent.fan_power, "cfm", "m^3/s"))
-      exhaust_fan.setPressureRise(300.0)
+      exhaust_fan.setFanEfficiency(1)
+      exhaust_fan.setPressureRise(0)
       exhaust_fan.setMaximumFlowRate(balanced_flow_rate)
       exhaust_fan.setMotorEfficiency(1)
       exhaust_fan.setMotorInAirstreamFraction(0)
-      exhaust_fan.setEndUseSubcategory(Constants.EndUseMechVentFan)
 
       erv_controller = OpenStudio::Model::ZoneHVACEnergyRecoveryVentilatorController.new(model)
       erv_controller.setName(obj_name_mech_vent + " erv controller")
@@ -2008,7 +2010,6 @@ class Airflow
       infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
       infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
       infil_program.addLine("Set Qb = QWHV + (@Min Qout Qin)")
-      infil_program.addLine("Set #{whole_house_fan_actuator.name} = 0")
     else
       if mech_vent.type == Constants.VentTypeExhaust
         infil_program.addLine("Set Qout = QWHV+Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
@@ -2021,14 +2022,14 @@ class Airflow
         infil_program.addLine("Set Qu = @Abs (Qout- Qin)")
         infil_program.addLine("Set Qb = (@Min Qout Qin)")
       end
-      if mech_vent.type != Constants.VentTypeCFIS
-        if mech_vent.fan_power !=  0
-          infil_program.addLine("Set faneff_wh = #{UnitConversions.convert(300.0 / mech_vent.fan_power, "cfm", "m^3/s")}")
-        else
-          infil_program.addLine("Set faneff_wh = 1")
-        end
-        infil_program.addLine("Set #{whole_house_fan_actuator.name} = (QWHV*300)/faneff_wh")
+    end
+    if mech_vent.type != Constants.VentTypeCFIS
+      if mech_vent.fan_power != 0
+        infil_program.addLine("Set faneff_wh = #{UnitConversions.convert(300.0 / mech_vent.fan_power, "cfm", "m^3/s")}")
+      else
+        infil_program.addLine("Set faneff_wh = 1")
       end
+      infil_program.addLine("Set #{whole_house_fan_actuator.name} = (QWHV*300)/faneff_wh*#{mv_output.num_fans}")
     end
 
     if mv_output.spot_fan_power != 0
@@ -2381,8 +2382,9 @@ class MechanicalVentilation
 end
 
 class MechanicalVentilationOutput
-  def initialize(frac_fan_heat, whole_house_vent_rate, bathroom_hour_avg_exhaust, range_hood_hour_avg_exhaust, spot_fan_power, latent_effectiveness, sensible_effectiveness, dryer_exhaust_day_shift, has_dryer)
+  def initialize(frac_fan_heat, num_fans, whole_house_vent_rate, bathroom_hour_avg_exhaust, range_hood_hour_avg_exhaust, spot_fan_power, latent_effectiveness, sensible_effectiveness, dryer_exhaust_day_shift, has_dryer)
     @frac_fan_heat = frac_fan_heat
+    @num_fans = num_fans
     @whole_house_vent_rate = whole_house_vent_rate
     @bathroom_hour_avg_exhaust = bathroom_hour_avg_exhaust
     @range_hood_hour_avg_exhaust = range_hood_hour_avg_exhaust
@@ -2392,7 +2394,7 @@ class MechanicalVentilationOutput
     @dryer_exhaust_day_shift = dryer_exhaust_day_shift
     @has_dryer = has_dryer
   end
-  attr_accessor(:frac_fan_heat, :whole_house_vent_rate, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust, :spot_fan_power, :latent_effectiveness, :sensible_effectiveness, :dryer_exhaust_day_shift, :has_dryer)
+  attr_accessor(:frac_fan_heat, :num_fans, :whole_house_vent_rate, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust, :spot_fan_power, :latent_effectiveness, :sensible_effectiveness, :dryer_exhaust_day_shift, :has_dryer)
 end
 
 class CFISOutput
