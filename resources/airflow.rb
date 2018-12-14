@@ -2061,9 +2061,8 @@ class Airflow
       infil_program.addLine("    Set #{cfis_output.t_sum_open_var.name} = #{cfis_output.t_sum_open_var.name}+cfistemp2")
       infil_program.addLine("    Set mxsfmfr=@MAX(#{cfis_output.max_supply_fan_mfrs.join(' ')})")
       infil_program.addLine("    Set cfis_cfm = (mxsfmfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
-
-      infil_program.addLine("    Set cfistemp3 = (1-fan_rtf_var)")
-      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*#{cfis_output.f_damper_open_var.name}*cfistemp3")
+      infil_program.addLine("    Set cfis_frac = #{cfis_output.f_damper_open_var.name}*(1-fan_rtf_var)")
+      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*cfis_frac")
       infil_program.addLine("  Else")
       infil_program.addLine("    Set cfistemp4 = fan_rtf_var*ZoneTimeStep*60")
       infil_program.addLine("    If (#{cfis_output.t_sum_open_var.name}+cfistemp4) > CFIS_t_min_hr_open")
