@@ -304,8 +304,15 @@ class Airflow
       if (ems_internal_var.name.to_s.start_with? obj_name_airflow_underscore or
           ems_internal_var.name.to_s.start_with? obj_name_natvent_underscore or
           ems_internal_var.name.to_s.start_with? obj_name_infil_underscore or
-          ems_internal_var.name.to_s.start_with? obj_name_ducts_underscore)
+          ems_internal_var.name.to_s.start_with? obj_name_ducts_underscore or
+          ems_internal_var.name.to_s.start_with? obj_name_mechvent_underscore)
         ems_internal_var.remove
+      end
+    end
+
+    model.getEnergyManagementSystemOutputVariables.each do |ems_output_var|
+      if (ems_output_var.name.to_s.start_with? obj_name_mechvent_underscore)
+        ems_output_var.remove
       end
     end
 
@@ -2089,7 +2096,7 @@ class Airflow
 
       # Create EMS output variable for CFIS tests
       ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "CFIS_fan_power")
-      ems_output_var.setName("CFIS_fan_power")
+      ems_output_var.setName("#{obj_name_mech_vent} cfis fan power".gsub(" ", "_"))
       ems_output_var.setTypeOfDataInVariable("Averaged")
       ems_output_var.setUpdateFrequency("ZoneTimestep")
       ems_output_var.setEMSProgramOrSubroutineName(infil_program)
