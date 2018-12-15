@@ -707,7 +707,7 @@ class Airflow
 
   def self.process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, is_existing_home, ela, mech_vent, building, nbeds, nbaths, weather, unit_ffa, unit_living, num_units, has_forced_air_equipment)
     if mech_vent.type == Constants.VentTypeCFIS
-      if not has_forced_air_equipment
+      if not has_forced_air_equipment or unit_has_mshp
         runner.registerError("A CFIS ventilation system has been selected but the building does not have central, forced air equipment.")
         return false
       end
