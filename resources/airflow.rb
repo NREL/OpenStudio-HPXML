@@ -304,8 +304,15 @@ class Airflow
       if (ems_internal_var.name.to_s.start_with? obj_name_airflow_underscore or
           ems_internal_var.name.to_s.start_with? obj_name_natvent_underscore or
           ems_internal_var.name.to_s.start_with? obj_name_infil_underscore or
-          ems_internal_var.name.to_s.start_with? obj_name_ducts_underscore)
+          ems_internal_var.name.to_s.start_with? obj_name_ducts_underscore or
+          ems_internal_var.name.to_s.start_with? obj_name_mechvent_underscore)
         ems_internal_var.remove
+      end
+    end
+
+    model.getEnergyManagementSystemOutputVariables.each do |ems_output_var|
+      if (ems_output_var.name.to_s.start_with? obj_name_mechvent_underscore)
+        ems_output_var.remove
       end
     end
 
@@ -2061,9 +2068,8 @@ class Airflow
       infil_program.addLine("    Set #{cfis_output.t_sum_open_var.name} = #{cfis_output.t_sum_open_var.name}+cfistemp2")
       infil_program.addLine("    Set mxsfmfr=@MAX(#{cfis_output.max_supply_fan_mfrs.join(' ')})")
       infil_program.addLine("    Set cfis_cfm = (mxsfmfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
-
-      infil_program.addLine("    Set cfistemp3 = (1-fan_rtf_var)")
-      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*#{cfis_output.f_damper_open_var.name}*cfistemp3")
+      infil_program.addLine("    Set cfis_frac = #{cfis_output.f_damper_open_var.name}*(1-fan_rtf_var)")
+      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*cfis_frac")
       infil_program.addLine("  Else")
       infil_program.addLine("    Set cfistemp4 = fan_rtf_var*ZoneTimeStep*60")
       infil_program.addLine("    If (#{cfis_output.t_sum_open_var.name}+cfistemp4) > CFIS_t_min_hr_open")
@@ -2090,7 +2096,7 @@ class Airflow
 
       # Create EMS output variable for CFIS tests
       ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "CFIS_fan_power")
-      ems_output_var.setName("CFIS_fan_power")
+      ems_output_var.setName("#{obj_name_mech_vent} cfis fan power".gsub(" ", "_"))
       ems_output_var.setTypeOfDataInVariable("Averaged")
       ems_output_var.setUpdateFrequency("ZoneTimestep")
       ems_output_var.setEMSProgramOrSubroutineName(infil_program)

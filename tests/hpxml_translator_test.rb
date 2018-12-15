@@ -195,7 +195,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Add output variable for CFIS fan power
-    output_var = OpenStudio::Model::OutputVariable.new("CFIS_fan_power", model)
+    output_var = OpenStudio::Model::OutputVariable.new("res_mv_1_cfis_fan_power", model)
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('EMS')
 
@@ -286,6 +286,30 @@ class HPXMLTranslatorTest < MiniTest::Test
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(180.0, sql_value, 0.01)
+    end
+
+    # Enclosure Foundations
+    # Ensure the correct number of Kiva instances
+    # TODO: Update for multiple foundations and garages.
+    # TODO: Update for walkout basements, which use multiple Kiva instances.
+    in_kiva_block = false
+    num_kiva_instances = 0
+    File.readlines(File.join(rundir, "eplusout.eio")).each do |eio_line|
+      if eio_line.start_with? "! <Kiva Foundation Name>"
+        in_kiva_block = true
+        next
+      elsif in_kiva_block
+        if eio_line.start_with? "! "
+          break # done reading
+        end
+
+        num_kiva_instances += 1
+      end
+    end
+    if XMLHelper.has_element(bldg_details, "Enclosure/Foundations/Foundation/FoundationType/Ambient")
+      assert_equal(0, num_kiva_instances)
+    else
+      assert_equal(1, num_kiva_instances)
     end
 
     # Enclosure Walls
@@ -383,7 +407,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
-    # Heating Systems
+    # HVAC Heating Systems
     num_htg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatingSystem)']
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
       htg_sys_id = htg_sys.elements["SystemIdentifier"].attributes["id"].upcase
@@ -453,10 +477,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # Cooling Systems
+    # HVAC Cooling Systems
     num_clg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/CoolingSystem)']
 
-    # Heat Pumps
+    # HVAC Heat Pumps
     num_hp = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatPump)']
 
     # HVAC fan power
@@ -490,7 +514,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       # CFIS fan power
       cfis_fan_w_per_airflow = nil
       if XMLHelper.get_value(bldg_details, "Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']/FanType") == "central fan integrated supply"
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='CFIS_fan_power')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_1_cfis_fan_power')"
         cfis_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get
         # Ensure CFIS fan power equals heating/cooling fan power
         if not htg_fan_w_per_cfm.nil?
