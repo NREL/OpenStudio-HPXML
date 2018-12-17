@@ -77,7 +77,7 @@ class HVAC
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
       fan.setMotorEfficiency(1.0)
@@ -227,7 +227,7 @@ class HVAC
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
       fan.setMotorEfficiency(1.0)
@@ -388,7 +388,7 @@ class HVAC
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
       fan.setMotorEfficiency(1.0)
@@ -580,7 +580,7 @@ class HVAC
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
       fan.setMotorEfficiency(1.0)
@@ -763,7 +763,7 @@ class HVAC
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
       fan.setMotorEfficiency(1.0)
@@ -960,7 +960,7 @@ class HVAC
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule, fan_power_curve, fan_eff_curve)
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
       fan.setMotorEfficiency(1.0)
@@ -1195,7 +1195,7 @@ class HVAC
         fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
         fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
         fan.setName(obj_name + " #{zone.name} supply fan")
-        fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+        fan.setEndUseSubcategory(obj_name + " supply fan")
         fan.setFanEfficiency(fan_eff)
         fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power / dse))
         fan.setMotorEfficiency(1.0)
@@ -1489,7 +1489,7 @@ class HVAC
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " #{control_zone.name} supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power / dse))
       fan.setMotorEfficiency(1.0)
@@ -1604,7 +1604,7 @@ class HVAC
 
         fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
         fan.setName(obj_name + " supply fan")
-        fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+        fan.setEndUseSubcategory(obj_name + " supply fan")
         fan.setFanEfficiency(1)
         fan.setPressureRise(0)
         fan.setMotorEfficiency(1)
@@ -1688,7 +1688,7 @@ class HVAC
       end
       fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
       fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+      fan.setEndUseSubcategory(obj_name + " supply fan")
       fan.setFanEfficiency(fan_eff)
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
       fan.setMotorEfficiency(1.0)
@@ -1970,7 +1970,7 @@ class HVAC
 
         fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
         fan.setName(obj_name + " fan")
-        fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+        fan.setEndUseSubcategory(obj_name + " supply fan")
         if fan_power > 0
           fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
           fan.setFanEfficiency(fan_eff)
@@ -2969,7 +2969,7 @@ class HVAC
       equip_def.setFractionRadiant(0.558)
       equip_def.setFractionLatent(0)
       equip_def.setFractionLost(0)
-      equip.setEndUseSubcategory(Constants.EndUseCeilingFan)
+      equip.setEndUseSubcategory(obj_name)
       equip.setSchedule(ceiling_fan_sch.schedule)
     end
 
