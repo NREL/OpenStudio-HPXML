@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>fe246eaf-d5d5-4b7c-94c5-f4b36d345812</version_id>
-  <version_modified>20181217T161517Z</version_modified>
+  <version_id>8d4d5901-748e-4c53-acb2-4e100db5271b</version_id>
+  <version_modified>20181217T201325Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -741,12 +741,6 @@
       <checksum>A452A666</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>0DD38697</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -805,12 +799,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>70601528</checksum>
-    </file>
-    <file>
-      <filename>airflow.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>7A544713</checksum>
     </file>
     <file>
       <version>
@@ -978,6 +966,18 @@
       <filetype>xml</filetype>
       <usage_type>test</usage_type>
       <checksum>64835674</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3F560655</checksum>
+    </file>
+    <file>
+      <filename>airflow.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>379C4452</checksum>
     </file>
   </files>
 </measure>
