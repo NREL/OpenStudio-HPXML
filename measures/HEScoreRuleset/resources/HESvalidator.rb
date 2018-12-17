@@ -68,7 +68,7 @@ class HEScoreValidator
         'RadiantBarrier' => one,
         '/HPXML/Building/BuildingDetails/Enclosure/Skylights' => zero_or_one, # See [Skylight]
       },
-      
+
       # [RoofColor=Reflective]
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof[RoofColor="reflective"]' => {
         'SolarAbsorptance' => one,

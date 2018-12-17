@@ -17,7 +17,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     Dir["#{xmldir}/*.xml"].sort.each do |xml|
       results[File.basename(xml)] = run_and_check(xml, parent_dir, false)
     end
-    
+
     _write_summary_results(parent_dir, results)
   end
 
@@ -49,10 +49,10 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
       schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HPXMLtoOpenStudio", "hpxml_schemas"))
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
     end
-    
+
     return _get_results(parent_dir, runtime)
   end
-  
+
   def _get_results(parent_dir, runtime)
     sql_path = File.join(parent_dir, "HEScoreDesign", "run", "eplusout.sql")
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
@@ -66,27 +66,27 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     end
 
     sqlFile.close
-    
+
     results["Runtime"] = runtime
 
     return results
   end
-  
+
   def _write_summary_results(parent_dir, results)
     csv_out = File.join(parent_dir, 'test_results', 'results.csv')
     _rm_path(File.dirname(csv_out))
     Dir.mkdir(File.dirname(csv_out))
-    
+
     column_headers = ['HPXML']
     results[results.keys[0]].keys.each do |key|
       next if not key.is_a? Array
-      
+
       column_headers << "#{key[0]}: #{key[1]} [#{key[2]}]"
     end
-    
+
     # Append runtime at the end
     column_headers << "Runtime"
-    
+
     require 'csv'
     CSV.open(csv_out, 'w') do |csv|
       csv << column_headers
@@ -94,7 +94,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         csv << [xml] + xml_results.values
       end
     end
-    
+
     puts "Wrote results to #{csv_out}."
   end
 
@@ -107,7 +107,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     end
     assert_equal(0, errors.size)
   end
-  
+
   def _rm_path(path)
     if Dir.exists?(path)
       FileUtils.rm_r(path)
