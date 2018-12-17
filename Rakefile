@@ -27,10 +27,4 @@ task :update_measures do
   command = "rubocop --auto-correct --format simple --only Layout"
   puts "Applying rubocop style to measures..."
   system(command)
-
-  # Update measure xmls
-  cli_path = OpenStudio.getOpenStudioCLI
-  command = "\"#{cli_path}\" --no-ssl measure --update_all #{measures_dir} >> log"
-  puts "Updating measure.xml files..."
-  system(command)
 end

@@ -155,7 +155,7 @@ class HEScoreRuleset
       new_attic = XMLHelper.add_element(new_attics, "Attic")
       XMLHelper.copy_element(new_attic, orig_attic, "SystemIdentifier")
       XMLHelper.copy_element(new_attic, orig_attic, "AtticType")
-      
+
       # Roof
       roof_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='cavity']/NominalRValue"))
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
@@ -734,7 +734,7 @@ class HEScoreRuleset
 
   def self.set_systems_photovoltaics(new_systems, orig_details)
     return if not XMLHelper.has_element(orig_details, "Systems/Photovoltaics")
-  
+
     pv_power = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/MaxPowerOutput")
     pv_num_panels = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/extension/hescore_num_panels")
     pv_orientation = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/ArrayOrientation")
@@ -742,7 +742,7 @@ class HEScoreRuleset
     if not pv_power.nil?
       pv_power = Float(pv_power)
     else
-      pv_power = Float(pv_num_panels)*300.0 # FIXME: Hard-coded
+      pv_power = Float(pv_num_panels) * 300.0 # FIXME: Hard-coded
     end
 
     new_pvs = XMLHelper.add_element(new_systems, "Photovoltaics")
@@ -965,29 +965,29 @@ def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   sidings = ["wood siding", "stucco", "vinyl siding", "aluminum siding", "brick veneer"]
   siding_index = sidings.index(siding)
   if r_cont == 0 and not ove
-    val = { 0 => [4.6, 3.2, 3.8, 3.7, 4.7],
-            3 => [7.0, 5.8, 6.3, 6.2, 7.1],
-            7 => [9.7, 8.5, 9.0, 8.8, 9.8],
-            11 => [11.5, 10.2, 10.8, 10.6, 11.6],
-            13 => [12.5, 11.1, 11.6, 11.5, 12.5],
-            15 => [13.3, 11.9, 12.5, 12.3, 13.3],
-            19 => [16.9, 15.4, 16.1, 15.9, 16.9],
-            21 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index]
+    val = { 0 => [4.6, 3.2, 3.8, 3.7, 4.7],                                # ewwf00wo, ewwf00st, ewwf00vi, ewwf00al, ewwf00br
+            3 => [7.0, 5.8, 6.3, 6.2, 7.1],                                # ewwf03wo, ewwf03st, ewwf03vi, ewwf03al, ewwf03br
+            7 => [9.7, 8.5, 9.0, 8.8, 9.8],                                # ewwf07wo, ewwf07st, ewwf07vi, ewwf07al, ewwf07br
+            11 => [11.5, 10.2, 10.8, 10.6, 11.6],                          # ewwf11wo, ewwf11st, ewwf11vi, ewwf11al, ewwf11br
+            13 => [12.5, 11.1, 11.6, 11.5, 12.5],                          # ewwf13wo, ewwf13st, ewwf13vi, ewwf13al, ewwf13br
+            15 => [13.3, 11.9, 12.5, 12.3, 13.3],                          # ewwf15wo, ewwf15st, ewwf15vi, ewwf15al, ewwf15br
+            19 => [16.9, 15.4, 16.1, 15.9, 16.9],                          # ewwf19wo, ewwf19st, ewwf19vi, ewwf19al, ewwf19br
+            21 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index] # ewwf21wo, ewwf21st, ewwf21vi, ewwf21al, ewwf21br
   elsif r_cont == 5 and not ove
-    val = { 11 => [16.7, 15.4, 15.9, 15.9, 16.9],
-            13 => [17.9, 16.4, 16.9, 16.9, 17.9],
-            15 => [18.5, 17.2, 17.9, 17.9, 18.9],
-            19 => [22.2, 20.8, 21.3, 21.3, 22.2],
-            21 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index]
+    val = { 11 => [16.7, 15.4, 15.9, 15.9, 16.9],                          # ewps11wo, ewps11st, ewps11vi, ewps11al, ewps11br
+            13 => [17.9, 16.4, 16.9, 16.9, 17.9],                          # ewps13wo, ewps13st, ewps13vi, ewps13al, ewps13br
+            15 => [18.5, 17.2, 17.9, 17.9, 18.9],                          # ewps15wo, ewps15st, ewps15vi, ewps15al, ewps15br
+            19 => [22.2, 20.8, 21.3, 21.3, 22.2],                          # ewps19wo, ewps19st, ewps19vi, ewps19al, ewps19br
+            21 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index] # ewps21wo, ewps21st, ewps21vi, ewps21al, ewps21br
   elsif r_cont == 0 and ove
-    val = { 19 => [19.2, 17.9, 18.5, 18.2, 19.2],
-            21 => [20.4, 18.9, 19.6, 19.6, 20.4],
-            27 => [25.6, 24.4, 25.0, 24.4, 25.6],
-            33 => [30.3, 29.4, 29.4, 29.4, 30.3],
-            38 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index]
+    val = { 19 => [19.2, 17.9, 18.5, 18.2, 19.2],                          # ewov19wo, ewov19st, ewov19vi, ewov19al, ewov19br
+            21 => [20.4, 18.9, 19.6, 19.6, 20.4],                          # ewov21wo, ewov21st, ewov21vi, ewov21al, ewov21br
+            27 => [25.6, 24.4, 25.0, 24.4, 25.6],                          # ewov27wo, ewov27st, ewov27vi, ewov27al, ewov27br
+            33 => [30.3, 29.4, 29.4, 29.4, 30.3],                          # ewov33wo, ewov33st, ewov33vi, ewov33al, ewov33br
+            38 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index] # ewov38wo, ewov38st, ewov38vi, ewov38al, ewov38br
   elsif r_cont == 5 and ove
-    val = { 19 => [24.4, 23.3, 23.8, 23.3, 24.4],
-            21 => [25.6, 24.4, 25.0, 25.0, 25.6] }[r_cavity][siding_index]
+    val = { 19 => [24.4, 23.3, 23.8, 23.3, 24.4],                          # ewop19wo, ewop19st, ewop19vi, ewop19al, ewop19br
+            21 => [25.6, 24.4, 25.0, 25.0, 25.6] }[r_cavity][siding_index] # ewop21wo, ewop21st, ewop21vi, ewop21al, ewop21br
   end
   return val if not val.nil?
 
@@ -998,9 +998,9 @@ def get_structural_block_wall_assembly_r(r_cavity)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  val = { 0 => 2.9,
-          5 => 7.9,
-          10 => 12.8 }[r_cavity]
+  val = { 0 => 2.9,              # ewbr00nn
+          5 => 7.9,              # ewbr05nn
+          10 => 12.8 }[r_cavity] # ewbr10nn
   return val if not val.nil?
 
   fail "Could not get default structural block wall assembly R-value for R-cavity '#{r_cavity}'"
@@ -1012,9 +1012,9 @@ def get_concrete_block_wall_assembly_r(r_cavity, siding)
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   sidings = ["stucco", "brick veneer", nil]
   siding_index = sidings.index(siding)
-  val = { 0 => [4.1, 5.6, 4.0],
-          3 => [5.7, 7.2, 5.6],
-          6 => [8.5, 10.0, 8.3] }[r_cavity][siding_index]
+  val = { 0 => [4.1, 5.6, 4.0],                           # ewcb00st, ewcb00br, ewcb00nn
+          3 => [5.7, 7.2, 5.6],                           # ewcb03st, ewcb03br, ewcb03nn
+          6 => [8.5, 10.0, 8.3] }[r_cavity][siding_index] # ewcb06st, ewcb06br, ewcb06nn
   return val if not val.nil?
 
   fail "Could not get default concrete block wall assembly R-value for R-cavity '#{r_cavity}' and siding '#{siding}'"
@@ -1024,7 +1024,7 @@ def get_straw_bale_wall_assembly_r(siding)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  return 58.8 if siding == "stucco"
+  return 58.8 if siding == "stucco" # ewsb00st
 
   fail "Could not get default straw bale assembly R-value for siding '#{siding}'"
 end
@@ -1040,22 +1040,22 @@ def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
                "plastic/rubber/synthetic sheeting"]
   material_index = materials.index(material)
   if r_cont == 0 and not has_radiant_barrier
-    val = { 0 => [3.3, 4.0, 3.4, 3.4, 3.7],
-            11 => [13.5, 14.3, 13.7, 13.5, 13.9],
-            13 => [14.9, 15.6, 15.2, 14.9, 15.4],
-            15 => [16.4, 16.9, 16.4, 16.4, 16.7],
-            19 => [20.0, 20.8, 20.4, 20.4, 20.4],
-            21 => [21.7, 22.2, 21.7, 21.3, 21.7],
-            27 => [nil, 27.8, 27.0, 27.0, 27.0] }[r_cavity][material_index]
+    val = { 0 => [3.3, 4.0, 3.4, 3.4, 3.7],                                 # rfwf00co, rfwf00wo, rfwf00rc, rfwf00lc, rfwf00tg
+            11 => [13.5, 14.3, 13.7, 13.5, 13.9],                           # rfwf11co, rfwf11wo, rfwf11rc, rfwf11lc, rfwf11tg
+            13 => [14.9, 15.6, 15.2, 14.9, 15.4],                           # rfwf13co, rfwf13wo, rfwf13rc, rfwf13lc, rfwf13tg
+            15 => [16.4, 16.9, 16.4, 16.4, 16.7],                           # rfwf15co, rfwf15wo, rfwf15rc, rfwf15lc, rfwf15tg
+            19 => [20.0, 20.8, 20.4, 20.4, 20.4],                           # rfwf19co, rfwf19wo, rfwf19rc, rfwf19lc, rfwf19tg
+            21 => [21.7, 22.2, 21.7, 21.3, 21.7],                           # rfwf21co, rfwf21wo, rfwf21rc, rfwf21lc, rfwf21tg
+            27 => [nil, 27.8, 27.0, 27.0, 27.0] }[r_cavity][material_index] # rfwf27co, rfwf27wo, rfwf27rc, rfwf27lc, rfwf27tg
   elsif r_cont == 0 and has_radiant_barrier
-    val = { 0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index]
+    val = { 0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index]      # rfrb00co, rfrb00wo, rfrb00rc, rfrb00lc, rfrb00tg
   elsif r_cont == 5 and not has_radiant_barrier
-    val = { 0 => [8.3, 9.0, 8.4, 8.3, 8.7],
-            11 => [18.5, 19.2, 18.5, 18.5, 18.9],
-            13 => [20.0, 20.8, 20.0, 20.0, 20.4],
-            15 => [21.3, 22.2, 21.3, 21.3, 21.7],
-            19 => [nil, 25.6, 25.6, 25.0, 25.6],
-            21 => [nil, 27.0, 27.0, 26.3, 27.0] }[r_cavity][material_index]
+    val = { 0 => [8.3, 9.0, 8.4, 8.3, 8.7],                                 # rfps00co, rfps00wo, rfps00rc, rfps00lc, rfps00tg
+            11 => [18.5, 19.2, 18.5, 18.5, 18.9],                           # rfps11co, rfps11wo, rfps11rc, rfps11lc, rfps11tg
+            13 => [20.0, 20.8, 20.0, 20.0, 20.4],                           # rfps13co, rfps13wo, rfps13rc, rfps13lc, rfps13tg
+            15 => [21.3, 22.2, 21.3, 21.3, 21.7],                           # rfps15co, rfps15wo, rfps15rc, rfps15lc, rfps15tg
+            19 => [nil, 25.6, 25.6, 25.0, 25.6],                            # rfps19co, rfps19wo, rfps19rc, rfps19lc, rfps19tg
+            21 => [nil, 27.0, 27.0, 26.3, 27.0] }[r_cavity][material_index] # rfps21co, rfps21wo, rfps21rc, rfps21lc, rfps21tg
   end
   return val if not val.nil?
 
@@ -1066,19 +1066,19 @@ def get_ceiling_assembly_r(r_cavity)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/ceiling-construction-types
-  val = { 0 => 2.2,
-          3 => 5.0,
-          6 => 7.6,
-          9 => 10.0,
-          11 => 10.9,
-          19 => 19.2,
-          21 => 21.3,
-          25 => 25.6,
-          30 => 30.3,
-          38 => 38.5,
-          44 => 43.5,
-          49 => 50.0,
-          60 => 58.8 }[r_cavity]
+  val = { 0 => 2.2,              # ecwf00
+          3 => 5.0,              # ecwf03
+          6 => 7.6,              # ecwf06
+          9 => 10.0,             # ecwf09
+          11 => 10.9,            # ecwf11
+          19 => 19.2,            # ecwf19
+          21 => 21.3,            # ecwf21
+          25 => 25.6,            # ecwf25
+          30 => 30.3,            # ecwf30
+          38 => 38.5,            # ecwf38
+          44 => 43.5,            # ecwf44
+          49 => 50.0,            # ecwf49
+          60 => 58.8 }[r_cavity] # ecwf60
   return val if not val.nil?
 
   fail "Could not get default ceiling assembly R-value for R-cavity '#{r_cavity}'"
@@ -1088,15 +1088,15 @@ def get_floor_assembly_r(r_cavity)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/floor-construction-types
-  val = { 0 => 5.9,
-          11 => 15.6,
-          13 => 17.2,
-          15 => 18.5,
-          19 => 22.2,
-          21 => 23.8,
-          25 => 27.0,
-          30 => 31.3,
-          38 => 37.0 }[r_cavity]
+  val = { 0 => 5.9,              # efwf00ca
+          11 => 15.6,            # efwf11ca
+          13 => 17.2,            # efwf13ca
+          15 => 18.5,            # efwf15ca
+          19 => 22.2,            # efwf19ca
+          21 => 23.8,            # efwf21ca
+          25 => 27.0,            # efwf25ca
+          30 => 31.3,            # efwf30ca
+          38 => 37.0 }[r_cavity] # efwf38ca
   return val if not val.nil?
 
   fail "Could not get default floor assembly R-value for R-cavity '#{r_cavity}'"
@@ -1104,26 +1104,26 @@ end
 
 def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
   # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/window-construction-types/window-skylight-construction-types
+  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, glass_layers, glass_type, gas_fill]
-  vals = { ["Aluminum", "single-pane", nil, nil] => [1.19, 0.78],
-           ["Wood", "single-pane", nil, nil] => [0.92, 0.72],
-           ["Aluminum", "single-pane", "tinted/reflective", nil] => [1.19, 0.67],
-           ["Wood", "single-pane", nil, nil] => [0.92, 0.72], # FIXME: Same as 2nd item?
-           ["Aluminum", "double-pane", nil, "air"] => [0.77, 0.7],
-           ["AluminumThermalBreak", "double-pane", nil, "air"] => [0.57, 0.67],
-           ["Wood", "double-pane", nil, "air"] => [0.52, 0.64],
-           ["Aluminum", "double-pane", "tinted/reflective", "air"] => [0.75, 0.58],
-           ["AluminumThermalBreak", "double-pane", "tinted/reflective", "air"] => [0.55, 0.55],
-           ["Wood", "double-pane", "tinted/reflective", "air"] => [0.5, 0.53],
-           ["Wood", "double-pane", "low-e", "air"] => [0.36, 0.56],
-           ["AluminumThermalBreak", "double-pane", "low-e", "argon"] => [0.37, 0.59],
-           ["Wood", "double-pane", "low-e", "argon"] => [0.33, 0.57],
-           ["Aluminum", "double-pane", "reflective", "air"] => [0.59, 0.28],
-           ["AluminumThermalBreak", "double-pane", "reflective", "argon"] => [0.4, 0.25], # FIXME: Not labeled as argon, but should be? See https://docs.google.com/spreadsheets/d/1Tr8ajqz-p-BhS9cRx8H3566k8C5-OD68m-tiRtE5Wvg/edit#gid=2115766420
-           ["Wood", "double-pane", "reflective", "argon"] => [0.35, 0.24], # FIXME: Not labeled as argon, but should be? See https://docs.google.com/spreadsheets/d/1Tr8ajqz-p-BhS9cRx8H3566k8C5-OD68m-tiRtE5Wvg/edit#gid=2115766420
-           ["Wood", "double-pane", "reflective", "argon"] => [0.26, 0.23],
-           ["Wood", "triple-pane", "low-e", "argon"] => [0.17, 0.21] }[key]
+  vals = { ["Aluminum", "single-pane", nil, nil] => [1.27, 0.75],                               # scna
+           ["Wood", "single-pane", nil, nil] => [0.89, 0.64],                                   # scnw
+           ["Aluminum", "single-pane", "tinted/reflective", nil] => [1.27, 0.64],               # stna
+           ["Wood", "single-pane", "tinted/reflective", nil] => [0.89, 0.54],                   # stnw
+           ["Aluminum", "double-pane", nil, "air"] => [0.81, 0.67],                             # dcaa
+           ["AluminumThermalBreak", "double-pane", nil, "air"] => [0.60, 0.67],                 # dcab
+           ["Wood", "double-pane", nil, "air"] => [0.51, 0.56],                                 # dcaw
+           ["Aluminum", "double-pane", "tinted/reflective", "air"] => [0.81, 0.55],             # dtaa
+           ["AluminumThermalBreak", "double-pane", "tinted/reflective", "air"] => [0.60, 0.55], # dtab
+           ["Wood", "double-pane", "tinted/reflective", "air"] => [0.51, 0.46],                 # dtaw
+           ["Wood", "double-pane", "low-e", "air"] => [0.42, 0.52],                             # dpeaw
+           ["AluminumThermalBreak", "double-pane", "low-e", "argon"] => [0.47, 0.62],           # dpeaab
+           ["Wood", "double-pane", "low-e", "argon"] => [0.39, 0.52],                           # dpeaaw
+           ["Aluminum", "double-pane", "reflective", "air"] => [0.67, 0.37],                    # dseaa
+           ["AluminumThermalBreak", "double-pane", "reflective", "air"] => [0.47, 0.37],        # dseab
+           ["Wood", "double-pane", "reflective", "air"] => [0.39, 0.31],                        # dseaw
+           ["Wood", "double-pane", "reflective", "argon"] => [0.36, 0.31],                      # dseaaw
+           ["Wood", "triple-pane", "low-e", "argon"] => [0.27, 0.31] }[key]                     # thmabw
   return vals if not vals.nil?
 
   fail "Could not get default window U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
@@ -1131,27 +1131,26 @@ end
 
 def get_skylight_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
   # FIXME: Verify
-  # FIXME: Table says 20 deg but Scoring Tool roof pitch is 30 deg?
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/window-construction-types/window-skylight-construction-types
+  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, glass_layers, glass_type, gas_fill]
-  vals = { ["Aluminum", "single-pane", nil, nil] => [1.35, 0.78],
-           ["Wood", "single-pane", nil, nil] => [1.08, 0.72],
-           ["Aluminum", "single-pane", "tinted/reflective", nil] => [1.35, 0.68],
-           ["Wood", "single-pane", nil, nil] => [1.08, 0.72], # FIXME: Same as 2nd item?
-           ["Aluminum", "double-pane", nil, "air"] => [0.82, 0.7],
-           ["AluminumThermalBreak", "double-pane", nil, "air"] => [0.62, 0.67],
-           ["Wood", "double-pane", nil, "air"] => [0.57, 0.64],
-           ["Aluminum", "double-pane", "tinted/reflective", "air"] => [0.83, 0.58],
-           ["AluminumThermalBreak", "double-pane", "tinted/reflective", "air"] => [0.63, 0.56],
-           ["Wood", "double-pane", "tinted/reflective", "air"] => [0.58, 0.53],
-           ["Wood", "double-pane", "low-e", "air"] => [0.47, 0.57],
-           ["AluminumThermalBreak", "double-pane", "low-e", "argon"] => [0.47, 0.6],
-           ["Wood", "double-pane", "low-e", "argon"] => [0.42, 0.57],
-           ["Aluminum", "double-pane", "reflective", "air"] => [0.71, 0.28],
-           ["AluminumThermalBreak", "double-pane", "reflective", "argon"] => [0.51, 0.26], # FIXME: Not labeled as argon, but should be? See https://docs.google.com/spreadsheets/d/1Tr8ajqz-p-BhS9cRx8H3566k8C5-OD68m-tiRtE5Wvg/edit#gid=2115766420
-           ["Wood", "double-pane", "reflective", "argon"] => [0.46, 0.24], # FIXME: Not labeled as argon, but should be? See https://docs.google.com/spreadsheets/d/1Tr8ajqz-p-BhS9cRx8H3566k8C5-OD68m-tiRtE5Wvg/edit#gid=2115766420
-           ["Wood", "double-pane", "reflective", "argon"] => [0.36, 0.24],
-           ["Wood", "triple-pane", "low-e", "argon"] => [0.2, 0.21] }[key]
+  vals = { ["Aluminum", "single-pane", nil, nil] => [1.98, 0.75],                               # scna
+           ["Wood", "single-pane", nil, nil] => [1.47, 0.64],                                   # scnw
+           ["Aluminum", "single-pane", "tinted/reflective", nil] => [1.98, 0.64],               # stna
+           ["Wood", "single-pane", "tinted/reflective", nil] => [1.47, 0.54],                   # stnw
+           ["Aluminum", "double-pane", nil, "air"] => [1.30, 0.67],                             # dcaa
+           ["AluminumThermalBreak", "double-pane", nil, "air"] => [1.10, 0.67],                 # dcab
+           ["Wood", "double-pane", nil, "air"] => [0.84, 0.56],                                 # dcaw
+           ["Aluminum", "double-pane", "tinted/reflective", "air"] => [1.30, 0.55],             # dtaa
+           ["AluminumThermalBreak", "double-pane", "tinted/reflective", "air"] => [1.10, 0.55], # dtab
+           ["Wood", "double-pane", "tinted/reflective", "air"] => [0.84, 0.46],                 # dtaw
+           ["Wood", "double-pane", "low-e", "air"] => [0.74, 0.52],                             # dpeaw
+           ["AluminumThermalBreak", "double-pane", "low-e", "argon"] => [0.95, 0.62],           # dpeaab
+           ["Wood", "double-pane", "low-e", "argon"] => [0.68, 0.52],                           # dpeaaw
+           ["Aluminum", "double-pane", "reflective", "air"] => [1.17, 0.37],                    # dseaa
+           ["AluminumThermalBreak", "double-pane", "reflective", "air"] => [0.98, 0.37],        # dseab
+           ["Wood", "double-pane", "reflective", "air"] => [0.71, 0.31],                        # dseaw
+           ["Wood", "double-pane", "reflective", "argon"] => [0.65, 0.31],                      # dseaaw
+           ["Wood", "triple-pane", "low-e", "argon"] => [0.47, 0.31] }[key]                     # thmabw
   return vals if not vals.nil?
 
   fail "Could not get default skylight U/SHGC for frame type '#{frame_type}' and glass layers '#{glass_layers}' and glass type '#{glass_type}' and gas fill '#{gas_fill}'"
@@ -1159,7 +1158,7 @@ end
 
 def get_roof_solar_absorptance(roof_color)
   # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/doe2-inputs
+  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
   val = { "reflective" => 0.40,
           "white" => 0.50,
           "light" => 0.65,
@@ -1167,21 +1166,20 @@ def get_roof_solar_absorptance(roof_color)
           "medium dark" => 0.85,
           "dark" => 0.95 }[roof_color]
   return val if not val.nil?
-  
+
   fail "Could not get roof absorptance for color '#{roof_color}'"
 end
 
 def get_wall_solar_absorptance(wall_color)
   # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/doe2-inputs
-  val = { "reflective" => 0.40,
-          "white" => 0.50,
-          "light" => 0.65,
-          "medium" => 0.75,
-          "medium dark" => 0.85,
-          "dark" => 0.95 }[wall_color]
+  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
+  val = { "white" => 0.35,
+          "light" => 0.55,
+          "medium" => 0.70,
+          "medium dark" => 0.80,
+          "dark" => 0.90 }[wall_color]
   return val if not val.nil?
-  
+
   fail "Could not get wall absorptance for color '#{wall_color}'"
 end
 
