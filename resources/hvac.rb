@@ -3101,14 +3101,8 @@ class HVAC
 
     else # Furnace/WallFurnace/Stove
 
-      set_fan = false
       model.getAirLoopHVACUnitarySystems.each do |system|
         next if not system.heatingCoil.is_initialized
-
-        if set_fan
-          runner.registerError("Cannot handle multiple heating systems.")
-          return false
-        end
 
         htg_coil = system.heatingCoil.get.to_CoilHeatingGas.get
         htg_coil.setParasiticElectricLoad(0.0)
@@ -3126,7 +3120,6 @@ class HVAC
         end
         fan.setMotorEfficiency(1.0)
         fan.setMotorInAirstreamFraction(1.0)
-        set_fan = true
       end
 
     end
