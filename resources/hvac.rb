@@ -1586,45 +1586,43 @@ class HVAC
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
-      next unless Geometry.zone_is_above_grade(control_zone)
+      ([control_zone] + slave_zones).each do |zone|
 
-      # _processSystemRoomAC
+        # _processSystemRoomAC
 
-      clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
-      clg_coil.setName(obj_name + " cooling coil")
-      if capacity != Constants.SizingAuto
-        clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+        clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
+        clg_coil.setName(obj_name + " cooling coil")
+        if capacity != Constants.SizingAuto
+          clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+        end
+        clg_coil.setRatedSensibleHeatRatio(shr)
+        clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(UnitConversions.convert(eer, "Btu/hr", "W")))
+        clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(773.3))
+        clg_coil.setEvaporativeCondenserEffectiveness(OpenStudio::OptionalDouble.new(0.9))
+        clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(OpenStudio::OptionalDouble.new(10))
+        clg_coil.setBasinHeaterSetpointTemperature(OpenStudio::OptionalDouble.new(2))
+
+        fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
+        fan.setName(obj_name + " supply fan")
+        fan.setEndUseSubcategory(Constants.EndUseHVACFan)
+        fan.setFanEfficiency(1)
+        fan.setPressureRise(0)
+        fan.setMotorEfficiency(1)
+        fan.setMotorInAirstreamFraction(0)
+
+        htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOffDiscreteSchedule())
+        htg_coil.setName(obj_name + " always off heating coil")
+
+        ptac = OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner.new(model, model.alwaysOnDiscreteSchedule, fan, htg_coil, clg_coil)
+        ptac.setName(obj_name + " zone ptac")
+        ptac.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
+        ptac.addToThermalZone(zone)
+        runner.registerInfo("Added '#{ptac.name}' to '#{zone.name}' of #{unit.name}")
+
+        prioritize_zone_hvac(model, runner, zone)
+
       end
-      clg_coil.setRatedSensibleHeatRatio(shr)
-      clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(UnitConversions.convert(eer, "Btu/hr", "W")))
-      clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(773.3))
-      clg_coil.setEvaporativeCondenserEffectiveness(OpenStudio::OptionalDouble.new(0.9))
-      clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(OpenStudio::OptionalDouble.new(10))
-      clg_coil.setBasinHeaterSetpointTemperature(OpenStudio::OptionalDouble.new(2))
-
-      fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-      fan.setName(obj_name + " supply fan")
-      fan.setEndUseSubcategory(Constants.EndUseHVACFan)
-      fan.setFanEfficiency(1)
-      fan.setPressureRise(0)
-      fan.setMotorEfficiency(1)
-      fan.setMotorInAirstreamFraction(0)
-
-      htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOffDiscreteSchedule())
-      htg_coil.setName(obj_name + " always off heating coil")
-
-      ptac = OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner.new(model, model.alwaysOnDiscreteSchedule, fan, htg_coil, clg_coil)
-      ptac.setName(obj_name + " zone ptac")
-      ptac.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
-      ptac.addToThermalZone(control_zone)
-      runner.registerInfo("Added '#{ptac.name}' to '#{control_zone.name}' of #{unit.name}")
-
-      prioritize_zone_hvac(model, runner, control_zone)
-
-      slave_zones.each do |slave_zone|
-        prioritize_zone_hvac(model, runner, slave_zone)
-      end # slave_zone
-    end # control_zone
+    end
 
     # Store info for HVAC Sizing measure
     unit.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, airflow_rate.to_s)
