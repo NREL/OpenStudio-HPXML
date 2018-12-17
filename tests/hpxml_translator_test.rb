@@ -490,7 +490,7 @@ class HPXMLTranslatorTest < MiniTest::Test
           dse_expect = 1.0 # TODO: Generalize this
         end
         puts "dse: #{dse_actual.round(2)} #{k}"
-        assert_in_epsilon(dse_expect, dse_actual, 0.025)
+        assert_in_delta(dse_expect, dse_actual, 0.022) # TODO: Reduce tolerance
       end
       puts "\n"
     end
