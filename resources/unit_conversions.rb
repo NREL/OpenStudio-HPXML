@@ -33,6 +33,8 @@ class UnitConversions
       return x * 3412.141633127942
     elsif from == 'kwh' and to == 'j'
       return x * 3600000.0
+    elsif from == 'wh' and to == 'gj'
+      return x * 0.0000036
     elsif from == 'kwh' and to == 'therm'
       return x / 29.307107017222222
     elsif from == 'kwh' and to == 'wh'

@@ -6,8 +6,6 @@ require 'fileutils'
 require 'json'
 require 'rexml/document'
 require 'rexml/xpath'
-require 'parallel'
-require 'etc'
 require_relative '../resources/constants'
 require_relative '../resources/meta_measure'
 require_relative '../resources/unit_conversions'
@@ -26,6 +24,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args['skip_validation'] = false
 
+    @simulation_runtime_key = "Simulation Runtime"
+    @workflow_runtime_key = "Workflow Runtime"
+
     dse_dir = File.absolute_path(File.join(this_dir, "dse"))
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
@@ -38,64 +39,28 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    num_proc = Parallel.processor_count - 1
-    if ENV['CI']
-      num_proc = 1 # Use 1 cpu on CircleCI
-    end
-
-    # Override to only use 1 processor for now; for some reason, simulations
-    # are giving different results when using multiple processors.
-    num_proc = 1 #
-
     # Test simulations (in parallel)
     puts "Running #{xmls.size} HPXML files..."
-    if Process.respond_to?(:fork) # e.g., most Unix systems
-
-      # Setup IO.pipe to communicate output from child processes to this parent process
-      readers, writers = {}, {}
-      xmls.each do |xml|
-        readers[xml], writers[xml] = IO.pipe
-      end
-
-      # Do runs in separate processes
-      Parallel.map(xmls, in_processes: num_proc) do |xml|
-        rundir, sim_time, workflow_time = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
-        sim_results = _get_results(rundir, sim_time, workflow_time)
-        writers[xml].puts(Marshal.dump(sim_results)) # Provide output data to parent process
-      end
-
-      # Retrieve output data from child processes
-      all_results = {}
-      readers.each do |xml, reader|
-        writers[xml].close
-        all_results[xml] = Marshal.load(reader.read)
-      end
-
-    else # e.g., Windows
-
-      # Do runs in separate threads
-      all_results = {}
-      Parallel.map(xmls, in_threads: num_proc) do |xml|
-        rundir, sim_time, workflow_time = _run_xml(xml, this_dir, args.dup, Parallel.worker_number)
-        all_results[xml] = _get_results(rundir, sim_time, workflow_time)
-      end
-
+    all_results = {}
+    xmls.each do |xml|
+      all_results[xml] = _run_xml(xml, this_dir, args.dup)
     end
 
     _write_summary_results(results_dir, all_results)
+
+    # Cross simulation tests
     _test_dse(xmls, dse_dir, all_results)
-    _test_cfis(xmls, cfis_dir, all_results)
   end
 
-  def _run_xml(xml, this_dir, args, worker_num)
+  def _run_xml(xml, this_dir, args)
     print "Testing #{File.basename(xml)}...\n"
-    rundir = File.join(this_dir, "run#{worker_num}")
+    rundir = File.join(this_dir, "run")
     args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     _test_schema_validation(this_dir, xml)
-    sim_time, workflow_time = _test_simulation(args, this_dir, rundir)
-    return rundir, sim_time, workflow_time
+    results = _test_simulation(args, this_dir, rundir)
+    return results
   end
 
   def _get_results(rundir, sim_time, workflow_time)
@@ -179,8 +144,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
-    results["Simulation Runtime"] = sim_time
-    results["Workflow Runtime"] = workflow_time
+    results[@simulation_runtime_key] = sim_time
+    results[@workflow_runtime_key] = workflow_time
 
     return results
   end
@@ -241,13 +206,15 @@ class HPXMLTranslatorTest < MiniTest::Test
     workflow_time = (Time.now - workflow_start).round(1)
     puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{sim_time}, workflow in #{workflow_time}s."
 
-    # Verify simulation outputs
-    _verify_simulation_outputs(rundir, args['hpxml_path'])
+    results = _get_results(rundir, sim_time, workflow_time)
 
-    return sim_time, workflow_time
+    # Verify simulation outputs
+    _verify_simulation_outputs(rundir, args['hpxml_path'], results)
+
+    return results
   end
 
-  def _verify_simulation_outputs(rundir, hpxml_path)
+  def _verify_simulation_outputs(rundir, hpxml_path, results)
     sql_path = File.join(rundir, "eplusout.sql")
     assert(File.exists? sql_path)
 
@@ -409,6 +376,30 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
+    # Mechanical Ventilation
+    mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
+    if not mv.nil?
+      found_mv_energy = false
+      results.keys.each do |k|
+        next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or k[2] != Constants.EndUseMechVentFan
+
+        found_mv_energy = true
+        if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
+          # CFIS, check for positive mech vent energy
+          assert_operator(results[k], :>, 0)
+        else
+          # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
+          fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
+          hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
+          fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
+          assert_in_delta(fan_kwhs, results[k], 0.1)
+        end
+      end
+      if not found_mv_energy
+        flunk "Could not find mechanical ventilation energy for #{hpxml_path}."
+      end
+    end
+
     sqlFile.close
   end
 
@@ -429,8 +420,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_keys.sort!
 
     # Append runtimes at the end
-    output_keys << "Simulation Runtime"
-    output_keys << "Workflow Runtime"
+    output_keys << @simulation_runtime_key
+    output_keys << @workflow_runtime_key
 
     column_headers = ['HPXML']
     output_keys.each do |key|
@@ -495,32 +486,13 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         dse_actual = result_dse100 / result_dse80
         dse_expect = 0.8
+        if File.basename(xml) == "valid-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
+          dse_expect = 1.0 # TODO: Generalize this
+        end
         puts "dse: #{dse_actual.round(2)} #{k}"
         assert_in_epsilon(dse_expect, dse_actual, 0.025)
       end
       puts "\n"
-    end
-  end
-
-  def _test_cfis(xmls, cfis_dir, all_results)
-    # Verify non-zero mechanical ventilation energy.
-    xmls.sort.each do |xml|
-      next if not xml.include? cfis_dir
-
-      xml_cfis = File.absolute_path(xml)
-      results_cfis = all_results[xml_cfis]
-
-      # Verify results
-      puts "\nResults for #{File.basename(xml)}:"
-      found_mv = false
-      results_cfis.keys.each do |k|
-        next if k[0] != 'Electricity' or k[2] != Constants.EndUseMechVentFan
-
-        found_mv = true
-        puts "CFIS: #{results_cfis[k].round(2)} #{k}"
-        assert_operator(results_cfis[k], :>, 0)
-      end
-      assert(found_mv)
     end
   end
 
