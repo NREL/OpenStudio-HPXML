@@ -263,18 +263,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.EndUseCeilingFan
-    return 'residential ceiling fan'
-  end
-
-  def self.EndUseHVACFan
-    return 'residential hvac fan'
-  end
-
-  def self.EndUseMechVentFan
-    return 'residential mech vent fan'
-  end
-
   def self.FacadeFront
     return 'front'
   end
