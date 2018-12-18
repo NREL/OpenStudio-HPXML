@@ -3210,7 +3210,7 @@ class HVAC
       equip_def.setFractionRadiant(0.558)
       equip_def.setFractionLatent(0)
       equip_def.setFractionLost(0)
-      equip.setEndUseSubcategory(Constants.EndUseCeilingFan)
+      equip.setEndUseSubcategory(obj_name)
       equip.setSchedule(ceiling_fan_sch.schedule)
     end
 
