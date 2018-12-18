@@ -3277,7 +3277,7 @@ class HVAC
     end
   end
 
-  def self.apply_eae_to_heating_fan(runner, loop_hvac, zone_hvac, eae, fuel, dse, has_furnace, has_boiler, load_frac, loop_hvac_cool)
+  def self.apply_eae_to_heating_fan(runner, loop_hvac, zone_hvacs, eae, fuel, dse, has_furnace, has_boiler, load_frac, loop_hvac_cool)
     # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
 
     if has_boiler
@@ -3306,13 +3306,13 @@ class HVAC
 
     else # Furnace/WallFurnace/Stove
 
-      htg_unitary_system = nil
+      htg_unitary_systems = []
       clg_unitary_system = nil
       if has_furnace
         loop_hvac.supplyComponents.each do |supply_component|
           next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
 
-          htg_unitary_system = supply_component.to_AirLoopHVACUnitarySystem.get
+          htg_unitary_systems << supply_component.to_AirLoopHVACUnitarySystem.get
         end
 
         # Cooling system with the same supply fan
@@ -3324,36 +3324,40 @@ class HVAC
           end
         end
       else
-        htg_unitary_system = zone_hvac.to_AirLoopHVACUnitarySystem.get
-      end
-
-      if eae.nil?
-        htg_coil = htg_unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-        htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, "W", "kBtu/hr")
-        eae = get_default_eae(has_boiler, has_furnace, fuel, load_frac, htg_capacity)
-      end
-      elec_power = eae / 2.08 # W
-
-      htg_coil = htg_unitary_system.heatingCoil.get.to_CoilHeatingGas.get
-      htg_coil.setParasiticElectricLoad(0.0)
-
-      htg_cfm = UnitConversions.convert(htg_unitary_system.supplyAirFlowRateDuringHeatingOperation.get, "m^3/s", "cfm")
-
-      [htg_unitary_system, clg_unitary_system].each do |unitary_system|
-        next if unitary_system.nil?
-
-        fan = unitary_system.supplyFan.get.to_FanOnOff.get
-        if elec_power > 0
-          fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
-          fan_w_cfm = elec_power / htg_cfm # W/cfm
-          fan.setFanEfficiency(fan_eff)
-          fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_w_cfm / dse))
-        else
-          fan.setFanEfficiency(1)
-          fan.setPressureRise(0)
+        zone_hvacs.each do |zone_hvac|
+          htg_unitary_systems << zone_hvac.to_AirLoopHVACUnitarySystem.get
         end
-        fan.setMotorEfficiency(1.0)
-        fan.setMotorInAirstreamFraction(1.0)
+      end
+
+      htg_unitary_systems.each do |htg_unitary_system|
+        if eae.nil?
+          htg_coil = htg_unitary_system.heatingCoil.get.to_CoilHeatingGas.get
+          htg_capacity = UnitConversions.convert(htg_coil.nominalCapacity.get, "W", "kBtu/hr")
+          eae = get_default_eae(has_boiler, has_furnace, fuel, load_frac, htg_capacity)
+        end
+        elec_power = eae / 2.08 # W
+
+        htg_coil = htg_unitary_system.heatingCoil.get.to_CoilHeatingGas.get
+        htg_coil.setParasiticElectricLoad(0.0)
+
+        htg_cfm = UnitConversions.convert(htg_unitary_system.supplyAirFlowRateDuringHeatingOperation.get, "m^3/s", "cfm")
+
+        [htg_unitary_system, clg_unitary_system].each do |unitary_system|
+          next if unitary_system.nil?
+
+          fan = unitary_system.supplyFan.get.to_FanOnOff.get
+          if elec_power > 0
+            fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+            fan_w_cfm = elec_power / htg_cfm # W/cfm
+            fan.setFanEfficiency(fan_eff)
+            fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_w_cfm / dse))
+          else
+            fan.setFanEfficiency(1)
+            fan.setPressureRise(0)
+          end
+          fan.setMotorEfficiency(1.0)
+          fan.setMotorInAirstreamFraction(1.0)
+        end
       end
 
     end

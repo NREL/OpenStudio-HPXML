@@ -413,11 +413,27 @@ class HPXMLTranslatorTest < MiniTest::Test
       htg_sys_id = htg_sys.elements["SystemIdentifier"].attributes["id"].upcase
       htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
       htg_sys_fuel = to_beopt_fuel(XMLHelper.get_value(htg_sys, 'HeatingSystemFuel'))
+      htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
       htg_dse = XMLHelper.get_value(bldg_details, 'Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency')
       if htg_dse.nil?
         htg_dse = 1.0
       else
         htg_dse = Float(htg_dse)
+      end
+
+      # Heating Capacity
+      # FIXME: For now, skip if multiple equipment
+      if htg_sys_cap > 0 and num_htg_sys == 1
+        hpxml_value = htg_sys_cap
+        if htg_sys_type == 'Boiler'
+          query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='Boiler:HotWater' AND ColumnName='User-Specified Nominal Capacity' AND Units='W'"
+        elsif htg_sys_type == 'ElectricResistance'
+          query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='ZONEHVAC:BASEBOARD:CONVECTIVE:ELECTRIC' AND ColumnName='User-Specified Heating Design Capacity' AND Units='W'"
+        else
+          query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Heating:%' AND ColumnName='User-Specified Nominal Capacity' AND Units='W'"
+        end
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
 
       # Electric Auxiliary Energy
@@ -448,7 +464,7 @@ class HPXMLTranslatorTest < MiniTest::Test
           sql_value_htg_airflow = sqlFile.execAndReturnFirstDouble(query_htg_airflow).get
           sql_value *= sql_value_htg_airflow / sql_value_fan_airflow
         elsif htg_sys_type == 'Stove' or htg_sys_type == 'WallFurnace'
-          query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
+          query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameUnitHeater.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
           sql_value = sqlFile.execAndReturnFirstDouble(query).get
         else
           flunk "Unexpected heating system type '#{htg_sys_type}'."
@@ -479,9 +495,49 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # HVAC Cooling Systems
     num_clg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/CoolingSystem)']
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
+      clg_sys_type = XMLHelper.get_value(clg_sys, "CoolingSystemType")
+      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
+      clg_sys_seer = XMLHelper.get_value(clg_sys, "AnnualCoolingEfficiency[Units='SEER']/Value")
+      clg_sys_seer = Float(clg_sys_seer) if not clg_sys_seer.nil?
+
+      # Cooling Capacity
+      # FIXME: For now, skip if multiple equipment
+      if clg_sys_cap > 0 and num_clg_sys == 1
+        hpxml_value = clg_sys_cap
+        query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Cooling:%' AND ColumnName LIKE '%User-Specified%Total Cooling Capacity' AND Units='W'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
+        if clg_sys_type == "central air conditioning" and get_ac_num_speeds(clg_sys_seer) == "Variable-Speed"
+          cap_adj = 1.16 # TODO: Generalize this
+        else
+          cap_adj = 1.0
+        end
+        assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
+      end
+    end
 
     # HVAC Heat Pumps
     num_hp = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatPump)']
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
+      hp_type = XMLHelper.get_value(hp, "HeatPumpType")
+      hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_seer = XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value")
+      hp_seer = Float(hp_seer) if not hp_seer.nil?
+
+      # Cooling Capacity
+      # FIXME: For now, skip if multiple equipment
+      if hp_cap > 0 and num_hp == 1
+        hpxml_value = hp_cap
+        query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Cooling:%' AND ColumnName LIKE '%User-Specified%Total Cooling Capacity' AND Units='W'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
+        if hp_type == "mini-split" or (hp_type == "air-to-air" and get_ashp_num_speeds(hp_seer) == "Variable-Speed")
+          cap_adj = 1.20 # TODO: Generalize this
+        else
+          cap_adj = 1.0
+        end
+        assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
+      end
+    end
 
     # HVAC fan power
     if bldg_details.elements['count(Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution)'] == 1
