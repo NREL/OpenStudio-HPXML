@@ -27,11 +27,11 @@
           </FuelTypesAvailable>
         </Site>
         <BuildingConstruction>
-          <NumberofConditionedFloors>2</NumberofConditionedFloors>
+          <NumberofConditionedFloors>3</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>4</NumberofBedrooms>
-          <ConditionedFloorArea>3500</ConditionedFloorArea>
-          <ConditionedBuildingVolume>33787.5</ConditionedBuildingVolume>
+          <ConditionedFloorArea>7000</ConditionedFloorArea>
+          <ConditionedBuildingVolume>67575</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
         </BuildingConstruction>
       </BuildingSummary>
@@ -150,33 +150,49 @@
           <Foundation>
             <SystemIdentifier id='Foundation_ID1'/>
             <FoundationType>
-              <SlabOnGrade/>
+              <Basement>
+                <Conditioned>true</Conditioned>
+              </Basement>
             </FoundationType>
+            <FoundationWall>
+              <SystemIdentifier id='fndwall-1'/>
+              <Height>9</Height>
+              <Area>2160</Area>
+              <Thickness>8</Thickness>
+              <DepthBelowGrade>7</DepthBelowGrade>
+              <Insulation>
+                <SystemIdentifier id='FWall_Ins_ID1'/>
+                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
+              </Insulation>
+              <extension>
+                <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+              </extension>
+            </FoundationWall>
             <Slab>
-              <SystemIdentifier id='Slab_ID1'/>
+              <SystemIdentifier id='fndslab-1'/>
               <Area>3500</Area>
               <Thickness>4</Thickness>
               <ExposedPerimeter>240</ExposedPerimeter>
               <PerimeterInsulationDepth>0</PerimeterInsulationDepth>
-              <UnderSlabInsulationWidth>2</UnderSlabInsulationWidth>
-              <DepthBelowGrade>0</DepthBelowGrade>
+              <UnderSlabInsulationWidth>0</UnderSlabInsulationWidth>
+              <DepthBelowGrade>7</DepthBelowGrade>
               <PerimeterInsulation>
-                <SystemIdentifier id='PerimeterInsulation_ID1'/>
+                <SystemIdentifier id='FSlab_PerimIns_ID1'/>
                 <Layer>
                   <InstallationType>continuous</InstallationType>
                   <NominalRValue>0</NominalRValue>
                 </Layer>
               </PerimeterInsulation>
               <UnderSlabInsulation>
-                <SystemIdentifier id='UnderSlabInsulation_ID1'/>
+                <SystemIdentifier id='FSlab_UnderIns_ID1'/>
                 <Layer>
                   <InstallationType>continuous</InstallationType>
-                  <NominalRValue>5</NominalRValue>
+                  <NominalRValue>0</NominalRValue>
                 </Layer>
               </UnderSlabInsulation>
               <extension>
-                <CarpetFraction>1.0</CarpetFraction>
-                <CarpetRValue>2.5</CarpetRValue>
+                <CarpetFraction>0</CarpetFraction>
+                <CarpetRValue>0</CarpetRValue>
               </extension>
             </Slab>
           </Foundation>
@@ -190,6 +206,16 @@
             <Insulation>
               <SystemIdentifier id='rimjoist_Ins_ID1'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='rimjoist-2'/>
+            <ExteriorAdjacentTo>ambient</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>180</Area>
+            <Insulation>
+              <SystemIdentifier id='rimjoist_Ins_ID2'/>
+              <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
         </RimJoists>
