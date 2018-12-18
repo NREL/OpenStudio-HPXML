@@ -531,7 +531,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not mv.nil?
       found_mv_energy = false
       results.keys.each do |k|
-        next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or k[2] != Constants.EndUseMechVentFan
+        next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or not k[2].start_with? Constants.ObjectNameMechanicalVentilation
 
         found_mv_energy = true
         if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
@@ -640,7 +640,7 @@ class HPXMLTranslatorTest < MiniTest::Test
           dse_expect = 1.0 # TODO: Generalize this
         end
         puts "dse: #{dse_actual.round(2)} #{k}"
-        assert_in_epsilon(dse_expect, dse_actual, 0.025)
+        assert_in_delta(dse_expect, dse_actual, 0.022) # TODO: Reduce tolerance
       end
       puts "\n"
     end
