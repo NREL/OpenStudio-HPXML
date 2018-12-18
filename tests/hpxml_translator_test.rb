@@ -413,7 +413,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       htg_sys_id = htg_sys.elements["SystemIdentifier"].attributes["id"].upcase
       htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
       htg_sys_fuel = to_beopt_fuel(XMLHelper.get_value(htg_sys, 'HeatingSystemFuel'))
-      htg_sys_cap = XMLHelper.has_element(htg_sys, "HeatingCapacity")
+      htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
       htg_dse = XMLHelper.get_value(bldg_details, 'Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency')
       if htg_dse.nil?
         htg_dse = 1.0
@@ -497,7 +497,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     num_clg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/CoolingSystem)']
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
       clg_sys_type = XMLHelper.get_value(clg_sys, "CoolingSystemType")
-      clg_sys_cap = XMLHelper.has_element(clg_sys, "CoolingCapacity")
+      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
       clg_sys_seer = XMLHelper.get_value(clg_sys, "AnnualCoolingEfficiency[Units='SEER']/Value")
       clg_sys_seer = Float(clg_sys_seer) if not clg_sys_seer.nil?
 
