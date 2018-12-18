@@ -1941,7 +1941,6 @@ class HVAC
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       ([control_zone] + slave_zones).each do |zone|
-
         # _processSystemRoomAC
 
         clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
@@ -1974,12 +1973,12 @@ class HVAC
         runner.registerInfo("Added '#{ptac.name}' to '#{zone.name}' of #{unit.name}")
 
         prioritize_zone_hvac(model, runner, zone)
-      end
 
-      # Store info for HVAC Sizing measure
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, airflow_rate.to_s)
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(","))
-      ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
+        # Store info for HVAC Sizing measure
+        ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, airflow_rate.to_s)
+        ptac.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(","))
+        ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
+      end # zone
     end # control_zone
 
     return true
