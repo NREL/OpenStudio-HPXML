@@ -21,6 +21,7 @@ class EnergyPlusValidator
     zero = [0]
     one = [1]
     zero_or_one = [0, 1]
+    zero_or_more = nil
     one_or_more = []
 
     requirements = {
@@ -60,9 +61,9 @@ class EnergyPlusValidator
 
         '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="ACH"]/AirLeakage' => one, # ACH50; see [AirInfiltration]
 
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => zero_or_one, # See [HeatingSystem]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => zero_or_one, # See [CoolingSystem]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump' => zero_or_one, # See [HeatPump]
+        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => zero_or_more, # See [HeatingSystem]
+        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => zero_or_more, # See [CoolingSystem]
+        '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump' => zero_or_more, # See [HeatPump]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HVACControl' => zero_or_one, # See [HVACControl]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/extension/Dehumidifier' => zero_or_one, # See [Dehumidifier]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/extension/NaturalVentilation' => zero_or_one, # See [NaturalVentilation]
@@ -641,6 +642,8 @@ class EnergyPlusValidator
     requirements.each do |parent, requirement|
       if parent.nil? # Unconditional
         requirement.each do |child, expected_sizes|
+          next if expected_sizes.nil?
+
           xpath = combine_into_xpath(parent, child)
           actual_size = REXML::XPath.first(hpxml_doc, "count(#{xpath})")
           check_number_of_elements(actual_size, expected_sizes, xpath, errors)
@@ -650,6 +653,8 @@ class EnergyPlusValidator
 
         hpxml_doc.elements.each(parent) do |parent_element|
           requirement.each do |child, expected_sizes|
+            next if expected_sizes.nil?
+
             xpath = combine_into_xpath(parent, child)
             actual_size = REXML::XPath.first(parent_element, "count(#{child})")
             check_number_of_elements(actual_size, expected_sizes, xpath, errors)
