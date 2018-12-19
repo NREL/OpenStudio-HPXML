@@ -84,6 +84,17 @@ class XMLHelper
     end
   end
 
+  # Copies the multiple elements
+  def self.copy_elements(dest, src, element_name)
+    return if src.nil?
+
+    if not src.elements[element_name].nil?
+      src.elements.each(element_name) do |el|
+        dest << el.dup
+      end
+    end
+  end
+
   def self.validate(doc, xsd_path, runner = nil)
     begin
       require 'nokogiri'
@@ -110,9 +121,9 @@ class XMLHelper
 end
 
 def Boolean(val)
-  if val.downcase.to_s == "true"
+  if val.downcase.to_s == "true" or val == "1"
     return true
-  elsif val.downcase.to_s == "false"
+  elsif val.downcase.to_s == "false" or val == "0"
     return false
   end
 
