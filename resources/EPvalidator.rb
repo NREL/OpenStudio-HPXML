@@ -311,7 +311,7 @@ class EnergyPlusValidator
         '../../HVACControl' => one, # See [HVACControl]
         'HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove]' => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove]
         'HeatingCapacity' => one, # Use -1 for autosizing
-        'FractionHeatLoadServed' => one,
+        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
       },
 
       ## [HeatingType=Resistance]
@@ -361,7 +361,7 @@ class EnergyPlusValidator
         '[CoolingSystemType="central air conditioning" or CoolingSystemType="room air conditioner"]' => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC]
         '[CoolingSystemFuel="electricity"]' => one,
         'CoolingCapacity' => one, # Use -1 for autosizing
-        'FractionCoolLoadServed' => one,
+        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
 
       ## [CoolingType=CentralAC]
@@ -382,8 +382,8 @@ class EnergyPlusValidator
         '../../HVACControl' => one, # See [HVACControl]
         '[HeatPumpType="air-to-air" or HeatPumpType="mini-split" or HeatPumpType="ground-to-air"]' => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP]
         'CoolingCapacity' => one, # Use -1 for autosizing
-        'FractionHeatLoadServed' => one,
-        'FractionCoolLoadServed' => one,
+        'FractionHeatLoadServed' => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
+        'FractionCoolLoadServed' => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
       },
 
       ## [HeatPumpType=ASHP]

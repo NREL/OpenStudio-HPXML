@@ -2534,7 +2534,7 @@ class OSModel
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump | BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htg_sys|
       htg_load_frac += Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
     end
-    if htg_load_frac > 0 and htg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99 and < 1
+    if htg_load_frac > 0 and htg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99
       success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1.0 - htg_load_frac)
       return false if not success
     end
@@ -2544,7 +2544,7 @@ class OSModel
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump | BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clg_sys|
       clg_load_frac += Float(XMLHelper.get_value(clg_sys, "FractionCoolLoadServed"))
     end
-    if clg_load_frac > 0 and clg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99 and < 1
+    if clg_load_frac > 0 and clg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99
       success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1.0 - clg_load_frac)
       return false if not success
     end
