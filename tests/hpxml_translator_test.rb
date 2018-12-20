@@ -30,8 +30,15 @@ class HPXMLTranslatorTest < MiniTest::Test
     dse_dir = File.absolute_path(File.join(this_dir, "dse"))
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     multiple_hvac_dir = File.absolute_path(File.join(this_dir, "multiple_hvac"))
+    partial_hvac_dir = File.absolute_path(File.join(this_dir, "partial_hvac"))
     autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
-    test_dirs = [this_dir, dse_dir, cfis_dir, multiple_hvac_dir, autosize_dir]
+
+    test_dirs = [this_dir,
+                 dse_dir,
+                 cfis_dir,
+                 multiple_hvac_dir,
+                 partial_hvac_dir,
+                 autosize_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
@@ -52,6 +59,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Cross simulation tests
     _test_dse(xmls, dse_dir, all_results)
     _test_multiple_hvac(xmls, multiple_hvac_dir, all_results)
+    _test_partial_hvac(xmls, partial_hvac_dir, all_results)
   end
 
   def _run_xml(xml, this_dir, args)
@@ -108,6 +116,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     # TabularDataWithStrings table is positional, so we access results by position.
     results = {}
     fueltypes.zip(full_categories, subcategories, units).each_with_index do |(fueltype, category, subcategory, fuel_units), index|
+      next if ['District Cooling', 'District Heating'].include? fueltype # Exclude ideal loads results
+
       query = "SELECT Value FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' AND TabularDataIndex='#{starting_index + index}'"
       val = sqlFile.execAndReturnFirstDouble(query).get
       next if val == 0
@@ -679,6 +689,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       results_dse80 = all_results[xml_dse80]
       results_dse100 = all_results[xml_dse100]
+      next if results_dse100.nil?
 
       # Compare results
       puts "\nResults for #{File.basename(xml)}:"
@@ -712,6 +723,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       results_x3 = all_results[xml_x3]
       results_x1 = all_results[xml_x1]
+      next if results_x1.nil?
 
       # Compare results
       puts "\nResults for #{xml}:"
@@ -736,6 +748,49 @@ class HPXMLTranslatorTest < MiniTest::Test
         end
 
         assert_in_delta(result_x1, result_x3, 0.7) # TODO: Reduce tolerance
+      end
+      puts "\n"
+    end
+  end
+
+  def _test_partial_hvac(xmls, partial_hvac_dir, all_results)
+    # Compare end use results for a partial HVAC system to a full HVAC system.
+    xmls.sort.each do |xml|
+      next if not xml.include? partial_hvac_dir
+
+      xml_50 = File.absolute_path(xml)
+      xml_100 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-50percent", ""))))
+
+      results_50 = all_results[xml_50]
+      results_100 = all_results[xml_100]
+      next if results_100.nil?
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_50.keys.each do |k|
+        next if not ["Heating", "Cooling"].include? k[1]
+        next if not ["General"].include? k[2] # Exclude crankcase/defrost
+
+        result_50 = results_50[k].to_f
+        result_100 = results_100[k].to_f
+        next if result_50 == 0.0 and result_100 == 0.0
+
+        puts "50%, 100%: #{result_50.round(2)}, #{result_100.round(2)} #{k}"
+
+        # FIXME: Remove this code after the next E+ release
+        # Skip ZoneHVAC tests on the CI that only pass if using an E+ bugfix version
+        # See https://github.com/NREL/EnergyPlus/pull/7025
+        if ENV['CI']
+          skip_files_on_ci = ['valid-hvac-boiler-elec-only-50percent.xml',
+                              'valid-hvac-boiler-gas-only-50percent.xml',
+                              'valid-hvac-elec-resistance-only-50percent.xml',
+                              'valid-hvac-room-ac-only-50percent.xml',
+                              'valid-hvac-stove-oil-only-50percent.xml',
+                              'valid-hvac-wall-furnace-propane-only-50percent.xml']
+          next if skip_files_on_ci.include? File.basename(xml_50)
+        end
+
+        assert_in_delta(result_50, result_100 / 2.0, 0.1)
       end
       puts "\n"
     end

@@ -259,41 +259,14 @@
               <HeatingSystemType>
                 <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>32000</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>1.0</Value>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID2'/>
-              <DistributionSystem idref='HVAC_Dist_ID2'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>1.0</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID3'/>
-              <DistributionSystem idref='HVAC_Dist_ID3'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>1.0</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+              <ElectricAuxiliaryEnergy>100</ElectricAuxiliaryEnergy>
             </HeatingSystem>
           </HVACPlant>
           <HVACControl>
@@ -302,18 +275,6 @@
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVAC_Dist_ID1'/>
-            <DistributionSystemType>
-              <HydronicDistribution/>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVAC_Dist_ID2'/>
-            <DistributionSystemType>
-              <HydronicDistribution/>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVAC_Dist_ID3'/>
             <DistributionSystemType>
               <HydronicDistribution/>
             </DistributionSystemType>

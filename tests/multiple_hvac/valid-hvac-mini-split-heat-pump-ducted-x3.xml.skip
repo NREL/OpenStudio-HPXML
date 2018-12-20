@@ -306,6 +306,9 @@
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
+          <extension>
+            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
+          </extension>
           <HVACDistribution>
             <SystemIdentifier id='HVAC_Dist_ID1'/>
             <DistributionSystemType>
