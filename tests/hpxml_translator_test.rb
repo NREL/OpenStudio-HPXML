@@ -777,6 +777,19 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         puts "50%, 100%: #{result_50.round(2)}, #{result_100.round(2)} #{k}"
 
+        # FIXME: Remove this code after the next E+ release
+        # Skip ZoneHVAC tests on the CI that only pass if using an E+ bugfix version
+        # See https://github.com/NREL/EnergyPlus/pull/7025
+        if ENV['CI']
+          skip_files_on_ci = ['valid-hvac-boiler-elec-only-50percent.xml',
+                              'valid-hvac-boiler-gas-only-50percent.xml',
+                              'valid-hvac-elec-resistance-only-50percent.xml',
+                              'valid-hvac-room-ac-only-50percent.xml',
+                              'valid-hvac-stove-oil-only-50percent.xml',
+                              'valid-hvac-wall-furnace-propane-only-50percent.xml']
+          next if skip_files_on_ci.include? File.basename(xml_50)
+        end
+
         assert_in_delta(result_50, result_100 / 2.0, 0.1)
       end
       puts "\n"
