@@ -305,7 +305,6 @@
           </HVACControl>
           <extension>
             <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
-            <SkipAddHeatCoolSystem>true</SkipAddHeatCoolSystem>
           </extension>
         </HVAC>
         <WaterHeating>

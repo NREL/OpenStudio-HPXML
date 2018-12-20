@@ -2354,33 +2354,54 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads(model, unit, runner)
+  def self.apply_ideal_air_loads_cooling(model, unit, runner, frac_cool_load_served)
     thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
-      ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
-      ideal_air.setMaximumHeatingSupplyAirTemperature(50)
-      ideal_air.setMinimumCoolingSupplyAirTemperature(10)
-      ideal_air.setMaximumHeatingSupplyAirHumidityRatio(0.015)
-      ideal_air.setMinimumCoolingSupplyAirHumidityRatio(0.01)
-      ideal_air.setHeatingLimit('NoLimit')
-      ideal_air.setCoolingLimit('NoLimit')
-      ideal_air.setDehumidificationControlType('None')
-      ideal_air.setHumidificationControlType('None')
-      ideal_air.addToThermalZone(control_zone)
-
-      slave_zones.each do |slave_zone|
+      ([control_zone] + slave_zones).each do |zone|
         ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
+        ideal_air.setName("ideal cooling system")
+        ideal_air.setMaximumHeatingSupplyAirTemperature(50)
+        ideal_air.setMinimumCoolingSupplyAirTemperature(10)
+        ideal_air.setMaximumHeatingSupplyAirHumidityRatio(0.015)
+        ideal_air.setMinimumCoolingSupplyAirHumidityRatio(0.01)
+        ideal_air.setHeatingLimit('LimitCapacity')
+        ideal_air.setMaximumSensibleHeatingCapacity(0.0)
+        ideal_air.setCoolingLimit('NoLimit')
+        ideal_air.setDehumidificationControlType('None')
+        ideal_air.setHumidificationControlType('None')
+        ideal_air.addToThermalZone(zone)
+
+        # Store info for HVAC Sizing measure
+        ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_cool_load_served)
+      end
+    end
+
+    return true
+  end
+
+  def self.apply_ideal_air_loads_heating(model, unit, runner, frac_heat_load_served)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+
+    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
+    control_slave_zones_hash.each do |control_zone, slave_zones|
+      ([control_zone] + slave_zones).each do |zone|
+        ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
+        ideal_air.setName("ideal heating system")
         ideal_air.setMaximumHeatingSupplyAirTemperature(50)
         ideal_air.setMinimumCoolingSupplyAirTemperature(10)
         ideal_air.setMaximumHeatingSupplyAirHumidityRatio(0.015)
         ideal_air.setMinimumCoolingSupplyAirHumidityRatio(0.01)
         ideal_air.setHeatingLimit('NoLimit')
-        ideal_air.setCoolingLimit('NoLimit')
+        ideal_air.setCoolingLimit('LimitCapacity')
+        ideal_air.setMaximumTotalCoolingCapacity(0.0)
         ideal_air.setDehumidificationControlType('None')
         ideal_air.setHumidificationControlType('None')
-        ideal_air.addToThermalZone(slave_zone)
+        ideal_air.addToThermalZone(zone)
+
+        # Store info for HVAC Sizing measure
+        ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
       end
     end
 
@@ -3286,8 +3307,7 @@ class HVAC
         eae = get_default_eae(has_boiler, has_furnace, fuel, load_frac, nil)
       end
 
-      # TODO: We shouldn't have to apply load_frac here, but it gives better results
-      elec_power = (eae / 2.08) * load_frac # W
+      elec_power = (eae / 2.08) # W
 
       loop_hvac.components.each do |plc|
         if plc.to_BoilerHotWater.is_initialized

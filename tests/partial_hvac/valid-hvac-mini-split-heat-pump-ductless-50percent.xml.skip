@@ -253,71 +253,26 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID1'/>
-              <DistributionSystem idref='HVAC_Dist_ID1'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
+            <HeatPump>
+              <SystemIdentifier id='SpaceHeatPump_ID1'/>
+              <HeatPumpType>mini-split</HeatPumpType>
+              <CoolingCapacity>24000</CoolingCapacity>
+              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>19.0</Value>
+              </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>1.0</Value>
+                <Units>HSPF</Units>
+                <Value>10.0</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID2'/>
-              <DistributionSystem idref='HVAC_Dist_ID2'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>1.0</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-            </HeatingSystem>
-            <HeatingSystem>
-              <SystemIdentifier id='SpaceHeat_ID3'/>
-              <DistributionSystem idref='HVAC_Dist_ID3'/>
-              <HeatingSystemType>
-                <Boiler/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>1.0</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-            </HeatingSystem>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
-          <HVACDistribution>
-            <SystemIdentifier id='HVAC_Dist_ID1'/>
-            <DistributionSystemType>
-              <HydronicDistribution/>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVAC_Dist_ID2'/>
-            <DistributionSystemType>
-              <HydronicDistribution/>
-            </DistributionSystemType>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='HVAC_Dist_ID3'/>
-            <DistributionSystemType>
-              <HydronicDistribution/>
-            </DistributionSystemType>
-          </HVACDistribution>
           <extension>
             <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
           </extension>

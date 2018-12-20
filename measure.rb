@@ -185,6 +185,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     htg_objs = []
     model.getThermalZones.each do |zone|
       HVAC.existing_cooling_equipment(model, runner, zone).each do |clg_equip|
+        next if clg_equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
+
         if clg_equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
           clg_objs << HVAC.get_coil_from_hvac_component(clg_equip.coolingCoil.get)
         elsif clg_equip.to_ZoneHVACComponent.is_initialized
@@ -195,6 +197,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
         end
       end
       HVAC.existing_heating_equipment(model, runner, zone).each do |htg_equip|
+        next if htg_equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
+
         if htg_equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
           htg_objs << HVAC.get_coil_from_hvac_component(htg_equip.heatingCoil.get)
         elsif htg_equip.to_ZoneHVACComponent.is_initialized
@@ -311,6 +315,7 @@ class OSModel
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
+
     success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs)
     return false if not success
 
@@ -318,6 +323,9 @@ class OSModel
     return false if not success
 
     success = add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs)
+    return false if not success
+
+    success = add_residual_hvac(runner, model, building, unit)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather)
@@ -2515,6 +2523,30 @@ class OSModel
       end
 
       update_loop_hvacs(loop_hvacs, zone_hvacs, model, hp, orig_air_loops, orig_plant_loops, orig_zone_hvacs)
+    end
+
+    return true
+  end
+
+  def self.add_residual_hvac(runner, model, building, unit)
+    # Residual heating
+    htg_load_frac = 0.0
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump | BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htg_sys|
+      htg_load_frac += Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
+    end
+    if htg_load_frac > 0 and htg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99 and < 1
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1.0 - htg_load_frac)
+      return false if not success
+    end
+
+    # Residual cooling
+    clg_load_frac = 0.0
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump | BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clg_sys|
+      clg_load_frac += Float(XMLHelper.get_value(clg_sys, "FractionCoolLoadServed"))
+    end
+    if clg_load_frac > 0 and clg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99 and < 1
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1.0 - clg_load_frac)
+      return false if not success
     end
 
     return true
