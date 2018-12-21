@@ -12,6 +12,8 @@ class HVAC
                                    eer_capacity_derates, capacity, dse,
                                    frac_cool_load_served)
 
+    return true if frac_cool_load_served <= 0
+
     num_speeds = 1
 
     # Performance curves
@@ -146,6 +148,8 @@ class HVAC
                                    crankcase_capacity, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
                                    frac_cool_load_served)
+
+    return true if frac_cool_load_served <= 0
 
     num_speeds = 2
 
@@ -289,6 +293,8 @@ class HVAC
                                    crankcase_capacity, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
                                    frac_cool_load_served)
+
+    return true if frac_cool_load_served <= 0
 
     num_speeds = 4
 
@@ -497,7 +503,11 @@ class HVAC
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(min_temp, "F", "C"))
       htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, "F", "C"))
-      htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      if frac_heat_load_served <= 0
+        htg_coil.setCrankcaseHeaterCapacity(0.0)
+      else
+        htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      end
       htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
       htg_coil.setDefrostStrategy("ReverseCycle")
       htg_coil.setDefrostControl("OnDemand")
@@ -524,7 +534,11 @@ class HVAC
 
       htg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       htg_air_loop_unitary.setName(obj_name + " htg unitary system")
-      htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_heat_load_served <= 0
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       htg_air_loop_unitary.setSupplyFan(fan)
       htg_air_loop_unitary.setHeatingCoil(htg_coil)
       htg_air_loop_unitary.setSupplementalHeatingCoil(supp_htg_coil)
@@ -615,7 +629,11 @@ class HVAC
 
       clg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       clg_air_loop_unitary.setName(obj_name + " clg unitary system")
-      clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_cool_load_served <= 0
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       clg_air_loop_unitary.setSupplyFan(fan)
       clg_air_loop_unitary.setCoolingCoil(clg_coil)
       clg_air_loop_unitary.setFanPlacement("BlowThrough")
@@ -743,7 +761,11 @@ class HVAC
       htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
       htg_coil.setName(obj_name + " htg coil")
       htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(min_temp, "F", "C"))
-      htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      if frac_heat_load_served <= 0
+        htg_coil.setCrankcaseHeaterCapacity(0.0)
+      else
+        htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      end
       htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, "F", "C"))
@@ -788,7 +810,11 @@ class HVAC
 
       htg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       htg_air_loop_unitary.setName(obj_name + " htg unitary system")
-      htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_heat_load_served <= 0
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       htg_air_loop_unitary.setSupplyFan(fan)
       htg_air_loop_unitary.setHeatingCoil(htg_coil)
       htg_air_loop_unitary.setSupplementalHeatingCoil(supp_htg_coil)
@@ -886,7 +912,11 @@ class HVAC
 
       clg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       clg_air_loop_unitary.setName(obj_name + " clg unitary system")
-      clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_cool_load_served <= 0
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       clg_air_loop_unitary.setSupplyFan(fan)
       clg_air_loop_unitary.setCoolingCoil(clg_coil)
       clg_air_loop_unitary.setFanPlacement("BlowThrough")
@@ -1022,7 +1052,11 @@ class HVAC
       htg_coil = OpenStudio::Model::CoilHeatingDXMultiSpeed.new(model)
       htg_coil.setName(obj_name + " htg coil")
       htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(min_temp, "F", "C"))
-      htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      if frac_heat_load_served <= 0
+        htg_coil.setCrankcaseHeaterCapacity(0.0)
+      else
+        htg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      end
       htg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setMaximumOutdoorDryBulbTemperatureforDefrostOperation(UnitConversions.convert(40.0, "F", "C"))
@@ -1067,7 +1101,11 @@ class HVAC
 
       htg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       htg_air_loop_unitary.setName(obj_name + " htg asys")
-      htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_heat_load_served <= 0
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       htg_air_loop_unitary.setSupplyFan(fan)
       htg_air_loop_unitary.setHeatingCoil(htg_coil)
       htg_air_loop_unitary.setSupplementalHeatingCoil(supp_htg_coil)
@@ -1165,7 +1203,11 @@ class HVAC
 
       clg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       clg_air_loop_unitary.setName(obj_name + " clg unitary system")
-      clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_cool_load_served <= 0
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       clg_air_loop_unitary.setSupplyFan(fan)
       clg_air_loop_unitary.setCoolingCoil(clg_coil)
       clg_air_loop_unitary.setFanPlacement("BlowThrough")
@@ -1366,7 +1408,11 @@ class HVAC
 
       htg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       htg_air_loop_unitary.setName(obj_name + " htg unitary system")
-      htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_heat_load_served <= 0
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       htg_air_loop_unitary.setSupplyFan(fan)
       htg_air_loop_unitary.setHeatingCoil(htg_coil)
       htg_air_loop_unitary.setSupplementalHeatingCoil(supp_htg_coil)
@@ -1520,7 +1566,11 @@ class HVAC
 
       clg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       clg_air_loop_unitary.setName(obj_name + " clg unitary system")
-      clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_cool_load_served <= 0
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       clg_air_loop_unitary.setSupplyFan(fan)
       clg_air_loop_unitary.setCoolingCoil(clg_coil)
       clg_air_loop_unitary.setFanPlacement("BlowThrough")
@@ -1760,7 +1810,11 @@ class HVAC
 
       htg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       htg_air_loop_unitary.setName(obj_name + " htg unitary system")
-      htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_heat_load_served <= 0
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        htg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       htg_air_loop_unitary.setSupplyFan(fan)
       htg_air_loop_unitary.setHeatingCoil(htg_coil)
       htg_air_loop_unitary.setSupplementalHeatingCoil(supp_htg_coil)
@@ -1851,7 +1905,11 @@ class HVAC
 
       clg_air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
       clg_air_loop_unitary.setName(obj_name + " clg unitary system")
-      clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      if frac_cool_load_served <= 0
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      else
+        clg_air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+      end
       clg_air_loop_unitary.setSupplyFan(fan)
       clg_air_loop_unitary.setCoolingCoil(clg_coil)
       clg_air_loop_unitary.setFanPlacement("BlowThrough")
@@ -1917,6 +1975,8 @@ class HVAC
 
   def self.apply_room_ac(model, unit, runner, eer, shr,
                          airflow_rate, capacity, frac_cool_load_served)
+
+    return true if frac_cool_load_served <= 0
 
     # Performance curves
     # From Frigidaire 10.7 EER unit in Winkler et. al. Lab Testing of Window ACs (2013)
@@ -1987,6 +2047,8 @@ class HVAC
   def self.apply_furnace(model, unit, runner, fuel_type, afue,
                          capacity, fan_power_installed, dse,
                          frac_heat_load_served, attached_to_multispeed_ac)
+
+    return true if frac_heat_load_served <= 0
 
     # Parasitic Electricity (Source: DOE. (2007). Technical Support Document: Energy Efficiency Program for Consumer Products: "Energy Conservation Standards for Residential Furnaces and Boilers". www.eere.energy.gov/buildings/appliance_standards/residential/furnaces_boilers.html)
     furnaceParasiticElecDict = { Constants.FuelTypeGas => 76.0, # W during operation
@@ -2104,6 +2166,8 @@ class HVAC
   def self.apply_boiler(model, unit, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                         capacity, design_temp, dse, frac_heat_load_served)
+
+    return true if frac_heat_load_served <= 0
 
     # _processHydronicSystem
 
@@ -2244,16 +2308,18 @@ class HVAC
         prioritize_zone_hvac(model, runner, zone)
 
         plant_loop.addDemandBranchForComponent(baseboard_coil)
+
+        # Store info for HVAC Sizing measure
+        baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
       end
     end
-
-    # Store info for HVAC Sizing measure
-    boiler.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
 
     return true
   end
 
   def self.apply_electric_baseboard(model, unit, runner, efficiency, capacity, frac_heat_load_served)
+    return true if frac_heat_load_served <= 0
+
     obj_name = Constants.ObjectNameElectricBaseboard(unit.name.to_s)
 
     thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
@@ -2284,6 +2350,8 @@ class HVAC
   def self.apply_unit_heater(model, unit, runner, fuel_type,
                              efficiency, capacity, fan_power,
                              airflow_rate, frac_heat_load_served)
+
+    return true if frac_heat_load_served <= 0
 
     if fan_power > 0 and airflow_rate == 0
       runner.registerError("If Fan Power > 0, then Airflow Rate cannot be zero.")
@@ -2355,6 +2423,8 @@ class HVAC
   end
 
   def self.apply_ideal_air_loads_cooling(model, unit, runner, frac_cool_load_served)
+    return true if frac_cool_load_served <= 0
+
     thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
@@ -2382,6 +2452,8 @@ class HVAC
   end
 
   def self.apply_ideal_air_loads_heating(model, unit, runner, frac_heat_load_served)
+    return true if frac_heat_load_served <= 0
+
     thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
