@@ -2530,21 +2530,17 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building, unit)
     # Residual heating
-    htg_load_frac = 0.0
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump | BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htg_sys|
-      htg_load_frac += Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
-    end
-    if htg_load_frac > 0 and htg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99
+    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
+    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
+    if htg_load_frac > 0 and htg_load_frac < 0.99 # TODO: Ensure that E+ will re-normalize if > 1
       success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1.0 - htg_load_frac)
       return false if not success
     end
 
     # Residual cooling
-    clg_load_frac = 0.0
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump | BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clg_sys|
-      clg_load_frac += Float(XMLHelper.get_value(clg_sys, "FractionCoolLoadServed"))
-    end
-    if clg_load_frac > 0 and clg_load_frac < 0.99 # TODO: Check that E+ will re-normalize if >= 0.99
+    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
+    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
+    if clg_load_frac > 0 and clg_load_frac < 0.99 # TODO: Ensure that E+ will re-normalize if > 1
       success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1.0 - clg_load_frac)
       return false if not success
     end
@@ -2777,7 +2773,7 @@ class OSModel
     vented_crawl_area = 0.0
     vented_crawl_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
-      area = REXML::XPath.first(vented_crawl, "sum(FrameFloor/Area/text())")
+      area = REXML::XPath.first(vented_crawl, "sum(FrameFloor/Area)")
       vented_crawl_sla = XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")
       if not vented_crawl_sla.nil?
         vented_crawl_sla = Float(vented_crawl_sla)
@@ -2797,7 +2793,7 @@ class OSModel
     vented_attic_area = 0.0
     vented_attic_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType='vented attic']") do |vented_attic|
-      area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area/text())")
+      area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area)")
       vented_attic_sla = XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")
       if not vented_attic_sla.nil?
         vented_attic_sla = Float(vented_attic_sla)
@@ -2937,9 +2933,9 @@ class OSModel
       # Connect AirLoopHVACs to ducts
       systems_for_this_duct = []
       duct_id = hvac_distribution.elements["SystemIdentifier"].attributes["id"]
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem |
-                              BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem |
-                              BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |sys|
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0] |
+                              BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0] |
+                              BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[FractionHeatLoadServed > 0 && FractionCoolLoadServed > 0]") do |sys|
         next if sys.elements["DistributionSystem"].nil? or duct_id != sys.elements["DistributionSystem"].attributes["idref"]
 
         sys_id = sys.elements["SystemIdentifier"].attributes["id"]
@@ -2995,7 +2991,7 @@ class OSModel
   def self.add_fuel_heating_eae(runner, model, building, loop_hvacs, zone_hvacs)
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
 
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0]") do |htgsys|
       htg_type = XMLHelper.get_child_name(htgsys, "HeatingSystemType")
       next if not ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
 
@@ -3024,7 +3020,7 @@ class OSModel
         if has_furnace
           # Check for cooling system on the same supply fan
           htgdist = htgsys.elements["DistributionSystem"]
-          building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
+          building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0]") do |clgsys|
             clgdist = clgsys.elements["DistributionSystem"]
             next if htgdist.nil? or clgdist.nil?
             next if clgdist.attributes["idref"] != htgdist.attributes["idref"]
