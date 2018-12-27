@@ -75,6 +75,11 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument("map_tsv_dir", false)
+    arg.setDisplayName("Map TSV Directory")
+    arg.setDescription("Creates TSV files in the specified directory that map some HPXML object names to EnergyPlus object names. Required for ERI calculation.")
+    args << arg
+
     return args
   end
 
@@ -94,6 +99,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     epw_output_path = runner.getOptionalStringArgumentValue("epw_output_path", user_arguments)
     osm_output_path = runner.getOptionalStringArgumentValue("osm_output_path", user_arguments)
     skip_validation = runner.getBoolArgumentValue("skip_validation", user_arguments)
+    map_tsv_dir = runner.getOptionalStringArgumentValue("map_tsv_dir", user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -144,7 +150,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       return false if not success
 
       # Create OpenStudio model
-      if not OSModel.create(hpxml_doc, runner, model, weather)
+      if not OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir)
         runner.registerError("Unsuccessful creation of OpenStudio model.")
         return false
       end
@@ -165,79 +171,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       runner.registerInfo("Wrote file: #{osm_output_path.get}")
     end
 
-    # Add output variables for building loads
-    if not generate_building_loads(model, runner, hpxml_doc)
-      return false
-    end
-
     return true
-  end
-
-  def generate_building_loads(model, runner, hpxml_doc)
-    # Note: Duct losses are included the heating/cooling energy values. For the
-    # Reference Home, the effect of DSE is removed during post-processing.
-
-    # FIXME: Are HW distribution losses included in the HW energy values?
-    # FIXME: Handle fan/pump energy (requires EMS or timeseries output to split apart heating/cooling)
-    # FIXME: Need to request supplemental heating coils too?
-
-    clg_objs = []
-    htg_objs = []
-    model.getThermalZones.each do |zone|
-      HVAC.existing_cooling_equipment(model, runner, zone).each do |clg_equip|
-        next if clg_equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
-
-        if clg_equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-          clg_objs << HVAC.get_coil_from_hvac_component(clg_equip.coolingCoil.get)
-        elsif clg_equip.to_ZoneHVACComponent.is_initialized
-          if clg_equip.is_a? OpenStudio::Model::ZoneHVACTerminalUnitVariableRefrigerantFlow
-            next unless clg_equip.coolingCoil.is_initialized
-          end
-          clg_objs << HVAC.get_coil_from_hvac_component(clg_equip.coolingCoil)
-        end
-      end
-      HVAC.existing_heating_equipment(model, runner, zone).each do |htg_equip|
-        next if htg_equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
-
-        if htg_equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-          htg_objs << HVAC.get_coil_from_hvac_component(htg_equip.heatingCoil.get)
-        elsif htg_equip.to_ZoneHVACComponent.is_initialized
-          if htg_equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric or htg_equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
-            htg_objs << htg_equip
-          else
-            if htg_equip.is_a? OpenStudio::Model::ZoneHVACTerminalUnitVariableRefrigerantFlow
-              next unless htg_equip.heatingCoil.is_initialized
-            end
-            htg_objs << HVAC.get_coil_from_hvac_component(htg_equip.heatingCoil)
-          end
-        end
-      end
-    end
-
-    # TODO: Make variables specific to the equipment
-    add_output_variables(model, Constants.LoadVarsSpaceHeating, htg_objs)
-    add_output_variables(model, Constants.LoadVarsSpaceCooling, clg_objs)
-    add_output_variables(model, Constants.LoadVarsWaterHeating, nil)
-
-    return true
-  end
-
-  def add_output_variables(model, vars, objects)
-    if objects.nil?
-      vars[nil].each do |object_var|
-        outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
-        outputVariable.setReportingFrequency('runperiod')
-        outputVariable.setKeyValue('*')
-      end
-    else
-      objects.each do |object|
-        vars[object.class.to_s].each do |object_var|
-          outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
-          outputVariable.setReportingFrequency('runperiod')
-          outputVariable.setKeyValue(object.name.to_s)
-        end
-      end
-    end
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
@@ -280,7 +214,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml_doc, runner, model, weather)
+  def self.create(hpxml_doc, runner, model, weather, map_tsv_dir)
     # Simulation parameters
     success = add_simulation_params(runner, model)
     return false if not success
@@ -373,6 +307,9 @@ class OSModel
     return false if not success
 
     success = add_photovoltaics(runner, model, building)
+    return false if not success
+
+    success = add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, map_tsv_dir)
     return false if not success
 
     return true
@@ -2677,6 +2614,8 @@ class OSModel
     zone_hvacs = []
     model.getThermalZones.each do |zone|
       zone.equipment.each do |zone_hvac|
+        next unless zone_hvac.to_ZoneHVACComponent.is_initialized
+
         zone_hvacs << zone_hvac
       end
     end
@@ -3069,6 +3008,138 @@ class OSModel
     end
 
     return true
+  end
+
+  def self.add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, map_tsv_dir)
+    htg_mapping = {}
+    clg_mapping = {}
+
+    # AirLoopHVAC systems
+    loop_hvacs.each do |sys_id, loops|
+      htg_mapping[sys_id] = []
+      clg_mapping[sys_id] = []
+      loops.each do |loop|
+        next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+
+        loop.supplyComponents.each do |comp|
+          next unless comp.to_AirLoopHVACUnitarySystem.is_initialized
+
+          unitary_system = comp.to_AirLoopHVACUnitarySystem.get
+          if unitary_system.coolingCoil.is_initialized
+            # Cooling system: Cooling coil, supply fan
+            clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.coolingCoil.get)
+            clg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
+          elsif unitary_system.heatingCoil.is_initialized
+            # Heating system: Heating coil, supply fan, supplemental coil
+            htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.heatingCoil.get)
+            htg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
+            if unitary_system.supplementalHeatingCoil.is_initialized
+              htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.supplementalHeatingCoil.get)
+            end
+          end
+        end
+      end
+    end
+
+    zone_hvacs.each do |sys_id, hvacs|
+      htg_mapping[sys_id] = []
+      clg_mapping[sys_id] = []
+      hvacs.each do |hvac|
+        next unless hvac.to_ZoneHVACComponent.is_initialized
+
+        if hvac.to_AirLoopHVACUnitarySystem.is_initialized
+
+          unitary_system = hvac.to_AirLoopHVACUnitarySystem.get
+          if unitary_system.coolingCoil.is_initialized
+            # Cooling system: Cooling coil, supply fan
+            clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.coolingCoil.get)
+            clg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
+          elsif unitary_system.heatingCoil.is_initialized
+            # Heating system: Heating coil, supply fan
+            htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.heatingCoil.get)
+            htg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
+          end
+
+        elsif hvac.to_ZoneHVACPackagedTerminalAirConditioner.is_initialized
+
+          ptac = hvac.to_ZoneHVACPackagedTerminalAirConditioner.get
+          clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(ptac.coolingCoil)
+
+        elsif hvac.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
+
+          htg_mapping[sys_id] << hvac.to_ZoneHVACBaseboardConvectiveElectric.get
+
+        elsif hvac.to_ZoneHVACBaseboardConvectiveWater.is_initialized
+
+          baseboard = hvac.to_ZoneHVACBaseboardConvectiveWater.get
+          baseboard.heatingCoil.plantLoop.get.components.each do |comp|
+            next unless comp.to_BoilerHotWater.is_initialized
+
+            htg_mapping[sys_id] << comp.to_BoilerHotWater.get
+          end
+
+        end
+      end
+    end
+
+    htg_mapping.each do |sys_id, htg_equip_list|
+      add_output_variables(model, Constants.OutputVarsSpaceHeatingElectricity, htg_equip_list)
+      add_output_variables(model, Constants.OutputVarsSpaceHeatingFuel, htg_equip_list)
+      add_output_variables(model, Constants.OutputVarsSpaceHeatingLoad, htg_equip_list)
+    end
+    clg_mapping.each do |sys_id, clg_equip_list|
+      add_output_variables(model, Constants.OutputVarsSpaceCoolingElectricity, clg_equip_list)
+      add_output_variables(model, Constants.OutputVarsSpaceCoolingLoad, clg_equip_list)
+    end
+    add_output_variables(model, Constants.OutputVarsWaterHeatingLoad, nil)
+
+    if map_tsv_dir.is_initialized
+      map_tsv_dir = map_tsv_dir.get
+      write_mapping(htg_mapping, File.join(map_tsv_dir, "map_hvac_heating.tsv"))
+      write_mapping(clg_mapping, File.join(map_tsv_dir, "map_hvac_cooling.tsv"))
+    end
+
+    return true
+  end
+
+  def self.add_output_variables(model, vars, objects)
+    if objects.nil?
+      vars[nil].each do |object_var|
+        outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
+        outputVariable.setReportingFrequency('runperiod')
+        outputVariable.setKeyValue('*')
+      end
+    else
+      objects.each do |object|
+        if vars[object.class.to_s].nil?
+          fail "Unexpected object type #{object.class.to_s}."
+        end
+
+        vars[object.class.to_s].each do |object_var|
+          outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
+          outputVariable.setReportingFrequency('runperiod')
+          outputVariable.setKeyValue(object.name.to_s)
+        end
+      end
+    end
+  end
+
+  def self.write_mapping(mapping, map_tsv_path)
+    # Write simple mapping TSV file for use by ERI calculation. Mapping file correlates
+    # EnergyPlus object name to a HPXML object name.
+
+    CSV.open(map_tsv_path, 'w', col_sep: "\t") do |tsv|
+      # Header
+      tsv << ["HPXML Name", "E+ Name(s)"]
+
+      mapping.each do |sys_id, objects|
+        out_data = [sys_id]
+        objects.each do |object|
+          out_data << object.name.to_s
+        end
+        tsv << out_data if out_data.size > 1
+      end
+    end
   end
 
   def self.calc_non_cavity_r(film_r, constr_set)
