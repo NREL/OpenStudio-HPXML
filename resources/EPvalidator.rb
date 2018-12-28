@@ -72,14 +72,17 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating' => zero_or_one, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/Photovoltaics' => zero_or_one, # See [PVSystem]
 
-        '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => one, # See [ClothesWasher]
-        '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => one, # See [ClothesDryer]
-        '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => one, # See [Dishwasher]
-        '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => one, # See [Refrigerator]
-        '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => one, # See [CookingRange]
+        '/HPXML/Building/BuildingDetails/Appliances/ClothesWasher' => zero_or_one, # See [ClothesWasher]
+        '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => zero_or_one, # See [ClothesDryer]
+        '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => zero_or_one, # See [Dishwasher]
+        '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => zero_or_one, # See [Refrigerator]
+        '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => zero_or_one, # See [CookingRange]
 
-        '/HPXML/Building/BuildingDetails/Lighting' => one, # See [Lighting]
+        '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
+        
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
+        '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [Television]
       },
 
       # [ClimateZone]
@@ -411,6 +414,8 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '[ControlType="manual thermostat" or ControlType="programmable thermostat"]' => one,
+        'SetpointTempHeatingSeason' => zero_or_one, # Uses ERI assumption if not provided
+        'SetpointTempCoolingSeason' => zero_or_one, # Uses ERI assumption if not provided
       },
 
       # [Dehumidifier]
@@ -632,6 +637,26 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Airflow[FanSpeed="medium"]/Efficiency' => zero_or_one, # Uses Reference Home if not provided
         'Quantity' => zero_or_one, # Uses Reference Home if not provided
+      },
+      
+      # [PlugLoads]
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
+      },
+
+      # [Television]
+      '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
+        '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
     }

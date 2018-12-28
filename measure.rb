@@ -249,17 +249,23 @@ class OSModel
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
+    use_only_ideal_air = XMLHelper.get_value(building, "BuildingDetails/HVAC/extension/UseOnlyIdealAirSystem")
+    if use_only_ideal_air.nil?
+      use_only_ideal_air = false
+    else
+      use_only_ideal_air = Boolean(use_only_ideal_air)
+    end
 
-    success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs)
+    success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs)
+    success = add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs)
+    success = add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_residual_hvac(runner, model, building, unit)
+    success = add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather)
@@ -790,12 +796,14 @@ class OSModel
     else
       num_occ = Float(num_occ)
     end
-    occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
-    weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
-    weekend_sch = weekday_sch
-    monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-    success = Geometry.process_occupants(model, runner, num_occ.to_s, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch)
-    return false if not success
+    if num_occ > 0
+      occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
+      weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
+      weekend_sch = weekday_sch
+      monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+      success = Geometry.process_occupants(model, runner, num_occ.to_s, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch)
+      return false if not success
+    end
 
     return true
   end
@@ -1831,86 +1839,104 @@ class OSModel
 
   def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces)
     wh = building.elements["BuildingDetails/Systems/WaterHeating"]
-    appl = building.elements["BuildingDetails/Appliances"]
 
     # Clothes Washer
-    cw = appl.elements["ClothesWasher"]
-    cw_mef = XMLHelper.get_value(cw, "ModifiedEnergyFactor")
-    cw_imef = XMLHelper.get_value(cw, "IntegratedModifiedEnergyFactor")
-    if cw_mef.nil? and cw_imef.nil?
-      cw_mef = HotWaterAndAppliances.get_clothes_washer_reference_mef()
-      cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
-      cw_elec_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
-      cw_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
-      cw_agc = HotWaterAndAppliances.get_clothes_washer_reference_agc()
-      cw_cap = HotWaterAndAppliances.get_clothes_washer_reference_cap()
-
-    else
-      if not cw_mef.nil?
-        cw_mef = Float(cw_mef)
-      elsif not cw_imef.nil?
-        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(Float(cw_imef))
+    cw = building.elements["BuildingDetails/Appliances/ClothesWasher"]
+    if not cw.nil?
+      cw_mef = XMLHelper.get_value(cw, "ModifiedEnergyFactor")
+      cw_imef = XMLHelper.get_value(cw, "IntegratedModifiedEnergyFactor")
+      if cw_mef.nil? and cw_imef.nil?
+        cw_mef = HotWaterAndAppliances.get_clothes_washer_reference_mef()
+        cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
+        cw_elec_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
+        cw_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
+        cw_agc = HotWaterAndAppliances.get_clothes_washer_reference_agc()
+        cw_cap = HotWaterAndAppliances.get_clothes_washer_reference_cap()
+      else
+        if not cw_mef.nil?
+          cw_mef = Float(cw_mef)
+        elsif not cw_imef.nil?
+          cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(Float(cw_imef))
+        end
+        cw_ler = Float(XMLHelper.get_value(cw, "RatedAnnualkWh"))
+        cw_elec_rate = Float(XMLHelper.get_value(cw, "LabelElectricRate"))
+        cw_gas_rate = Float(XMLHelper.get_value(cw, "LabelGasRate"))
+        cw_agc = Float(XMLHelper.get_value(cw, "LabelAnnualGasCost"))
+        cw_cap = Float(XMLHelper.get_value(cw, "Capacity"))
       end
-      cw_ler = Float(XMLHelper.get_value(cw, "RatedAnnualkWh"))
-      cw_elec_rate = Float(XMLHelper.get_value(cw, "LabelElectricRate"))
-      cw_gas_rate = Float(XMLHelper.get_value(cw, "LabelGasRate"))
-      cw_agc = Float(XMLHelper.get_value(cw, "LabelAnnualGasCost"))
-      cw_cap = Float(XMLHelper.get_value(cw, "Capacity"))
+    else
+      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = nil
     end
 
     # Clothes Dryer
-    cd = appl.elements["ClothesDryer"]
-    cd_fuel = to_beopt_fuel(XMLHelper.get_value(cd, "FuelType"))
-    cd_ef = XMLHelper.get_value(cd, "EnergyFactor")
-    cd_cef = XMLHelper.get_value(cd, "CombinedEnergyFactor")
-    if cd_ef.nil? and cd_cef.nil?
-      cd_ef = HotWaterAndAppliances.get_clothes_dryer_reference_ef(cd_fuel)
-      cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
-    else
-      if not cd_ef.nil?
-        cd_ef = Float(cd_ef)
-      elsif not cd_cef.nil?
-        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(Float(cd_cef))
+    cd = building.elements["BuildingDetails/Appliances/ClothesDryer"]
+    if not cd.nil?
+      cd_fuel = to_beopt_fuel(XMLHelper.get_value(cd, "FuelType"))
+      cd_ef = XMLHelper.get_value(cd, "EnergyFactor")
+      cd_cef = XMLHelper.get_value(cd, "CombinedEnergyFactor")
+      if cd_ef.nil? and cd_cef.nil?
+        cd_ef = HotWaterAndAppliances.get_clothes_dryer_reference_ef(cd_fuel)
+        cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
+      else
+        if not cd_ef.nil?
+          cd_ef = Float(cd_ef)
+        elsif not cd_cef.nil?
+          cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(Float(cd_cef))
+        end
+        cd_control = XMLHelper.get_value(cd, "ControlType")
       end
-      cd_control = XMLHelper.get_value(cd, "ControlType")
+    else
+      cd_ef = cd_control = cd_fuel = nil
     end
 
     # Dishwasher
-    dw = appl.elements["Dishwasher"]
-    dw_ef = XMLHelper.get_value(dw, "EnergyFactor")
-    dw_annual_kwh = XMLHelper.get_value(dw, "RatedAnnualkWh")
-    if dw_ef.nil? and dw_annual_kwh.nil?
-      dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
-      dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
-    else
-      if not dw_ef.nil?
-        dw_ef = Float(dw_ef)
-      elsif not dw_annual_kwh.nil?
-        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(Float(dw_annual_kwh))
+    dw = building.elements["BuildingDetails/Appliances/Dishwasher"]
+    if not dw.nil?
+      dw_ef = XMLHelper.get_value(dw, "EnergyFactor")
+      dw_annual_kwh = XMLHelper.get_value(dw, "RatedAnnualkWh")
+      if dw_ef.nil? and dw_annual_kwh.nil?
+        dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
+        dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
+      else
+        if not dw_ef.nil?
+          dw_ef = Float(dw_ef)
+        elsif not dw_annual_kwh.nil?
+          dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(Float(dw_annual_kwh))
+        end
+        dw_cap = Float(XMLHelper.get_value(dw, "PlaceSettingCapacity"))
       end
-      dw_cap = Float(XMLHelper.get_value(dw, "PlaceSettingCapacity"))
+    else
+      dw_ef = dw_cap = nil
     end
 
     # Refrigerator
-    fridge = appl.elements["Refrigerator"]
-    fridge_annual_kwh = XMLHelper.get_value(fridge, "RatedAnnualkWh")
-    if fridge_annual_kwh.nil?
-      fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
+    fridge = building.elements["BuildingDetails/Appliances/Refrigerator"]
+    if not fridge.nil?
+      fridge_annual_kwh = XMLHelper.get_value(fridge, "RatedAnnualkWh")
+      if fridge_annual_kwh.nil?
+        fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
+      else
+        fridge_annual_kwh = Float(fridge_annual_kwh)
+      end
     else
-      fridge_annual_kwh = Float(fridge_annual_kwh)
+      fridge_annual_kwh = nil
     end
 
     # Cooking Range/Oven
-    cook = appl.elements["CookingRange"]
-    oven = appl.elements["Oven"]
-    cook_fuel_type = to_beopt_fuel(XMLHelper.get_value(cook, "FuelType"))
-    cook_is_induction = XMLHelper.get_value(cook, "IsInduction")
-    if cook_is_induction.nil?
-      cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
-      oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
+    cook = building.elements["BuildingDetails/Appliances/CookingRange"]
+    oven = building.elements["BuildingDetails/Appliances/Oven"]
+    if not cook.nil? and not oven.nil?
+      cook_fuel_type = to_beopt_fuel(XMLHelper.get_value(cook, "FuelType"))
+      cook_is_induction = XMLHelper.get_value(cook, "IsInduction")
+      if cook_is_induction.nil?
+        cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
+        oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
+      else
+        cook_is_induction = Boolean(cook_is_induction)
+        oven_is_convection = Boolean(XMLHelper.get_value(oven, "IsConvection"))
+      end
     else
-      cook_is_induction = Boolean(cook_is_induction)
-      oven_is_convection = Boolean(XMLHelper.get_value(oven, "IsConvection"))
+      cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
 
     # Fixtures
@@ -2092,7 +2118,9 @@ class OSModel
     return true
   end
 
-  def self.add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs)
+  def self.add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    return true if use_only_ideal_air
+  
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
       clg_type = XMLHelper.get_value(clgsys, "CoolingSystemType")
 
@@ -2189,7 +2217,9 @@ class OSModel
     return true
   end
 
-  def self.add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs)
+  def self.add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    return true if use_only_ideal_air
+  
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
       fuel = to_beopt_fuel(XMLHelper.get_value(htgsys, "HeatingSystemFuel"))
 
@@ -2270,7 +2300,9 @@ class OSModel
     return true
   end
 
-  def self.add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs)
+  def self.add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    return true if use_only_ideal_air
+  
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
 
@@ -2465,20 +2497,30 @@ class OSModel
     return true
   end
 
-  def self.add_residual_hvac(runner, model, building, unit)
+  def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     # Residual heating
-    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-    if htg_load_frac > 0 and htg_load_frac < 0.99 # TODO: Ensure that E+ will re-normalize if > 1
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1.0 - htg_load_frac)
+    if use_only_ideal_air
+      residual_htg_load_frac = 1
+    else
+      htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
+      htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
+      residual_htg_load_frac = 1.0 - htg_load_frac
+    end
+    if residual_htg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_htg_load_frac)
       return false if not success
     end
 
     # Residual cooling
-    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-    if clg_load_frac > 0 and clg_load_frac < 0.99 # TODO: Ensure that E+ will re-normalize if > 1
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1.0 - clg_load_frac)
+    if use_only_ideal_air
+      residual_clg_load_frac = 1
+    else
+      clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
+      clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
+      residual_clg_load_frac = 1.0 - clg_load_frac
+    end
+    if residual_clg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_clg_load_frac)
       return false if not success
     end
 
@@ -2490,15 +2532,20 @@ class OSModel
     return true if control.nil?
 
     control_type = XMLHelper.get_value(control, "ControlType")
-
-    htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
-    if htg_setback_sp.nil?
-      htg_weekday_setpoints = [[htg_sp] * 24] * 12
-    else
-      htg_weekday_setpoints = [[htg_sp] * 24] * 12
-      (0..11).to_a.each do |m|
-        for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-          htg_weekday_setpoints[m][hr % 24] = htg_setback_sp
+    
+    heating_temp = XMLHelper.get_value(control, "SetpointTempHeatingSeason")
+    if not heating_temp.nil? # Use provided value
+      htg_weekday_setpoints = [[Float(heating_temp)] * 24] * 12
+    else # Use ERI default
+      htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
+      if htg_setback_sp.nil?
+        htg_weekday_setpoints = [[htg_sp] * 24] * 12
+      else
+        htg_weekday_setpoints = [[htg_sp] * 24] * 12
+        (0..11).to_a.each do |m|
+          for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
+            htg_weekday_setpoints[m][hr % 24] = htg_setback_sp
+          end
         end
       end
     end
@@ -2510,14 +2557,19 @@ class OSModel
                                            htg_use_auto_season, htg_season_start_month, htg_season_end_month)
     return false if not success
 
-    clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
-    if clg_setup_sp.nil?
-      clg_weekday_setpoints = [[clg_sp] * 24] * 12
-    else
-      clg_weekday_setpoints = [[clg_sp] * 24] * 12
-      (0..11).to_a.each do |m|
-        for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-          clg_weekday_setpoints[m][hr % 24] = clg_setup_sp
+    cooling_temp = XMLHelper.get_value(control, "SetpointTempCoolingSeason")
+    if not cooling_temp.nil? # Use provided value
+      clg_weekday_setpoints = [[Float(cooling_temp)] * 24] * 12
+    else # Use ERI default
+      clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
+      if clg_setup_sp.nil?
+        clg_weekday_setpoints = [[clg_sp] * 24] * 12
+      else
+        clg_weekday_setpoints = [[clg_sp] * 24] * 12
+        (0..11).to_a.each do |m|
+          for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
+            clg_weekday_setpoints[m][hr % 24] = clg_setup_sp
+          end
         end
       end
     end
@@ -2659,25 +2711,72 @@ class OSModel
   end
 
   def self.add_mels(runner, model, building, unit, living_space)
+  
     # Misc
-    annual_kwh, sens_frac, lat_frac = MiscLoads.get_residual_mels_values(@cfa)
-    weekday_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
-    weekend_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
-    monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
-    success, sch = MiscLoads.apply_plug(model, unit, runner, annual_kwh,
-                                        sens_frac, lat_frac, weekday_sch,
-                                        weekend_sch, monthly_sch, nil)
-    return false if not success
-
+    misc = building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']"]
+    if not misc.nil?
+      misc_annual_kwh = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/Load[Units='kWh/year']/Value")
+      if misc_annual_kwh.nil?
+        misc_annual_kwh = MiscLoads.get_residual_mels_values(@cfa)[0]
+      else
+        misc_annual_kwh = Float(misc_annual_kwh)
+      end
+      
+      misc_sens_frac = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/extension/FracSensible")
+      if misc_sens_frac.nil?
+        misc_sens_frac = MiscLoads.get_residual_mels_values(@cfa)[1]
+      else
+        misc_sens_frac = Float(misc_sens_frac)
+      end
+      
+      misc_lat_frac = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/extension/FracLatent")
+      if misc_lat_frac.nil?
+        misc_lat_frac = MiscLoads.get_residual_mels_values(@cfa)[2]
+      else
+        misc_lat_frac = Float(misc_lat_frac)
+      end
+      
+      misc_weekday_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/WeekdayScheduleFractions")
+      if misc_weekday_sch.nil?
+        misc_weekday_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
+      end
+      
+      misc_weekend_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/WeekendScheduleFractions")
+      if misc_weekend_sch.nil?
+        misc_weekend_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
+      end
+      
+      misc_monthly_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/MonthlyScheduleMultipliers")
+      if misc_monthly_sch.nil?
+        misc_monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
+      end
+      
+      success, sch = MiscLoads.apply_plug(model, unit, runner, misc_annual_kwh,
+                                          misc_sens_frac, misc_lat_frac, misc_weekday_sch,
+                                          misc_weekend_sch, misc_monthly_sch, nil)
+      return false if not success
+    end
+    
     # Television
-    annual_kwh, sens_frac, lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
-    success = MiscLoads.apply_tv(model, unit, runner, annual_kwh, sch, living_space)
-    return false if not success
+    tv = building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']"]
+    if not tv.nil?
+      tv_annual_kwh = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']/Load[Units='kWh/year']/Value")
+      if tv_annual_kwh.nil?
+        tv_annual_kwh, tv_sens_frac, tv_lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
+      else
+        tv_annual_kwh = Float(tv_annual_kwh)
+      end
+      
+      success = MiscLoads.apply_tv(model, unit, runner, tv_annual_kwh, sch, living_space)
+      return false if not success
+    end
 
     return true
   end
 
   def self.add_lighting(runner, model, building, unit, weather)
+    return true if building.elements["BuildingDetails/Lighting"].nil?
+  
     lighting_fractions = building.elements["BuildingDetails/Lighting/LightingFractions"]
     if lighting_fractions.nil?
       fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
@@ -2821,18 +2920,34 @@ class OSModel
     cfis_systems = { cfis => model.getAirLoopHVACs }
 
     # Natural Ventilation
-    nat_vent_htg_offset = 1.0
-    nat_vent_clg_offset = 1.0
-    nat_vent_ovlp_offset = 1.0
-    nat_vent_htg_season = true
-    nat_vent_clg_season = true
-    nat_vent_ovlp_season = true
-    nat_vent_num_weekdays = 5
-    nat_vent_num_weekends = 2
-    nat_vent_frac_windows_open = 0.33
-    nat_vent_frac_window_area_openable = 0.2
-    nat_vent_max_oa_hr = 0.0115
-    nat_vent_max_oa_rh = 0.7
+    disable_nat_vent = XMLHelper.get_value(building, "BuildingDetails/Enclosure/Windows/extension/DisableNaturalVentilation")
+    if not disable_nat_vent.nil? and Boolean(disable_nat_vent)
+      nat_vent_htg_offset = 0
+      nat_vent_clg_offset = 0
+      nat_vent_ovlp_offset = 0
+      nat_vent_htg_season = false
+      nat_vent_clg_season = false
+      nat_vent_ovlp_season = false
+      nat_vent_num_weekdays = 0
+      nat_vent_num_weekends = 0
+      nat_vent_frac_windows_open = 0
+      nat_vent_frac_window_area_openable = 0
+      nat_vent_max_oa_hr = 0.0115
+      nat_vent_max_oa_rh = 0.7
+    else
+      nat_vent_htg_offset = 1.0
+      nat_vent_clg_offset = 1.0
+      nat_vent_ovlp_offset = 1.0
+      nat_vent_htg_season = true
+      nat_vent_clg_season = true
+      nat_vent_ovlp_season = true
+      nat_vent_num_weekdays = 5
+      nat_vent_num_weekends = 2
+      nat_vent_frac_windows_open = 0.33
+      nat_vent_frac_window_area_openable = 0.2
+      nat_vent_max_oa_hr = 0.0115
+      nat_vent_max_oa_rh = 0.7
+    end
     nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
                                       nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
                                       nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
