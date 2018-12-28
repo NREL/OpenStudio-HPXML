@@ -59,7 +59,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Enclosure/Skylights' => zero_or_one, # See [Skylight]
         '/HPXML/Building/BuildingDetails/Enclosure/Doors' => zero_or_one, # See [Door]
 
-        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="ACH"]/AirLeakage | extension/ConstantACHnatural]' => one, # ACH50 or constant nACH; see [AirInfiltration]
+        '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="ACH"]/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]' => one, # ACH50 or constant nACH; see [AirInfiltration]
 
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem' => zero_or_more, # See [HeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem' => zero_or_more, # See [CoolingSystem]
