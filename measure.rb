@@ -2804,7 +2804,13 @@ class OSModel
   def self.add_airflow(runner, model, building, unit, loop_hvacs)
     # Infiltration
     infiltration = building.elements["BuildingDetails/Enclosure/AirInfiltration"]
-    infil_ach50 = Float(XMLHelper.get_value(infiltration, "AirInfiltrationMeasurement[HousePressure='50']/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage"))
+    infil_ach50 = XMLHelper.get_value(infiltration, "AirInfiltrationMeasurement[HousePressure='50']/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage")
+    infil_const_ach = XMLHelper.get_value(infiltration, "AirInfiltrationMeasurement/extension/ConstantACHnatural")
+    if not infil_ach50.nil?
+      infil_ach50 = Float(infil_ach50)
+    elsif not infil_const_ach.nil?
+      infil_const_ach = Float(infil_const_ach)
+    end
 
     # Vented crawl SLA
     vented_crawl_area = 0.0
@@ -2854,6 +2860,7 @@ class OSModel
     end
 
     living_ach50 = infil_ach50
+    living_constant_ach = infil_const_ach
     garage_ach50 = infil_ach50
     finished_basement_ach = 0 # TODO: Need to handle above-grade basement
     unfinished_basement_ach = 0.1 # TODO: Need to handle above-grade basement
@@ -2868,7 +2875,7 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, nil, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unfinished_basement_ach,
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unfinished_basement_ach,
                              finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
