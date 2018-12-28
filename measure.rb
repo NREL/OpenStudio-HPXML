@@ -857,6 +857,7 @@ class OSModel
         else
           fail "Unhandled foundation type #{foundation_type}."
         end
+        surface.setSunExposure("NoSun")
         slab_surface = surface
 
         slab_gap_r = 0.0 # FIXME
@@ -956,6 +957,10 @@ class OSModel
         wall_ff = 0.0
         wall_cont_height = Float(XMLHelper.get_value(fnd_wall, "Height"))
         wall_cont_r = wall_assembly_r - Material.Concrete(walls_concrete_thick_in).rvalue - Material.GypsumWall(walls_drywall_thick_in).rvalue - wall_film_r
+        if wall_cont_r < 0 # Try without drywall
+          walls_drywall_thick_in = 0.0
+          wall_cont_r = wall_assembly_r - Material.Concrete(walls_concrete_thick_in).rvalue - Material.GypsumWall(walls_drywall_thick_in).rvalue - wall_film_r
+        end
         wall_cont_depth = 1.0
       end
 
@@ -997,6 +1002,7 @@ class OSModel
         else
           fail "Unhandled foundation type #{foundation_type}."
         end
+        surface.setSunExposure("NoSun")
         ceiling_surfaces << surface
 
         floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
