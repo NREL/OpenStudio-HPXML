@@ -2829,21 +2829,28 @@ class OSModel
     # Vented attic SLA
     vented_attic_area = 0.0
     vented_attic_sla_area = 0.0
+    vented_attic_const_ach = nil
     building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType='vented attic']") do |vented_attic|
       area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area)")
       vented_attic_sla = XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")
+      vented_attic_const_ach = XMLHelper.get_value(vented_attic, "extension/AtticConstantACHnatural")
       if not vented_attic_sla.nil?
         vented_attic_sla = Float(vented_attic_sla)
+        vented_attic_sla_area += (vented_attic_sla * area)
+      elsif not vented_attic_const_ach.nil?
+        vented_attic_const_ach = Float(vented_attic_const_ach)
       else
         vented_attic_sla = Airflow.get_default_vented_attic_sla()
+        vented_attic_sla_area += (vented_attic_sla * area)
       end
-      vented_attic_sla_area += (vented_attic_sla * area)
       vented_attic_area += area
     end
-    if vented_attic_area > 0
+    if vented_attic_sla_area > 0
       attic_sla = vented_attic_sla_area / vented_attic_area
+      attic_const_ach = nil
     else
-      attic_sla = 0.0
+      attic_sla = nil
+      attic_const_ach = vented_attic_const_ach
     end
 
     living_ach50 = infil_ach50
@@ -2861,7 +2868,7 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, nil, shelter_coef, garage_ach50, crawl_ach, attic_sla, nil, unfinished_basement_ach,
+    infil = Infiltration.new(living_ach50, nil, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unfinished_basement_ach,
                              finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
