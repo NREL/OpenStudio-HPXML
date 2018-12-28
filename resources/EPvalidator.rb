@@ -80,7 +80,7 @@ class EnergyPlusValidator
 
         '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
         '/HPXML/Building/BuildingDetails/Lighting/CeilingFan' => zero_or_one, # See [CeilingFan]
-        
+
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => zero_or_one, # See [PlugLoads]
         '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => zero_or_one, # See [Television]
       },
@@ -638,7 +638,7 @@ class EnergyPlusValidator
         'Airflow[FanSpeed="medium"]/Efficiency' => zero_or_one, # Uses Reference Home if not provided
         'Quantity' => zero_or_one, # Uses Reference Home if not provided
       },
-      
+
       # [PlugLoads]
       '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="other"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema

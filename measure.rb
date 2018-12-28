@@ -2120,7 +2120,7 @@ class OSModel
 
   def self.add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
-  
+
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
       clg_type = XMLHelper.get_value(clgsys, "CoolingSystemType")
 
@@ -2219,7 +2219,7 @@ class OSModel
 
   def self.add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
-  
+
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
       fuel = to_beopt_fuel(XMLHelper.get_value(htgsys, "HeatingSystemFuel"))
 
@@ -2302,7 +2302,7 @@ class OSModel
 
   def self.add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
-  
+
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
 
@@ -2532,7 +2532,7 @@ class OSModel
     return true if control.nil?
 
     control_type = XMLHelper.get_value(control, "ControlType")
-    
+
     heating_temp = XMLHelper.get_value(control, "SetpointTempHeatingSeason")
     if not heating_temp.nil? # Use provided value
       htg_weekday_setpoints = [[Float(heating_temp)] * 24] * 12
@@ -2711,7 +2711,6 @@ class OSModel
   end
 
   def self.add_mels(runner, model, building, unit, living_space)
-  
     # Misc
     misc = building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']"]
     if not misc.nil?
@@ -2721,42 +2720,42 @@ class OSModel
       else
         misc_annual_kwh = Float(misc_annual_kwh)
       end
-      
+
       misc_sens_frac = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/extension/FracSensible")
       if misc_sens_frac.nil?
         misc_sens_frac = MiscLoads.get_residual_mels_values(@cfa)[1]
       else
         misc_sens_frac = Float(misc_sens_frac)
       end
-      
+
       misc_lat_frac = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/extension/FracLatent")
       if misc_lat_frac.nil?
         misc_lat_frac = MiscLoads.get_residual_mels_values(@cfa)[2]
       else
         misc_lat_frac = Float(misc_lat_frac)
       end
-      
+
       misc_weekday_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/WeekdayScheduleFractions")
       if misc_weekday_sch.nil?
         misc_weekday_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
       end
-      
+
       misc_weekend_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/WeekendScheduleFractions")
       if misc_weekend_sch.nil?
         misc_weekend_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
       end
-      
+
       misc_monthly_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/MonthlyScheduleMultipliers")
       if misc_monthly_sch.nil?
         misc_monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
       end
-      
+
       success, sch = MiscLoads.apply_plug(model, unit, runner, misc_annual_kwh,
                                           misc_sens_frac, misc_lat_frac, misc_weekday_sch,
                                           misc_weekend_sch, misc_monthly_sch, nil)
       return false if not success
     end
-    
+
     # Television
     tv = building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']"]
     if not tv.nil?
@@ -2766,7 +2765,7 @@ class OSModel
       else
         tv_annual_kwh = Float(tv_annual_kwh)
       end
-      
+
       success = MiscLoads.apply_tv(model, unit, runner, tv_annual_kwh, sch, living_space)
       return false if not success
     end
@@ -2776,7 +2775,7 @@ class OSModel
 
   def self.add_lighting(runner, model, building, unit, weather)
     return true if building.elements["BuildingDetails/Lighting"].nil?
-  
+
     lighting_fractions = building.elements["BuildingDetails/Lighting/LightingFractions"]
     if lighting_fractions.nil?
       fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
