@@ -2851,7 +2851,10 @@ class OSModel
       end
       vented_attic_area += area
     end
-    if vented_attic_sla_area > 0
+    if vented_attic_area == 0
+      attic_sla = 0
+      attic_const_ach = nil
+    elsif vented_attic_sla_area > 0
       attic_sla = vented_attic_sla_area / vented_attic_area
       attic_const_ach = nil
     else
