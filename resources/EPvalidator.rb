@@ -124,6 +124,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Roofs/Roof' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Area' => one,
+        'Azimuth' => zero_or_one,
         'SolarAbsorptance' => one,
         'Emittance' => one,
         'Pitch' => one,
@@ -146,6 +147,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]' => one,
         'Area' => one,
+        'Azimuth' => zero_or_one,
         'SolarAbsorptance' => one,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
@@ -208,6 +210,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'Height' => one,
         'Area' => one,
+        'Azimuth' => zero_or_one,
         'Thickness' => one,
         'DepthBelowGrade' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
@@ -238,6 +241,7 @@ class EnergyPlusValidator
         '[ExteriorAdjacentTo="ambient" or ExteriorAdjacentTo="unconditioned basement" or ExteriorAdjacentTo="living space" or ExteriorAdjacentTo="ground" or ExteriorAdjacentTo="crawlspace" or ExteriorAdjacentTo="attic" or ExteriorAdjacentTo="garage"]' => one,
         '[InteriorAdjacentTo="unconditioned basement" or InteriorAdjacentTo="living space" or InteriorAdjacentTo="crawlspace" or InteriorAdjacentTo="attic" or InteriorAdjacentTo="garage"]' => one,
         'Area' => one,
+        'Azimuth' => zero_or_one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue' => one,
       },
@@ -247,6 +251,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]' => one, # See [WallType=WoodStud] or [WallType=NotWoodStud]
         'Area' => one,
+        'Azimuth' => zero_or_one,
         'SolarAbsorptance' => one,
         'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema

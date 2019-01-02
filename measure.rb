@@ -814,12 +814,13 @@ class OSModel
       interior_adjacent_to = get_foundation_interior_adjacent_to(foundation_type)
 
       # Foundation slab surfaces
-
       slab_surface = nil
       perim_exp = 0.0
       slab_ext_r, slab_ext_depth, slab_perim_r, slab_perim_width, slab_gap_r = nil
       slab_whole_r, slab_concrete_thick_in = nil
+      num_slabs = 0
       foundation.elements.each("Slab") do |fnd_slab|
+        num_slabs += 1
         slab_id = fnd_slab.elements["SystemIdentifier"].attributes["id"]
 
         slab_perim = Float(XMLHelper.get_value(fnd_slab, "ExposedPerimeter"))
@@ -892,6 +893,9 @@ class OSModel
           slab_perim_width = 0
         end
       end
+      if num_slabs > 1
+        fail "Cannot currently handle multiple Foundation/Slab elements." # FIXME
+      end
 
       # Foundation wall surfaces
 
@@ -900,7 +904,9 @@ class OSModel
       wall_height, wall_cav_r, wall_cav_depth, wall_grade, wall_ff, wall_cont_height, wall_cont_r = nil
       wall_cont_depth, walls_filled_cavity, walls_drywall_thick_in, walls_concrete_thick_in = nil
       wall_assembly_r, wall_film_r = nil
+      num_walls = 0
       foundation.elements.each("FoundationWall") do |fnd_wall|
+        num_walls += 1
         wall_id = fnd_wall.elements["SystemIdentifier"].attributes["id"]
 
         exterior_adjacent_to = XMLHelper.get_value(fnd_wall, "extension/ExteriorAdjacentTo")
@@ -916,9 +922,17 @@ class OSModel
 
         z_origin = -1 * Float(XMLHelper.get_value(fnd_wall, "DepthBelowGrade"))
 
+        wall_azimuth = XMLHelper.get_value(fnd_wall, "Azimuth")
+        if not wall_azimuth.nil?
+          wall_azimuth = Float(wall_azimuth)
+        else
+          wall_azimuth = 0.0
+        end
+
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(UnitConversions.convert(wall_length, "ft", "m"),
                                                                   UnitConversions.convert(wall_height, "ft", "m"),
-                                                                  UnitConversions.convert(z_origin, "ft", "m")), model)
+                                                                  UnitConversions.convert(z_origin, "ft", "m"),
+                                                                  wall_azimuth), model)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
         if exterior_adjacent_to == "ground"
@@ -962,6 +976,9 @@ class OSModel
           wall_cont_r = wall_assembly_r - Material.Concrete(walls_concrete_thick_in).rvalue - Material.GypsumWall(walls_drywall_thick_in).rvalue - wall_film_r
         end
         wall_cont_depth = 1.0
+      end
+      if num_walls > 1
+        fail "Cannot currently handle multiple Foundation/FoundationWall elements." # FIXME
       end
 
       # Foundation ceiling surfaces
@@ -1195,10 +1212,17 @@ class OSModel
       wall_height = 8.0
       wall_length = wall_net_area / wall_height
       z_origin = 0
+      wall_azimuth = XMLHelper.get_value(wall, "Azimuth")
+      if not wall_azimuth.nil?
+        wall_azimuth = Float(wall_azimuth)
+      else
+        wall_azimuth = 0.0
+      end
 
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(UnitConversions.convert(wall_length, "ft", "m"),
                                                                 UnitConversions.convert(wall_height, "ft", "m"),
-                                                                UnitConversions.convert(z_origin, "ft", "m")), model)
+                                                                UnitConversions.convert(z_origin, "ft", "m"),
+                                                                wall_azimuth), model)
       surface.setName(wall_id)
       surface.setSurfaceType("Wall")
       if ["living space"].include? interior_adjacent_to
@@ -1263,9 +1287,17 @@ class OSModel
       rim_joist_height = 7.5
       rim_joist_length = rim_joist_area / rim_joist_height
       z_origin = 0
+      rim_joist_azimuth = XMLHelper.get_value(rim_joist, "Azimuth")
+      if not rim_joist_azimuth.nil?
+        rim_joist_azimuth = Float(rim_joist_azimuth)
+      else
+        rim_joist_azimuth = 0.0
+      end
+
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(UnitConversions.convert(rim_joist_length, "ft", "m"),
                                                                 UnitConversions.convert(rim_joist_height, "ft", "m"),
-                                                                UnitConversions.convert(z_origin, "ft", "m")), model)
+                                                                UnitConversions.convert(z_origin, "ft", "m"),
+                                                                rim_joist_azimuth), model)
       surface.setName(rim_joist_id)
       surface.setSurfaceType("Wall")
       if ["living space"].include? interior_adjacent_to
@@ -1421,11 +1453,17 @@ class OSModel
         roof_length = roof_net_area / roof_width
         z_origin = 0
         roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
+        roof_azimuth = XMLHelper.get_value(roof, "Azimuth")
+        if not roof_azimuth.nil?
+          roof_azimuth = Float(roof_azimuth)
+        else
+          roof_azimuth = 0.0
+        end
 
         surface = OpenStudio::Model::Surface.new(add_roof_polygon(UnitConversions.convert(roof_length, "ft", "m"),
                                                                   UnitConversions.convert(roof_width, "ft", "m"),
                                                                   UnitConversions.convert(z_origin, "ft", "m"),
-                                                                  0.0, roof_tilt), model)
+                                                                  roof_azimuth, roof_tilt), model)
 
         surface.setName(roof_id)
         surface.setSurfaceType("RoofCeiling")
@@ -1504,10 +1542,17 @@ class OSModel
         wall_height = 8.0
         wall_length = wall_net_area / wall_height
         z_origin = 0
+        wall_azimuth = XMLHelper.get_value(wall, "Azimuth")
+        if not wall_azimuth.nil?
+          wall_azimuth = Float(wall_azimuth)
+        else
+          wall_azimuth = 0.0
+        end
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(UnitConversions.convert(wall_length, "ft", "m"),
                                                                   UnitConversions.convert(wall_height, "ft", "m"),
-                                                                  UnitConversions.convert(z_origin, "ft", "m")), model)
+                                                                  UnitConversions.convert(z_origin, "ft", "m"),
+                                                                  wall_azimuth), model)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
         if ["unvented attic", "vented attic"].include? interior_adjacent_to
@@ -1574,8 +1619,8 @@ class OSModel
 
       window_area = Float(XMLHelper.get_value(window, "Area"))
       window_width = window_area / window_height
-      window_azimuth = Float(XMLHelper.get_value(window, "Azimuth"))
       z_origin = 0
+      window_azimuth = Float(XMLHelper.get_value(window, "Azimuth"))
 
       if not fenestration_areas.keys.include? window.elements["AttachedToWall"].attributes["idref"]
         fenestration_areas[window.elements["AttachedToWall"].attributes["idref"]] = window_area
@@ -1590,22 +1635,28 @@ class OSModel
                                                                 [0, 0.001, 0.001 * 2, 0.001]), model) # offsets B, L, T, R
       surface.setName("surface #{window_id}")
       surface.setSurfaceType("Wall")
+      surface_space = nil
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
         next unless wall.elements["SystemIdentifier"].attributes["id"] == window.elements["AttachedToWall"].attributes["idref"]
 
         interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
         if interior_adjacent_to == "living space"
-          surface.setSpace(spaces[Constants.SpaceTypeLiving])
+          surface_space = spaces[Constants.SpaceTypeLiving]
         elsif interior_adjacent_to == "garage"
-          surface.setSpace(spaces[Constants.SpaceTypeGarage])
+          surface_space = spaces[Constants.SpaceTypeGarage]
         elsif interior_adjacent_to == "vented attic" or interior_adjacent_to == "unvented attic"
-          surface.setSpace(spaces[Constants.SpaceTypeUnfinishedAttic])
+          surface_space = spaces[Constants.SpaceTypeUnfinishedAttic]
         elsif interior_adjacent_to == "cape cod"
-          surface.setSpace(spaces[Constants.SpaceTypeFinishedAttic])
+          surface_space = spaces[Constants.SpaceTypeFinishedAttic]
         else
           fail "Unhandled value (#{interior_adjacent_to})."
         end
       end
+      if surface_space.nil?
+        fail "Attached wall '#{window.elements['AttachedToWall'].attributes['idref']}' not found for window '#{window_id}'."
+      end
+
+      surface.setSpace(surface_space)
       surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic or OS won't create subsurface
       surfaces << surface
 
@@ -1656,34 +1707,47 @@ class OSModel
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_id = skylight.elements["SystemIdentifier"].attributes["id"]
+
       skylight_area = Float(XMLHelper.get_value(skylight, "Area"))
-      skylight_height = 5.0 # FIXME
+      skylight_height = 5.0
       skylight_width = skylight_area / skylight_height
-      skylight_azimuth = Float(XMLHelper.get_value(skylight, "Azimuth"))
       z_origin = 0
+      skylight_azimuth = Float(XMLHelper.get_value(skylight, "Azimuth"))
+
       if not fenestration_areas.keys.include? skylight.elements["AttachedToRoof"].attributes["idref"]
         fenestration_areas[skylight.elements["AttachedToRoof"].attributes["idref"]] = skylight_area
       else
         fenestration_areas[skylight.elements["AttachedToRoof"].attributes["idref"]] += skylight_area
       end
+
       skylight_tilt = nil
+
+      skylight_roof = nil
       building.elements.each("BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic") do |attic|
         attic_type = XMLHelper.get_value(attic, "AtticType")
         attic.elements.each("Roofs/Roof") do |roof|
           next unless roof.elements["SystemIdentifier"].attributes["id"] == skylight.elements["AttachedToRoof"].attributes["idref"]
 
-          skylight_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
+          skylight_roof = roof
         end
       end
+      if skylight_roof.nil?
+        fail "Attached roof '#{skylight.elements['AttachedToRoof'].attributes['idref']}' not found for skylight '#{skylight_id}'."
+      end
+
+      skylight_tilt = Float(XMLHelper.get_value(skylight_roof, "Pitch")) / 12.0
+
       surface = OpenStudio::Model::Surface.new(add_roof_polygon(UnitConversions.convert(skylight_width, "ft", "m") + 0.0001, # base surface must be at least slightly larger than subsurface
                                                                 UnitConversions.convert(skylight_height, "ft", "m") + 0.0001, # base surface must be at least slightly larger than subsurface
                                                                 UnitConversions.convert(z_origin, "ft", "m"),
                                                                 skylight_azimuth, skylight_tilt), model)
+
       surface.setName("surface #{skylight_id}")
       surface.setSurfaceType("RoofCeiling")
       surface.setSpace(spaces[Constants.SpaceTypeLiving]) # Ensures it is included in Manual J sizing
       surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic or OS won't create subsurface
       surfaces << surface
+
       sub_surface = OpenStudio::Model::SubSurface.new(add_roof_polygon(UnitConversions.convert(skylight_width, "ft", "m"),
                                                                        UnitConversions.convert(skylight_height, "ft", "m"),
                                                                        UnitConversions.convert(z_origin, "ft", "m"),
@@ -1725,13 +1789,7 @@ class OSModel
       door_height = 6.67 # ft
       door_width = door_area / door_height
       z_origin = 0
-
-      door_azimuth = XMLHelper.get_value(door, "Azimuth")
-      if not door_azimuth.nil?
-        door_azimuth = Float(door_azimuth)
-      else
-        door_azimuth = SubsurfaceConstructions.get_default_door_azimuth()
-      end
+      door_azimuth = Float(XMLHelper.get_value(door, "Azimuth"))
 
       if not fenestration_areas.keys.include? door.elements["AttachedToWall"].attributes["idref"]
         fenestration_areas[door.elements["AttachedToWall"].attributes["idref"]] = door_area
@@ -1746,22 +1804,28 @@ class OSModel
                                                                 [0, 0.001, 0.001, 0.001]), model) # offsets B, L, T, R
       surface.setName("surface #{door_id}")
       surface.setSurfaceType("Wall")
+      surface_space = nil
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
         next unless wall.elements["SystemIdentifier"].attributes["id"] == door.elements["AttachedToWall"].attributes["idref"]
 
         interior_adjacent_to = XMLHelper.get_value(wall, "extension/InteriorAdjacentTo")
         if interior_adjacent_to == "living space"
-          surface.setSpace(spaces[Constants.SpaceTypeLiving])
+          surface_space = spaces[Constants.SpaceTypeLiving]
         elsif interior_adjacent_to == "garage"
-          surface.setSpace(spaces[Constants.SpaceTypeGarage])
+          surface_space = spaces[Constants.SpaceTypeGarage]
         elsif interior_adjacent_to == "vented attic" or interior_adjacent_to == "unvented attic"
-          surface.setSpace(spaces[Constants.SpaceTypeUnfinishedAttic])
+          surface_space = spaces[Constants.SpaceTypeUnfinishedAttic]
         elsif interior_adjacent_to == "cape cod"
-          surface.setSpace(spaces[Constants.SpaceTypeFinishedAttic])
+          surface_space = spaces[Constants.SpaceTypeFinishedAttic]
         else
           fail "Unhandled value (#{interior_adjacent_to})."
         end
       end
+      if surface_space.nil?
+        fail "Attached wall '#{door.elements['AttachedToWall'].attributes['idref']}' not found for door '#{door_id}'."
+      end
+
+      surface.setSpace(surface_space)
       surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic or OS won't create subsurface
       surfaces << surface
 
@@ -2942,7 +3006,7 @@ class OSModel
     cfis_systems = { cfis => model.getAirLoopHVACs }
 
     # Natural Ventilation
-    disable_nat_vent = XMLHelper.get_value(building, "BuildingDetails/Enclosure/Windows/extension/DisableNaturalVentilation")
+    disable_nat_vent = XMLHelper.get_value(building, "BuildingDetails/Enclosure/extension/DisableNaturalVentilation")
     if not disable_nat_vent.nil? and Boolean(disable_nat_vent)
       nat_vent_htg_offset = 0
       nat_vent_clg_offset = 0
