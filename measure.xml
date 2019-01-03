@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>da872530-b25b-4271-ab34-1f909dbee2a7</version_id>
-  <version_modified>20190102T200643Z</version_modified>
+  <version_id>378c3a25-4d9c-4df5-8ba0-b9189a64a36b</version_id>
+  <version_modified>20190103T214655Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -959,25 +959,25 @@
       <filename>appliances.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>769D1CCD</checksum>
+      <checksum>E0BCAF0B</checksum>
     </file>
     <file>
       <filename>waterheater.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>480D1AFD</checksum>
+      <checksum>0975F889</checksum>
     </file>
     <file>
       <filename>schedules.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>7B20E0F2</checksum>
+      <checksum>D24EB32C</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>D7CBEFA3</checksum>
+      <checksum>CA5F7807</checksum>
     </file>
   </files>
 </measure>
