@@ -572,26 +572,22 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="AtticAndRoof" minOccurs="0">
+			<xs:element minOccurs="0" name="Attics">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Attics">
+						<xs:element maxOccurs="unbounded" name="Attic">
 							<xs:complexType>
 								<xs:sequence>
-									<xs:element maxOccurs="unbounded" name="Attic">
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace">
+										<xs:annotation>
+											<xs:documentation>The space over which this attic is</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="AtticType" type="AtticType" minOccurs="0"/>
+									<xs:element minOccurs="0" name="Roofs">
 										<xs:complexType>
 											<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" ref="AttachedToSpace">
-												<xs:annotation>
-												<xs:documentation>The space over which this attic is</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element name="AtticType" type="AtticType"
-												minOccurs="0"/>
-												<xs:element minOccurs="0" name="Roofs">
-												<xs:complexType>
-												<xs:sequence>
 												<xs:element name="Roof" maxOccurs="unbounded">
 												<xs:complexType>
 												<xs:sequence>
@@ -638,16 +634,18 @@
 												</xs:sequence>
 												</xs:complexType>
 												</xs:element>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-												<xs:element minOccurs="0" name="Floors">
-												<xs:complexType>
-												<xs:sequence>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="Floors">
+										<xs:complexType>
+											<xs:sequence>
 												<xs:element maxOccurs="unbounded" name="Floor">
 												<xs:complexType>
 												<xs:sequence>
 												<xs:group ref="SystemInfo"/>
+												<xs:element minOccurs="0" name="AdjacentTo"
+												type="AdjacentTo"/>
 												<xs:element minOccurs="0" name="Area"
 												type="SurfaceArea">
 												<xs:annotation>
@@ -666,16 +664,18 @@
 												</xs:sequence>
 												</xs:complexType>
 												</xs:element>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-												<xs:element minOccurs="0" name="Walls">
-												<xs:complexType>
-												<xs:sequence>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="Walls">
+										<xs:complexType>
+											<xs:sequence>
 												<xs:element maxOccurs="unbounded" name="Wall">
 												<xs:complexType>
 												<xs:sequence>
 												<xs:group ref="SystemInfo"/>
+												<xs:element minOccurs="0" name="AdjacentTo"
+												type="AdjacentTo"/>
 												<xs:element name="AtticWallType"
 												type="AtticWallType" minOccurs="0"/>
 												<xs:element name="WallType" type="WallType"
@@ -716,30 +716,26 @@
 												</xs:sequence>
 												</xs:complexType>
 												</xs:element>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-												<xs:element name="Area" type="SurfaceArea"
-												minOccurs="0">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.] Area of the floor of the attic. DO WE STILL NEED THIS?</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element ref="extension" minOccurs="0"/>
 											</xs:sequence>
 										</xs:complexType>
 									</xs:element>
+									<xs:element name="Area" type="SurfaceArea" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>[sq.ft.] Area of the floor of the attic. DO WE STILL NEED THIS?</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="AnnualEnergyUse" minOccurs="0">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="ConsumptionInfo"
+												type="ConsumptionInfoType"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
-						<xs:element name="AnnualEnergyUse" minOccurs="0">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
@@ -762,6 +758,8 @@
 										<xs:complexType>
 											<xs:sequence>
 												<xs:group ref="SystemInfo"/>
+												<xs:element name="AdjacentTo" type="AdjacentTo"
+												minOccurs="0"> </xs:element>
 												<xs:element minOccurs="0" name="FloorJoists"
 												type="StudProperties"/>
 												<xs:element minOccurs="0" name="FloorTrusses"
