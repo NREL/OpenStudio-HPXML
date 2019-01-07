@@ -832,7 +832,7 @@ class HEScoreRuleset
   def self.set_misc_television(new_misc_loads, orig_details)
     new_plug_load = XMLHelper.add_element(new_misc_loads, "PlugLoad")
     sys_id = XMLHelper.add_element(new_plug_load, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "PlugLoadOther")
+    XMLHelper.add_attribute(sys_id, "id", "PlugLoadTV")
     XMLHelper.add_element(new_plug_load, "PlugLoadType", "TV other")
 
     # Uses ERI Reference Home for performance
