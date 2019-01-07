@@ -527,7 +527,7 @@ class OSModel
           end
         end
       end
-      
+
       # Shift at 90-degrees to previous transformation
       azimuth_side_shifts[azimuth] -= surface.additionalProperties.getFeatureAsDouble("Length").get / 2.0
       transformation_shift = get_surface_transformation(azimuth_side_shifts[azimuth], Math::sin(azimuth_rad + rad90), Math::cos(azimuth_rad + rad90), 0)
@@ -546,7 +546,7 @@ class OSModel
           end
         end
       end
-      
+
       azimuth_side_shifts[azimuth] -= (surface.additionalProperties.getFeatureAsDouble("Length").get / 2.0 + gap_distance)
 
       surfaces_moved << surface

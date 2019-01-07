@@ -398,14 +398,6 @@
           </Airflow>
           <Quantity>2</Quantity>
         </CeilingFan>
-        <CeilingFan>
-          <SystemIdentifier id='CeilingFan_ID2'/>
-          <Airflow>
-            <FanSpeed>medium</FanSpeed>
-            <Efficiency>120.0</Efficiency>
-          </Airflow>
-          <Quantity>1</Quantity>
-        </CeilingFan>
       </Lighting>
     </BuildingDetails>
   </Building>
