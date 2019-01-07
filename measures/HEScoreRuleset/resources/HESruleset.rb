@@ -82,6 +82,11 @@ class HEScoreRuleset
     new_lighting = XMLHelper.add_element(new_details, "Lighting")
     set_lighting(new_lighting, orig_details)
     set_ceiling_fans(new_lighting, orig_details)
+
+    # MiscLoads
+    new_misc_loads = XMLHelper.add_element(new_details, "MiscLoads")
+    set_misc_plug_loads(new_misc_loads, orig_details)
+    set_misc_television(new_misc_loads, orig_details)
   end
 
   def self.set_summary(new_summary, orig_details)
@@ -144,8 +149,7 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_attics_roofs(new_enclosure, orig_details)
-    new_attic_roof = XMLHelper.add_element(new_enclosure, "AtticAndRoof")
-    new_attics = XMLHelper.add_element(new_attic_roof, "Attics")
+    new_attics = XMLHelper.add_element(new_enclosure, "Attics")
 
     orig_details.elements.each("Enclosure/AtticAndRoof/Attics/Attic") do |orig_attic|
       orig_roof = get_attached(orig_attic.elements["AttachedToRoof"].attributes["idref"], orig_details, "Enclosure/AtticAndRoof/Roofs/Roof")
@@ -170,6 +174,7 @@ class HEScoreRuleset
       new_roof = XMLHelper.add_element(new_roofs, "Roof")
       XMLHelper.copy_element(new_roof, orig_roof, "SystemIdentifier")
       XMLHelper.copy_element(new_roof, orig_roof, "Area", 1000) # FIXME: Hard-coded
+      XMLHelper.add_element(new_roof, "Azimuth", 0) # FIXME: Hard-coded
       XMLHelper.copy_element(new_roof, orig_roof, "SolarAbsorptance", get_roof_solar_absorptance(roof_color))
       XMLHelper.add_element(new_roof, "Emittance", 0.9) # FIXME: Hard-coded
       XMLHelper.add_element(new_roof, "Pitch", 5) # FIXME: Hard-coded
@@ -188,12 +193,11 @@ class HEScoreRuleset
         new_floor = XMLHelper.add_element(new_floors, "Floor")
         sys_id = XMLHelper.add_element(new_floor, "SystemIdentifier")
         XMLHelper.add_attribute(sys_id, "id", "#{attic_id}_floor")
+        XMLHelper.add_element(new_floor, "AdjacentTo", "living space")
         XMLHelper.copy_element(new_floor, orig_attic, "Area") # FIXME: Verify. This is the attic floor area and not the roof area?
         new_floor_ins = XMLHelper.add_element(new_floor, "Insulation")
         XMLHelper.copy_element(new_floor_ins, orig_attic, "AtticFloorInsulation/SystemIdentifier")
         XMLHelper.add_element(new_floor_ins, "AssemblyEffectiveRValue", floor_r)
-        extension = XMLHelper.add_element(new_floor, "extension")
-        XMLHelper.add_element(extension, "ExteriorAdjacentTo", "living space")
       end
 
       # FIXME: Verify no gable walls assumed
@@ -233,12 +237,11 @@ class HEScoreRuleset
 
         new_framefloor = XMLHelper.add_element(new_foundation, "FrameFloor")
         XMLHelper.copy_element(new_framefloor, orig_foundation, "FrameFloor/SystemIdentifier")
+        XMLHelper.add_element(new_framefloor, "AdjacentTo", "living space")
         XMLHelper.copy_element(new_framefloor, "Area")
         new_framefloor_ins = XMLHelper.add_element(new_framefloor, "Insulation")
         XMLHelper.copy_element(new_framefloor_ins, orig_foundation, "FrameFloor/Insulation/SystemIdentifier")
         XMLHelper.add_element(new_framefloor_ins, "AssemblyEffectiveRValue", floor_r)
-        extension = XMLHelper.add_element(new_framefloor, "extension")
-        XMLHelper.add_element(extension, "ExteriorAdjacentTo", "living space")
       end
 
       # FoundationWall
@@ -256,13 +259,13 @@ class HEScoreRuleset
         XMLHelper.copy_element(new_fndwall, orig_foundation, "FoundationWall/SystemIdentifier")
         XMLHelper.add_element(new_fndwall, "Height", wall_height) # FIXME: Verify
         XMLHelper.add_element(new_fndwall, "Area", wall_height * @bldg_perimeter) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Azimuth", 0) # FIXME: Hard-coded
         XMLHelper.add_element(new_fndwall, "Thickness", 8) # FIXME: Verify
         XMLHelper.add_element(new_fndwall, "DepthBelowGrade", wall_height) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "AdjacentTo", "ground")
         new_fndwall_ins = XMLHelper.add_element(new_fndwall, "Insulation")
         XMLHelper.copy_element(new_fndwall_ins, orig_foundation, "FoundationWall/Insulation/SystemIdentifier")
         XMLHelper.add_element(new_fndwall_ins, "AssemblyEffectiveRValue", wall_r)
-        extension = XMLHelper.add_element(new_fndwall, "extension")
-        XMLHelper.add_element(extension, "ExteriorAdjacentTo", "ground")
       end
 
       # Slab
@@ -347,20 +350,20 @@ class HEScoreRuleset
 
       new_wall = XMLHelper.add_element(new_walls, "Wall")
       XMLHelper.copy_element(new_wall, orig_wall, "SystemIdentifier")
+      XMLHelper.add_element(new_wall, "ExteriorAdjacentTo", "outside")
+      XMLHelper.add_element(new_wall, "InteriorAdjacentTo", "living space")
       XMLHelper.copy_element(new_wall, orig_wall, "WallType")
       if @bldg_orient == wall_orient or @bldg_orient == reverse_orientation(wall_orient)
         XMLHelper.add_element(new_wall, "Area", @ceil_height * @bldg_width) # FIXME: Verify
       else
         XMLHelper.add_element(new_wall, "Area", @ceil_height * @bldg_length) # FIXME: Verify
       end
+      XMLHelper.add_element(new_wall, "Azimuth", 0) # FIXME: Hard-coded
       XMLHelper.add_element(new_wall, "SolarAbsorptance", get_wall_solar_absorptance("medium")) # FIXME: Hard-coded
       XMLHelper.add_element(new_wall, "Emittance", 0.9) # FIXME: Hard-coded
       new_wall_ins = XMLHelper.add_element(new_wall, "Insulation")
       XMLHelper.copy_element(new_wall_ins, orig_wall, "Insulation/SystemIdentifier")
       XMLHelper.add_element(new_wall_ins, "AssemblyEffectiveRValue", wall_r)
-      wall_ext = XMLHelper.add_element(new_wall, "extension")
-      XMLHelper.add_element(wall_ext, "InteriorAdjacentTo", "living space")
-      XMLHelper.add_element(wall_ext, "ExteriorAdjacentTo", "ambient")
     end
   end
 
@@ -650,6 +653,11 @@ class HEScoreRuleset
       XMLHelper.add_element(new_return_leakage, "TotalOrToOutside", "to outside") # FIXME: Hard-coded
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
+        hpxml_v23_to_v30_map = { "conditioned space" => "living space",
+                                 "unconditioned basement" => "basement - unconditioned",
+                                 "unvented crawlspace" => "crawlspace - unvented",
+                                 "vented crawlspace" => "crawlspace - vented",
+                                 "unconditioned attic" => "attic - vented" } # FIXME: Or 'attic - unvented'
         duct_location = XMLHelper.get_value(orig_duct, "DuctLocation")
         duct_frac_area = Float(XMLHelper.get_value(orig_duct, "FractionDuctArea"))
         duct_insulated = Boolean(XMLHelper.get_value(orig_duct, "extension/hescore_ducts_insulated"))
@@ -667,14 +675,14 @@ class HEScoreRuleset
         new_supply_duct = XMLHelper.add_element(new_air_dist, "Ducts")
         XMLHelper.add_element(new_supply_duct, "DuctType", "supply")
         XMLHelper.add_element(new_supply_duct, "DuctInsulationRValue", duct_rvalue)
-        XMLHelper.add_element(new_supply_duct, "DuctLocation", duct_location)
+        XMLHelper.add_element(new_supply_duct, "DuctLocation", hpxml_v23_to_v30_map[duct_location])
         XMLHelper.add_element(new_supply_duct, "DuctSurfaceArea", duct_frac_area * supply_duct_area)
 
         # Return duct
         new_return_duct = XMLHelper.add_element(new_air_dist, "Ducts")
         XMLHelper.add_element(new_return_duct, "DuctType", "return")
         XMLHelper.add_element(new_return_duct, "DuctInsulationRValue", duct_rvalue)
-        XMLHelper.add_element(new_return_duct, "DuctLocation", duct_location)
+        XMLHelper.add_element(new_return_duct, "DuctLocation", hpxml_v23_to_v30_map[duct_location])
         XMLHelper.add_element(new_return_duct, "DuctSurfaceArea", duct_frac_area * return_duct_area)
       end
     end
@@ -703,7 +711,7 @@ class HEScoreRuleset
       XMLHelper.copy_element(new_wh_sys, orig_wh_sys, "SystemIdentifier")
       XMLHelper.add_element(new_wh_sys, "FuelType", wh_fuel)
       XMLHelper.add_element(new_wh_sys, "WaterHeaterType", wh_type)
-      XMLHelper.add_element(new_wh_sys, "Location", "conditioned space") # FIXME: Verify
+      XMLHelper.add_element(new_wh_sys, "Location", "living space") # FIXME: Verify
       XMLHelper.add_element(new_wh_sys, "TankVolume", get_default_water_heater_volume(wh_fuel))
       XMLHelper.add_element(new_wh_sys, "FractionDHWLoadServed", 1.0)
       if wh_type == "storage water heater"
@@ -810,6 +818,24 @@ class HEScoreRuleset
 
   def self.set_ceiling_fans(new_lighting, orig_details)
     # No ceiling fans
+  end
+
+  def self.set_misc_plug_loads(new_misc_loads, orig_details)
+    new_plug_load = XMLHelper.add_element(new_misc_loads, "PlugLoad")
+    sys_id = XMLHelper.add_element(new_plug_load, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", "PlugLoadOther")
+    XMLHelper.add_element(new_plug_load, "PlugLoadType", "other")
+
+    # Uses ERI Reference Home for performance
+  end
+
+  def self.set_misc_television(new_misc_loads, orig_details)
+    new_plug_load = XMLHelper.add_element(new_misc_loads, "PlugLoad")
+    sys_id = XMLHelper.add_element(new_plug_load, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", "PlugLoadOther")
+    XMLHelper.add_element(new_plug_load, "PlugLoadType", "TV other")
+
+    # Uses ERI Reference Home for performance
   end
 end
 
