@@ -359,7 +359,7 @@ class OSModel
     success, unit = add_building_info(model, building)
     return false if not success
 
-    success = add_foundations(runner, model, building, spaces, subsurface_areas, unit) # TODO: Don't need to pass unit once slab hvac sizing is updated
+    success = add_foundations(runner, model, building, spaces, subsurface_areas)
     return false if not success
 
     success = add_walls(runner, model, building, spaces, subsurface_areas)
@@ -785,7 +785,7 @@ class OSModel
     return spaces[spacetype]
   end
 
-  def self.add_foundations(runner, model, building, spaces, subsurface_areas, unit)
+  def self.add_foundations(runner, model, building, spaces, subsurface_areas)
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
       foundation_id = foundation.elements["SystemIdentifier"].attributes["id"]
       foundation_type = foundation.elements["FoundationType"]
@@ -962,13 +962,15 @@ class OSModel
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(framefloor_length, framefloor_width, z_origin), model)
 
         surface.setName(floor_id)
-        if interior_adjacent_to == "outside"
+        if interior_adjacent_to == "outside" # pier & beam foundation
           surface.setSurfaceType("Floor")
+          set_surface_interior(model, spaces, surface, floor_id, exterior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, floor_id, interior_adjacent_to)
         else
           surface.setSurfaceType("RoofCeiling")
+          set_surface_interior(model, spaces, surface, floor_id, interior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, floor_id, exterior_adjacent_to)
         end
-        set_surface_interior(model, spaces, surface, floor_id, interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, floor_id, exterior_adjacent_to)
         surface.setSunExposure("NoSun")
         surface.setWindExposure("NoWind")
         ceiling_surfaces << surface
@@ -3615,7 +3617,7 @@ class OSModel
   end
 
   def self.set_surface_interior(model, spaces, surface, surface_id, interior_adjacent_to)
-    if ["living space", "outside"].include? interior_adjacent_to
+    if ["living space"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     elsif ["garage"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
