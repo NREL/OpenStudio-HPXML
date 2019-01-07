@@ -3849,6 +3849,10 @@ def get_attic_adjacent_to(attic_type)
     return "attic - vented"
   elsif attic_type == "cape cod"
     return "attic - conditioned"
+  elsif attic_type == "cathedral ceiling"
+    return "living space"
+  elsif attic_type == "flat roof"
+    return "living space"
   end
 
   fail "Unexpected attic type."
