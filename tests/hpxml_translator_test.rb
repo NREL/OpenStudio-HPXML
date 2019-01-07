@@ -255,7 +255,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Roofs
-    bldg_details.elements.each('Enclosure/AtticAndRoof/Attics/Attic/Roofs/Roof') do |roof|
+    bldg_details.elements.each('Enclosure/Attics/Attic/Roofs/Roof') do |roof|
       roof_id = roof.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -286,6 +286,14 @@ class HPXMLTranslatorTest < MiniTest::Test
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+      # Azimuth
+      if XMLHelper.has_element(roof, 'Azimuth')
+        hpxml_value = Float(XMLHelper.get_value(roof, 'Azimuth'))
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Azimuth' AND Units='deg'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
     end
 
     # Enclosure Foundation Slabs
@@ -329,7 +337,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Walls
-    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="ambient"]] | Enclosure/AtticAndRoof/Attics/Attic/Walls/Wall[extension[ExteriorAdjacentTo="ambient"]]') do |wall|
+    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="outside"]] | Enclosure/Attics/Attic/Walls/Wall[extension[ExteriorAdjacentTo="outside"]]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -359,6 +367,14 @@ class HPXMLTranslatorTest < MiniTest::Test
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(90.0, sql_value, 0.01)
+
+      # Azimuth
+      if XMLHelper.has_element(wall, 'Azimuth')
+        hpxml_value = Float(XMLHelper.get_value(wall, 'Azimuth'))
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Azimuth' AND Units='deg'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
     end
 
     # Enclosure Windows/Skylights
@@ -393,7 +409,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_epsilon(90.0, sql_value, 0.01)
       elsif XMLHelper.has_element(subsurface, "AttachedToRoof")
         hpxml_value = nil
-        bldg_details.elements.each('Enclosure/AtticAndRoof/Attics/Attic/Roofs/Roof') do |roof|
+        bldg_details.elements.each('Enclosure/Attics/Attic/Roofs/Roof') do |roof|
           next if roof.elements["SystemIdentifier"].attributes["id"] != subsurface.elements["AttachedToRoof"].attributes["idref"]
 
           hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")

@@ -2438,6 +2438,7 @@ class HVAC
         ideal_air.setMinimumCoolingSupplyAirHumidityRatio(0.01)
         ideal_air.setHeatingLimit('LimitCapacity')
         ideal_air.setMaximumSensibleHeatingCapacity(0.0)
+        ideal_air.setHeatingAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
         ideal_air.setCoolingLimit('NoLimit')
         ideal_air.setDehumidificationControlType('None')
         ideal_air.setHumidificationControlType('None')
@@ -2468,6 +2469,7 @@ class HVAC
         ideal_air.setHeatingLimit('NoLimit')
         ideal_air.setCoolingLimit('LimitCapacity')
         ideal_air.setMaximumTotalCoolingCapacity(0.0)
+        ideal_air.setCoolingAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
         ideal_air.setDehumidificationControlType('None')
         ideal_air.setHumidificationControlType('None')
         ideal_air.addToThermalZone(zone)
@@ -3946,9 +3948,9 @@ class HVAC
       cooling_equipment << ptac
     end
 
-    if self.has_ideal_air(model, runner, thermal_zone)
+    if self.has_ideal_air_cooling(model, runner, thermal_zone)
       runner.registerInfo("Found ideal air system in #{thermal_zone.name}.")
-      ideal_air = self.get_ideal_air(model, runner, thermal_zone)
+      ideal_air = self.get_ideal_air_cooling(model, runner, thermal_zone)
       cooling_equipment << ideal_air
     end
 
@@ -4007,9 +4009,9 @@ class HVAC
       heating_equipment << system
     end
 
-    if self.has_ideal_air(model, runner, thermal_zone)
+    if self.has_ideal_air_heating(model, runner, thermal_zone)
       runner.registerInfo("Found ideal air system in #{thermal_zone.name}.")
-      ideal_air = self.get_ideal_air(model, runner, thermal_zone)
+      ideal_air = self.get_ideal_air_heating(model, runner, thermal_zone)
       heating_equipment << ideal_air
     end
 
@@ -4155,10 +4157,22 @@ class HVAC
     return dehums
   end
 
-  def self.get_ideal_air(model, runner, thermal_zone)
-    # Returns the ideal air loads system if available
+  def self.get_ideal_air_heating(model, runner, thermal_zone)
+    # Returns the heating ideal air loads system if available
     model.getZoneHVACIdealLoadsAirSystems.each do |ideal_air|
       next unless thermal_zone.handle.to_s == ideal_air.thermalZone.get.handle.to_s
+      next if ideal_air.heatingAvailabilitySchedule == model.alwaysOffDiscreteSchedule
+
+      return ideal_air
+    end
+    return nil
+  end
+
+  def self.get_ideal_air_cooling(model, runner, thermal_zone)
+    # Returns the heating ideal air loads system if available
+    model.getZoneHVACIdealLoadsAirSystems.each do |ideal_air|
+      next unless thermal_zone.handle.to_s == ideal_air.thermalZone.get.handle.to_s
+      next if ideal_air.coolingAvailabilitySchedule == model.alwaysOffDiscreteSchedule
 
       return ideal_air
     end
@@ -4354,8 +4368,17 @@ class HVAC
     return true
   end
 
-  def self.has_ideal_air(model, runner, thermal_zone)
-    ideal_air = self.get_ideal_air(model, runner, thermal_zone)
+  def self.has_ideal_air_heating(model, runner, thermal_zone)
+    ideal_air = self.get_ideal_air_heating(model, runner, thermal_zone)
+    if not ideal_air.nil?
+      return true
+    end
+
+    return false
+  end
+
+  def self.has_ideal_air_cooling(model, runner, thermal_zone)
+    ideal_air = self.get_ideal_air_heating(model, runner, thermal_zone)
     if not ideal_air.nil?
       return true
     end
