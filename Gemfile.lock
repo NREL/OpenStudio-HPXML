@@ -4,12 +4,14 @@ GEM
     mini_portile2 (2.1.0)
     nokogiri (1.6.8.1-x64-mingw32)
       mini_portile2 (~> 2.1.0)
+    yard (0.9.16)
 
 PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
   nokogiri (~> 1.6, <= 1.6.8.1)
+  yard
 
 BUNDLED WITH
-   1.16.1
+   1.17.1
