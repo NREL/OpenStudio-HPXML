@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: EnergyGuideLabel
+  
+    &mdash; Documentation by YARD 0.9.16
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "EnergyGuideLabel";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (E)</a> &raquo;
+    
+    
+    <span class="title">EnergyGuideLabel</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: EnergyGuideLabel
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">EnergyGuideLabel</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>resources/appliances.rb</dd>
+  </dl>
+  
+</div>
+
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_energy_guide_elec_cost-class_method" title="get_energy_guide_elec_cost (class method)">.<strong>get_energy_guide_elec_cost</strong>(date)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_energy_guide_gas_cost-class_method" title="get_energy_guide_gas_cost (class method)">.<strong>get_energy_guide_gas_cost</strong>(date)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="get_energy_guide_elec_cost-class_method">
+  
+    .<strong>get_energy_guide_elec_cost</strong>(date)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1331
+1332
+1333
+1334
+1335
+1336
+1337
+1338
+1339
+1340
+1341
+1342
+1343
+1344
+1345
+1346
+1347
+1348
+1349
+1350
+1351
+1352
+1353
+1354
+1355
+1356
+1357
+1358
+1359
+1360
+1361
+1362
+1363
+1364
+1365
+1366
+1367
+1368
+1369
+1370
+1371
+1372
+1373
+1374
+1375
+1376
+1377
+1378
+1379
+1380
+1381
+1382
+1383
+1384
+1385
+1386
+1387
+1388
+1389
+1390
+1391
+1392
+1393
+1394
+1395
+1396
+1397
+1398
+1399
+1400
+1401
+1402
+1403
+1404
+1405
+1406
+1407
+1408
+1409
+1410
+1411
+1412</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/appliances.rb', line 1331</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_energy_guide_elec_cost'>get_energy_guide_elec_cost</span><span class='lparen'>(</span><span class='id identifier rubyid_date'>date</span><span class='rparen'>)</span>
+  <span class='comment'># Search for, e.g., &quot;Representative Average Unit Costs of Energy for Five Residential Energy Sources (1996)&quot;
+</span>  <span class='kw'>if</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>&lt;=</span> <span class='int'>1991</span>
+    <span class='comment'># http://books.google.com/books?id=GsY5AAAAIAAJ&amp;pg=PA184&amp;lpg=PA184&amp;dq=%22Representative+Average+Unit+Costs+of+Energy+for+Five+Residential+Energy+Sources%22+1991&amp;source=bl&amp;ots=QuQ83OQ1Wd&amp;sig=jEsENidBQCtDnHkqpXGE3VYoLEg&amp;hl=en&amp;sa=X&amp;ei=3QOjT-y4IJCo8QSsgIHVCg&amp;ved=0CDAQ6AEwBA#v=onepage&amp;q=%22Representative%20Average%20Unit%20Costs%20of%20Energy%20for%20Five%20Residential%20Energy%20Sources%22%201991&amp;f=false
+</span>    <span class='kw'>return</span> <span class='float'>8.24</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1992</span>
+    <span class='comment'># http://books.google.com/books?id=esk5AAAAIAAJ&amp;pg=PA193&amp;lpg=PA193&amp;dq=%22Representative+Average+Unit+Costs+of+Energy+for+Five+Residential+Energy+Sources%22+1992&amp;source=bl&amp;ots=tiUb_2hZ7O&amp;sig=xG2k0WRDwVNauPhoXEQOAbCF80w&amp;hl=en&amp;sa=X&amp;ei=owOjT7aOMoic9gTw6P3vCA&amp;ved=0CDIQ6AEwAw#v=onepage&amp;q=%22Representative%20Average%20Unit%20Costs%20of%20Energy%20for%20Five%20Residential%20Energy%20Sources%22%201992&amp;f=false
+</span>    <span class='kw'>return</span> <span class='float'>8.25</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1993</span>
+    <span class='comment'># No data, use prev/next years
+</span>    <span class='kw'>return</span> <span class='lparen'>(</span><span class='float'>8.25</span> <span class='op'>+</span> <span class='float'>8.41</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='float'>2.0</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1994</span>
+    <span class='comment'># http://govpulse.us/entries/1994/02/08/94-2823/rule-concerning-disclosures-of-energy-consumption-and-water-use-information-about-certain-home-appli
+</span>    <span class='kw'>return</span> <span class='float'>8.41</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1995</span>
+    <span class='comment'># http://www.ftc.gov/os/fedreg/1995/february/950217appliancelabelingrule.pdf
+</span>    <span class='kw'>return</span> <span class='float'>8.67</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1996</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-1996-01-19/pdf/96-574.pdf
+</span>    <span class='kw'>return</span> <span class='float'>8.60</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1997</span>
+    <span class='comment'># http://www.ftc.gov/os/fedreg/1997/february/970205ruleconcerningdisclosures.pdf
+</span>    <span class='kw'>return</span> <span class='float'>8.31</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1998</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-1997-12-08/html/97-32046.htm
+</span>    <span class='kw'>return</span> <span class='float'>8.42</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1999</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-1999-01-05/html/99-89.htm
+</span>    <span class='kw'>return</span> <span class='float'>8.22</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2000</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2000-02-07/html/00-2707.htm
+</span>    <span class='kw'>return</span> <span class='float'>8.03</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2001</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2001-03-08/html/01-5668.htm
+</span>    <span class='kw'>return</span> <span class='float'>8.29</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2002</span>
+    <span class='comment'># http://govpulse.us/entries/2002/06/07/02-14333/rule-concerning-disclosures-regarding-energy-consumption-and-water-use-of-certain-home-appliances-an#id963086
+</span>    <span class='kw'>return</span> <span class='float'>8.28</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2003</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2003-04-09/html/03-8634.htm
+</span>    <span class='kw'>return</span> <span class='float'>8.41</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2004</span>
+    <span class='comment'># http://www.ftc.gov/os/fedreg/2004/april/040430ruleconcerningdisclosures.pdf
+</span>    <span class='kw'>return</span> <span class='float'>8.60</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2005</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2005_costs.pdf
+</span>    <span class='kw'>return</span> <span class='float'>9.06</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2006</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2006_energy_costs.pdf
+</span>    <span class='kw'>return</span> <span class='float'>9.91</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2007</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/price_notice_032707.pdf
+</span>    <span class='kw'>return</span> <span class='float'>10.65</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2008</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2008_forecast.pdf
+</span>    <span class='kw'>return</span> <span class='float'>10.80</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2009</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/commercial/pdfs/ee_rep_avg_unit_costs.pdf
+</span>    <span class='kw'>return</span> <span class='float'>11.40</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2010</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2010-03-18/html/2010-5936.htm
+</span>    <span class='kw'>return</span> <span class='float'>11.50</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2011</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2011_average_representative_unit_costs_of_energy.pdf
+</span>    <span class='kw'>return</span> <span class='float'>11.65</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2012</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2012-04-26/pdf/2012-10058.pdf
+</span>    <span class='kw'>return</span> <span class='float'>11.84</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2013</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2013-03-22/pdf/2013-06618.pdf
+</span>    <span class='kw'>return</span> <span class='float'>12.10</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2014</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2014-03-18/pdf/2014-05949.pdf
+</span>    <span class='kw'>return</span> <span class='float'>12.40</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>&gt;=</span> <span class='int'>2015</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2015-08-27/pdf/2015-21243.pdf
+</span>    <span class='kw'>return</span> <span class='float'>12.70</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>&gt;=</span> <span class='int'>2016</span>
+    <span class='comment'># https://www.gpo.gov/fdsys/pkg/FR-2016-03-23/pdf/2016-06505.pdf
+</span>    <span class='kw'>return</span> <span class='float'>12.60</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_energy_guide_gas_cost-class_method">
+  
+    .<strong>get_energy_guide_gas_cost</strong>(date)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1248
+1249
+1250
+1251
+1252
+1253
+1254
+1255
+1256
+1257
+1258
+1259
+1260
+1261
+1262
+1263
+1264
+1265
+1266
+1267
+1268
+1269
+1270
+1271
+1272
+1273
+1274
+1275
+1276
+1277
+1278
+1279
+1280
+1281
+1282
+1283
+1284
+1285
+1286
+1287
+1288
+1289
+1290
+1291
+1292
+1293
+1294
+1295
+1296
+1297
+1298
+1299
+1300
+1301
+1302
+1303
+1304
+1305
+1306
+1307
+1308
+1309
+1310
+1311
+1312
+1313
+1314
+1315
+1316
+1317
+1318
+1319
+1320
+1321
+1322
+1323
+1324
+1325
+1326
+1327
+1328
+1329</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/appliances.rb', line 1248</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_energy_guide_gas_cost'>get_energy_guide_gas_cost</span><span class='lparen'>(</span><span class='id identifier rubyid_date'>date</span><span class='rparen'>)</span>
+  <span class='comment'># Search for, e.g., &quot;Representative Average Unit Costs of Energy for Five Residential Energy Sources (1996)&quot;
+</span>  <span class='kw'>if</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>&lt;=</span> <span class='int'>1991</span>
+    <span class='comment'># http://books.google.com/books?id=GsY5AAAAIAAJ&amp;pg=PA184&amp;lpg=PA184&amp;dq=%22Representative+Average+Unit+Costs+of+Energy+for+Five+Residential+Energy+Sources%22+1991&amp;source=bl&amp;ots=QuQ83OQ1Wd&amp;sig=jEsENidBQCtDnHkqpXGE3VYoLEg&amp;hl=en&amp;sa=X&amp;ei=3QOjT-y4IJCo8QSsgIHVCg&amp;ved=0CDAQ6AEwBA#v=onepage&amp;q=%22Representative%20Average%20Unit%20Costs%20of%20Energy%20for%20Five%20Residential%20Energy%20Sources%22%201991&amp;f=false
+</span>    <span class='kw'>return</span> <span class='float'>60.54</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1992</span>
+    <span class='comment'># http://books.google.com/books?id=esk5AAAAIAAJ&amp;pg=PA193&amp;lpg=PA193&amp;dq=%22Representative+Average+Unit+Costs+of+Energy+for+Five+Residential+Energy+Sources%22+1992&amp;source=bl&amp;ots=tiUb_2hZ7O&amp;sig=xG2k0WRDwVNauPhoXEQOAbCF80w&amp;hl=en&amp;sa=X&amp;ei=owOjT7aOMoic9gTw6P3vCA&amp;ved=0CDIQ6AEwAw#v=onepage&amp;q=%22Representative%20Average%20Unit%20Costs%20of%20Energy%20for%20Five%20Residential%20Energy%20Sources%22%201992&amp;f=false
+</span>    <span class='kw'>return</span> <span class='float'>58.0</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1993</span>
+    <span class='comment'># No data, use prev/next years
+</span>    <span class='kw'>return</span> <span class='lparen'>(</span><span class='float'>58.0</span> <span class='op'>+</span> <span class='float'>60.40</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='float'>2.0</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1994</span>
+    <span class='comment'># http://govpulse.us/entries/1994/02/08/94-2823/rule-concerning-disclosures-of-energy-consumption-and-water-use-information-about-certain-home-appli
+</span>    <span class='kw'>return</span> <span class='float'>60.40</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1995</span>
+    <span class='comment'># http://www.ftc.gov/os/fedreg/1995/february/950217appliancelabelingrule.pdf
+</span>    <span class='kw'>return</span> <span class='float'>63.0</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1996</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-1996-01-19/pdf/96-574.pdf
+</span>    <span class='kw'>return</span> <span class='float'>62.6</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1997</span>
+    <span class='comment'># http://www.ftc.gov/os/fedreg/1997/february/970205ruleconcerningdisclosures.pdf
+</span>    <span class='kw'>return</span> <span class='float'>61.2</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1998</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-1997-12-08/html/97-32046.htm
+</span>    <span class='kw'>return</span> <span class='float'>61.9</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>1999</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-1999-01-05/html/99-89.htm
+</span>    <span class='kw'>return</span> <span class='float'>68.8</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2000</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2000-02-07/html/00-2707.htm
+</span>    <span class='kw'>return</span> <span class='float'>68.8</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2001</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2001-03-08/html/01-5668.htm
+</span>    <span class='kw'>return</span> <span class='float'>83.7</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2002</span>
+    <span class='comment'># http://govpulse.us/entries/2002/06/07/02-14333/rule-concerning-disclosures-regarding-energy-consumption-and-water-use-of-certain-home-appliances-an#id963086
+</span>    <span class='kw'>return</span> <span class='float'>65.6</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2003</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2003-04-09/html/03-8634.htm
+</span>    <span class='kw'>return</span> <span class='float'>81.6</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2004</span>
+    <span class='comment'># http://www.ftc.gov/os/fedreg/2004/april/040430ruleconcerningdisclosures.pdf
+</span>    <span class='kw'>return</span> <span class='float'>91.0</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2005</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2005_costs.pdf
+</span>    <span class='kw'>return</span> <span class='float'>109.2</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2006</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2006_energy_costs.pdf
+</span>    <span class='kw'>return</span> <span class='float'>141.5</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2007</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/price_notice_032707.pdf
+</span>    <span class='kw'>return</span> <span class='float'>121.8</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2008</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2008_forecast.pdf
+</span>    <span class='kw'>return</span> <span class='float'>132.8</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2009</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/commercial/pdfs/ee_rep_avg_unit_costs.pdf
+</span>    <span class='kw'>return</span> <span class='float'>111.2</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2010</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2010-03-18/html/2010-5936.htm
+</span>    <span class='kw'>return</span> <span class='float'>119.4</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2011</span>
+    <span class='comment'># http://www1.eere.energy.gov/buildings/appliance_standards/pdfs/2011_average_representative_unit_costs_of_energy.pdf
+</span>    <span class='kw'>return</span> <span class='float'>110.1</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2012</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2012-04-26/pdf/2012-10058.pdf
+</span>    <span class='kw'>return</span> <span class='float'>105.9</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2013</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2013-03-22/pdf/2013-06618.pdf
+</span>    <span class='kw'>return</span> <span class='float'>108.7</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>==</span> <span class='int'>2014</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2014-03-18/pdf/2014-05949.pdf
+</span>    <span class='kw'>return</span> <span class='float'>112.8</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>&gt;=</span> <span class='int'>2015</span>
+    <span class='comment'># http://www.gpo.gov/fdsys/pkg/FR-2015-08-27/pdf/2015-21243.pdf
+</span>    <span class='kw'>return</span> <span class='float'>100.3</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_date'>date</span> <span class='op'>&gt;=</span> <span class='int'>2016</span>
+    <span class='comment'># https://www.gpo.gov/fdsys/pkg/FR-2016-03-23/pdf/2016-06505.pdf
+</span>    <span class='kw'>return</span> <span class='float'>93.2</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Jan  8 16:00:19 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.16 (ruby-2.2.6).
+</div>
+
+    </div>
+  </body>
+</html>

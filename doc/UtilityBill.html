@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: UtilityBill
+  
+    &mdash; Documentation by YARD 0.9.16
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "UtilityBill";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (U)</a> &raquo;
+    
+    
+    <span class="title">UtilityBill</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: UtilityBill
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">UtilityBill</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>resources/util.rb</dd>
+  </dl>
+  
+</div>
+
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#calculate_detailed_electric-class_method" title="calculate_detailed_electric (class method)">.<strong>calculate_detailed_electric</strong>(load, gen, pv_compensation_type, pv_annual_excess_sellback_rate_type, pv_sellback_rate, pv_tariff_rate, tariff, test_name)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#calculate_realtime_electric-class_method" title="calculate_realtime_electric (class method)">.<strong>calculate_realtime_electric</strong>(load, gen, tariffs, test_name)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#calculate_simple-class_method" title="calculate_simple (class method)">.<strong>calculate_simple</strong>(annual_energy, fixed_rate, marginal_rate)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#calculate_simple_electric-class_method" title="calculate_simple_electric (class method)">.<strong>calculate_simple_electric</strong>(load, gen, ur_monthly_fixed_charge, ur_flat_buy_rate, pv_compensation_type, pv_annual_excess_sellback_rate_type, pv_sellback_rate, pv_tariff_rate, test_name)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#remove_leap_day-class_method" title="remove_leap_day (class method)">.<strong>remove_leap_day</strong>(timeseries)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#validate_tariff-class_method" title="validate_tariff (class method)">.<strong>validate_tariff</strong>(tariff)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="calculate_detailed_electric-class_method">
+  
+    .<strong>calculate_detailed_electric</strong>(load, gen, pv_compensation_type, pv_annual_excess_sellback_rate_type, pv_sellback_rate, pv_tariff_rate, tariff, test_name)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 394</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_calculate_detailed_electric'>calculate_detailed_electric</span><span class='lparen'>(</span><span class='id identifier rubyid_load'>load</span><span class='comma'>,</span> <span class='id identifier rubyid_gen'>gen</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_compensation_type'>pv_compensation_type</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_annual_excess_sellback_rate_type'>pv_annual_excess_sellback_rate_type</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_sellback_rate'>pv_sellback_rate</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_tariff_rate'>pv_tariff_rate</span><span class='comma'>,</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='comma'>,</span> <span class='id identifier rubyid_test_name'>test_name</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_analysis_period'>analysis_period</span> <span class='op'>=</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_degradation'>degradation</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_system_use_lifetime_output'>system_use_lifetime_output</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_inflation_rate'>inflation_rate</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_ur_flat_buy_rate'>ur_flat_buy_rate</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_ur_flat_sell_rate'>ur_flat_sell_rate</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_ur_nm_yearend_sell_rate'>ur_nm_yearend_sell_rate</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_ur_enable_net_metering'>ur_enable_net_metering</span> <span class='op'>=</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_ur_excess_monthly_energy_or_dollars'>ur_excess_monthly_energy_or_dollars</span> <span class='op'>=</span> <span class='int'>1</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_pv_annual_excess_sellback_rate_type'>pv_annual_excess_sellback_rate_type</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#PVNetMeteringExcessUserSpecified-class_method" title="Constants.PVNetMeteringExcessUserSpecified (method)">PVNetMeteringExcessUserSpecified</a></span></span>
+    <span class='id identifier rubyid_pv_sellback_rate'>pv_sellback_rate</span> <span class='op'>=</span> <span class='id identifier rubyid_pv_sellback_rate'>pv_sellback_rate</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_pv_compensation_type'>pv_compensation_type</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#PVTypeFeedInTariff-class_method" title="Constants.PVTypeFeedInTariff (method)">PVTypeFeedInTariff</a></span></span>
+    <span class='id identifier rubyid_ur_enable_net_metering'>ur_enable_net_metering</span> <span class='op'>=</span> <span class='int'>0</span>
+    <span class='id identifier rubyid_ur_flat_sell_rate'>ur_flat_sell_rate</span> <span class='op'>=</span> <span class='id identifier rubyid_pv_tariff_rate'>pv_tariff_rate</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_p_data'>p_data</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_create_data_object'>create_data_object</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>analysis_period</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_analysis_period'>analysis_period</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_array'>set_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>degradation</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_degradation'>degradation</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_array'>set_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>gen</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_gen'>gen</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_array'>set_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>load</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_load'>load</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>system_use_lifetime_output</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_system_use_lifetime_output'>system_use_lifetime_output</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>inflation_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_inflation_rate'>inflation_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_flat_buy_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_flat_buy_rate'>ur_flat_buy_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_flat_sell_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_flat_sell_rate'>ur_flat_sell_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_enable_net_metering</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_enable_net_metering'>ur_enable_net_metering</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_nm_yearend_sell_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_nm_yearend_sell_rate'>ur_nm_yearend_sell_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_excess_monthly_energy_or_dollars</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_excess_monthly_energy_or_dollars'>ur_excess_monthly_energy_or_dollars</span><span class='rparen'>)</span>
+
+  <span class='kw'>unless</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:fixedmonthlycharge</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_monthly_fixed_charge</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:fixedmonthlycharge</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_energyweekdayschedule'>energyweekdayschedule</span> <span class='op'>=</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:energyweekdayschedule</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_energyweekdayschedule'>energyweekdayschedule</span><span class='period'>.</span><span class='id identifier rubyid_each_with_index'>each_with_index</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_day_sch'>day_sch</span><span class='comma'>,</span> <span class='id identifier rubyid_i'>i</span><span class='op'>|</span>
+    <span class='id identifier rubyid_shifted_day_sch'>shifted_day_sch</span> <span class='op'>=</span> <span class='id identifier rubyid_day_sch'>day_sch</span><span class='lbracket'>[</span><span class='int'>1</span><span class='op'>..</span><span class='op'>-</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='lbracket'>[</span><span class='id identifier rubyid_day_sch'>day_sch</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_energyweekdayschedule'>energyweekdayschedule</span><span class='lbracket'>[</span><span class='id identifier rubyid_i'>i</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_shifted_day_sch'>shifted_day_sch</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_energyweekendschedule'>energyweekendschedule</span> <span class='op'>=</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:energyweekendschedule</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_energyweekendschedule'>energyweekendschedule</span><span class='period'>.</span><span class='id identifier rubyid_each_with_index'>each_with_index</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_day_sch'>day_sch</span><span class='comma'>,</span> <span class='id identifier rubyid_i'>i</span><span class='op'>|</span>
+    <span class='id identifier rubyid_shifted_day_sch'>shifted_day_sch</span> <span class='op'>=</span> <span class='id identifier rubyid_day_sch'>day_sch</span><span class='lbracket'>[</span><span class='int'>1</span><span class='op'>..</span><span class='op'>-</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='lbracket'>[</span><span class='id identifier rubyid_day_sch'>day_sch</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span><span class='rbracket'>]</span>
+    <span class='id identifier rubyid_energyweekendschedule'>energyweekendschedule</span><span class='lbracket'>[</span><span class='id identifier rubyid_i'>i</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_shifted_day_sch'>shifted_day_sch</span>
+  <span class='kw'>end</span>
+
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_ec_enable</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='int'>1</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_matrix'>set_matrix</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_ec_sched_weekday</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='const'>Matrix</span><span class='period'>.</span><span class='id identifier rubyid_rows'>rows</span><span class='lparen'>(</span><span class='id identifier rubyid_energyweekdayschedule'>energyweekdayschedule</span><span class='rparen'>)</span> <span class='op'>+</span> <span class='const'>Matrix</span><span class='period'>.</span><span class='id identifier rubyid_rows'>rows</span><span class='lparen'>(</span><span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>12</span><span class='comma'>,</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>24</span><span class='comma'>,</span> <span class='int'>1</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_matrix'>set_matrix</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_ec_sched_weekend</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='const'>Matrix</span><span class='period'>.</span><span class='id identifier rubyid_rows'>rows</span><span class='lparen'>(</span><span class='id identifier rubyid_energyweekendschedule'>energyweekendschedule</span><span class='rparen'>)</span> <span class='op'>+</span> <span class='const'>Matrix</span><span class='period'>.</span><span class='id identifier rubyid_rows'>rows</span><span class='lparen'>(</span><span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>12</span><span class='comma'>,</span> <span class='const'>Array</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>24</span><span class='comma'>,</span> <span class='int'>1</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:energyratestructure</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_each_with_index'>each_with_index</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_period'>period</span><span class='comma'>,</span> <span class='id identifier rubyid_i'>i</span><span class='op'>|</span>
+    <span class='id identifier rubyid_period_num'>period_num</span> <span class='op'>=</span> <span class='id identifier rubyid_i'>i</span> <span class='op'>+</span> <span class='int'>1</span>
+    <span class='id identifier rubyid_period'>period</span><span class='period'>.</span><span class='id identifier rubyid_each_with_index'>each_with_index</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_tier'>tier</span><span class='comma'>,</span> <span class='id identifier rubyid_j'>j</span><span class='op'>|</span>
+      <span class='id identifier rubyid_tier_num'>tier_num</span> <span class='op'>=</span> <span class='id identifier rubyid_j'>j</span> <span class='op'>+</span> <span class='int'>1</span>
+      <span class='id identifier rubyid_rate'>rate</span> <span class='op'>=</span> <span class='int'>0</span>
+      <span class='kw'>unless</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:rate</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+        <span class='id identifier rubyid_rate'>rate</span> <span class='op'>+=</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:rate</span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+      <span class='kw'>unless</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:adj</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+        <span class='id identifier rubyid_rate'>rate</span> <span class='op'>+=</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:adj</span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+      <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_ec_p</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_period_num'>period_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_t</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_tier_num'>tier_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_br</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_rate'>rate</span><span class='rparen'>)</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_pv_annual_excess_sellback_rate_type'>pv_annual_excess_sellback_rate_type</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#PVNetMeteringExcessRetailElectricityCost-class_method" title="Constants.PVNetMeteringExcessRetailElectricityCost (method)">PVNetMeteringExcessRetailElectricityCost</a></span></span>
+        <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_ec_p</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_period_num'>period_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_t</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_tier_num'>tier_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_sr</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_rate'>rate</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_max'>max</span> <span class='op'>=</span> <span class='float'>1000000000.0</span>
+      <span class='kw'>unless</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:max</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+        <span class='id identifier rubyid_max'>max</span> <span class='op'>=</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:max</span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+      <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_ec_p</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_period_num'>period_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_t</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_tier_num'>tier_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_ub</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_max'>max</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>unless</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:demandratestructure</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_dc_enable</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='int'>1</span><span class='rparen'>)</span>
+    <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_matrix'>set_matrix</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_dc_sched_weekday</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='const'>Matrix</span><span class='period'>.</span><span class='id identifier rubyid_rows'>rows</span><span class='lparen'>(</span><span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:demandweekdayschedule</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_matrix'>set_matrix</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_dc_sched_weekend</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='const'>Matrix</span><span class='period'>.</span><span class='id identifier rubyid_rows'>rows</span><span class='lparen'>(</span><span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:demandweekendschedule</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_tariff'>tariff</span><span class='lbracket'>[</span><span class='symbol'>:demandratestructure</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_each_with_index'>each_with_index</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_period'>period</span><span class='comma'>,</span> <span class='id identifier rubyid_i'>i</span><span class='op'>|</span>
+      <span class='id identifier rubyid_period_num'>period_num</span> <span class='op'>=</span> <span class='id identifier rubyid_i'>i</span> <span class='op'>+</span> <span class='int'>1</span>
+      <span class='id identifier rubyid_period'>period</span><span class='period'>.</span><span class='id identifier rubyid_each_with_index'>each_with_index</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_tier'>tier</span><span class='comma'>,</span> <span class='id identifier rubyid_j'>j</span><span class='op'>|</span>
+        <span class='id identifier rubyid_tier_num'>tier_num</span> <span class='op'>=</span> <span class='id identifier rubyid_j'>j</span> <span class='op'>+</span> <span class='int'>1</span>
+        <span class='id identifier rubyid_rate'>rate</span> <span class='op'>=</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:rate</span><span class='rbracket'>]</span>
+        <span class='kw'>unless</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:adj</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+          <span class='id identifier rubyid_rate'>rate</span> <span class='op'>+=</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:adj</span><span class='rbracket'>]</span>
+        <span class='kw'>end</span>
+        <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_dc_p</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_period_num'>period_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_t</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_tier_num'>tier_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_dc</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_rate'>rate</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_max'>max</span> <span class='op'>=</span> <span class='float'>1000000000.0</span>
+        <span class='kw'>unless</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:max</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+          <span class='id identifier rubyid_max'>max</span> <span class='op'>=</span> <span class='id identifier rubyid_tier'>tier</span><span class='lbracket'>[</span><span class='symbol'>:max</span><span class='rbracket'>]</span>
+        <span class='kw'>end</span>
+        <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_dc_p</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_period_num'>period_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_t</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_tier_num'>tier_num</span><span class='embexpr_end'>}</span><span class='tstring_content'>_ub</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_max'>max</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_p_mod'>p_mod</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_create_module'>create_module</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>utilityrate3</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_execute_module'>execute_module</span><span class='lparen'>(</span><span class='id identifier rubyid_p_mod'>p_mod</span><span class='comma'>,</span> <span class='id identifier rubyid_p_data'>p_data</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_utility_bills'>utility_bills</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_get_array'>get_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>utility_bill_w_sys</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_total_bill'>total_bill</span> <span class='op'>=</span> <span class='id identifier rubyid_utility_bills'>utility_bills</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span>
+
+  <span class='kw'>unless</span> <span class='id identifier rubyid_test_name'>test_name</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_hourly'>hourly</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_get_array'>get_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>year1_hourly_ec_with_system</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='const'>CSV</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./measures/UtilityBillCalculations/tests/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_test_name'>test_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>.csv</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>w</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_csv'>csv</span><span class='op'>|</span>
+      <span class='id identifier rubyid_csv'>csv</span> <span class='op'>&lt;&lt;</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>year1_hourly_ec_with_system</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_hourly'>hourly</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span>
+        <span class='id identifier rubyid_csv'>csv</span> <span class='op'>&lt;&lt;</span> <span class='lbracket'>[</span><span class='id identifier rubyid_val'>val</span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_total_bill'>total_bill</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="calculate_realtime_electric-class_method">
+  
+    .<strong>calculate_realtime_electric</strong>(load, gen, tariffs, test_name)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 508</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_calculate_realtime_electric'>calculate_realtime_electric</span><span class='lparen'>(</span><span class='id identifier rubyid_load'>load</span><span class='comma'>,</span> <span class='id identifier rubyid_gen'>gen</span><span class='comma'>,</span> <span class='id identifier rubyid_tariffs'>tariffs</span><span class='comma'>,</span> <span class='id identifier rubyid_test_name'>test_name</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_rates'>rates</span> <span class='op'>=</span> <span class='id identifier rubyid_tariffs'>tariffs</span><span class='lbracket'>[</span><span class='symbol'>:realtimepricing</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>,</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_collect'>collect</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_i'>i</span><span class='op'>|</span> <span class='id identifier rubyid_i'>i</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_net_facility'>net_facility</span> <span class='op'>=</span> <span class='id identifier rubyid_load'>load</span><span class='period'>.</span><span class='id identifier rubyid_zip'>zip</span><span class='lparen'>(</span><span class='id identifier rubyid_gen'>gen</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span> <span class='id identifier rubyid_y'>y</span><span class='op'>|</span> <span class='id identifier rubyid_x'>x</span> <span class='op'>-</span> <span class='id identifier rubyid_y'>y</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_hourly'>hourly</span> <span class='op'>=</span> <span class='id identifier rubyid_net_facility'>net_facility</span><span class='period'>.</span><span class='id identifier rubyid_zip'>zip</span><span class='lparen'>(</span><span class='id identifier rubyid_rates'>rates</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_map'>map</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span> <span class='id identifier rubyid_y'>y</span><span class='op'>|</span> <span class='id identifier rubyid_x'>x</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_marginal'>marginal</span> <span class='op'>=</span> <span class='id identifier rubyid_hourly'>hourly</span><span class='period'>.</span><span class='id identifier rubyid_inject'>inject</span><span class='lparen'>(</span><span class='int'>0</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_sum'>sum</span><span class='comma'>,</span> <span class='id identifier rubyid_x'>x</span><span class='op'>|</span> <span class='id identifier rubyid_sum'>sum</span> <span class='op'>+</span> <span class='id identifier rubyid_x'>x</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_fixed'>fixed</span> <span class='op'>=</span> <span class='id identifier rubyid_tariffs'>tariffs</span><span class='lbracket'>[</span><span class='symbol'>:fixedmonthlycharge</span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span> <span class='op'>*</span> <span class='float'>12.0</span>
+  <span class='id identifier rubyid_total_bill'>total_bill</span> <span class='op'>=</span> <span class='id identifier rubyid_marginal'>marginal</span> <span class='op'>+</span> <span class='id identifier rubyid_fixed'>fixed</span>
+
+  <span class='kw'>unless</span> <span class='id identifier rubyid_test_name'>test_name</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='const'>CSV</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./measures/UtilityBillCalculations/tests/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_test_name'>test_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>.csv</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>w</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_csv'>csv</span><span class='op'>|</span>
+      <span class='id identifier rubyid_csv'>csv</span> <span class='op'>&lt;&lt;</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>year1_hourly_ec_with_system</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_hourly'>hourly</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span>
+        <span class='id identifier rubyid_csv'>csv</span> <span class='op'>&lt;&lt;</span> <span class='lbracket'>[</span><span class='id identifier rubyid_val'>val</span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_total_bill'>total_bill</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="calculate_simple-class_method">
+  
+    .<strong>calculate_simple</strong>(annual_energy, fixed_rate, marginal_rate)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+329
+330
+331
+332
+333</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 329</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_calculate_simple'>calculate_simple</span><span class='lparen'>(</span><span class='id identifier rubyid_annual_energy'>annual_energy</span><span class='comma'>,</span> <span class='id identifier rubyid_fixed_rate'>fixed_rate</span><span class='comma'>,</span> <span class='id identifier rubyid_marginal_rate'>marginal_rate</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_total_annual_energy'>total_annual_energy</span> <span class='op'>=</span> <span class='id identifier rubyid_annual_energy'>annual_energy</span><span class='period'>.</span><span class='id identifier rubyid_inject'>inject</span><span class='lparen'>(</span><span class='int'>0</span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_sum'>sum</span><span class='comma'>,</span> <span class='id identifier rubyid_x'>x</span><span class='op'>|</span> <span class='id identifier rubyid_sum'>sum</span> <span class='op'>+</span> <span class='id identifier rubyid_x'>x</span> <span class='rbrace'>}</span>
+  <span class='id identifier rubyid_total_bill'>total_bill</span> <span class='op'>=</span> <span class='float'>12.0</span> <span class='op'>*</span> <span class='id identifier rubyid_fixed_rate'>fixed_rate</span> <span class='op'>+</span> <span class='id identifier rubyid_total_annual_energy'>total_annual_energy</span> <span class='op'>*</span> <span class='id identifier rubyid_marginal_rate'>marginal_rate</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_total_bill'>total_bill</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="calculate_simple_electric-class_method">
+  
+    .<strong>calculate_simple_electric</strong>(load, gen, ur_monthly_fixed_charge, ur_flat_buy_rate, pv_compensation_type, pv_annual_excess_sellback_rate_type, pv_sellback_rate, pv_tariff_rate, test_name)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 342</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_calculate_simple_electric'>calculate_simple_electric</span><span class='lparen'>(</span><span class='id identifier rubyid_load'>load</span><span class='comma'>,</span> <span class='id identifier rubyid_gen'>gen</span><span class='comma'>,</span> <span class='id identifier rubyid_ur_monthly_fixed_charge'>ur_monthly_fixed_charge</span><span class='comma'>,</span> <span class='id identifier rubyid_ur_flat_buy_rate'>ur_flat_buy_rate</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_compensation_type'>pv_compensation_type</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_annual_excess_sellback_rate_type'>pv_annual_excess_sellback_rate_type</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_sellback_rate'>pv_sellback_rate</span><span class='comma'>,</span> <span class='id identifier rubyid_pv_tariff_rate'>pv_tariff_rate</span><span class='comma'>,</span> <span class='id identifier rubyid_test_name'>test_name</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_analysis_period'>analysis_period</span> <span class='op'>=</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_degradation'>degradation</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_system_use_lifetime_output'>system_use_lifetime_output</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_inflation_rate'>inflation_rate</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_ur_flat_sell_rate'>ur_flat_sell_rate</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_ur_nm_yearend_sell_rate'>ur_nm_yearend_sell_rate</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='id identifier rubyid_ur_enable_net_metering'>ur_enable_net_metering</span> <span class='op'>=</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_ur_excess_monthly_energy_or_dollars'>ur_excess_monthly_energy_or_dollars</span> <span class='op'>=</span> <span class='int'>0</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_pv_annual_excess_sellback_rate_type'>pv_annual_excess_sellback_rate_type</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#PVNetMeteringExcessRetailElectricityCost-class_method" title="Constants.PVNetMeteringExcessRetailElectricityCost (method)">PVNetMeteringExcessRetailElectricityCost</a></span></span>
+    <span class='id identifier rubyid_pv_sellback_rate'>pv_sellback_rate</span> <span class='op'>=</span> <span class='id identifier rubyid_ur_flat_buy_rate'>ur_flat_buy_rate</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_pv_compensation_type'>pv_compensation_type</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#PVTypeNetMetering-class_method" title="Constants.PVTypeNetMetering (method)">PVTypeNetMetering</a></span></span>
+    <span class='id identifier rubyid_ur_nm_yearend_sell_rate'>ur_nm_yearend_sell_rate</span> <span class='op'>=</span> <span class='id identifier rubyid_pv_sellback_rate'>pv_sellback_rate</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span>
+  <span class='kw'>elsif</span> <span class='id identifier rubyid_pv_compensation_type'>pv_compensation_type</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#PVTypeFeedInTariff-class_method" title="Constants.PVTypeFeedInTariff (method)">PVTypeFeedInTariff</a></span></span>
+    <span class='id identifier rubyid_ur_enable_net_metering'>ur_enable_net_metering</span> <span class='op'>=</span> <span class='int'>0</span>
+    <span class='id identifier rubyid_ur_flat_sell_rate'>ur_flat_sell_rate</span> <span class='op'>=</span> <span class='id identifier rubyid_pv_tariff_rate'>pv_tariff_rate</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_p_data'>p_data</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_create_data_object'>create_data_object</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>analysis_period</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_analysis_period'>analysis_period</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_array'>set_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>degradation</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_degradation'>degradation</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_array'>set_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>gen</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_gen'>gen</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_array'>set_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>load</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_load'>load</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>system_use_lifetime_output</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_system_use_lifetime_output'>system_use_lifetime_output</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>inflation_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_inflation_rate'>inflation_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_flat_buy_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_flat_buy_rate'>ur_flat_buy_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_flat_sell_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_flat_sell_rate'>ur_flat_sell_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_enable_net_metering</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_enable_net_metering'>ur_enable_net_metering</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_nm_yearend_sell_rate</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_nm_yearend_sell_rate'>ur_nm_yearend_sell_rate</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_monthly_fixed_charge</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_monthly_fixed_charge'>ur_monthly_fixed_charge</span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_set_number'>set_number</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ur_excess_monthly_energy_or_dollars</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_ur_excess_monthly_energy_or_dollars'>ur_excess_monthly_energy_or_dollars</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_p_mod'>p_mod</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_create_module'>create_module</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>utilityrate3</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_execute_module'>execute_module</span><span class='lparen'>(</span><span class='id identifier rubyid_p_mod'>p_mod</span><span class='comma'>,</span> <span class='id identifier rubyid_p_data'>p_data</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_utility_bills'>utility_bills</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_get_array'>get_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>utility_bill_w_sys</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_total_bill'>total_bill</span> <span class='op'>=</span> <span class='id identifier rubyid_utility_bills'>utility_bills</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span>
+
+  <span class='kw'>unless</span> <span class='id identifier rubyid_test_name'>test_name</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_hourly'>hourly</span> <span class='op'>=</span> <span class='const'>SscApi</span><span class='period'>.</span><span class='id identifier rubyid_get_array'>get_array</span><span class='lparen'>(</span><span class='id identifier rubyid_p_data'>p_data</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>year1_hourly_ec_with_system</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='const'>CSV</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./measures/UtilityBillCalculations/tests/</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_test_name'>test_name</span><span class='embexpr_end'>}</span><span class='tstring_content'>.csv</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>w</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_csv'>csv</span><span class='op'>|</span>
+      <span class='id identifier rubyid_csv'>csv</span> <span class='op'>&lt;&lt;</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>year1_hourly_ec_with_system</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span>
+      <span class='id identifier rubyid_hourly'>hourly</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span>
+        <span class='id identifier rubyid_csv'>csv</span> <span class='op'>&lt;&lt;</span> <span class='lbracket'>[</span><span class='id identifier rubyid_val'>val</span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_total_bill'>total_bill</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="remove_leap_day-class_method">
+  
+    .<strong>remove_leap_day</strong>(timeseries)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+335
+336
+337
+338
+339
+340</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 335</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_remove_leap_day'>remove_leap_day</span><span class='lparen'>(</span><span class='id identifier rubyid_timeseries'>timeseries</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_timeseries'>timeseries</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='op'>==</span> <span class='int'>8784</span> <span class='comment'># leap year
+</span>    <span class='id identifier rubyid_timeseries'>timeseries</span> <span class='op'>=</span> <span class='id identifier rubyid_timeseries'>timeseries</span><span class='lbracket'>[</span><span class='int'>0</span><span class='op'>..</span><span class='int'>1415</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='id identifier rubyid_timeseries'>timeseries</span><span class='lbracket'>[</span><span class='int'>1440</span><span class='op'>..</span><span class='op'>-</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='comment'># remove leap day
+</span>  <span class='kw'>end</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_timeseries'>timeseries</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="validate_tariff-class_method">
+  
+    .<strong>validate_tariff</strong>(tariff)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+528
+529
+530
+531
+532
+533
+534
+535
+536</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 528</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_validate_tariff'>validate_tariff</span><span class='lparen'>(</span><span class='id identifier rubyid_tariff'>tariff</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='id identifier rubyid_rate_structures_available'>rate_structures_available</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='symbol'>:energyratestructure</span><span class='comma'>,</span> <span class='symbol'>:demandratestructure</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_rate_structures_contained'>rate_structures_contained</span> <span class='op'>=</span> <span class='id identifier rubyid_tariff'>tariff</span><span class='period'>.</span><span class='id identifier rubyid_keys'>keys</span> <span class='op'>&amp;</span> <span class='id identifier rubyid_rate_structures_available'>rate_structures_available</span>
+  <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='id identifier rubyid_rate_structures_contained'>rate_structures_contained</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+
+  <span class='kw'>return</span> <span class='kw'>true</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Jan  8 16:00:15 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.16 (ruby-2.2.6).
+</div>
+
+    </div>
+  </body>
+</html>

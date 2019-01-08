@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: MathTools
+  
+    &mdash; Documentation by YARD 0.9.16
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "MathTools";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (M)</a> &raquo;
+    
+    
+    <span class="title">MathTools</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: MathTools
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">MathTools</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>resources/util.rb</dd>
+  </dl>
+  
+</div>
+
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#bicubic-class_method" title="bicubic (class method)">.<strong>bicubic</strong>(x, y, c)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#biquadratic-class_method" title="biquadratic (class method)">.<strong>biquadratic</strong>(x, y, c)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#interp2-class_method" title="interp2 (class method)">.<strong>interp2</strong>(x, x0, x1, f0, f1)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#interp4-class_method" title="interp4 (class method)">.<strong>interp4</strong>(x, y, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#Iterate-class_method" title="Iterate (class method)">.<strong>Iterate</strong>(x0, f0, x1, f1, x2, f2, icount, cvg)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#quadratic-class_method" title="quadratic (class method)">.<strong>quadratic</strong>(x, c)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#valid_float%3F-class_method" title="valid_float? (class method)">.<strong>valid_float?</strong>(str)  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="bicubic-class_method">
+  
+    .<strong>bicubic</strong>(x, y, c)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 146</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_bicubic'>bicubic</span><span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span> <span class='id identifier rubyid_y'>y</span><span class='comma'>,</span> <span class='id identifier rubyid_c'>c</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>
+  Description:
+  ------------
+      Calculate the result of a bicubic polynomial with independent variables
+      x and y, and a list of coefficients, c:
+
+      z = c[1] + c[2]*x + c[3]*y + c[4]*x**2 + c[5]*x*y + c[6]*y**2 + \
+          c[7]*x**3 + c[8]*y*x**2 + c[9]*x*y**2 + c[10]*y**3
+
+  Inputs:
+  -------
+      x       float      independent variable 1
+      y       float      independent variable 2
+      c       tuple      list of 10 coeffients [floats]
+
+  Outputs:
+  --------
+      z       float      result of bicubic polynomial
+  </span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_c'>c</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>!=</span> <span class='int'>10</span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Error: There must be 10 coefficients in a bicubic polynomial</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_z'>z</span> <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>2</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>3</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span><span class='op'>**</span><span class='int'>2</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>4</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>5</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span><span class='op'>**</span><span class='int'>2</span> <span class='op'>+</span> \
+      <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>6</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span><span class='op'>**</span><span class='int'>3</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>7</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span><span class='op'>**</span><span class='int'>2</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>8</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span><span class='op'>**</span><span class='int'>2</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>9</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span><span class='op'>**</span><span class='int'>3</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_z'>z</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="biquadratic-class_method">
+  
+    .<strong>biquadratic</strong>(x, y, c)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 97</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_biquadratic'>biquadratic</span><span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span> <span class='id identifier rubyid_y'>y</span><span class='comma'>,</span> <span class='id identifier rubyid_c'>c</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>
+  Description:
+  ------------
+      Calculate the result of a biquadratic polynomial with independent variables
+      x and y, and a list of coefficients, c:
+      z = c[1] + c[2]*x + c[3]*x**2 + c[4]*y + c[5]*y**2 + c[6]*x*y
+  Inputs:
+  -------
+      x       float      independent variable 1
+      y       float      independent variable 2
+      c       tuple      list of 6 coeffients [floats]
+  Outputs:
+  --------
+      z       float      result of biquadratic polynomial
+  </span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_c'>c</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='op'>!=</span> <span class='int'>6</span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Error: There must be 6 coefficients in a biquadratic polynomial</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_z'>z</span> <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>2</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span><span class='op'>**</span><span class='int'>2</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>3</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>4</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span><span class='op'>**</span><span class='int'>2</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>5</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_y'>y</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_z'>z</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="interp2-class_method">
+  
+    .<strong>interp2</strong>(x, x0, x1, f0, f1)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+78
+79
+80
+81
+82
+83
+84</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 78</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_interp2'>interp2</span><span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span> <span class='id identifier rubyid_x0'>x0</span><span class='comma'>,</span> <span class='id identifier rubyid_x1'>x1</span><span class='comma'>,</span> <span class='id identifier rubyid_f0'>f0</span><span class='comma'>,</span> <span class='id identifier rubyid_f1'>f1</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>
+  Returns the linear interpolation between two results.
+  </span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_f0'>f0</span> <span class='op'>+</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='id identifier rubyid_x1'>x1</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_f1'>f1</span> <span class='op'>-</span> <span class='id identifier rubyid_f0'>f0</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="interp4-class_method">
+  
+    .<strong>interp4</strong>(x, y, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 86</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_interp4'>interp4</span><span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span> <span class='id identifier rubyid_y'>y</span><span class='comma'>,</span> <span class='id identifier rubyid_x1'>x1</span><span class='comma'>,</span> <span class='id identifier rubyid_x2'>x2</span><span class='comma'>,</span> <span class='id identifier rubyid_y1'>y1</span><span class='comma'>,</span> <span class='id identifier rubyid_y2'>y2</span><span class='comma'>,</span> <span class='id identifier rubyid_fx1y1'>fx1y1</span><span class='comma'>,</span> <span class='id identifier rubyid_fx1y2'>fx1y2</span><span class='comma'>,</span> <span class='id identifier rubyid_fx2y1'>fx2y1</span><span class='comma'>,</span> <span class='id identifier rubyid_fx2y2'>fx2y2</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>
+  Returns the bilinear interpolation between four results.
+  </span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span>
+
+  <span class='kw'>return</span> <span class='lparen'>(</span><span class='id identifier rubyid_fx1y1'>fx1y1</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y2'>y2</span> <span class='op'>-</span> <span class='id identifier rubyid_y1'>y1</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x'>x</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y2'>y2</span> <span class='op'>-</span> <span class='id identifier rubyid_y'>y</span><span class='rparen'>)</span> \
+        <span class='op'>+</span> <span class='lparen'>(</span><span class='id identifier rubyid_fx2y1'>fx2y1</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y2'>y2</span> <span class='op'>-</span> <span class='id identifier rubyid_y1'>y1</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y2'>y2</span> <span class='op'>-</span> <span class='id identifier rubyid_y'>y</span><span class='rparen'>)</span> \
+        <span class='op'>+</span> <span class='lparen'>(</span><span class='id identifier rubyid_fx1y2'>fx1y2</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y2'>y2</span> <span class='op'>-</span> <span class='id identifier rubyid_y1'>y1</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x'>x</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y'>y</span> <span class='op'>-</span> <span class='id identifier rubyid_y1'>y1</span><span class='rparen'>)</span> \
+        <span class='op'>+</span> <span class='lparen'>(</span><span class='id identifier rubyid_fx2y2'>fx2y2</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y2'>y2</span> <span class='op'>-</span> <span class='id identifier rubyid_y1'>y1</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='id identifier rubyid_y'>y</span> <span class='op'>-</span> <span class='id identifier rubyid_y1'>y1</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="Iterate-class_method">
+  
+    .<strong>Iterate</strong>(x0, f0, x1, f1, x2, f2, icount, cvg)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 175</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='const'>Iterate</span><span class='lparen'>(</span><span class='id identifier rubyid_x0'>x0</span><span class='comma'>,</span> <span class='id identifier rubyid_f0'>f0</span><span class='comma'>,</span> <span class='id identifier rubyid_x1'>x1</span><span class='comma'>,</span> <span class='id identifier rubyid_f1'>f1</span><span class='comma'>,</span> <span class='id identifier rubyid_x2'>x2</span><span class='comma'>,</span> <span class='id identifier rubyid_f2'>f2</span><span class='comma'>,</span> <span class='id identifier rubyid_icount'>icount</span><span class='comma'>,</span> <span class='id identifier rubyid_cvg'>cvg</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>
+  Description:
+  ------------
+      Determine if a guess is within tolerance for convergence
+      if not, output a new guess using the Newton-Raphson method
+  Source:
+  -------
+      Based on XITERATE f77 code in ResAC (Brandemuehl)
+  Inputs:
+  -------
+      x0      float    current guess value
+      f0      float    value of function f(x) at current guess value
+      x1,x2   floats   previous two guess values, used to create quadratic
+                       (or linear fit)
+      f1,f2   floats   previous two values of f(x)
+      icount  int      iteration count
+      cvg     bool     Has the iteration reached convergence?
+  Outputs:
+  --------
+      x_new   float    new guess value
+      cvg     bool     Has the iteration reached convergence?
+      x1,x2   floats   updated previous two guess values, used to create quadratic
+                       (or linear fit)
+      f1,f2   floats   updated previous two values of f(x)
+  Example:
+  --------
+      # Find a value of x that makes f(x) equal to some specific value f:
+      # initial guess (all values of x)
+      x = 1.0
+      x1 = x
+      x2 = x
+      # initial error
+      error = f - f(x)
+      error1 = error
+      error2 = error
+      itmax = 50  # maximum iterations
+      cvg = False # initialize convergence to &quot;False&quot;
+      for i in range(1,itmax+1):
+          error = f - f(x)
+          x,cvg,x1,error1,x2,error2 = \
+                                   Iterate(x,error,x1,error1,x2,error2,i,cvg)
+          if cvg:
+              break
+      if cvg:
+          print &quot;x converged after&quot;, i, :iterations&quot;
+      else:
+          print &quot;x did NOT converge after&quot;, i, &quot;iterations&quot;
+      print &quot;x, when f(x) is&quot;, f,&quot;is&quot;, x
+  </span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span>
+
+  <span class='id identifier rubyid_tolRel'>tolRel</span> <span class='op'>=</span> <span class='float'>1e-5</span>
+  <span class='id identifier rubyid_dx'>dx</span> <span class='op'>=</span> <span class='float'>0.1</span>
+
+  <span class='comment'># Test for convergence
+</span>  <span class='kw'>if</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_x0'>x0</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span> <span class='op'>&lt;</span> <span class='id identifier rubyid_tolRel'>tolRel</span> <span class='op'>*</span> <span class='lbracket'>[</span><span class='id identifier rubyid_x0'>x0</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='id identifier rubyid_small'><span class='object_link'><a href="Constants.html#small-class_method" title="Constants.small (method)">small</a></span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_max'>max</span> <span class='kw'>and</span> <span class='id identifier rubyid_icount'>icount</span> <span class='op'>!=</span> <span class='int'>1</span><span class='rparen'>)</span> <span class='kw'>or</span> <span class='id identifier rubyid_f0'>f0</span> <span class='op'>==</span> <span class='int'>0</span>
+    <span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>=</span> <span class='id identifier rubyid_x0'>x0</span>
+    <span class='id identifier rubyid_cvg'>cvg</span> <span class='op'>=</span> <span class='kw'>true</span>
+  <span class='kw'>else</span>
+    <span class='id identifier rubyid_cvg'>cvg</span> <span class='op'>=</span> <span class='kw'>false</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_icount'>icount</span> <span class='op'>==</span> <span class='int'>1</span> <span class='comment'># Perturbation
+</span>      <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>1</span>
+    <span class='kw'>elsif</span> <span class='id identifier rubyid_icount'>icount</span> <span class='op'>==</span> <span class='int'>2</span> <span class='comment'># Linear fit
+</span>      <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>2</span>
+    <span class='kw'>else</span> <span class='comment'># Quadratic fit
+</span>      <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>3</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='int'>3</span>
+      <span class='comment'># Quadratic fit
+</span>      <span class='kw'>if</span> <span class='id identifier rubyid_x0'>x0</span> <span class='op'>==</span> <span class='id identifier rubyid_x1'>x1</span> <span class='comment'># If two xi are equal, use a linear fit
+</span>        <span class='id identifier rubyid_x1'>x1</span> <span class='op'>=</span> <span class='id identifier rubyid_x2'>x2</span>
+        <span class='id identifier rubyid_f1'>f1</span> <span class='op'>=</span> <span class='id identifier rubyid_f2'>f2</span>
+        <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>2</span>
+      <span class='kw'>elsif</span> <span class='id identifier rubyid_x0'>x0</span> <span class='op'>==</span> <span class='id identifier rubyid_x2'>x2</span> <span class='comment'># If two xi are equal, use a linear fit
+</span>        <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>2</span>
+      <span class='kw'>else</span>
+        <span class='comment'># Set up quadratic coefficients
+</span>        <span class='id identifier rubyid_c'>c</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_f2'>f2</span> <span class='op'>-</span> <span class='id identifier rubyid_f0'>f0</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span> <span class='op'>-</span> <span class='lparen'>(</span><span class='id identifier rubyid_f1'>f1</span> <span class='op'>-</span> <span class='id identifier rubyid_f0'>f0</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='id identifier rubyid_x1'>x1</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='id identifier rubyid_x2'>x2</span> <span class='op'>-</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_b'>b</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_f1'>f1</span> <span class='op'>-</span> <span class='id identifier rubyid_f0'>f0</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='id identifier rubyid_x1'>x1</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span> <span class='op'>-</span> <span class='lparen'>(</span><span class='id identifier rubyid_x1'>x1</span> <span class='op'>+</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='id identifier rubyid_c'>c</span>
+        <span class='id identifier rubyid_a'>a</span> <span class='op'>=</span> <span class='id identifier rubyid_f0'>f0</span> <span class='op'>-</span> <span class='lparen'>(</span><span class='id identifier rubyid_b'>b</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span> <span class='op'>*</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='id identifier rubyid_x0'>x0</span>
+
+        <span class='kw'>if</span> <span class='id identifier rubyid_c'>c</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span> <span class='op'>&lt;</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='id identifier rubyid_small'><span class='object_link'><a href="Constants.html#small-class_method" title="Constants.small (method)">small</a></span></span> <span class='comment'># If points are co-linear, use linear fit
+</span>          <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>2</span>
+        <span class='kw'>elsif</span> <span class='lparen'>(</span><span class='lparen'>(</span><span class='id identifier rubyid_a'>a</span> <span class='op'>+</span> <span class='lparen'>(</span><span class='id identifier rubyid_b'>b</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span> <span class='op'>*</span> <span class='id identifier rubyid_x1'>x1</span><span class='rparen'>)</span> <span class='op'>*</span> <span class='id identifier rubyid_x1'>x1</span> <span class='op'>-</span> <span class='id identifier rubyid_f1'>f1</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='id identifier rubyid_f1'>f1</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span> <span class='op'>&gt;</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='id identifier rubyid_small'><span class='object_link'><a href="Constants.html#small-class_method" title="Constants.small (method)">small</a></span></span>
+          <span class='comment'># If coefficients do not accurately predict data points due to
+</span>          <span class='comment'># round-off, use linear fit
+</span>          <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>2</span>
+        <span class='kw'>else</span>
+          <span class='id identifier rubyid_d'>d</span> <span class='op'>=</span> <span class='id identifier rubyid_b'>b</span><span class='op'>**</span><span class='int'>2</span> <span class='op'>-</span> <span class='float'>4.0</span> <span class='op'>*</span> <span class='id identifier rubyid_a'>a</span> <span class='op'>*</span> <span class='id identifier rubyid_c'>c</span> <span class='comment'># calculate discriminant to check for real roots
+</span>          <span class='kw'>if</span> <span class='id identifier rubyid_d'>d</span> <span class='op'>&lt;</span> <span class='float'>0.0</span> <span class='comment'># if no real roots, use linear fit
+</span>            <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>2</span>
+          <span class='kw'>else</span>
+            <span class='kw'>if</span> <span class='id identifier rubyid_d'>d</span> <span class='op'>&gt;</span> <span class='float'>0.0</span> <span class='comment'># if real unequal roots, use nearest root to recent guess
+</span>              <span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='op'>-</span><span class='id identifier rubyid_b'>b</span> <span class='op'>+</span> <span class='const'>Math</span><span class='period'>.</span><span class='id identifier rubyid_sqrt'>sqrt</span><span class='lparen'>(</span><span class='id identifier rubyid_d'>d</span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='int'>2</span> <span class='op'>*</span> <span class='id identifier rubyid_c'>c</span><span class='rparen'>)</span>
+              <span class='id identifier rubyid_x_other'>x_other</span> <span class='op'>=</span> <span class='op'>-</span><span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>-</span> <span class='id identifier rubyid_b'>b</span> <span class='op'>/</span> <span class='id identifier rubyid_c'>c</span>
+              <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span> <span class='op'>&gt;</span> <span class='lparen'>(</span><span class='id identifier rubyid_x_other'>x_other</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span>
+                <span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>=</span> <span class='id identifier rubyid_x_other'>x_other</span>
+              <span class='kw'>end</span>
+            <span class='kw'>else</span> <span class='comment'># If real equal roots, use that root
+</span>              <span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>=</span> <span class='op'>-</span><span class='id identifier rubyid_b'>b</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='int'>2</span> <span class='op'>*</span> <span class='id identifier rubyid_c'>c</span><span class='rparen'>)</span>
+            <span class='kw'>end</span>
+
+            <span class='kw'>if</span> <span class='id identifier rubyid_f1'>f1</span> <span class='op'>*</span> <span class='id identifier rubyid_f0'>f0</span> <span class='op'>&gt;</span> <span class='int'>0</span> <span class='kw'>and</span> <span class='id identifier rubyid_f2'>f2</span> <span class='op'>*</span> <span class='id identifier rubyid_f0'>f0</span> <span class='op'>&gt;</span> <span class='int'>0</span> <span class='comment'># If the previous two f(x) were the same sign as the new
+</span>              <span class='kw'>if</span> <span class='id identifier rubyid_f2'>f2</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span> <span class='op'>&gt;</span> <span class='id identifier rubyid_f1'>f1</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span>
+                <span class='id identifier rubyid_x2'>x2</span> <span class='op'>=</span> <span class='id identifier rubyid_x1'>x1</span>
+                <span class='id identifier rubyid_f2'>f2</span> <span class='op'>=</span> <span class='id identifier rubyid_f1'>f1</span>
+              <span class='kw'>end</span>
+            <span class='kw'>else</span>
+              <span class='kw'>if</span> <span class='id identifier rubyid_f2'>f2</span> <span class='op'>*</span> <span class='id identifier rubyid_f0'>f0</span> <span class='op'>&gt;</span> <span class='int'>0</span>
+                <span class='id identifier rubyid_x2'>x2</span> <span class='op'>=</span> <span class='id identifier rubyid_x1'>x1</span>
+                <span class='id identifier rubyid_f2'>f2</span> <span class='op'>=</span> <span class='id identifier rubyid_f1'>f1</span>
+              <span class='kw'>end</span>
+            <span class='kw'>end</span>
+            <span class='id identifier rubyid_x1'>x1</span> <span class='op'>=</span> <span class='id identifier rubyid_x0'>x0</span>
+            <span class='id identifier rubyid_f1'>f1</span> <span class='op'>=</span> <span class='id identifier rubyid_f0'>f0</span>
+          <span class='kw'>end</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='int'>2</span>
+      <span class='comment'># Linear Fit
+</span>      <span class='id identifier rubyid_m'>m</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_f1'>f1</span> <span class='op'>-</span> <span class='id identifier rubyid_f0'>f0</span><span class='rparen'>)</span> <span class='op'>/</span> <span class='lparen'>(</span><span class='id identifier rubyid_x1'>x1</span> <span class='op'>-</span> <span class='id identifier rubyid_x0'>x0</span><span class='rparen'>)</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_m'>m</span> <span class='op'>==</span> <span class='int'>0</span> <span class='comment'># If slope is zero, use perturbation
+</span>        <span class='id identifier rubyid_mode'>mode</span> <span class='op'>=</span> <span class='int'>1</span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>=</span> <span class='id identifier rubyid_x0'>x0</span> <span class='op'>-</span> <span class='id identifier rubyid_f0'>f0</span> <span class='op'>/</span> <span class='id identifier rubyid_m'>m</span>
+        <span class='id identifier rubyid_x2'>x2</span> <span class='op'>=</span> <span class='id identifier rubyid_x1'>x1</span>
+        <span class='id identifier rubyid_f2'>f2</span> <span class='op'>=</span> <span class='id identifier rubyid_f1'>f1</span>
+        <span class='id identifier rubyid_x1'>x1</span> <span class='op'>=</span> <span class='id identifier rubyid_x0'>x0</span>
+        <span class='id identifier rubyid_f1'>f1</span> <span class='op'>=</span> <span class='id identifier rubyid_f0'>f0</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+
+    <span class='kw'>if</span> <span class='id identifier rubyid_mode'>mode</span> <span class='op'>==</span> <span class='int'>1</span>
+      <span class='comment'># Perturbation
+</span>      <span class='kw'>if</span> <span class='id identifier rubyid_x0'>x0</span><span class='period'>.</span><span class='id identifier rubyid_abs'>abs</span> <span class='op'>&gt;</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='id identifier rubyid_small'><span class='object_link'><a href="Constants.html#small-class_method" title="Constants.small (method)">small</a></span></span>
+        <span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>=</span> <span class='id identifier rubyid_x0'>x0</span> <span class='op'>*</span> <span class='lparen'>(</span><span class='int'>1</span> <span class='op'>+</span> <span class='id identifier rubyid_dx'>dx</span><span class='rparen'>)</span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_x_new'>x_new</span> <span class='op'>=</span> <span class='id identifier rubyid_dx'>dx</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_x2'>x2</span> <span class='op'>=</span> <span class='id identifier rubyid_x1'>x1</span>
+      <span class='id identifier rubyid_f2'>f2</span> <span class='op'>=</span> <span class='id identifier rubyid_f1'>f1</span>
+      <span class='id identifier rubyid_x1'>x1</span> <span class='op'>=</span> <span class='id identifier rubyid_x0'>x0</span>
+      <span class='id identifier rubyid_f1'>f1</span> <span class='op'>=</span> <span class='id identifier rubyid_f0'>f0</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_x_new'>x_new</span><span class='comma'>,</span> <span class='id identifier rubyid_cvg'>cvg</span><span class='comma'>,</span> <span class='id identifier rubyid_x1'>x1</span><span class='comma'>,</span> <span class='id identifier rubyid_f1'>f1</span><span class='comma'>,</span> <span class='id identifier rubyid_x2'>x2</span><span class='comma'>,</span> <span class='id identifier rubyid_f2'>f2</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="quadratic-class_method">
+  
+    .<strong>quadratic</strong>(x, c)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 120</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_quadratic'>quadratic</span><span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span> <span class='id identifier rubyid_c'>c</span><span class='rparen'>)</span>
+  <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>
+  Description:
+  ------------
+      Calculate the result of a quadratic polynomial with independent variable
+      x and a list of coefficients, c:
+
+      y = c[1] + c[2]*x + c[3]*x**2
+
+  Inputs:
+  -------
+      x       float      independent variable
+      c       tuple      list of 6 coeffients [floats]
+
+  Outputs:
+  --------
+      y       float      result of biquadratic polynomial
+  </span><span class='tstring_end'>&#39;</span></span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_c'>c</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>!=</span> <span class='int'>3</span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Error: There must be 3 coefficients in a quadratic polynomial</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_y'>y</span> <span class='op'>=</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>0</span><span class='rbracket'>]</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span> <span class='op'>+</span> <span class='id identifier rubyid_c'>c</span><span class='lbracket'>[</span><span class='int'>2</span><span class='rbracket'>]</span> <span class='op'>*</span> <span class='id identifier rubyid_x'>x</span><span class='op'>**</span><span class='int'>2</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_y'>y</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="valid_float?-class_method">
+  
+    .<strong>valid_float?</strong>(str)  &#x21d2; <tt><span class='object_link'><a href="top-level-namespace.html#Boolean-instance_method" title="#Boolean (method)">Boolean</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="top-level-namespace.html#Boolean-instance_method" title="#Boolean (method)">Boolean</a></span></tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+74
+75
+76</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/util.rb', line 74</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_valid_float?'>valid_float?</span><span class='lparen'>(</span><span class='id identifier rubyid_str'>str</span><span class='rparen'>)</span>
+  <span class='op'>!</span><span class='op'>!</span><span class='const'>Float</span><span class='lparen'>(</span><span class='id identifier rubyid_str'>str</span><span class='rparen'>)</span> <span class='kw'>rescue</span> <span class='kw'>false</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Jan  8 16:00:14 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.16 (ruby-2.2.6).
+</div>
+
+    </div>
+  </body>
+</html>

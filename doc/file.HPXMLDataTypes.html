@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: HPXMLDataTypes
+  
+    &mdash; Documentation by YARD 0.9.16
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "HPXMLDataTypes";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: HPXMLDataTypes</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'>
+<p>&lt;?xml version=“1.0” encoding=“UTF-8”?&gt; &lt;xs:schema xmlns:xs=“<a
+href="http://www.w3.org/2001/XMLSchema">www.w3.org/2001/XMLSchema</a>”
+xmlns=“<a href="http://hpxmlonline.com/2014/6">hpxmlonline.com/2014/6</a>”
+	targetNamespace=“<a
+href="http://hpxmlonline.com/2014/6">hpxmlonline.com/2014/6</a>”
+elementFormDefault=“qualified” version=“3.0”&gt; 	&lt;!– Value Lists –&gt;
+	&lt;!–Address Information Below–&gt; 	&lt;xs:simpleType
+name=“schemaVersionType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“3.0”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“AddressTypeCode”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“street”/&gt; 			&lt;xs:enumeration value=“mailing”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“StateCode”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“ZipCode”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:pattern <a
+href="0-9">value=“</a>5(-[0-9]4)?”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“USPSBarCode”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Name Information Below–&gt; 	&lt;xs:simpleType name=“PrefixName”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“SuffixName”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“IndividualType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“owner-occupant”/&gt; 			&lt;xs:enumeration
+value=“owner-non-occupant”/&gt; 			&lt;xs:enumeration value=“property
+manager”/&gt; 			&lt;xs:enumeration value=“real estate agent”/&gt;
+			&lt;xs:enumeration value=“tenant”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“BusinessCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“BPI”/&gt;
+			&lt;xs:enumeration value=“RESNET”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Telephone Information Below–&gt; 	&lt;xs:simpleType
+name=“TelephoneTypeCode”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“day”/&gt; 			&lt;xs:enumeration
+value=“evening”/&gt; 			&lt;xs:enumeration value=“mobile”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“TelephoneNumber”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“TelephoneExtension”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Email Information Below–&gt; 	&lt;xs:simpleType
+name=“EmailTypeCode”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“personal”/&gt; 			&lt;xs:enumeration
+value=“work”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“EmailAddress”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;!–System Identifiers Below–&gt;
+	&lt;xs:simpleType name=“SendingSystemIdentifierType”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“SendingSystemIdentifierValue”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ReceivingSystemIdentifierType”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ReceivingSystemIdentifierValue”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–XMLTransaction Header Information Below–&gt; 	&lt;xs:simpleType
+name=“XMLType”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“XMLGeneratedBy”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“CreatedDateAndTime”&gt; 		&lt;xs:restriction
+base=“xs:dateTime”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Utility Information
+Below–&gt; 	&lt;!–Misc Data Fields Below–&gt; 	&lt;!–Air Infiltration
+Below–&gt; 	&lt;xs:simpleType name=“BuildingLeakiness”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“very
+tight”/&gt; 			&lt;xs:enumeration value=“tight”/&gt; 			&lt;xs:enumeration
+value=“average”/&gt; 			&lt;xs:enumeration value=“leaky”/&gt;
+			&lt;xs:enumeration value=“very leaky”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“WindConditions”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“windy”/&gt; 			&lt;xs:enumeration value=“normal”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“BuildingAirLeakage”&gt; 		&lt;xs:restriction base=“xs:double”&gt;
+			&lt;xs:minExclusive value=“0”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“BuildingAirLeakageUnit”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“CFM”/&gt; 			&lt;xs:enumeration
+value=“CFMnatural”/&gt; 			&lt;xs:enumeration value=“ACH”/&gt;
+			&lt;xs:enumeration value=“ACHnatural”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“FanPressure”&gt;
+		&lt;xs:restriction base=“xs:double”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“FanRingUsed”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“open”/&gt;
+			&lt;xs:enumeration value=“A”/&gt; 			&lt;xs:enumeration value=“B”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“TestDate”&gt; 		&lt;xs:restriction base=“xs:dateTime”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“TestInorOut”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“test
+in”/&gt; 			&lt;xs:enumeration value=“test out”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“TypeofBlowerDoorTest”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“pressurization”/&gt; 			&lt;xs:enumeration
+value=“depressurization”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“HousePressure”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minExclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“TypeofInfiltrationMeasurement”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“blower door”/&gt; 			&lt;xs:enumeration value=“tracer gas”/&gt;
+			&lt;xs:enumeration value=“estimate”/&gt; 			&lt;xs:enumeration
+value=“checklist”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Climate and Risk Zones–&gt; 	&lt;xs:simpleType
+name=“ClimateZoneDOE”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“subarctic”/&gt; 			&lt;xs:enumeration
+value=“marine”/&gt; 			&lt;xs:enumeration value=“hot-dry”/&gt;
+			&lt;xs:enumeration value=“mixed-dry”/&gt; 			&lt;xs:enumeration
+value=“hot-humid”/&gt; 			&lt;xs:enumeration value=“mixed-humid”/&gt;
+			&lt;xs:enumeration value=“cold”/&gt; 			&lt;xs:enumeration value=“very
+cold”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“IECCYear”&gt; 		&lt;xs:restriction
+base=“xs:integer”&gt; 			&lt;xs:enumeration value=“2012”/&gt;
+			&lt;xs:enumeration value=“2009”/&gt; 			&lt;xs:enumeration
+value=“2006”/&gt; 			&lt;xs:enumeration value=“2003”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“ClimateZoneIECC”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“1A”/&gt; 			&lt;xs:enumeration value=“1B”/&gt;
+			&lt;xs:enumeration value=“1C”/&gt; 			&lt;xs:enumeration value=“2A”/&gt;
+			&lt;xs:enumeration value=“2B”/&gt; 			&lt;xs:enumeration value=“2C”/&gt;
+			&lt;xs:enumeration value=“3A”/&gt; 			&lt;xs:enumeration value=“3B”/&gt;
+			&lt;xs:enumeration value=“3C”/&gt; 			&lt;xs:enumeration value=“4A”/&gt;
+			&lt;xs:enumeration value=“4B”/&gt; 			&lt;xs:enumeration value=“4C”/&gt;
+			&lt;xs:enumeration value=“5A”/&gt; 			&lt;xs:enumeration value=“5B”/&gt;
+			&lt;xs:enumeration value=“5C”/&gt; 			&lt;xs:enumeration value=“6A”/&gt;
+			&lt;xs:enumeration value=“6B”/&gt; 			&lt;xs:enumeration value=“6C”/&gt;
+			&lt;xs:enumeration value=“7”/&gt; 			&lt;xs:enumeration value=“8”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“EarthquakeZone”&gt; 		&lt;xs:restriction base=“xs:boolean”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“RadonZone”&gt;
+		&lt;xs:restriction base=“xs:integer”&gt; 			&lt;xs:minInclusive
+value=“1”/&gt; 			&lt;xs:maxInclusive value=“3”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“TermiteZone”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“none to slight”/&gt; 			&lt;xs:enumeration
+value=“slight to moderate”/&gt; 			&lt;xs:enumeration value=“moderate to
+heavy”/&gt; 			&lt;xs:enumeration value=“very heavy”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Construction
+Below–&gt; 	&lt;xs:simpleType name=“ResidentialFacilityType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“single-family detached”/&gt; 			&lt;xs:enumeration
+value=“single-family attached”/&gt; 			&lt;xs:enumeration
+value=“manufactured home”/&gt; 			&lt;xs:enumeration value=“2-4 unit
+building”/&gt; 			&lt;xs:enumeration value=“5+ unit building”/&gt;
+			&lt;xs:enumeration value=“multi-family - uncategorized”/&gt;
+			&lt;xs:enumeration value=“multi-family - town homes”/&gt;
+			&lt;xs:enumeration value=“multi-family - condos”/&gt;
+			&lt;xs:enumeration value=“apartment unit”/&gt; 			&lt;xs:enumeration
+value=“studio unit”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+			&lt;xs:enumeration value=“unknown”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“EducationLevels”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“no
+high school”/&gt; 			&lt;xs:enumeration value=“some high school”/&gt;
+			&lt;xs:enumeration value=“high school graduate”/&gt;
+			&lt;xs:enumeration value=“some college”/&gt; 			&lt;xs:enumeration
+value=“vocational/technical/associates degree”/&gt; 			&lt;xs:enumeration
+value=“bachelor&#39;s degree”/&gt; 			&lt;xs:enumeration value=“some post
+graduate ”/&gt; 			&lt;xs:enumeration value=“master&#39;s degree”/&gt;
+			&lt;xs:enumeration value=“professional degree”/&gt;
+			&lt;xs:enumeration value=“doctoral degree”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“FootprintShape”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“rectangular”/&gt; 			&lt;xs:enumeration
+value=“square”/&gt; 			&lt;xs:enumeration value=“circular”/&gt;
+			&lt;xs:enumeration value=“L-shaped”/&gt; 			&lt;xs:enumeration
+value=“U-shaped”/&gt; 			&lt;xs:enumeration value=“I-shaped”/&gt;
+			&lt;xs:enumeration value=“V-shaped”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“OrientationType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“north”/&gt;
+			&lt;xs:enumeration value=“northwest”/&gt; 			&lt;xs:enumeration
+value=“west”/&gt; 			&lt;xs:enumeration value=“southwest”/&gt;
+			&lt;xs:enumeration value=“south”/&gt; 			&lt;xs:enumeration
+value=“southeast”/&gt; 			&lt;xs:enumeration value=“east”/&gt;
+			&lt;xs:enumeration value=“northeast”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“NumberOfFloorsType”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“IntegerGreaterThanZero”&gt; 		&lt;xs:restriction
+base=“xs:integer”&gt; 			&lt;xs:minExclusive value=“0”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“IntegerGreaterThanOrEqualToZero”&gt; 		&lt;xs:restriction
+base=“xs:integer”&gt; 			&lt;xs:minInclusive value=“0”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“SiteType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“rural”/&gt; 			&lt;xs:enumeration
+value=“suburban”/&gt; 			&lt;xs:enumeration value=“urban”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“Surroundings”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“stand-alone”/&gt; 			&lt;xs:enumeration
+value=“attached on one side”/&gt; 			&lt;xs:enumeration value=“attached on
+two sides”/&gt; 			&lt;xs:enumeration value=“attached on three sides”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“VerticalSurroundings”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“unit above”/&gt; 			&lt;xs:enumeration
+value=“unit below”/&gt; 			&lt;xs:enumeration value=“unit above and
+below”/&gt; 			&lt;xs:enumeration value=“no units above or below”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“ShieldingofHome”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“well-shielded”/&gt; 			&lt;xs:enumeration
+value=“normal”/&gt; 			&lt;xs:enumeration value=“exposed”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“GarageLocation”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“basement”/&gt; 			&lt;xs:enumeration
+value=“first floor”/&gt; 			&lt;xs:enumeration value=“detached”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“SpaceAboveGarage”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“conditioned area”/&gt; 			&lt;xs:enumeration
+value=“unconditioned attic”/&gt; 			&lt;xs:enumeration
+value=“crawlspace”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“HouseholdType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“family household”/&gt;
+			&lt;xs:enumeration value=“married couple, no children”/&gt;
+			&lt;xs:enumeration value=“male household, no spouse”/&gt;
+			&lt;xs:enumeration value=“female household, no spouse”/&gt;
+			&lt;xs:enumeration value=“nonfamily household”/&gt;
+			&lt;xs:enumeration value=“single male”/&gt; 			&lt;xs:enumeration
+value=“single female”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“ResidentPopulationType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“no specific resident population”/&gt;
+			&lt;xs:enumeration value=“student”/&gt; 			&lt;xs:enumeration
+value=“military”/&gt; 			&lt;xs:enumeration value=“senior”/&gt;
+			&lt;xs:enumeration value=“special accessibility needs”/&gt;
+			&lt;xs:enumeration value=“young children”/&gt; 			&lt;xs:enumeration
+value=“at risk”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“Occupancy”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“owner-occupied”/&gt; 			&lt;xs:enumeration
+value=“renter-occupied”/&gt; 			&lt;xs:enumeration
+value=“owner-and-renter-occupied”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“OccupantIncomeRangeUnits”&gt; 		&lt;xs:annotation&gt;
+			&lt;xs:documentation&gt;AMI = Area Median Income; FPL = Federal Poverty
+Level&lt;/xs:documentation&gt; 		&lt;/xs:annotation&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“%
+area median income”/&gt; 			&lt;xs:enumeration value=“% federal poverty
+level”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“Year”&gt; 		&lt;xs:restriction
+base=“xs:integer”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;!– Make sure to update
+FuelType with changes to this list as well. –&gt; 	&lt;xs:simpleType
+name=“ConsumptionType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“electricity”/&gt; 			&lt;xs:enumeration
+value=“renewable electricity”/&gt; 			&lt;xs:enumeration value=“natural
+gas”/&gt; 			&lt;xs:enumeration value=“renewable natural gas”/&gt;
+			&lt;xs:enumeration value=“fuel oil”/&gt; 			&lt;xs:enumeration
+value=“fuel oil 1”/&gt; 			&lt;xs:enumeration value=“fuel oil 2”/&gt;
+			&lt;xs:enumeration value=“fuel oil 4”/&gt; 			&lt;xs:enumeration
+value=“fuel oil 5/6”/&gt; 			&lt;xs:enumeration value=“district steam”/&gt;
+			&lt;xs:enumeration value=“district hot water”/&gt; 			&lt;xs:enumeration
+value=“district chilled water”/&gt; 			&lt;xs:enumeration value=“solar hot
+water”/&gt; 			&lt;xs:enumeration value=“propane”/&gt;
+			&lt;xs:enumeration value=“kerosene”/&gt; 			&lt;xs:enumeration
+value=“diesel”/&gt; 			&lt;xs:enumeration value=“anthracite coal”/&gt;
+			&lt;xs:enumeration value=“bituminous coal”/&gt; 			&lt;xs:enumeration
+value=“coke”/&gt; 			&lt;xs:enumeration value=“wood”/&gt;
+			&lt;xs:enumeration value=“wood pellets”/&gt; 			&lt;xs:enumeration
+value=“combination”/&gt; 			&lt;xs:enumeration value=“water”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“MeteringConfiguration”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“direct metering”/&gt; 			&lt;xs:enumeration value=“master meter
+without sub-metering”/&gt; 			&lt;xs:enumeration value=“master meter with
+sub-metering”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“EmissionType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“CO2”/&gt;
+			&lt;xs:enumeration value=“methane”/&gt; 			&lt;xs:enumeration
+value=“N2O”/&gt; 			&lt;xs:enumeration value=“CO2 equivalent”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“EmissionUnits”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“kg”/&gt; 			&lt;xs:enumeration
+value=“ton”/&gt; 			&lt;xs:enumeration value=“metric ton”/&gt;
+			&lt;xs:enumeration value=“pound”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“FuelInterruptibility”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“interruptible”/&gt; 			&lt;xs:enumeration value=“firm”/&gt;
+			&lt;xs:enumeration value=“na”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“SharedEnergySystem”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“yes”/&gt; 			&lt;xs:enumeration value=“no”/&gt;
+			&lt;xs:enumeration value=“common meter”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“IntervalType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“15-minute”/&gt; 			&lt;xs:enumeration value=“hourly”/&gt;
+			&lt;xs:enumeration value=“daily”/&gt; 			&lt;xs:enumeration
+value=“monthly”/&gt; 			&lt;xs:enumeration value=“annual”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“PeakSeason”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“summer”/&gt; 			&lt;xs:enumeration
+value=“winter”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“COReading”&gt; 		&lt;xs:restriction
+base=“xs:double”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“RadonTestTypes”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“activated charcoal absorption”/&gt;
+			&lt;xs:enumeration value=“alpha-track detectors”/&gt;
+			&lt;xs:enumeration value=“unfiltered track detection”/&gt;
+			&lt;xs:enumeration value=“short term electret ion chamber”/&gt;
+			&lt;xs:enumeration value=“long term electret ion chamber”/&gt;
+			&lt;xs:enumeration value=“continuous radon monitoring”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“RadonTestLocation”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“kitchen”/&gt; 			&lt;xs:enumeration
+value=“crawlspace”/&gt; 			&lt;xs:enumeration value=“basement”/&gt;
+			&lt;xs:enumeration value=“bedroom”/&gt; 			&lt;xs:enumeration
+value=“living room”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!– Make sure to
+update ConsumptionType with changes to this list as well. –&gt;
+	&lt;xs:simpleType name=“FuelType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“electricity”/&gt;
+			&lt;xs:enumeration value=“renewable electricity”/&gt;
+			&lt;xs:enumeration value=“natural gas”/&gt; 			&lt;xs:enumeration
+value=“renewable natural gas”/&gt; 			&lt;xs:enumeration value=“fuel
+oil”/&gt; 			&lt;xs:enumeration value=“fuel oil 1”/&gt;
+			&lt;xs:enumeration value=“fuel oil 2”/&gt; 			&lt;xs:enumeration
+value=“fuel oil 4”/&gt; 			&lt;xs:enumeration value=“fuel oil 5/6”/&gt;
+			&lt;xs:enumeration value=“district steam”/&gt; 			&lt;xs:enumeration
+value=“district hot water”/&gt; 			&lt;xs:enumeration value=“district
+chilled water”/&gt; 			&lt;xs:enumeration value=“solar hot water”/&gt;
+			&lt;xs:enumeration value=“propane”/&gt; 			&lt;xs:enumeration
+value=“kerosene”/&gt; 			&lt;xs:enumeration value=“diesel”/&gt;
+			&lt;xs:enumeration value=“anthracite coal”/&gt; 			&lt;xs:enumeration
+value=“bituminous coal”/&gt; 			&lt;xs:enumeration value=“coke”/&gt;
+			&lt;xs:enumeration value=“wood”/&gt; 			&lt;xs:enumeration value=“wood
+pellets”/&gt; 			&lt;xs:enumeration value=“combination”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;!–Other Health and Safety Below–&gt;
+	&lt;!–Standard Measure Fields Below–&gt; 	&lt;xs:simpleType
+name=“EventType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“audit”/&gt; 			&lt;xs:enumeration
+value=“proposed workscope”/&gt; 			&lt;xs:enumeration value=“approved
+workscope”/&gt; 			&lt;xs:enumeration value=“construction-period
+testing/daily test out”/&gt; 			&lt;xs:enumeration value=“job completion
+testing/final inspection”/&gt; 			&lt;xs:enumeration value=“quality
+assurance/monitoring”/&gt; 			&lt;xs:enumeration
+value=“preconstruction”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;!–Air Sealing Below–&gt; 	&lt;!–Doors
+Below–&gt; 	&lt;xs:simpleType name=“AtticComponentsAirSealed”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“attic floor”/&gt; 			&lt;xs:enumeration value=“top plates”/&gt;
+			&lt;xs:enumeration value=“kneewall transitions”/&gt;
+			&lt;xs:enumeration value=“plumbing wet walls”/&gt; 			&lt;xs:enumeration
+value=“chimney/flue chases”/&gt; 			&lt;xs:enumeration value=“recessed
+lights”/&gt; 			&lt;xs:enumeration value=“attic access”/&gt;
+			&lt;xs:enumeration value=“dropped soffit”/&gt; 			&lt;xs:enumeration
+value=“attic level transitions”/&gt; 			&lt;xs:enumeration
+value=“mechanical chases”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“BasementCrawlspaceComponentsAirSealed”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“plumbing
+penetrations”/&gt; 			&lt;xs:enumeration value=“access”/&gt;
+			&lt;xs:enumeration value=“wiring penetrations”/&gt;
+			&lt;xs:enumeration value=“chimney/flue chase”/&gt; 			&lt;xs:enumeration
+value=“mechanical chases”/&gt; 			&lt;xs:enumeration value=“rim
+joists”/&gt; 			&lt;xs:enumeration value=“windows and door”/&gt;
+			&lt;xs:enumeration value=“foundation service penetrations”/&gt;
+			&lt;xs:enumeration value=“cantilevers”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“LivingSpaceComponentsAirSealed”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“home-garage connection”/&gt; 			&lt;xs:enumeration value=“rim
+joists”/&gt; 			&lt;xs:enumeration value=“baseboards”/&gt;
+			&lt;xs:enumeration value=“windows and door”/&gt; 			&lt;xs:enumeration
+value=“plumbing penetrations”/&gt; 			&lt;xs:enumeration value=“hvac
+registers”/&gt; 			&lt;xs:enumeration value=“interior sheating voids”/&gt;
+			&lt;xs:enumeration value=“cantilevers”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“FoundationWallType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“solid concrete”/&gt;
+			&lt;xs:enumeration value=“concrete block”/&gt; 			&lt;xs:enumeration
+value=“concrete block foam core”/&gt; 			&lt;xs:enumeration value=“concrete
+block vermiculite core”/&gt; 			&lt;xs:enumeration value=“double
+brick”/&gt; 			&lt;xs:enumeration value=“wood”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“AdjacentTo”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“attic”/&gt; 			&lt;xs:enumeration value=“attic
+- conditioned”/&gt; 			&lt;xs:enumeration value=“attic - unvented”/&gt;
+			&lt;xs:enumeration value=“attic - vented”/&gt; 			&lt;xs:enumeration
+value=“basement”/&gt; 			&lt;xs:enumeration value=“basement -
+conditioned”/&gt; 			&lt;xs:enumeration value=“basement -
+unconditioned”/&gt; 			&lt;xs:enumeration value=“crawlspace”/&gt;
+			&lt;xs:enumeration value=“crawlspace - conditioned”/&gt;
+			&lt;xs:enumeration value=“crawlspace - unvented”/&gt;
+			&lt;xs:enumeration value=“crawlspace - vented”/&gt;
+			&lt;xs:enumeration value=“garage”/&gt; 			&lt;xs:enumeration
+value=“garage - conditioned”/&gt; 			&lt;xs:enumeration value=“garage -
+unconditioned”/&gt; 			&lt;xs:enumeration value=“ground”/&gt;
+			&lt;xs:enumeration value=“living space”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 			&lt;xs:enumeration value=“other housing unit”/&gt;
+			&lt;xs:enumeration value=“outside”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“StudSize”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“2x2”/&gt; 			&lt;xs:enumeration value=“2x3”/&gt;
+			&lt;xs:enumeration value=“2x4”/&gt; 			&lt;xs:enumeration
+value=“2x6”/&gt; 			&lt;xs:enumeration value=“2x8”/&gt;
+			&lt;xs:enumeration value=“2x10”/&gt; 			&lt;xs:enumeration
+value=“2x12”/&gt; 			&lt;xs:enumeration value=“2x14”/&gt;
+			&lt;xs:enumeration value=“2x16”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“StudMaterial”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“wood”/&gt;
+			&lt;xs:enumeration value=“metal”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“DoorMaterial”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“solid wood”/&gt; 			&lt;xs:enumeration value=“hollow wood”/&gt;
+			&lt;xs:enumeration value=“uninsulated metal”/&gt; 			&lt;xs:enumeration
+value=“insulated metal”/&gt; 			&lt;xs:enumeration value=“glass”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“DoorType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“interior”/&gt; 			&lt;xs:enumeration value=“exterior”/&gt;
+			&lt;xs:enumeration value=“storm”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“RValue”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Insulation Below–&gt; 	&lt;xs:simpleType
+name=“DoorThirdPartyCertifications”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“InstallationType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“cavity”/&gt; 			&lt;xs:enumeration value=“continuous”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“InsulationBattType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“fiberglass”/&gt; 			&lt;xs:enumeration
+value=“rockwool”/&gt; 			&lt;xs:enumeration value=“recycled cotton”/&gt;
+			&lt;xs:enumeration value=“unknown”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“InsulationLooseFillType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“cellulose”/&gt;
+			&lt;xs:enumeration value=“fiberglass”/&gt; 			&lt;xs:enumeration
+value=“rockwool”/&gt; 			&lt;xs:enumeration value=“vermiculite”/&gt;
+			&lt;xs:enumeration value=“unknown”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“InsulationRigidType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“polyisocyanurate”/&gt; 			&lt;xs:enumeration value=“xps”/&gt;
+			&lt;xs:enumeration value=“eps”/&gt; 			&lt;xs:enumeration
+value=“unknown”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“InsulationSprayFoamType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“open cell”/&gt;
+			&lt;xs:enumeration value=“closed cell”/&gt; 			&lt;xs:enumeration
+value=“unknown”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“InsulationCondition”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“good”/&gt;
+			&lt;xs:enumeration value=“fair”/&gt; 			&lt;xs:enumeration
+value=“poor”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Lighting Below–&gt; 	&lt;!–Lighting Controls Below–&gt;
+	&lt;xs:simpleType name=“InsulationLocation”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“interior”/&gt;
+			&lt;xs:enumeration value=“exterior”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“LightingLocation”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“interior”/&gt; 			&lt;xs:enumeration value=“exterior”/&gt;
+			&lt;xs:enumeration value=“common area”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“FluorescentTubeType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“T2”/&gt; 			&lt;xs:enumeration value=“T4”/&gt; 			&lt;xs:enumeration
+value=“T5”/&gt; 			&lt;xs:enumeration value=“T8”/&gt; 			&lt;xs:enumeration
+value=“super T8”/&gt; 			&lt;xs:enumeration value=“T9”/&gt;
+			&lt;xs:enumeration value=“T10”/&gt; 			&lt;xs:enumeration
+value=“T12”/&gt; 			&lt;xs:enumeration value=“T17”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“FluorescentBallastType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“electronic”/&gt; 			&lt;xs:enumeration
+value=“magnetic”/&gt; 			&lt;xs:enumeration value=“instant start”/&gt;
+			&lt;xs:enumeration value=“rapid start”/&gt; 			&lt;xs:enumeration
+value=“programmed start”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“LightingThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“LightingDailyHours”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“1 to
+4 hours per day”/&gt; 			&lt;xs:enumeration value=“4 to 12 hours per
+day”/&gt; 			&lt;xs:enumeration value=“more than 12 hours per day”/&gt;
+			&lt;xs:enumeration value=“all day”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“LightingControls”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“daylight dimming”/&gt; 			&lt;xs:enumeration value=“occupancy
+sensors”/&gt; 			&lt;xs:enumeration value=“vacancy sensors”/&gt;
+			&lt;xs:enumeration value=“manual dimming”/&gt; 			&lt;xs:enumeration
+value=“bi-level control”/&gt; 			&lt;xs:enumeration value=“timers”/&gt;
+			&lt;xs:enumeration value=“manual”/&gt; 			&lt;xs:enumeration
+value=“advanced controls”/&gt; 			&lt;xs:enumeration value=“part of
+emcs”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Moisture Control Below–&gt; 	&lt;xs:simpleType
+name=“ExteriorLocationsWaterIntrusionorDamage”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“roof”/&gt;
+			&lt;xs:enumeration value=“interior ceiling”/&gt; 			&lt;xs:enumeration
+value=“foundation”/&gt; 			&lt;xs:enumeration value=“basement”/&gt;
+			&lt;xs:enumeration value=“crawlspace”/&gt; 			&lt;xs:enumeration
+value=“walls”/&gt; 			&lt;xs:enumeration value=“around windows”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“InteriorLocationsofWaterLeaksorDamage”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“kitchen ”/&gt;
+			&lt;xs:enumeration value=“bathroom”/&gt; 			&lt;xs:enumeration
+value=“basement”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Plug Load Controls
+Below–&gt; 	&lt;!–Shading and Solar Reflectance Below–&gt;
+	&lt;xs:simpleType name=“PlugLoadControlType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“advanced power strip for
+AV”/&gt; 			&lt;xs:enumeration value=“advanced power strip for IT”/&gt;
+			&lt;xs:enumeration value=“whole-house energy management system”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“RadiantBarrierLocation”&gt; 		&lt;xs:annotation&gt;
+			&lt;xs:documentation&gt;Enumerations from <a
+href="http://www.fsec.ucf.edu/en/publications/pdf/FSEC-DN-7-84.pdf</xs:documentation">www.fsec.ucf.edu/en/publications/pdf/FSEC-DN-7-84.pdf</xs:documentation</a>&gt;
+		&lt;/xs:annotation&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“top side of truss under sheathing”/&gt;
+			&lt;xs:enumeration value=“below bottom chord of truss”/&gt;
+			&lt;xs:enumeration value=“attic floor”/&gt; 			&lt;xs:enumeration
+value=“underside of rafters”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Ventilation
+Below–&gt; 	&lt;!–Window Group Below–&gt; 	&lt;xs:simpleType
+name=“HVACThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“Energy Star Most Efficient”/&gt;
+			&lt;xs:enumeration value=“CEE Tier 1”/&gt; 			&lt;xs:enumeration
+value=“CEE Tier 2”/&gt; 			&lt;xs:enumeration value=“CEE Tier 3”/&gt;
+			&lt;xs:enumeration value=“NEEP Cold-Climate Air-Source Heat Pump
+Specification”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DHWThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“CEE Tier 1”/&gt; 			&lt;xs:enumeration
+value=“CEE Tier 2”/&gt; 			&lt;xs:enumeration value=“CEE Tier 3”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“GlassLayers”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“single-pane”/&gt; 			&lt;xs:enumeration value=“double-pane”/&gt;
+			&lt;xs:enumeration value=“triple-pane”/&gt; 			&lt;xs:enumeration
+value=“multi-layered”/&gt; 			&lt;xs:enumeration value=“single-paned with
+storms”/&gt; 			&lt;xs:enumeration value=“single-paned with low-e
+storms”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WindowThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“SHGC”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minExclusive
+value=“0”/&gt; 			&lt;xs:maxExclusive value=“1”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“InteriorShading”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“light blinds”/&gt; 			&lt;xs:enumeration
+value=“dark blinds”/&gt; 			&lt;xs:enumeration value=“light shades”/&gt;
+			&lt;xs:enumeration value=“dark shades”/&gt; 			&lt;xs:enumeration
+value=“light curtains”/&gt; 			&lt;xs:enumeration value=“dark
+curtains”/&gt; 			&lt;xs:enumeration value=“none”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“ExteriorShading”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“external overhangs”/&gt; 			&lt;xs:enumeration
+value=“awnings”/&gt; 			&lt;xs:enumeration value=“solar screens”/&gt;
+			&lt;xs:enumeration value=“solar film”/&gt; 			&lt;xs:enumeration
+value=“deciduous tree”/&gt; 			&lt;xs:enumeration value=“evergreen
+tree”/&gt; 			&lt;xs:enumeration value=“building”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 			&lt;xs:enumeration
+value=“none”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“Treatments”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“window film”/&gt;
+			&lt;xs:enumeration value=“solar screen”/&gt; 			&lt;xs:enumeration
+value=“shading”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“UFactor”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minExclusive value=“0”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Combustion
+Applicance Tests Below–&gt; 	&lt;xs:simpleType name=“FlueCondition”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“pass”/&gt; 			&lt;xs:enumeration value=“fail”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Combustion
+Appliance Zone Test Below–&gt; 	&lt;xs:simpleType
+name=“CAZDepressurizationLimit”&gt; 		&lt;xs:restriction
+base=“xs:double”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“OpenClosed”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“open”/&gt; 			&lt;xs:enumeration
+value=“closed”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“DepressurizationFindingPoorCase”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“pass”/&gt; 			&lt;xs:enumeration value=“fail”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“NetPressureChange”&gt; 		&lt;xs:restriction base=“xs:double”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;!–Cooling System Information Below–&gt;
+	&lt;xs:simpleType name=“CoolingSystemType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“central air
+conditioning”/&gt; 			&lt;xs:enumeration value=“mini-split”/&gt;
+			&lt;xs:enumeration value=“room air conditioner”/&gt;
+			&lt;xs:enumeration value=“evaporative cooler”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“CoolingEfficiencyUnits”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“SEER”/&gt;
+			&lt;xs:enumeration value=“EER”/&gt; 			&lt;xs:enumeration
+value=“COP”/&gt; 			&lt;xs:enumeration value=“kW/ton”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“HeatingEfficiencyUnits”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“HSPF”/&gt; 			&lt;xs:enumeration
+value=“COP”/&gt; 			&lt;xs:enumeration value=“AFUE”/&gt;
+			&lt;xs:enumeration value=“Percent”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“DistrictSteamType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“1-pipe”/&gt; 			&lt;xs:enumeration value=“2-pipe”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Efficiency”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Heat Pump Information Below–&gt; 	&lt;xs:simpleType
+name=“GeothermalLoop”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“open”/&gt; 			&lt;xs:enumeration
+value=“closed”/&gt; 			&lt;xs:enumeration value=“direct expansion”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“HeatPumpType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“water-to-air”/&gt; 			&lt;xs:enumeration
+value=“water-to-water”/&gt; 			&lt;xs:enumeration value=“air-to-air”/&gt;
+			&lt;xs:enumeration value=“mini-split”/&gt; 			&lt;xs:enumeration
+value=“ground-to-air”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“VentSystem”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“atmospheric”/&gt; 			&lt;xs:enumeration value=“induced draft”/&gt;
+			&lt;xs:enumeration value=“power vented (at unit)”/&gt;
+			&lt;xs:enumeration value=“power vented (at exterior)”/&gt;
+			&lt;xs:enumeration value=“direct vented”/&gt; 			&lt;xs:enumeration
+value=“sealed combustion”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;!–Heating System Information Below–&gt;
+	&lt;xs:simpleType name=“AFUE”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minInclusive value=“1”/&gt;
+			&lt;xs:maxInclusive value=“100”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“COP”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minExclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–HVAC Distribution Below–&gt; 	&lt;xs:simpleType name=“HSPF”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“SEER”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minInclusive value=“0”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“EER”&gt; 		&lt;xs:restriction base=“xs:double”&gt;
+			&lt;xs:minInclusive value=“0”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“kWperTon”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“DuctType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“supply”/&gt;
+			&lt;xs:enumeration value=“return”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“DuctMaterial”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“duct
+board”/&gt; 			&lt;xs:enumeration value=“sheet metal”/&gt;
+			&lt;xs:enumeration value=“galvanized”/&gt; 			&lt;xs:enumeration
+value=“flexible”/&gt; 			&lt;xs:enumeration value=“fiberboard”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“DuctLocation”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“attic”/&gt; 			&lt;xs:enumeration value=“attic - conditioned”/&gt;
+			&lt;xs:enumeration value=“attic - unvented”/&gt; 			&lt;xs:enumeration
+value=“attic - vented”/&gt; 			&lt;xs:enumeration value=“basement”/&gt;
+			&lt;xs:enumeration value=“basement - conditioned”/&gt;
+			&lt;xs:enumeration value=“basement - unconditioned”/&gt;
+			&lt;xs:enumeration value=“crawlspace”/&gt; 			&lt;xs:enumeration
+value=“crawlspace - conditioned”/&gt; 			&lt;xs:enumeration
+value=“crawlspace - unvented”/&gt; 			&lt;xs:enumeration value=“crawlspace
+- vented”/&gt; 			&lt;xs:enumeration value=“garage”/&gt;
+			&lt;xs:enumeration value=“garage - conditioned”/&gt;
+			&lt;xs:enumeration value=“garage - unconditioned”/&gt;
+			&lt;xs:enumeration value=“interstitial space”/&gt; 			&lt;xs:enumeration
+value=“living space”/&gt; 			&lt;xs:enumeration value=“outside”/&gt;
+			&lt;xs:enumeration value=“unconditioned space”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DuctLeakageTestMethod”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“duct leakage tester”/&gt;
+			&lt;xs:enumeration value=“blower door subtract”/&gt;
+			&lt;xs:enumeration value=“pressure pan”/&gt; 			&lt;xs:enumeration
+value=“visual inspection”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DuctLeakageTestUnitofMeasure”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“CFM50”/&gt;
+			&lt;xs:enumeration value=“CFM25”/&gt; 			&lt;xs:enumeration value=“CFM
+per Std 152”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“LeakinessObservedVisualInspection”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“connections sealed w mastic”/&gt; 			&lt;xs:enumeration value=“no
+observable leaks”/&gt; 			&lt;xs:enumeration value=“some observable
+leaks”/&gt; 			&lt;xs:enumeration value=“significant leaks”/&gt;
+			&lt;xs:enumeration value=“catastrophic leaks”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“MeasuredDuctLeakage”&gt; 		&lt;xs:restriction base=“xs:double”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;!–HVAC System Below–&gt; 	&lt;xs:simpleType
+name=“AirHandlerStaticPressureMeasurementLocation”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“in ducts”/&gt;
+			&lt;xs:enumeration value=“at equipment”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“StaticPressureSource”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“as
+measured”/&gt; 			&lt;xs:enumeration value=“per design report”/&gt;
+			&lt;xs:enumeration value=“per OEM documentation”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“Capacity”&gt; 		&lt;xs:restriction base=“xs:double”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“HVACMaintenanceSchedule”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“none”/&gt;
+			&lt;xs:enumeration value=“yes - unspecified”/&gt; 			&lt;xs:enumeration
+value=“as needed”/&gt; 			&lt;xs:enumeration value=“daily”/&gt;
+			&lt;xs:enumeration value=“weekly”/&gt; 			&lt;xs:enumeration
+value=“bi-weekly”/&gt; 			&lt;xs:enumeration value=“monthly”/&gt;
+			&lt;xs:enumeration value=“semi-quarterly”/&gt; 			&lt;xs:enumeration
+value=“quarterly”/&gt; 			&lt;xs:enumeration value=“semi-annually”/&gt;
+			&lt;xs:enumeration value=“annually”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DispositionofExistingSystem”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“Manufacturer”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Model”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“UnitLocation”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“attic”/&gt;
+			&lt;xs:enumeration value=“attic - conditioned”/&gt;
+			&lt;xs:enumeration value=“attic - unvented”/&gt; 			&lt;xs:enumeration
+value=“attic - vented”/&gt; 			&lt;xs:enumeration value=“basement”/&gt;
+			&lt;xs:enumeration value=“basement - conditioned”/&gt;
+			&lt;xs:enumeration value=“basement - unconditioned”/&gt;
+			&lt;xs:enumeration value=“crawlspace”/&gt; 			&lt;xs:enumeration
+value=“crawlspace - conditioned”/&gt; 			&lt;xs:enumeration
+value=“crawlspace - unvented”/&gt; 			&lt;xs:enumeration value=“crawlspace
+- vented”/&gt; 			&lt;xs:enumeration value=“garage”/&gt;
+			&lt;xs:enumeration value=“garage - conditioned”/&gt;
+			&lt;xs:enumeration value=“garage - unconditioned”/&gt;
+			&lt;xs:enumeration value=“living space”/&gt; 			&lt;xs:enumeration
+value=“mechanical closet”/&gt; 			&lt;xs:enumeration value=“other
+interior”/&gt; 			&lt;xs:enumeration value=“other exterior”/&gt;
+			&lt;xs:enumeration value=“roof deck”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;!–Thermostats Below–&gt; 	&lt;xs:simpleType
+name=“Temperature”&gt; 		&lt;xs:restriction base=“xs:double”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“ThermostatType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“programmable thermostat”/&gt; 			&lt;xs:enumeration value=“manual
+thermostat”/&gt; 			&lt;xs:enumeration value=“digital thermostat”/&gt;
+			&lt;xs:enumeration value=“timer”/&gt; 			&lt;xs:enumeration
+value=“EMCS”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“HotWaterResetControl”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“seasonal”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“Hours”&gt; 		&lt;xs:restriction
+base=“xs:integer”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Water Heating System
+Below–&gt; 	&lt;xs:simpleType name=“EnergyFactor”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minExclusive value=“0”/&gt;
+			&lt;xs:maxInclusive value=“5”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“PipeInsulated”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“RecoveryEfficiency”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minExclusive value=“0”/&gt;
+			&lt;xs:maxInclusive value=“5”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Volume”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minExclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ThermalEfficiency”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minExclusive value=“0”/&gt;
+			&lt;xs:maxInclusive value=“1”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“ProjectType”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Appliances Below–&gt; 	&lt;!–Clothes Dryers Below–&gt;
+	&lt;!–Clothes Washer Below–&gt; 	&lt;xs:simpleType
+name=“ApplianceThirdPartyCertifications”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“Energy Star Most Efficient”/&gt;
+			&lt;xs:enumeration value=“CEE Tier 1”/&gt; 			&lt;xs:enumeration
+value=“CEE Tier 2”/&gt; 			&lt;xs:enumeration value=“CEE Tier 3”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Dishwasher
+Below–&gt; 	&lt;xs:simpleType name=“DishwasherType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“uncategorized”/&gt; 			&lt;xs:enumeration value=“built-in under
+counter”/&gt; 			&lt;xs:enumeration value=“portable”/&gt;
+			&lt;xs:enumeration value=“counter-top”/&gt; 			&lt;xs:enumeration
+value=“single tank”/&gt; 			&lt;xs:enumeration value=“conveyor”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“RatedAnnualkWh”&gt; 		&lt;xs:restriction base=“xs:double”&gt;
+			&lt;xs:minExclusive value=“0”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“RatedWaterGalPerCycle”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minExclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;!–Freezer Below–&gt; 	&lt;!–Refrigerators Below–&gt; 	&lt;!–Energy
+Savings Information Below–&gt; 	&lt;xs:simpleType
+name=“TotalCostHealthSafetyMeasures”&gt; 		&lt;xs:restriction
+base=“xs:double”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“TotalCostQualEnergyMeasures”&gt; 		&lt;xs:restriction
+base=“xs:double”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Homeowner Questionaire
+Below–&gt; 	&lt;xs:simpleType name=“HomeownerQuestionaireScore”&gt;
+		&lt;xs:annotation&gt; 			&lt;xs:documentation&gt;1-10 score of why they
+chose that option&lt;/xs:documentation&gt; 		&lt;/xs:annotation&gt;
+		&lt;xs:restriction base=“xs:integer”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 			&lt;xs:maxInclusive value=“10”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Software
+Information Below–&gt; 	&lt;xs:simpleType name=“SoftwareProgramUsed”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“SoftwareProgramVersion”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;!–Contractor /
+Contracting Company Information Below–&gt; 	&lt;xs:simpleType
+name=“BusinessSpecialization”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“energy audit”/&gt; 			&lt;xs:enumeration
+value=“hvac”/&gt; 			&lt;xs:enumeration value=“insulation”/&gt;
+			&lt;xs:enumeration value=“carpentry”/&gt; 			&lt;xs:enumeration
+value=“plumbing”/&gt; 			&lt;xs:enumeration value=“electrical”/&gt;
+			&lt;xs:enumeration value=“painting”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“BusinessType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“contractor”/&gt;
+			&lt;xs:enumeration value=“auditor”/&gt; 			&lt;xs:enumeration
+value=“subcontractor”/&gt; 			&lt;xs:enumeration value=“property
+manager”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“AuditorQualification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“PE”/&gt;
+			&lt;xs:enumeration value=“CEM”/&gt; 			&lt;xs:enumeration
+value=“BPI-BA”/&gt; 			&lt;xs:enumeration value=“RESNET-Home Partner”/&gt;
+			&lt;xs:enumeration value=“RA”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ImplementerQualification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“PE”/&gt;
+			&lt;xs:enumeration value=“CEM”/&gt; 			&lt;xs:enumeration
+value=“BPI-BA”/&gt; 			&lt;xs:enumeration value=“BPI-MFBA”/&gt;
+			&lt;xs:enumeration value=“RESNET-Home Partner”/&gt;
+			&lt;xs:enumeration value=“RA”/&gt; 			&lt;xs:enumeration
+value=“Refrigerating System Operating Engineer”/&gt; 			&lt;xs:enumeration
+value=“High Pressure Boiler Operating Engineer”/&gt; 			&lt;xs:enumeration
+value=“HEP - EA”/&gt; 			&lt;xs:enumeration value=“HEP - QCI”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“AzimuthType”&gt;
+		&lt;xs:annotation&gt; 			&lt;xs:documentation&gt;Gives compass direction
+a surface (window, wall) is facing. Measured in degrees clockwise from
+North.&lt;/xs:documentation&gt; 		&lt;/xs:annotation&gt;
+		&lt;xs:restriction base=“xs:integer”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 			&lt;xs:maxExclusive value=“360”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“energyUnitType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“cmh”/&gt; 			&lt;xs:enumeration
+value=“ccf”/&gt; 			&lt;xs:enumeration value=“kcf”/&gt;
+			&lt;xs:enumeration value=“Mcf”/&gt; 			&lt;xs:enumeration
+value=“cfh”/&gt; 			&lt;xs:enumeration value=“kWh”/&gt;
+			&lt;xs:enumeration value=“MWh”/&gt; 			&lt;xs:enumeration
+value=“Btu”/&gt; 			&lt;xs:enumeration value=“kBtu”/&gt;
+			&lt;xs:enumeration value=“MBtu”/&gt; 			&lt;xs:enumeration
+value=“therms”/&gt; 			&lt;xs:enumeration value=“lbs”/&gt;
+			&lt;xs:enumeration value=“kLbs”/&gt; 			&lt;xs:enumeration
+value=“MLbs”/&gt; 			&lt;xs:enumeration value=“tonnes”/&gt;
+			&lt;xs:enumeration value=“cords”/&gt; 			&lt;xs:enumeration
+value=“gal”/&gt; 			&lt;xs:enumeration value=“kgal”/&gt;
+			&lt;xs:enumeration value=“ton hours”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“waterUnitType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“gal”/&gt; 			&lt;xs:enumeration value=“kgal”/&gt;
+			&lt;xs:enumeration value=“Mgal”/&gt; 			&lt;xs:enumeration
+value=“cf”/&gt; 			&lt;xs:enumeration value=“ccf”/&gt;
+			&lt;xs:enumeration value=“kcf”/&gt; 			&lt;xs:enumeration
+value=“Mcf”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“MeterReadingType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“point”/&gt;
+			&lt;xs:enumeration value=“median”/&gt; 			&lt;xs:enumeration
+value=“average”/&gt; 			&lt;xs:enumeration value=“total”/&gt;
+			&lt;xs:enumeration value=“estimate”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“WaterType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“indoor and outdoor
+water”/&gt; 			&lt;xs:enumeration value=“indoor water ”/&gt; 			&lt;!–
+deprecated –&gt; 			&lt;xs:enumeration value=“indoor water”/&gt;
+			&lt;xs:enumeration value=“outdoor water”/&gt; 			&lt;xs:enumeration
+value=“wastewater/sewer”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WaterUseIntensityUnits”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“gal/sq.ft.”/&gt; 			&lt;xs:enumeration
+value=“gal/day/person”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“endUseType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“Heating”/&gt; 			&lt;xs:enumeration value=“Cooling”/&gt;
+			&lt;xs:enumeration value=“HotWater”/&gt; 			&lt;xs:enumeration
+value=“Appliance”/&gt; 			&lt;xs:enumeration value=“Lighting”/&gt;
+			&lt;xs:enumeration value=“PV”/&gt; 			&lt;xs:enumeration
+value=“SolarThermal”/&gt; 			&lt;xs:enumeration value=“Other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“MeasuredOrEstimated”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“estimated”/&gt; 			&lt;xs:enumeration
+value=“measured”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“GrossOrNet”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“gross”/&gt;
+			&lt;xs:enumeration value=“net”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“SurfaceArea”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minExclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“TransactionType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“create”/&gt;
+			&lt;xs:enumeration value=“update”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“AuditorRelationship”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“HVACInstallationStandard”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“ACCA 5 QI HVAC”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“HVACSizingCalcs”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“manual j”/&gt; 			&lt;xs:enumeration value=“manual j and manual
+d”/&gt; 			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“HydronicDistributionType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“radiator”/&gt;
+			&lt;xs:enumeration value=“baseboard”/&gt; 			&lt;xs:enumeration
+value=“radiant floor”/&gt; 			&lt;xs:enumeration value=“radiant
+ceiling”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“AirDistributionType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“regular velocity”/&gt; 			&lt;xs:enumeration
+value=“high velocity”/&gt; 			&lt;xs:enumeration value=“gravity”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“ElectricDistributionType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“baseboard”/&gt;
+			&lt;xs:enumeration value=“radiant floor”/&gt; 			&lt;xs:enumeration
+value=“radiant ceiling”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“AirHandlerMotorType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“PSC
+single-speed”/&gt; 			&lt;xs:enumeration value=“PSC multi-speed”/&gt;
+			&lt;xs:enumeration value=“ECM”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“PlugLoadType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“TV
+plasma”/&gt; 			&lt;xs:enumeration value=“TV CRT”/&gt;
+			&lt;xs:enumeration value=“TV other”/&gt; 			&lt;xs:enumeration
+value=“computer”/&gt; 			&lt;xs:enumeration value=“space heater”/&gt;
+			&lt;xs:enumeration value=“water bed”/&gt; 			&lt;xs:enumeration
+value=“aquarium”/&gt; 			&lt;xs:enumeration value=“electric vehicle
+charging”/&gt; 			&lt;xs:enumeration value=“well pump”/&gt;
+			&lt;xs:enumeration value=“sauna”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“PlugLoadLocation”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“interior”/&gt;
+			&lt;xs:enumeration value=“exterior”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“PlugLoadUnits”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“kWh/year”/&gt; 			&lt;xs:enumeration value=“W”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WindowCondition”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“good”/&gt; 			&lt;xs:enumeration
+value=“moderate”/&gt; 			&lt;xs:enumeration value=“poor”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“GasFill”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“air”/&gt; 			&lt;xs:enumeration
+value=“argon”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“GlassType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“low-e”/&gt; 			&lt;xs:enumeration
+value=“tinted”/&gt; 			&lt;xs:enumeration value=“reflective”/&gt;
+			&lt;xs:enumeration value=“tinted/reflective”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ClothesWasherType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“top loader”/&gt;
+			&lt;xs:enumeration value=“front loader”/&gt; 			&lt;xs:enumeration
+value=“all-in-one combination washer/dryer”/&gt; 			&lt;xs:enumeration
+value=“unitized/stacked washer-dryer pair”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“ClothesDryerType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“dryer”/&gt; 			&lt;xs:enumeration value=“all-in-one combination
+washer/dryer”/&gt; 			&lt;xs:enumeration value=“unitized/stacked
+washer-dryer pair”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“LaundryMachineLocation”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“basement”/&gt;
+			&lt;xs:enumeration value=“basement - conditioned”/&gt;
+			&lt;xs:enumeration value=“basement - unconditioned”/&gt;
+			&lt;xs:enumeration value=“garage”/&gt; 			&lt;xs:enumeration
+value=“garage - conditioned”/&gt; 			&lt;xs:enumeration value=“garage -
+unconditioned”/&gt; 			&lt;xs:enumeration value=“laundry room”/&gt;
+			&lt;xs:enumeration value=“living space”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 			&lt;xs:enumeration value=“unconditioned space”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“FreezerStyle”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“uncategorized”/&gt; 			&lt;xs:enumeration
+value=“manual defrost”/&gt; 			&lt;xs:enumeration value=“frost free”/&gt;
+			&lt;xs:enumeration value=“walk-in”/&gt; 			&lt;xs:enumeration
+value=“case”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“RefrigeratorStyle”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“side-by-side”/&gt;
+			&lt;xs:enumeration value=“top freezer”/&gt; 			&lt;xs:enumeration
+value=“bottom freezer”/&gt; 			&lt;xs:enumeration value=“single door”/&gt;
+			&lt;xs:enumeration value=“full-size one door”/&gt; 			&lt;xs:enumeration
+value=“full-size two doors”/&gt; 			&lt;xs:enumeration value=“half or
+quarter size”/&gt; 			&lt;xs:enumeration value=“walk-in”/&gt;
+			&lt;xs:enumeration value=“open case”/&gt; 			&lt;xs:enumeration
+value=“closed case”/&gt; 			&lt;xs:enumeration value=“uncategorized”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“RefrigeratorLocation”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“basement”/&gt; 			&lt;xs:enumeration
+value=“basement - conditioned”/&gt; 			&lt;xs:enumeration value=“basement -
+unconditioned”/&gt; 			&lt;xs:enumeration value=“garage”/&gt;
+			&lt;xs:enumeration value=“garage - conditioned”/&gt;
+			&lt;xs:enumeration value=“garage - unconditioned”/&gt;
+			&lt;xs:enumeration value=“kitchen”/&gt; 			&lt;xs:enumeration
+value=“living space”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+			&lt;xs:enumeration value=“unconditioned space”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DehumidifierLocation”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“living space”/&gt; 			&lt;xs:enumeration
+value=“basement”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WaterHeaterType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“storage water heater”/&gt;
+			&lt;xs:enumeration value=“dedicated boiler with storage tank”/&gt;
+			&lt;xs:enumeration value=“instantaneous water heater”/&gt;
+			&lt;xs:enumeration value=“heat pump water heater”/&gt;
+			&lt;xs:enumeration value=“space-heating boiler with storage tank”/&gt;
+			&lt;xs:enumeration value=“space-heating boiler with tankless coil”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“SolarThermalSystemType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“hot water”/&gt; 			&lt;xs:enumeration
+value=“hot water and space heating”/&gt; 			&lt;xs:enumeration value=“space
+heating”/&gt; 			&lt;xs:enumeration value=“hybrid system”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“SolarThermalCollectorLoopType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“air direct”/&gt;
+			&lt;xs:enumeration value=“air indirect”/&gt; 			&lt;xs:enumeration
+value=“liquid direct”/&gt; 			&lt;xs:enumeration value=“liquid
+indirect”/&gt; 			&lt;xs:enumeration value=“passive thermosyphon”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“SolarThermalCollectorType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“single glazing
+black”/&gt; 			&lt;xs:enumeration value=“single glazing selective”/&gt;
+			&lt;xs:enumeration value=“double glazing black”/&gt;
+			&lt;xs:enumeration value=“double glazing selective”/&gt;
+			&lt;xs:enumeration value=“evacuated tube”/&gt; 			&lt;xs:enumeration
+value=“integrated collector storage”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“ResourceTypeCode”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“Quantity”&gt; 		&lt;xs:restriction
+base=“xs:decimal”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“ProgramName”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Title”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“StartDate”&gt; 		&lt;xs:restriction
+base=“xs:date”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“CompleteDateEstimated”&gt; 		&lt;xs:restriction base=“xs:date”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“CompleteDateActual”&gt;
+		&lt;xs:restriction base=“xs:date”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“Notes”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“MeasureCode”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“MeasureDescription”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“EstimatedLife”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“InstallationDate”&gt; 		&lt;xs:restriction base=“xs:date”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Cost”&gt;
+		&lt;xs:restriction base=“xs:decimal”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“FundingSourceCode”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“TotalAmount”&gt; 		&lt;xs:restriction base=“xs:decimal”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“FundingSourceName”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“IncentiveAmount”&gt; 		&lt;xs:restriction
+base=“xs:decimal”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“LoadProfile”&gt; 		&lt;xs:restriction base=“xs:string”/&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“AnnualAmount”&gt;
+		&lt;xs:restriction base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“JobRole”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“Fraction”&gt; 		&lt;xs:annotation&gt; 			&lt;xs:documentation&gt;A
+fraction that has to be between 0 and 1 inclusive&lt;/xs:documentation&gt;
+		&lt;/xs:annotation&gt; 		&lt;xs:restriction base=“xs:double”&gt;
+			&lt;xs:minInclusive value=“0”/&gt; 			&lt;xs:maxInclusive value=“1”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“FractionGreaterThanOne”&gt; 		&lt;xs:annotation&gt;
+			&lt;xs:documentation&gt;A fraction that can be greater than one (ie
+110%)&lt;/xs:documentation&gt; 		&lt;/xs:annotation&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“AtticType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“cape cod”/&gt;
+			&lt;xs:enumeration value=“cathedral ceiling”/&gt; 			&lt;xs:enumeration
+value=“flat roof”/&gt; 			&lt;xs:enumeration value=“unvented attic”/&gt;
+			&lt;xs:enumeration value=“vented attic”/&gt; 			&lt;xs:enumeration
+value=“venting unknown attic”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“AtticWallType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“gable”/&gt; 			&lt;xs:enumeration value=“knee
+wall”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“ImprovementStatusType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“Installed”/&gt; 			&lt;xs:enumeration
+value=“NotInstalled”/&gt; 			&lt;xs:enumeration value=“Recommended”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“TestResultType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“passed”/&gt; 			&lt;xs:enumeration
+value=“failed”/&gt; 			&lt;xs:enumeration value=“not tested”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“FoundationThermalBoundary”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“frame floor”/&gt;
+			&lt;xs:enumeration value=“foundation wall”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WallAndRoofColor”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“light”/&gt; 			&lt;xs:enumeration
+value=“medium”/&gt; 			&lt;xs:enumeration value=“medium dark”/&gt;
+			&lt;xs:enumeration value=“dark”/&gt; 			&lt;xs:enumeration
+value=“reflective”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“RoofType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“shingles”/&gt;
+			&lt;xs:enumeration value=“slate or tile shingles”/&gt;
+			&lt;xs:enumeration value=“wood shingles or shakes”/&gt;
+			&lt;xs:enumeration value=“asphalt or fiberglass shingles”/&gt;
+			&lt;xs:enumeration value=“metal surfacing”/&gt; 			&lt;xs:enumeration
+value=“expanded polystyrene sheathing”/&gt; 			&lt;xs:enumeration
+value=“plastic/rubber/synthetic sheeting”/&gt; 			&lt;xs:enumeration
+value=“concrete”/&gt; 			&lt;xs:enumeration value=“cool roof”/&gt;
+			&lt;xs:enumeration value=“green roof”/&gt; 			&lt;xs:enumeration
+value=“no one major type”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DeckType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“concrete”/&gt; 			&lt;xs:enumeration
+value=“metal”/&gt; 			&lt;xs:enumeration value=“wood”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Siding”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“wood
+siding”/&gt; 			&lt;xs:enumeration value=“stucco”/&gt;
+			&lt;xs:enumeration value=“synthetic stucco”/&gt; 			&lt;xs:enumeration
+value=“vinyl siding”/&gt; 			&lt;xs:enumeration value=“aluminum
+siding”/&gt; 			&lt;xs:enumeration value=“brick veneer”/&gt;
+			&lt;xs:enumeration value=“asbestos siding”/&gt; 			&lt;xs:enumeration
+value=“fiber cement siding”/&gt; 			&lt;xs:enumeration value=“composite
+shingle siding”/&gt; 			&lt;xs:enumeration value=“masonite siding”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“LengthMeasurement”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“InsulationGrade”&gt; 		&lt;xs:restriction
+base=“xs:integer”&gt; 			&lt;xs:minInclusive value=“1”/&gt;
+			&lt;xs:maxInclusive value=“3”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“FloorCovering”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“carpet”/&gt; 			&lt;xs:enumeration value=“tile”/&gt;
+			&lt;xs:enumeration value=“hardwood”/&gt; 			&lt;xs:enumeration
+value=“vinyl”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“Pitch”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minInclusive value=“0”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“Tilt”&gt; 		&lt;xs:restriction base=“xs:double”&gt;
+			&lt;xs:minInclusive value=“0”/&gt; 			&lt;xs:maxInclusive
+value=“90”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“PVSystemLocation”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“roof”/&gt;
+			&lt;xs:enumeration value=“ground”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“PVSystemOwnership”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“leased”/&gt;
+			&lt;xs:enumeration value=“owned”/&gt; 			&lt;xs:enumeration value=“power
+purchase agreement”/&gt; 			&lt;xs:enumeration value=“utility owned”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Power”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ZoneType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“conditioned”/&gt;
+			&lt;xs:enumeration value=“unconditioned”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WholeBldgVentilationRequirementMethod”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“ASHRAE 62.2-1989”/&gt;
+			&lt;xs:enumeration value=“ASHRAE 62.2-2007”/&gt; 			&lt;xs:enumeration
+value=“ASHRAE 62.2-2010”/&gt; 			&lt;xs:enumeration value=“ASHRAE
+62.2-2013”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“BooleanWithNA”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“true”/&gt;
+			&lt;xs:enumeration value=“false”/&gt; 			&lt;xs:enumeration
+value=“na”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“VentilationRateUnits”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“ACH”/&gt;
+			&lt;xs:enumeration value=“CFMnat”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“VentilationFanThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“Home Ventilation Institute”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Recommendation”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“require”/&gt; 			&lt;xs:enumeration value=“recommend”/&gt;
+			&lt;xs:enumeration value=“no recommendation”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“SpotVentilationLocation”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“bath”/&gt;
+			&lt;xs:enumeration value=“garage”/&gt; 			&lt;xs:enumeration
+value=“garage - conditioned”/&gt; 			&lt;xs:enumeration value=“garage -
+unconditioned”/&gt; 			&lt;xs:enumeration value=“kitchen”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“SpotVentilationUnits”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“CFM”/&gt; 			&lt;xs:enumeration value=“ACH”/&gt;
+			&lt;xs:enumeration value=“L/s”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“VentilationFanType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“exhaust only”/&gt; 			&lt;xs:enumeration value=“supply only”/&gt;
+			&lt;xs:enumeration value=“heat recovery ventilator”/&gt;
+			&lt;xs:enumeration value=“energy recovery ventilator”/&gt;
+			&lt;xs:enumeration value=“balanced”/&gt; 			&lt;xs:enumeration
+value=“central fan integrated supply”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“HoursPerDay”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 			&lt;xs:maxInclusive value=“24”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“VentilationFanLocation”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“bath”/&gt; 			&lt;xs:enumeration
+value=“garage”/&gt; 			&lt;xs:enumeration value=“garage - conditioned”/&gt;
+			&lt;xs:enumeration value=“garage - unconditioned”/&gt;
+			&lt;xs:enumeration value=“hallway”/&gt; 			&lt;xs:enumeration
+value=“kitchen”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“eGridRegions”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“Alaska”/&gt; 			&lt;xs:enumeration
+value=“Eastern”/&gt; 			&lt;xs:enumeration value=“ERCOT”/&gt;
+			&lt;xs:enumeration value=“Hawaii”/&gt; 			&lt;xs:enumeration
+value=“Western”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ProgramSponsor”&gt; 		&lt;xs:restriction
+base=“xs:string”/&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“CertifyingOrganization”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“USGBC”/&gt; 			&lt;xs:enumeration
+value=“NAHB”/&gt; 			&lt;xs:enumeration value=“Energy Star Home”/&gt;
+			&lt;xs:enumeration value=“local program”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“ProgramCertificate”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Home Performance with
+Energy Star”/&gt; 			&lt;xs:enumeration value=“LEED Certified”/&gt;
+			&lt;xs:enumeration value=“LEED Silver”/&gt; 			&lt;xs:enumeration
+value=“LEED Gold”/&gt; 			&lt;xs:enumeration value=“LEED Platinum”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“BoilerType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“hot
+water”/&gt; 			&lt;xs:enumeration value=“steam”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;</p>
+
+<p>&lt;xs:simpleType name=“KnownOrEstimated”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“known”/&gt;
+			&lt;xs:enumeration value=“estimated”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“PoolType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration value=“in
+ground”/&gt; 			&lt;xs:enumeration value=“on ground”/&gt;
+			&lt;xs:enumeration value=“above ground”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 			&lt;xs:enumeration value=“unknown”/&gt;
+			&lt;xs:enumeration value=“none”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“MonthsPerYear”&gt;
+		&lt;xs:restriction base=“xs:integer”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 			&lt;xs:maxInclusive value=“12”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“PoolFilterType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“sand”/&gt; 			&lt;xs:enumeration
+value=“diatomaceous earth”/&gt; 			&lt;xs:enumeration
+value=“cartridge”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+			&lt;xs:enumeration value=“unknown”/&gt; 			&lt;xs:enumeration
+value=“none”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“PoolPumpType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“single speed”/&gt;
+			&lt;xs:enumeration value=“multi speed”/&gt; 			&lt;xs:enumeration
+value=“variable speed”/&gt; 			&lt;xs:enumeration value=“variable
+flow”/&gt; 			&lt;xs:enumeration value=“other”/&gt; 			&lt;xs:enumeration
+value=“unknown”/&gt; 			&lt;xs:enumeration value=“none”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“PoolPump3rdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“ENERGY STAR”/&gt;
+			&lt;xs:enumeration value=“ENERGY STAR Most Efficient”/&gt;
+			&lt;xs:enumeration value=“CEE Tier 1”/&gt; 			&lt;xs:enumeration
+value=“CEE Tier 2”/&gt; 			&lt;xs:enumeration value=“Cee Tier 3”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 			&lt;xs:enumeration
+value=“unknown”/&gt; 			&lt;xs:enumeration value=“none”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“PoolPumpSpeedSetting”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“low”/&gt; 			&lt;xs:enumeration
+value=“high”/&gt; 			&lt;xs:enumeration value=“most efficient”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 			&lt;xs:enumeration
+value=“unknown”/&gt; 			&lt;xs:enumeration value=“none”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“Speed”&gt; 		&lt;xs:restriction base=“xs:double”&gt;
+			&lt;xs:minInclusive value=“0”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“FlowRate”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“PoolCleanerType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“robotic”/&gt;
+			&lt;xs:enumeration value=“suction side”/&gt; 			&lt;xs:enumeration
+value=“pressure side”/&gt; 			&lt;xs:enumeration value=“booster pump”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 			&lt;xs:enumeration
+value=“unknown”/&gt; 			&lt;xs:enumeration value=“none”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“PoolHeaterType”&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“gas fired”/&gt; 			&lt;xs:enumeration
+value=“electric resistance”/&gt; 			&lt;xs:enumeration value=“heat
+pump”/&gt; 			&lt;xs:enumeration value=“solar”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 			&lt;xs:enumeration value=“unknown”/&gt;
+			&lt;xs:enumeration value=“none”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“BPI2400CalibrationQualification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“none”/&gt;
+			&lt;xs:enumeration value=“detailed”/&gt; 			&lt;xs:enumeration
+value=“simple”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“WeatherStationType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“TMY”/&gt;
+			&lt;xs:enumeration value=“TMY2”/&gt; 			&lt;xs:enumeration
+value=“TMY3”/&gt; 			&lt;xs:enumeration value=“other”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DuctLeakageTotalOrToOutside”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“to outside”/&gt;
+			&lt;xs:enumeration value=“total”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“WeatherStationUse”&gt;
+		&lt;xs:annotation&gt; 			&lt;xs:documentation&gt;By leaving this field
+empty, the weather station is assumed used for all functions such as
+utility bill regression analysis and energy model simulations. If different
+weather stations are used for the different functions, use this field to
+specify the usage of each weather station.&lt;/xs:documentation&gt;
+		&lt;/xs:annotation&gt; 		&lt;xs:restriction base=“xs:string”&gt;
+			&lt;xs:enumeration value=“billing analysis”/&gt; 			&lt;xs:enumeration
+value=“energy modeling”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“WaterFixtureType”&gt;
+		&lt;xs:restriction base=“xs:string”&gt; 			&lt;xs:enumeration
+value=“faucet”/&gt; 			&lt;xs:enumeration value=“shower head”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WaterFixtureThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“Energy Star Most Efficient”/&gt;
+			&lt;xs:enumeration value=“WaterSense”/&gt; 			&lt;xs:enumeration
+value=“CEE Tier 1”/&gt; 			&lt;xs:enumeration value=“CEE Tier 2”/&gt;
+			&lt;xs:enumeration value=“CEE Tier 3”/&gt; 			&lt;xs:enumeration
+value=“other”/&gt; 			&lt;xs:enumeration value=“unknown”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“LightingFixtureThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“Energy Star”/&gt;
+			&lt;xs:enumeration value=“Energy Star Most Efficient”/&gt;
+			&lt;xs:enumeration value=“CEE Tier 1”/&gt; 			&lt;xs:enumeration
+value=“CEE Tier 2”/&gt; 			&lt;xs:enumeration value=“CEE Tier 3”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 			&lt;xs:enumeration
+value=“unknown”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“PeopleCount”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minInclusive value=“0”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“WindThirdPartyCertification”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“AWEA 9.1-2009”/&gt;
+			&lt;xs:enumeration value=“other”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“DrainWaterHeatRecoveryFacilitiesConnected”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“one”/&gt;
+			&lt;xs:enumeration value=“all”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType
+name=“RecirculationControlType”&gt; 		&lt;xs:restriction
+base=“xs:string”&gt; 			&lt;xs:enumeration value=“no control”/&gt;
+			&lt;xs:enumeration value=“timer”/&gt; 			&lt;xs:enumeration
+value=“temperature”/&gt; 			&lt;xs:enumeration value=“presence sensor
+demand control”/&gt; 			&lt;xs:enumeration value=“manual demand
+control”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“MERV”&gt; 		&lt;xs:restriction base=“xs:int”&gt;
+			&lt;xs:minInclusive value=“1”/&gt; 			&lt;xs:maxInclusive
+value=“20”/&gt; 		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt;
+	&lt;xs:simpleType name=“SolarAbsorptance”&gt; 		&lt;xs:restriction
+base=“xs:double”&gt; 			&lt;xs:minInclusive value=“0”/&gt;
+			&lt;xs:maxInclusive value=“1”/&gt; 		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt; 	&lt;xs:simpleType name=“Emittance”&gt;
+		&lt;xs:restriction base=“xs:double”&gt; 			&lt;xs:minInclusive
+value=“0”/&gt; 			&lt;xs:maxInclusive value=“1”/&gt;
+		&lt;/xs:restriction&gt; 	&lt;/xs:simpleType&gt; &lt;/xs:schema&gt;</p>
+</div></div>
+
+      <div id="footer">
+  Generated on Tue Jan  8 15:55:36 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.16 (ruby-2.2.6).
+</div>
+
+    </div>
+  </body>
+</html>

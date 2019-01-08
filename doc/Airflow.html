@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: Airflow
+  
+    &mdash; Documentation by YARD 0.9.16
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "Airflow";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (A)</a> &raquo;
+    
+    
+    <span class="title">Airflow</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: Airflow
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">Airflow</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>resources/airflow.rb</dd>
+  </dl>
+  
+</div>
+
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#apply-class_method" title="apply (class method)">.<strong>apply</strong>(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_default_shelter_coefficient-class_method" title="get_default_shelter_coefficient (class method)">.<strong>get_default_shelter_coefficient</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_default_vented_attic_sla-class_method" title="get_default_vented_attic_sla (class method)">.<strong>get_default_vented_attic_sla</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_default_vented_crawl_sla-class_method" title="get_default_vented_crawl_sla (class method)">.<strong>get_default_vented_crawl_sla</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#remove-class_method" title="remove (class method)">.<strong>remove</strong>(model, obj_name_airflow, obj_name_natvent, obj_name_infil, obj_name_ducts, obj_name_mech_vent)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="apply-class_method">
+  
+    .<strong>apply</strong>(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/airflow.rb', line 11</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_apply'>apply</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='comma'>,</span> <span class='id identifier rubyid_mech_vent'>mech_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_nat_vent'>nat_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_duct_systems'>duct_systems</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_systems'>cfis_systems</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_weather'>weather</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="WeatherProcess.html" title="WeatherProcess (class)">WeatherProcess</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="WeatherProcess.html#initialize-instance_method" title="WeatherProcess#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_weather'>weather</span><span class='period'>.</span><span class='id identifier rubyid_error?'>error?</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='ivar'>@infMethodRes</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>RESIDENTIAL</span><span class='tstring_end'>&#39;</span></span>
+  <span class='ivar'>@infMethodASHRAE</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>ASHRAE-ENHANCED</span><span class='tstring_end'>&#39;</span></span>
+  <span class='ivar'>@infMethodSG</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>SHERMAN-GRIMSRUD</span><span class='tstring_end'>&#39;</span></span>
+
+  <span class='comment'># Get building units
+</span>  <span class='id identifier rubyid_units'>units</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_building_units'><span class='object_link'><a href="Geometry.html#get_building_units-class_method" title="Geometry.get_building_units (method)">get_building_units</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_units'>units</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model_spaces'>model_spaces</span> <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getSpaces'>getSpaces</span>
+
+  <span class='comment'># Populate building object
+</span>  <span class='id identifier rubyid_building'>building</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Building.html" title="Building (class)">Building</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Building.html#initialize-instance_method" title="Building#initialize (method)">new</a></span></span>
+  <span class='id identifier rubyid_spaces'>spaces</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_model_spaces'>model_spaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_space'>space</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>if</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_below_grade'><span class='object_link'><a href="Geometry.html#space_is_below_grade-class_method" title="Geometry.space_is_below_grade (method)">space_is_below_grade</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_spaces'>spaces</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_space'>space</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_building_height'>building_height</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getBuilding'>getBuilding</span><span class='period'>.</span><span class='id identifier rubyid_standardsNumberOfAboveGroundStories'>standardsNumberOfAboveGroundStories</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Cannot determine the number of above grade stories.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_stories'>stories</span> <span class='op'>=</span> <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getBuilding'>getBuilding</span><span class='period'>.</span><span class='id identifier rubyid_standardsNumberOfAboveGroundStories'>standardsNumberOfAboveGroundStories</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
+  <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_above_grade_volume'>above_grade_volume</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_above_grade_finished_volume'><span class='object_link'><a href="Geometry.html#get_above_grade_finished_volume-class_method" title="Geometry.get_above_grade_finished_volume (method)">get_above_grade_finished_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='kw'>true</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_ag_ext_wall_area'>ag_ext_wall_area</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_calculate_above_grade_exterior_wall_area'><span class='object_link'><a href="Geometry.html#calculate_above_grade_exterior_wall_area-class_method" title="Geometry.calculate_above_grade_exterior_wall_area (method)">calculate_above_grade_exterior_wall_area</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model_spaces'>model_spaces</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getThermalZones'>getThermalZones</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_garage'><span class='object_link'><a href="Geometry.html#is_garage-class_method" title="Geometry.is_garage (method)">is_garage</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_garage'>garage</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ZoneInfo.html" title="ZoneInfo (class)">ZoneInfo</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ZoneInfo.html#initialize-instance_method" title="ZoneInfo#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_floorArea'>floorArea</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m^2</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft^2</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_zone_volume'><span class='object_link'><a href="Geometry.html#get_zone_volume-class_method" title="Geometry.get_zone_volume (method)">get_zone_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_z_origin_for_zone'><span class='object_link'><a href="Geometry.html#get_z_origin_for_zone-class_method" title="Geometry.get_z_origin_for_zone (method)">get_z_origin_for_zone</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_basement'><span class='object_link'><a href="Geometry.html#is_unfinished_basement-class_method" title="Geometry.is_unfinished_basement (method)">is_unfinished_basement</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_basement'>unfinished_basement</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ZoneInfo.html" title="ZoneInfo (class)">ZoneInfo</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ZoneInfo.html#initialize-instance_method" title="ZoneInfo#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_floorArea'>floorArea</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m^2</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft^2</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_zone_volume'><span class='object_link'><a href="Geometry.html#get_zone_volume-class_method" title="Geometry.get_zone_volume (method)">get_zone_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_z_origin_for_zone'><span class='object_link'><a href="Geometry.html#get_z_origin_for_zone-class_method" title="Geometry.get_z_origin_for_zone (method)">get_z_origin_for_zone</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_basement_ach'>unfinished_basement_ach</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_crawl'><span class='object_link'><a href="Geometry.html#is_crawl-class_method" title="Geometry.is_crawl (method)">is_crawl</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_crawlspace'>crawlspace</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ZoneInfo.html" title="ZoneInfo (class)">ZoneInfo</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ZoneInfo.html#initialize-instance_method" title="ZoneInfo#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_floorArea'>floorArea</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m^2</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft^2</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_zone_volume'><span class='object_link'><a href="Geometry.html#get_zone_volume-class_method" title="Geometry.get_zone_volume (method)">get_zone_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_z_origin_for_zone'><span class='object_link'><a href="Geometry.html#get_z_origin_for_zone-class_method" title="Geometry.get_z_origin_for_zone (method)">get_z_origin_for_zone</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_crawl_ach'>crawl_ach</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_pier_beam'><span class='object_link'><a href="Geometry.html#is_pier_beam-class_method" title="Geometry.is_pier_beam (method)">is_pier_beam</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_pierbeam'>pierbeam</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ZoneInfo.html" title="ZoneInfo (class)">ZoneInfo</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ZoneInfo.html#initialize-instance_method" title="ZoneInfo#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_floorArea'>floorArea</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m^2</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft^2</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_zone_volume'><span class='object_link'><a href="Geometry.html#get_zone_volume-class_method" title="Geometry.get_zone_volume (method)">get_zone_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_z_origin_for_zone'><span class='object_link'><a href="Geometry.html#get_z_origin_for_zone-class_method" title="Geometry.get_z_origin_for_zone (method)">get_z_origin_for_zone</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_pier_beam_ach'>pier_beam_ach</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+    <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_attic'><span class='object_link'><a href="Geometry.html#is_unfinished_attic-class_method" title="Geometry.is_unfinished_attic (method)">is_unfinished_attic</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_attic'>unfinished_attic</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ZoneInfo.html" title="ZoneInfo (class)">ZoneInfo</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ZoneInfo.html#initialize-instance_method" title="ZoneInfo#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_floorArea'>floorArea</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m^2</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft^2</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_zone_volume'><span class='object_link'><a href="Geometry.html#get_zone_volume-class_method" title="Geometry.get_zone_volume (method)">get_zone_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_z_origin_for_zone'><span class='object_link'><a href="Geometry.html#get_z_origin_for_zone-class_method" title="Geometry.get_z_origin_for_zone (method)">get_z_origin_for_zone</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_attic_const_ach'>unfinished_attic_const_ach</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_attic_sla'>unfinished_attic_sla</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_ffa'>ffa</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_finished_floor_area_from_spaces'><span class='object_link'><a href="Geometry.html#get_finished_floor_area_from_spaces-class_method" title="Geometry.get_finished_floor_area_from_spaces (method)">get_finished_floor_area_from_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model_spaces'>model_spaces</span><span class='comma'>,</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_ffa'>ffa</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_ag_ffa'>ag_ffa</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_above_grade_finished_floor_area_from_spaces'><span class='object_link'><a href="Geometry.html#get_above_grade_finished_floor_area_from_spaces-class_method" title="Geometry.get_above_grade_finished_floor_area_from_spaces (method)">get_above_grade_finished_floor_area_from_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model_spaces'>model_spaces</span><span class='comma'>,</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_ag_ffa'>ag_ffa</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='id identifier rubyid_wind_speed'>wind_speed</span> <span class='op'>=</span> <span class='id identifier rubyid_process_wind_speed_correction'>process_wind_speed_correction</span><span class='lparen'>(</span><span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_terrain'>terrain</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_shelter_coef'>shelter_coef</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_closest_neighbor_distance'><span class='object_link'><a href="Geometry.html#get_closest_neighbor_distance-class_method" title="Geometry.get_closest_neighbor_distance (method)">get_closest_neighbor_distance</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_building_height'>building_height</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_process_infiltration'>process_infiltration</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='comma'>,</span> <span class='id identifier rubyid_wind_speed'>wind_speed</span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='comma'>,</span> <span class='id identifier rubyid_weather'>weather</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Global sensors
+</span>
+  <span class='id identifier rubyid_pbar_sensor'>pbar_sensor</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>EnergyManagementSystemSensor</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Site Outdoor Air Barometric Pressure</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_pbar_sensor'>pbar_sensor</span><span class='period'>.</span><span class='id identifier rubyid_setName'>setName</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameNaturalVentilation-class_method" title="Constants.ObjectNameNaturalVentilation (method)">ObjectNameNaturalVentilation</a></span></span><span class='embexpr_end'>}</span><span class='tstring_content'> pb s</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_vwind_sensor'>vwind_sensor</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>EnergyManagementSystemSensor</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Site Wind Speed</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_vwind_sensor'>vwind_sensor</span><span class='period'>.</span><span class='id identifier rubyid_setName'>setName</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameAirflow-class_method" title="Constants.ObjectNameAirflow (method)">ObjectNameAirflow</a></span></span><span class='embexpr_end'>}</span><span class='tstring_content'> vw s</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_wout_sensor'>wout_sensor</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>EnergyManagementSystemSensor</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Site Outdoor Air Humidity Ratio</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_wout_sensor'>wout_sensor</span><span class='period'>.</span><span class='id identifier rubyid_setName'>setName</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameNaturalVentilation-class_method" title="Constants.ObjectNameNaturalVentilation (method)">ObjectNameNaturalVentilation</a></span></span><span class='embexpr_end'>}</span><span class='tstring_content'> wt s</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+  <span class='comment'># Adiabatic construction for ducts
+</span>
+  <span class='id identifier rubyid_adiabatic_mat'>adiabatic_mat</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>MasslessOpaqueMaterial</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Rough</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='float'>176.1</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_adiabatic_mat'>adiabatic_mat</span><span class='period'>.</span><span class='id identifier rubyid_setName'>setName</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Adiabatic</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_adiabatic_const'>adiabatic_const</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>Construction</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_adiabatic_const'>adiabatic_const</span><span class='period'>.</span><span class='id identifier rubyid_setName'>setName</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>AdiabaticConst</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_adiabatic_const'>adiabatic_const</span><span class='period'>.</span><span class='id identifier rubyid_insertLayer'>insertLayer</span><span class='lparen'>(</span><span class='int'>0</span><span class='comma'>,</span> <span class='id identifier rubyid_adiabatic_mat'>adiabatic_mat</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_units'>units</span><span class='period'>.</span><span class='id identifier rubyid_each_with_index'>each_with_index</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_unit'>unit</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_index'>unit_index</span><span class='op'>|</span>
+    <span class='id identifier rubyid_obj_name_airflow'>obj_name_airflow</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameAirflow-class_method" title="Constants.ObjectNameAirflow (method)">ObjectNameAirflow</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unit </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>|</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameInfiltration-class_method" title="Constants.ObjectNameInfiltration (method)">ObjectNameInfiltration</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unit </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>|</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_obj_name_natvent'>obj_name_natvent</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameNaturalVentilation-class_method" title="Constants.ObjectNameNaturalVentilation (method)">ObjectNameNaturalVentilation</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unit </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>|</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameMechanicalVentilation-class_method" title="Constants.ObjectNameMechanicalVentilation (method)">ObjectNameMechanicalVentilation</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>unit </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>|</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_nbeds'>nbeds</span><span class='comma'>,</span> <span class='id identifier rubyid_nbaths'>nbaths</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_unit_beds_baths'><span class='object_link'><a href="Geometry.html#get_unit_beds_baths-class_method" title="Geometry.get_unit_beds_baths (method)">get_unit_beds_baths</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_unit'>unit</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_nbeds'>nbeds</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='kw'>or</span> <span class='id identifier rubyid_nbaths'>nbaths</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+      <span class='kw'>return</span> <span class='kw'>false</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_unit_ag_ext_wall_area'>unit_ag_ext_wall_area</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_calculate_above_grade_exterior_wall_area'><span class='object_link'><a href="Geometry.html#calculate_above_grade_exterior_wall_area-class_method" title="Geometry.calculate_above_grade_exterior_wall_area (method)">calculate_above_grade_exterior_wall_area</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_unit_ag_ffa'>unit_ag_ffa</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_above_grade_finished_floor_area_from_spaces'><span class='object_link'><a href="Geometry.html#get_above_grade_finished_floor_area_from_spaces-class_method" title="Geometry.get_above_grade_finished_floor_area_from_spaces (method)">get_above_grade_finished_floor_area_from_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_unit_ffa'>unit_ffa</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_finished_floor_area_from_spaces'><span class='object_link'><a href="Geometry.html#get_finished_floor_area_from_spaces-class_method" title="Geometry.get_finished_floor_area_from_spaces (method)">get_finished_floor_area_from_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_unit_window_area'>unit_window_area</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_window_area_from_spaces'><span class='object_link'><a href="Geometry.html#get_window_area_from_spaces-class_method" title="Geometry.get_window_area_from_spaces (method)">get_window_area_from_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='comma'>,</span> <span class='kw'>false</span><span class='rparen'>)</span>
+
+    <span class='comment'># Determine geometry for spaces and zones that are unit specific
+</span>    <span class='id identifier rubyid_unit_living'>unit_living</span> <span class='op'>=</span> <span class='kw'>nil</span>
+    <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span> <span class='op'>=</span> <span class='kw'>nil</span>
+    <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_thermal_zones_from_spaces'><span class='object_link'><a href="Geometry.html#get_thermal_zones_from_spaces-class_method" title="Geometry.get_thermal_zones_from_spaces (method)">get_thermal_zones_from_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_unit'>unit</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='op'>|</span>
+      <span class='kw'>if</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_finished_basement'><span class='object_link'><a href="Geometry.html#is_finished_basement-class_method" title="Geometry.is_finished_basement (method)">is_finished_basement</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ZoneInfo.html" title="ZoneInfo (class)">ZoneInfo</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ZoneInfo.html#initialize-instance_method" title="ZoneInfo#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_floorArea'>floorArea</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m^2</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft^2</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_zone_volume'><span class='object_link'><a href="Geometry.html#get_zone_volume-class_method" title="Geometry.get_zone_volume (method)">get_zone_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_z_origin_for_zone'><span class='object_link'><a href="Geometry.html#get_z_origin_for_zone-class_method" title="Geometry.get_z_origin_for_zone (method)">get_z_origin_for_zone</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_finished_basement_ach'>finished_basement_ach</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_living'><span class='object_link'><a href="Geometry.html#is_living-class_method" title="Geometry.is_living (method)">is_living</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_unit_living'>unit_living</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="ZoneInfo.html" title="ZoneInfo (class)">ZoneInfo</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="ZoneInfo.html#initialize-instance_method" title="ZoneInfo#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_height_of_spaces'><span class='object_link'><a href="Geometry.html#get_height_of_spaces-class_method" title="Geometry.get_height_of_spaces (method)">get_height_of_spaces</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_floorArea'>floorArea</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m^2</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft^2</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_zone_volume'><span class='object_link'><a href="Geometry.html#get_zone_volume-class_method" title="Geometry.get_zone_volume (method)">get_zone_volume</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='comma'>,</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_get_z_origin_for_zone'><span class='object_link'><a href="Geometry.html#get_z_origin_for_zone-class_method" title="Geometry.get_z_origin_for_zone (method)">get_z_origin_for_zone</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># Search for mini-split heat pump
+</span>    <span class='id identifier rubyid_unit_has_mshp'>unit_has_mshp</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="HVAC.html" title="HVAC (class)">HVAC</a></span></span><span class='period'>.</span><span class='id identifier rubyid_has_mshp'>has_mshp</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='rparen'>)</span>
+
+    <span class='comment'># Determine if forced air equipment
+</span>    <span class='id identifier rubyid_has_forced_air_equipment'>has_forced_air_equipment</span> <span class='op'>=</span> <span class='kw'>false</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_airLoopHVACs'>airLoopHVACs</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span> <span class='op'>&gt;</span> <span class='int'>0</span>
+      <span class='id identifier rubyid_has_forced_air_equipment'>has_forced_air_equipment</span> <span class='op'>=</span> <span class='kw'>true</span>
+    <span class='kw'>end</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_unit_has_mshp'>unit_has_mshp</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='const'><span class='object_link'><a href="HVAC.html" title="HVAC (class)">HVAC</a></span></span><span class='period'>.</span><span class='id identifier rubyid_has_ducted_mshp'>has_ducted_mshp</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_has_forced_air_equipment'>has_forced_air_equipment</span> <span class='op'>=</span> <span class='kw'>false</span>
+    <span class='kw'>end</span>
+
+    <span class='comment'># Common sensors
+</span>
+    <span class='id identifier rubyid_tin_sensor'>tin_sensor</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>EnergyManagementSystemSensor</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Zone Mean Air Temperature</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_tin_sensor'>tin_sensor</span><span class='period'>.</span><span class='id identifier rubyid_setName'>setName</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_obj_name_airflow'>obj_name_airflow</span><span class='embexpr_end'>}</span><span class='tstring_content'> tin s</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_tin_sensor'>tin_sensor</span><span class='period'>.</span><span class='id identifier rubyid_setKeyName'>setKeyName</span><span class='lparen'>(</span><span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_tout_sensor'>tout_sensor</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>EnergyManagementSystemSensor</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Zone Outdoor Air Drybulb Temperature</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_tout_sensor'>tout_sensor</span><span class='period'>.</span><span class='id identifier rubyid_setName'>setName</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_obj_name_airflow'>obj_name_airflow</span><span class='embexpr_end'>}</span><span class='tstring_content'> tt s</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_tout_sensor'>tout_sensor</span><span class='period'>.</span><span class='id identifier rubyid_setKeyName'>setKeyName</span><span class='lparen'>(</span><span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rparen'>)</span>
+
+    <span class='comment'># Update model
+</span>
+    <span class='id identifier rubyid_success'>success</span><span class='comma'>,</span> <span class='id identifier rubyid_infil_output'>infil_output</span> <span class='op'>=</span> <span class='id identifier rubyid_process_infiltration_for_unit'>process_infiltration_for_unit</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='comma'>,</span> <span class='id identifier rubyid_wind_speed'>wind_speed</span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='comma'>,</span> <span class='id identifier rubyid_weather'>weather</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_ag_ffa'>unit_ag_ffa</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_ag_ext_wall_area'>unit_ag_ext_wall_area</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_success'>success</span>
+
+    <span class='id identifier rubyid_success'>success</span><span class='comma'>,</span> <span class='id identifier rubyid_mv_output'>mv_output</span> <span class='op'>=</span> <span class='id identifier rubyid_process_mech_vent_for_unit'>process_mech_vent_for_unit</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_unit'>unit</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_is_existing_home'>is_existing_home</span><span class='comma'>,</span> <span class='id identifier rubyid_infil_output'>infil_output</span><span class='period'>.</span><span class='id identifier rubyid_a_o'>a_o</span><span class='comma'>,</span> <span class='id identifier rubyid_mech_vent'>mech_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='comma'>,</span> <span class='id identifier rubyid_nbeds'>nbeds</span><span class='comma'>,</span> <span class='id identifier rubyid_nbaths'>nbaths</span><span class='comma'>,</span> <span class='id identifier rubyid_weather'>weather</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_ffa'>unit_ffa</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='comma'>,</span> <span class='id identifier rubyid_units'>units</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span><span class='comma'>,</span> <span class='id identifier rubyid_has_forced_air_equipment'>has_forced_air_equipment</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_success'>success</span>
+
+    <span class='id identifier rubyid_cfis_programs'>cfis_programs</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+    <span class='kw'>if</span> <span class='id identifier rubyid_mech_vent'>mech_vent</span><span class='period'>.</span><span class='id identifier rubyid_type'>type</span> <span class='op'>==</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#VentTypeCFIS-class_method" title="Constants.VentTypeCFIS (method)">VentTypeCFIS</a></span></span>
+      <span class='id identifier rubyid_cfis_systems'>cfis_systems</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_cfis'>cfis</span><span class='comma'>,</span> <span class='id identifier rubyid_air_loops'>air_loops</span><span class='op'>|</span>
+        <span class='id identifier rubyid_success'>success</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_output'>cfis_output</span> <span class='op'>=</span> <span class='id identifier rubyid_process_cfis_for_unit'>process_cfis_for_unit</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis'>cfis</span><span class='comma'>,</span> <span class='id identifier rubyid_unit'>unit</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='rparen'>)</span>
+        <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_success'>success</span>
+
+        <span class='id identifier rubyid_cfis_programs'>cfis_programs</span> <span class='op'>=</span> <span class='id identifier rubyid_create_cfis_objects'>create_cfis_objects</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis'>cfis</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_output'>cfis_output</span><span class='comma'>,</span> <span class='id identifier rubyid_air_loops'>air_loops</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_programs'>cfis_programs</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='rparen'>)</span>
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_success'>success</span><span class='comma'>,</span> <span class='id identifier rubyid_nv_output'>nv_output</span> <span class='op'>=</span> <span class='id identifier rubyid_process_nat_vent_for_unit'>process_nat_vent_for_unit</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_natvent'>obj_name_natvent</span><span class='comma'>,</span> <span class='id identifier rubyid_nat_vent'>nat_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_wind_speed'>wind_speed</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='comma'>,</span> <span class='id identifier rubyid_weather'>weather</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_window_area'>unit_window_area</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_success'>success</span>
+
+    <span class='id identifier rubyid_nv_program'>nv_program</span> <span class='op'>=</span> <span class='id identifier rubyid_create_nat_vent_objects'>create_nat_vent_objects</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_natvent'>obj_name_natvent</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='comma'>,</span> <span class='id identifier rubyid_nat_vent'>nat_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_nv_output'>nv_output</span><span class='comma'>,</span> <span class='id identifier rubyid_tin_sensor'>tin_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_tout_sensor'>tout_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_pbar_sensor'>pbar_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_vwind_sensor'>vwind_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_wout_sensor'>wout_sensor</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_duct_programs'>duct_programs</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+    <span class='id identifier rubyid_duct_lks'>duct_lks</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+    <span class='id identifier rubyid_duct_systems'>duct_systems</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_ducts'>ducts</span><span class='comma'>,</span> <span class='id identifier rubyid_air_loops'>air_loops</span><span class='op'>|</span>
+      <span class='id identifier rubyid_success'>success</span><span class='comma'>,</span> <span class='id identifier rubyid_ducts_output'>ducts_output</span> <span class='op'>=</span> <span class='id identifier rubyid_process_ducts_for_unit'>process_ducts_for_unit</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_ducts'>ducts</span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='comma'>,</span> <span class='id identifier rubyid_unit'>unit</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_index'>unit_index</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_ffa'>unit_ffa</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_has_mshp'>unit_has_mshp</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span><span class='comma'>,</span> <span class='id identifier rubyid_has_forced_air_equipment'>has_forced_air_equipment</span><span class='rparen'>)</span>
+      <span class='kw'>return</span> <span class='kw'>false</span> <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_success'>success</span>
+
+      <span class='id identifier rubyid_air_loops'>air_loops</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_air_loop'>air_loop</span><span class='op'>|</span>
+        <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_airLoopHVACs'>airLoopHVACs</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_air_loop'>air_loop</span> <span class='comment'># next if airloop doesn&#39;t serve this unit
+</span>        <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_ducts_output'>ducts_output</span><span class='period'>.</span><span class='id identifier rubyid_location_name'>location_name</span> <span class='op'>==</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='kw'>or</span> <span class='id identifier rubyid_ducts_output'>ducts_output</span><span class='period'>.</span><span class='id identifier rubyid_location_name'>location_name</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>none</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>or</span> <span class='kw'>not</span> <span class='id identifier rubyid_has_forced_air_equipment'>has_forced_air_equipment</span>
+
+        <span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#ObjectNameDucts-class_method" title="Constants.ObjectNameDucts (method)">ObjectNameDucts</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_air_loop'>air_loop</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>|</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_duct_lk_supply_fan_equiv_var'>duct_lk_supply_fan_equiv_var</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>EnergyManagementSystemGlobalVariable</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span><span class='embexpr_end'>}</span><span class='tstring_content'> lk sup fan equiv</span><span class='tstring_end'>&quot;</span></span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_duct_lk_return_fan_equiv_var'>duct_lk_return_fan_equiv_var</span> <span class='op'>=</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>EnergyManagementSystemGlobalVariable</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span><span class='embexpr_end'>}</span><span class='tstring_content'> lk ret fan equiv</span><span class='tstring_end'>&quot;</span></span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_duct_lks'>duct_lks</span><span class='lbracket'>[</span><span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='id identifier rubyid_duct_lk_supply_fan_equiv_var'>duct_lk_supply_fan_equiv_var</span><span class='comma'>,</span> <span class='id identifier rubyid_duct_lk_return_fan_equiv_var'>duct_lk_return_fan_equiv_var</span><span class='rbracket'>]</span>
+      <span class='kw'>end</span>
+
+      <span class='id identifier rubyid_duct_programs'>duct_programs</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_programs'>cfis_programs</span> <span class='op'>=</span> <span class='id identifier rubyid_create_ducts_objects'>create_ducts_objects</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_unit'>unit</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span><span class='comma'>,</span> <span class='id identifier rubyid_mech_vent'>mech_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_ducts_output'>ducts_output</span><span class='comma'>,</span> <span class='id identifier rubyid_tin_sensor'>tin_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_pbar_sensor'>pbar_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_has_forced_air_equipment'>has_forced_air_equipment</span><span class='comma'>,</span> <span class='id identifier rubyid_adiabatic_const'>adiabatic_const</span><span class='comma'>,</span> <span class='id identifier rubyid_air_loops'>air_loops</span><span class='comma'>,</span> <span class='id identifier rubyid_duct_programs'>duct_programs</span><span class='comma'>,</span> <span class='id identifier rubyid_duct_lks'>duct_lks</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_programs'>cfis_programs</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_infil_program'>infil_program</span> <span class='op'>=</span> <span class='id identifier rubyid_create_infil_mech_vent_objects'>create_infil_mech_vent_objects</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='comma'>,</span> <span class='id identifier rubyid_infil'>infil</span><span class='comma'>,</span> <span class='id identifier rubyid_mech_vent'>mech_vent</span><span class='comma'>,</span> <span class='id identifier rubyid_wind_speed'>wind_speed</span><span class='comma'>,</span> <span class='id identifier rubyid_mv_output'>mv_output</span><span class='comma'>,</span> <span class='id identifier rubyid_infil_output'>infil_output</span><span class='comma'>,</span> <span class='id identifier rubyid_tin_sensor'>tin_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_tout_sensor'>tout_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_vwind_sensor'>vwind_sensor</span><span class='comma'>,</span> <span class='id identifier rubyid_duct_lks'>duct_lks</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_programs'>cfis_programs</span><span class='comma'>,</span> <span class='id identifier rubyid_nbeds'>nbeds</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_create_ems_program_managers'>create_ems_program_managers</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_infil_program'>infil_program</span><span class='comma'>,</span> <span class='id identifier rubyid_nv_program'>nv_program</span><span class='comma'>,</span> <span class='id identifier rubyid_cfis_programs'>cfis_programs</span><span class='comma'>,</span> <span class='id identifier rubyid_duct_programs'>duct_programs</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_airflow'>obj_name_airflow</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='rparen'>)</span>
+
+    <span class='comment'># Store info for HVAC Sizing measure
+</span>    <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='const'>ELA</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+      <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationELA-class_method" title="Constants.SizingInfoZoneInfiltrationELA (method)">SizingInfoZoneInfiltrationELA</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='const'>ELA</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationCFM-class_method" title="Constants.SizingInfoZoneInfiltrationCFM (method)">SizingInfoZoneInfiltrationCFM</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_inf_flow'>inf_flow</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span><span class='rparen'>)</span>
+    <span class='kw'>else</span>
+      <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationELA-class_method" title="Constants.SizingInfoZoneInfiltrationELA (method)">SizingInfoZoneInfiltrationELA</a></span></span><span class='comma'>,</span> <span class='float'>0.0</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_unit_living'>unit_living</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationCFM-class_method" title="Constants.SizingInfoZoneInfiltrationCFM (method)">SizingInfoZoneInfiltrationCFM</a></span></span><span class='comma'>,</span> <span class='float'>0.0</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='kw'>unless</span> <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+      <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationCFM-class_method" title="Constants.SizingInfoZoneInfiltrationCFM (method)">SizingInfoZoneInfiltrationCFM</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_unit_finished_basement'>unit_finished_basement</span><span class='period'>.</span><span class='id identifier rubyid_inf_flow'>inf_flow</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span> <span class='comment'># end unit loop
+</span>
+  <span class='comment'># Store info for HVAC Sizing measure
+</span>  <span class='kw'>unless</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_crawlspace'>crawlspace</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_crawlspace'>crawlspace</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationCFM-class_method" title="Constants.SizingInfoZoneInfiltrationCFM (method)">SizingInfoZoneInfiltrationCFM</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_crawlspace'>crawlspace</span><span class='period'>.</span><span class='id identifier rubyid_inf_flow'>inf_flow</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_pierbeam'>pierbeam</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_pierbeam'>pierbeam</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationCFM-class_method" title="Constants.SizingInfoZoneInfiltrationCFM (method)">SizingInfoZoneInfiltrationCFM</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_pierbeam'>pierbeam</span><span class='period'>.</span><span class='id identifier rubyid_inf_flow'>inf_flow</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_basement'>unfinished_basement</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_basement'>unfinished_basement</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationCFM-class_method" title="Constants.SizingInfoZoneInfiltrationCFM (method)">SizingInfoZoneInfiltrationCFM</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_basement'>unfinished_basement</span><span class='period'>.</span><span class='id identifier rubyid_inf_flow'>inf_flow</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='kw'>unless</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_attic'>unfinished_attic</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_attic'>unfinished_attic</span><span class='period'>.</span><span class='id identifier rubyid_zone'>zone</span><span class='period'>.</span><span class='id identifier rubyid_additionalProperties'>additionalProperties</span><span class='period'>.</span><span class='id identifier rubyid_setFeature'>setFeature</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SizingInfoZoneInfiltrationCFM-class_method" title="Constants.SizingInfoZoneInfiltrationCFM (method)">SizingInfoZoneInfiltrationCFM</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_building'>building</span><span class='period'>.</span><span class='id identifier rubyid_unfinished_attic'>unfinished_attic</span><span class='period'>.</span><span class='id identifier rubyid_inf_flow'>inf_flow</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_terrain'>terrain</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#TerrainOcean-class_method" title="Constants.TerrainOcean (method)">TerrainOcean</a></span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Ocean</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='comment'># Ocean, Bayou flat country
+</span>              <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#TerrainPlains-class_method" title="Constants.TerrainPlains (method)">TerrainPlains</a></span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Country</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span>   <span class='comment'># Flat, open country
+</span>              <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#TerrainRural-class_method" title="Constants.TerrainRural (method)">TerrainRural</a></span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Country</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span>    <span class='comment'># Flat, open country
+</span>              <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#TerrainSuburban-class_method" title="Constants.TerrainSuburban (method)">TerrainSuburban</a></span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Suburbs</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='comment'># Rough, wooded country, suburbs
+</span>              <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#TerrainCity-class_method" title="Constants.TerrainCity (method)">TerrainCity</a></span></span> <span class='op'>=&gt;</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>City</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span> <span class='comment'># Towns, city outskirts, center of large cities
+</span>  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getSite'>getSite</span><span class='period'>.</span><span class='id identifier rubyid_setTerrain'>setTerrain</span><span class='lparen'>(</span><span class='id identifier rubyid_terrain'>terrain</span><span class='lbracket'>[</span><span class='id identifier rubyid_infil'>infil</span><span class='period'>.</span><span class='id identifier rubyid_terrain'>terrain</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getScheduleDays'>getScheduleDays</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_obj'>obj</span><span class='op'>|</span> <span class='comment'># remove any orphaned day schedules
+</span>    <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_obj'>obj</span><span class='period'>.</span><span class='id identifier rubyid_directUseCount'>directUseCount</span> <span class='op'>&gt;</span> <span class='int'>0</span>
+
+    <span class='id identifier rubyid_obj'>obj</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_default_shelter_coefficient-class_method">
+  
+    .<strong>get_default_shelter_coefficient</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+399
+400
+401</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/airflow.rb', line 399</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_default_shelter_coefficient'>get_default_shelter_coefficient</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='float'>0.5</span> <span class='comment'># Table 4.2.2(1)(g)
+</span><span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_default_vented_attic_sla-class_method">
+  
+    .<strong>get_default_vented_attic_sla</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+403
+404
+405</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/airflow.rb', line 403</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_default_vented_attic_sla'>get_default_vented_attic_sla</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='float'>1.0</span> <span class='op'>/</span> <span class='float'>300.0</span> <span class='comment'># Table 4.2.2(1) - Attics
+</span><span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_default_vented_crawl_sla-class_method">
+  
+    .<strong>get_default_vented_crawl_sla</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+407
+408
+409</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/airflow.rb', line 407</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_default_vented_crawl_sla'>get_default_vented_crawl_sla</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='float'>1.0</span> <span class='op'>/</span> <span class='float'>150.0</span> <span class='comment'># Table 4.2.2(1) - Crawlspaces
+</span><span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="remove-class_method">
+  
+    .<strong>remove</strong>(model, obj_name_airflow, obj_name_natvent, obj_name_infil, obj_name_ducts, obj_name_mech_vent)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/airflow.rb', line 224</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_airflow'>obj_name_airflow</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_natvent'>obj_name_natvent</span><span class='comma'>,</span>
+                <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span><span class='comma'>,</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='rparen'>)</span>
+
+  <span class='comment'># Remove existing EMS
+</span>
+  <span class='id identifier rubyid_obj_name_airflow_underscore'>obj_name_airflow_underscore</span> <span class='op'>=</span> <span class='id identifier rubyid_obj_name_airflow'>obj_name_airflow</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_obj_name_natvent_underscore'>obj_name_natvent_underscore</span> <span class='op'>=</span> <span class='id identifier rubyid_obj_name_natvent'>obj_name_natvent</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_obj_name_infil_underscore'>obj_name_infil_underscore</span> <span class='op'>=</span> <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_obj_name_ducts_underscore'>obj_name_ducts_underscore</span> <span class='op'>=</span> <span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_obj_name_mechvent_underscore'>obj_name_mechvent_underscore</span> <span class='op'>=</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='period'>.</span><span class='id identifier rubyid_gsub'>gsub</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'> </span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>_</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemProgramCallingManagers'>getEnergyManagementSystemProgramCallingManagers</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_pcm'>pcm</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_pcm'>pcm</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_airflow'>obj_name_airflow</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_pcm'>pcm</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent'>obj_name_natvent</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_pcm'>pcm</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_pcm'>pcm</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_pcm'>pcm</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_pcm'>pcm</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemSensors'>getEnergyManagementSystemSensors</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_sensor'>sensor</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_sensor'>sensor</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_airflow_underscore'>obj_name_airflow_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_sensor'>sensor</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent_underscore'>obj_name_natvent_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_sensor'>sensor</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil_underscore'>obj_name_infil_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_sensor'>sensor</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts_underscore'>obj_name_ducts_underscore</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_sensor'>sensor</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemActuators'>getEnergyManagementSystemActuators</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_actuator'>actuator</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_actuator'>actuator</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_airflow_underscore'>obj_name_airflow_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_actuator'>actuator</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent_underscore'>obj_name_natvent_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_actuator'>actuator</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil_underscore'>obj_name_infil_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_actuator'>actuator</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts_underscore'>obj_name_ducts_underscore</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span> <span class='op'>=</span> <span class='id identifier rubyid_actuator'>actuator</span><span class='period'>.</span><span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span><span class='period'>.</span><span class='id identifier rubyid_is_a?'>is_a?</span> <span class='const'>OpenStudio</span><span class='op'>::</span><span class='const'>Model</span><span class='op'>::</span><span class='const'>OptionalModelObject</span> <span class='comment'># 2.4.0 or higher
+</span>        <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span> <span class='op'>=</span> <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
+      <span class='kw'>end</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span><span class='period'>.</span><span class='id identifier rubyid_to_ElectricEquipment'>to_ElectricEquipment</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+        <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span><span class='period'>.</span><span class='id identifier rubyid_to_ElectricEquipment'>to_ElectricEquipment</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_electricEquipmentDefinition'>electricEquipmentDefinition</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+      <span class='kw'>elsif</span> <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span><span class='period'>.</span><span class='id identifier rubyid_to_OtherEquipment'>to_OtherEquipment</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+        <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span><span class='period'>.</span><span class='id identifier rubyid_to_OtherEquipment'>to_OtherEquipment</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_otherEquipmentDefinition'>otherEquipmentDefinition</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+      <span class='kw'>else</span>
+        <span class='id identifier rubyid_actuatedComponent'>actuatedComponent</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_actuator'>actuator</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemPrograms'>getEnergyManagementSystemPrograms</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_program'>program</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_program'>program</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_airflow_underscore'>obj_name_airflow_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_program'>program</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent_underscore'>obj_name_natvent_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_program'>program</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil_underscore'>obj_name_infil_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_program'>program</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts_underscore'>obj_name_ducts_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_program'>program</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mechvent_underscore'>obj_name_mechvent_underscore</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_program'>program</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemSubroutines'>getEnergyManagementSystemSubroutines</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_subroutine'>subroutine</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_subroutine'>subroutine</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_airflow_underscore'>obj_name_airflow_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_subroutine'>subroutine</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent_underscore'>obj_name_natvent_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_subroutine'>subroutine</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil_underscore'>obj_name_infil_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_subroutine'>subroutine</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts_underscore'>obj_name_ducts_underscore</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_subroutine'>subroutine</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemGlobalVariables'>getEnergyManagementSystemGlobalVariables</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_ems_global_var'>ems_global_var</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_ems_global_var'>ems_global_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_airflow_underscore'>obj_name_airflow_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_global_var'>ems_global_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent_underscore'>obj_name_natvent_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_global_var'>ems_global_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil_underscore'>obj_name_infil_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_global_var'>ems_global_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts_underscore'>obj_name_ducts_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_global_var'>ems_global_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mechvent_underscore'>obj_name_mechvent_underscore</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_ems_global_var'>ems_global_var</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemInternalVariables'>getEnergyManagementSystemInternalVariables</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_ems_internal_var'>ems_internal_var</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_ems_internal_var'>ems_internal_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_airflow_underscore'>obj_name_airflow_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_internal_var'>ems_internal_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent_underscore'>obj_name_natvent_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_internal_var'>ems_internal_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil_underscore'>obj_name_infil_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_internal_var'>ems_internal_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts_underscore'>obj_name_ducts_underscore</span> <span class='kw'>or</span>
+        <span class='id identifier rubyid_ems_internal_var'>ems_internal_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mechvent_underscore'>obj_name_mechvent_underscore</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_ems_internal_var'>ems_internal_var</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getEnergyManagementSystemOutputVariables'>getEnergyManagementSystemOutputVariables</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_ems_output_var'>ems_output_var</span><span class='op'>|</span>
+    <span class='kw'>if</span> <span class='lparen'>(</span><span class='id identifier rubyid_ems_output_var'>ems_output_var</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mechvent_underscore'>obj_name_mechvent_underscore</span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_ems_output_var'>ems_output_var</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Remove existing infiltration
+</span>
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getScheduleRulesets'>getScheduleRulesets</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_schedule'>schedule</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span>
+
+    <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getSpaces'>getSpaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_space'>space</span><span class='op'>|</span>
+    <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_spaceInfiltrationEffectiveLeakageAreas'>spaceInfiltrationEffectiveLeakageAreas</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_leakage_area'>leakage_area</span><span class='op'>|</span>
+      <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_leakage_area'>leakage_area</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span>
+
+      <span class='id identifier rubyid_leakage_area'>leakage_area</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_spaceInfiltrationDesignFlowRates'>spaceInfiltrationDesignFlowRates</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_flow_rate'>flow_rate</span><span class='op'>|</span>
+      <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_flow_rate'>flow_rate</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_infil'>obj_name_infil</span>
+
+      <span class='id identifier rubyid_flow_rate'>flow_rate</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Remove existing natural ventilation
+</span>
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getScheduleRulesets'>getScheduleRulesets</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_schedule'>schedule</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_natvent'>obj_name_natvent</span>
+
+    <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Remove existing mechanical ventilation
+</span>
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getZoneHVACEnergyRecoveryVentilators'>getZoneHVACEnergyRecoveryVentilators</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_erv'>erv</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_erv'>erv</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span>
+
+    <span class='id identifier rubyid_erv'>erv</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getScheduleRulesets'>getScheduleRulesets</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_schedule'>schedule</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span>
+
+    <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getScheduleFixedIntervals'>getScheduleFixedIntervals</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_schedule'>schedule</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_mech_vent'>obj_name_mech_vent</span>
+
+    <span class='id identifier rubyid_schedule'>schedule</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Remove existing ducts
+</span>
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getThermalZones'>getThermalZones</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_start_with?'>start_with?</span> <span class='id identifier rubyid_obj_name_ducts'>obj_name_ducts</span>
+
+    <span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_spaces'>spaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_space'>space</span><span class='op'>|</span>
+      <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_surfaces'>surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_surface'>surface</span><span class='op'>|</span>
+        <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_surfacePropertyConvectionCoefficients'>surfacePropertyConvectionCoefficients</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+          <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_surfacePropertyConvectionCoefficients'>surfacePropertyConvectionCoefficients</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+        <span class='kw'>end</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_airLoopHVACs'>airLoopHVACs</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_air_loop'>air_loop</span><span class='op'>|</span>
+      <span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_removeReturnPlenum'>removeReturnPlenum</span><span class='lparen'>(</span><span class='id identifier rubyid_air_loop'>air_loop</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_thermal_zone'>thermal_zone</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Remove adiabatic construction/material
+</span>
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getLayeredConstructions'>getLayeredConstructions</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_construction'>construction</span><span class='op'>|</span>
+    <span class='kw'>next</span> <span class='kw'>unless</span> <span class='id identifier rubyid_construction'>construction</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>AdiabaticConst</span><span class='tstring_end'>&quot;</span></span>
+
+    <span class='id identifier rubyid_construction'>construction</span><span class='period'>.</span><span class='id identifier rubyid_layers'>layers</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_material'>material</span><span class='op'>|</span>
+      <span class='id identifier rubyid_material'>material</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+    <span class='kw'>end</span>
+    <span class='id identifier rubyid_construction'>construction</span><span class='period'>.</span><span class='id identifier rubyid_remove'>remove</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Jan  8 16:00:15 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.16 (ruby-2.2.6).
+</div>
+
+    </div>
+  </body>
+</html>

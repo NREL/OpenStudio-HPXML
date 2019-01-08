@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: SurfaceTypes
+  
+    &mdash; Documentation by YARD 0.9.16
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "SurfaceTypes";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (S)</a> &raquo;
+    
+    
+    <span class="title">SurfaceTypes</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: SurfaceTypes
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">SurfaceTypes</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>resources/constructions.rb</dd>
+  </dl>
+  
+</div>
+
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_floors-class_method" title="get_floors (class method)">.<strong>get_floors</strong>(model, runner)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_roofs-class_method" title="get_roofs (class method)">.<strong>get_roofs</strong>(model, runner)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_walls-class_method" title="get_walls (class method)">.<strong>get_walls</strong>(model, runner)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Container class for identifying types of surfaces.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="get_floors-class_method">
+  
+    .<strong>get_floors</strong>(model, runner)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+2605
+2606
+2607
+2608
+2609
+2610
+2611
+2612
+2613
+2614
+2615
+2616
+2617
+2618
+2619
+2620
+2621
+2622
+2623
+2624
+2625
+2626
+2627
+2628
+2629
+2630
+2631
+2632
+2633
+2634
+2635
+2636
+2637
+2638
+2639
+2640
+2641
+2642
+2643
+2644
+2645
+2646
+2647
+2648
+2649
+2650
+2651
+2652
+2653
+2654
+2655
+2656
+2657
+2658
+2659
+2660
+2661
+2662
+2663
+2664
+2665
+2666
+2667
+2668
+2669
+2670
+2671
+2672
+2673
+2674
+2675
+2676
+2677
+2678
+2679
+2680
+2681
+2682
+2683
+2684
+2685
+2686
+2687
+2688
+2689
+2690
+2691
+2692
+2693
+2694
+2695
+2696
+2697
+2698
+2699
+2700
+2701
+2702
+2703
+2704
+2705
+2706
+2707
+2708
+2709
+2710
+2711
+2712
+2713
+2714
+2715
+2716
+2717
+2718
+2719
+2720
+2721
+2722
+2723
+2724
+2725</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 2605</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_floors'>get_floors</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_surfaces'>surfaces</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFinInsUnfinAttic-class_method" title="Constants.SurfaceTypeFloorFinInsUnfinAttic (method)">SurfaceTypeFloorFinInsUnfinAttic</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFinInsUnfin-class_method" title="Constants.SurfaceTypeFloorFinInsUnfin (method)">SurfaceTypeFloorFinInsUnfin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFinUninsFin-class_method" title="Constants.SurfaceTypeFloorFinUninsFin (method)">SurfaceTypeFloorFinUninsFin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorUnfinUninsUnfin-class_method" title="Constants.SurfaceTypeFloorUnfinUninsUnfin (method)">SurfaceTypeFloorUnfinUninsUnfin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndFinB-class_method" title="Constants.SurfaceTypeFloorFndGrndFinB (method)">SurfaceTypeFloorFndGrndFinB</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndUnfinB-class_method" title="Constants.SurfaceTypeFloorFndGrndUnfinB (method)">SurfaceTypeFloorFndGrndUnfinB</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndCS-class_method" title="Constants.SurfaceTypeFloorFndGrndCS (method)">SurfaceTypeFloorFndGrndCS</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndFinSlab-class_method" title="Constants.SurfaceTypeFloorFndGrndFinSlab (method)">SurfaceTypeFloorFndGrndFinSlab</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndUnfinSlab-class_method" title="Constants.SurfaceTypeFloorFndGrndUnfinSlab (method)">SurfaceTypeFloorFndGrndUnfinSlab</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorUnfinBInsFin-class_method" title="Constants.SurfaceTypeFloorUnfinBInsFin (method)">SurfaceTypeFloorUnfinBInsFin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorCSInsFin-class_method" title="Constants.SurfaceTypeFloorCSInsFin (method)">SurfaceTypeFloorCSInsFin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorPBInsFin-class_method" title="Constants.SurfaceTypeFloorPBInsFin (method)">SurfaceTypeFloorPBInsFin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+  <span class='rbrace'>}</span>
+
+  <span class='comment'># Ceilings
+</span>  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getSpaces'>getSpaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_space'>space</span><span class='op'>|</span>
+    <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_surfaces'>surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_surface'>surface</span><span class='op'>|</span>
+      <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_surfaceType'>surfaceType</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>!=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>roofceiling</span><span class='tstring_end'>&quot;</span></span>
+
+      <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>adiabatic</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='kw'>nil</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span> <span class='kw'>and</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+        <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='kw'>not</span> <span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
+
+      <span class='comment'># Unfinished basement ceiling
+</span>      <span class='kw'>if</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_basement'><span class='object_link'><a href="Geometry.html#is_unfinished_basement-class_method" title="Geometry.is_unfinished_basement (method)">is_unfinished_basement</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorUnfinBInsFin-class_method" title="Constants.SurfaceTypeFloorUnfinBInsFin (method)">SurfaceTypeFloorUnfinBInsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Crawlspace ceiling
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_crawl'><span class='object_link'><a href="Geometry.html#is_crawl-class_method" title="Geometry.is_crawl (method)">is_crawl</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorCSInsFin-class_method" title="Constants.SurfaceTypeFloorCSInsFin (method)">SurfaceTypeFloorCSInsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Pier beam ceiling
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_pier_beam'><span class='object_link'><a href="Geometry.html#is_pier_beam-class_method" title="Geometry.is_pier_beam (method)">is_pier_beam</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorPBInsFin-class_method" title="Constants.SurfaceTypeFloorPBInsFin (method)">SurfaceTypeFloorPBInsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='id identifier rubyid_ceiling_surface_names'>ceiling_surface_names</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='rbracket'>]</span>
+  <span class='id identifier rubyid_surfaces'>surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_surface_type'>surface_type</span><span class='comma'>,</span> <span class='id identifier rubyid_surfaces'>surfaces</span><span class='op'>|</span>
+    <span class='id identifier rubyid_surfaces'>surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_surface'>surface</span><span class='op'>|</span>
+      <span class='id identifier rubyid_ceiling_surface_names'>ceiling_surface_names</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Floors
+</span>  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getSpaces'>getSpaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_space'>space</span><span class='op'>|</span>
+    <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_above_grade'>above_grade</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_above_grade'><span class='object_link'><a href="Geometry.html#space_is_above_grade-class_method" title="Geometry.space_is_above_grade (method)">space_is_above_grade</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_surfaces'>surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_surface'>surface</span><span class='op'>|</span>
+      <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_surfaceType'>surfaceType</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>!=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>floor</span><span class='tstring_end'>&quot;</span></span>
+
+      <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>outdoors</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>foundation</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>adiabatic</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='kw'>nil</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span> <span class='kw'>and</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+        <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
+        <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_ceiling_surface_names'>ceiling_surface_names</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='kw'>not</span> <span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
+
+      <span class='comment'># Unfinished attic floor
+</span>      <span class='kw'>if</span> <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_attic'><span class='object_link'><a href="Geometry.html#is_unfinished_attic-class_method" title="Geometry.is_unfinished_attic (method)">is_unfinished_attic</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFinInsUnfinAttic-class_method" title="Constants.SurfaceTypeFloorFinInsUnfinAttic (method)">SurfaceTypeFloorFinInsUnfinAttic</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Floor between finished spaces
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFinUninsFin-class_method" title="Constants.SurfaceTypeFloorFinUninsFin (method)">SurfaceTypeFloorFinUninsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Floor between unfinished spaces
+</span>      <span class='kw'>elsif</span> <span class='kw'>not</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorUnfinUninsUnfin-class_method" title="Constants.SurfaceTypeFloorUnfinUninsUnfin (method)">SurfaceTypeFloorUnfinUninsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Finished basement floor
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_finished_basement'><span class='object_link'><a href="Geometry.html#is_finished_basement-class_method" title="Geometry.is_finished_basement (method)">is_finished_basement</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndFinB-class_method" title="Constants.SurfaceTypeFloorFndGrndFinB (method)">SurfaceTypeFloorFndGrndFinB</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Unfinished basement floor
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_basement'><span class='object_link'><a href="Geometry.html#is_unfinished_basement-class_method" title="Geometry.is_unfinished_basement (method)">is_unfinished_basement</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndUnfinB-class_method" title="Constants.SurfaceTypeFloorFndGrndUnfinB (method)">SurfaceTypeFloorFndGrndUnfinB</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Crawlspace floor
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_crawl'><span class='object_link'><a href="Geometry.html#is_crawl-class_method" title="Geometry.is_crawl (method)">is_crawl</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndCS-class_method" title="Constants.SurfaceTypeFloorFndGrndCS (method)">SurfaceTypeFloorFndGrndCS</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Finished slab
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_above_grade'>above_grade</span> <span class='kw'>and</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndFinSlab-class_method" title="Constants.SurfaceTypeFloorFndGrndFinSlab (method)">SurfaceTypeFloorFndGrndFinSlab</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Unfinished slab
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_above_grade'>above_grade</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFndGrndUnfinSlab-class_method" title="Constants.SurfaceTypeFloorFndGrndUnfinSlab (method)">SurfaceTypeFloorFndGrndUnfinSlab</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Interzonal floor
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='lparen'>(</span><span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span> <span class='kw'>or</span> <span class='lparen'>(</span><span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span><span class='rparen'>)</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFinInsUnfin-class_method" title="Constants.SurfaceTypeFloorFinInsUnfin (method)">SurfaceTypeFloorFinInsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Adiabatic finished floor
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='kw'>and</span> <span class='id identifier rubyid_is_finished'>is_finished</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorFinUninsFin-class_method" title="Constants.SurfaceTypeFloorFinUninsFin (method)">SurfaceTypeFloorFinUninsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Adiabatic unfinished floor
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='id identifier rubyid_is_finished'>is_finished</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeFloorUnfinUninsUnfin-class_method" title="Constants.SurfaceTypeFloorUnfinUninsUnfin (method)">SurfaceTypeFloorUnfinUninsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_surfaces'>surfaces</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_roofs-class_method">
+  
+    .<strong>get_roofs</strong>(model, runner)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+2559
+2560
+2561
+2562
+2563
+2564
+2565
+2566
+2567
+2568
+2569
+2570
+2571
+2572
+2573
+2574
+2575
+2576
+2577
+2578
+2579
+2580
+2581
+2582
+2583
+2584
+2585
+2586
+2587
+2588
+2589
+2590
+2591
+2592
+2593
+2594
+2595
+2596
+2597
+2598
+2599
+2600
+2601
+2602
+2603</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 2559</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_roofs'>get_roofs</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_surfaces'>surfaces</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeRoofFinInsExt-class_method" title="Constants.SurfaceTypeRoofFinInsExt (method)">SurfaceTypeRoofFinInsExt</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeRoofUnfinInsExt-class_method" title="Constants.SurfaceTypeRoofUnfinInsExt (method)">SurfaceTypeRoofUnfinInsExt</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeRoofUnfinUninsExt-class_method" title="Constants.SurfaceTypeRoofUnfinUninsExt (method)">SurfaceTypeRoofUnfinUninsExt</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+  <span class='rbrace'>}</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getSpaces'>getSpaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_space'>space</span><span class='op'>|</span>
+    <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_above_grade'>above_grade</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_above_grade'><span class='object_link'><a href="Geometry.html#space_is_above_grade-class_method" title="Geometry.space_is_above_grade (method)">space_is_above_grade</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_surfaces'>surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_surface'>surface</span><span class='op'>|</span>
+      <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_surfaceType'>surfaceType</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>!=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>roofceiling</span><span class='tstring_end'>&quot;</span></span>
+
+      <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>outdoors</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>adiabatic</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='kw'>nil</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span> <span class='kw'>and</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+        <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='kw'>not</span> <span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
+
+      <span class='comment'># Exterior insulated finished
+</span>      <span class='kw'>if</span> <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span> <span class='kw'>and</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_above_grade'>above_grade</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeRoofFinInsExt-class_method" title="Constants.SurfaceTypeRoofFinInsExt (method)">SurfaceTypeRoofFinInsExt</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Exterior insulated unfinished
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_attic'><span class='object_link'><a href="Geometry.html#is_unfinished_attic-class_method" title="Geometry.is_unfinished_attic (method)">is_unfinished_attic</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeRoofUnfinInsExt-class_method" title="Constants.SurfaceTypeRoofUnfinInsExt (method)">SurfaceTypeRoofUnfinInsExt</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Exterior uninsulated unfinished
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeRoofUnfinUninsExt-class_method" title="Constants.SurfaceTypeRoofUnfinUninsExt (method)">SurfaceTypeRoofUnfinUninsExt</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Adiabatic
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeRoofUnfinUninsExt-class_method" title="Constants.SurfaceTypeRoofUnfinUninsExt (method)">SurfaceTypeRoofUnfinUninsExt</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_surfaces'>surfaces</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_walls-class_method">
+  
+    .<strong>get_walls</strong>(model, runner)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Container class for identifying types of surfaces</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+2479
+2480
+2481
+2482
+2483
+2484
+2485
+2486
+2487
+2488
+2489
+2490
+2491
+2492
+2493
+2494
+2495
+2496
+2497
+2498
+2499
+2500
+2501
+2502
+2503
+2504
+2505
+2506
+2507
+2508
+2509
+2510
+2511
+2512
+2513
+2514
+2515
+2516
+2517
+2518
+2519
+2520
+2521
+2522
+2523
+2524
+2525
+2526
+2527
+2528
+2529
+2530
+2531
+2532
+2533
+2534
+2535
+2536
+2537
+2538
+2539
+2540
+2541
+2542
+2543
+2544
+2545
+2546
+2547
+2548
+2549
+2550
+2551
+2552
+2553
+2554
+2555
+2556
+2557</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 2479</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_walls'>get_walls</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_surfaces'>surfaces</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallExtInsFin-class_method" title="Constants.SurfaceTypeWallExtInsFin (method)">SurfaceTypeWallExtInsFin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallExtInsUnfin-class_method" title="Constants.SurfaceTypeWallExtInsUnfin (method)">SurfaceTypeWallExtInsUnfin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallExtUninsUnfin-class_method" title="Constants.SurfaceTypeWallExtUninsUnfin (method)">SurfaceTypeWallExtUninsUnfin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntFinUninsFin-class_method" title="Constants.SurfaceTypeWallIntFinUninsFin (method)">SurfaceTypeWallIntFinUninsFin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntUnfinUninsUnfin-class_method" title="Constants.SurfaceTypeWallIntUnfinUninsUnfin (method)">SurfaceTypeWallIntUnfinUninsUnfin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntFinInsUnfin-class_method" title="Constants.SurfaceTypeWallIntFinInsUnfin (method)">SurfaceTypeWallIntFinInsUnfin</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallFndGrndFinB-class_method" title="Constants.SurfaceTypeWallFndGrndFinB (method)">SurfaceTypeWallFndGrndFinB</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallFndGrndUnfinB-class_method" title="Constants.SurfaceTypeWallFndGrndUnfinB (method)">SurfaceTypeWallFndGrndUnfinB</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+    <span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallFndGrndCS-class_method" title="Constants.SurfaceTypeWallFndGrndCS (method)">SurfaceTypeWallFndGrndCS</a></span></span> <span class='op'>=&gt;</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='comma'>,</span>
+  <span class='rbrace'>}</span>
+
+  <span class='id identifier rubyid_model'>model</span><span class='period'>.</span><span class='id identifier rubyid_getSpaces'>getSpaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_space'>space</span><span class='op'>|</span>
+    <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span>
+
+    <span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_surfaces'>surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_surface'>surface</span><span class='op'>|</span>
+      <span class='kw'>next</span> <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_surfaceType'>surfaceType</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>!=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>wall</span><span class='tstring_end'>&quot;</span></span>
+
+      <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>outdoors</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>foundation</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+      <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_outsideBoundaryCondition'>outsideBoundaryCondition</span><span class='period'>.</span><span class='id identifier rubyid_downcase'>downcase</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>adiabatic</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+
+      <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='kw'>nil</span>
+      <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span> <span class='kw'>and</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_is_initialized'>is_initialized</span>
+        <span class='id identifier rubyid_adjacent_space'>adjacent_space</span> <span class='op'>=</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_adjacentSurface'>adjacentSurface</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span><span class='period'>.</span><span class='id identifier rubyid_space'>space</span><span class='period'>.</span><span class='id identifier rubyid_get'>get</span>
+      <span class='kw'>end</span>
+      <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='op'>=</span> <span class='lparen'>(</span><span class='kw'>not</span> <span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='rparen'>)</span>
+
+      <span class='comment'># Exterior insulated finished
+</span>      <span class='kw'>if</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallExtInsFin-class_method" title="Constants.SurfaceTypeWallExtInsFin (method)">SurfaceTypeWallExtInsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Exterior insulated unfinished
+</span>      <span class='kw'>elsif</span> <span class='kw'>not</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_attic'><span class='object_link'><a href="Geometry.html#is_unfinished_attic-class_method" title="Geometry.is_unfinished_attic (method)">is_unfinished_attic</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_get_space_r_value'>get_space_r_value</span><span class='lparen'>(</span><span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_space'>space</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>roofceiling</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_to_f'>to_f</span> <span class='op'>&gt;</span> <span class='int'>5</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallExtInsUnfin-class_method" title="Constants.SurfaceTypeWallExtInsUnfin (method)">SurfaceTypeWallExtInsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Exterior uninsulated unfinished
+</span>      <span class='kw'>elsif</span> <span class='kw'>not</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_exterior'>obc_is_exterior</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallExtUninsUnfin-class_method" title="Constants.SurfaceTypeWallExtUninsUnfin (method)">SurfaceTypeWallExtUninsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Interior finished uninsulated finished
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_finished'><span class='object_link'><a href="Geometry.html#space_is_finished-class_method" title="Geometry.space_is_finished (method)">space_is_finished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntFinUninsFin-class_method" title="Constants.SurfaceTypeWallIntFinUninsFin (method)">SurfaceTypeWallIntFinUninsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Interior unfinished uninsulated unfinished
+</span>      <span class='kw'>elsif</span> <span class='kw'>not</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_unfinished'><span class='object_link'><a href="Geometry.html#space_is_unfinished-class_method" title="Geometry.space_is_unfinished (method)">space_is_unfinished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntUnfinUninsUnfin-class_method" title="Constants.SurfaceTypeWallIntUnfinUninsUnfin (method)">SurfaceTypeWallIntUnfinUninsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Interior finished insulated unfinished
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_is_finished'>is_finished</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_adjacent'>obc_is_adjacent</span> <span class='kw'>and</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_space_is_unfinished'><span class='object_link'><a href="Geometry.html#space_is_unfinished-class_method" title="Geometry.space_is_unfinished (method)">space_is_unfinished</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_adjacent_space'>adjacent_space</span><span class='rparen'>)</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntFinInsUnfin-class_method" title="Constants.SurfaceTypeWallIntFinInsUnfin (method)">SurfaceTypeWallIntFinInsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Exterior finished basement
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_finished_basement'><span class='object_link'><a href="Geometry.html#is_finished_basement-class_method" title="Geometry.is_finished_basement (method)">is_finished_basement</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallFndGrndFinB-class_method" title="Constants.SurfaceTypeWallFndGrndFinB (method)">SurfaceTypeWallFndGrndFinB</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Exterior unfinished basement
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_unfinished_basement'><span class='object_link'><a href="Geometry.html#is_unfinished_basement-class_method" title="Geometry.is_unfinished_basement (method)">is_unfinished_basement</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallFndGrndUnfinB-class_method" title="Constants.SurfaceTypeWallFndGrndUnfinB (method)">SurfaceTypeWallFndGrndUnfinB</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Exterior crawlspace
+</span>      <span class='kw'>elsif</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_is_crawl'><span class='object_link'><a href="Geometry.html#is_crawl-class_method" title="Geometry.is_crawl (method)">is_crawl</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_space'>space</span><span class='rparen'>)</span> <span class='kw'>and</span> <span class='id identifier rubyid_obc_is_foundation'>obc_is_foundation</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallFndGrndCS-class_method" title="Constants.SurfaceTypeWallFndGrndCS (method)">SurfaceTypeWallFndGrndCS</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Adiabatic finished
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='kw'>and</span> <span class='id identifier rubyid_is_finished'>is_finished</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntFinUninsFin-class_method" title="Constants.SurfaceTypeWallIntFinUninsFin (method)">SurfaceTypeWallIntFinUninsFin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='comment'># Adiabatic unfinished
+</span>      <span class='kw'>elsif</span> <span class='id identifier rubyid_obc_is_adiabatic'>obc_is_adiabatic</span> <span class='kw'>and</span> <span class='kw'>not</span> <span class='id identifier rubyid_is_finished'>is_finished</span>
+        <span class='id identifier rubyid_surfaces'>surfaces</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Constants.html" title="Constants (class)">Constants</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Constants.html#SurfaceTypeWallIntUnfinUninsUnfin-class_method" title="Constants.SurfaceTypeWallIntUnfinUninsUnfin (method)">SurfaceTypeWallIntUnfinUninsUnfin</a></span></span><span class='rbracket'>]</span> <span class='op'>&lt;&lt;</span> <span class='id identifier rubyid_surface'>surface</span>
+
+      <span class='kw'>end</span>
+    <span class='kw'>end</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='id identifier rubyid_surfaces'>surfaces</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Jan  8 16:00:21 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.16 (ruby-2.2.6).
+</div>
+
+    </div>
+  </body>
+</html>

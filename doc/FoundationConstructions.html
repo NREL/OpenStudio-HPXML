@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: FoundationConstructions
+  
+    &mdash; Documentation by YARD 0.9.16
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "FoundationConstructions";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index (F)</a> &raquo;
+    
+    
+    <span class="title">FoundationConstructions</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: FoundationConstructions
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">FoundationConstructions</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>resources/constructions.rb</dd>
+  </dl>
+  
+</div>
+
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#apply_slab-class_method" title="apply_slab (class method)">.<strong>apply_slab</strong>(runner, model, surface, constr_name, perimeter_r, perimeter_width, gap_r, exterior_r, exterior_depth, whole_r, concrete_thick_in, mat_carpet = nil, has_fnd_walls = false, exposed_perimeter = nil, foundation = nil)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Slabs.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#apply_walls_and_slab-class_method" title="apply_walls_and_slab (class method)">.<strong>apply_walls_and_slab</strong>(runner, model, wall_surfaces, walls_constr_name, walls_ins_height, walls_cavity_r, walls_install_grade, walls_cavity_depth_in, walls_filled_cavity, walls_framing_factor, walls_rigid_r, walls_drywall_thick_in, walls_concrete_thick_in, space_height, slab_surface, slab_constr_name, slab_whole_r, slab_concrete_thick_in, exposed_perimeter = nil)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Basement/crawlspace.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_default_basement_wall_ufactor-class_method" title="get_default_basement_wall_ufactor (class method)">.<strong>get_default_basement_wall_ufactor</strong>(iecc_zone_2006)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_default_slab_perimeter_rvalue_depth-class_method" title="get_default_slab_perimeter_rvalue_depth (class method)">.<strong>get_default_slab_perimeter_rvalue_depth</strong>(iecc_zone_2006)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#get_default_slab_under_rvalue_width-class_method" title="get_default_slab_under_rvalue_width (class method)">.<strong>get_default_slab_under_rvalue_width</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="apply_slab-class_method">
+  
+    .<strong>apply_slab</strong>(runner, model, surface, constr_name, perimeter_r, perimeter_width, gap_r, exterior_r, exterior_depth, whole_r, concrete_thick_in, mat_carpet = nil, has_fnd_walls = false, exposed_perimeter = nil, foundation = nil)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Slabs</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1437
+1438
+1439
+1440
+1441
+1442
+1443
+1444
+1445
+1446
+1447
+1448
+1449
+1450
+1451
+1452
+1453
+1454
+1455
+1456
+1457
+1458
+1459
+1460
+1461
+1462
+1463
+1464
+1465
+1466
+1467
+1468
+1469
+1470
+1471
+1472
+1473
+1474
+1475
+1476
+1477
+1478
+1479
+1480
+1481
+1482
+1483
+1484
+1485
+1486
+1487
+1488
+1489
+1490
+1491
+1492
+1493
+1494
+1495
+1496
+1497
+1498
+1499
+1500
+1501
+1502
+1503
+1504
+1505
+1506
+1507
+1508
+1509
+1510
+1511
+1512
+1513
+1514
+1515
+1516
+1517
+1518
+1519
+1520
+1521
+1522
+1523
+1524
+1525
+1526
+1527
+1528</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 1437</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_apply_slab'>apply_slab</span><span class='lparen'>(</span><span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_surface'>surface</span><span class='comma'>,</span> <span class='id identifier rubyid_constr_name'>constr_name</span><span class='comma'>,</span>
+                    <span class='id identifier rubyid_perimeter_r'>perimeter_r</span><span class='comma'>,</span> <span class='id identifier rubyid_perimeter_width'>perimeter_width</span><span class='comma'>,</span>
+                    <span class='id identifier rubyid_gap_r'>gap_r</span><span class='comma'>,</span> <span class='id identifier rubyid_exterior_r'>exterior_r</span><span class='comma'>,</span> <span class='id identifier rubyid_exterior_depth'>exterior_depth</span><span class='comma'>,</span>
+                    <span class='id identifier rubyid_whole_r'>whole_r</span><span class='comma'>,</span> <span class='id identifier rubyid_concrete_thick_in'>concrete_thick_in</span><span class='comma'>,</span> <span class='id identifier rubyid_mat_carpet'>mat_carpet</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span>
+                    <span class='id identifier rubyid_has_fnd_walls'>has_fnd_walls</span> <span class='op'>=</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='id identifier rubyid_exposed_perimeter'>exposed_perimeter</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span>
+                    <span class='id identifier rubyid_foundation'>foundation</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+
+  <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='comment'># Validate inputs
+</span>  <span class='kw'>if</span> <span class='id identifier rubyid_perimeter_r'>perimeter_r</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Perimeter Insulation Nominal R-value must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_perimeter_width'>perimeter_width</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Perimeter Insulation Width must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_gap_r'>gap_r</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Gap Insulation Nominal R-value must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_exterior_r'>exterior_r</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Exterior Insulation Nominal R-value must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_exterior_depth'>exterior_depth</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Exterior Insulation Depth must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_whole_r'>whole_r</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Whole Slab Insulation Nominal R-value must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_foundation'>foundation</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='comment'># Create Kiva foundation
+</span>    <span class='id identifier rubyid_thick'>thick</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_concrete_thick_in'>concrete_thick_in</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>in</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_foundation'>foundation</span> <span class='op'>=</span> <span class='id identifier rubyid_create_kiva_slab_foundation'>create_kiva_slab_foundation</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_perimeter_r'>perimeter_r</span><span class='comma'>,</span> <span class='id identifier rubyid_perimeter_width'>perimeter_width</span><span class='comma'>,</span>
+                                             <span class='id identifier rubyid_gap_r'>gap_r</span><span class='comma'>,</span> <span class='id identifier rubyid_thick'>thick</span><span class='comma'>,</span> <span class='id identifier rubyid_exterior_r'>exterior_r</span><span class='comma'>,</span> <span class='id identifier rubyid_exterior_depth'>exterior_depth</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Define materials
+</span>  <span class='id identifier rubyid_mat_concrete'>mat_concrete</span> <span class='op'>=</span> <span class='kw'>nil</span>
+  <span class='id identifier rubyid_mat_soil'>mat_soil</span> <span class='op'>=</span> <span class='kw'>nil</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_concrete_thick_in'>concrete_thick_in</span> <span class='op'>&gt;</span> <span class='int'>0</span>
+    <span class='id identifier rubyid_mat_concrete'>mat_concrete</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Material.html" title="Material (class)">Material</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Material.html#Concrete-class_method" title="Material.Concrete (method)">Concrete</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_concrete_thick_in'>concrete_thick_in</span><span class='rparen'>)</span>
+  <span class='kw'>else</span>
+    <span class='comment'># Use 0.5 - 1.0 inches of soil, per Neal Kruis recommendation
+</span>    <span class='id identifier rubyid_mat_soil'>mat_soil</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Material.html" title="Material (class)">Material</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Material.html#Soil-class_method" title="Material.Soil (method)">Soil</a></span></span><span class='lparen'>(</span><span class='float'>0.5</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='id identifier rubyid_mat_rigid'>mat_rigid</span> <span class='op'>=</span> <span class='kw'>nil</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_whole_r'>whole_r</span> <span class='op'>&gt;</span> <span class='int'>0</span>
+    <span class='id identifier rubyid_rigid_thick_in'>rigid_thick_in</span> <span class='op'>=</span> <span class='id identifier rubyid_whole_r'>whole_r</span> <span class='op'>*</span> <span class='const'><span class='object_link'><a href="BaseMaterial.html" title="BaseMaterial (class)">BaseMaterial</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="BaseMaterial.html#InsulationRigid-class_method" title="BaseMaterial.InsulationRigid (method)">InsulationRigid</a></span></span><span class='period'>.</span><span class='id identifier rubyid_k_in'>k_in</span>
+    <span class='id identifier rubyid_mat_rigid'>mat_rigid</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Material.html" title="Material (class)">Material</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Material.html#initialize-instance_method" title="Material#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>SlabRigidIns</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_thick_in'>thick_in</span> <span class='op'>=</span> <span class='id identifier rubyid_rigid_thick_in'>rigid_thick_in</span><span class='comma'>,</span> <span class='id identifier rubyid_mat_base'>mat_base</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="BaseMaterial.html" title="BaseMaterial (class)">BaseMaterial</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="BaseMaterial.html#InsulationRigid-class_method" title="BaseMaterial.InsulationRigid (method)">InsulationRigid</a></span></span><span class='comma'>,</span> <span class='id identifier rubyid_k_in'>k_in</span> <span class='op'>=</span> <span class='id identifier rubyid_rigid_thick_in'>rigid_thick_in</span> <span class='op'>/</span> <span class='id identifier rubyid_whole_r'>whole_r</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Define construction
+</span>  <span class='id identifier rubyid_constr'>constr</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Construction.html" title="Construction (class)">Construction</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Construction.html#initialize-instance_method" title="Construction#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_constr_name'>constr_name</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='float'>1.0</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_mat_rigid'>mat_rigid</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_add_layer'>add_layer</span><span class='lparen'>(</span><span class='id identifier rubyid_mat_rigid'>mat_rigid</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_mat_concrete'>mat_concrete</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_add_layer'>add_layer</span><span class='lparen'>(</span><span class='id identifier rubyid_mat_concrete'>mat_concrete</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_mat_soil'>mat_soil</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_add_layer'>add_layer</span><span class='lparen'>(</span><span class='id identifier rubyid_mat_soil'>mat_soil</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_mat_carpet'>mat_carpet</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_add_layer'>add_layer</span><span class='lparen'>(</span><span class='id identifier rubyid_mat_carpet'>mat_carpet</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Create and assign construction to surfaces
+</span>  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_create_and_assign_constructions'>create_and_assign_constructions</span><span class='lparen'>(</span><span class='lbracket'>[</span><span class='id identifier rubyid_surface'>surface</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Exposed perimeter
+</span>  <span class='kw'>if</span> <span class='id identifier rubyid_exposed_perimeter'>exposed_perimeter</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='id identifier rubyid_exposed_perimeter'>exposed_perimeter</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Geometry.html" title="Geometry (class)">Geometry</a></span></span><span class='period'>.</span><span class='id identifier rubyid_calculate_exposed_perimeter'><span class='object_link'><a href="Geometry.html#calculate_exposed_perimeter-class_method" title="Geometry.calculate_exposed_perimeter (method)">calculate_exposed_perimeter</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='id identifier rubyid_surface'>surface</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_has_fnd_walls'>has_fnd_walls</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_exposed_perimeter'>exposed_perimeter</span> <span class='op'>&lt;=</span> <span class='int'>0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Calculated an exposed perimeter &lt;= 0 for slab &#39;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='embexpr_end'>}</span><span class='tstring_content'>&#39;.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Assign surface to Kiva foundation
+</span>  <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_setAdjacentFoundation'>setAdjacentFoundation</span><span class='lparen'>(</span><span class='id identifier rubyid_foundation'>foundation</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_surface'>surface</span><span class='period'>.</span><span class='id identifier rubyid_createSurfacePropertyExposedFoundationPerimeter'>createSurfacePropertyExposedFoundationPerimeter</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>TotalExposedPerimeter</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="UnitConversions.html" title="UnitConversions (class)">UnitConversions</a></span></span><span class='period'>.</span><span class='id identifier rubyid_convert'><span class='object_link'><a href="UnitConversions.html#convert-class_method" title="UnitConversions.convert (method)">convert</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_exposed_perimeter'>exposed_perimeter</span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ft</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>m</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span><span class='rparen'>)</span>
+
+  <span class='kw'>return</span> <span class='kw'>true</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="apply_walls_and_slab-class_method">
+  
+    .<strong>apply_walls_and_slab</strong>(runner, model, wall_surfaces, walls_constr_name, walls_ins_height, walls_cavity_r, walls_install_grade, walls_cavity_depth_in, walls_filled_cavity, walls_framing_factor, walls_rigid_r, walls_drywall_thick_in, walls_concrete_thick_in, space_height, slab_surface, slab_constr_name, slab_whole_r, slab_concrete_thick_in, exposed_perimeter = nil)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Basement/crawlspace</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1358
+1359
+1360
+1361
+1362
+1363
+1364
+1365
+1366
+1367
+1368
+1369
+1370
+1371
+1372
+1373
+1374
+1375
+1376
+1377
+1378
+1379
+1380
+1381
+1382
+1383
+1384
+1385
+1386
+1387
+1388
+1389
+1390
+1391
+1392
+1393
+1394
+1395
+1396
+1397
+1398
+1399
+1400
+1401
+1402
+1403
+1404
+1405
+1406
+1407
+1408
+1409
+1410
+1411
+1412
+1413
+1414
+1415
+1416
+1417
+1418
+1419
+1420
+1421
+1422
+1423
+1424
+1425
+1426
+1427
+1428
+1429
+1430
+1431
+1432
+1433
+1434</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 1358</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_apply_walls_and_slab'>apply_walls_and_slab</span><span class='lparen'>(</span><span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_wall_surfaces'>wall_surfaces</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_constr_name'>walls_constr_name</span><span class='comma'>,</span>
+                              <span class='id identifier rubyid_walls_ins_height'>walls_ins_height</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_cavity_r'>walls_cavity_r</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_install_grade'>walls_install_grade</span><span class='comma'>,</span>
+                              <span class='id identifier rubyid_walls_cavity_depth_in'>walls_cavity_depth_in</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_filled_cavity'>walls_filled_cavity</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_framing_factor'>walls_framing_factor</span><span class='comma'>,</span>
+                              <span class='id identifier rubyid_walls_rigid_r'>walls_rigid_r</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_drywall_thick_in'>walls_drywall_thick_in</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_concrete_thick_in'>walls_concrete_thick_in</span><span class='comma'>,</span>
+                              <span class='id identifier rubyid_space_height'>space_height</span><span class='comma'>,</span> <span class='id identifier rubyid_slab_surface'>slab_surface</span><span class='comma'>,</span> <span class='id identifier rubyid_slab_constr_name'>slab_constr_name</span><span class='comma'>,</span>
+                              <span class='id identifier rubyid_slab_whole_r'>slab_whole_r</span><span class='comma'>,</span> <span class='id identifier rubyid_slab_concrete_thick_in'>slab_concrete_thick_in</span><span class='comma'>,</span> <span class='id identifier rubyid_exposed_perimeter'>exposed_perimeter</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+
+  <span class='kw'>return</span> <span class='kw'>true</span> <span class='kw'>if</span> <span class='id identifier rubyid_slab_surface'>slab_surface</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+
+  <span class='kw'>if</span> <span class='id identifier rubyid_wall_surfaces'>wall_surfaces</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>No wall surfaces found adjacent to floor surface.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Validate inputs
+</span>  <span class='kw'>if</span> <span class='id identifier rubyid_walls_ins_height'>walls_ins_height</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Wall Insulation Height must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_walls_cavity_r'>walls_cavity_r</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Wall Cavity Insulation Installed R-value must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_walls_cavity_depth_in'>walls_cavity_depth_in</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Wall Cavity Depth must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_walls_framing_factor'>walls_framing_factor</span> <span class='op'>&lt;</span> <span class='float'>0.0</span> <span class='kw'>or</span> <span class='id identifier rubyid_walls_framing_factor'>walls_framing_factor</span> <span class='op'>&gt;=</span> <span class='float'>1.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Wall Framing Factor must be greater than or equal to 0 and less than 1.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_walls_rigid_r'>walls_rigid_r</span> <span class='op'>&lt;</span> <span class='float'>0.0</span>
+    <span class='id identifier rubyid_runner'>runner</span><span class='period'>.</span><span class='id identifier rubyid_registerError'>registerError</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Wall Continuous Insulation Nominal R-value must be greater than or equal to 0.</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Calculate interior wall R-value
+</span>  <span class='id identifier rubyid_int_wall_Rvalue'>int_wall_Rvalue</span> <span class='op'>=</span> <span class='id identifier rubyid_calc_interior_wall_r_value'>calc_interior_wall_r_value</span><span class='lparen'>(</span><span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_cavity_depth_in'>walls_cavity_depth_in</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_cavity_r'>walls_cavity_r</span><span class='comma'>,</span>
+                                               <span class='id identifier rubyid_walls_filled_cavity'>walls_filled_cavity</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_framing_factor'>walls_framing_factor</span><span class='comma'>,</span>
+                                               <span class='id identifier rubyid_walls_install_grade'>walls_install_grade</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_rigid_r'>walls_rigid_r</span><span class='comma'>,</span>
+                                               <span class='id identifier rubyid_walls_drywall_thick_in'>walls_drywall_thick_in</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_int_wall_Rvalue'>int_wall_Rvalue</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Create Kiva foundation
+</span>  <span class='id identifier rubyid_foundation'>foundation</span> <span class='op'>=</span> <span class='id identifier rubyid_create_kiva_crawl_or_basement_foundation'>create_kiva_crawl_or_basement_foundation</span><span class='lparen'>(</span><span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_int_wall_Rvalue'>int_wall_Rvalue</span><span class='comma'>,</span> <span class='id identifier rubyid_space_height'>space_height</span><span class='comma'>,</span>
+                                                        <span class='id identifier rubyid_walls_rigid_r'>walls_rigid_r</span><span class='comma'>,</span> <span class='id identifier rubyid_walls_ins_height'>walls_ins_height</span><span class='rparen'>)</span>
+
+  <span class='comment'># Define materials
+</span>  <span class='id identifier rubyid_mat_concrete'>mat_concrete</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Material.html" title="Material (class)">Material</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Material.html#Concrete-class_method" title="Material.Concrete (method)">Concrete</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_walls_concrete_thick_in'>walls_concrete_thick_in</span><span class='rparen'>)</span>
+
+  <span class='comment'># Define construction
+</span>  <span class='id identifier rubyid_constr'>constr</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Construction.html" title="Construction (class)">Construction</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Construction.html#initialize-instance_method" title="Construction#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_walls_constr_name'>walls_constr_name</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='int'>1</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_add_layer'>add_layer</span><span class='lparen'>(</span><span class='id identifier rubyid_mat_concrete'>mat_concrete</span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='id identifier rubyid_walls_drywall_thick_in'>walls_drywall_thick_in</span> <span class='op'>&gt;</span> <span class='int'>0</span>
+    <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_add_layer'>add_layer</span><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="Material.html" title="Material (class)">Material</a></span></span><span class='period'>.</span><span class='const'><span class='object_link'><a href="Material.html#GypsumWall-class_method" title="Material.GypsumWall (method)">GypsumWall</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_walls_drywall_thick_in'>walls_drywall_thick_in</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Create and assign construction to surfaces
+</span>  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_constr'>constr</span><span class='period'>.</span><span class='id identifier rubyid_create_and_assign_constructions'>create_and_assign_constructions</span><span class='lparen'>(</span><span class='id identifier rubyid_wall_surfaces'>wall_surfaces</span><span class='comma'>,</span> <span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='comment'># Assign surfaces to Kiva foundation
+</span>  <span class='id identifier rubyid_wall_surfaces'>wall_surfaces</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_wall_surface'>wall_surface</span><span class='op'>|</span>
+    <span class='id identifier rubyid_wall_surface'>wall_surface</span><span class='period'>.</span><span class='id identifier rubyid_setAdjacentFoundation'>setAdjacentFoundation</span><span class='lparen'>(</span><span class='id identifier rubyid_foundation'>foundation</span><span class='rparen'>)</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>if</span> <span class='kw'>not</span> <span class='id identifier rubyid_apply_slab'>apply_slab</span><span class='lparen'>(</span><span class='id identifier rubyid_runner'>runner</span><span class='comma'>,</span> <span class='id identifier rubyid_model'>model</span><span class='comma'>,</span> <span class='id identifier rubyid_slab_surface'>slab_surface</span><span class='comma'>,</span> <span class='id identifier rubyid_slab_constr_name'>slab_constr_name</span><span class='comma'>,</span>
+                    <span class='int'>0</span><span class='comma'>,</span> <span class='int'>0</span><span class='comma'>,</span> <span class='int'>0</span><span class='comma'>,</span> <span class='int'>0</span><span class='comma'>,</span> <span class='int'>0</span><span class='comma'>,</span> <span class='id identifier rubyid_slab_whole_r'>slab_whole_r</span><span class='comma'>,</span> <span class='id identifier rubyid_slab_concrete_thick_in'>slab_concrete_thick_in</span><span class='comma'>,</span>
+                    <span class='kw'>nil</span><span class='comma'>,</span> <span class='kw'>true</span><span class='comma'>,</span> <span class='id identifier rubyid_exposed_perimeter'>exposed_perimeter</span><span class='comma'>,</span> <span class='id identifier rubyid_foundation'>foundation</span><span class='rparen'>)</span>
+    <span class='kw'>return</span> <span class='kw'>false</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>return</span> <span class='kw'>true</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_default_basement_wall_ufactor-class_method">
+  
+    .<strong>get_default_basement_wall_ufactor</strong>(iecc_zone_2006)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1530
+1531
+1532
+1533
+1534
+1535
+1536
+1537
+1538
+1539
+1540</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 1530</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_default_basement_wall_ufactor'>get_default_basement_wall_ufactor</span><span class='lparen'>(</span><span class='id identifier rubyid_iecc_zone_2006'>iecc_zone_2006</span><span class='rparen'>)</span>
+  <span class='comment'># Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+</span>  <span class='comment'># Basement Wall U-Factor
+</span>  <span class='kw'>if</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>1A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>1B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>1C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>2A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>2B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>2C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>3A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>3B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>3C</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_iecc_zone_2006'>iecc_zone_2006</span>
+    <span class='kw'>return</span> <span class='float'>0.360</span>
+  <span class='kw'>elsif</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>4A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>4B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>4C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>5A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>5B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>5C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>6A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>6B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>6C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>7</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>8</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_iecc_zone_2006'>iecc_zone_2006</span>
+    <span class='kw'>return</span> <span class='float'>0.059</span>
+  <span class='kw'>else</span>
+    <span class='kw'>return</span> <span class='kw'>nil</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_default_slab_perimeter_rvalue_depth-class_method">
+  
+    .<strong>get_default_slab_perimeter_rvalue_depth</strong>(iecc_zone_2006)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1542
+1543
+1544
+1545
+1546
+1547
+1548
+1549
+1550
+1551
+1552
+1553
+1554</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 1542</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_default_slab_perimeter_rvalue_depth'>get_default_slab_perimeter_rvalue_depth</span><span class='lparen'>(</span><span class='id identifier rubyid_iecc_zone_2006'>iecc_zone_2006</span><span class='rparen'>)</span>
+  <span class='comment'># Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+</span>  <span class='comment'># Slab-on-Grade R-Value &amp; Depth (ft)
+</span>  <span class='kw'>if</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>1A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>1B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>1C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>2A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>2B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>2C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>3A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>3B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>3C</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_iecc_zone_2006'>iecc_zone_2006</span>
+    <span class='kw'>return</span> <span class='float'>0.0</span><span class='comma'>,</span> <span class='float'>0.0</span>
+  <span class='kw'>elsif</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>4A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>4B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>4C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>5A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>5B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>5C</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_iecc_zone_2006'>iecc_zone_2006</span>
+    <span class='kw'>return</span> <span class='float'>10.0</span><span class='comma'>,</span> <span class='float'>2.0</span>
+  <span class='kw'>elsif</span> <span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>6A</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>6B</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>6C</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>7</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>8</span><span class='tstring_end'>&quot;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span> <span class='id identifier rubyid_iecc_zone_2006'>iecc_zone_2006</span>
+    <span class='kw'>return</span> <span class='float'>10.0</span><span class='comma'>,</span> <span class='float'>4.0</span>
+  <span class='kw'>else</span>
+    <span class='kw'>return</span> <span class='kw'>nil</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="get_default_slab_under_rvalue_width-class_method">
+  
+    .<strong>get_default_slab_under_rvalue_width</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1556
+1557
+1558</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'resources/constructions.rb', line 1556</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_get_default_slab_under_rvalue_width'>get_default_slab_under_rvalue_width</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='float'>0.0</span><span class='comma'>,</span> <span class='float'>0.0</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Tue Jan  8 16:00:21 2019 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.16 (ruby-2.2.6).
+</div>
+
+    </div>
+  </body>
+</html>
