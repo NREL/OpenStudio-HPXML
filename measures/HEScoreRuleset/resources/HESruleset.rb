@@ -32,7 +32,7 @@ class HEScoreRuleset
 
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
-    # FIXME: Verify. How does this change for single-family detached homes?
+    # FIXME: Verify. Does this change for shape=townhouse?
     @cfa_basement = 0.0
     orig_details.elements.each("Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |cond_basement|
       @cfa_basement += Float(XMLHelper.get_value(cond_basement, "FrameFloor/Area"))
@@ -41,7 +41,7 @@ class HEScoreRuleset
     @bldg_length = (3.0 * @bldg_footprint / 5.0)**0.5
     @bldg_width = (5.0 / 3.0) * @bldg_length
     @bldg_perimeter = 2.0 * @bldg_length + 2.0 * @bldg_width
-    @cvolume = @cfa * @ceil_height # FIXME: Verify
+    @cvolume = @cfa * @ceil_height # FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
 
     # BuildingSummary
     new_summary = XMLHelper.add_element(new_details, "BuildingSummary")
@@ -130,7 +130,6 @@ class HEScoreRuleset
       ach50 = Float(cfm50) * 60.0 / @cvolume
     else
       # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/infiltration/infiltration
-      # TODO
       if desc == "tight"
         ach50 = 15.0 # FIXME: Hard-coded
       elsif desc == "average"
@@ -166,18 +165,18 @@ class HEScoreRuleset
       roof_material = XMLHelper.get_value(orig_roof, "RoofType")
       roof_has_radiant_barrier = Boolean(XMLHelper.get_value(orig_roof, "RadiantBarrier"))
       roof_color = XMLHelper.get_value(orig_roof, "RoofColor")
-      # TODO: Get roof area; is roof area for cathedral and ceiling area for attic
+      # FIXME: Get roof area; is roof area for cathedral and ceiling area for attic?
 
       roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, roof_material, roof_has_radiant_barrier)
 
       new_roofs = XMLHelper.add_element(new_attic, "Roofs")
-      new_roof = XMLHelper.add_element(new_roofs, "Roof")
+      new_roof = XMLHelper.add_element(new_roofs, "Roof") # FIXME: Should be two (or four?) roofs per HES zone_roof?
       XMLHelper.copy_element(new_roof, orig_roof, "SystemIdentifier")
       XMLHelper.copy_element(new_roof, orig_roof, "Area", 1000) # FIXME: Hard-coded
       XMLHelper.add_element(new_roof, "Azimuth", 0) # FIXME: Hard-coded
       XMLHelper.copy_element(new_roof, orig_roof, "SolarAbsorptance", get_roof_solar_absorptance(roof_color))
-      XMLHelper.add_element(new_roof, "Emittance", 0.9) # FIXME: Hard-coded
-      XMLHelper.add_element(new_roof, "Pitch", 5) # FIXME: Hard-coded
+      XMLHelper.add_element(new_roof, "Emittance", 0.9) # FIXME: Verify. Make optional element and remove from here.
+      XMLHelper.add_element(new_roof, "Pitch", Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12) # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
       XMLHelper.add_element(new_roof, "RadiantBarrier", false) # FIXME: Verify. Setting to false because it's included in the assembly R-value
       new_roof_ins = XMLHelper.add_element(new_roof, "Insulation")
       XMLHelper.copy_element(new_roof_ins, orig_attic, "AtticRoofInsulation/SystemIdentifier")
@@ -200,7 +199,7 @@ class HEScoreRuleset
         XMLHelper.add_element(new_floor_ins, "AssemblyEffectiveRValue", floor_r)
       end
 
-      # FIXME: Verify no gable walls assumed
+      # FIXME: Should be zero (or two?) gable walls per HES zone_roof?
 
       # Uses ERI Reference Home for vented attic specific leakage area
     end
@@ -250,22 +249,21 @@ class HEScoreRuleset
 
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
         if ["UnconditionedBasement", "ConditionedBasement"].include? fnd_type
-          wall_height = 8.0
+          wall_height = 8.0 # FIXME: Verify
         else
-          wall_height = 2.5
+          wall_height = 2.5 # FIXME: Verify
         end
 
         new_fndwall = XMLHelper.add_element(new_foundation, "FoundationWall")
         XMLHelper.copy_element(new_fndwall, orig_foundation, "FoundationWall/SystemIdentifier")
-        XMLHelper.add_element(new_fndwall, "Height", wall_height) # FIXME: Verify
+        XMLHelper.add_element(new_fndwall, "Height", wall_height)
         XMLHelper.add_element(new_fndwall, "Area", wall_height * @bldg_perimeter) # FIXME: Verify
-        XMLHelper.add_element(new_fndwall, "Azimuth", 0) # FIXME: Hard-coded
         XMLHelper.add_element(new_fndwall, "Thickness", 8) # FIXME: Verify
         XMLHelper.add_element(new_fndwall, "DepthBelowGrade", wall_height) # FIXME: Verify
         XMLHelper.add_element(new_fndwall, "AdjacentTo", "ground")
         new_fndwall_ins = XMLHelper.add_element(new_fndwall, "Insulation")
         XMLHelper.copy_element(new_fndwall_ins, orig_foundation, "FoundationWall/Insulation/SystemIdentifier")
-        XMLHelper.add_element(new_fndwall_ins, "AssemblyEffectiveRValue", wall_r)
+        XMLHelper.add_element(new_fndwall_ins, "AssemblyEffectiveRValue", wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
       end
 
       # Slab
@@ -288,7 +286,7 @@ class HEScoreRuleset
       sys_id = XMLHelper.add_element(new_slab, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", slab_id)
       XMLHelper.add_element(new_slab, "Area", slab_area)
-      XMLHelper.add_element(new_slab, "Thickness", 4) # FIXME: Verify
+      XMLHelper.add_element(new_slab, "Thickness", 4)
       XMLHelper.add_element(new_slab, "ExposedPerimeter", @bldg_perimeter) # FIXME: Verify
       XMLHelper.add_element(new_slab, "PerimeterInsulationDepth", 1) # FIXME: Hard-coded
       XMLHelper.add_element(new_slab, "UnderSlabInsulationWidth", 0) # FIXME: Verify
@@ -359,8 +357,8 @@ class HEScoreRuleset
         XMLHelper.add_element(new_wall, "Area", @ceil_height * @bldg_length) # FIXME: Verify
       end
       XMLHelper.add_element(new_wall, "Azimuth", 0) # FIXME: Hard-coded
-      XMLHelper.add_element(new_wall, "SolarAbsorptance", get_wall_solar_absorptance("medium")) # FIXME: Hard-coded
-      XMLHelper.add_element(new_wall, "Emittance", 0.9) # FIXME: Hard-coded
+      XMLHelper.add_element(new_wall, "SolarAbsorptance", 0.75) # FIXME: Verify. Make optional element and remove from here.
+      XMLHelper.add_element(new_wall, "Emittance", 0.9) # FIXME: Verify. Make optional element and remove from here.
       new_wall_ins = XMLHelper.add_element(new_wall, "Insulation")
       XMLHelper.copy_element(new_wall_ins, orig_wall, "Insulation/SystemIdentifier")
       XMLHelper.add_element(new_wall_ins, "AssemblyEffectiveRValue", wall_r)
@@ -374,7 +372,7 @@ class HEScoreRuleset
       orig_wall = get_attached(orig_window.elements["AttachedToWall"].attributes["idref"], orig_details, "Enclosure/Walls/Wall")
       win_orient = XMLHelper.get_value(orig_wall, "Orientation")
       win_ufactor = XMLHelper.get_value(orig_window, "UFactor")
-      # TODO: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
+      # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
 
       if not win_ufactor.nil?
         win_ufactor = Float(win_ufactor)
@@ -397,7 +395,8 @@ class HEScoreRuleset
       XMLHelper.add_element(new_window, "Azimuth", orientation_to_azimuth(win_orient))
       XMLHelper.add_element(new_window, "UFactor", win_ufactor)
       XMLHelper.add_element(new_window, "SHGC", win_shgc)
-      # No overhangs
+      # No overhangs FIXME: Verify
+      # No neighboring buildings FIXME: Verify
       XMLHelper.copy_element(new_window, orig_window, "AttachedToWall")
       # Uses ERI Reference Home for interior shading
     end
@@ -434,7 +433,6 @@ class HEScoreRuleset
       XMLHelper.add_element(new_skylight, "SHGC", sky_shgc)
       # No overhangs
       XMLHelper.copy_element(new_skylight, orig_skylight, "AttachedToRoof")
-      # Uses ERI Reference Home for interior shading
     end
   end
 
@@ -657,7 +655,7 @@ class HEScoreRuleset
                                  "unconditioned basement" => "basement - unconditioned",
                                  "unvented crawlspace" => "crawlspace - unvented",
                                  "vented crawlspace" => "crawlspace - vented",
-                                 "unconditioned attic" => "attic - vented" } # FIXME: Or 'attic - unvented'
+                                 "unconditioned attic" => "attic - vented" } # FIXME: Change to "attic - unconditioned"
         duct_location = XMLHelper.get_value(orig_duct, "DuctLocation")
         duct_frac_area = Float(XMLHelper.get_value(orig_duct, "FractionDuctArea"))
         duct_insulated = Boolean(XMLHelper.get_value(orig_duct, "extension/hescore_ducts_insulated"))
@@ -1194,19 +1192,6 @@ def get_roof_solar_absorptance(roof_color)
   return val if not val.nil?
 
   fail "Could not get roof absorptance for color '#{roof_color}'"
-end
-
-def get_wall_solar_absorptance(wall_color)
-  # FIXME: Verify
-  # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
-  val = { "white" => 0.35,
-          "light" => 0.55,
-          "medium" => 0.70,
-          "medium dark" => 0.80,
-          "dark" => 0.90 }[wall_color]
-  return val if not val.nil?
-
-  fail "Could not get wall absorptance for color '#{wall_color}'"
 end
 
 def orientation_to_azimuth(orientation)
