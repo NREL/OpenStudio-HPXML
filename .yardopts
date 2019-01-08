@@ -1,0 +1,3 @@
+--debug
+**/*.rb
+- tests/**/*.xml
