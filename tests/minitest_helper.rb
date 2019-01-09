@@ -9,6 +9,9 @@ if ENV['CI']
   end
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
   SimpleCov.start
+else
+  SimpleCov.coverage_dir("coverage")
+  SimpleCov.start
 end
 require 'minitest/autorun'
 require 'minitest/reporters'
