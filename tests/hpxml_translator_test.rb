@@ -681,6 +681,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     end
 
+    # Water Heater
+    wh = bldg_details.elements["Systems/WaterHeating"]
+
     # Mechanical Ventilation
     mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     if not mv.nil?
@@ -705,9 +708,9 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # ClothesWasher
+    # Clothes Washer
     cw = bldg_details.elements["Appliances/ClothesWasher"]
-    if not cw.nil?
+    if not cw.nil? and not wh.nil?
       # Location
       location = XMLHelper.get_value(cw, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
@@ -720,9 +723,9 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_equal(hpxml_value, sql_value)
     end
 
-    # ClothesDryer
+    # Clothes Dryer
     cd = bldg_details.elements["Appliances/ClothesDryer"]
-    if not cd.nil?
+    if not cd.nil? and not wh.nil?
       # Location
       fuel = to_beopt_fuel(XMLHelper.get_value(cd, 'FuelType'))
       location = XMLHelper.get_value(cd, "Location")
