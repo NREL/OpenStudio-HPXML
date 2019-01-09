@@ -118,6 +118,17 @@ class XMLHelper
       formatter.write(doc, f)
     end
   end
+
+  def self.parse_file(hpxml_path)
+    file_read = File.read(hpxml_path)
+    hpxml_doc = REXML::Document.new(file_read)
+    return hpxml_doc
+  end
+
+  def self.get_first(element, path)
+    node = REXML::XPath.first(element, path)
+    return node
+  end
 end
 
 def Boolean(val)

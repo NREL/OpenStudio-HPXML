@@ -109,7 +109,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    hpxml_doc = REXML::Document.new(File.read(hpxml_path))
+    hpxml_doc = XMLHelper.parse_file(hpxml_path)
 
     # Check for invalid HPXML file up front?
     if not skip_validation
@@ -2748,7 +2748,7 @@ class OSModel
     vented_crawl_area = 0.0
     vented_crawl_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
-      area = REXML::XPath.first(vented_crawl, "sum(FrameFloor/Area)")
+      area = XMLHelper.get_first(vented_crawl, "sum(FrameFloor/Area)")
       vented_crawl_sla = XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")
       if not vented_crawl_sla.nil?
         vented_crawl_sla = Float(vented_crawl_sla)
@@ -2769,7 +2769,7 @@ class OSModel
     vented_attic_sla_area = 0.0
     vented_attic_const_ach = nil
     building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType='vented attic']") do |vented_attic|
-      area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area)")
+      area = XMLHelper.get_first(vented_attic, "sum(Floors/Floor/Area)")
       vented_attic_sla = XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")
       vented_attic_const_ach = XMLHelper.get_value(vented_attic, "extension/AtticConstantACHnatural")
       if not vented_attic_sla.nil?
