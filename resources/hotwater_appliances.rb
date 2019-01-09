@@ -7,9 +7,9 @@ class HotWaterAndAppliances
   def self.apply(model, unit, runner, weather,
                  cfa, nbeds, ncfl, has_uncond_bsmnt,
                  cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
-                 cw_agc, cw_cap, cd_fuel, cd_ef, cd_control,
-                 dw_ef, dw_cap, fridge_annual_kwh, cook_fuel_type,
-                 cook_is_induction, oven_is_convection,
+                 cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
+                 cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
+                 cook_fuel_type, cook_is_induction, oven_is_convection,
                  has_low_flow_fixtures, dist_type, pipe_r,
                  std_pipe_length, recirc_loop_length,
                  recirc_branch_length, recirc_control_type,
@@ -94,7 +94,6 @@ class HotWaterAndAppliances
     if not dist_type.nil? and not cw_mef.nil?
       cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = self.calc_clothes_washer_energy_gpd(eri_version, nbeds, cw_ler, cw_elec_rate, cw_gas_rate, cw_agc, cw_cap)
       cw_name = Constants.ObjectNameClothesWasher(unit.name.to_s)
-      cw_space = Geometry.get_space_from_location(unit, Constants.Auto, location_hierarchy)
       cw_peak_flow_gpm = cw_gpd / sum_fractions_hw / timestep_minutes * 365.0
       cw_design_level_w = UnitConversions.convert(cw_annual_kwh * 60.0 / (cw_gpd * 365.0 / cw_peak_flow_gpm), "kW", "W")
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, schedule_hw)
@@ -108,7 +107,6 @@ class HotWaterAndAppliances
       cd_name_f = Constants.ObjectNameClothesDryer(Constants.FuelTypeGas, unit.name.to_s)
       cd_weekday_sch = "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024"
       cd_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      cd_space = Geometry.get_space_from_location(unit, Constants.Auto, location_hierarchy)
       cd_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cd_name_e, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0)
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
@@ -132,7 +130,6 @@ class HotWaterAndAppliances
       fridge_name = Constants.ObjectNameRefrigerator(unit.name.to_s)
       fridge_weekday_sch = "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041"
       fridge_monthly_sch = "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837"
-      fridge_space = Geometry.get_space_from_location(unit, Constants.Auto, location_hierarchy)
       fridge_schedule = MonthWeekdayWeekendSchedule.new(model, runner, fridge_name, fridge_weekday_sch, fridge_weekday_sch, fridge_monthly_sch, 1.0, 1.0)
       fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(fridge_annual_kwh / 365.0)
       add_electric_equipment(model, fridge_name, fridge_space, fridge_design_level, 1.0, 0.0, fridge_schedule.schedule)
