@@ -45,7 +45,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/valid-appliances-gas.xml"].sort.each do |xml|
+      Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
