@@ -49,6 +49,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
+    xmls = xmls[194..-1]
+
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
