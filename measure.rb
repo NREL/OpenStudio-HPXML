@@ -1846,9 +1846,9 @@ class OSModel
 
     # Refrigerator
     fridge = building.elements["BuildingDetails/Appliances/Refrigerator"]
-    fridge_location = XMLHelper.get_value(fridge, "Location")
-    fridge_space = get_space_from_location(fridge_location, "Refrigerator", model, spaces)
     if not fridge.nil?
+      fridge_location = XMLHelper.get_value(fridge, "Location")
+      fridge_space = get_space_from_location(fridge_location, "Refrigerator", model, spaces)
       fridge_annual_kwh = XMLHelper.get_value(fridge, "RatedAnnualkWh")
       if fridge_annual_kwh.nil?
         fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
