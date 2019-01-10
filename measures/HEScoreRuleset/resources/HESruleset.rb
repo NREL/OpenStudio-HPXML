@@ -1,6 +1,7 @@
 require_relative "../../HPXMLtoOpenStudio/resources/airflow"
 require_relative "../../HPXMLtoOpenStudio/resources/geometry"
 require_relative "../../HPXMLtoOpenStudio/resources/xmlhelper"
+require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
 
 class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
@@ -90,25 +91,9 @@ class HEScoreRuleset
   end
 
   def self.set_summary(new_summary, orig_details)
-    new_site = XMLHelper.add_element(new_summary, "Site")
-    orig_site = orig_details.elements["BuildingSummary/Site"]
-    fuel_types = XMLHelper.add_element(new_site, "FuelTypesAvailable")
-    XMLHelper.add_element(fuel_types, "Fuel", "electricity")
-    extension = XMLHelper.add_element(new_site, "extension")
-    XMLHelper.add_element(extension, "ShelterCoefficient", Airflow.get_default_shelter_coefficient())
-
-    new_occupancy = XMLHelper.add_element(new_summary, "BuildingOccupancy")
-    orig_occupancy = orig_details.elements["BuildingSummary/BuildingOccupancy"]
-    XMLHelper.add_element(new_occupancy, "NumberofResidents", Geometry.get_occupancy_default_num(@nbeds))
-
-    new_construction = XMLHelper.add_element(new_summary, "BuildingConstruction")
-    orig_construction = orig_details.elements["BuildingSummary/BuildingConstruction"]
-    XMLHelper.add_element(new_construction, "NumberofConditionedFloors", Integer(@ncfl))
-    XMLHelper.add_element(new_construction, "NumberofConditionedFloorsAboveGrade", Integer(@ncfl_ag))
-    XMLHelper.add_element(new_construction, "NumberofBedrooms", Integer(@nbeds))
-    XMLHelper.add_element(new_construction, "ConditionedFloorArea", @cfa)
-    XMLHelper.add_element(new_construction, "ConditionedBuildingVolume", @cvolume)
-    XMLHelper.add_element(new_construction, "GaragePresent", false)
+    new_site = HPXML.add_site(building_summary: new_summary, fuels: ["electricity"], shelter_coefficient: Airflow.get_default_shelter_coefficient())
+    new_occupancy = HPXML.add_building_occupancy(building_summary: new_summary, number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
+    new_construction = HPXML.add_building_construction(building_summary: new_summary, ncfl: Integer(@ncfl), ncfl_ag: Integer(@ncfl_ag), nbeds: Integer(@nbeds), cfa: @cfa, cvolume: @cvolume, garage_present: false)
   end
 
   def self.set_climate(new_climate)
