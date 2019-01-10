@@ -386,6 +386,9 @@ class OSModel
     success = add_thermal_mass(runner, model, building)
     return false if not success
 
+    success = check_for_errors(runner, model)
+    return false if not success
+
     success = set_zone_volumes(runner, model, building)
     return false if not success
 
@@ -550,6 +553,45 @@ class OSModel
       azimuth_side_shifts[azimuth] -= (surface.additionalProperties.getFeatureAsDouble("Length").get / 2.0 + gap_distance)
 
       surfaces_moved << surface
+    end
+
+    return true
+  end
+
+  def self.check_for_errors(runner, model)
+    # Check every thermal zone has:
+    # 1. At least one floor surface
+    # 2. At least one roofceiling surface
+    # 3. At least one surface adjacent to outside/ground
+    model.getThermalZones.each do |zone|
+      n_floors = 0
+      n_roofceilings = 0
+      n_exteriors = 0
+      zone.spaces.each do |space|
+        space.surfaces.each do |surface|
+          if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
+            n_exteriors += 1
+          end
+          if surface.surfaceType.downcase == "floor"
+            n_floors += 1
+          elsif surface.surfaceType.downcase == "roofceiling"
+            n_roofceilings += 1
+          end
+        end
+      end
+
+      if n_floors == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one floor surface.")
+      end
+      if n_roofceilings == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one roof/ceiling surface.")
+      end
+      if n_exteriors == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one surface adjacent to outside/ground.")
+      end
+      if n_floors == 0 or n_roofceilings == 0 or n_exteriors == 0
+        return false
+      end
     end
 
     return true
@@ -1370,6 +1412,9 @@ class OSModel
 
         roof_gross_area = Float(XMLHelper.get_value(roof, "Area"))
         roof_net_area = net_wall_area(roof_gross_area, subsurface_areas, roof_id)
+        if roof_net_area <= 0
+          fail "Calculated a negative net surface area for Roof '#{roof_id}'."
+        end
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
@@ -3589,8 +3634,7 @@ class OSModel
     end
 
     if (assembly_r - constr_r).abs > 0.01
-      # FIXME
-      # fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
+      fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
     end
   end
 
