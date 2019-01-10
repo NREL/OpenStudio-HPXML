@@ -1412,6 +1412,9 @@ class OSModel
 
         roof_gross_area = Float(XMLHelper.get_value(roof, "Area"))
         roof_net_area = net_wall_area(roof_gross_area, subsurface_areas, roof_id)
+        if roof_net_area <= 0
+          fail "Calculated a negative net surface area for Roof '#{roof_id}'."
+        end
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
