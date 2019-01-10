@@ -1,3 +1,4 @@
+require_relative 'minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
@@ -680,6 +681,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     end
 
+    # Water Heater
+    wh = bldg_details.elements["Systems/WaterHeating"]
+
     # Mechanical Ventilation
     mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     if not mv.nil?
@@ -702,6 +706,52 @@ class HPXMLTranslatorTest < MiniTest::Test
       if not found_mv_energy
         flunk "Could not find mechanical ventilation energy for #{hpxml_path}."
       end
+    end
+
+    # Clothes Washer
+    cw = bldg_details.elements["Appliances/ClothesWasher"]
+    if not cw.nil? and not wh.nil?
+      # Location
+      location = XMLHelper.get_value(cw, "Location")
+      hpxml_value = { nil => Constants.SpaceTypeLiving,
+                      'living space' => Constants.SpaceTypeLiving,
+                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value, sql_value)
+    end
+
+    # Clothes Dryer
+    cd = bldg_details.elements["Appliances/ClothesDryer"]
+    if not cd.nil? and not wh.nil?
+      # Location
+      fuel = to_beopt_fuel(XMLHelper.get_value(cd, 'FuelType'))
+      location = XMLHelper.get_value(cd, "Location")
+      hpxml_value = { nil => Constants.SpaceTypeLiving,
+                      'living space' => Constants.SpaceTypeLiving,
+                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer(fuel).upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value, sql_value)
+    end
+
+    # Refrigerator
+    refr = bldg_details.elements["Appliances/Refrigerator"]
+    if not refr.nil?
+      # Location
+      location = XMLHelper.get_value(refr, "Location")
+      hpxml_value = { nil => Constants.SpaceTypeLiving,
+                      'living space' => Constants.SpaceTypeLiving,
+                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value, sql_value)
     end
 
     sqlFile.close
