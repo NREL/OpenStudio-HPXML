@@ -295,4 +295,214 @@ class HPXML
     return wall
   end
 
+  def self.add_window(windows:,
+                      id: nil,
+                      area: nil,
+                      azimuth: nil,
+                      ufactor: nil,
+                      shgc: nil,
+                      idref: nil)
+    window = XMLHelper.add_element(windows, "Window")
+    sys_id = XMLHelper.add_element(window, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(window, "Area", area) unless area.nil?
+    XMLHelper.add_element(window, "Azimuth", azimuth) unless azimuth.nil?
+    XMLHelper.add_element(window, "UFactor", ufactor) unless ufactor.nil?
+    XMLHelper.add_element(window, "SHGC", shgc) unless shgc.nil?
+    unless idref.nil?
+      attached_to_wall = XMLHelper.add_element(window, "AttachedToWall")
+      XMLHelper.add_attribute(attached_to_wall, "idref", idref)
+    end
+
+    return window
+  end
+
+  def self.add_skylight(skylights:,
+                        id: nil,
+                        area: nil,
+                        azimuth: nil,
+                        ufactor: nil,
+                        shgc: nil,
+                        idref: nil)
+    skylight = XMLHelper.add_element(skylights, "Skylight")
+    sys_id = XMLHelper.add_element(skylight, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(skylight, "Area", area) unless area.nil?
+    XMLHelper.add_element(skylight, "Azimuth", azimuth) unless azimuth.nil?
+    XMLHelper.add_element(skylight, "UFactor", ufactor) unless ufactor.nil?
+    XMLHelper.add_element(skylight, "SHGC", shgc) unless shgc.nil?
+    unless idref.nil?
+      attached_to_roof = XMLHelper.add_element(skylight, "AttachedToRoof")
+      XMLHelper.add_attribute(attached_to_roof, "idref", idref)
+    end
+
+    return skylight
+  end
+
+  def self.add_door(doors:,
+                    id: nil,
+                    idref: nil,
+                    azimuth: nil)
+    door = XMLHelper.add_element(doors, "Door")
+    sys_id = XMLHelper.add_element(door, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    unless idref.nil?
+      attached_to_wall = XMLHelper.add_element(door, "AttachedToWall")
+      XMLHelper.add_attribute(attached_to_wall, "idref", idref)
+    end
+    XMLHelper.add_element(door, "Azimuth", azimuth) unless azimuth.nil?
+
+    return door
+  end
+
+  def self.add_heating_system(hvac_plant:,
+                              id: nil,
+                              idref: nil,
+                              heating_system_type: nil,
+                              heating_system_fuel: nil,
+                              heating_capacity: nil,
+                              annual_heating_efficiency_units: nil,
+                              annual_heating_efficiency_value: nil,
+                              fraction_heat_load_served: nil)
+    heating_system = XMLHelper.add_element(hvac_plant, "HeatingSystem")
+    sys_id = XMLHelper.add_element(heating_system, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    unless idref.nil?
+      distribution_system = XMLHelper.add_element(heating_system, "DistributionSystem")
+      XMLHelper.add_attribute(distribution_system, "idref", idref)
+    end
+    unless heating_system_type.nil?
+      heating_system_type_e = XMLHelper.add_element(heating_system, "HeatingSystemType")
+      XMLHelper.add_element(heating_system_type_e, heating_system_type)
+    end
+    XMLHelper.add_element(heating_system, "HeatingSystemFuel", heating_system_fuel) unless heating_system_fuel.nil?
+    XMLHelper.add_element(heating_system, "HeatingCapacity", heating_capacity) unless heating_capacity.nil?
+    if not annual_heating_efficiency_units.nil? and not annual_heating_efficiency_value.nil?
+      annual_heating_efficiency = XMLHelper.add_element(heating_system, "AnnualHeatingEfficiency")
+      XMLHelper.add_element(annual_heating_efficiency, "Units", annual_heating_efficiency_units)
+      XMLHelper.add_element(annual_heating_efficiency, "Value", annual_heating_efficiency_value)
+    end
+    XMLHelper.add_element(heating_system, "FractionHeatLoadServed", fraction_heat_load_served) unless fraction_heat_load_served.nil?
+
+    return heating_system
+  end
+
+  def self.add_cooling_system(hvac_plant:,
+                              id: nil,
+                              idref: nil,
+                              cooling_system_type: nil,
+                              cooling_system_fuel: nil,
+                              cooling_capacity: nil,
+                              fraction_cool_load_served: nil,
+                              annual_cooling_efficiency_units: nil,
+                              annual_cooling_efficiency_value: nil)
+    cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
+    sys_id = XMLHelper.add_element(cooling_system, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    unless idref.nil?
+      distribution_system = XMLHelper.add_element(cooling_system, "DistributionSystem")
+      XMLHelper.add_attribute(distribution_system, "idref", idref)
+    end
+    XMLHelper.add_element(cooling_system, "CoolingSystemType", cooling_system_type) unless cooling_system_type.nil?
+    XMLHelper.add_element(cooling_system, "CoolingSystemFuel", cooling_system_fuel) unless cooling_system_fuel.nil?
+    XMLHelper.add_element(cooling_system, "CoolingCapacity", cooling_capacity) unless cooling_capacity.nil?
+    XMLHelper.add_element(cooling_system, "FractionCoolLoadServed", fraction_cool_load_served) unless fraction_cool_load_served.nil?
+    if not annual_cooling_efficiency_units.nil? and not annual_cooling_efficiency_value.nil?
+      annual_cooling_efficiency = XMLHelper.add_element(cooling_system, "AnnualCoolingEfficiency")
+      XMLHelper.add_element(annual_cooling_efficiency, "Units", annual_cooling_efficiency_units)
+      XMLHelper.add_element(annual_cooling_efficiency, "Value", annual_cooling_efficiency_value)
+    end
+
+    return cooling_system
+  end
+
+  def self.add_heat_pump(hvac_plant:,
+                         id: nil,
+                         idref: nil,
+                         heat_pump_type: nil,
+                         heating_capacity: nil,
+                         cooling_capacity: nil,
+                         fraction_heat_load_served: nil,
+                         fraction_cool_load_served: nil,
+                         annual_heating_efficiency_units: nil,
+                         annual_heating_efficiency_value: nil,
+                         annual_cooling_efficiency_units: nil,
+                         annual_cooling_efficiency_value: nil)
+    heat_pump = XMLHelper.add_element(hvac_plant, "HeatPump")
+    sys_id = XMLHelper.add_element(heat_pump, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    unless idref.nil?
+      distribution_system = XMLHelper.add_element(heat_pump, "DistributionSystem")
+      XMLHelper.add_attribute(distribution_system, "idref", idref)
+    end
+    XMLHelper.add_element(heat_pump, "HeatPumpType", heat_pump_type) unless heat_pump_type.nil?
+    XMLHelper.add_element(heat_pump, "HeatingCapacity", heating_capacity) unless heating_capacity.nil?
+    XMLHelper.add_element(heat_pump, "CoolingCapacity", cooling_capacity) unless cooling_capacity.nil?
+    XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", fraction_heat_load_served) unless fraction_heat_load_served.nil?
+    XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", fraction_cool_load_served) unless fraction_cool_load_served.nil?
+    if not annual_cooling_efficiency_units.nil? and not annual_cooling_efficiency_value.nil?
+      annual_cooling_efficiency = XMLHelper.add_element(heat_pump, "AnnualCoolingEfficiency")
+      XMLHelper.add_element(annual_cooling_efficiency, "Units", annual_cooling_efficiency_units)
+      XMLHelper.add_element(annual_cooling_efficiency, "Value", annual_cooling_efficiency_value)
+    end
+    if not anunal_heating_efficiency_units.nil? and not annual_heating_efficiency_value.nil?
+      annual_heating_efficiency = XMLHelper.add_element(heat_pump, "AnnualHeatingEfficiency")
+      XMLHelper.add_element(annual_heating_efficiency, "Units", annual_heating_efficiency_units)
+      XMLHelper.add_element(annual_heating_efficiency, "Value", fraction_heat_load_served)
+    end
+
+    return heat_pump
+  end
+
+  def self.add_hvac_control(hvac:,
+                            id: nil,
+                            control_type: nil)
+    hvac_control = XMLHelper.add_element(hvac, "HVACControl")
+    sys_id = XMLHelper.add_element(hvac_control, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(hvac_control, "ControlType", control_type) unless control_type.nil?
+
+    return hvac_control
+  end
+
+  def self.add_hvac_distribution(hvac:,
+                                 id: nil)
+    hvac_distribution = XMLHelper.add_element(hvac, "HVACDistribution")
+    sys_id = XMLHelper.add_element(hvac_distribution, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
+    return hvac_distribution
+  end
+
+  def self.add_duct_leakage_measurement(air_distribution:,
+                                        duct_type: nil,
+                                        duct_leakage_units: nil,
+                                        duct_leakage_value: nil,
+                                        duct_leakage_total_or_to_outside: nil)
+    duct_leakage_measurement = XMLHelper.add_element(air_distribution, "DuctLeakageMeasurement")
+    XMLHelper.add_element(duct_leakage_measurement, "DuctType", duct_type) unless duct_type.nil?
+    if not duct_leakage_units.nil? and not duct_leakage_value.nil? and not duct_leakage_total_or_to_outside.nil?
+      duct_leakage = XMLHelper.add_element(duct_leakage_measurement, "DuctLeakage")
+      XMLHelper.add_element(duct_leakage, "Units", duct_leakage_units) unless duct_leakage_units.nil?
+      XMLHelper.add_element(duct_leakage, "Value", duct_leakage_value) unless duct_leakage_value.nil?
+      XMLHelper.add_element(duct_leakage, "TotalOrToOutside", duct_leakage_total_or_to_outside) unless duct_leakage_total_or_to_outside.nil?
+    end
+
+    return duct_leakage_measurement
+  end
+
+  def self.add_ducts(air_distribution:,
+                     duct_type: nil,
+                     duct_insulation_r_value: nil,
+                     duct_location: nil,
+                     duct_surface_area: nil)
+    ducts = XMLHelper.add_element(air_distribution, "Ducts")
+    XMLHelper.add_element(ducts, "DuctType", duct_type) unless duct_type.nil?
+    XMLHelper.add_element(ducts, "DuctInsulationRValue", duct_insulation_r_value) unless duct_insulation_r_value.nil?
+    XMLHelper.add_element(ducts, "DuctLocation", duct_location) unless duct_location.nil?
+    XMLHelper.add_element(ducts, "DuctSurfaceArea", duct_surface_area) unless duct_surface_area.nil?
+    
+    return ducts
+  end
+
 end
