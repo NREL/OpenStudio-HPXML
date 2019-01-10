@@ -68,7 +68,7 @@ class HEScoreRuleset
     set_systems_hvac(new_systems, orig_details)
     set_systems_mechanical_ventilation(new_systems, orig_details)
     set_systems_water_heater(new_systems, orig_details)
-    set_systems_water_heating_use(new_systems, orig_details)
+    set_systems_water_heating_use(new_systems)
     set_systems_photovoltaics(new_systems, orig_details)
 
     # Appliances
@@ -726,6 +726,7 @@ class HEScoreRuleset
     new_water_heating = XMLHelper.add_element(new_systems, "WaterHeating")
 
     orig_details.elements.each("Systems/WaterHeating/WaterHeatingSystem") do |orig_wh_sys|
+      wh_id = orig_wh_sys.elements["SystemIdentifier"].attributes["id"]
       wh_year = XMLHelper.get_value(orig_wh_sys, "YearInstalled")
       wh_ef = XMLHelper.get_value(orig_wh_sys, "EnergyFactor")
       wh_fuel = XMLHelper.get_value(orig_wh_sys, "FuelType")
@@ -737,37 +738,39 @@ class HEScoreRuleset
         wh_ef = Float(wh_ef)
       end
 
-      new_wh_sys = XMLHelper.add_element(new_water_heating, "WaterHeatingSystem")
-      XMLHelper.copy_element(new_wh_sys, orig_wh_sys, "SystemIdentifier")
-      XMLHelper.add_element(new_wh_sys, "FuelType", wh_fuel)
-      XMLHelper.add_element(new_wh_sys, "WaterHeaterType", wh_type)
-      XMLHelper.add_element(new_wh_sys, "Location", "living space") # FIXME: Verify
-      XMLHelper.add_element(new_wh_sys, "TankVolume", get_default_water_heater_volume(wh_fuel))
-      XMLHelper.add_element(new_wh_sys, "FractionDHWLoadServed", 1.0)
+      wh_capacity = nil
       if wh_type == "storage water heater"
-        XMLHelper.add_element(new_wh_sys, "HeatingCapacity", get_default_water_heater_capacity(wh_fuel))
+        wh_capacity = get_default_water_heater_capacity(wh_fuel)
       end
-      XMLHelper.add_element(new_wh_sys, "EnergyFactor", wh_ef)
+      wh_recovery_efficiency = nil
       if wh_type == "storage water heater" and XMLHelper.get_value(orig_wh_sys, "FuelType") != "electricity"
-        XMLHelper.add_element(new_wh_sys, "RecoveryEfficiency", get_default_water_heater_re(wh_fuel))
+        wh_recovery_efficiency = get_default_water_heater_re(wh_fuel)
       end
+      new_wh_sys = HPXML.add_water_heating_system(water_heating: new_water_heating,
+                                                  id: wh_id,
+                                                  fuel_type: wh_fuel,
+                                                  water_heater_type: wh_type,
+                                                  location: "living space", # FIXME: Verify
+                                                  tank_volume: get_default_water_heater_volume(wh_fuel),
+                                                  fraction_dhw_load_served: 1.0,
+                                                  heating_capacity: wh_capacity,
+                                                  energy_factor: wh_ef,
+                                                  recovery_efficiency: wh_recovery_efficiency)
     end
   end
 
-  def self.set_systems_water_heating_use(new_systems, orig_details)
+  def self.set_systems_water_heating_use(new_systems)
     new_water_heating = new_systems.elements["WaterHeating"]
 
-    new_hw_dist = XMLHelper.add_element(new_water_heating, "HotWaterDistribution")
-    sys_id = XMLHelper.add_element(new_hw_dist, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "HotWaterDistribution")
-    XMLHelper.add_element(new_hw_dist, "SystemType/Standard") # FIXME: Verify
-    XMLHelper.add_element(new_hw_dist, "PipeInsulation/PipeRValue", 0) # FIXME: Verify
+    new_hw_dist = HPXML.add_hot_water_distribution(water_heating: new_water_heating,
+                                                   id: "HotWaterDistribution",
+                                                   system_type: "Standard", # FIXME: Verify
+                                                   pipe_r_value: 0) # FIXME: Verify
 
-    new_fixture = XMLHelper.add_element(new_water_heating, "WaterFixture")
-    sys_id = XMLHelper.add_element(new_fixture, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "ShowerHead")
-    XMLHelper.add_element(new_fixture, "WaterFixtureType", "shower head")
-    XMLHelper.add_element(new_fixture, "LowFlow", false) # FIXME: Verify
+    new_fixture = HPXML.add_water_fixture(water_heating: new_water_heating,
+                                          id: "ShowerHead",
+                                          water_fixture_type: "shower head",
+                                          low_flow: false) # FIXME: Verify
   end
 
   def self.set_systems_photovoltaics(new_systems, orig_details)

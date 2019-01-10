@@ -505,4 +505,143 @@ class HPXML
     return ducts
   end
 
+  def self.add_water_heating_system(water_heating:,
+                                    id: nil,
+                                    fuel_type: nil,
+                                    water_heater_type: nil,
+                                    location: nil,
+                                    tank_volume: nil,
+                                    fraction_dhw_load_served: nil,
+                                    heating_capacity: nil,
+                                    energy_factor: nil,
+                                    recovery_efficiency: nil)
+    water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
+    sys_id = XMLHelper.add_element(water_heating_system, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(water_heating_system, "FuelType", fuel_type) unless fuel_type.nil?
+    XMLHelper.add_element(water_heating_system, "WaterHeaterType", water_heater_type) unless water_heater_type.nil?
+    XMLHelper.add_element(water_heating_system, "Location", location) unless location.nil?
+    XMLHelper.add_element(water_heating_system, "TankVolume", tank_volume) unless tank_volume.nil?
+    XMLHelper.add_element(water_heating_system, "FractionDHWLoadServed", fraction_dhw_load_served) unless fraction_dhw_load_served.nil?
+    XMLHelper.add_element(water_heating_system, "HeatingCapacity", heating_capacity) unless heating_capacity.nil?
+    XMLHelper.add_element(water_heating_system, "EnergyFactor", energy_factor) unless energy_factor.nil?
+    XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", recovery_efficiency) unless recovery_efficiency.nil?
+
+    return water_heating_system
+  end
+
+  def self.add_hot_water_distribution(water_heating:,
+                                      id: nil,
+                                      system_type: nil,
+                                      pipe_r_value: nil)
+    hot_water_distribution = XMLHelper.add_element(water_heating, "HotWaterDistribution")
+    sys_id = XMLHelper.add_element(hot_water_distribution, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    unless system_type.nil?
+      system_type_e = XMLHelper.add_element(hot_water_distribution, "SystemType")
+      XMLHelper.add_element(system_type_e, system_type)
+    end
+    unless pipe_r_value.nil?
+      pipe_insulation = XMLHelper.add_element(hot_water_distribution, "PipeInsulation")
+      XMLHelper.add_element(pipe_insulation, "PipeRValue", pipe_r_value)
+    end
+
+    return hot_water_distribution
+  end
+
+  def self.add_water_fixture(water_heating:,
+                             id: nil,
+                             water_fixture_type: nil,
+                             low_flow: nil)
+    water_fixture = XMLHelper.add_element(water_heating, "WaterFixture")
+    sys_id = XMLHelper.add_element(water_fixture, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(water_fixture, "WaterFixtureType", water_fixture_type) unless water_fixture_type.nil?
+    XMLHelper.add_element(water_fixture, "LowFlow", low_flow) unless low_flow.nil?
+
+    return water_fixture
+  end
+
+  def self.add_pv_system(photovoltaics:,
+                         id: nil,
+                         module_type: nil,
+                         array_type: nil,
+                         array_azimuth: nil,
+                         array_tilt: nil,
+                         max_power_output: nil,
+                         inverter_efficiency: nil,
+                         system_losses_fraction: nil)
+    pv_system = XMLHelper.add_element(photovoltaics, "PVSystem")
+    sys_id = XMLHelper.add_element(pv_system, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
+    return pv_system
+  end
+
+  def self.add_clothes_washer(appliances:,
+                              id: nil)
+    clothes_washer = XMLHelper.add_element(appliances, "ClothesWasher")
+    sys_id = XMLHelper.add_element(clothes_washer, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
+    return clothes_washer
+  end
+
+  def self.add_clothes_dryer(appliances:,
+                             id: nil,
+                             fuel_type: nil)
+    clothes_dryer = XMLHelper.add_element(appliances, "ClothesDryer")
+    sys_id = XMLHelper.add_element(clothes_dryer, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
+    return clothes_dryer
+  end
+
+  def self.add_dishwasher(appliances:,
+                          id: nil)
+
+    dishwasher = XMLHelper.add_element(appliances, "Dishwasher")
+    sys_id = XMLHelper.add_element(dishwasher, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    return dishwasher
+  end
+
+  def self.add_refrigerator(appliances:,
+                            id: nil)
+    refrigerator = XMLHelper.add_element(appliances, "Refrigerator")
+    sys_id = XMLHelper.add_element(refrigerator, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
+    return refrigerator
+  end
+
+  def self.add_cooking_range(appliances:,
+                             id: nil,
+                             fuel_type: nil)
+    cooking_range = XMLHelper.add_element(appliances, "CookingRange")
+    sys_id = XMLHelper.add_element(cooking_range, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
+    return cooking_range
+  end
+
+  def self.add_oven(appliances:,
+                    id: nil)
+    oven = XMLHelper.add_element(appliances, "Oven")
+    sys_id = XMLHelper.add_element(oven, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
+    return oven
+  end
+
+  def self.add_plug_load(misc_loads:,
+                         id: nil,
+                         plug_load_type: nil)
+    plug_load = XMLHelper.add_element(misc_loads, "PlugLoad")
+    sys_id = XMLHelper.add_element(plug_load, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    
+    return plug_load
+  end
+
 end
