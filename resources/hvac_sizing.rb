@@ -1500,9 +1500,9 @@ class HVACSizing
     unit_final = process_duct_loads_heating(runner, mj8, unit_final, weather, hvac, unit_init.Heat_Load, ducts)
     unit_init, unit_final = process_duct_loads_cool_dehum(runner, mj8, unit, zones_loads, unit_init, unit_final, weather, hvac, ducts)
     unit_final = process_cooling_equipment_adjustments(runner, mj8, unit, unit_init, unit_final, weather, hvac)
+    unit_final = process_slave_zone_flow_ratios(runner, zones_loads, ducts, unit_final)
     unit_final = process_fixed_equipment(runner, unit_final, hvac)
     unit_final = process_finalize(runner, mj8, unit, zones_loads, unit_init, unit_final, weather, hvac, ducts, nbeds, unit_ffa, unit_shelter_class)
-    unit_final = process_slave_zone_flow_ratios(runner, zones_loads, ducts, unit_final)
     unit_final = process_efficiency_capacity_derate(runner, hvac, unit_final)
     unit_final = process_dehumidifier_sizing(runner, mj8, unit_init, unit_final, weather, hvac)
     return unit_init, unit_final

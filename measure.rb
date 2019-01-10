@@ -1774,6 +1774,8 @@ class OSModel
     # Clothes Washer
     cw = building.elements["BuildingDetails/Appliances/ClothesWasher"]
     if not cw.nil?
+      cw_location = XMLHelper.get_value(cw, "Location")
+      cw_space = get_space_from_location(cw_location, "ClothesWasher", model, spaces)
       cw_mef = XMLHelper.get_value(cw, "ModifiedEnergyFactor")
       cw_imef = XMLHelper.get_value(cw, "IntegratedModifiedEnergyFactor")
       if cw_mef.nil? and cw_imef.nil?
@@ -1802,6 +1804,8 @@ class OSModel
     # Clothes Dryer
     cd = building.elements["BuildingDetails/Appliances/ClothesDryer"]
     if not cd.nil?
+      cd_location = XMLHelper.get_value(cd, "Location")
+      cd_space = get_space_from_location(cd_location, "ClothesDryer", model, spaces)
       cd_fuel = to_beopt_fuel(XMLHelper.get_value(cd, "FuelType"))
       cd_ef = XMLHelper.get_value(cd, "EnergyFactor")
       cd_cef = XMLHelper.get_value(cd, "CombinedEnergyFactor")
@@ -1842,6 +1846,8 @@ class OSModel
 
     # Refrigerator
     fridge = building.elements["BuildingDetails/Appliances/Refrigerator"]
+    fridge_location = XMLHelper.get_value(fridge, "Location")
+    fridge_space = get_space_from_location(fridge_location, "Refrigerator", model, spaces)
     if not fridge.nil?
       fridge_annual_kwh = XMLHelper.get_value(fridge, "RatedAnnualkWh")
       if fridge_annual_kwh.nil?
@@ -1932,6 +1938,7 @@ class OSModel
     if not wh.nil?
       dhw = wh.elements["WaterHeatingSystem"]
       location = XMLHelper.get_value(dhw, "Location")
+      space = get_space_from_location(location, "WaterHeatingSystem", model, spaces)
       setpoint_temp = XMLHelper.get_value(dhw, "HotWaterTemperature")
       if setpoint_temp.nil?
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
@@ -1940,22 +1947,6 @@ class OSModel
       end
       wh_type = XMLHelper.get_value(dhw, "WaterHeaterType")
       fuel = XMLHelper.get_value(dhw, "FuelType")
-
-      if location == 'living space'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-      elsif location == 'basement - unconditioned'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
-      elsif location == 'basement - conditioned'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
-      elsif location == 'attic - unvented' or location == 'attic - vented'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
-      elsif location == 'garage'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
-      elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
-      else
-        fail "Unhandled water heater space: #{location}."
-      end
 
       ef = XMLHelper.get_value(dhw, "EnergyFactor")
       if ef.nil?
@@ -2034,9 +2025,9 @@ class OSModel
     success = HotWaterAndAppliances.apply(model, unit, runner, weather,
                                           @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
                                           cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
-                                          cw_agc, cw_cap, cd_fuel, cd_ef, cd_control,
-                                          dw_ef, dw_cap, fridge_annual_kwh, cook_fuel_type,
-                                          cook_is_induction, oven_is_convection,
+                                          cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
+                                          cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
+                                          cook_fuel_type, cook_is_induction, oven_is_convection,
                                           has_low_flow_fixtures, dist_type, pipe_r,
                                           std_pipe_length, recirc_loop_length,
                                           recirc_branch_length, recirc_control_type,
@@ -3722,6 +3713,24 @@ class OSModel
 
     return UnitConversions.convert(walls_top, "m", "ft")
   end
+
+  def self.get_space_from_location(location, object_name, model, spaces)
+    if location.nil? or location == 'living space'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
+    elsif location == 'basement - conditioned'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
+    elsif location == 'basement - unconditioned'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
+    elsif location == 'garage'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
+    elsif location == 'attic - unvented' or location == 'attic - vented'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
+    elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
+    end
+
+    fail "Unhandled #{object_name} location: #{location}."
+  end
 end
 
 class WoodStudConstructionSet
@@ -3849,6 +3858,10 @@ def get_attic_adjacent_to(attic_type)
     return "attic - vented"
   elsif attic_type == "cape cod"
     return "attic - conditioned"
+  elsif attic_type == "cathedral ceiling"
+    return "living space"
+  elsif attic_type == "flat roof"
+    return "living space"
   end
 
   fail "Unexpected attic type."
