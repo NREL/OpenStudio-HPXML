@@ -157,7 +157,9 @@ class HotWaterAndAppliances
       fx_obj_name_lat = "#{fx_obj_name} Latent"
       fx_peak_flow_gpm = fx_gpd / sum_fractions_hw / timestep_minutes * 365.0
       fx_space = Geometry.get_space_from_location(unit, Constants.Auto, location_hierarchy)
-      fx_schedule = cd_schedule
+      fx_weekday_sch = "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024"
+      fx_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+      fx_schedule = MonthWeekdayWeekendSchedule.new(model, runner, fx_obj_name, fx_weekday_sch, fx_weekday_sch, fx_monthly_sch, 1.0, 1.0)
       fx_design_level_sens = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_sens_btu, "Btu", "kWh") / 365.0)
       fx_design_level_lat = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_lat_btu, "Btu", "kWh") / 365.0)
       add_water_use_equipment(model, fx_obj_name, fx_peak_flow_gpm, schedule_mw, setpoint_sched, water_use_connection)
@@ -174,7 +176,7 @@ class HotWaterAndAppliances
       dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(dist_type, recirc_control_type, recirc_pump_power)
       dist_pump_obj_name = Constants.ObjectNameHotWaterRecircPump(unit.name.to_s)
       dist_pump_space = Geometry.get_space_from_location(unit, Constants.Auto, location_hierarchy)
-      dist_pump_schedule = cd_schedule
+      dist_pump_schedule = fx_schedule
       dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
       add_electric_equipment(model, dist_pump_obj_name, dist_pump_space, dist_pump_design_level, 0.0, 0.0, dist_pump_schedule.schedule)
     end
