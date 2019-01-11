@@ -71,7 +71,8 @@ class HPXML
                                             id: nil,
                                             house_pressure: nil,
                                             unit_of_measure: nil,
-                                            air_leakage: nil)
+                                            air_leakage: nil,
+                                            effective_leakage_area: nil)
     air_infiltration_measurement = XMLHelper.add_element(air_infiltration, "AirInfiltrationMeasurement")
     sys_id = XMLHelper.add_element(air_infiltration_measurement, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
@@ -81,6 +82,7 @@ class HPXML
       XMLHelper.add_element(building_air_leakage, "UnitofMeasure", unit_of_measure)
       XMLHelper.add_element(building_air_leakage, "AirLeakage", air_leakage)
     end
+    XMLHelper.add_element(air_infiltration_measurement, "EffectiveLeakageArea", effective_leakage_area) unless effective_leakage_area.nil?
 
     return air_infiltration_measurement
   end
@@ -260,7 +262,10 @@ class HPXML
   def self.add_extension(parent:,
                          extensions: {})
     unless extensions.empty?
-      extension = XMLHelper.add_element(parent, "extension")
+      extension = parent.elements["extension"]
+      if extension.nil?
+        extension = XMLHelper.add_element(parent, "extension")
+      end
       extensions.each do |name, text|
         XMLHelper.add_element(extension, "#{name}", text) unless text.nil?
       end
@@ -273,6 +278,7 @@ class HPXML
                     id: nil,
                     exterior_adjacent_to: nil,
                     interior_adjacent_to: nil,
+                    adjacent_to: nil,
                     wall_type: nil,
                     area: nil,
                     azimuth: nil,
@@ -283,6 +289,7 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
     XMLHelper.add_element(wall, "ExteriorAdjacentTo", exterior_adjacent_to) unless exterior_adjacent_to.nil?
     XMLHelper.add_element(wall, "InteriorAdjacentTo", interior_adjacent_to) unless interior_adjacent_to.nil?
+    XMLHelper.add_element(wall, "AdjacentTo", adjacent_to) unless adjacent_to.nil?
     unless wall_type.nil?
       wall_type_e = XMLHelper.add_element(wall, "WallType")
       XMLHelper.add_element(wall_type_e, wall_type)
