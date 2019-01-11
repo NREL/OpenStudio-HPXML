@@ -787,61 +787,49 @@ class HEScoreRuleset
     end
 
     new_pvs = XMLHelper.add_element(new_systems, "Photovoltaics")
-    new_pv = XMLHelper.add_element(new_pvs, "PVSystem")
-    sys_id = XMLHelper.add_element(new_pv, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "PVSystem")
-    XMLHelper.add_element(new_pv, "ModuleType", "standard") # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-    XMLHelper.add_element(new_pv, "ArrayType", "fixed roof mount") # FIXME: Verify. HEScore was using "fixed open rack"??
-    XMLHelper.add_element(new_pv, "ArrayAzimuth", orientation_to_azimuth(pv_orientation))
-    XMLHelper.add_element(new_pv, "ArrayTilt", 30) # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-    XMLHelper.add_element(new_pv, "MaxPowerOutput", pv_power)
-    XMLHelper.add_element(new_pv, "InverterEfficiency", 0.96) # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-    XMLHelper.add_element(new_pv, "SystemLossesFraction", 0.14) # FIXME: Verify
+    new_pv = HPXML.add_pv_system(photovoltaics: new_pvs,
+                                 id: "PVSystem",
+                                 module_type: "standard", # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                                 array_type: "fixed roof mount", # FIXME: Verify. HEScore was using "fixed open rack"??
+                                 array_azimuth: orientation_to_azimuth(pv_orientation),
+                                 array_tilt: 30, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                                 max_power_output: pv_power,
+                                 inverter_efficiency: 0.96, # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                                 system_losses_fraction: 0.14) # FIXME: Verify
   end
 
   def self.set_appliances_clothes_washer(new_appliances, orig_details)
-    new_washer = XMLHelper.add_element(new_appliances, "ClothesWasher")
-    sys_id = XMLHelper.add_element(new_washer, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "ClothesWasher")
-
+    new_washer = HPXML.add_clothes_washer(appliances: new_appliances,
+                                          id: "ClothesWasher")
     # Uses ERI Reference Home for performance
   end
 
   def self.set_appliances_clothes_dryer(new_appliances, orig_details)
-    new_dryer = XMLHelper.add_element(new_appliances, "ClothesDryer")
-    sys_id = XMLHelper.add_element(new_dryer, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "ClothesDryer")
-    XMLHelper.add_element(new_dryer, "FuelType", "electricity") # FIXME: Verify
-
+    new_dryer = HPXML.add_clothes_dryer(appliances: new_appliances,
+                                        id: "ClothesDryer",
+                                        fuel_type: "electricity") # FIXME: Verify
     # Uses ERI Reference Home for performance
   end
 
   def self.set_appliances_dishwasher(new_appliances, orig_details)
-    new_dishwasher = XMLHelper.add_element(new_appliances, "Dishwasher")
-    sys_id = XMLHelper.add_element(new_dishwasher, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "Dishwasher")
-
+    new_dishwasher = HPXML.add_dishwasher(appliances: new_appliances,
+                                          id: "Dishwasher")
     # Uses ERI Reference Home for performance
   end
 
   def self.set_appliances_refrigerator(new_appliances, orig_details)
-    new_fridge = XMLHelper.add_element(new_appliances, "Refrigerator")
-    sys_id = XMLHelper.add_element(new_fridge, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "Refrigerator")
-
+    new_fridge = HPXML.add_refrigerator(appliances: new_appliances,
+                                        id: "Refrigerator")
     # Uses ERI Reference Home for performance
   end
 
   def self.set_appliances_cooking_range_oven(new_appliances, orig_details)
-    new_range = XMLHelper.add_element(new_appliances, "CookingRange")
-    sys_id = XMLHelper.add_element(new_range, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "CookingRange")
-    XMLHelper.add_element(new_range, "FuelType", "electricity") # FIXME: Verify
+    new_range = HPXML.add_cooking_range(appliances: new_appliances,
+                                        id: "CookingRange",
+                                        fuel_type: "electricity") # FIXME: Verify
 
-    new_oven = XMLHelper.add_element(new_appliances, "Oven")
-    sys_id = XMLHelper.add_element(new_oven, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "Oven")
-
+    new_oven = HPXML.add_oven(appliances: new_appliances,
+                              id: "Oven")
     # Uses ERI Reference Home for performance
   end
 
@@ -854,20 +842,16 @@ class HEScoreRuleset
   end
 
   def self.set_misc_plug_loads(new_misc_loads, orig_details)
-    new_plug_load = XMLHelper.add_element(new_misc_loads, "PlugLoad")
-    sys_id = XMLHelper.add_element(new_plug_load, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "PlugLoadOther")
-    XMLHelper.add_element(new_plug_load, "PlugLoadType", "other")
-
+    new_plug_load = HPXML.add_plug_load(misc_loads: new_misc_loads,
+                                        id: "PlugLoadOther",
+                                        plug_load_type: "other")
     # Uses ERI Reference Home for performance
   end
 
   def self.set_misc_television(new_misc_loads, orig_details)
-    new_plug_load = XMLHelper.add_element(new_misc_loads, "PlugLoad")
-    sys_id = XMLHelper.add_element(new_plug_load, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", "PlugLoadTV")
-    XMLHelper.add_element(new_plug_load, "PlugLoadType", "TV other")
-
+    new_plug_load = HPXML.add_plug_load(misc_loads: new_misc_loads,
+                                        id: "PlugLoadTV",
+                                        plug_load_type: "TV other")
     # Uses ERI Reference Home for performance
   end
 end
