@@ -29,12 +29,24 @@ class XMLHelper
 
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
+    return if parent.nil?
     val = parent.elements[element_name]
     if val.nil?
       return val
     end
 
     return val.text
+  end
+
+  # Returns the value(s) of 'element_name' in the parent element or [].
+  def self.get_values(parent, element_name)
+    return if parent.nil?
+    vals = []
+    parent.elements.each(element_name) do |val|
+      vals << val.text
+    end
+
+    return vals
   end
 
   # Returns the name of the first child element of the 'element_name'
@@ -117,6 +129,18 @@ class XMLHelper
     File.open(out_path, 'w') do |f|
       formatter.write(doc, f)
     end
+  end
+
+  def self.get_id(parent)
+    return if parent.nil?
+    return parent.elements["SystemIdentifier"].attributes["id"]
+  end
+
+  def self.get_idref(parent, element_name)
+    return if parent.nil?
+    element = parent.elements[element_name]
+    return if element.nil?
+    return element.attributes["idref"]
   end
 end
 
