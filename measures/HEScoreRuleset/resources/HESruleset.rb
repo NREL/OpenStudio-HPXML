@@ -73,11 +73,11 @@ class HEScoreRuleset
 
     # Appliances
     new_appliances = XMLHelper.add_element(new_details, "Appliances")
-    set_appliances_clothes_washer(new_appliances, orig_details)
-    set_appliances_clothes_dryer(new_appliances, orig_details)
-    set_appliances_dishwasher(new_appliances, orig_details)
-    set_appliances_refrigerator(new_appliances, orig_details)
-    set_appliances_cooking_range_oven(new_appliances, orig_details)
+    set_appliances_clothes_washer(new_appliances)
+    set_appliances_clothes_dryer(new_appliances)
+    set_appliances_dishwasher(new_appliances)
+    set_appliances_refrigerator(new_appliances)
+    set_appliances_cooking_range_oven(new_appliances)
 
     # Lighting
     new_lighting = XMLHelper.add_element(new_details, "Lighting")
@@ -86,33 +86,35 @@ class HEScoreRuleset
 
     # MiscLoads
     new_misc_loads = XMLHelper.add_element(new_details, "MiscLoads")
-    set_misc_plug_loads(new_misc_loads, orig_details)
-    set_misc_television(new_misc_loads, orig_details)
+    set_misc_plug_loads(new_misc_loads)
+    set_misc_television(new_misc_loads)
   end
 
   def self.set_summary(new_summary)
-    new_site = HPXML.add_site(building_summary: new_summary,
-                              fuels: ["electricity"],
-                              shelter_coefficient: Airflow.get_default_shelter_coefficient())
-    new_occupancy = HPXML.add_building_occupancy(building_summary: new_summary,
-                                                 number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
-    new_construction = HPXML.add_building_construction(building_summary: new_summary,
-                                                       number_of_conditioned_floors: Integer(@ncfl),
-                                                       number_of_conditioned_floors_above_grade: Integer(@ncfl_ag),
-                                                       number_of_bedrooms: Integer(@nbeds),
-                                                       conditioned_floor_area: @cfa,
-                                                       conditioned_building_volume: @cvolume,
-                                                       garage_present: false)
+    HPXML.add_site(building_summary: new_summary,
+                   fuels: ["electricity"],
+                   shelter_coefficient: Airflow.get_default_shelter_coefficient())
+
+    HPXML.add_building_occupancy(building_summary: new_summary,
+                                 number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
+
+    HPXML.add_building_construction(building_summary: new_summary,
+                                    number_of_conditioned_floors: Integer(@ncfl),
+                                    number_of_conditioned_floors_above_grade: Integer(@ncfl_ag),
+                                    number_of_bedrooms: Integer(@nbeds),
+                                    conditioned_floor_area: @cfa,
+                                    conditioned_building_volume: @cvolume,
+                                    garage_present: false)
   end
 
   def self.set_climate(new_climate)
-    new_iecc = HPXML.add_climate_zone_iecc(climate_and_risk_zones: new_climate,
-                                           year: 2006,
-                                           climate_zone: "1A") # FIXME: Hard-coded
-    new_weather = HPXML.add_weather_station(climate_and_risk_zones: new_climate,
-                                            id: "WeatherStation",
-                                            name: "Miami, FL", # FIXME: Hard-coded
-                                            wmo: 722020) # FIXME: Hard-coded
+    HPXML.add_climate_zone_iecc(climate_and_risk_zones: new_climate,
+                                year: 2006,
+                                climate_zone: "1A") # FIXME: Hard-coded
+    HPXML.add_weather_station(climate_and_risk_zones: new_climate,
+                              id: "WeatherStation",
+                              name: "Miami, FL", # FIXME: Hard-coded
+                              wmo: 722020) # FIXME: Hard-coded
   end
 
   def self.set_enclosure_air_infiltration(new_enclosure, orig_details)
@@ -131,70 +133,62 @@ class HEScoreRuleset
     end
 
     new_air_infil = XMLHelper.add_element(new_enclosure, "AirInfiltration")
-    new_air_meas = HPXML.add_air_infiltration_measurement(air_infiltration: new_air_infil,
-                                                          id: "AirInfiltrationMeasurement",
-                                                          house_pressure: 50,
-                                                          unit_of_measure: "ACH",
-                                                          air_leakage: ach50)
+    HPXML.add_air_infiltration_measurement(air_infiltration: new_air_infil,
+                                           id: "AirInfiltrationMeasurement",
+                                           house_pressure: 50,
+                                           unit_of_measure: "ACH",
+                                           air_leakage: ach50)
   end
 
   def self.set_enclosure_attics_roofs(new_enclosure, orig_details)
     new_attics = XMLHelper.add_element(new_enclosure, "Attics")
 
     orig_details.elements.each("Enclosure/AtticAndRoof/Attics/Attic") do |orig_attic|
-      orig_roof = get_attached(orig_attic.elements["AttachedToRoof"].attributes["idref"], orig_details, "Enclosure/AtticAndRoof/Roofs/Roof")
       attic_id = orig_attic.elements["SystemIdentifier"].attributes["id"]
       attic_type = XMLHelper.get_value(orig_attic, "AtticType")
+      orig_roof = get_attached(orig_attic.elements["AttachedToRoof"].attributes["idref"], orig_details, "Enclosure/AtticAndRoof/Roofs/Roof")
 
       new_attic = HPXML.add_attic(attics: new_attics,
                                   id: attic_id,
                                   attic_type: attic_type)
 
       # Roof
-      roof_id = orig_roof.elements["SystemIdentifier"].attributes["id"]
       roof_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='cavity']/NominalRValue"))
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
       roof_material = XMLHelper.get_value(orig_roof, "RoofType")
       roof_has_radiant_barrier = Boolean(XMLHelper.get_value(orig_roof, "RadiantBarrier"))
-      roof_color = XMLHelper.get_value(orig_roof, "RoofColor")
       # FIXME: Get roof area; is roof area for cathedral and ceiling area for attic?
-      roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, roof_material, roof_has_radiant_barrier)
 
       new_roofs = XMLHelper.add_element(new_attic, "Roofs")
       new_roof = HPXML.add_roof(roofs: new_roofs,
-                                id: roof_id,
+                                id: orig_roof.elements["SystemIdentifier"].attributes["id"],
                                 area: 1000, # FIXME: Hard-coded
                                 azimuth: 0, # FIXME: Hard-coded
-                                solar_absorptance: get_roof_solar_absorptance(roof_color),
+                                solar_absorptance: get_roof_solar_absorptance(XMLHelper.get_value(orig_roof, "RoofColor")),
                                 emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
                                 pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                                 radiant_barrier: false) # FIXME: Verify. Setting to false because it's included in the assembly R-value
       orig_attic_roof_ins = orig_attic.elements["AtticRoofInsulation"]
-      attic_roof_ins_id = orig_attic_roof_ins.elements["SystemIdentifier"].attributes["id"]
-      new_roof_ins = HPXML.add_insulation(parent: new_roof,
-                                          id: attic_roof_ins_id,
-                                          assembly_effective_r_value: roof_r)
+      HPXML.add_insulation(parent: new_roof,
+                           id: orig_attic_roof_ins.elements["SystemIdentifier"].attributes["id"],
+                           assembly_effective_r_value: get_roof_assembly_r(roof_r_cavity, roof_r_cont, roof_material, roof_has_radiant_barrier))
 
       # Floor
       if ["unvented attic", "vented attic"].include? attic_type
         floor_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticFloorInsulation/Layer[InstallationType='cavity']/NominalRValue"))
-        floor_r = get_ceiling_assembly_r(floor_r_cavity)
-        floor_area = XMLHelper.get_value(orig_attic, "Area")
 
         new_floors = XMLHelper.add_element(new_attic, "Floors")
         new_floor = HPXML.add_floor(floors: new_floors,
                                     id: "#{attic_id}_floor",
                                     adjacent_to: "living space",
-                                    area: floor_area) # FIXME: Verify. This is the attic floor area and not the roof area?
+                                    area: XMLHelper.get_value(orig_attic, "Area")) # FIXME: Verify. This is the attic floor area and not the roof area?
         orig_attic_floor_ins = orig_attic.elements["AtticFloorInsulation"]
         attic_floor_ins_id = orig_attic_floor_ins.elements["SystemIdentifier"].attributes["id"]
-        new_floor_ins = HPXML.add_insulation(parent: new_floor,
-                                             id: attic_floor_ins_id,
-                                             assembly_effective_r_value: floor_r)
+        HPXML.add_insulation(parent: new_floor,
+                             id: attic_floor_ins_id,
+                             assembly_effective_r_value: get_ceiling_assembly_r(floor_r_cavity))
       end
-
       # FIXME: Should be zero (or two?) gable walls per HES zone_roof?
-
       # Uses ERI Reference Home for vented attic specific leakage area
     end
   end
@@ -238,9 +232,9 @@ class HEScoreRuleset
 
         orig_framefloor_ins = orig_framefloor.elements["Insulation"]
         framefloor_ins_id = orig_framefloor_ins.elements["SystemIdentifier"].attributes["id"]
-        new_framefloor_ins = HPXML.add_insulation(parent: new_framefloor,
-                                                  id: framefloor_ins_id,
-                                                  assembly_effective_r_value: floor_r)
+        HPXML.add_insulation(parent: new_framefloor,
+                             id: framefloor_ins_id,
+                             assembly_effective_r_value: floor_r)
 
       end
 
@@ -267,9 +261,9 @@ class HEScoreRuleset
 
         orig_fndwall_ins = orig_fndwall.elements["Insulation"]
         fndwall_ins_id = orig_fndwall_ins.elements["SystemIdentifier"].attributes["id"]
-        new_fndwall_ins = HPXML.add_insulation(parent: new_fndwall,
-                                               id: fndwall_ins_id,
-                                               assembly_effective_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
+        HPXML.add_insulation(parent: new_fndwall,
+                             id: fndwall_ins_id,
+                             assembly_effective_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
 
       end
 
@@ -301,16 +295,16 @@ class HEScoreRuleset
       new_slab_perim_ins = HPXML.add_perimeter_insulation(slab: new_slab,
                                                           id: slab_perim_id)
 
-      new_slab_perim_layer = HPXML.add_layer(insulation: new_slab_perim_ins,
-                                             installation_type: "continuous",
-                                             nominal_r_value: slab_perim_r)
+      HPXML.add_layer(insulation: new_slab_perim_ins,
+                      installation_type: "continuous",
+                      nominal_r_value: slab_perim_r)
 
       new_slab_under_ins = HPXML.add_under_slab_insulation(slab: new_slab,
                                                            id: slab_under_id)
 
-      new_slab_under_layer = HPXML.add_layer(insulation: new_slab_under_ins,
-                                             installation_type: "continuous",
-                                             nominal_r_value: 0)
+      HPXML.add_layer(insulation: new_slab_under_ins,
+                      installation_type: "continuous",
+                      nominal_r_value: 0)
 
       HPXML.add_extension(parent: new_slab,
                           extensions: {"CarpetFraction": 0.5, # FIXME: Hard-coded
@@ -798,32 +792,32 @@ class HEScoreRuleset
                                  system_losses_fraction: 0.14) # FIXME: Verify
   end
 
-  def self.set_appliances_clothes_washer(new_appliances, orig_details)
+  def self.set_appliances_clothes_washer(new_appliances)
     new_washer = HPXML.add_clothes_washer(appliances: new_appliances,
                                           id: "ClothesWasher")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_clothes_dryer(new_appliances, orig_details)
+  def self.set_appliances_clothes_dryer(new_appliances)
     new_dryer = HPXML.add_clothes_dryer(appliances: new_appliances,
                                         id: "ClothesDryer",
                                         fuel_type: "electricity") # FIXME: Verify
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_dishwasher(new_appliances, orig_details)
+  def self.set_appliances_dishwasher(new_appliances)
     new_dishwasher = HPXML.add_dishwasher(appliances: new_appliances,
                                           id: "Dishwasher")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_refrigerator(new_appliances, orig_details)
+  def self.set_appliances_refrigerator(new_appliances)
     new_fridge = HPXML.add_refrigerator(appliances: new_appliances,
                                         id: "Refrigerator")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_cooking_range_oven(new_appliances, orig_details)
+  def self.set_appliances_cooking_range_oven(new_appliances)
     new_range = HPXML.add_cooking_range(appliances: new_appliances,
                                         id: "CookingRange",
                                         fuel_type: "electricity") # FIXME: Verify
@@ -841,14 +835,14 @@ class HEScoreRuleset
     # No ceiling fans
   end
 
-  def self.set_misc_plug_loads(new_misc_loads, orig_details)
+  def self.set_misc_plug_loads(new_misc_loads)
     new_plug_load = HPXML.add_plug_load(misc_loads: new_misc_loads,
                                         id: "PlugLoadOther",
                                         plug_load_type: "other")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_misc_television(new_misc_loads, orig_details)
+  def self.set_misc_television(new_misc_loads)
     new_plug_load = HPXML.add_plug_load(misc_loads: new_misc_loads,
                                         id: "PlugLoadTV",
                                         plug_load_type: "TV other")
