@@ -574,6 +574,13 @@ class HPXML
     pv_system = XMLHelper.add_element(photovoltaics, "PVSystem")
     sys_id = XMLHelper.add_element(pv_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(pv_system, "ModuleType", module_type) unless module_type.nil?
+    XMLHelper.add_element(pv_system, "ArrayType", array_type) unless array_type.nil?
+    XMLHelper.add_element(pv_system, "ArrayAzimuth", array_azimuth) unless array_azimuth.nil?
+    XMLHelper.add_element(pv_system, "ArrayTilt", array_tilt) unless array_tilt.nil?
+    XMLHelper.add_element(pv_system, "MaxPowerOutput", max_power_output) unless max_power_output.nil?
+    XMLHelper.add_element(pv_system, "InverterEfficiency", inverter_efficiency) unless inverter_efficiency.nil?
+    XMLHelper.add_element(pv_system, "SystemLossesFraction", system_losses_fraction) unless system_losses_fraction.nil?
 
     return pv_system
   end
@@ -593,6 +600,7 @@ class HPXML
     clothes_dryer = XMLHelper.add_element(appliances, "ClothesDryer")
     sys_id = XMLHelper.add_element(clothes_dryer, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(clothes_dryer, "FuelType", fuel_type) unless fuel_type.nil?
 
     return clothes_dryer
   end
@@ -603,6 +611,7 @@ class HPXML
     dishwasher = XMLHelper.add_element(appliances, "Dishwasher")
     sys_id = XMLHelper.add_element(dishwasher, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+
     return dishwasher
   end
 
@@ -621,6 +630,7 @@ class HPXML
     cooking_range = XMLHelper.add_element(appliances, "CookingRange")
     sys_id = XMLHelper.add_element(cooking_range, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(cooking_range, "FuelType", fuel_type)
 
     return cooking_range
   end
@@ -640,6 +650,7 @@ class HPXML
     plug_load = XMLHelper.add_element(misc_loads, "PlugLoad")
     sys_id = XMLHelper.add_element(plug_load, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(plug_load, "PlugLoadType", plug_load_type) unless plug_load_type.nil?
     
     return plug_load
   end
