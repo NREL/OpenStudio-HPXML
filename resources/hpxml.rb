@@ -693,52 +693,112 @@ class HPXML
 
   def self.add_clothes_dryer(appliances:,
                              id: nil,
-                             fuel_type: nil)
+                             location: nil,
+                             fuel_type: nil,
+                             energy_factor: nil,
+                             combined_energy_factor: nil,
+                             control_type: nil)
     clothes_dryer = XMLHelper.add_element(appliances, "ClothesDryer")
     sys_id = XMLHelper.add_element(clothes_dryer, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(clothes_dryer, "Location", location) unless location.nil?
     XMLHelper.add_element(clothes_dryer, "FuelType", fuel_type) unless fuel_type.nil?
+    XMLHelper.add_element(clothes_dryer, "EnergyFactor", energy_factor) unless energy_factor.nil?
+    XMLHelper.add_element(clothes_dryer, "CombinedEnergyFactor", combined_energy_factor) unless combined_energy_factor.nil?
+    XMLHelper.add_element(clothes_dryer, "ControlType", control_type) unless control_type.nil?
 
     return clothes_dryer
   end
 
   def self.add_dishwasher(appliances:,
-                          id: nil)
+                          id: nil,
+                          energy_factor: nil,
+                          rated_annual_kwh: nil,
+                          place_setting_capacity: nil)
 
     dishwasher = XMLHelper.add_element(appliances, "Dishwasher")
     sys_id = XMLHelper.add_element(dishwasher, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(dishwasher, "EnergyFactor", energy_factor) unless energy_factor.nil?
+    XMLHelper.add_element(dishwasher, "RatedAnnualkWh", rated_annual_kwh) unless rated_annual_kwh.nil?
+    XMLHelper.add_element(dishwasher, "PlaceSettingCapacity", place_setting_capacity) unless place_setting_capacity.nil?
 
     return dishwasher
   end
 
   def self.add_refrigerator(appliances:,
-                            id: nil)
+                            id: nil,
+                            location: nil,
+                            rated_annual_kwh: nil)
     refrigerator = XMLHelper.add_element(appliances, "Refrigerator")
     sys_id = XMLHelper.add_element(refrigerator, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(refrigerator, "Location", location) unless location.nil?
+    XMLHelper.add_element(refrigerator, "RatedAnnualkWh", rated_annual_kwh) unless rated_annual_kwh.nil?
 
     return refrigerator
   end
 
   def self.add_cooking_range(appliances:,
                              id: nil,
-                             fuel_type: nil)
+                             fuel_type: nil,
+                             is_induction: nil)
     cooking_range = XMLHelper.add_element(appliances, "CookingRange")
     sys_id = XMLHelper.add_element(cooking_range, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
     XMLHelper.add_element(cooking_range, "FuelType", fuel_type)
+    XMLHelper.add_element(cooking_range, "IsInduction", is_induction) unless is_induction.nil?
 
     return cooking_range
   end
 
   def self.add_oven(appliances:,
-                    id: nil)
+                    id: nil,
+                    is_convection: nil)
     oven = XMLHelper.add_element(appliances, "Oven")
     sys_id = XMLHelper.add_element(oven, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(oven, "IsConvection", is_convection) unless is_convection.nil?
 
     return oven
+  end
+
+  def self.add_lighting_fractions(lighting:,
+                                  fraction_qualifying_tier_i_fixtures_interior: nil,
+                                  fraction_qualifying_tier_i_fixtures_exterior: nil,
+                                  fraction_qualifying_tier_i_fixtures_garage: nil,
+                                  fraction_qualifying_tier_ii_fixtures_interior: nil,
+                                  fraction_qualifying_tier_ii_fixtures_exterior: nil,
+                                  fraction_qualifying_tier_ii_fixtures_garage: nil)
+    lighting_fractions = XMLHelper.add_element(lighting, "LightingFractions")
+    HPXML.add_extension(parent: lighting_fractions,
+                        extensions: {"FractionQualifyingTierIFixturesInterior": fraction_qualifying_tier_i_fixtures_interior,
+                                     "FractionQualifyingTierIFixturesExterior": fraction_qualifying_tier_i_fixtures_exterior,
+                                     "FractionQualifyingTierIFixturesGarage": fraction_qualifying_tier_i_fixtures_garage,
+                                     "FractionQualifyingTierIIFixturesInterior": fraction_qualifying_tier_ii_fixtures_interior,
+                                     "FractionQualifyingTierIIFixturesIExterior": fraction_qualifying_tier_ii_fixtures_exterior,
+                                     "FractionQualifyingTierIIFixturesGarage": fraction_qualifying_tier_ii_fixtures_garage})
+
+    return lighting_fractions
+  end
+
+  def self.add_ceiling_fan(lighting:,
+                           id: nil,
+                           fan_speed: nil,
+                           efficiency: nil,
+                           quantity: nil)
+
+    ceiling_fan = XMLHelper.add_element(lighting, "CeilingFan")
+    sys_id = XMLHelper.add_element(ceiling_fan, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    if not fan_speed.nil and not efficiency.nil?
+      airflow = XMLHelper.add_element(ceiling_fan, "Airflow")
+      XMLHelper.add_element(airflow, "FanSpeed", fan_speed)
+      XMLHelper.add_element(airflow, "Efficiency", efficiency)
+    end
+    XMLHelper.add_element(ceiling_fan, "Quantity", quanity) unless quantity.nil?
+    
+    return ceiling_fan
   end
 
   def self.add_plug_load(misc_loads:,
