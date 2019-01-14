@@ -37,6 +37,16 @@ class XMLHelper
     return val.text
   end
 
+  # Returns the value(s) of 'element_name' in the parent element or [].
+  def self.get_values(parent, element_name)
+    vals = []
+    parent.elements.each(element_name) do |val|
+      vals << val.text
+    end
+
+    return vals
+  end
+
   # Returns the name of the first child element of the 'element_name'
   # element on the parent element.
   def self.get_child_name(parent, element_name)
