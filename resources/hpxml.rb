@@ -10,9 +10,9 @@ class HPXML
         XMLHelper.add_element(fuel_types_available, "Fuel", fuel)
       end
     end
-    unless shelter_coefficient.nil?    
-      extension = XMLHelper.add_element(site, "extension")
-      XMLHelper.add_element(extension, "ShelterCoefficient", shelter_coefficient)
+    unless shelter_coefficient.nil?
+      HPXML.add_extension(parent: site,
+                          extensions: {"ShelterCoefficient": shelter_coefficient})
     end
 
     return site
@@ -178,7 +178,7 @@ class HPXML
     frame_floor = XMLHelper.add_element(foundation, "FrameFloor")
     sys_id = XMLHelper.add_element(frame_floor, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
-    XMLHelpher.add_element(frame_floor, "AdjacentTo", adjacent_to) unless adjacent_to.nil?
+    XMLHelper.add_element(frame_floor, "AdjacentTo", adjacent_to) unless adjacent_to.nil?
     XMLHelper.add_element(frame_floor, "Area", area) unless area.nil?
 
     return frame_floor
@@ -223,12 +223,13 @@ class HPXML
     XMLHelper.add_element(slab, "UnderSlabInsulationWidth", under_slab_insulation_width) unless under_slab_insulation_width.nil?
     XMLHelper.add_element(slab, "DepthBelowGrade", depth_below_grade) unless depth_below_grade.nil?
     if not carpet_fraction.nil? and not carpet_r_value.nil?
-      extension = XMLHelper.add_element(slab, "extension")
-      XMLHelper.add_element(extension, "CarpetFraction", carpet_fraction)
-      XMLHelper.add_element(extension, "CarpetRValue", carpet_r_value)
+      HPXML.add_extension(parent: slab,
+                          extensions: {"CarpetFraction": carpet_fraction,
+                                       "CarpetRValue": carpet_r_value})
     end
 
     return slab
+    
   end
 
   def self.add_perimeter_insulation(slab:,
@@ -308,6 +309,9 @@ class HPXML
                       azimuth: nil,
                       ufactor: nil,
                       shgc: nil,
+                      overhangs_depth: nil,
+                      overhangs_distance_to_top_of_window: nil,
+                      overhangs_distance_to_bottom_of_window: nil,
                       idref: nil)
     window = XMLHelper.add_element(windows, "Window")
     sys_id = XMLHelper.add_element(window, "SystemIdentifier")
@@ -316,6 +320,12 @@ class HPXML
     XMLHelper.add_element(window, "Azimuth", azimuth) unless azimuth.nil?
     XMLHelper.add_element(window, "UFactor", ufactor) unless ufactor.nil?
     XMLHelper.add_element(window, "SHGC", shgc) unless shgc.nil?
+    if not overhangs_depth.nil? and not overhangs_distance_to_top_of_window.nil? and not overhangs_distance_to_bottom_of_window.nil?
+      overhangs = XMLHelper.add_element(window, "Overhangs")
+      XMLHelper.add_element(overhangs, "Depth", overhangs_depth) unless overhangs_depth.nil?
+      XMLHelper.add_element(overhangs, "DistanceToTopOfWindow", overhangs_distance_to_top_of_window) unless overhangs_distance_to_top_of_window
+      XMLHelper.add_element(overhangs, "DistanceToBottomOfWindow", overhangs_distance_to_bottom_of_window) unless overhangs_distance_to_bottom_of_window.nil?
+    end
     unless idref.nil?
       attached_to_wall = XMLHelper.add_element(window, "AttachedToWall")
       XMLHelper.add_attribute(attached_to_wall, "idref", idref)
@@ -349,7 +359,9 @@ class HPXML
   def self.add_door(doors:,
                     id: nil,
                     idref: nil,
-                    azimuth: nil)
+                    area: nil,
+                    azimuth: nil,
+                    r_value: nil)
     door = XMLHelper.add_element(doors, "Door")
     sys_id = XMLHelper.add_element(door, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
@@ -357,7 +369,9 @@ class HPXML
       attached_to_wall = XMLHelper.add_element(door, "AttachedToWall")
       XMLHelper.add_attribute(attached_to_wall, "idref", idref)
     end
+    XMLHelper.add_element(door, "Area", area) unless area.nil?
     XMLHelper.add_element(door, "Azimuth", azimuth) unless azimuth.nil?
+    XMLHelper.add_element(door, "RValue", r_value) unless r_value.nil?
 
     return door
   end
@@ -452,10 +466,10 @@ class HPXML
       XMLHelper.add_element(annual_cooling_efficiency, "Units", annual_cooling_efficiency_units)
       XMLHelper.add_element(annual_cooling_efficiency, "Value", annual_cooling_efficiency_value)
     end
-    if not anunal_heating_efficiency_units.nil? and not annual_heating_efficiency_value.nil?
+    if not annual_heating_efficiency_units.nil? and not annual_heating_efficiency_value.nil?
       annual_heating_efficiency = XMLHelper.add_element(heat_pump, "AnnualHeatingEfficiency")
       XMLHelper.add_element(annual_heating_efficiency, "Units", annual_heating_efficiency_units)
-      XMLHelper.add_element(annual_heating_efficiency, "Value", fraction_heat_load_served)
+      XMLHelper.add_element(annual_heating_efficiency, "Value", annual_heating_efficiency_value)
     end
 
     return heat_pump
@@ -473,10 +487,19 @@ class HPXML
   end
 
   def self.add_hvac_distribution(hvac:,
-                                 id: nil)
+                                 id: nil,
+                                 distribution_system_type: nil,
+                                 annual_heating_distribution_system_efficiency: nil,
+                                 annual_cooling_distribution_system_efficiency: nil)
     hvac_distribution = XMLHelper.add_element(hvac, "HVACDistribution")
     sys_id = XMLHelper.add_element(hvac_distribution, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    unless distribution_system_type.nil?
+      distribution_system_type_e = XMLHelper.add_element(hvac_distribution, "DistributionSystemType")
+      XMLHelper.add_element(distribution_system_type_e, "Other", distribution_system_type)
+    end
+    XMLHelper.add_element(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency", annual_heating_distribution_system_efficiency) unless annual_heating_distribution_system_efficiency.nil?
+    XMLHelper.add_element(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency", annual_cooling_distribution_system_efficiency) unless annual_cooling_distribution_system_efficiency.nil?
 
     return hvac_distribution
   end
@@ -512,6 +535,34 @@ class HPXML
     return ducts
   end
 
+  def self.add_ventilation_fan(ventilation_fans:,
+                               id: nil,
+                               fan_type: nil,
+                               rated_flow_rate: nil,
+                               hours_in_operation: nil,
+                               used_for_whole_building_ventilation: nil,
+                               total_recovery_efficiency: nil,
+                               sensible_recovery_efficiency: nil,
+                               fan_power: nil,
+                               idref: nil)
+    ventilation_fan = XMLHelper.add_element(ventilation_fans, "VentilationFan")
+    sys_id = XMLHelper.add_element(ventilation_fan, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(ventilation_fan, "FanType", fan_type) unless fan_type.nil?
+    XMLHelper.add_element(ventilation_fan, "RatedFlowRate", rated_flow_rate) unless rated_flow_rate.nil?
+    XMLHelper.add_element(ventilation_fan, "HoursInOperation", hours_in_operation) unless hours_in_operation.nil?
+    XMLHelper.add_element(ventilation_fan, "UsedForWholeBuildingVentilation", used_for_whole_building_ventilation) unless used_for_whole_building_ventilation.nil?
+    XMLHelper.add_element(ventilation_fan, "TotalRecoveryEfficiency", total_recovery_efficiency) unless total_recovery_efficiency.nil?
+    XMLHelper.add_element(ventilation_fan, "SensibleRecoveryEfficiency", sensible_recovery_efficiency) unless sensible_recovery_efficiency.nil?
+    XMLHelper.add_element(ventilation_fan, "FanPower", fan_power) unless fan_power.nil?
+    unless idref.nil?
+      attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, "AttachedToHVACDistributionSystem")
+      XMLHelper.add_attribute(attached_to_hvac_distribution_system, "idref", idref)
+    end
+
+    return ventilation_fan
+  end
+
   def self.add_water_heating_system(water_heating:,
                                     id: nil,
                                     fuel_type: nil,
@@ -540,17 +591,40 @@ class HPXML
   def self.add_hot_water_distribution(water_heating:,
                                       id: nil,
                                       system_type: nil,
-                                      pipe_r_value: nil)
+                                      pipe_r_value: nil,
+                                      standard_piping_length: nil,
+                                      recirculation_control_type: nil,
+                                      recirculation_piping_loop_length: nil,
+                                      recirculation_branch_piping_loop_length: nil,
+                                      recirculation_pump_power: nil,
+                                      drain_water_heat_recovery_facilities_connected: nil,
+                                      drain_water_heat_recovery_equal_flow: nil,
+                                      drain_water_heat_recovery_efficiency: nil)
     hot_water_distribution = XMLHelper.add_element(water_heating, "HotWaterDistribution")
     sys_id = XMLHelper.add_element(hot_water_distribution, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
     unless system_type.nil?
       system_type_e = XMLHelper.add_element(hot_water_distribution, "SystemType")
-      XMLHelper.add_element(system_type_e, system_type)
+      if system_type == "Standard"
+        standard = XMLHelper.add_element(system_type_e, system_type)
+        XMLHelper.add_element(standard, "PipingLength", standard_piping_length) unless standard_piping_length.nil?
+      elsif system_type == "Recirculation"
+        recirculation = XMLHelper.add_element(system_type_e, system_type)
+        XMLHelper.add_element(recirculation, "ControlType", recirculation_control_type) unless recirculation_control_type.nil?
+        XMLHelper.add_element(recirculation, "RecirculationPipingLoopLength", recirculation_piping_loop_length) unless recirculation_piping_loop_length.nil?
+        XMLHelper.add_element(recirculation, "BranchPipingLoopLength", recirculation_branch_piping_loop_length) unless recirculation_branch_piping_loop_length.nil?
+        XMLHelper.add_element(recirculation, "PumpPower", recirculation_pump_power) unless recirculation_pump_power.nil?
+      end
     end
     unless pipe_r_value.nil?
       pipe_insulation = XMLHelper.add_element(hot_water_distribution, "PipeInsulation")
       XMLHelper.add_element(pipe_insulation, "PipeRValue", pipe_r_value)
+    end
+    if not drain_water_heat_recovery_facilities_connected.nil? and not drain_water_heat_recovery_equal_flow.nil? and not drain_water_heat_recovery_efficiency.nil?
+      drain_water_heat_recovery = XMLHelper.add_element(hot_water_distribution, "DrainWaterHeatRecovery")
+      XMLHelper.add_element(drain_water_heat_recovery, "FacilitiesConnected", drain_water_heat_recovery_facilities_connected)
+      XMLHelper.add_element(drain_water_heat_recovery, "EqualFlow", drain_water_heat_recovery_equal_flow)
+      XMLHelper.add_element(drain_water_heat_recovery, "Efficiency", drain_water_heat_recovery_efficiency)
     end
 
     return hot_water_distribution
@@ -593,10 +667,26 @@ class HPXML
   end
 
   def self.add_clothes_washer(appliances:,
-                              id: nil)
+                              id: nil,
+                              location: nil,
+                              modified_energy_factor: nil,
+                              integrated_modified_energy_factor: nil,
+                              rated_annual_kwh: nil,
+                              label_electric_rate: nil,
+                              label_gas_rate: nil,
+                              label_annual_gas_cost: nil,
+                              capacity: nil)
     clothes_washer = XMLHelper.add_element(appliances, "ClothesWasher")
     sys_id = XMLHelper.add_element(clothes_washer, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
+    XMLHelper.add_element(clothes_washer, "Location", location) unless location.nil?
+    XMLHelper.add_element(clothes_washer, "ModifiedEnergyFactor", modified_energy_factor) unless modified_energy_factor.nil?
+    XMLHelper.add_element(clothes_washer, "IntegratedModifiedEnergyFactor", integrated_modified_energy_factor) unless integrated_modified_energy_factor.nil?
+    XMLHelper.add_element(clothes_washer, "RatedAnnualkWh", rated_annual_kwh) unless rated_annual_kwh.nil?
+    XMLHelper.add_element(clothes_washer, "LabelElectricRate", label_electric_rate) unless label_electric_rate.nil?
+    XMLHelper.add_element(clothes_washer, "LabelGasRate", label_gas_rate) unless label_gas_rate.nil?
+    XMLHelper.add_element(clothes_washer, "LabelAnnualGasCost", label_annual_gas_cost) unless label_annual_gas_cost.nil?
+    XMLHelper.add_element(clothes_washer, "Capacity", capacity) unless capacity.nil?
 
     return clothes_washer
   end
