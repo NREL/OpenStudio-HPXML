@@ -1415,6 +1415,7 @@ class OSModel
         if roof_net_area <= 0
           fail "Calculated a negative net surface area for Roof '#{roof_id}'."
         end
+
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
@@ -2465,27 +2466,25 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     # Residual heating
+    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
+    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
+    residual_htg_load_frac = 1.0 - htg_load_frac
     if use_only_ideal_air
-      residual_htg_load_frac = 1
-    else
-      htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-      htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-      residual_htg_load_frac = 1.0 - htg_load_frac
-    end
-    if residual_htg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1)
+      return false if not success
+    elsif residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_htg_load_frac)
       return false if not success
     end
 
     # Residual cooling
+    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
+    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
+    residual_clg_load_frac = 1.0 - clg_load_frac
     if use_only_ideal_air
-      residual_clg_load_frac = 1
-    else
-      clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-      clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-      residual_clg_load_frac = 1.0 - clg_load_frac
-    end
-    if residual_clg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1)
+      return false if not success
+    elsif residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_clg_load_frac)
       return false if not success
     end
