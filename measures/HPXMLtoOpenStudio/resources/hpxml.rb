@@ -1,5 +1,4 @@
 class HPXML
-
   def self.add_site(building_summary:,
                     fuels: [],
                     shelter_coefficient: nil)
@@ -12,7 +11,7 @@ class HPXML
     end
     unless shelter_coefficient.nil?
       HPXML.add_extension(parent: site,
-                          extensions: {"ShelterCoefficient": shelter_coefficient})
+                          extensions: { "ShelterCoefficient": shelter_coefficient })
     end
 
     return site
@@ -161,10 +160,10 @@ class HPXML
         XMLHelper.add_element(basement, "Conditioned", false)
       elsif foundation_type == "VentedCrawlspace"
         crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
-         XMLHelper.add_element(crawlspace, "Vented", true)
+        XMLHelper.add_element(crawlspace, "Vented", true)
       elsif foundation_type == "UnventedCrawlspace"
         crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
-         XMLHelper.add_element(crawlspace, "Vented", false)
+        XMLHelper.add_element(crawlspace, "Vented", false)
       end
     end
 
@@ -224,12 +223,11 @@ class HPXML
     XMLHelper.add_element(slab, "DepthBelowGrade", depth_below_grade) unless depth_below_grade.nil?
     if not carpet_fraction.nil? and not carpet_r_value.nil?
       HPXML.add_extension(parent: slab,
-                          extensions: {"CarpetFraction": carpet_fraction,
-                                       "CarpetRValue": carpet_r_value})
+                          extensions: { "CarpetFraction": carpet_fraction,
+                                        "CarpetRValue": carpet_r_value })
     end
 
     return slab
-    
   end
 
   def self.add_perimeter_insulation(slab:,
@@ -294,7 +292,7 @@ class HPXML
     unless wall_type.nil?
       wall_type_e = XMLHelper.add_element(wall, "WallType")
       XMLHelper.add_element(wall_type_e, wall_type)
-    end    
+    end
     XMLHelper.add_element(wall, "Area", area) unless area.nil?
     XMLHelper.add_element(wall, "Azimuth", azimuth) unless azimuth.nil?
     XMLHelper.add_element(wall, "SolarAbsorptance", solar_absorptance) unless solar_absorptance.nil?
@@ -531,7 +529,7 @@ class HPXML
     XMLHelper.add_element(ducts, "DuctInsulationRValue", duct_insulation_r_value) unless duct_insulation_r_value.nil?
     XMLHelper.add_element(ducts, "DuctLocation", duct_location) unless duct_location.nil?
     XMLHelper.add_element(ducts, "DuctSurfaceArea", duct_surface_area) unless duct_surface_area.nil?
-    
+
     return ducts
   end
 
@@ -772,12 +770,12 @@ class HPXML
                                   fraction_qualifying_tier_ii_fixtures_garage: nil)
     lighting_fractions = XMLHelper.add_element(lighting, "LightingFractions")
     HPXML.add_extension(parent: lighting_fractions,
-                        extensions: {"FractionQualifyingTierIFixturesInterior": fraction_qualifying_tier_i_fixtures_interior,
-                                     "FractionQualifyingTierIFixturesExterior": fraction_qualifying_tier_i_fixtures_exterior,
-                                     "FractionQualifyingTierIFixturesGarage": fraction_qualifying_tier_i_fixtures_garage,
-                                     "FractionQualifyingTierIIFixturesInterior": fraction_qualifying_tier_ii_fixtures_interior,
-                                     "FractionQualifyingTierIIFixturesIExterior": fraction_qualifying_tier_ii_fixtures_exterior,
-                                     "FractionQualifyingTierIIFixturesGarage": fraction_qualifying_tier_ii_fixtures_garage})
+                        extensions: { "FractionQualifyingTierIFixturesInterior": fraction_qualifying_tier_i_fixtures_interior,
+                                      "FractionQualifyingTierIFixturesExterior": fraction_qualifying_tier_i_fixtures_exterior,
+                                      "FractionQualifyingTierIFixturesGarage": fraction_qualifying_tier_i_fixtures_garage,
+                                      "FractionQualifyingTierIIFixturesInterior": fraction_qualifying_tier_ii_fixtures_interior,
+                                      "FractionQualifyingTierIIFixturesIExterior": fraction_qualifying_tier_ii_fixtures_exterior,
+                                      "FractionQualifyingTierIIFixturesGarage": fraction_qualifying_tier_ii_fixtures_garage })
 
     return lighting_fractions
   end
@@ -797,7 +795,7 @@ class HPXML
       XMLHelper.add_element(airflow, "Efficiency", efficiency)
     end
     XMLHelper.add_element(ceiling_fan, "Quantity", quanity) unless quantity.nil?
-    
+
     return ceiling_fan
   end
 
@@ -808,8 +806,7 @@ class HPXML
     sys_id = XMLHelper.add_element(plug_load, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id) unless id.nil?
     XMLHelper.add_element(plug_load, "PlugLoadType", plug_load_type) unless plug_load_type.nil?
-    
+
     return plug_load
   end
-
 end

@@ -157,6 +157,9 @@ class HEScoreRuleset
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
       roof_material = XMLHelper.get_value(orig_roof, "RoofType")
       roof_has_radiant_barrier = Boolean(XMLHelper.get_value(orig_roof, "RadiantBarrier"))
+      roof_color = XMLHelper.get_value(orig_roof, "RoofColor")
+      roof_solar_abs = XMLHelper.get_value(orig_roof, "SolarAbsorptance")
+      roof_solar_abs = get_roof_solar_absorptance(roof_color) if roof_solar_abs.nil?
       # FIXME: Get roof area; is roof area for cathedral and ceiling area for attic?
 
       new_roofs = XMLHelper.add_element(new_attic, "Roofs")
@@ -164,7 +167,7 @@ class HEScoreRuleset
                                 id: orig_roof.elements["SystemIdentifier"].attributes["id"],
                                 area: 1000, # FIXME: Hard-coded
                                 azimuth: 0, # FIXME: Hard-coded
-                                solar_absorptance: get_roof_solar_absorptance(XMLHelper.get_value(orig_roof, "RoofColor")),
+                                solar_absorptance: roof_solar_abs,
                                 emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
                                 pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                                 radiant_barrier: false) # FIXME: Verify. Setting to false because it's included in the assembly R-value
@@ -212,7 +215,7 @@ class HEScoreRuleset
           fnd_type = "UnventedCrawlspace"
         end
       end
-      
+
       new_foundation = HPXML.add_foundation(foundations: new_foundations,
                                             id: foundation_id,
                                             foundation_type: fnd_type)
@@ -307,8 +310,8 @@ class HEScoreRuleset
                       nominal_r_value: 0)
 
       HPXML.add_extension(parent: new_slab,
-                          extensions: {"CarpetFraction": 0.5, # FIXME: Hard-coded
-                                       "CarpetRValue": 2}) # FIXME: Hard-coded
+                          extensions: { "CarpetFraction": 0.5, # FIXME: Hard-coded
+                                        "CarpetRValue": 2 }) # FIXME: Hard-coded
 
       # Uses ERI Reference Home for vented crawlspace specific leakage area
     end
@@ -371,7 +374,6 @@ class HEScoreRuleset
       new_wall_ins = HPXML.add_insulation(parent: new_wall,
                                           id: wall_ins_id,
                                           assembly_effective_r_value: wall_r)
-
     end
   end
 
@@ -707,7 +709,6 @@ class HEScoreRuleset
                                           duct_insulation_r_value: duct_rvalue,
                                           duct_location: hpxml_v23_to_v30_map[duct_location],
                                           duct_surface_area: duct_frac_area * return_duct_area)
-
       end
     end
   end
