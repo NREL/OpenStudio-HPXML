@@ -163,6 +163,7 @@ class HEScoreRuleset
       # FIXME: Get roof area; is roof area for cathedral and ceiling area for attic?
 
       new_roofs = XMLHelper.add_element(new_attic, "Roofs")
+      # FIXME: Should be two (or four?) roofs per HES zone_roof?
       new_roof = HPXML.add_roof(roofs: new_roofs,
                                 id: orig_roof.elements["SystemIdentifier"].attributes["id"],
                                 area: 1000, # FIXME: Hard-coded
