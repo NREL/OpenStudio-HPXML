@@ -150,7 +150,7 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     unless foundation_type.nil?
       foundation_type_e = XMLHelper.add_element(foundation, "FoundationType")
-      if foundation_type == "SlabOnGrade"
+      if ["SlabOnGrade", "Ambient"].include? foundation_type
         XMLHelper.add_element(foundation_type_e, foundation_type)
       elsif foundation_type == "ConditionedBasement"
         basement = XMLHelper.add_element(foundation_type_e, "Basement")
@@ -514,7 +514,12 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     unless distribution_system_type.nil?
       distribution_system_type_e = XMLHelper.add_element(hvac_distribution, "DistributionSystemType")
-      XMLHelper.add_element(distribution_system_type_e, "Other", distribution_system_type)
+      if ["AirDistribution", "HydronicDistribution"].include? distribution_system_type
+        XMLHelper.add_element(distribution_system_type_e, distribution_system_type)
+      else
+        XMLHelper.add_element(distribution_system_type_e, "Other", distribution_system_type)
+      end      
+      
     end
     XMLHelper.add_element(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency", annual_heating_distribution_system_efficiency) unless annual_heating_distribution_system_efficiency.nil?
     XMLHelper.add_element(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency", annual_cooling_distribution_system_efficiency) unless annual_cooling_distribution_system_efficiency.nil?
