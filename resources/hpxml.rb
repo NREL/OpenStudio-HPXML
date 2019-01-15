@@ -341,7 +341,7 @@ class HPXML
     if not overhangs_depth.nil? or not overhangs_distance_to_top_of_window.nil? or not overhangs_distance_to_bottom_of_window.nil?
       overhangs = XMLHelper.add_element(window, "Overhangs")
       XMLHelper.add_element(overhangs, "Depth", overhangs_depth) unless overhangs_depth.nil?
-      XMLHelper.add_element(overhangs, "DistanceToTopOfWindow", overhangs_distance_to_top_of_window) unless overhangs_distance_to_top_of_window
+      XMLHelper.add_element(overhangs, "DistanceToTopOfWindow", overhangs_distance_to_top_of_window) unless overhangs_distance_to_top_of_window.nil?
       XMLHelper.add_element(overhangs, "DistanceToBottomOfWindow", overhangs_distance_to_bottom_of_window) unless overhangs_distance_to_bottom_of_window.nil?
     end
     unless idref.nil?
