@@ -386,6 +386,9 @@ class OSModel
     success = add_thermal_mass(runner, model, building)
     return false if not success
 
+    success = check_for_errors(runner, model)
+    return false if not success
+
     success = set_zone_volumes(runner, model, building)
     return false if not success
 
@@ -550,6 +553,45 @@ class OSModel
       azimuth_side_shifts[azimuth] -= (surface.additionalProperties.getFeatureAsDouble("Length").get / 2.0 + gap_distance)
 
       surfaces_moved << surface
+    end
+
+    return true
+  end
+
+  def self.check_for_errors(runner, model)
+    # Check every thermal zone has:
+    # 1. At least one floor surface
+    # 2. At least one roofceiling surface
+    # 3. At least one surface adjacent to outside/ground
+    model.getThermalZones.each do |zone|
+      n_floors = 0
+      n_roofceilings = 0
+      n_exteriors = 0
+      zone.spaces.each do |space|
+        space.surfaces.each do |surface|
+          if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
+            n_exteriors += 1
+          end
+          if surface.surfaceType.downcase == "floor"
+            n_floors += 1
+          elsif surface.surfaceType.downcase == "roofceiling"
+            n_roofceilings += 1
+          end
+        end
+      end
+
+      if n_floors == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one floor surface.")
+      end
+      if n_roofceilings == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one roof/ceiling surface.")
+      end
+      if n_exteriors == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one surface adjacent to outside/ground.")
+      end
+      if n_floors == 0 or n_roofceilings == 0 or n_exteriors == 0
+        return false
+      end
     end
 
     return true
@@ -1370,6 +1412,10 @@ class OSModel
 
         roof_gross_area = Float(XMLHelper.get_value(roof, "Area"))
         roof_net_area = net_wall_area(roof_gross_area, subsurface_areas, roof_id)
+        if roof_net_area <= 0
+          fail "Calculated a negative net surface area for Roof '#{roof_id}'."
+        end
+
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
@@ -1774,6 +1820,8 @@ class OSModel
     # Clothes Washer
     cw = building.elements["BuildingDetails/Appliances/ClothesWasher"]
     if not cw.nil?
+      cw_location = XMLHelper.get_value(cw, "Location")
+      cw_space = get_space_from_location(cw_location, "ClothesWasher", model, spaces)
       cw_mef = XMLHelper.get_value(cw, "ModifiedEnergyFactor")
       cw_imef = XMLHelper.get_value(cw, "IntegratedModifiedEnergyFactor")
       if cw_mef.nil? and cw_imef.nil?
@@ -1802,6 +1850,8 @@ class OSModel
     # Clothes Dryer
     cd = building.elements["BuildingDetails/Appliances/ClothesDryer"]
     if not cd.nil?
+      cd_location = XMLHelper.get_value(cd, "Location")
+      cd_space = get_space_from_location(cd_location, "ClothesDryer", model, spaces)
       cd_fuel = to_beopt_fuel(XMLHelper.get_value(cd, "FuelType"))
       cd_ef = XMLHelper.get_value(cd, "EnergyFactor")
       cd_cef = XMLHelper.get_value(cd, "CombinedEnergyFactor")
@@ -1843,6 +1893,8 @@ class OSModel
     # Refrigerator
     fridge = building.elements["BuildingDetails/Appliances/Refrigerator"]
     if not fridge.nil?
+      fridge_location = XMLHelper.get_value(fridge, "Location")
+      fridge_space = get_space_from_location(fridge_location, "Refrigerator", model, spaces)
       fridge_annual_kwh = XMLHelper.get_value(fridge, "RatedAnnualkWh")
       if fridge_annual_kwh.nil?
         fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
@@ -1932,6 +1984,7 @@ class OSModel
     if not wh.nil?
       dhw = wh.elements["WaterHeatingSystem"]
       location = XMLHelper.get_value(dhw, "Location")
+      space = get_space_from_location(location, "WaterHeatingSystem", model, spaces)
       setpoint_temp = XMLHelper.get_value(dhw, "HotWaterTemperature")
       if setpoint_temp.nil?
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
@@ -1940,22 +1993,6 @@ class OSModel
       end
       wh_type = XMLHelper.get_value(dhw, "WaterHeaterType")
       fuel = XMLHelper.get_value(dhw, "FuelType")
-
-      if location == 'living space'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-      elsif location == 'basement - unconditioned'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
-      elsif location == 'basement - conditioned'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
-      elsif location == 'attic - unvented' or location == 'attic - vented'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
-      elsif location == 'garage'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
-      elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
-      else
-        fail "Unhandled water heater space: #{location}."
-      end
 
       ef = XMLHelper.get_value(dhw, "EnergyFactor")
       if ef.nil?
@@ -2034,9 +2071,9 @@ class OSModel
     success = HotWaterAndAppliances.apply(model, unit, runner, weather,
                                           @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
                                           cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
-                                          cw_agc, cw_cap, cd_fuel, cd_ef, cd_control,
-                                          dw_ef, dw_cap, fridge_annual_kwh, cook_fuel_type,
-                                          cook_is_induction, oven_is_convection,
+                                          cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
+                                          cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
+                                          cook_fuel_type, cook_is_induction, oven_is_convection,
                                           has_low_flow_fixtures, dist_type, pipe_r,
                                           std_pipe_length, recirc_loop_length,
                                           recirc_branch_length, recirc_control_type,
@@ -2429,27 +2466,25 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     # Residual heating
+    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
+    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
+    residual_htg_load_frac = 1.0 - htg_load_frac
     if use_only_ideal_air
-      residual_htg_load_frac = 1
-    else
-      htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-      htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-      residual_htg_load_frac = 1.0 - htg_load_frac
-    end
-    if residual_htg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1)
+      return false if not success
+    elsif residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_htg_load_frac)
       return false if not success
     end
 
     # Residual cooling
+    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
+    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
+    residual_clg_load_frac = 1.0 - clg_load_frac
     if use_only_ideal_air
-      residual_clg_load_frac = 1
-    else
-      clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-      clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-      residual_clg_load_frac = 1.0 - clg_load_frac
-    end
-    if residual_clg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1)
+      return false if not success
+    elsif residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_clg_load_frac)
       return false if not success
     end
@@ -3598,8 +3633,7 @@ class OSModel
     end
 
     if (assembly_r - constr_r).abs > 0.01
-      # FIXME
-      # fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
+      fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
     end
   end
 
@@ -3721,6 +3755,24 @@ class OSModel
     end
 
     return UnitConversions.convert(walls_top, "m", "ft")
+  end
+
+  def self.get_space_from_location(location, object_name, model, spaces)
+    if location.nil? or location == 'living space'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
+    elsif location == 'basement - conditioned'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
+    elsif location == 'basement - unconditioned'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
+    elsif location == 'garage'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
+    elsif location == 'attic - unvented' or location == 'attic - vented'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
+    elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
+      return create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
+    end
+
+    fail "Unhandled #{object_name} location: #{location}."
   end
 end
 
