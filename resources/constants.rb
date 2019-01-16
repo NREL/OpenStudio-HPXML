@@ -1178,7 +1178,7 @@ class Constants
   def self.SizingInfoWindowHasOverhang
     return __method__.to_s
   end
-  
+
   def self.SizingInfoWindowOverhangDepth
     return __method__.to_s
   end
