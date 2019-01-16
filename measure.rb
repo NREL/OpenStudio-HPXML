@@ -1604,6 +1604,9 @@ class OSModel
       if not overhang_depth.nil?
         overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, "ft", "m"), UnitConversions.convert(overhang_distance_to_top, "ft", "m"))
         overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+
+        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
+        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
       end
 
       # Apply construction
