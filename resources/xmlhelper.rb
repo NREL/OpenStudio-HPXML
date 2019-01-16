@@ -130,18 +130,6 @@ class XMLHelper
       formatter.write(doc, f)
     end
   end
-
-  def self.get_id(parent)
-    return if parent.nil?
-    return parent.elements["SystemIdentifier"].attributes["id"]
-  end
-
-  def self.get_idref(parent, element_name)
-    return if parent.nil?
-    element = parent.elements[element_name]
-    return if element.nil?
-    return element.attributes["idref"]
-  end
 end
 
 def Boolean(val)
