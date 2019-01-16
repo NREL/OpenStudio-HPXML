@@ -150,7 +150,7 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     unless foundation_type.nil?
       foundation_type_e = XMLHelper.add_element(foundation, "FoundationType")
-      if foundation_type == "SlabOnGrade"
+      if ["SlabOnGrade", "Ambient"].include? foundation_type
         XMLHelper.add_element(foundation_type_e, foundation_type)
       elsif foundation_type == "ConditionedBasement"
         basement = XMLHelper.add_element(foundation_type_e, "Basement")
@@ -278,6 +278,21 @@ class HPXML
     return extension
   end
 
+  def self.add_rim_joist(rim_joists:,
+                         id:,
+                         exterior_adjacent_to: nil,
+                         interior_adjacent_to: nil,
+                         area: nil)
+    rim_joist = XMLHelper.add_element(rim_joists, "RimJoist")
+    sys_id = XMLHelper.add_element(rim_joist, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(rim_joist, "ExteriorAdjacentTo", exterior_adjacent_to) unless exterior_adjacent_to.nil?
+    XMLHelper.add_element(rim_joist, "InteriorAdjacentTo", interior_adjacent_to) unless interior_adjacent_to.nil?
+    XMLHelper.add_element(rim_joist, "Area", area) unless area.nil?
+
+    return rim_joist
+  end
+
   def self.add_wall(walls:,
                     id:,
                     exterior_adjacent_to: nil,
@@ -326,7 +341,7 @@ class HPXML
     if not overhangs_depth.nil? or not overhangs_distance_to_top_of_window.nil? or not overhangs_distance_to_bottom_of_window.nil?
       overhangs = XMLHelper.add_element(window, "Overhangs")
       XMLHelper.add_element(overhangs, "Depth", overhangs_depth) unless overhangs_depth.nil?
-      XMLHelper.add_element(overhangs, "DistanceToTopOfWindow", overhangs_distance_to_top_of_window) unless overhangs_distance_to_top_of_window
+      XMLHelper.add_element(overhangs, "DistanceToTopOfWindow", overhangs_distance_to_top_of_window) unless overhangs_distance_to_top_of_window.nil?
       XMLHelper.add_element(overhangs, "DistanceToBottomOfWindow", overhangs_distance_to_bottom_of_window) unless overhangs_distance_to_bottom_of_window.nil?
     end
     unless idref.nil?
@@ -499,7 +514,12 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     unless distribution_system_type.nil?
       distribution_system_type_e = XMLHelper.add_element(hvac_distribution, "DistributionSystemType")
-      XMLHelper.add_element(distribution_system_type_e, "Other", distribution_system_type)
+      if ["AirDistribution", "HydronicDistribution"].include? distribution_system_type
+        XMLHelper.add_element(distribution_system_type_e, distribution_system_type)
+      else
+        XMLHelper.add_element(distribution_system_type_e, "Other", distribution_system_type)
+      end      
+      
     end
     XMLHelper.add_element(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency", annual_heating_distribution_system_efficiency) unless annual_heating_distribution_system_efficiency.nil?
     XMLHelper.add_element(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency", annual_cooling_distribution_system_efficiency) unless annual_cooling_distribution_system_efficiency.nil?
@@ -781,7 +801,7 @@ class HPXML
                                       "FractionQualifyingTierIFixturesExterior": fraction_qualifying_tier_i_fixtures_exterior,
                                       "FractionQualifyingTierIFixturesGarage": fraction_qualifying_tier_i_fixtures_garage,
                                       "FractionQualifyingTierIIFixturesInterior": fraction_qualifying_tier_ii_fixtures_interior,
-                                      "FractionQualifyingTierIIFixturesIExterior": fraction_qualifying_tier_ii_fixtures_exterior,
+                                      "FractionQualifyingTierIIFixturesExterior": fraction_qualifying_tier_ii_fixtures_exterior,
                                       "FractionQualifyingTierIIFixturesGarage": fraction_qualifying_tier_ii_fixtures_garage })
 
     return lighting_fractions
@@ -796,12 +816,12 @@ class HPXML
     ceiling_fan = XMLHelper.add_element(lighting, "CeilingFan")
     sys_id = XMLHelper.add_element(ceiling_fan, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    if not fan_speed.nil or not efficiency.nil?
+    if not fan_speed.nil? or not efficiency.nil?
       airflow = XMLHelper.add_element(ceiling_fan, "Airflow")
       XMLHelper.add_element(airflow, "FanSpeed", fan_speed) unless fan_speed.nil?
       XMLHelper.add_element(airflow, "Efficiency", efficiency) unless efficiency.nil?
     end
-    XMLHelper.add_element(ceiling_fan, "Quantity", quanity) unless quantity.nil?
+    XMLHelper.add_element(ceiling_fan, "Quantity", quantity) unless quantity.nil?
 
     return ceiling_fan
   end
