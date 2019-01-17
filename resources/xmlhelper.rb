@@ -29,7 +29,6 @@ class XMLHelper
 
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
-    return if parent.nil?
     val = parent.elements[element_name]
     if val.nil?
       return val
@@ -40,7 +39,6 @@ class XMLHelper
 
   # Returns the value(s) of 'element_name' in the parent element or [].
   def self.get_values(parent, element_name)
-    return if parent.nil?
     vals = []
     parent.elements.each(element_name) do |val|
       vals << val.text
