@@ -534,7 +534,7 @@ class HPXML
             :shgc => XMLHelper.get_value(window, "SHGC"),
             :overhangs_depth => XMLHelper.get_value(window, "Overhangs/Depth"),
             :overhangs_distance_to_top_of_window => XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"),
-            :overhangs_distance_to_bottom_of_window => XMLHelper.get_value(window, "Overhangs/DistnaceToBottomOfWindow"),
+            :overhangs_distance_to_bottom_of_window => XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"),
             :idref => HPXML.get_idref(window, "AttachedToWall")}
   end
 
