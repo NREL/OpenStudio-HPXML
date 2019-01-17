@@ -1,3 +1,4 @@
+require_relative 'minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
@@ -64,14 +65,43 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_partial_hvac(xmls, hvac_partial_dir, all_results)
   end
 
-  def _run_xml(xml, this_dir, args)
+  def test_invalid
+    this_dir = File.dirname(__FILE__)
+
+    args = {}
+    args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
+    args['skip_validation'] = false
+
+    expected_error_msgs = { 'invalid-bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'invalid-missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
+                                                               "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
+                            'invalid-hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to 1, but calculated sum is 1.2.",
+                                                                    "Expected FractionHeatLoadServed to sum to 1, but calculated sum is 1.1."],
+                            'invalid-missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
+                                                               "Thermal zone 'garage' must have at least one roof/ceiling surface.",
+                                                               "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
+                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'agwall-1'."],
+                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'attic-roof-1'."],
+                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'Window_ID1'."],
+                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door_ID1'."],
+                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'Skylight_ID1'."],
+                            'invalid-unattached-hvac.xml' => ["TODO"],
+                            'invalid-unattached-cfis.xml' => ["TODO"] }
+
+    # Test simulations
+    Dir["#{this_dir}/invalid*.xml"].sort.each do |xml|
+      _run_xml(xml, this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
+    end
+  end
+
+  def _run_xml(xml, this_dir, args, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, "run")
     args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     _test_schema_validation(this_dir, xml)
-    results = _test_simulation(args, this_dir, rundir)
+    results = _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
     return results
   end
 
@@ -164,7 +194,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     return results
   end
 
-  def _test_simulation(args, this_dir, rundir)
+  def _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
     # Uses meta_measure workflow for faster simulations
 
     # Setup
@@ -194,7 +224,29 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    assert(success)
+    if expect_error
+      assert_equal(false, success)
+
+      if expect_error_msgs.nil?
+        flunk "No error message defined for #{File.basename(args['hpxml_path'])}."
+      else
+        run_log = File.readlines(File.join(rundir, "run.log")).map(&:strip)
+        expect_error_msgs.each do |error_msg|
+          found_error_msg = false
+          run_log.each do |run_line|
+            next unless run_line.include? error_msg
+
+            found_error_msg = true
+            break
+          end
+          assert(found_error_msg)
+        end
+      end
+
+      return
+    else
+      assert_equal(true, success)
+    end
 
     # Add output variables for crankcase and defrost energy (for DSE tests)
     vars = ["Cooling Coil Crankcase Heater Electric Energy",
@@ -680,6 +732,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     end
 
+    # Water Heater
+    wh = bldg_details.elements["Systems/WaterHeating"]
+
     # Mechanical Ventilation
     mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     if not mv.nil?
@@ -702,6 +757,52 @@ class HPXMLTranslatorTest < MiniTest::Test
       if not found_mv_energy
         flunk "Could not find mechanical ventilation energy for #{hpxml_path}."
       end
+    end
+
+    # Clothes Washer
+    cw = bldg_details.elements["Appliances/ClothesWasher"]
+    if not cw.nil? and not wh.nil?
+      # Location
+      location = XMLHelper.get_value(cw, "Location")
+      hpxml_value = { nil => Constants.SpaceTypeLiving,
+                      'living space' => Constants.SpaceTypeLiving,
+                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value, sql_value)
+    end
+
+    # Clothes Dryer
+    cd = bldg_details.elements["Appliances/ClothesDryer"]
+    if not cd.nil? and not wh.nil?
+      # Location
+      fuel = to_beopt_fuel(XMLHelper.get_value(cd, 'FuelType'))
+      location = XMLHelper.get_value(cd, "Location")
+      hpxml_value = { nil => Constants.SpaceTypeLiving,
+                      'living space' => Constants.SpaceTypeLiving,
+                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer(fuel).upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value, sql_value)
+    end
+
+    # Refrigerator
+    refr = bldg_details.elements["Appliances/Refrigerator"]
+    if not refr.nil?
+      # Location
+      location = XMLHelper.get_value(refr, "Location")
+      hpxml_value = { nil => Constants.SpaceTypeLiving,
+                      'living space' => Constants.SpaceTypeLiving,
+                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
+      sql_value = sqlFile.execAndReturnFirstString(query).get
+      assert_equal(hpxml_value, sql_value)
     end
 
     sqlFile.close
