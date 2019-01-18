@@ -53,29 +53,13 @@ class Waterheater
       return false
     end
 
-    # Check if a DHW plant loop already exists, if not add it
-    loop = nil
-    model.getPlantLoops.each do |pl|
-      next if pl.name.to_s != Constants.PlantLoopDomesticWater(unit.name.to_s)
+    loop = create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeTank)
 
-      loop = pl
-    end
+    new_pump = create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.nil?
-      runner.registerInfo("A new plant loop for DHW will be added to the model")
-      runner.registerInitialCondition("No water heater model currently exists")
-      loop = create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeTank)
-    end
-
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
-
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater(unit.name.to_s), cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
 
@@ -132,29 +116,13 @@ class Waterheater
       return false
     end
 
-    # Check if a DHW plant loop already exists, if not add it
-    loop = nil
-    model.getPlantLoops.each do |pl|
-      next if pl.name.to_s != Constants.PlantLoopDomesticWater(unit.name.to_s)
+    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeTankless)
 
-      loop = pl
-    end
+    new_pump = Waterheater.create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.nil?
-      runner.registerInfo("A new plant loop for DHW will be added to the model")
-      runner.registerInitialCondition("No water heater model currently exists")
-      loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeTankless)
-    end
-
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = Waterheater.create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
-
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     new_heater = Waterheater.create_new_heater(Constants.ObjectNameWaterHeater(unit.name.to_s), cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
 
@@ -246,31 +214,13 @@ class Waterheater
     alt = weather.header.Altitude
     water_heater_tz = space.thermalZone.get
 
-    # Check if a DHW plant loop already exists, if not add it
-    loop = nil
-    model.getPlantLoops.each do |pl|
-      next if pl.name.to_s != Constants.PlantLoopDomesticWater(unit.name.to_s)
+    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeHeatPump)
 
-      loop = pl
-    end
+    new_pump = Waterheater.create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.nil?
-      runner.registerInfo("A new plant loop for DHW will be added to the model")
-      runner.registerInitialCondition("There is no existing water heater")
-      loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeHeatPump)
-    else
-      runner.registerInitialCondition("An existing water heater was found in the model. This water heater will be removed and replace with a heat pump water heater")
-    end
-
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = Waterheater.create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
-
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     # Only ever going to make HPWHs in this measure, so don't split this code out to waterheater.rb
     # Calculate some geometry parameters for UA, the location of sensors and heat sources in the tank

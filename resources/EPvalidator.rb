@@ -494,7 +494,6 @@ class EnergyPlusValidator
         '[Location="living space" or Location="basement - unconditioned" or Location="basement - conditioned" or Location="attic - unvented" or Location="attic - vented" or Location="garage" or Location="crawlspace - unvented" or Location="crawlspace - vented"]' => one,
         'FractionDHWLoadServed' => one,
         '[EnergyFactor | UniformEnergyFactor]' => one,
-        'HotWaterTemperature' => zero_or_one, # Uses ERI assumption if not provided
         'extension/EnergyFactorMultiplier' => zero_or_one, # Uses ERI assumption if not provided
       },
 
@@ -696,6 +695,12 @@ class EnergyPlusValidator
           end
         end
       end
+    end
+
+    # Check sum of FractionDHWLoadServed == 1
+    frac_dhw_load = hpxml_doc.elements['sum(/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed/text())']
+    if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01)
+      errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load}."
     end
 
     return errors
