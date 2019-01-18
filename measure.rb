@@ -1978,7 +1978,7 @@ class OSModel
           capacity_kbtuh = Float(XMLHelper.get_value(dhw, "HeatingCapacity")) / 1000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_tank(model, unit, runner, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tank(model, unit, runner, nil, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj)
           return false if not success
@@ -1988,7 +1988,7 @@ class OSModel
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_tankless(model, unit, runner, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tankless(model, unit, runner, nil, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, ef_adj,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj)
           return false if not success
@@ -2010,7 +2010,7 @@ class OSModel
           temp_depress = 0.0 # FIXME
           ducting = "none"
           # FIXME: Use ef, ef_adj, ec_adj
-          success = Waterheater.apply_heatpump(model, unit, runner, space, weather,
+          success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather,
                                                e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
                                                cap, cop, shr, airflow_rate, fan_power,
                                                parasitics, tank_ua, int_factor, temp_depress,

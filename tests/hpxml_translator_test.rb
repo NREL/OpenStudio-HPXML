@@ -49,7 +49,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
         next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
-        
+
         xmls << File.absolute_path(xml)
       end
     end
@@ -694,7 +694,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not mv.nil?
       found_mv_energy = false
       results.keys.each do |k|
-        next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or not k[2].start_with? Constants.ObjectNameMechanicalVentilation
+        next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or k[2] != Constants.EndUseMechVentFan
 
         found_mv_energy = true
         if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
@@ -850,7 +850,34 @@ class HPXMLTranslatorTest < MiniTest::Test
           dse_expect = 1.0 # TODO: Generalize this
         end
         puts "dse: #{dse_actual.round(2)} #{k}"
-        assert_in_delta(dse_expect, dse_actual, 0.022) # TODO: Reduce tolerance
+        assert_in_epsilon(dse_expect, dse_actual, 0.025)
+      end
+      puts "\n"
+    end
+  end
+
+  def _test_multiple_hvac(xmls, multiple_hvac_dir, all_results)
+    # Compare end use results for three of an HVAC system to results for one HVAC system.
+    xmls.sort.each do |xml|
+      next if not xml.include? multiple_hvac_dir
+
+      xml_x3 = File.absolute_path(xml)
+      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
+
+      results_x3 = all_results[xml_x3]
+      results_x1 = all_results[xml_x1]
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_x3.keys.each do |k|
+        next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+
+        result_x1 = results_x1[k].to_f
+        result_x3 = results_x3[k].to_f
+        next if result_x1 == 0.0 and result_x3 == 0.0
+
+        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
+        assert_in_delta(result_x1, result_x3, 0.1)
       end
       puts "\n"
     end
