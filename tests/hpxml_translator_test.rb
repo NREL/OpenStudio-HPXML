@@ -745,7 +745,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not mv.nil?
       found_mv_energy = false
       results.keys.each do |k|
-        next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or k[2] != Constants.EndUseMechVentFan
+        next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or not k[2].start_with? Constants.ObjectNameMechanicalVentilation
 
         found_mv_energy = true
         if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
