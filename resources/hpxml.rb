@@ -1,13 +1,72 @@
 class HPXML
+  def self.create_hpxml(xml_generated_by: nil,
+                        transaction: nil,
+                        software_program_used: nil,
+                        software_program_version: nil,
+                        eri_calculation_version: nil,
+                        building_id: nil,
+                        event_type: nil)
+    hpxml = REXML::Element.new("HPXML")
+    XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2014/6")
+    XMLHelper.add_attribute(hpxml, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+    XMLHelper.add_attribute(hpxml, "xsi:schemaLocation", "http://hpxmlonline.com/2014/6")
+    XMLHelper.add_attribute(hpxml, "schemaVersion", "3.0")
+
+    add_xml_transaction_header_information(hpxml: hpxml,
+                                           xml_generated_by: xml_generated_by,
+                                           transaction: transaction)
+
+    add_software_info(hpxml: hpxml,
+                      software_program_used: software_program_used,
+                      software_program_version: software_program_version,
+                      eri_calculation_version: eri_calculation_version)
+
+    add_building(hpxml: hpxml,
+                 id: building_id,
+                 event_type: event_type)
+
+    return hpxml
+  end
+
+  def self.get_hpxml_version(hpxml:)
+    return nil if hpxml.nil?
+
+    return {:schema_version => hpxml.attributes["schemaVersion"]}
+  end
+
+  def self.get_hpxml_values(doc)
+    values = {}
+
+    hpxml = doc.elements["HPXML"]
+  
+    values[:xml_transaction_header_information] = get_xml_transaction_header_information_values(xml_transaction_header_information: hpxml.elements["XMLTransactionHeaderInformation"])
+    values[:software_info] = get_software_info(software_info: hpxml.elements["SoftwareInfo"])
+    values[:building] = get_building_values(building: hpxml.elements["Building"])
+    values[:project_status] = get_project_status_values(project_status: hpxml.elements["Building/ProjectStatus"])
+    values[:site] = get_site_values(site: hpxml.elements["Building/BuildingDetails/BuildingSummary/Site"])
+    values[:building_occupancy] = get_building_occupancy_values(building_occupancy: hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingOccupancy"])
+    values[:building_construction] = get_building_construction_values(building_construction: hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"])
+    values[:climate_zone_iecc] = []
+    hpxml.elements.each("Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC") do |climate_zone_iecc|
+      values[:climate_zone_iecc] << get_climate_zone_iecc_values(climate_zone_iecc: climate_zone_iecc)
+    end
+    values[:weather_station] = get_weather_station_values(weather_station: hpxml.elements["Building/BuildingDetails/ClimateandRiskZones/WeatherStation"])
+    values[:air_infiltration_measurement] = []
+    hpxml.elements.each("Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
+      values[:air_infiltration_measurement] << get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
+    end
+    # TODO: ...
+  
+    return values
+  end
+
   def self.add_xml_transaction_header_information(hpxml:,
-                                                  xml_type: nil,
                                                   xml_generated_by: nil,
-                                                  created_date_and_time: nil,
                                                   transaction: nil)
     xml_transaction_header_information = XMLHelper.add_element(hpxml, "XMLTransactionHeaderInformation")
-    XMLHelper.add_element(xml_transaction_header_information, "XMLType", xml_type) unless xml_type.nil?
+    XMLHelper.add_element(xml_transaction_header_information, "XMLType", "HPXML")
     XMLHelper.add_element(xml_transaction_header_information, "XMLGeneratedBy", xml_generated_by) unless xml_generated_by.nil?
-    XMLHelper.add_element(xml_transaction_header_information, "CreatedDateAndTime", created_date_and_time) unless created_date_and_time.nil?
+    XMLHelper.add_element(xml_transaction_header_information, "CreatedDateAndTime", "014-11-17T15:17:17.128-07:00") # TODO: get current date and time
     XMLHelper.add_element(xml_transaction_header_information, "Transaction", transaction) unless transaction.nil?
 
     return xml_transaction_header_information
@@ -23,8 +82,12 @@ class HPXML
   end
 
   def self.add_software_info(hpxml:,
+                             software_program_used: nil,
+                             software_program_version: nil,
                              eri_calculation_version: nil)
     software_info = XMLHelper.add_element(hpxml, "SoftwareInfo")
+    XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used) unless software_program_used.nil?
+    XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version) unless software_program_version.nil?
     unless eri_calculation_version.nil?
       extension = XMLHelper.add_element(software_info, "ERICalculation")
       XMLHelper.add_element(extension, "Version", eri_calculation_version)
@@ -36,7 +99,44 @@ class HPXML
   def self.get_software_info(software_info:)
     return nil if software_info.nil?
 
-    return {:eri_calculation_version => XMLHelper.get_value(software_info, "extension/ERICalculation/Version")}
+    return {:software_program_used => XMLHelper.get_value(software_info, "SoftwareProgramUsed"),
+            :software_program_version => XMLHelper.get_value(software_info, "SoftwareProgramVersion"),
+            :eri_calculation_version => XMLHelper.get_value(software_info, "extension/ERICalculation/Version")}
+  end
+
+  def self.add_building(hpxml:,
+                        id: nil,
+                        event_type: nil)
+    building = XMLHelper.add_element(hpxml, "Building")
+    building_id = XMLHelper.add_element(building, "BuildingID")
+    XMLHelper.add_attribute(building_id, "id", id)
+
+    add_project_status(building: building,
+                       event_type: event_type)
+
+    XMLHelper.add_element(building, "BuildingDetails/BuildingSummary")
+
+    return building
+  end
+
+  def self.get_building_values(building:)
+    return nil if building.nil?
+
+    return {:id => building.elements["BuildingID"].attributes["id"]}
+  end
+
+  def self.add_project_status(building:,
+                              event_type: nil)
+    project_status = XMLHelper.add_element(building, "ProjectStatus")
+    XMLHelper.add_element(project_status, "EventType", event_type) unless event_type.nil?
+
+    return project_status
+  end
+
+  def self.get_project_status_values(project_status:)
+    return nil if project_status.nil?
+
+    return {:event_type => XMLHelper.get_value(project_status, "EventType")}
   end
 
   def self.add_site(building_summary:,
@@ -168,7 +268,7 @@ class HPXML
 
     return { :id => HPXML.get_id(air_infiltration_measurement),
              :house_pressure => XMLHelper.get_value(air_infiltration_measurement, "HousePressure"),
-             :unit_of_measure => XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/UnitOfMeasure"),
+             :unit_of_measure => XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/UnitofMeasure"),
              :air_leakage => XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/AirLeakage"),
              :effective_leakage_area => XMLHelper.get_value(air_infiltration_measurement, "EffectiveLeakageArea") }
   end
