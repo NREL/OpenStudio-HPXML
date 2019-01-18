@@ -45,7 +45,7 @@
           <ClimateZone>7</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
-          <SystemIdentifiersInfo id='Weather_Station'/>
+          <SystemIdentifier id='Weather_Station'/>
           <Name>Denver, CO</Name>
           <WMO>725650</WMO>
         </WeatherStation>
@@ -369,6 +369,7 @@
               <SystemIdentifier id='AirSourceHeatPump'/>
               <DistributionSystem idref='HVAC_Dist_ID5'/>
               <HeatPumpType>air-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>48000</CoolingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
@@ -385,6 +386,7 @@
               <SystemIdentifier id='GroundSourceHeatPump'/>
               <DistributionSystem idref='HVAC_Dist_ID6'/>
               <HeatPumpType>ground-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>48000</CoolingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
@@ -400,6 +402,7 @@
             <HeatPump>
               <SystemIdentifier id='DuctlessMiniSplit'/>
               <HeatPumpType>mini-split</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>48000</CoolingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>

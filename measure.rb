@@ -388,6 +388,9 @@ class OSModel
     success = add_thermal_mass(runner, model, building)
     return false if not success
 
+    success = check_for_errors(runner, model)
+    return false if not success
+
     success = set_zone_volumes(runner, model, building)
     return false if not success
 
@@ -552,6 +555,45 @@ class OSModel
       azimuth_side_shifts[azimuth] -= (surface.additionalProperties.getFeatureAsDouble("Length").get / 2.0 + gap_distance)
 
       surfaces_moved << surface
+    end
+
+    return true
+  end
+
+  def self.check_for_errors(runner, model)
+    # Check every thermal zone has:
+    # 1. At least one floor surface
+    # 2. At least one roofceiling surface
+    # 3. At least one surface adjacent to outside/ground
+    model.getThermalZones.each do |zone|
+      n_floors = 0
+      n_roofceilings = 0
+      n_exteriors = 0
+      zone.spaces.each do |space|
+        space.surfaces.each do |surface|
+          if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
+            n_exteriors += 1
+          end
+          if surface.surfaceType.downcase == "floor"
+            n_floors += 1
+          elsif surface.surfaceType.downcase == "roofceiling"
+            n_roofceilings += 1
+          end
+        end
+      end
+
+      if n_floors == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one floor surface.")
+      end
+      if n_roofceilings == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one roof/ceiling surface.")
+      end
+      if n_exteriors == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one surface adjacent to outside/ground.")
+      end
+      if n_floors == 0 or n_roofceilings == 0 or n_exteriors == 0
+        return false
+      end
     end
 
     return true
@@ -987,8 +1029,8 @@ class OSModel
         end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare), # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),  # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                    # Fallback
         ]
         floor_constr_set, floor_cav_r = pick_wood_stud_construction_set(floor_assembly_r, constr_sets, floor_film_r, "foundation framefloor #{floor_id}")
 
@@ -1277,7 +1319,7 @@ class OSModel
       assembly_r = Float(XMLHelper.get_value(rim_joist, "Insulation/AssemblyEffectiveRValue"))
 
       constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, drywall_thick_in, mat_ext_finish), # 2x4 + R10
+        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, drywall_thick_in, mat_ext_finish),  # 2x4 + R10
         WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 5.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4 + R5
         WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4
         WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, 0.0, nil),                           # Fallback
@@ -1344,7 +1386,7 @@ class OSModel
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.11, 0.0, 0.0, drywall_thick_in, nil), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.24, 0.0, 0.0, drywall_thick_in, nil), # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil), # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),              # Fallback
         ]
 
         constr_set, ceiling_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "attic floor #{floor_id}")
@@ -1372,6 +1414,10 @@ class OSModel
 
         roof_gross_area = Float(XMLHelper.get_value(roof, "Area"))
         roof_net_area = net_wall_area(roof_gross_area, subsurface_areas, roof_id)
+        if roof_net_area <= 0
+          fail "Calculated a negative net surface area for Roof '#{roof_id}'."
+        end
+
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
@@ -1411,9 +1457,9 @@ class OSModel
           WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, drywall_thick_in, mat_roofing), # 2x8, 24" o.c. + R10
           WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 5.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c. + R5
           WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, drywall_thick_in, mat_roofing),   # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                        # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),      # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, drywall_thick_in, mat_roofing),       # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, mat_roofing),                    # Fallback
         ]
         constr_set, roof_cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "attic roof #{roof_id}")
 
@@ -1427,7 +1473,7 @@ class OSModel
                                                           true, constr_set.framing_factor,
                                                           constr_set.drywall_thick_in,
                                                           constr_set.osb_thick_in, constr_set.rigid_r,
-                                                          mat_roofing)
+                                                          constr_set.exterior_material)
         else
           has_radiant_barrier = false # TODO
           success = RoofConstructions.apply_unfinished_attic(runner, model, [surface],
@@ -1437,7 +1483,7 @@ class OSModel
                                                              constr_set.framing_factor,
                                                              constr_set.stud.thick_in,
                                                              constr_set.osb_thick_in, constr_set.rigid_r,
-                                                             mat_roofing, has_radiant_barrier)
+                                                             constr_set.exterior_material, has_radiant_barrier)
           return false if not success
         end
 
@@ -1560,6 +1606,9 @@ class OSModel
       if not overhang_depth.nil?
         overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, "ft", "m"), UnitConversions.convert(overhang_distance_to_top, "ft", "m"))
         overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
+
+        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
+        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
       end
 
       # Apply construction
@@ -2428,27 +2477,25 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     # Residual heating
+    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
+    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
+    residual_htg_load_frac = 1.0 - htg_load_frac
     if use_only_ideal_air
-      residual_htg_load_frac = 1
-    else
-      htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-      htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-      residual_htg_load_frac = 1.0 - htg_load_frac
-    end
-    if residual_htg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1)
+      return false if not success
+    elsif residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_htg_load_frac)
       return false if not success
     end
 
     # Residual cooling
+    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
+    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
+    residual_clg_load_frac = 1.0 - clg_load_frac
     if use_only_ideal_air
-      residual_clg_load_frac = 1
-    else
-      clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-      clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-      residual_clg_load_frac = 1.0 - clg_load_frac
-    end
-    if residual_clg_load_frac > 0.02 # TODO: Ensure that E+ will re-normalize if == 0.01
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1)
+      return false if not success
+    elsif residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_clg_load_frac)
       return false if not success
     end
@@ -3666,8 +3713,7 @@ class OSModel
     end
 
     if (assembly_r - constr_r).abs > 0.01
-      # FIXME
-      # fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
+      fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
     end
   end
 
