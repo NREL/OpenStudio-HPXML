@@ -346,7 +346,8 @@
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='ClothesWasher_ID1'/>
+          <SystemIdentifier id='ClothesWasher'/>
+          <Location>living space</Location>
           <IntegratedModifiedEnergyFactor>0.73</IntegratedModifiedEnergyFactor>
           <RatedAnnualkWh>387.0</RatedAnnualkWh>
           <LabelElectricRate>0.127</LabelElectricRate>
@@ -355,7 +356,8 @@
           <Capacity>3.5</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer_ID1'/>
+          <SystemIdentifier id='ClothesDryer'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <EnergyFactor>3.01</EnergyFactor>
           <ControlType>timer</ControlType>
@@ -366,7 +368,8 @@
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
-          <SystemIdentifier id='Refrigerator_ID1'/>
+          <SystemIdentifier id='Refrigerator'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>609</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
