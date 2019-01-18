@@ -3186,6 +3186,16 @@ class OSModel
           end
         end
 
+        recirc_pump_name = loop.additionalProperties.getFeatureAsString("PlantLoopRecircPump")
+        if recirc_pump_name.is_initialized
+          recirc_pump_name = recirc_pump_name.get
+          model.getElectricEquipments.each do |ee|
+            next unless ee.name.to_s == recirc_pump_name
+
+            dhw_mapping[sys_id] << ee
+          end
+        end
+
         loop.demandComponents.each do |comp|
           if comp.to_WaterUseConnections.is_initialized
 
@@ -3198,18 +3208,19 @@ class OSModel
     end
 
     htg_mapping.each do |sys_id, htg_equip_list|
-      add_output_variables(model, Constants.OutputVarsSpaceHeatingElectricity, htg_equip_list)
-      add_output_variables(model, Constants.OutputVarsSpaceHeatingFuel, htg_equip_list)
-      add_output_variables(model, Constants.OutputVarsSpaceHeatingLoad, htg_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingElectricity, htg_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingFuel, htg_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingLoad, htg_equip_list)
     end
     clg_mapping.each do |sys_id, clg_equip_list|
-      add_output_variables(model, Constants.OutputVarsSpaceCoolingElectricity, clg_equip_list)
-      add_output_variables(model, Constants.OutputVarsSpaceCoolingLoad, clg_equip_list)
+      add_output_variables(model, OutputVars.SpaceCoolingElectricity, clg_equip_list)
+      add_output_variables(model, OutputVars.SpaceCoolingLoad, clg_equip_list)
     end
     dhw_mapping.each do |sys_id, dhw_equip_list|
-      add_output_variables(model, Constants.OutputVarsWaterHeatingElectricity, dhw_equip_list)
-      add_output_variables(model, Constants.OutputVarsWaterHeatingFuel, dhw_equip_list)
-      add_output_variables(model, Constants.OutputVarsWaterHeatingLoad, dhw_equip_list)
+      add_output_variables(model, OutputVars.WaterHeatingElectricity, dhw_equip_list)
+      add_output_variables(model, OutputVars.WaterHeatingElectricityRecircPump, dhw_equip_list)
+      add_output_variables(model, OutputVars.WaterHeatingFuel, dhw_equip_list)
+      add_output_variables(model, OutputVars.WaterHeatingLoad, dhw_equip_list)
     end
 
     if map_tsv_dir.is_initialized
@@ -3984,6 +3995,87 @@ def get_ashp_num_speeds(seer)
     num_speeds = "2-Speed"
   else
     num_speeds = "Variable-Speed"
+  end
+end
+
+class OutputVars
+  def self.SpaceHeatingElectricity
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingGas' => [],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Electric Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.SpaceHeatingFuel
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => [],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => [],
+             'OpenStudio::Model::CoilHeatingElectric' => [],
+             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => [],
+             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy', 'Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy', 'Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy', 'Boiler Propane Energy', 'Boiler FuelOil#1 Energy'],
+             'OpenStudio::Model::FanOnOff' => [] }
+  end
+
+  def self.SpaceHeatingLoad
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Total Heating Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.SpaceCoolingElectricity
+    return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.SpaceCoolingLoad
+    return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Total Cooling Energy'],
+             'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Total Cooling Energy'],
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Total Cooling Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.WaterHeatingElectricity
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'],
+             'OpenStudio::Model::WaterUseConnections' => [],
+             'OpenStudio::Model::ElectricEquipment' => [] }
+  end
+
+  def self.WaterHeatingElectricityRecircPump
+    return { 'OpenStudio::Model::WaterHeaterMixed' => [],
+             'OpenStudio::Model::WaterHeaterStratified' => [],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => [],
+             'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
+  end
+
+  def self.WaterHeatingFuel
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => [],
+             'OpenStudio::Model::ElectricEquipment' => [] }
+  end
+
+  def self.WaterHeatingLoad
+    return { 'OpenStudio::Model::WaterHeaterMixed' => [],
+             'OpenStudio::Model::WaterHeaterStratified' => [],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'],
+             'OpenStudio::Model::ElectricEquipment' => [] }
   end
 end
 
