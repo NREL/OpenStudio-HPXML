@@ -200,7 +200,12 @@ class HotWaterAndAppliances
       dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, runner, dist_pump_obj_name, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
       dist_pump_space = Geometry.get_space_from_location(unit, Constants.Auto, location_hierarchy)
       dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
-      add_electric_equipment(model, dist_pump_obj_name, dist_pump_space, dist_pump_design_level, 0.0, 0.0, dist_pump_schedule.schedule)
+      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        dist_pump = add_electric_equipment(model, dist_pump_obj_name, dist_pump_space, dist_pump_design_level * dhw_load_frac, 0.0, 0.0, dist_pump_schedule.schedule)
+        if not dist_pump.nil?
+          dhw_loop.additionalProperties.setFeature("PlantLoopRecircPump", dist_pump.name.to_s)
+        end
+      end
     end
 
     return true
@@ -431,6 +436,8 @@ class HotWaterAndAppliances
     ee_def.setFractionLatent(frac_lat)
     ee_def.setFractionLost(1.0 - frac_sens - frac_lat)
     ee.setSchedule(schedule)
+
+    return ee
   end
 
   def self.add_other_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule, fuel_type)
@@ -452,6 +459,8 @@ class HotWaterAndAppliances
     oe_def.setFractionLatent(frac_lat)
     oe_def.setFractionLost(1.0 - frac_sens - frac_lat)
     oe.setSchedule(schedule)
+
+    return oe
   end
 
   def self.add_water_use_equipment(model, obj_name, peak_flow_gpm, schedule, temp_schedule, water_use_connection)
@@ -466,6 +475,8 @@ class HotWaterAndAppliances
     wu.setFlowRateFractionSchedule(schedule)
     wu_def.setTargetTemperatureSchedule(temp_schedule)
     water_use_connection.addWaterUseEquipment(wu)
+
+    return wu
   end
 
   def self.get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, is_equal_flow, facilities_connected, has_low_flow_fixtures)
