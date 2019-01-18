@@ -230,24 +230,6 @@
             <AttachedToWall idref='agwall-1'/>
           </Window>
         </Windows>
-        <Skylights>
-          <Skylight>
-            <SystemIdentifier id='Skylight_ID1'/>
-            <Area>4199</Area>
-            <Azimuth>90</Azimuth>
-            <UFactor>0.33</UFactor>
-            <SHGC>0.45</SHGC>
-            <AttachedToRoof idref='attic-roof-1'/>
-          </Skylight>
-          <Skylight>
-            <SystemIdentifier id='Skylight_ID2'/>
-            <Area>15</Area>
-            <Azimuth>270</Azimuth>
-            <UFactor>0.35</UFactor>
-            <SHGC>0.47</SHGC>
-            <AttachedToRoof idref='attic-roof-1'/>
-          </Skylight>
-        </Skylights>
         <Doors>
           <Door>
             <SystemIdentifier id='Door_ID1'/>
@@ -331,13 +313,14 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='DHW_ID1'/>
-            <FuelType>electricity</FuelType>
+            <FuelType>fuel oil</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>40</TankVolume>
+            <TankVolume>50</TankVolume>
             <FractionDHWLoadServed>1</FractionDHWLoadServed>
-            <HeatingCapacity>18767</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <HeatingCapacity>4500</HeatingCapacity>
+            <EnergyFactor>0.59</EnergyFactor>
+            <RecoveryEfficiency>0.76</RecoveryEfficiency>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HWDist_ID1'/>
@@ -364,7 +347,8 @@
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='ClothesWasher_ID1'/>
+          <SystemIdentifier id='ClothesWasher'/>
+          <Location>living space</Location>
           <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
           <RatedAnnualkWh>387.0</RatedAnnualkWh>
           <LabelElectricRate>0.127</LabelElectricRate>
@@ -373,7 +357,8 @@
           <Capacity>3.5</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer_ID1'/>
+          <SystemIdentifier id='ClothesDryer'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <EnergyFactor>3.01</EnergyFactor>
           <ControlType>timer</ControlType>
@@ -384,7 +369,8 @@
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
-          <SystemIdentifier id='Refrigerator_ID1'/>
+          <SystemIdentifier id='Refrigerator'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>609</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>

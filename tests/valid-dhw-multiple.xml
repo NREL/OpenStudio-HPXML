@@ -199,7 +199,7 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window_ID1'/>
-            <Area>3500</Area>
+            <Area>240</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -317,9 +317,45 @@
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
             <TankVolume>40</TankVolume>
-            <FractionDHWLoadServed>1</FractionDHWLoadServed>
+            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
             <HeatingCapacity>18767</HeatingCapacity>
             <EnergyFactor>0.95</EnergyFactor>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='DHW_ID2'/>
+            <FuelType>natural gas</FuelType>
+            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <TankVolume>50</TankVolume>
+            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
+            <HeatingCapacity>4500</HeatingCapacity>
+            <EnergyFactor>0.59</EnergyFactor>
+            <RecoveryEfficiency>0.76</RecoveryEfficiency>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='DHW_ID3'/>
+            <FuelType>electricity</FuelType>
+            <WaterHeaterType>heat pump water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <TankVolume>80</TankVolume>
+            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
+            <EnergyFactor>2.3</EnergyFactor>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='DHW_ID4'/>
+            <FuelType>electricity</FuelType>
+            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
+            <EnergyFactor>0.99</EnergyFactor>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='DHW_ID5'/>
+            <FuelType>natural gas</FuelType>
+            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
+            <EnergyFactor>0.82</EnergyFactor>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HWDist_ID1'/>
@@ -346,7 +382,8 @@
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='ClothesWasher_ID1'/>
+          <SystemIdentifier id='ClothesWasher'/>
+          <Location>living space</Location>
           <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
           <RatedAnnualkWh>387.0</RatedAnnualkWh>
           <LabelElectricRate>0.127</LabelElectricRate>
@@ -355,7 +392,8 @@
           <Capacity>3.5</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer_ID1'/>
+          <SystemIdentifier id='ClothesDryer'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <EnergyFactor>3.01</EnergyFactor>
           <ControlType>timer</ControlType>
@@ -366,7 +404,8 @@
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
-          <SystemIdentifier id='Refrigerator_ID1'/>
+          <SystemIdentifier id='Refrigerator'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>609</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>

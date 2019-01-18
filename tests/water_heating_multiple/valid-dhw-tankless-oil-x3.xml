@@ -233,7 +233,7 @@
         <Doors>
           <Door>
             <SystemIdentifier id='Door_ID1'/>
-            <AttachedToWall idref='foobar'/>
+            <AttachedToWall idref='agwall-1'/>
             <Area>80</Area>
             <Azimuth>270</Azimuth>
             <RValue>4.4</RValue>
@@ -313,13 +313,27 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='DHW_ID1'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <FuelType>fuel oil</FuelType>
+            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>40</TankVolume>
-            <FractionDHWLoadServed>1</FractionDHWLoadServed>
-            <HeatingCapacity>18767</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <FractionDHWLoadServed>0.333</FractionDHWLoadServed>
+            <EnergyFactor>0.82</EnergyFactor>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='DHW_ID2'/>
+            <FuelType>fuel oil</FuelType>
+            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <FractionDHWLoadServed>0.333</FractionDHWLoadServed>
+            <EnergyFactor>0.82</EnergyFactor>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='DHW_ID3'/>
+            <FuelType>fuel oil</FuelType>
+            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
+            <Location>living space</Location>
+            <FractionDHWLoadServed>0.333</FractionDHWLoadServed>
+            <EnergyFactor>0.82</EnergyFactor>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HWDist_ID1'/>
@@ -346,7 +360,8 @@
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='ClothesWasher_ID1'/>
+          <SystemIdentifier id='ClothesWasher'/>
+          <Location>living space</Location>
           <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
           <RatedAnnualkWh>387.0</RatedAnnualkWh>
           <LabelElectricRate>0.127</LabelElectricRate>
@@ -355,7 +370,8 @@
           <Capacity>3.5</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer_ID1'/>
+          <SystemIdentifier id='ClothesDryer'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <EnergyFactor>3.01</EnergyFactor>
           <ControlType>timer</ControlType>
@@ -366,7 +382,8 @@
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
-          <SystemIdentifier id='Refrigerator_ID1'/>
+          <SystemIdentifier id='Refrigerator'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>609</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>

@@ -247,8 +247,8 @@
               <SystemIdentifier id='SpaceHeatPump_ID1'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <CoolingCapacity>16000</CoolingCapacity>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.33</FractionCoolLoadServed>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>19.0</Value>
@@ -262,8 +262,8 @@
               <SystemIdentifier id='SpaceHeatPump_ID2'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <CoolingCapacity>16000</CoolingCapacity>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.33</FractionCoolLoadServed>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>19.0</Value>
@@ -277,8 +277,8 @@
               <SystemIdentifier id='SpaceHeatPump_ID3'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <CoolingCapacity>16000</CoolingCapacity>
-              <FractionHeatLoadServed>0.33</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.33</FractionCoolLoadServed>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>19.0</Value>
@@ -333,7 +333,8 @@
       </Systems>
       <Appliances>
         <ClothesWasher>
-          <SystemIdentifier id='ClothesWasher_ID1'/>
+          <SystemIdentifier id='ClothesWasher'/>
+          <Location>living space</Location>
           <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
           <RatedAnnualkWh>387.0</RatedAnnualkWh>
           <LabelElectricRate>0.127</LabelElectricRate>
@@ -342,7 +343,8 @@
           <Capacity>3.5</Capacity>
         </ClothesWasher>
         <ClothesDryer>
-          <SystemIdentifier id='ClothesDryer_ID1'/>
+          <SystemIdentifier id='ClothesDryer'/>
+          <Location>living space</Location>
           <FuelType>electricity</FuelType>
           <EnergyFactor>3.01</EnergyFactor>
           <ControlType>timer</ControlType>
@@ -353,7 +355,8 @@
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
-          <SystemIdentifier id='Refrigerator_ID1'/>
+          <SystemIdentifier id='Refrigerator'/>
+          <Location>living space</Location>
           <RatedAnnualkWh>609</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
