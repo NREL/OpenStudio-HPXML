@@ -397,17 +397,22 @@ class Constants
   def self.OutputVarsWaterHeatingElectricity
     return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
              'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
-             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'] }
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'],
+             'OpenStudio::Model::WaterUseConnections' => [] }
   end
 
   def self.OutputVarsWaterHeatingFuel
     return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
              'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
-             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [] }
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => [] }
   end
 
   def self.OutputVarsWaterHeatingLoad
-    return { nil => ['Water Use Connections Plant Hot Water Energy'] }
+    return { 'OpenStudio::Model::WaterHeaterMixed' => [],
+             'OpenStudio::Model::WaterHeaterStratified' => [],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'] }
   end
 
   def self.PVArrayTypeFixedOpenRack

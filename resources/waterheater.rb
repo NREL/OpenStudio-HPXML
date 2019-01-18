@@ -80,8 +80,8 @@ class Waterheater
                           cd, t_set, oncycle_p, offcycle_p, ec_adj)
 
     # Validate inputs
-    if ef >= 1 or ef <= 0
-      runner.registerError("Rated energy factor must be greater than 0 and less than 1.")
+    if ef > 1 or ef <= 0
+      runner.registerError("Rated energy factor must be greater than 0 and less than or equal to 1.")
       return false
     end
     if t_set <= 0 or t_set >= 212

@@ -3185,6 +3185,15 @@ class OSModel
 
           end
         end
+
+        loop.demandComponents.each do |comp|
+          if comp.to_WaterUseConnections.is_initialized
+
+            water_use_connections = comp.to_WaterUseConnections.get
+            dhw_mapping[sys_id] << water_use_connections
+
+          end
+        end
       end
     end
 
@@ -3200,8 +3209,8 @@ class OSModel
     dhw_mapping.each do |sys_id, dhw_equip_list|
       add_output_variables(model, Constants.OutputVarsWaterHeatingElectricity, dhw_equip_list)
       add_output_variables(model, Constants.OutputVarsWaterHeatingFuel, dhw_equip_list)
+      add_output_variables(model, Constants.OutputVarsWaterHeatingLoad, dhw_equip_list)
     end
-    add_output_variables(model, Constants.OutputVarsWaterHeatingLoad, nil)
 
     if map_tsv_dir.is_initialized
       map_tsv_dir = map_tsv_dir.get
