@@ -15,7 +15,7 @@ class HotWaterAndAppliances
                  recirc_branch_length, recirc_control_type,
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
-                 dwhr_efficiency, setpoint_temp, eri_version)
+                 dwhr_efficiency, dhw_loop_fracs, eri_version)
 
     # Table 4.6.1.1(1): Hourly Hot Water Draw Fraction for Hot Water Tests
     daily_fraction = [0.0085, 0.0085, 0.0085, 0.0085, 0.0085, 0.0100, 0.0750, 0.0750,
@@ -34,20 +34,32 @@ class HotWaterAndAppliances
     temp_sch_limits = model.getScheduleTypeLimitsByName("Temperature")
 
     if not dist_type.nil?
-      # Get plant loop
-      plant_loop = Waterheater.get_plant_loop_from_string(model.getPlantLoops, Constants.Auto, unit, Constants.ObjectNameWaterHeater(unit.name.to_s.gsub("unit ", "")).gsub("|", "_"), runner)
-      if plant_loop.nil?
-        return false
+
+      water_use_connections = {}
+      setpoint_scheds = {}
+      setpoint_temps = {}
+
+      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        water_use_connections[dhw_loop] = OpenStudio::Model::WaterUseConnections.new(model)
+        dhw_loop.addDemandBranchForComponent(water_use_connections[dhw_loop])
+
+        # Get water heater setpoint schedule
+        setpoint_scheds[dhw_loop] = Waterheater.get_water_heater_setpoint_schedule(model, dhw_loop, runner)
+        if setpoint_scheds[dhw_loop].nil?
+          return false
+        end
+
+        setpoint_temps[dhw_loop] = Waterheater.get_water_heater_setpoint(model, dhw_loop, runner)
+        if setpoint_temps[dhw_loop].nil?
+          return false
+        end
       end
 
-      water_use_connection = OpenStudio::Model::WaterUseConnections.new(model)
-      plant_loop.addDemandBranchForComponent(water_use_connection)
-
-      # Get water heater setpoint schedule
-      setpoint_sched = Waterheater.get_water_heater_setpoint_schedule(model, plant_loop, runner)
-      if setpoint_sched.nil?
+      if setpoint_temps.values.max - setpoint_temps.values.min > 0.1
+        runner.registerError("Cannot handle different water heater setpoints.")
         return false
       end
+      setpoint_temp = setpoint_temps.values.reduce(:+) / setpoint_temps.size.to_f # average
 
       # Create hot water draw profile schedule
       fractions_hw = []
@@ -97,7 +109,9 @@ class HotWaterAndAppliances
       cw_peak_flow_gpm = cw_gpd / sum_fractions_hw / timestep_minutes * 365.0
       cw_design_level_w = UnitConversions.convert(cw_annual_kwh * 60.0 / (cw_gpd * 365.0 / cw_peak_flow_gpm), "kW", "W")
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, schedule_hw)
-      add_water_use_equipment(model, cw_name, cw_peak_flow_gpm, schedule_hw, setpoint_sched, water_use_connection)
+      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        add_water_use_equipment(model, cw_name, cw_peak_flow_gpm * dhw_load_frac, schedule_hw, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+      end
     end
 
     # Clothes dryer
@@ -121,7 +135,9 @@ class HotWaterAndAppliances
       dw_peak_flow_gpm = dw_gpd / sum_fractions_hw / timestep_minutes * 365.0
       dw_design_level_w = UnitConversions.convert(dw_annual_kwh * 60.0 / (dw_gpd * 365.0 / dw_peak_flow_gpm), "kW", "W")
       add_electric_equipment(model, dw_name, dw_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, schedule_hw)
-      add_water_use_equipment(model, dw_name, dw_peak_flow_gpm, schedule_hw, setpoint_sched, water_use_connection)
+      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        add_water_use_equipment(model, dw_name, dw_peak_flow_gpm * dhw_load_frac, schedule_hw, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+      end
     end
 
     # Refrigerator
@@ -162,7 +178,9 @@ class HotWaterAndAppliances
       fx_schedule = MonthWeekdayWeekendSchedule.new(model, runner, fx_obj_name, fx_weekday_sch, fx_weekday_sch, fx_monthly_sch, 1.0, 1.0)
       fx_design_level_sens = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_sens_btu, "Btu", "kWh") / 365.0)
       fx_design_level_lat = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_lat_btu, "Btu", "kWh") / 365.0)
-      add_water_use_equipment(model, fx_obj_name, fx_peak_flow_gpm, schedule_mw, setpoint_sched, water_use_connection)
+      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        add_water_use_equipment(model, fx_obj_name, fx_peak_flow_gpm * dhw_load_frac, schedule_mw, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+      end
       add_other_equipment(model, fx_obj_name_sens, fx_space, fx_design_level_sens, 1.0, 0.0, fx_schedule.schedule, nil)
       add_other_equipment(model, fx_obj_name_lat, fx_space, fx_design_level_lat, 0.0, 1.0, fx_schedule.schedule, nil)
 
@@ -170,7 +188,9 @@ class HotWaterAndAppliances
       dist_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
       dist_obj_name = Constants.ObjectNameHotWaterDistribution(unit.name.to_s)
       dist_peak_flow_gpm = dist_gpd / sum_fractions_hw / timestep_minutes * 365.0
-      add_water_use_equipment(model, dist_obj_name, dist_peak_flow_gpm, schedule_mw, setpoint_sched, water_use_connection)
+      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        add_water_use_equipment(model, dist_obj_name, dist_peak_flow_gpm * dhw_load_frac, schedule_mw, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+      end
 
       # Recirculation pump
       dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(dist_type, recirc_control_type, recirc_pump_power)
@@ -180,7 +200,12 @@ class HotWaterAndAppliances
       dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, runner, dist_pump_obj_name, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
       dist_pump_space = Geometry.get_space_from_location(unit, Constants.Auto, location_hierarchy)
       dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
-      add_electric_equipment(model, dist_pump_obj_name, dist_pump_space, dist_pump_design_level, 0.0, 0.0, dist_pump_schedule.schedule)
+      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        dist_pump = add_electric_equipment(model, dist_pump_obj_name, dist_pump_space, dist_pump_design_level * dhw_load_frac, 0.0, 0.0, dist_pump_schedule.schedule)
+        if not dist_pump.nil?
+          dhw_loop.additionalProperties.setFeature("PlantLoopRecircPump", dist_pump.name.to_s)
+        end
+      end
     end
 
     return true
@@ -411,6 +436,8 @@ class HotWaterAndAppliances
     ee_def.setFractionLatent(frac_lat)
     ee_def.setFractionLost(1.0 - frac_sens - frac_lat)
     ee.setSchedule(schedule)
+
+    return ee
   end
 
   def self.add_other_equipment(model, obj_name, space, design_level_w, frac_sens, frac_lat, schedule, fuel_type)
@@ -432,6 +459,8 @@ class HotWaterAndAppliances
     oe_def.setFractionLatent(frac_lat)
     oe_def.setFractionLost(1.0 - frac_sens - frac_lat)
     oe.setSchedule(schedule)
+
+    return oe
   end
 
   def self.add_water_use_equipment(model, obj_name, peak_flow_gpm, schedule, temp_schedule, water_use_connection)
@@ -446,6 +475,8 @@ class HotWaterAndAppliances
     wu.setFlowRateFractionSchedule(schedule)
     wu_def.setTargetTemperatureSchedule(temp_schedule)
     water_use_connection.addWaterUseEquipment(wu)
+
+    return wu
   end
 
   def self.get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, is_equal_flow, facilities_connected, has_low_flow_fixtures)

@@ -87,7 +87,7 @@ class HPXML
                                name: nil,
                                wmo: nil)
     weather_station = XMLHelper.add_element(climate_and_risk_zones, "WeatherStation")
-    sys_id = XMLHelper.add_element(weather_station, "SystemIdentifiersInfo")
+    sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(weather_station, "Name", name) unless name.nil?
     XMLHelper.add_element(weather_station, "WMO", wmo) unless wmo.nil?
@@ -98,7 +98,7 @@ class HPXML
   def self.get_weather_station_values(weather_station:)
     return nil if weather_station.nil?
 
-    return { :id => weather_station.elements["SystemIdentifiersInfo"].attributes["id"],
+    return { :id => HPXML.get_id(weather_station),
              :name => XMLHelper.get_value(weather_station, "Name"),
              :wmo => XMLHelper.get_value(weather_station, "WMO") }
   end
@@ -692,6 +692,7 @@ class HPXML
                          id:,
                          idref: nil,
                          heat_pump_type: nil,
+                         heat_pump_fuel: nil,
                          heating_capacity: nil,
                          cooling_capacity: nil,
                          fraction_heat_load_served: nil,
@@ -708,6 +709,7 @@ class HPXML
       XMLHelper.add_attribute(distribution_system, "idref", idref)
     end
     XMLHelper.add_element(heat_pump, "HeatPumpType", heat_pump_type) unless heat_pump_type.nil?
+    XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel) unless heat_pump_fuel.nil?
     XMLHelper.add_element(heat_pump, "HeatingCapacity", heating_capacity) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", cooling_capacity) unless cooling_capacity.nil?
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", fraction_heat_load_served) unless fraction_heat_load_served.nil?
@@ -732,6 +734,7 @@ class HPXML
     return { :id => HPXML.get_id(heat_pump),
              :idref => HPXML.get_idref(heat_pump, "DistributionSystem"),
              :heat_pump_type => XMLHelper.get_value(heat_pump, "HeatPumpType"),
+             :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
              :heating_capacity => XMLHelper.get_value(heat_pump, "HeatingCapacity"),
              :cooling_capacity => XMLHelper.get_value(heat_pump, "CoolingCapacity"),
              :fraction_heat_load_served => XMLHelper.get_value(heat_pump, "FractionHeatLoadServed"),
