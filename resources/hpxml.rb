@@ -58,7 +58,7 @@ class HPXML
                                name: nil,
                                wmo: nil)
     weather_station = XMLHelper.add_element(climate_and_risk_zones, "WeatherStation")
-    sys_id = XMLHelper.add_element(weather_station, "SystemIdentifiersInfo")
+    sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(weather_station, "Name", name) unless name.nil?
     XMLHelper.add_element(weather_station, "WMO", wmo) unless wmo.nil?
@@ -475,6 +475,7 @@ class HPXML
       XMLHelper.add_attribute(distribution_system, "idref", idref)
     end
     XMLHelper.add_element(heat_pump, "HeatPumpType", heat_pump_type) unless heat_pump_type.nil?
+    XMLHelper.add_element(heat_pump, "HeatPumpFuel", "electricity")
     XMLHelper.add_element(heat_pump, "HeatingCapacity", heating_capacity) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", cooling_capacity) unless cooling_capacity.nil?
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", fraction_heat_load_served) unless fraction_heat_load_served.nil?
