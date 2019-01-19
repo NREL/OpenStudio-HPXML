@@ -33,6 +33,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     hvac_multiple_dir = File.absolute_path(File.join(this_dir, "hvac_multiple"))
     hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
     hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "hvac_load_fracs"))
+    water_heating_multiple_dir = File.absolute_path(File.join(this_dir, "water_heating_multiple"))
     autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
 
     test_dirs = [this_dir,
@@ -41,11 +42,14 @@ class HPXMLTranslatorTest < MiniTest::Test
                  hvac_multiple_dir,
                  hvac_partial_dir,
                  hvac_load_fracs_dir,
+                 water_heating_multiple_dir,
                  autosize_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
+        next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
+
         xmls << File.absolute_path(xml)
       end
     end
@@ -62,17 +66,47 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Cross simulation tests
     _test_dse(xmls, hvac_dse_dir, all_results)
     _test_multiple_hvac(xmls, hvac_multiple_dir, all_results)
+    _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, all_results)
   end
 
-  def _run_xml(xml, this_dir, args)
+  def test_invalid
+    this_dir = File.dirname(__FILE__)
+
+    args = {}
+    args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
+    args['skip_validation'] = false
+
+    expected_error_msgs = { 'invalid-bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'invalid-missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
+                                                               "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
+                            'invalid-hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to 1, but calculated sum is 1.2.",
+                                                                    "Expected FractionHeatLoadServed to sum to 1, but calculated sum is 1.1."],
+                            'invalid-missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
+                                                               "Thermal zone 'garage' must have at least one roof/ceiling surface.",
+                                                               "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
+                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'agwall-1'."],
+                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'attic-roof-1'."],
+                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'Window_ID1'."],
+                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door_ID1'."],
+                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'Skylight_ID1'."],
+                            'invalid-unattached-hvac.xml' => ["TODO"],
+                            'invalid-unattached-cfis.xml' => ["TODO"] }
+
+    # Test simulations
+    Dir["#{this_dir}/invalid*.xml"].sort.each do |xml|
+      _run_xml(xml, this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
+    end
+  end
+
+  def _run_xml(xml, this_dir, args, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, "run")
     args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     _test_schema_validation(this_dir, xml)
-    results = _test_simulation(args, this_dir, rundir)
+    results = _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
     return results
   end
 
@@ -165,7 +199,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     return results
   end
 
-  def _test_simulation(args, this_dir, rundir)
+  def _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
     # Uses meta_measure workflow for faster simulations
 
     # Setup
@@ -195,7 +229,29 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    assert(success)
+    if expect_error
+      assert_equal(false, success)
+
+      if expect_error_msgs.nil?
+        flunk "No error message defined for #{File.basename(args['hpxml_path'])}."
+      else
+        run_log = File.readlines(File.join(rundir, "run.log")).map(&:strip)
+        expect_error_msgs.each do |error_msg|
+          found_error_msg = false
+          run_log.each do |run_line|
+            next unless run_line.include? error_msg
+
+            found_error_msg = true
+            break
+          end
+          assert(found_error_msg)
+        end
+      end
+
+      return
+    else
+      assert_equal(true, success)
+    end
 
     # Add output variables for crankcase and defrost energy (for DSE tests)
     vars = ["Cooling Coil Crankcase Heater Electric Energy",
@@ -845,7 +901,34 @@ class HPXMLTranslatorTest < MiniTest::Test
           dse_expect = 1.0 # TODO: Generalize this
         end
         puts "dse: #{dse_actual.round(2)} #{k}"
-        assert_in_delta(dse_expect, dse_actual, 0.022) # TODO: Reduce tolerance
+        assert_in_epsilon(dse_expect, dse_actual, 0.025)
+      end
+      puts "\n"
+    end
+  end
+
+  def _test_multiple_hvac(xmls, multiple_hvac_dir, all_results)
+    # Compare end use results for three of an HVAC system to results for one HVAC system.
+    xmls.sort.each do |xml|
+      next if not xml.include? multiple_hvac_dir
+
+      xml_x3 = File.absolute_path(xml)
+      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
+
+      results_x3 = all_results[xml_x3]
+      results_x1 = all_results[xml_x1]
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_x3.keys.each do |k|
+        next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+
+        result_x1 = results_x1[k].to_f
+        result_x3 = results_x3[k].to_f
+        next if result_x1 == 0.0 and result_x3 == 0.0
+
+        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
+        assert_in_delta(result_x1, result_x3, 0.1)
       end
       puts "\n"
     end
@@ -886,6 +969,35 @@ class HPXMLTranslatorTest < MiniTest::Test
         end
 
         assert_in_delta(result_x1, result_x3, 0.7) # TODO: Reduce tolerance
+      end
+      puts "\n"
+    end
+  end
+
+  def _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
+    # Compare end use results for three tankless water heaters to results for one tankless water heater.
+    xmls.sort.each do |xml|
+      next if not xml.include? water_heating_multiple_dir
+
+      xml_x3 = File.absolute_path(xml)
+      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
+
+      results_x3 = all_results[xml_x3]
+      results_x1 = all_results[xml_x1]
+      next if results_x1.nil?
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_x3.keys.each do |k|
+        next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+
+        result_x1 = results_x1[k].to_f
+        result_x3 = results_x3[k].to_f
+        next if result_x1 == 0.0 and result_x3 == 0.0
+
+        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
+
+        assert_in_delta(result_x1, result_x3, 0.2)
       end
       puts "\n"
     end
