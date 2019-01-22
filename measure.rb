@@ -230,6 +230,17 @@ class OSModel
     @has_uncond_bsmnt = (not building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"].nil?)
     @iecc_zone_2006 = XMLHelper.get_value(building, "BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year='2006']/ClimateZone")
 
+    loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
+    zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
+    loop_dhws = {}  # mapping between HPXML Water Heating systems and plant loops
+
+    use_only_ideal_air = XMLHelper.get_value(building, "BuildingDetails/HVAC/extension/UseOnlyIdealAirSystem")
+    if use_only_ideal_air.nil?
+      use_only_ideal_air = false
+    else
+      use_only_ideal_air = Boolean(use_only_ideal_air)
+    end
+
     # Geometry/Envelope
 
     spaces = {}
@@ -243,19 +254,10 @@ class OSModel
 
     # Hot Water
 
-    success = add_hot_water_and_appliances(runner, model, building, unit, weather, spaces)
+    success = add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
     return false if not success
 
     # HVAC
-
-    loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
-    zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
-    use_only_ideal_air = XMLHelper.get_value(building, "BuildingDetails/HVAC/extension/UseOnlyIdealAirSystem")
-    if use_only_ideal_air.nil?
-      use_only_ideal_air = false
-    else
-      use_only_ideal_air = Boolean(use_only_ideal_air)
-    end
 
     success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
@@ -316,7 +318,7 @@ class OSModel
     success = add_photovoltaics(runner, model, building)
     return false if not success
 
-    success = add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, map_tsv_dir)
+    success = add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, loop_dhws, map_tsv_dir)
     return false if not success
 
     return true
@@ -1817,7 +1819,7 @@ class OSModel
     return true
   end
 
-  def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces)
+  def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
     wh = building.elements["BuildingDetails/Systems/WaterHeating"]
 
     # Clothes Washer
@@ -1984,90 +1986,96 @@ class OSModel
     end
 
     # Water Heater
+    dhw_loop_fracs = {}
     if not wh.nil?
-      dhw = wh.elements["WaterHeatingSystem"]
-      location = XMLHelper.get_value(dhw, "Location")
-      space = get_space_from_location(location, "WaterHeatingSystem", model, spaces)
-      setpoint_temp = XMLHelper.get_value(dhw, "HotWaterTemperature")
-      if setpoint_temp.nil?
+      wh.elements.each("WaterHeatingSystem") do |dhw|
+        orig_plant_loops = model.getPlantLoops
+
+        location = XMLHelper.get_value(dhw, "Location")
+        space = get_space_from_location(location, "WaterHeatingSystem", model, spaces)
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
-      else
-        setpoint_temp = Float(setpoint_temp)
-      end
-      wh_type = XMLHelper.get_value(dhw, "WaterHeaterType")
-      fuel = XMLHelper.get_value(dhw, "FuelType")
+        wh_type = XMLHelper.get_value(dhw, "WaterHeaterType")
+        fuel = XMLHelper.get_value(dhw, "FuelType")
 
-      ef = XMLHelper.get_value(dhw, "EnergyFactor")
-      if ef.nil?
-        uef = Float(XMLHelper.get_value(dhw, "UniformEnergyFactor"))
-        ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
-      else
-        ef = Float(ef)
-      end
-      ef_adj = XMLHelper.get_value(dhw, "extension/EnergyFactorMultiplier")
-      if ef_adj.nil?
-        ef_adj = Waterheater.get_ef_multiplier(to_beopt_wh_type(wh_type))
-      else
-        ef_adj = Float(ef_adj)
-      end
-      ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
-                                                                            dist_type, recirc_control_type,
-                                                                            pipe_r, std_pipe_length, recirc_loop_length)
-
-      if wh_type == "storage water heater"
-
-        tank_vol = Float(XMLHelper.get_value(dhw, "TankVolume"))
-        if fuel != "electricity"
-          re = Float(XMLHelper.get_value(dhw, "RecoveryEfficiency"))
+        ef = XMLHelper.get_value(dhw, "EnergyFactor")
+        if ef.nil?
+          uef = Float(XMLHelper.get_value(dhw, "UniformEnergyFactor"))
+          ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
         else
-          re = 0.98
+          ef = Float(ef)
         end
-        capacity_kbtuh = Float(XMLHelper.get_value(dhw, "HeatingCapacity")) / 1000.0
-        oncycle_power = 0.0
-        offcycle_power = 0.0
-        success = Waterheater.apply_tank(model, unit, runner, space, to_beopt_fuel(fuel),
-                                         capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
-                                         oncycle_power, offcycle_power, ec_adj)
-        return false if not success
+        ef_adj = XMLHelper.get_value(dhw, "extension/EnergyFactorMultiplier")
+        if ef_adj.nil?
+          ef_adj = Waterheater.get_ef_multiplier(to_beopt_wh_type(wh_type))
+        else
+          ef_adj = Float(ef_adj)
+        end
+        ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
+                                                                              dist_type, recirc_control_type,
+                                                                              pipe_r, std_pipe_length, recirc_loop_length)
 
-      elsif wh_type == "instantaneous water heater"
+        dhw_load_frac = Float(XMLHelper.get_value(dhw, "FractionDHWLoadServed"))
 
-        capacity_kbtuh = 100000000.0
-        oncycle_power = 0.0
-        offcycle_power = 0.0
-        success = Waterheater.apply_tankless(model, unit, runner, space, to_beopt_fuel(fuel),
-                                             capacity_kbtuh, ef, ef_adj,
-                                             setpoint_temp, oncycle_power, offcycle_power, ec_adj)
-        return false if not success
+        if wh_type == "storage water heater"
 
-      elsif wh_type == "heat pump water heater"
+          tank_vol = Float(XMLHelper.get_value(dhw, "TankVolume"))
+          if fuel != "electricity"
+            re = Float(XMLHelper.get_value(dhw, "RecoveryEfficiency"))
+          else
+            re = 0.98
+          end
+          capacity_kbtuh = Float(XMLHelper.get_value(dhw, "HeatingCapacity")) / 1000.0
+          oncycle_power = 0.0
+          offcycle_power = 0.0
+          success = Waterheater.apply_tank(model, unit, runner, nil, space, to_beopt_fuel(fuel),
+                                           capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
+                                           oncycle_power, offcycle_power, ec_adj)
+          return false if not success
 
-        tank_vol = Float(XMLHelper.get_value(dhw, "TankVolume"))
-        e_cap = 4.5 # FIXME
-        min_temp = 45.0 # FIXME
-        max_temp = 120.0 # FIXME
-        cap = 0.5 # FIXME
-        cop = 2.8 # FIXME
-        shr = 0.88 # FIXME
-        airflow_rate = 181.0 # FIXME
-        fan_power = 0.0462 # FIXME
-        parasitics = 3.0 # FIXME
-        tank_ua = 3.9 # FIXME
-        int_factor = 1.0 # FIXME
-        temp_depress = 0.0 # FIXME
-        ducting = "none"
-        # FIXME: Use ef, ef_adj, ec_adj
-        success = Waterheater.apply_heatpump(model, unit, runner, space, weather,
-                                             e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
-                                             cap, cop, shr, airflow_rate, fan_power,
-                                             parasitics, tank_ua, int_factor, temp_depress,
-                                             ducting, 0)
-        return false if not success
+        elsif wh_type == "instantaneous water heater"
 
-      else
+          capacity_kbtuh = 100000000.0
+          oncycle_power = 0.0
+          offcycle_power = 0.0
+          success = Waterheater.apply_tankless(model, unit, runner, nil, space, to_beopt_fuel(fuel),
+                                               capacity_kbtuh, ef, ef_adj,
+                                               setpoint_temp, oncycle_power, offcycle_power, ec_adj)
+          return false if not success
 
-        fail "Unhandled water heater (#{wh_type})."
+        elsif wh_type == "heat pump water heater"
 
+          tank_vol = Float(XMLHelper.get_value(dhw, "TankVolume"))
+          e_cap = 4.5 # FIXME
+          min_temp = 45.0 # FIXME
+          max_temp = 120.0 # FIXME
+          cap = 0.5 # FIXME
+          cop = 2.8 # FIXME
+          shr = 0.88 # FIXME
+          airflow_rate = 181.0 # FIXME
+          fan_power = 0.0462 # FIXME
+          parasitics = 3.0 # FIXME
+          tank_ua = 3.9 # FIXME
+          int_factor = 1.0 # FIXME
+          temp_depress = 0.0 # FIXME
+          ducting = "none"
+          # FIXME: Use ef, ef_adj, ec_adj
+          success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather,
+                                               e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
+                                               cap, cop, shr, airflow_rate, fan_power,
+                                               parasitics, tank_ua, int_factor, temp_depress,
+                                               ducting, 0)
+          return false if not success
+
+        else
+
+          fail "Unhandled water heater (#{wh_type})."
+
+        end
+
+        new_plant_loop = (model.getPlantLoops - orig_plant_loops)[0]
+        dhw_loop_fracs[new_plant_loop] = dhw_load_frac
+
+        update_loop_dhws(loop_dhws, model, dhw, orig_plant_loops)
       end
     end
 
@@ -2082,7 +2090,7 @@ class OSModel
                                           recirc_branch_length, recirc_control_type,
                                           recirc_pump_power, dwhr_present,
                                           dwhr_facilities_connected, dwhr_is_equal_flow,
-                                          dwhr_efficiency, setpoint_temp, @eri_version)
+                                          dwhr_efficiency, dhw_loop_fracs, @eri_version)
     return false if not success
 
     return true
@@ -2678,6 +2686,23 @@ class OSModel
     end
   end
 
+  def self.update_loop_dhws(loop_dhws, model, sys, orig_plant_loops)
+    sys_id = sys.elements["SystemIdentifier"].attributes["id"]
+    loop_dhws[sys_id] = []
+
+    model.getPlantLoops.each do |plant_loop|
+      next if orig_plant_loops.include? plant_loop # Only include newly added plant loops
+
+      loop_dhws[sys_id] << plant_loop
+    end
+
+    loop_dhws.each do |sys_id, loops|
+      next if not loops.empty?
+
+      loop_dhws.delete(sys_id)
+    end
+  end
+
   def self.add_mels(runner, model, building, unit, spaces)
     living_space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
 
@@ -3111,9 +3136,10 @@ class OSModel
     return true
   end
 
-  def self.add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, map_tsv_dir)
+  def self.add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, loop_dhws, map_tsv_dir)
     htg_mapping = {}
     clg_mapping = {}
+    dhw_mapping = {}
 
     # AirLoopHVAC systems
     loop_hvacs.each do |sys_id, loops|
@@ -3183,21 +3209,72 @@ class OSModel
       end
     end
 
+    loop_dhws.each do |sys_id, loops|
+      dhw_mapping[sys_id] = []
+      loops.each do |loop|
+        loop.supplyComponents.each do |comp|
+          if comp.to_WaterHeaterMixed.is_initialized
+
+            water_heater = comp.to_WaterHeaterMixed.get
+            dhw_mapping[sys_id] << water_heater
+
+          elsif comp.to_WaterHeaterStratified.is_initialized
+
+            hpwh_tank = comp.to_WaterHeaterStratified.get
+            dhw_mapping[sys_id] << hpwh_tank
+
+            model.getWaterHeaterHeatPumpWrappedCondensers.each do |hpwh|
+              next if hpwh.tank.name.to_s != hpwh_tank.name.to_s
+
+              water_heater_coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.get
+              dhw_mapping[sys_id] << water_heater_coil
+            end
+
+          end
+        end
+
+        recirc_pump_name = loop.additionalProperties.getFeatureAsString("PlantLoopRecircPump")
+        if recirc_pump_name.is_initialized
+          recirc_pump_name = recirc_pump_name.get
+          model.getElectricEquipments.each do |ee|
+            next unless ee.name.to_s == recirc_pump_name
+
+            dhw_mapping[sys_id] << ee
+          end
+        end
+
+        loop.demandComponents.each do |comp|
+          if comp.to_WaterUseConnections.is_initialized
+
+            water_use_connections = comp.to_WaterUseConnections.get
+            dhw_mapping[sys_id] << water_use_connections
+
+          end
+        end
+      end
+    end
+
     htg_mapping.each do |sys_id, htg_equip_list|
-      add_output_variables(model, Constants.OutputVarsSpaceHeatingElectricity, htg_equip_list)
-      add_output_variables(model, Constants.OutputVarsSpaceHeatingFuel, htg_equip_list)
-      add_output_variables(model, Constants.OutputVarsSpaceHeatingLoad, htg_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingElectricity, htg_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingFuel, htg_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingLoad, htg_equip_list)
     end
     clg_mapping.each do |sys_id, clg_equip_list|
-      add_output_variables(model, Constants.OutputVarsSpaceCoolingElectricity, clg_equip_list)
-      add_output_variables(model, Constants.OutputVarsSpaceCoolingLoad, clg_equip_list)
+      add_output_variables(model, OutputVars.SpaceCoolingElectricity, clg_equip_list)
+      add_output_variables(model, OutputVars.SpaceCoolingLoad, clg_equip_list)
     end
-    add_output_variables(model, Constants.OutputVarsWaterHeatingLoad, nil)
+    dhw_mapping.each do |sys_id, dhw_equip_list|
+      add_output_variables(model, OutputVars.WaterHeatingElectricity, dhw_equip_list)
+      add_output_variables(model, OutputVars.WaterHeatingElectricityRecircPump, dhw_equip_list)
+      add_output_variables(model, OutputVars.WaterHeatingFuel, dhw_equip_list)
+      add_output_variables(model, OutputVars.WaterHeatingLoad, dhw_equip_list)
+    end
 
     if map_tsv_dir.is_initialized
       map_tsv_dir = map_tsv_dir.get
       write_mapping(htg_mapping, File.join(map_tsv_dir, "map_hvac_heating.tsv"))
       write_mapping(clg_mapping, File.join(map_tsv_dir, "map_hvac_cooling.tsv"))
+      write_mapping(dhw_mapping, File.join(map_tsv_dir, "map_water_heating.tsv"))
     end
 
     return true
@@ -3964,6 +4041,87 @@ def get_ashp_num_speeds(seer)
     num_speeds = "2-Speed"
   else
     num_speeds = "Variable-Speed"
+  end
+end
+
+class OutputVars
+  def self.SpaceHeatingElectricity
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingGas' => [],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Electric Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.SpaceHeatingFuel
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => [],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => [],
+             'OpenStudio::Model::CoilHeatingElectric' => [],
+             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => [],
+             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy', 'Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy', 'Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy', 'Boiler Propane Energy', 'Boiler FuelOil#1 Energy'],
+             'OpenStudio::Model::FanOnOff' => [] }
+  end
+
+  def self.SpaceHeatingLoad
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Total Heating Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.SpaceCoolingElectricity
+    return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.SpaceCoolingLoad
+    return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Total Cooling Energy'],
+             'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Total Cooling Energy'],
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Total Cooling Energy'],
+             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+  end
+
+  def self.WaterHeatingElectricity
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'],
+             'OpenStudio::Model::WaterUseConnections' => [],
+             'OpenStudio::Model::ElectricEquipment' => [] }
+  end
+
+  def self.WaterHeatingElectricityRecircPump
+    return { 'OpenStudio::Model::WaterHeaterMixed' => [],
+             'OpenStudio::Model::WaterHeaterStratified' => [],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => [],
+             'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
+  end
+
+  def self.WaterHeatingFuel
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => [],
+             'OpenStudio::Model::ElectricEquipment' => [] }
+  end
+
+  def self.WaterHeatingLoad
+    return { 'OpenStudio::Model::WaterHeaterMixed' => [],
+             'OpenStudio::Model::WaterHeaterStratified' => [],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
+             'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'],
+             'OpenStudio::Model::ElectricEquipment' => [] }
   end
 end
 
