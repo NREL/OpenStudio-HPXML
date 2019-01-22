@@ -6,7 +6,10 @@ class HPXML
                         eri_calculation_version: nil,
                         building_id: nil,
                         event_type: nil)
-    hpxml = REXML::Element.new("HPXML")
+    doc = REXML::Document.new
+    doc << REXML::XMLDecl.new(version="1.0", encoding="UTF-8")
+    doc.add_element "HPXML"
+    hpxml = doc.elements["HPXML"]
     XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2014/6")
     XMLHelper.add_attribute(hpxml, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
     XMLHelper.add_attribute(hpxml, "xsi:schemaLocation", "http://hpxmlonline.com/2014/6")
@@ -25,7 +28,7 @@ class HPXML
                  id: building_id,
                  event_type: event_type)
 
-    return hpxml
+    return doc
   end
 
   def self.get_hpxml_version(hpxml:)
@@ -238,7 +241,7 @@ class HPXML
   def self.get_weather_station_values(weather_station:)
     return nil if weather_station.nil?
 
-    return { :id => weather_station.elements["SystemIdentifiersInfo"].attributes["id"],
+    return { :id => HPXML.get_id(weather_station),
              :name => XMLHelper.get_value(weather_station, "Name"),
              :wmo => XMLHelper.get_value(weather_station, "WMO") }
   end
