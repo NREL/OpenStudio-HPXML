@@ -54,12 +54,12 @@ task :update_hpxmls do
       # derivative = get_hpxml_values(XMLHelper.parse_file(File.absolute_path(derivative_path)))
 
       doc = HPXML.create_hpxml(xml_generated_by: "rakefile",
-                                 transaction: parent[:xml_transaction_header_information][:transaction],
-                                 software_program_used: parent[:software_info][:software_program_used],
-                                 software_program_version: parent[:software_info][:software_program_version],
-                                 eri_calculation_version: parent[:software_info][:eri_calculation_version],
-                                 building_id: parent[:building][:id],
-                                 event_type: parent[:project_status][:event_type])
+                               transaction: parent[:xml_transaction_header_information][:transaction],
+                               software_program_used: parent[:software_info][:software_program_used],
+                               software_program_version: parent[:software_info][:software_program_version],
+                               eri_calculation_version: parent[:software_info][:eri_calculation_version],
+                               building_id: parent[:building][:id],
+                               event_type: parent[:project_status][:event_type])
       hpxml = doc.elements["HPXML"]
       building_details = hpxml.elements["Building/BuildingDetails"]
       building_summary = building_details.elements["BuildingSummary"]
