@@ -119,6 +119,12 @@ class XMLHelper
     end
   end
 
+  def self.parse_file(hpxml_path)
+    file_read = File.read(hpxml_path)
+    hpxml_doc = REXML::Document.new(file_read)
+    return hpxml_doc
+  end
+
   def self.write_file(doc, out_path)
     # Write XML file
     formatter = REXML::Formatters::Pretty.new(2)
