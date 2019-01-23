@@ -234,7 +234,7 @@ class OSModel
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
     loop_dhws = {}  # mapping between HPXML Water Heating systems and plant loops
 
-    use_only_ideal_air = XMLHelper.get_value(building, "BuildingDetails/HVAC/extension/UseOnlyIdealAirSystem")
+    use_only_ideal_air = XMLHelper.get_value(building, "BuildingDetails/Systems/HVAC/extension/UseOnlyIdealAirSystem")
     if use_only_ideal_air.nil?
       use_only_ideal_air = false
     else
@@ -2037,8 +2037,9 @@ class OSModel
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
+          cycling_derate = 1.0 - ef_adj
           success = Waterheater.apply_tankless(model, unit, runner, nil, space, to_beopt_fuel(fuel),
-                                               capacity_kbtuh, ef, ef_adj,
+                                               capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj)
           return false if not success
 
@@ -2476,14 +2477,21 @@ class OSModel
   end
 
   def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
+    if use_only_ideal_air
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1)
+      return false if not success
+
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1)
+      return false if not success
+
+      return true
+    end
+
     # Residual heating
     htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
     htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
     residual_htg_load_frac = 1.0 - htg_load_frac
-    if use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1)
-      return false if not success
-    elsif residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
+    if residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_htg_load_frac)
       return false if not success
     end
@@ -2492,10 +2500,7 @@ class OSModel
     clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
     clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
     residual_clg_load_frac = 1.0 - clg_load_frac
-    if use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1)
-      return false if not success
-    elsif residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
+    if residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
       success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_clg_load_frac)
       return false if not success
     end
