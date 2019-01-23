@@ -4,6 +4,8 @@ This repository contains an [OpenStudio measure](http://nrel.github.io/OpenStudi
 
 Unit Test Status: [![CircleCI](https://circleci.com/gh/NREL/OpenStudio-HPXML/tree/master.svg?style=svg)](https://circleci.com/gh/NREL/OpenStudio-HPXML/tree/master)
 
+Code Coverage: [![codecov](https://codecov.io/gh/NREL/OpenStudio-HPXML/branch/master/graph/badge.svg)](https://codecov.io/gh/NREL/OpenStudio-HPXML)
+
 To serve documentation, run:
 
 ```ruby
