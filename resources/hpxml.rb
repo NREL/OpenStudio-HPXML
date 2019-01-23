@@ -45,7 +45,7 @@ class HPXML
     hpxml = doc.elements["HPXML"]
 
     values[:xml_transaction_header_information] = get_xml_transaction_header_information_values(xml_transaction_header_information: hpxml.elements["XMLTransactionHeaderInformation"])
-    values[:software_info] = get_software_info(software_info: hpxml.elements["SoftwareInfo"])
+    values[:software_info] = get_software_info_values(software_info: hpxml.elements["SoftwareInfo"])
     values[:building] = get_building_values(building: hpxml.elements["Building"])
     values[:project_status] = get_project_status_values(project_status: hpxml.elements["Building/ProjectStatus"])
     values[:site] = get_site_values(site: hpxml.elements["Building/BuildingDetails/BuildingSummary/Site"])
@@ -102,7 +102,7 @@ class HPXML
     return software_info
   end
 
-  def self.get_software_info(software_info:)
+  def self.get_software_info_values(software_info:)
     return nil if software_info.nil?
 
     return { :software_program_used => XMLHelper.get_value(software_info, "SoftwareProgramUsed"),
@@ -958,7 +958,6 @@ class HPXML
         systems = hpxml.elements["Building/BuildingDetails/Systems"]
         if systems.nil?
           building_details = hpxml.elements["Building/BuildingDetails"]
-          puts building_details
           systems = XMLHelper.add_element(building_details, "Systems")
         end
         hvac = XMLHelper.add_element(systems, "HVAC")
@@ -1002,6 +1001,7 @@ class HPXML
                          id:,
                          idref: nil,
                          heat_pump_type: nil,
+                         heat_pump_fuel: nil,
                          heating_capacity: nil,
                          cooling_capacity: nil,
                          fraction_heat_load_served: nil,
@@ -1031,6 +1031,7 @@ class HPXML
       XMLHelper.add_attribute(distribution_system, "idref", idref)
     end
     XMLHelper.add_element(heat_pump, "HeatPumpType", heat_pump_type) unless heat_pump_type.nil?
+    XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel) unless heat_pump_fuel.nil?
     XMLHelper.add_element(heat_pump, "HeatingCapacity", heating_capacity) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", cooling_capacity) unless cooling_capacity.nil?
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", fraction_heat_load_served) unless fraction_heat_load_served.nil?
@@ -1055,6 +1056,7 @@ class HPXML
     return { :id => HPXML.get_id(heat_pump),
              :idref => HPXML.get_idref(heat_pump, "DistributionSystem"),
              :heat_pump_type => XMLHelper.get_value(heat_pump, "HeatPumpType"),
+             :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
              :heating_capacity => XMLHelper.get_value(heat_pump, "HeatingCapacity"),
              :cooling_capacity => XMLHelper.get_value(heat_pump, "CoolingCapacity"),
              :fraction_heat_load_served => XMLHelper.get_value(heat_pump, "FractionHeatLoadServed"),
@@ -1655,7 +1657,7 @@ class HPXML
              :fraction_qualifying_tier_ii_fixtures_garage => XMLHelper.get_value(lighting_fractions, "extension/FractionQualifyingTierIIFixturesGarage") }
   end
 
-  def self.add_ceiling_fan(lighting:,
+  def self.add_ceiling_fan(hpxml:,
                            id:,
                            fan_speed: nil,
                            efficiency: nil,
