@@ -826,11 +826,16 @@ class HPXML
   def self.get_window_values(window:)
     return nil if window.nil?
 
+    frame_type = window.elements["FrameType"]
+    unless frame_type.nil?
+      frame_type = XMLHelper.get_child_name(window, "FrameType")
+    end
+
     return { :id => HPXML.get_id(window),
              :area => XMLHelper.get_value(window, "Area"),
              :azimuth => XMLHelper.get_value(window, "Azimuth"),
              :orientation => XMLHelper.get_value(window, "Orientation"),
-             :frame_type => XMLHelper.get_child_name(window, "FrameType"),
+             :frame_type => frame_type,
              :glass_layers => XMLHelper.get_value(window, "GlassLayers"),
              :glass_type => XMLHelper.get_value(window, "GlassType"),
              :gas_fill => XMLHelper.get_value(window, "GasFill"),
