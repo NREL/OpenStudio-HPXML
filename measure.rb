@@ -2037,8 +2037,9 @@ class OSModel
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
+          cycling_derate = 1.0 - ef_adj
           success = Waterheater.apply_tankless(model, unit, runner, nil, space, to_beopt_fuel(fuel),
-                                               capacity_kbtuh, ef, ef_adj,
+                                               capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj)
           return false if not success
 
