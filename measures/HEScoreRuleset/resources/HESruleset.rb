@@ -380,7 +380,7 @@ class HEScoreRuleset
                                     azimuth: orientation_to_azimuth(orig_window_values[:orientation]),
                                     ufactor: win_ufactor,
                                     shgc: win_shgc,
-                                    idref: orig_window_values[:idref])
+                                    wall_idref: orig_window_values[:wall_idref])
       # No overhangs FIXME: Verify
       # No neighboring buildings FIXME: Verify
       # Uses ERI Reference Home for interior shading
@@ -412,7 +412,7 @@ class HEScoreRuleset
                                         azimuth: orientation_to_azimuth("north"), # FIXME: Hard-coded
                                         ufactor: sky_ufactor,
                                         shgc: sky_shgc,
-                                        idref: orig_skylight_values[:idref])
+                                        roof_idref: orig_skylight_values[:roof_idref])
       # No overhangs
     end
   end
@@ -430,7 +430,7 @@ class HEScoreRuleset
     front_wall_values = HPXML.get_wall_values(wall: front_wall)
     new_door = HPXML.add_door(hpxml: hpxml,
                               id: "Door",
-                              idref: front_wall_values[:id],
+                              wall_idref: front_wall_values[:id],
                               azimuth: orientation_to_azimuth(@bldg_orient))
     # Uses ERI Reference Home for Area
     # Uses ERI Reference Home for RValue
@@ -443,7 +443,7 @@ class HEScoreRuleset
 
       distribution_system_id = nil
       if XMLHelper.has_element(orig_heating, "DistributionSystem")
-        distribution_system_id = orig_heating_values[:idref]
+        distribution_system_id = orig_heating_values[:distribution_system_idref]
       end
       hvac_type = orig_heating_values[:heating_system_type]
       hvac_fuel = orig_heating_values[:heating_system_fuel]
@@ -485,7 +485,7 @@ class HEScoreRuleset
 
       new_heating = HPXML.add_heating_system(hpxml: hpxml,
                                              id: orig_heating_values[:id],
-                                             idref: distribution_system_id,
+                                             distribution_system_idref: distribution_system_id,
                                              heating_system_type: hvac_type,
                                              heating_system_fuel: hvac_fuel,
                                              heating_capacity: -1, # Use Manual J auto-sizing
@@ -500,7 +500,7 @@ class HEScoreRuleset
 
       distribution_system_id = nil
       if XMLHelper.has_element(orig_cooling, "DistributionSystem")
-        distribution_system_id = orig_cooling_values[:idref]
+        distribution_system_id = orig_cooling_values[:distribution_system_idref]
       end
       hvac_type = orig_cooling_values[:cooling_system_type]
       hvac_frac = orig_cooling_values[:fraction_cool_load_served]
@@ -530,7 +530,7 @@ class HEScoreRuleset
 
       new_cooling = HPXML.add_cooling_system(hpxml: hpxml,
                                              id: orig_cooling_values[:id],
-                                             idref: distribution_system_id,
+                                             distribution_system_idref: distribution_system_id,
                                              cooling_system_type: hvac_type,
                                              cooling_system_fuel: "electricity",
                                              cooling_capacity: -1, # Use Manual J auto-sizing
@@ -545,7 +545,7 @@ class HEScoreRuleset
 
       distribution_system_id = nil
       if XMLHelper.has_element(orig_hp, "DistributionSystem")
-        distribution_system_id = orig_hp_values[:idref]
+        distribution_system_id = orig_hp_values[:distribution_system_idref]
       end
       hvac_type = orig_hp_values[:heat_pump_type]
       hvac_frac_heat = orig_hp_values[:fraction_heat_load_served]
@@ -584,7 +584,7 @@ class HEScoreRuleset
 
       new_hp = HPXML.add_heat_pump(hpxml: hpxml,
                                    id: orig_hp_values[:id],
-                                   idref: distribution_system_id,
+                                   distribution_system_idref: distribution_system_id,
                                    heat_pump_type: hvac_type,
                                    heating_capacity: -1, # Use Manual J auto-sizing
                                    cooling_capacity: -1, # Use Manual J auto-sizing
