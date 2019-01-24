@@ -7,8 +7,7 @@ class HPXML
                         eri_calculation_version: nil,
                         building_id: nil,
                         event_type: nil)
-    doc = REXML::Document.new
-    doc << REXML::XMLDecl.new(version = "1.0", encoding = "UTF-8")
+    doc = XMLHelper.create_doc(version = "1.0", encoding = "UTF-8")
     doc.add_element "HPXML"
     hpxml = doc.elements["HPXML"]
     XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2014/6")
@@ -117,7 +116,7 @@ class HPXML
     building_id = XMLHelper.add_element(building, "BuildingID")
     XMLHelper.add_attribute(building_id, "id", id)
 
-    add_project_status(building: building,
+    add_project_status(hpxml: hpxml,
                        event_type: event_type)
 
     XMLHelper.add_element(building, "BuildingDetails/BuildingSummary")
@@ -131,8 +130,9 @@ class HPXML
     return { :id => building.elements["BuildingID"].attributes["id"] }
   end
 
-  def self.add_project_status(building:,
+  def self.add_project_status(hpxml:,
                               event_type: nil)
+    building = hpxml.elements["Building"]
     project_status = XMLHelper.add_element(building, "ProjectStatus")
     XMLHelper.add_element(project_status, "EventType", event_type) unless event_type.nil?
 
@@ -784,7 +784,7 @@ class HPXML
                       overhangs_depth: nil,
                       overhangs_distance_to_top_of_window: nil,
                       overhangs_distance_to_bottom_of_window: nil,
-                      idref: nil)
+                      wall_idref: nil)
     windows = hpxml.elements["Building/BuildingDetails/Enclosure/Windows"]
     if windows.nil?
       enclosure = hpxml.elements["Building/BuildingDetails/Enclosure"]
@@ -815,9 +815,9 @@ class HPXML
       XMLHelper.add_element(overhangs, "DistanceToTopOfWindow", overhangs_distance_to_top_of_window) unless overhangs_distance_to_top_of_window.nil?
       XMLHelper.add_element(overhangs, "DistanceToBottomOfWindow", overhangs_distance_to_bottom_of_window) unless overhangs_distance_to_bottom_of_window.nil?
     end
-    unless idref.nil?
+    unless wall_idref.nil?
       attached_to_wall = XMLHelper.add_element(window, "AttachedToWall")
-      XMLHelper.add_attribute(attached_to_wall, "idref", idref)
+      XMLHelper.add_attribute(attached_to_wall, "idref", wall_idref)
     end
 
     return window
@@ -844,7 +844,7 @@ class HPXML
              :overhangs_depth => XMLHelper.get_value(window, "Overhangs/Depth"),
              :overhangs_distance_to_top_of_window => XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"),
              :overhangs_distance_to_bottom_of_window => XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"),
-             :idref => HPXML.get_idref(window, "AttachedToWall") }
+             :wall_idref => HPXML.get_idref(window, "AttachedToWall") }
   end
 
   def self.add_skylight(hpxml:,
@@ -858,7 +858,7 @@ class HPXML
                         gas_fill: nil,
                         ufactor: nil,
                         shgc: nil,
-                        idref: nil)
+                        roof_idref: nil)
     skylights = hpxml.elements["Building/BuildingDetails/Enclosure/Skylights"]
     if skylights.nil?
       enclosure = hpxml.elements["Building/BuildingDetails/Enclosure"]
@@ -883,9 +883,9 @@ class HPXML
     XMLHelper.add_element(skylight, "GasFill", gas_fill) unless gas_fill.nil?
     XMLHelper.add_element(skylight, "UFactor", ufactor) unless ufactor.nil?
     XMLHelper.add_element(skylight, "SHGC", shgc) unless shgc.nil?
-    unless idref.nil?
+    unless roof_idref.nil?
       attached_to_roof = XMLHelper.add_element(skylight, "AttachedToRoof")
-      XMLHelper.add_attribute(attached_to_roof, "idref", idref)
+      XMLHelper.add_attribute(attached_to_roof, "idref", roof_idref)
     end
 
     return skylight
@@ -894,22 +894,27 @@ class HPXML
   def self.get_skylight_values(skylight:)
     return nil if skylight.nil?
 
+    frame_type = skylight.elements["FrameType"]
+    unless frame_type.nil?
+      frame_type = XMLHelper.get_child_name(skylight, "FrameType")
+    end
+
     return { :id => HPXML.get_id(skylight),
              :area => XMLHelper.get_value(skylight, "Area"),
              :azimuth => XMLHelper.get_value(skylight, "Azimuth"),
              :orientation => XMLHelper.get_value(skylight, "Orientation"),
-             :frame_type => XMLHelper.get_child_name(skylight, "FrameType"),
+             :frame_type => frame_type,
              :glass_layers => XMLHelper.get_value(skylight, "GlassLayers"),
              :glass_type => XMLHelper.get_value(skylight, "GlassType"),
              :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
              :ufactor => XMLHelper.get_value(skylight, "UFactor"),
              :shgc => XMLHelper.get_value(skylight, "SHGC"),
-             :idref => HPXML.get_idref(skylight, "AttachedToRoof") }
+             :roof_idref => HPXML.get_idref(skylight, "AttachedToRoof") }
   end
 
   def self.add_door(hpxml:,
                     id:,
-                    idref: nil,
+                    wall_idref: nil,
                     area: nil,
                     azimuth: nil,
                     r_value: nil)
@@ -925,9 +930,9 @@ class HPXML
     door = XMLHelper.add_element(doors, "Door")
     sys_id = XMLHelper.add_element(door, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    unless idref.nil?
+    unless wall_idref.nil?
       attached_to_wall = XMLHelper.add_element(door, "AttachedToWall")
-      XMLHelper.add_attribute(attached_to_wall, "idref", idref)
+      XMLHelper.add_attribute(attached_to_wall, "idref", wall_idref)
     end
     XMLHelper.add_element(door, "Area", area) unless area.nil?
     XMLHelper.add_element(door, "Azimuth", azimuth) unless azimuth.nil?
@@ -940,7 +945,7 @@ class HPXML
     return nil if door.nil?
 
     return { :id => HPXML.get_id(door),
-             :idref => HPXML.get_idref(door, "AttachedToWall"),
+             :wall_idref => HPXML.get_idref(door, "AttachedToWall"),
              :area => XMLHelper.get_value(door, "Area"),
              :azimuth => XMLHelper.get_value(door, "Azimuth"),
              :r_value => XMLHelper.get_value(door, "RValue") }
@@ -948,7 +953,7 @@ class HPXML
 
   def self.add_heating_system(hpxml:,
                               id:,
-                              idref: nil,
+                              distribution_system_idref: nil,
                               year_installed: nil,
                               heating_system_type: nil,
                               heating_system_fuel: nil,
@@ -972,9 +977,9 @@ class HPXML
     heating_system = XMLHelper.add_element(hvac_plant, "HeatingSystem")
     sys_id = XMLHelper.add_element(heating_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    unless idref.nil?
+    unless distribution_system_idref.nil?
       distribution_system = XMLHelper.add_element(heating_system, "DistributionSystem")
-      XMLHelper.add_attribute(distribution_system, "idref", idref)
+      XMLHelper.add_attribute(distribution_system, "idref", distribution_system_idref)
     end
     XMLHelper.add_element(heating_system, "YearInstalled", year_installed) unless year_installed.nil?
     unless heating_system_type.nil?
@@ -997,7 +1002,7 @@ class HPXML
     return nil if heating_system.nil?
 
     return { :id => HPXML.get_id(heating_system),
-             :idref => HPXML.get_idref(heating_system, "DistributionSystem"),
+             :distribution_system_idref => HPXML.get_idref(heating_system, "DistributionSystem"),
              :year_installed => XMLHelper.get_value(heating_system, "YearInstalled"),
              :heating_system_type => XMLHelper.get_child_name(heating_system, "HeatingSystemType"),
              :heating_system_fuel => XMLHelper.get_value(heating_system, "HeatingSystemFuel"),
@@ -1009,7 +1014,7 @@ class HPXML
 
   def self.add_cooling_system(hpxml:,
                               id:,
-                              idref: nil,
+                              distribution_system_idref: nil,
                               year_installed: nil,
                               cooling_system_type: nil,
                               cooling_system_fuel: nil,
@@ -1033,9 +1038,9 @@ class HPXML
     cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
     sys_id = XMLHelper.add_element(cooling_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    unless idref.nil?
+    unless distribution_system_idref.nil?
       distribution_system = XMLHelper.add_element(cooling_system, "DistributionSystem")
-      XMLHelper.add_attribute(distribution_system, "idref", idref)
+      XMLHelper.add_attribute(distribution_system, "idref", distribution_system_idref)
     end
     XMLHelper.add_element(cooling_system, "YearInstalled", year_installed) unless year_installed.nil?
     XMLHelper.add_element(cooling_system, "CoolingSystemType", cooling_system_type) unless cooling_system_type.nil?
@@ -1055,7 +1060,7 @@ class HPXML
     return nil if cooling_system.nil?
 
     return { :id => HPXML.get_id(cooling_system),
-             :idref => HPXML.get_idref(cooling_system, "DistributionSystem"),
+             :distribution_system_idref => HPXML.get_idref(cooling_system, "DistributionSystem"),
              :year_installed => XMLHelper.get_value(cooling_system, "YearInstalled"),
              :cooling_system_type => XMLHelper.get_value(cooling_system, "CoolingSystemType"),
              :cooling_system_fuel => XMLHelper.get_value(cooling_system, "CoolingSystemFuel"),
@@ -1067,7 +1072,7 @@ class HPXML
 
   def self.add_heat_pump(hpxml:,
                          id:,
-                         idref: nil,
+                         distribution_system_idref: nil,
                          year_installed: nil,
                          heat_pump_type: nil,
                          heat_pump_fuel: nil,
@@ -1095,9 +1100,9 @@ class HPXML
     heat_pump = XMLHelper.add_element(hvac_plant, "HeatPump")
     sys_id = XMLHelper.add_element(heat_pump, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    unless idref.nil?
+    unless distribution_system_idref.nil?
       distribution_system = XMLHelper.add_element(heat_pump, "DistributionSystem")
-      XMLHelper.add_attribute(distribution_system, "idref", idref)
+      XMLHelper.add_attribute(distribution_system, "idref", distribution_system_idref)
     end
     XMLHelper.add_element(heat_pump, "YearInstalled", year_installed) unless year_installed.nil?
     XMLHelper.add_element(heat_pump, "HeatPumpType", heat_pump_type) unless heat_pump_type.nil?
@@ -1124,7 +1129,7 @@ class HPXML
     return nil if heat_pump.nil?
 
     return { :id => HPXML.get_id(heat_pump),
-             :idref => HPXML.get_idref(heat_pump, "DistributionSystem"),
+             :distribution_system_idref => HPXML.get_idref(heat_pump, "DistributionSystem"),
              :year_installed => XMLHelper.get_value(heat_pump, "YearInstalle"),
              :heat_pump_type => XMLHelper.get_value(heat_pump, "HeatPumpType"),
              :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
@@ -1282,7 +1287,7 @@ class HPXML
                                total_recovery_efficiency: nil,
                                sensible_recovery_efficiency: nil,
                                fan_power: nil,
-                               idref: nil)
+                               distribution_system_idref: nil)
     ventilation_fans = hpxml.elements["Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans"]
     if ventilation_fans.nil?
       mechanical_ventilation = hpxml.elements["Building/BuildingDetails/Systems/MechanicalVentilation"]
@@ -1306,9 +1311,9 @@ class HPXML
     XMLHelper.add_element(ventilation_fan, "TotalRecoveryEfficiency", total_recovery_efficiency) unless total_recovery_efficiency.nil?
     XMLHelper.add_element(ventilation_fan, "SensibleRecoveryEfficiency", sensible_recovery_efficiency) unless sensible_recovery_efficiency.nil?
     XMLHelper.add_element(ventilation_fan, "FanPower", fan_power) unless fan_power.nil?
-    unless idref.nil?
+    unless distribution_system_idref.nil?
       attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, "AttachedToHVACDistributionSystem")
-      XMLHelper.add_attribute(attached_to_hvac_distribution_system, "idref", idref)
+      XMLHelper.add_attribute(attached_to_hvac_distribution_system, "idref", distribution_system_idref)
     end
 
     return ventilation_fan
@@ -1325,7 +1330,7 @@ class HPXML
              :total_recovery_efficiency => XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency"),
              :sensible_recovery_efficiency => XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency"),
              :fan_power => XMLHelper.get_value(ventilation_fan, "FanPower"),
-             :idref => HPXML.get_idref(ventilation_fan, "AttachedToHVACDistributionSystem") }
+             :distribution_system_idref => HPXML.get_idref(ventilation_fan, "AttachedToHVACDistributionSystem") }
   end
 
   def self.add_water_heating_system(hpxml:,
