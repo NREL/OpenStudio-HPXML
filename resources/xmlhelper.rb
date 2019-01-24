@@ -119,6 +119,13 @@ class XMLHelper
     end
   end
 
+  def self.create_doc(version = nil, encoding = nil, standalone = nil)
+    doc = REXML::Document.new
+    decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
+    doc << decl
+    return doc
+  end
+
   def self.parse_file(hpxml_path)
     file_read = File.read(hpxml_path)
     hpxml_doc = REXML::Document.new(file_read)
