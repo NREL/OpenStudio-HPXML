@@ -594,8 +594,8 @@ class HEScoreRuleset
       hvac_value_cool = nil
       if ["air-to-air", "mini-split"].include? hvac_type
         hvac_year = XMLHelper.get_value(orig_hp, "YearInstalled")
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolingEfficiency[Units='SEER']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatingEfficiency[Units='HSPF']/Value")
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='SEER']/Value")
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='HSPF']/Value")
         hvac_units_cool = "SEER"
         hvac_units_heat = "HSPF"
         if not hvac_year.nil?
@@ -606,8 +606,8 @@ class HEScoreRuleset
         end
       elsif hvac_type == "ground-to-air"
         hvac_year = XMLHelper.get_value(orig_hp, "YearInstalled")
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolingEfficiency[Units='EER']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatingEfficiency[Units='COP']/Value")
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='EER']/Value")
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='COP']/Value")
         hvac_units_cool = "EER"
         hvac_units_heat = "COP"
         if not hvac_year.nil?
