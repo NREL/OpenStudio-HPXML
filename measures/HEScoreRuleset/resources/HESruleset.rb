@@ -50,7 +50,7 @@ class HEScoreRuleset
 
     # ClimateAndRiskZones
     new_climate = XMLHelper.add_element(new_details, "ClimateandRiskZones")
-    set_climate(new_climate)
+    set_climate(new_climate, orig_details)
 
     # Enclosure
     new_enclosure = XMLHelper.add_element(new_details, "Enclosure")
@@ -107,14 +107,17 @@ class HEScoreRuleset
                                     garage_present: false)
   end
 
-  def self.set_climate(new_climate)
+  def self.set_climate(new_climate, orig_details)
     HPXML.add_climate_zone_iecc(climate_and_risk_zones: new_climate,
                                 year: 2006,
                                 climate_zone: "1A") # FIXME: Hard-coded
+    
+    name = XMLHelper.get_value(orig_details, "ClimateandRiskZones/WeatherStation/Name")
+    wmo = Integer(XMLHelper.get_value(orig_details, "ClimateandRiskZones/WeatherStation/WMO"))
     HPXML.add_weather_station(climate_and_risk_zones: new_climate,
                               id: "WeatherStation",
-                              name: "Miami, FL", # FIXME: Hard-coded
-                              wmo: 722020) # FIXME: Hard-coded
+                              name: name,
+                              wmo: wmo)
   end
 
   def self.set_enclosure_air_infiltration(new_enclosure, orig_details)

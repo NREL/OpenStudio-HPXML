@@ -44,6 +44,13 @@
           <ConditionedFloorArea>2000</ConditionedFloorArea>
         </BuildingConstruction>
       </BuildingSummary>
+      <ClimateandRiskZones>
+        <WeatherStation>
+          <SystemIdentifiersInfo id='wmo'/>
+          <Name>Miami, FL</Name>
+          <WMO>722020</WMO>
+        </WeatherStation>
+      </ClimateandRiskZones>
       <Enclosure>
         <AirInfiltration>
           <AirInfiltrationMeasurement>
