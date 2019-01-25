@@ -2891,7 +2891,6 @@ class OSModel
       mech_vent_cfm = 0.0
     else
       # FIXME: HoursInOperation isn't hooked up
-      # FIXME: AttachedToHVACDistributionSystem isn't hooked up
       fan_type = XMLHelper.get_value(whole_house_fan, "FanType")
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
@@ -2931,9 +2930,41 @@ class OSModel
                                           nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
                                           mech_vent_ashrae_std, clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour)
-    # FIXME: AttachedToHVACDistributionSystem isn't hooked up
-    cfis = CFIS.new(mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac)
-    cfis_systems = { cfis => model.getAirLoopHVACs }
+    
+    if mech_vent_type == Constants.VentTypeCFIS
+      # Get HVAC distribution system CFIS is attached to
+      cfis_hvac_dist = nil
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_dist|
+        next unless hvac_dist.elements["SystemIdentifier"].attributes["id"] == whole_house_fan.elements["AttachedToHVACDistributionSystem"].attributes["idref"]
+        
+        cfis_hvac_dist = hvac_dist
+      end
+      if cfis_hvac_dist.nil?
+        fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
+      end
+      
+      # Get HVAC systems attached to this distribution system
+      cfis_sys_ids = []
+      hvac_plant = building.elements["BuildingDetails/Systems/HVAC/HVACPlant"]
+      hvac_plant.elements.each("HeatingSystem | CoolingSystem | HeatPump") do |hvac|
+        next unless XMLHelper.has_element(hvac, "DistributionSystem")
+        next unless cfis_hvac_dist.elements["SystemIdentifier"].attributes["id"] == hvac.elements["DistributionSystem"].attributes["idref"]
+        
+        cfis_sys_ids << hvac.elements["SystemIdentifier"].attributes["id"]
+      end
+      
+      # Get AirLoopHVACs associated with these HVAC systems
+      cfis_airloops = []
+      loop_hvacs.each do |sys_id, loops|
+        next unless cfis_sys_ids.include? sys_id
+        
+        cfis_airloops.concat(loops)
+      end
+      cfis = CFIS.new(mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac)
+      cfis_systems = { cfis => cfis_airloops }
+    else
+      cfis_systems = {}
+    end
 
     # Natural Ventilation
     disable_nat_vent = XMLHelper.get_value(building, "BuildingDetails/Enclosure/extension/DisableNaturalVentilation")
