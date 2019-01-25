@@ -2971,35 +2971,45 @@ class OSModel
 
     # Ducts
     duct_systems = {}
+    location_map = { 'living space' => Constants.SpaceTypeLiving,
+                     'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                     'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                     'crawlspace - vented' => Constants.SpaceTypeCrawl,
+                     'crawlspace - unvented' => Constants.SpaceTypeCrawl,
+                     'attic - vented' => Constants.SpaceTypeUnfinishedAttic,
+                     'attic - unvented' => Constants.SpaceTypeUnfinishedAttic,
+                     'attic - conditioned' => Constants.SpaceTypeLiving,
+                     'garage' => Constants.SpaceTypeGarage }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      # Ducts
-      supply_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      return_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      supply_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctInsulationRValue"))
-      return_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctInsulationRValue"))
-      supply_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctSurfaceArea"))
-      return_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctSurfaceArea"))
-      # FIXME: Values below
-      duct_location = Constants.Auto
-      duct_total_leakage = 0.3
-      duct_supply_frac = 0.6
-      duct_return_frac = 0.067
-      duct_ah_supply_frac = 0.067
-      duct_ah_return_frac = 0.267
-      duct_location_frac = Constants.Auto
-      duct_num_returns = 1
-      duct_supply_area_mult = supply_area / 100.0
-      duct_return_area_mult = return_area / 100.0
-      duct_r = 4.0
-      duct_norm_leakage_25pa = nil
+      ducts = []
+      
+      # Supply Ducts
+      supply_duct_total_leakage_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
+      supply_duct_total_area = Float(air_distribution.elements["sum(Ducts[DuctType='supply']/DuctSurfaceArea)"])
+      air_distribution.elements.each("Ducts[DuctType='supply']") do |supply_duct|
+        supply_duct_r = Float(XMLHelper.get_value(supply_duct, "DuctInsulationRValue"))
+        supply_duct_area = Float(XMLHelper.get_value(supply_duct, "DuctSurfaceArea"))
+        supply_duct_location = location_map[XMLHelper.get_value(supply_duct, "DuctLocation")]
+        supply_duct_leakage_cfm25 = supply_duct_total_leakage_cfm25 * supply_duct_area / supply_duct_total_area
+        
+        ducts << Duct.new(Constants.DuctSideSupply, supply_duct_location, nil, supply_duct_leakage_cfm25, supply_duct_area, supply_duct_r)
+      end
 
-      ducts = Ducts.new(duct_total_leakage, duct_norm_leakage_25pa, duct_supply_area_mult, duct_return_area_mult, duct_r,
-                        duct_supply_frac, duct_return_frac, duct_ah_supply_frac, duct_ah_return_frac, duct_location_frac,
-                        duct_num_returns, duct_location)
-
+      # Return Ducts
+      return_duct_total_leakage_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
+      return_duct_total_area = Float(air_distribution.elements["sum(Ducts[DuctType='return']/DuctSurfaceArea)"])
+      air_distribution.elements.each("Ducts[DuctType='return']") do |return_duct|
+        return_duct_r = Float(XMLHelper.get_value(return_duct, "DuctInsulationRValue"))
+        return_duct_area = Float(XMLHelper.get_value(return_duct, "DuctSurfaceArea"))
+        return_duct_location = location_map[XMLHelper.get_value(return_duct, "DuctLocation")]
+        return_duct_leakage_cfm25 = return_duct_total_leakage_cfm25 * return_duct_area / return_duct_total_area
+        
+        ducts << Duct.new(Constants.DuctSideReturn, return_duct_location, nil, return_duct_leakage_cfm25, return_duct_area, return_duct_r)
+      end
+      
       # Connect AirLoopHVACs to ducts
       systems_for_this_duct = []
       duct_id = hvac_distribution.elements["SystemIdentifier"].attributes["id"]
@@ -3019,31 +3029,7 @@ class OSModel
       duct_systems[ducts] = systems_for_this_duct
     end
 
-    # Set no ducts for HVAC without duct systems
-    systems_for_no_duct = []
-    no_ducts = Ducts.new(0.0, nil, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Constants.Auto, Constants.Auto, "none")
-    loop_hvacs.each do |sys_id, loops|
-      loops.each do |loop|
-        next if not loop.is_a? OpenStudio::Model::AirLoopHVAC
-
-        # Look for loop already associated with a duct system
-        loop_found = false
-        duct_systems.keys.each do |duct_system|
-          if duct_systems[duct_system].include? loop
-            loop_found = true
-          end
-        end
-        next if loop_found
-
-        # Loop has no associated ducts; associate with no duct system
-        systems_for_no_duct << loop
-      end
-    end
-    if not systems_for_no_duct.empty?
-      duct_systems[no_ducts] = systems_for_no_duct
-    end
-
-    # FIXME: Throw error if, e.g., multiple heating systems connected to same distribution system?
+    # TODO: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)
     return false if not success

@@ -95,7 +95,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Test simulations
     Dir["#{this_dir}/invalid*.xml"].sort.each do |xml|
-      _run_xml(xml, this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
+      _run_xml(File.absolute_path(xml), this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
     end
   end
 

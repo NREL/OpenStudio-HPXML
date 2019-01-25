@@ -258,6 +258,14 @@ class Constants
   def self.CondenserTypeWater
     return 'watercooled'
   end
+  
+  def self.DuctSideReturn
+    return 'return'
+  end
+  
+  def self.DuctSideSupply
+    return 'supply'
+  end
 
   def self.DuctedInfoMiniSplitHeatPump
     return __method__.to_s
@@ -947,36 +955,32 @@ class Constants
   def self.SizingInfoCMUWallFurringInsRvalue
     return __method__.to_s
   end
-
-  def self.SizingInfoDuctsLocationFrac
+  
+  def self.SizingInfoDuctExist
+    return __method__.to_s
+  end
+  
+  def self.SizingInfoDuctSides
+    return __method__.to_s
+  end
+  
+  def self.SizingInfoDuctLocationZones
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsLocationZone
+  def self.SizingInfoDuctLeakageFracs
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsReturnLoss
+  def self.SizingInfoDuctLeakageCFM25s
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsReturnRvalue
+  def self.SizingInfoDuctAreas
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsReturnSurfaceArea
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctsSupplyLoss
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctsSupplyRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoDuctsSupplySurfaceArea
+  def self.SizingInfoDuctRvalues
     return __method__.to_s
   end
 
