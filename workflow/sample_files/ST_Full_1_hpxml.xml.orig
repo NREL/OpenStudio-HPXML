@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2018-12-07T11:33:35-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-01-25T09:34:14-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.1</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id='bid-2066'>
+    <BuildingID id='bid-2020'>
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -42,8 +42,21 @@
           <AverageCeilingHeight>8</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2000</ConditionedFloorArea>
+          <extension>
+            <hescore_building_shape>rectangle</hescore_building_shape>
+          </extension>
         </BuildingConstruction>
+        <extension>
+          <comments>ST v2018 Full XSD Test #1 - PV, multiple distribution, solar_screen, domestic_hot_water/uef</comments>
+        </extension>
       </BuildingSummary>
+      <ClimateandRiskZones>
+        <WeatherStation>
+          <SystemIdentifiersInfo id='wmo'/>
+          <Name>Oakland Metro AP</Name>
+          <WMO>724930</WMO>
+        </WeatherStation>
+      </ClimateandRiskZones>
       <Enclosure>
         <AirInfiltration>
           <AirInfiltrationMeasurement>
@@ -60,6 +73,9 @@
               <RoofType>asphalt or fiberglass shingles</RoofType>
               <RoofArea>600</RoofArea>
               <RadiantBarrier>false</RadiantBarrier>
+              <extension>
+                <roof_assembly_code>rfwf00co</roof_assembly_code>
+              </extension>
             </Roof>
             <Roof>
               <SystemIdentifier id='roof2'/>
@@ -68,6 +84,9 @@
               <RoofType>asphalt or fiberglass shingles</RoofType>
               <RoofArea>400</RoofArea>
               <RadiantBarrier>false</RadiantBarrier>
+              <extension>
+                <roof_assembly_code>rfps19co</roof_assembly_code>
+              </extension>
             </Roof>
           </Roofs>
           <Attics>
@@ -78,16 +97,21 @@
               <AtticFloorInsulation>
                 <SystemIdentifier id='roof1_floor_insulation'/>
                 <Layer>
+                  <InstallationType>cavity</InstallationType>
                   <NominalRValue>19</NominalRValue>
                 </Layer>
               </AtticFloorInsulation>
               <AtticRoofInsulation>
                 <SystemIdentifier id='roof1_roof_insulation'/>
                 <Layer>
+                  <InstallationType>cavity</InstallationType>
                   <NominalRValue>00</NominalRValue>
                 </Layer>
               </AtticRoofInsulation>
               <Area>600</Area>
+              <extension>
+                <hescore_roof_type>vented attic</hescore_roof_type>
+              </extension>
             </Attic>
             <Attic>
               <SystemIdentifier id='attic2'/>
@@ -96,10 +120,14 @@
               <AtticRoofInsulation>
                 <SystemIdentifier id='roof2_roof_insulation'/>
                 <Layer>
+                  <InstallationType>continuous</InstallationType>
                   <NominalRValue>19</NominalRValue>
                 </Layer>
               </AtticRoofInsulation>
               <Area>400</Area>
+              <extension>
+                <hescore_roof_type>cathedral ceiling</hescore_roof_type>
+              </extension>
             </Attic>
           </Attics>
         </AtticAndRoof>
@@ -115,6 +143,7 @@
               <PerimeterInsulation>
                 <SystemIdentifier id='foundation1'/>
                 <Layer>
+                  <InstallationType>cavity</InstallationType>
                   <NominalRValue>0</NominalRValue>
                 </Layer>
               </PerimeterInsulation>
@@ -143,6 +172,7 @@
               <Insulation>
                 <SystemIdentifier id='insulation2'/>
                 <Layer>
+                  <InstallationType>continuous</InstallationType>
                   <NominalRValue>11</NominalRValue>
                 </Layer>
               </Insulation>
@@ -167,6 +197,9 @@
                 <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
+            <extension>
+              <hescore_wall_code>ewbr00nn</hescore_wall_code>
+            </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id='back_wall'/>
@@ -181,6 +214,9 @@
                 <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
+            <extension>
+              <hescore_wall_code/>
+            </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id='right_wall'/>
@@ -195,6 +231,9 @@
                 <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
+            <extension>
+              <hescore_wall_code/>
+            </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id='left_wall'/>
@@ -209,6 +248,9 @@
                 <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
+            <extension>
+              <hescore_wall_code/>
+            </extension>
           </Wall>
         </Walls>
         <Windows>
@@ -218,11 +260,15 @@
             <Orientation>north</Orientation>
             <FrameType>
               <Aluminum>
-                <ThermalBreak>1</ThermalBreak>
+                <ThermalBreak>false</ThermalBreak>
               </Aluminum>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
+            <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref='front_wall'/>
+            <extension>
+              <hescore_window_code>scna</hescore_window_code>
+            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='back_window'/>
@@ -230,11 +276,15 @@
             <Orientation>south</Orientation>
             <FrameType>
               <Aluminum>
-                <ThermalBreak>1</ThermalBreak>
+                <ThermalBreak>false</ThermalBreak>
               </Aluminum>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
+            <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref='back_wall'/>
+            <extension>
+              <hescore_window_code>scna</hescore_window_code>
+            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='right_window'/>
@@ -242,11 +292,15 @@
             <Orientation>west</Orientation>
             <FrameType>
               <Aluminum>
-                <ThermalBreak>1</ThermalBreak>
+                <ThermalBreak>false</ThermalBreak>
               </Aluminum>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
+            <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref='right_wall'/>
+            <extension>
+              <hescore_window_code>scna</hescore_window_code>
+            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='left_window'/>
@@ -254,23 +308,23 @@
             <Orientation>east</Orientation>
             <FrameType>
               <Aluminum>
-                <ThermalBreak>1</ThermalBreak>
+                <ThermalBreak>false</ThermalBreak>
               </Aluminum>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
+            <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref='left_wall'/>
+            <extension>
+              <hescore_window_code>scna</hescore_window_code>
+            </extension>
           </Window>
         </Windows>
         <Skylights>
           <Skylight>
             <SystemIdentifier id='roof1_skylight'/>
             <Area>100</Area>
-            <FrameType>
-              <Aluminum>
-                <ThermalBreak>1</ThermalBreak>
-              </Aluminum>
-            </FrameType>
-            <GlassLayers>single-pane</GlassLayers>
+            <UFactor>0.2</UFactor>
+            <SHGC>0.5</SHGC>
             <AttachedToRoof idref='roof1'/>
           </Skylight>
           <Skylight>
@@ -278,13 +332,20 @@
             <Area>50</Area>
             <FrameType>
               <Aluminum>
-                <ThermalBreak>1</ThermalBreak>
+                <ThermalBreak>false</ThermalBreak>
               </Aluminum>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
             <AttachedToRoof idref='roof2'/>
+            <extension>
+              <hescore_skylight_code>scna</hescore_skylight_code>
+            </extension>
           </Skylight>
         </Skylights>
+        <extension>
+          <hescore_wall_construction_same>true</hescore_wall_construction_same>
+          <hescore_window_construction_same>true</hescore_window_construction_same>
+        </extension>
       </Enclosure>
       <Systems>
         <HVAC>
@@ -301,14 +362,27 @@
                 <Value>0.95</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.75</FractionHeatLoadServed>
-              <FloorAreaServed>1500</FloorAreaServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='hvac1_cool'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <FractionCoolLoadServed>0.75</FractionCoolLoadServed>
-              <FloorAreaServed>1500</FloorAreaServed>
             </CoolingSystem>
+            <HeatPump>
+              <SystemIdentifier id='hvac2_heatpump'/>
+              <HeatPumpType>mini-split</HeatPumpType>
+              <FractionHeatLoadServed>0.25</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.25</FractionCoolLoadServed>
+              <FloorAreaServed>500</FloorAreaServed>
+              <AnnualCoolEfficiency>
+                <Units>SEER</Units>
+                <Value>8</Value>
+              </AnnualCoolEfficiency>
+              <AnnualHeatEfficiency>
+                <Units>HSPF</Units>
+                <Value>8</Value>
+              </AnnualHeatEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACDistribution>
             <SystemIdentifier id='hvac1_dist'/>
@@ -329,15 +403,6 @@
                   </extension>
                 </Ducts>
               </AirDistribution>
-            </DistributionSystemType>
-            <HVACDistributionImprovement>
-              <DuctSystemSealed>true</DuctSystemSealed>
-            </HVACDistributionImprovement>
-          </HVACDistribution>
-          <HVACDistribution>
-            <SystemIdentifier id='hvac2_dist'/>
-            <DistributionSystemType>
-              <AirDistribution/>
             </DistributionSystemType>
             <HVACDistributionImprovement>
               <DuctSystemSealed>false</DuctSystemSealed>

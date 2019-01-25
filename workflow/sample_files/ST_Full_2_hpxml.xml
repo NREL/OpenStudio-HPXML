@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-01-23T08:49:06-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-01-25T09:34:41-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.1</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id='bid-2159'>
+    <BuildingID id='bid-2021'>
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2018-10-25</Date>
+      <Date>2019-01-15</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>ST v2018 Full XSD Test - PV, multiple distribution, solar_screen, domestic_hot_water/uef</comments>
+          <comments>ST v2018 Full XSD Test #2 - Added multiple wall and window assemblies</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -356,12 +356,12 @@
                 <Units>AFUE</Units>
                 <Value>0.95</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.75</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='hvac1_cool'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.75</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
                 <Value>8</Value>
