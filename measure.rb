@@ -3041,6 +3041,18 @@ class OSModel
         ducts << Duct.new(Constants.DuctSideReturn, return_duct_location, nil, return_duct_leakage_cfm25, return_duct_area, return_duct_r)
       end
       
+      # FIXME FIXME FIXME
+      # TEMPORARY FOR COMPARISON TO MASTER BRANCH
+      supply_area_mult = supply_duct_total_area / 100.0
+      supply_area = Airflow.get_duct_supply_surface_area(supply_area_mult, @cfa, Float(@ncfl))
+      supply_duct_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctLocation")]
+      return_area_mult = return_duct_total_area / 100.0
+      return_area = Airflow.get_return_surface_area(return_area_mult, @cfa, Float(@ncfl), 1.0)
+      return_duct_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctLocation")]
+      ducts = [Duct.new(Constants.DuctSideSupply, supply_duct_location, 0.2, nil, supply_area, 4.0),
+               Duct.new(Constants.DuctSideReturn, return_duct_location, 0.1, nil, return_area, 4.0)]
+      # FIXME FIXME FIXME
+      
       # Connect AirLoopHVACs to ducts
       systems_for_this_duct = []
       duct_id = hvac_distribution.elements["SystemIdentifier"].attributes["id"]

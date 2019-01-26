@@ -2200,6 +2200,7 @@ class Airflow
     end
   end
 
+  # TODO: Unused here. Move to Airflow measure.
   def self.get_duct_supply_surface_area(mult, ffa, num_stories)
     # Duct Surface Areas per 2010 BA Benchmark
     if num_stories == 1
@@ -2209,6 +2210,7 @@ class Airflow
     end
   end
 
+  # TODO: Unused here. Move to Airflow measure.
   def self.get_return_surface_area(mult, ffa, num_stories, num_returns)
     # Duct Surface Areas per 2010 BA Benchmark
     if num_stories == 1
@@ -2218,6 +2220,7 @@ class Airflow
     end
   end
 
+  # TODO: Unused here. Move to Airflow measure.
   def self.get_num_returns(num_returns, num_stories)
     if num_returns.nil?
       return 0
