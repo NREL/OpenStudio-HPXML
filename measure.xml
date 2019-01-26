@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>69a2ee1d-8977-4582-85c3-40cf749cba39</version_id>
-  <version_modified>20190125T180720Z</version_modified>
+  <version_id>215018f2-dd3d-4348-a757-9a4347aa1d00</version_id>
+  <version_modified>20190126T001304Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -1117,13 +1117,13 @@
       <filename>airflow.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CE31475A</checksum>
+      <checksum>AAD2B6EF</checksum>
     </file>
     <file>
       <filename>hvac.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>07D7B450</checksum>
+      <checksum>C20D7C11</checksum>
     </file>
   </files>
 </measure>

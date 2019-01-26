@@ -894,23 +894,23 @@ class Airflow
     if thermostatsetpointdualsetpoint.is_initialized
       thermostatsetpointdualsetpoint = thermostatsetpointdualsetpoint.get
 
-      heatingSetpointWeekday = HVAC.get_24_hour_weekday_setpoints(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, runner)
-      heatingSetpointWeekend = HVAC.get_24_hour_weekend_setpoints(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, runner)
+      heatingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
+      heatingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
       if heatingSetpointWeekday.nil? or heatingSetpointWeekend.nil?
         return false
       end
 
-      heatingSetpointWeekday = heatingSetpointWeekday.map { |j| UnitConversions.convert(j, "C", "F") }
-      heatingSetpointWeekend = heatingSetpointWeekend.map { |j| UnitConversions.convert(j, "C", "F") }
+      heatingSetpointWeekday = heatingSetpointWeekday[0].map { |j| UnitConversions.convert(j, "C", "F") } # get january hourly setpoints
+      heatingSetpointWeekend = heatingSetpointWeekend[0].map { |j| UnitConversions.convert(j, "C", "F") } # get january hourly setpoints
 
-      coolingSetpointWeekday = HVAC.get_24_hour_weekday_setpoints(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, runner)
-      coolingSetpointWeekend = HVAC.get_24_hour_weekend_setpoints(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, runner)
+      coolingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
+      coolingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
       if coolingSetpointWeekday.nil? or coolingSetpointWeekend.nil?
         return false
       end
 
-      coolingSetpointWeekday = coolingSetpointWeekday.map { |j| UnitConversions.convert(j, "C", "F") }
-      coolingSetpointWeekend = coolingSetpointWeekend.map { |j| UnitConversions.convert(j, "C", "F") }
+      coolingSetpointWeekday = coolingSetpointWeekday[6].map { |j| UnitConversions.convert(j, "C", "F") } # get july hourly setpoints
+      coolingSetpointWeekend = coolingSetpointWeekend[6].map { |j| UnitConversions.convert(j, "C", "F") } # get july hourly setpoints
     end
 
     if heatingSetpointWeekday.empty?
