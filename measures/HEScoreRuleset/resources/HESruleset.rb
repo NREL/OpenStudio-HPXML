@@ -19,7 +19,7 @@ class HEScoreRuleset
                                    transaction: xml_transaction_header_information_values[:transaction],
                                    software_program_used: software_info_values[:software_program_used],
                                    software_program_version: software_info_values[:software_program_version],
-                                   eri_calculation_version: "2014AEG",
+                                   eri_calculation_version: "2014AEG", # FIXME: Verify
                                    building_id: building_values[:id],
                                    event_type: project_status_values[:event_type])
 
@@ -263,13 +263,12 @@ class HEScoreRuleset
         slab_perim_r = Integer(XMLHelper.get_value(orig_foundation, "Slab/PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue"))
         slab_area = XMLHelper.get_value(orig_foundation, "Slab/Area")
         fnd_id = orig_foundation_values[:id]
-        slab_id = orig_foundation.elements["Slab/SystemIdentifier"].attributes["id"]
         slab_perim_id = orig_foundation.elements["Slab/PerimeterInsulation/SystemIdentifier"].attributes["id"]
         slab_under_id = "#{fnd_id}_slab_under_insulation"
       else
         slab_perim_r = 0
         slab_area = Float(XMLHelper.get_value(orig_foundation, "FrameFloor/Area"))
-        slab_id = "#{orig_foundation_values[:id]}_slab"
+        fnd_id = "#{orig_foundation_values[:id]}_slab"
         slab_perim_id = "#{fnd_id}_slab_perim_insulation"
         slab_under_id = "#{fnd_id}_slab_under_insulation"
       end
