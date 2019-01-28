@@ -263,14 +263,15 @@ class HEScoreRuleset
         slab_perim_r = Integer(XMLHelper.get_value(orig_foundation, "Slab/PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue"))
         slab_area = XMLHelper.get_value(orig_foundation, "Slab/Area")
         fnd_id = orig_foundation_values[:id]
+        slab_id = orig_foundation.elements["Slab/SystemIdentifier"].attributes["id"]
         slab_perim_id = orig_foundation.elements["Slab/PerimeterInsulation/SystemIdentifier"].attributes["id"]
-        slab_under_id = "#{fnd_id}_slab_under_insulation"
+        slab_under_id = "#{slab_id}_slab_under_insulation"
       else
         slab_perim_r = 0
         slab_area = Float(XMLHelper.get_value(orig_foundation, "FrameFloor/Area"))
-        fnd_id = "#{orig_foundation_values[:id]}_slab"
-        slab_perim_id = "#{fnd_id}_slab_perim_insulation"
-        slab_under_id = "#{fnd_id}_slab_under_insulation"
+        slab_id = "#{orig_foundation_values[:id]}_slab"
+        slab_perim_id = "#{slab_id}_slab_perim_insulation"
+        slab_under_id = "#{slab_id}_slab_under_insulation"
       end
       new_slab = HPXML.add_slab(foundation: new_foundation,
                                 id: slab_id,
@@ -391,8 +392,6 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_skylights(orig_details, hpxml)
-    return if not XMLHelper.has_element(orig_details, "Enclosure/Skylights")
-
     orig_details.elements.each("Enclosure/Skylights/Skylight") do |orig_skylight|
       orig_skylight_values = HPXML.get_skylight_values(skylight: orig_skylight)
       sky_ufactor = orig_skylight_values[:ufactor]
