@@ -119,11 +119,12 @@ class HEScoreRuleset
                                 climate_zone: "1A") # FIXME: Hard-coded
 
     orig_weather_station = orig_details.elements["ClimateandRiskZones/WeatherStation"]
-    orig_weather_station_values = HPXML.get_weather_station_values(weather_station: orig_weather_station)
+    orig_name = XMLHelper.get_value(orig_weather_station, "Name")
+    orig_wmo = XMLHelper.get_value(orig_weather_station, "WMO")
     HPXML.add_weather_station(hpxml: hpxml,
                               id: "WeatherStation",
-                              name: orig_weather_station_values[:name],
-                              wmo: orig_weather_station_values[:wmo])
+                              name: orig_name,
+                              wmo: orig_wmo)
   end
 
   def self.set_enclosure_air_infiltration(orig_details, hpxml)
