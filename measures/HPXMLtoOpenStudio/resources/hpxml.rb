@@ -214,7 +214,7 @@ class HPXML
     building_construction = XMLHelper.add_element(building_summary, "BuildingConstruction")
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", number_of_conditioned_floors) unless number_of_conditioned_floors.nil?
     XMLHelper.add_element(building_construction, "NumberofConditionedFloorsAboveGrade", number_of_conditioned_floors_above_grade) unless number_of_conditioned_floors_above_grade.nil?
-    XMLHelper.add_element(building_construction, "AverageCeilingHeight", average_ceiling_height) unless average_ceiling_height.nil?    
+    XMLHelper.add_element(building_construction, "AverageCeilingHeight", average_ceiling_height) unless average_ceiling_height.nil?
     XMLHelper.add_element(building_construction, "NumberofBedrooms", number_of_bedrooms) unless number_of_bedrooms.nil?
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", conditioned_floor_area) unless conditioned_floor_area.nil?
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", conditioned_building_volume) unless conditioned_building_volume.nil?

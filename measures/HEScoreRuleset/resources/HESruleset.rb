@@ -61,7 +61,7 @@ class HEScoreRuleset
     set_summary(hpxml)
 
     # ClimateAndRiskZones
-    set_climate(hpxml)
+    set_climate(orig_details, hpxml)
 
     # Enclosure
     set_enclosure_air_infiltration(orig_details, hpxml)
@@ -113,14 +113,17 @@ class HEScoreRuleset
                                     garage_present: false)
   end
 
-  def self.set_climate(hpxml)
+  def self.set_climate(orig_details, hpxml)
     HPXML.add_climate_zone_iecc(hpxml: hpxml,
                                 year: 2006,
                                 climate_zone: "1A") # FIXME: Hard-coded
+
+    orig_weather_station = orig_details.elements["ClimateandRiskZones/WeatherStation"]
+    orig_weather_station_values = HPXML.get_weather_station_values(weather_station: orig_weather_station)
     HPXML.add_weather_station(hpxml: hpxml,
                               id: "WeatherStation",
-                              name: "Miami, FL", # FIXME: Hard-coded
-                              wmo: 722020) # FIXME: Hard-coded
+                              name: orig_weather_station_values[:name],
+                              wmo: orig_weather_station_values[:wmo])
   end
 
   def self.set_enclosure_air_infiltration(orig_details, hpxml)
@@ -556,8 +559,8 @@ class HEScoreRuleset
       hvac_value_cool = nil
       if ["air-to-air", "mini-split"].include? hvac_type
         hvac_year = orig_hp_values[:year_installed]
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolingEfficiency[Units='SEER']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatingEfficiency[Units='HSPF']/Value")
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='SEER']/Value")
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='HSPF']/Value")
         hvac_units_cool = "SEER"
         hvac_units_heat = "HSPF"
         if not hvac_year.nil?
@@ -568,8 +571,8 @@ class HEScoreRuleset
         end
       elsif hvac_type == "ground-to-air"
         hvac_year = orig_hp_values[:year_installed]
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolingEfficiency[Units='EER']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatingEfficiency[Units='COP']/Value")
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='EER']/Value")
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='COP']/Value")
         hvac_units_cool = "EER"
         hvac_units_heat = "COP"
         if not hvac_year.nil?
@@ -627,7 +630,7 @@ class HEScoreRuleset
                                              id: dist_id,
                                              distribution_system_type: "AirDistribution")
       new_air_dist = new_dist.elements["DistributionSystemType/AirDistribution"]
-      
+
       # Supply duct leakage
       new_supply_measurement = HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                                                   duct_type: "supply",
