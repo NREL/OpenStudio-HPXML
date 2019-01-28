@@ -519,8 +519,8 @@ class HPXML
         XMLHelper.add_element(distribution_system_type_e, distribution_system_type)
       else
         XMLHelper.add_element(distribution_system_type_e, "Other", distribution_system_type)
-      end      
-      
+      end
+
     end
     XMLHelper.add_element(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency", annual_heating_distribution_system_efficiency) unless annual_heating_distribution_system_efficiency.nil?
     XMLHelper.add_element(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency", annual_cooling_distribution_system_efficiency) unless annual_cooling_distribution_system_efficiency.nil?
@@ -840,13 +840,16 @@ class HPXML
 
   def self.get_id(parent)
     return if parent.nil?
+
     return parent.elements["SystemIdentifier"].attributes["id"]
   end
 
   def self.get_idref(parent, element_name)
     return if parent.nil?
+
     element = parent.elements[element_name]
     return if element.nil?
+
     return element.attributes["idref"]
   end
 end
