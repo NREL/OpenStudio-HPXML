@@ -111,7 +111,7 @@ class HEScoreRuleset
     HPXML.add_climate_zone_iecc(climate_and_risk_zones: new_climate,
                                 year: 2006,
                                 climate_zone: "1A") # FIXME: Hard-coded
-    
+
     name = XMLHelper.get_value(orig_details, "ClimateandRiskZones/WeatherStation/Name")
     wmo = Integer(XMLHelper.get_value(orig_details, "ClimateandRiskZones/WeatherStation/WMO"))
     HPXML.add_weather_station(climate_and_risk_zones: new_climate,
@@ -382,6 +382,8 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_windows(new_enclosure, orig_details)
+    return if not XMLHelper.has_element(orig_details, "Enclosure/Windows")
+
     new_windows = XMLHelper.add_element(new_enclosure, "Windows")
 
     orig_details.elements.each("Enclosure/Windows/Window") do |orig_window|
@@ -422,7 +424,7 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_skylights(new_enclosure, orig_details)
-    return if not XMLHelper.has_element(new_enclosure, "Skylights")
+    return if not XMLHelper.has_element(orig_details, "Enclosure/Skylights")
 
     new_skylights = XMLHelper.add_element(new_enclosure, "Skylights")
 
@@ -430,6 +432,7 @@ class HEScoreRuleset
       sky_id = HPXML.get_id(orig_skylight)
       roof_id = HPXML.get_idref(orig_skylight, "AttachedToRoof")
       sky_ufactor = XMLHelper.get_value(orig_skylight, "UFactor")
+      sky_area = Float(XMLHelper.get_value(orig_skylight, "Area"))
 
       if not sky_ufactor.nil?
         sky_ufactor = Float(sky_ufactor)
@@ -449,7 +452,7 @@ class HEScoreRuleset
       new_skylight = HPXML.add_skylight(skylights: new_skylights,
                                         id: sky_id,
                                         area: sky_area,
-                                        azimuth: orientation_to_azimuth(0), # FIXME: Hard-coded
+                                        azimuth: orientation_to_azimuth("north"), # FIXME: Hard-coded
                                         ufactor: sky_ufactor,
                                         shgc: sky_shgc,
                                         idref: roof_id)
@@ -458,6 +461,8 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_doors(new_enclosure, orig_details)
+    return if not XMLHelper.has_element(orig_details, "Enclosure/Doors")
+
     new_doors = XMLHelper.add_element(new_enclosure, "Doors")
 
     front_wall = nil
