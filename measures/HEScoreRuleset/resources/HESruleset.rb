@@ -265,13 +265,13 @@ class HEScoreRuleset
         fnd_id = orig_foundation_values[:id]
         slab_id = orig_foundation.elements["Slab/SystemIdentifier"].attributes["id"]
         slab_perim_id = orig_foundation.elements["Slab/PerimeterInsulation/SystemIdentifier"].attributes["id"]
-        slab_under_id = "#{slab_id}_slab_under_insulation"
+        slab_under_id = "#{slab_id}_under_insulation"
       else
         slab_perim_r = 0
         slab_area = Float(XMLHelper.get_value(orig_foundation, "FrameFloor/Area"))
         slab_id = "#{orig_foundation_values[:id]}_slab"
-        slab_perim_id = "#{slab_id}_slab_perim_insulation"
-        slab_under_id = "#{slab_id}_slab_under_insulation"
+        slab_perim_id = "#{slab_id}_perim_insulation"
+        slab_under_id = "#{slab_id}_under_insulation"
       end
       new_slab = HPXML.add_slab(foundation: new_foundation,
                                 id: slab_id,
