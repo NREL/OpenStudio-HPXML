@@ -461,8 +461,6 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_doors(new_enclosure, orig_details)
-    return if not XMLHelper.has_element(orig_details, "Enclosure/Doors")
-
     new_doors = XMLHelper.add_element(new_enclosure, "Doors")
 
     front_wall = nil
