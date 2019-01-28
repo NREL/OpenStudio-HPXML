@@ -791,6 +791,7 @@ class HEScoreRuleset
   end
 
   def self.set_lighting(orig_details, hpxml)
+    new_lighting = HPXML.add_lighting_fractions(hpxml: hpxml)
     # Uses ERI Reference Home
   end
 

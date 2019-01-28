@@ -1733,14 +1733,22 @@ class HPXML
       building_details = hpxml.elements["Building/BuildingDetails"]
       lighting = XMLHelper.add_element(building_details, "Lighting")
     end
-    lighting_fractions = XMLHelper.add_element(lighting, "LightingFractions")
-    HPXML.add_extension(parent: lighting_fractions,
-                        extensions: { "FractionQualifyingTierIFixturesInterior": fraction_qualifying_tier_i_fixtures_interior,
-                                      "FractionQualifyingTierIFixturesExterior": fraction_qualifying_tier_i_fixtures_exterior,
-                                      "FractionQualifyingTierIFixturesGarage": fraction_qualifying_tier_i_fixtures_garage,
-                                      "FractionQualifyingTierIIFixturesInterior": fraction_qualifying_tier_ii_fixtures_interior,
-                                      "FractionQualifyingTierIIFixturesExterior": fraction_qualifying_tier_ii_fixtures_exterior,
-                                      "FractionQualifyingTierIIFixturesGarage": fraction_qualifying_tier_ii_fixtures_garage })
+    frac_array = [fraction_qualifying_tier_i_fixtures_interior,
+                  fraction_qualifying_tier_i_fixtures_exterior,
+                  fraction_qualifying_tier_i_fixtures_garage,
+                  fraction_qualifying_tier_ii_fixtures_interior,
+                  fraction_qualifying_tier_ii_fixtures_exterior,
+                  fraction_qualifying_tier_ii_fixtures_garage]
+    if frac_array.count(nil) != frac_array.length
+      lighting_fractions = XMLHelper.add_element(lighting, "LightingFractions")
+      HPXML.add_extension(parent: lighting_fractions,
+                          extensions: { "FractionQualifyingTierIFixturesInterior": fraction_qualifying_tier_i_fixtures_interior,
+                                        "FractionQualifyingTierIFixturesExterior": fraction_qualifying_tier_i_fixtures_exterior,
+                                        "FractionQualifyingTierIFixturesGarage": fraction_qualifying_tier_i_fixtures_garage,
+                                        "FractionQualifyingTierIIFixturesInterior": fraction_qualifying_tier_ii_fixtures_interior,
+                                        "FractionQualifyingTierIIFixturesExterior": fraction_qualifying_tier_ii_fixtures_exterior,
+                                        "FractionQualifyingTierIIFixturesGarage": fraction_qualifying_tier_ii_fixtures_garage })
+    end
 
     return lighting_fractions
   end
