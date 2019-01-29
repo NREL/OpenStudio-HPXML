@@ -38,40 +38,17 @@ class HPXML
     return { :schema_version => hpxml.attributes["schemaVersion"] }
   end
 
-  def self.get_hpxml_values(doc)
-    values = {}
-
-    hpxml = doc.elements["HPXML"]
-
-    values[:xml_transaction_header_information] = get_xml_transaction_header_information_values(xml_transaction_header_information: hpxml.elements["XMLTransactionHeaderInformation"])
-    values[:software_info] = get_software_info_values(software_info: hpxml.elements["SoftwareInfo"])
-    values[:building] = get_building_values(building: hpxml.elements["Building"])
-    values[:project_status] = get_project_status_values(project_status: hpxml.elements["Building/ProjectStatus"])
-    values[:site] = get_site_values(site: hpxml.elements["Building/BuildingDetails/BuildingSummary/Site"])
-    values[:building_occupancy] = get_building_occupancy_values(building_occupancy: hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingOccupancy"])
-    values[:building_construction] = get_building_construction_values(building_construction: hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"])
-    values[:climate_zone_iecc] = []
-    hpxml.elements.each("Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC") do |climate_zone_iecc|
-      values[:climate_zone_iecc] << get_climate_zone_iecc_values(climate_zone_iecc: climate_zone_iecc)
-    end
-    values[:weather_station] = get_weather_station_values(weather_station: hpxml.elements["Building/BuildingDetails/ClimateandRiskZones/WeatherStation"])
-    values[:air_infiltration_measurement] = []
-    hpxml.elements.each("Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-      values[:air_infiltration_measurement] << get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
-    end
-    # TODO: ...
-
-    return values
-  end
-
   def self.add_xml_transaction_header_information(hpxml:,
                                                   xml_type: nil,
                                                   xml_generated_by: nil,
                                                   transaction: nil)
+    created_date_and_time = Time.now
+    created_date_and_time = created_date_and_time.strftime "%Y-%m-%dT%H:%M:%S%:z"
+
     xml_transaction_header_information = XMLHelper.add_element(hpxml, "XMLTransactionHeaderInformation")
     XMLHelper.add_element(xml_transaction_header_information, "XMLType", xml_type)
     XMLHelper.add_element(xml_transaction_header_information, "XMLGeneratedBy", xml_generated_by) unless xml_generated_by.nil?
-    XMLHelper.add_element(xml_transaction_header_information, "CreatedDateAndTime", "2014-11-17T15:17:17.128-07:00") # TODO: get current date and time
+    XMLHelper.add_element(xml_transaction_header_information, "CreatedDateAndTime", created_date_and_time)
     XMLHelper.add_element(xml_transaction_header_information, "Transaction", transaction) unless transaction.nil?
 
     return xml_transaction_header_information
