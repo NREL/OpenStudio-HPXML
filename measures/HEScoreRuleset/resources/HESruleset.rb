@@ -30,9 +30,9 @@ class HEScoreRuleset
     orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_building_construction)
     orig_site = building.elements["BuildingDetails/BuildingSummary/Site"]
     orig_site_values = HPXML.get_site_values(site: orig_site)
-    @nbeds = Float(orig_building_construction_values[:number_of_bedrooms])
-    @cfa = Float(orig_building_construction_values[:conditioned_floor_area])
-    @ncfl_ag = Float(orig_building_construction_values[:number_of_conditioned_floors_above_grade])
+    @nbeds = orig_building_construction_values[:number_of_bedrooms]
+    @cfa = orig_building_construction_values[:conditioned_floor_area]
+    @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
     @ncfl = @ncfl_ag # Number above-grade stories plus any conditioned basement
     if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='true']").nil?
       @ncfl += 1
@@ -41,7 +41,7 @@ class HEScoreRuleset
     if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement").nil?
       @nfl += 1
     end
-    @ceil_height = Float(orig_building_construction_values[:average_ceiling_height])
+    @ceil_height = orig_building_construction_values[:average_ceiling_height]
     @bldg_orient = orig_site_values[:orientation_of_front_of_home]
 
     # Calculate geometry
@@ -153,7 +153,9 @@ class HEScoreRuleset
     orig_details.elements.each("Enclosure/AtticAndRoof/Attics/Attic") do |orig_attic|
       orig_attic_values = HPXML.get_attic_values(attic: orig_attic)
       orig_roof = get_attached(HPXML.get_idref(orig_attic, "AttachedToRoof"), orig_details, "Enclosure/AtticAndRoof/Roofs/Roof")
-      orig_roof_values = HPXML.get_roof_values(roof: orig_roof)
+      orig_roof_values = HPXML.get_attic_roof_values(roof: orig_roof)
+      orig_roof_ins = orig_attic.elements["AtticRoofInsulation"]
+      orig_roof_ins_values = HPXML.get_assembly_insulation_values(insulation: orig_roof_ins)
 
       new_attic = HPXML.add_attic(hpxml: hpxml,
                                   id: orig_attic_values[:id],
@@ -164,6 +166,7 @@ class HEScoreRuleset
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
       roof_solar_abs = orig_roof_values[:solar_absorptance]
       roof_solar_abs = get_roof_solar_absorptance(orig_roof_values[:roof_color]) if orig_roof_values[:solar_absorptance].nil?
+      roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, orig_roof_values[:roof_type], orig_roof_values[:radiant_barrier])
       # FIXME: Get roof area; is roof area for cathedral and ceiling area for attic?
 
       # FIXME: Should be two (or four?) roofs per HES zone_roof?
@@ -174,26 +177,24 @@ class HEScoreRuleset
                                       solar_absorptance: roof_solar_abs,
                                       emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
                                       pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                                      radiant_barrier: false) # FIXME: Verify. Setting to false because it's included in the assembly R-value
-      orig_attic_roof_ins = orig_attic.elements["AtticRoofInsulation"]
-      orig_attic_roof_ins_values = HPXML.get_insulation_values(insulation: orig_attic_roof_ins)
-      HPXML.add_insulation(parent: new_roof,
-                           id: orig_attic_roof_ins_values[:id],
-                           assembly_effective_r_value: get_roof_assembly_r(roof_r_cavity, roof_r_cont, orig_roof_values[:roof_type], Boolean(orig_roof_values[:radiant_barrier])))
+                                      radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
+                                      insulation_id: orig_roof_ins_values[:id],
+                                      insulation_assembly_effective_r_value: roof_r)
 
       # Floor
       if ["unvented attic", "vented attic"].include? orig_attic_values[:attic_type]
         floor_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticFloorInsulation/Layer[InstallationType='cavity']/NominalRValue"))
+        floor_r = get_ceiling_assembly_r(floor_r_cavity)
+
+        orig_floor_ins = orig_attic.elements["AtticFloorInsulation"]
+        orig_floor_ins_values = HPXML.get_assembly_insulation_values(insulation: orig_floor_ins)
 
         new_floor = HPXML.add_attic_floor(attic: new_attic,
                                           id: "#{orig_attic_values[:id]}_floor",
                                           adjacent_to: "living space",
-                                          area: XMLHelper.get_value(orig_attic, "Area")) # FIXME: Verify. This is the attic floor area and not the roof area?
-        orig_attic_floor_ins = orig_attic.elements["AtticFloorInsulation"]
-        orig_attic_floor_ins_values = HPXML.get_insulation_values(insulation: orig_attic_floor_ins)
-        HPXML.add_insulation(parent: new_floor,
-                             id: orig_attic_floor_ins_values[:id],
-                             assembly_effective_r_value: get_ceiling_assembly_r(floor_r_cavity))
+                                          area: XMLHelper.get_value(orig_attic, "Area"), # FIXME: Verify. This is the attic floor area and not the roof area?
+                                          insulation_id: orig_floor_ins_values[:id],
+                                          insulation_assembly_effective_r_value: floor_r)
       end
       # FIXME: Should be zero (or two?) gable walls per HES zone_roof?
       # Uses ERI Reference Home for vented attic specific leakage area
@@ -215,17 +216,14 @@ class HEScoreRuleset
         orig_frameflooor_values = HPXML.get_floor_values(floor: orig_framefloor)
         floor_r_cavity = Integer(XMLHelper.get_value(orig_foundation, "FrameFloor/Insulation/Layer[InstallationType='cavity']/NominalRValue"))
         floor_r = get_floor_assembly_r(floor_r_cavity)
+        insulation_id = orig_framefloor.elements["Insulation/SystemIdentifier"].attributes["id"]
 
         new_framefloor = HPXML.add_frame_floor(foundation: new_foundation,
                                                id: orig_framefloor_values[:id],
                                                adjacent_to: "living space",
-                                               area: orig_framefloor_values[:area])
-
-        orig_framefloor_ins = orig_framefloor.elements["Insulation"]
-        orig_framefloor_ins_values = HPXML.get_insulation_values(insulation: orig_framefloor_ins)
-        HPXML.add_insulation(parent: new_framefloor,
-                             id: orig_framefloor_ins_values[:id],
-                             assembly_effective_r_value: floor_r)
+                                               area: orig_framefloor_values[:area],
+                                               insulation_id: insulation_id,
+                                               insulation_assembly_effective_r_value: floor_r)
 
       end
 
@@ -234,6 +232,7 @@ class HEScoreRuleset
         orig_fndwall = orig_foundation.elements["FoundationWall"]
         orig_fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: orig_fndwall)
         wall_r = 10 # FIXME: Hard-coded
+        insulation_id = orig_fndwall.elements["Insulation/SystemIdentifier"].attributes["id"]
 
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
         if ["UnconditionedBasement", "ConditionedBasement"].include? fnd_type
@@ -248,13 +247,9 @@ class HEScoreRuleset
                                                 area: wall_height * @bldg_perimeter, # FIXME: Verify
                                                 thickness: 8, # FIXME: Verify
                                                 depth_below_grade: wall_height, # FIXME: Verify
-                                                adjacent_to: "ground")
-
-        orig_fndwall_ins = orig_fndwall.elements["Insulation"]
-        orig_fndwall_ins_values = HPXML.get_insulation_values(insulation: orig_fndwall_ins)
-        HPXML.add_insulation(parent: new_fndwall,
-                             id: orig_fndwall_ins_values[:id],
-                             assembly_effective_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
+                                                adjacent_to: "ground",
+                                                insulation_id: insulation_id,
+                                                insulation_assembly_effective_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
 
       end
 
@@ -280,21 +275,11 @@ class HEScoreRuleset
                                 exposed_perimeter: @bldg_perimeter, # FIXME: Verify
                                 perimeter_insulation_depth: 1, # FIXME: Hard-coded
                                 under_slab_insulation_width: 0, # FIXME: Verify
-                                depth_below_grade: 0) # FIXME: Verify
-
-      new_slab_perim_ins = HPXML.add_perimeter_insulation(slab: new_slab,
-                                                          id: slab_perim_id)
-
-      HPXML.add_layer(insulation: new_slab_perim_ins,
-                      installation_type: "continuous",
-                      nominal_r_value: slab_perim_r)
-
-      new_slab_under_ins = HPXML.add_under_slab_insulation(slab: new_slab,
-                                                           id: slab_under_id)
-
-      HPXML.add_layer(insulation: new_slab_under_ins,
-                      installation_type: "continuous",
-                      nominal_r_value: 0)
+                                depth_below_grade: 0, # FIXME: Verify
+                                perimeter_insulation_id: slab_perim_id,
+                                perimeter_insulation_nominal_r_value: slab_perim_r,
+                                under_slab_insulation_id: slab_under_id,
+                                under_slab_insulation_nominal_r_value: 0)
 
       HPXML.add_extension(parent: new_slab,
                           extensions: { "CarpetFraction": 0.5, # FIXME: Hard-coded
@@ -341,6 +326,9 @@ class HEScoreRuleset
         fail "Unexpected wall type '#{wall_type}'."
       end
 
+      orig_wall_ins = orig_wall.elements["Insulation"]
+      wall_ins_id = HPXML.get_id(orig_wall_ins)
+
       new_wall = HPXML.add_wall(hpxml: hpxml,
                                 id: orig_wall_values[:id],
                                 exterior_adjacent_to: "outside",
@@ -349,13 +337,9 @@ class HEScoreRuleset
                                 area: wall_area,
                                 azimuth: 0, # FIXME: Hard-coded
                                 solar_absorptance: 0.75, # FIXME: Verify. Make optional element and remove from here.
-                                emittance: 0.9) # FIXME: Verify. Make optional element and remove from here.
-
-      orig_wall_ins = orig_wall.elements["Insulation"]
-      wall_ins_id = HPXML.get_id(orig_wall_ins)
-      new_wall_ins = HPXML.add_insulation(parent: new_wall,
-                                          id: wall_ins_id,
-                                          assembly_effective_r_value: wall_r)
+                                emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
+                                insulation_id: wall_ins_id,
+                                insulation_assembly_effective_r_value: wall_r)
     end
   end
 
@@ -366,10 +350,7 @@ class HEScoreRuleset
       win_shgc = orig_window_values[:shgc]
       # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
 
-      if not win_ufactor.nil?
-        win_ufactor = Float(win_ufactor)
-        win_shgc = Float(win_shgc)
-      else
+      if win_ufactor.nil?
         win_frame_type = orig_window_values[:frame_type]
         if win_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_window, "FrameType/Aluminum/ThermalBreak"))
           win_frame_type += "ThermalBreak"
@@ -397,10 +378,7 @@ class HEScoreRuleset
       sky_ufactor = orig_skylight_values[:ufactor]
       sky_shgc = orig_skylight_values[:shgc]
 
-      if not sky_ufactor.nil?
-        sky_ufactor = Float(sky_ufactor)
-        sky_shgc = Float(sky_shgc)
-      else
+      if sky_ufactor.nil?
         sky_frame_type = orig_skylight_values[:frame_type]
         if sky_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_skylight, "FrameType/Aluminum/ThermalBreak"))
           sky_frame_type += "ThermalBreak"
@@ -462,8 +440,6 @@ class HEScoreRuleset
           else
             hvac_value = get_default_boiler_afue(Integer(hvac_year), hvac_type, hvac_fuel)
           end
-        else
-          hvac_value = Float(hvac_value)
         end
       elsif hvac_type == "ElectricResistance"
         # FIXME: Verify
@@ -514,8 +490,6 @@ class HEScoreRuleset
         hvac_units = "SEER"
         if not hvac_year.nil?
           hvac_value = get_default_central_ac_seer(Integer(hvac_year))
-        else
-          hvac_value = Float(hvac_value)
         end
       elsif hvac_type == "room air conditioner"
         hvac_year = orig_cooling_values[:year_installed]
@@ -523,8 +497,6 @@ class HEScoreRuleset
         hvac_units = "EER"
         if not hvac_year.nil?
           hvac_value = get_default_room_ac_eer(Integer(hvac_year))
-        else
-          hvac_value = Float(hvac_value)
         end
       else
         fail "Unexpected cooling system type '#{hvac_type}'."
@@ -564,9 +536,6 @@ class HEScoreRuleset
         hvac_units_heat = "HSPF"
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(Integer(hvac_year))
-        else
-          hvac_value_cool = Float(hvac_value_cool)
-          hvac_value_heat = Float(hvac_value_heat)
         end
       elsif hvac_type == "ground-to-air"
         hvac_year = orig_hp_values[:year_installed]
@@ -576,9 +545,6 @@ class HEScoreRuleset
         hvac_units_heat = "COP"
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_gshp_eer_cop(Integer(hvac_year))
-        else
-          hvac_value_cool = Float(hvac_value_cool)
-          hvac_value_heat = Float(hvac_value_heat)
         end
       else
         fail "Unexpected peat pump system type '#{hvac_type}'."
@@ -606,7 +572,7 @@ class HEScoreRuleset
     # HVACDistribution
     orig_details.elements.each("Systems/HVAC/HVACDistribution") do |orig_dist|
       orig_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: orig_dist)
-      ducts_sealed = Boolean(orig_dist_values[:duct_system_sealed])
+      ducts_sealed = orig_dist_values[:duct_system_sealed]
 
       # Leakage fraction of total air handler flow
       # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/thermal-distribution-efficiency/thermal-distribution-efficiency
@@ -652,7 +618,7 @@ class HEScoreRuleset
                                  "vented crawlspace" => "crawlspace - vented",
                                  "unconditioned attic" => "attic - vented" } # FIXME: Change to "attic - unconditioned"
         duct_location = orig_duct_values[:duct_location]
-        duct_insulated = Boolean(orig_duct_values[:hescore_ducts_insulated])
+        duct_insulated = orig_duct_values[:hescore_ducts_insulated]
 
         next if duct_location == "conditioned space"
 
@@ -668,14 +634,14 @@ class HEScoreRuleset
                                           duct_type: "supply",
                                           duct_insulation_r_value: duct_rvalue,
                                           duct_location: hpxml_v23_to_v30_map[duct_location],
-                                          duct_surface_area: Float(orig_duct_values[:duct_fraction_area]) * supply_duct_area)
+                                          duct_surface_area: orig_duct_values[:duct_fraction_area] * supply_duct_area)
 
         # Return duct
         new_supply_duct = HPXML.add_ducts(air_distribution: new_air_dist,
                                           duct_type: "return",
                                           duct_insulation_r_value: duct_rvalue,
                                           duct_location: hpxml_v23_to_v30_map[duct_location],
-                                          duct_surface_area: Float(orig_duct_values[:duct_fraction_area]) * return_duct_area)
+                                          duct_surface_area: orig_duct_values[:duct_fraction_area] * return_duct_area)
       end
     end
   end
@@ -694,8 +660,6 @@ class HEScoreRuleset
 
       if not wh_year.nil?
         wh_ef = get_default_water_heater_ef(Integer(wh_year), wh_fuel)
-      else
-        wh_ef = Float(wh_ef)
       end
 
       wh_capacity = nil
@@ -738,10 +702,8 @@ class HEScoreRuleset
     pv_power = orig_pv_system_values[:max_power_output]
     pv_num_panels = orig_pv_system_values[:hescore_num_panels]
 
-    if not pv_power.nil?
-      pv_power = Float(pv_power)
-    else
-      pv_power = Float(pv_num_panels) * 300.0 # FIXME: Hard-coded
+    if pv_power.nil?
+      pv_power = pv_num_panels * 300.0 # FIXME: Hard-coded
     end
 
     new_pv = HPXML.add_pv_system(hpxml: hpxml,
