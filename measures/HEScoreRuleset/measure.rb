@@ -89,13 +89,12 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     begin
       # Apply HEScore ruleset on HPXML object
-      HEScoreRuleset.apply_ruleset(hpxml_doc)
+      new_hpxml_doc = HEScoreRuleset.apply_ruleset(hpxml_doc)
     rescue Exception => e
       if skip_validation
         # Something went wrong, check for invalid HPXML file now. This was previously
         # skipped to reduce runtime (see https://github.com/NREL/OpenStudio-ERI/issues/47).
-        original_hpxml_doc = REXML::Document.new(File.read(hpxml_path))
-        validate_hpxml(runner, hpxml_path, original_hpxml_doc, schemas_dir)
+        validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
       end
 
       # Report exception
@@ -105,7 +104,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     # Write new HPXML file
     if hpxml_output_path.is_initialized
-      XMLHelper.write_file(hpxml_doc, hpxml_output_path.get)
+      XMLHelper.write_file(new_hpxml_doc, hpxml_output_path.get)
       runner.registerInfo("Wrote file: #{hpxml_output_path.get}")
     end
 

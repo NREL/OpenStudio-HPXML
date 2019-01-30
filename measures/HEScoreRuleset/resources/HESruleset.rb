@@ -5,21 +5,21 @@ require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
 
 class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
-    hpxml_doc.elements["/HPXML"].attributes["schemaVersion"] = '3.0'
+    orig_details = hpxml_doc.elements["/HPXML/Building/BuildingDetails"]
 
-    # Add ERI version
-    software_info = hpxml_doc.elements["/HPXML/SoftwareInfo"]
-    XMLHelper.add_element(software_info, "extension/ERICalculation/Version", "2014AEG") # FIXME: Verify
+    # Create new HPXML doc
+    hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml_doc.elements["/HPXML"])
+    hpxml_values[:eri_calculation_version] = "2014AEG" # FIXME: Verify
+    hpxml_doc = HPXML.create_hpxml(**hpxml_values)
 
-    # Create new BuildingDetails element
-    building = hpxml_doc.elements["/HPXML/Building"]
-    orig_details = XMLHelper.delete_element(building, "BuildingDetails")
-    new_details = XMLHelper.add_element(building, "BuildingDetails")
+    hpxml = hpxml_doc.elements["HPXML"]
 
     # Global variables
-    @nbeds = Float(XMLHelper.get_value(orig_details, "BuildingSummary/BuildingConstruction/NumberofBedrooms"))
-    @cfa = Float(XMLHelper.get_value(orig_details, "BuildingSummary/BuildingConstruction/ConditionedFloorArea"))
-    @ncfl_ag = Float(XMLHelper.get_value(orig_details, "BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade"))
+    orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_details.elements["BuildingSummary/BuildingConstruction"])
+    orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
+    @nbeds = orig_building_construction_values[:number_of_bedrooms]
+    @cfa = orig_building_construction_values[:conditioned_floor_area]
+    @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
     @ncfl = @ncfl_ag # Number above-grade stories plus any conditioned basement
     if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='true']").nil?
       @ncfl += 1
@@ -28,8 +28,8 @@ class HEScoreRuleset
     if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement").nil?
       @nfl += 1
     end
-    @ceil_height = Float(XMLHelper.get_value(orig_details, "BuildingSummary/BuildingConstruction/AverageCeilingHeight"))
-    @bldg_orient = XMLHelper.get_value(orig_details, "BuildingSummary/Site/OrientationOfFrontOfHome")
+    @ceil_height = orig_building_construction_values[:average_ceiling_height]
+    @bldg_orient = orig_site_values[:orientation_of_front_of_home]
 
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
@@ -45,60 +45,53 @@ class HEScoreRuleset
     @cvolume = @cfa * @ceil_height # FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
 
     # BuildingSummary
-    new_summary = XMLHelper.add_element(new_details, "BuildingSummary")
-    set_summary(new_summary)
+    set_summary(hpxml)
 
     # ClimateAndRiskZones
-    new_climate = XMLHelper.add_element(new_details, "ClimateandRiskZones")
-    set_climate(new_climate, orig_details)
+    set_climate(orig_details, hpxml)
 
     # Enclosure
-    new_enclosure = XMLHelper.add_element(new_details, "Enclosure")
-    set_enclosure_air_infiltration(new_enclosure, orig_details)
-    set_enclosure_attics_roofs(new_enclosure, orig_details)
-    set_enclosure_foundations(new_enclosure, orig_details)
-    set_enclosure_rim_joists(new_enclosure, orig_details)
-    set_enclosure_walls(new_enclosure, orig_details)
-    set_enclosure_windows(new_enclosure, orig_details)
-    set_enclosure_skylights(new_enclosure, orig_details)
-    set_enclosure_doors(new_enclosure, orig_details)
+    set_enclosure_air_infiltration(orig_details, hpxml)
+    set_enclosure_attics_roofs(orig_details, hpxml)
+    set_enclosure_foundations(orig_details, hpxml)
+    set_enclosure_rim_joists(orig_details, hpxml)
+    set_enclosure_walls(orig_details, hpxml)
+    set_enclosure_windows(orig_details, hpxml)
+    set_enclosure_skylights(orig_details, hpxml)
+    set_enclosure_doors(orig_details, hpxml)
 
     # Systems
-    new_systems = XMLHelper.add_element(new_details, "Systems")
-    set_systems_hvac(new_systems, orig_details)
-    set_systems_mechanical_ventilation(new_systems, orig_details)
-    set_systems_water_heater(new_systems, orig_details)
-    set_systems_water_heating_use(new_systems)
-    set_systems_photovoltaics(new_systems, orig_details)
+    set_systems_hvac(orig_details, hpxml)
+    set_systems_mechanical_ventilation(orig_details, hpxml)
+    set_systems_water_heater(orig_details, hpxml)
+    set_systems_water_heating_use(hpxml)
+    set_systems_photovoltaics(orig_details, hpxml)
 
     # Appliances
-    new_appliances = XMLHelper.add_element(new_details, "Appliances")
-    set_appliances_clothes_washer(new_appliances)
-    set_appliances_clothes_dryer(new_appliances)
-    set_appliances_dishwasher(new_appliances)
-    set_appliances_refrigerator(new_appliances)
-    set_appliances_cooking_range_oven(new_appliances)
+    set_appliances_clothes_washer(hpxml)
+    set_appliances_clothes_dryer(hpxml)
+    set_appliances_dishwasher(hpxml)
+    set_appliances_refrigerator(hpxml)
+    set_appliances_cooking_range_oven(hpxml)
 
     # Lighting
-    new_lighting = XMLHelper.add_element(new_details, "Lighting")
-    set_lighting(new_lighting, orig_details)
-    set_ceiling_fans(new_lighting, orig_details)
+    set_lighting(orig_details, hpxml)
+    set_ceiling_fans(orig_details, hpxml)
 
     # MiscLoads
-    new_misc_loads = XMLHelper.add_element(new_details, "MiscLoads")
-    set_misc_plug_loads(new_misc_loads)
-    set_misc_television(new_misc_loads)
+    set_misc_plug_loads(hpxml)
+    set_misc_television(hpxml)
+
+    return hpxml_doc
   end
 
-  def self.set_summary(new_summary)
-    HPXML.add_site(building_summary: new_summary,
+  def self.set_summary(hpxml)
+    HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"],
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
-
-    HPXML.add_building_occupancy(building_summary: new_summary,
+    HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
-
-    HPXML.add_building_construction(building_summary: new_summary,
+    HPXML.add_building_construction(hpxml: hpxml,
                                     number_of_conditioned_floors: Integer(@ncfl),
                                     number_of_conditioned_floors_above_grade: Integer(@ncfl_ag),
                                     number_of_bedrooms: Integer(@nbeds),
@@ -107,20 +100,21 @@ class HEScoreRuleset
                                     garage_present: false)
   end
 
-  def self.set_climate(new_climate, orig_details)
-    HPXML.add_climate_zone_iecc(climate_and_risk_zones: new_climate,
+  def self.set_climate(orig_details, hpxml)
+    HPXML.add_climate_zone_iecc(hpxml: hpxml,
                                 year: 2006,
                                 climate_zone: "1A") # FIXME: Hard-coded
 
-    name = XMLHelper.get_value(orig_details, "ClimateandRiskZones/WeatherStation/Name")
-    wmo = Integer(XMLHelper.get_value(orig_details, "ClimateandRiskZones/WeatherStation/WMO"))
-    HPXML.add_weather_station(climate_and_risk_zones: new_climate,
+    orig_weather_station = orig_details.elements["ClimateandRiskZones/WeatherStation"]
+    orig_name = XMLHelper.get_value(orig_weather_station, "Name")
+    orig_wmo = XMLHelper.get_value(orig_weather_station, "WMO")
+    HPXML.add_weather_station(hpxml: hpxml,
                               id: "WeatherStation",
-                              name: name,
-                              wmo: wmo)
+                              name: orig_name,
+                              wmo: orig_wmo)
   end
 
-  def self.set_enclosure_air_infiltration(new_enclosure, orig_details)
+  def self.set_enclosure_air_infiltration(orig_details, hpxml)
     cfm50 = XMLHelper.get_value(orig_details, "Enclosure/AirInfiltration/AirInfiltrationMeasurement[HousePressure='50']/BuildingAirLeakage[UnitofMeasure='CFM']/AirLeakage")
     desc = XMLHelper.get_value(orig_details, "Enclosure/AirInfiltration/AirInfiltrationMeasurement/LeakinessDescription")
 
@@ -135,121 +129,97 @@ class HEScoreRuleset
       end
     end
 
-    new_air_infil = XMLHelper.add_element(new_enclosure, "AirInfiltration")
-    HPXML.add_air_infiltration_measurement(air_infiltration: new_air_infil,
+    HPXML.add_air_infiltration_measurement(hpxml: hpxml,
                                            id: "AirInfiltrationMeasurement",
                                            house_pressure: 50,
                                            unit_of_measure: "ACH",
                                            air_leakage: ach50)
   end
 
-  def self.set_enclosure_attics_roofs(new_enclosure, orig_details)
-    new_attics = XMLHelper.add_element(new_enclosure, "Attics")
-
+  def self.set_enclosure_attics_roofs(orig_details, hpxml)
     orig_details.elements.each("Enclosure/AtticAndRoof/Attics/Attic") do |orig_attic|
-      attic_id = HPXML.get_id(orig_attic)
-      attic_type = XMLHelper.get_value(orig_attic, "AtticType")
+      orig_attic_values = HPXML.get_attic_values(attic: orig_attic)
       orig_roof = get_attached(HPXML.get_idref(orig_attic, "AttachedToRoof"), orig_details, "Enclosure/AtticAndRoof/Roofs/Roof")
+      orig_roof_values = HPXML.get_attic_roof_values(roof: orig_roof)
+      orig_roof_ins = orig_attic.elements["AtticRoofInsulation"]
+      orig_roof_ins_values = HPXML.get_assembly_insulation_values(insulation: orig_roof_ins)
 
-      new_attic = HPXML.add_attic(attics: new_attics,
-                                  id: attic_id,
-                                  attic_type: attic_type)
+      new_attic = HPXML.add_attic(hpxml: hpxml,
+                                  id: orig_attic_values[:id],
+                                  attic_type: orig_attic_values[:attic_type])
 
       # Roof
       roof_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='cavity']/NominalRValue"))
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
-      roof_material = XMLHelper.get_value(orig_roof, "RoofType")
-      roof_has_radiant_barrier = Boolean(XMLHelper.get_value(orig_roof, "RadiantBarrier"))
-      roof_color = XMLHelper.get_value(orig_roof, "RoofColor")
-      roof_solar_abs = XMLHelper.get_value(orig_roof, "SolarAbsorptance")
-      roof_solar_abs = get_roof_solar_absorptance(roof_color) if roof_solar_abs.nil?
+      roof_solar_abs = orig_roof_values[:solar_absorptance]
+      roof_solar_abs = get_roof_solar_absorptance(orig_roof_values[:roof_color]) if orig_roof_values[:solar_absorptance].nil?
+      roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, orig_roof_values[:roof_type], orig_roof_values[:radiant_barrier])
       # FIXME: Get roof area; is roof area for cathedral and ceiling area for attic?
 
-      new_roofs = XMLHelper.add_element(new_attic, "Roofs")
       # FIXME: Should be two (or four?) roofs per HES zone_roof?
-      new_roof = HPXML.add_roof(roofs: new_roofs,
-                                id: HPXML.get_id(orig_roof),
-                                area: 1000, # FIXME: Hard-coded
-                                azimuth: 0, # FIXME: Hard-coded
-                                solar_absorptance: roof_solar_abs,
-                                emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
-                                pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                                radiant_barrier: false) # FIXME: Verify. Setting to false because it's included in the assembly R-value
-      orig_attic_roof_ins = orig_attic.elements["AtticRoofInsulation"]
-      HPXML.add_insulation(parent: new_roof,
-                           id: HPXML.get_id(orig_attic_roof_ins),
-                           assembly_effective_r_value: get_roof_assembly_r(roof_r_cavity, roof_r_cont, roof_material, roof_has_radiant_barrier))
+      new_roof = HPXML.add_attic_roof(attic: new_attic,
+                                      id: orig_roof_values[:id],
+                                      area: 1000, # FIXME: Hard-coded
+                                      azimuth: 0, # FIXME: Hard-coded
+                                      solar_absorptance: roof_solar_abs,
+                                      emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
+                                      pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                                      radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
+                                      insulation_id: orig_roof_ins_values[:id],
+                                      insulation_assembly_r_value: roof_r)
 
       # Floor
-      if ["unvented attic", "vented attic"].include? attic_type
+      if ["unvented attic", "vented attic"].include? orig_attic_values[:attic_type]
         floor_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticFloorInsulation/Layer[InstallationType='cavity']/NominalRValue"))
+        floor_r = get_ceiling_assembly_r(floor_r_cavity)
 
-        new_floors = XMLHelper.add_element(new_attic, "Floors")
-        new_floor = HPXML.add_floor(floors: new_floors,
-                                    id: "#{attic_id}_floor",
-                                    adjacent_to: "living space",
-                                    area: XMLHelper.get_value(orig_attic, "Area")) # FIXME: Verify. This is the attic floor area and not the roof area?
-        orig_attic_floor_ins = orig_attic.elements["AtticFloorInsulation"]
-        attic_floor_ins_id = HPXML.get_id(orig_attic_floor_ins)
-        HPXML.add_insulation(parent: new_floor,
-                             id: attic_floor_ins_id,
-                             assembly_effective_r_value: get_ceiling_assembly_r(floor_r_cavity))
+        orig_floor_ins = orig_attic.elements["AtticFloorInsulation"]
+        orig_floor_ins_values = HPXML.get_assembly_insulation_values(insulation: orig_floor_ins)
+
+        new_floor = HPXML.add_attic_floor(attic: new_attic,
+                                          id: "#{orig_attic_values[:id]}_floor",
+                                          adjacent_to: "living space",
+                                          area: XMLHelper.get_value(orig_attic, "Area"), # FIXME: Verify. This is the attic floor area and not the roof area?
+                                          insulation_id: orig_floor_ins_values[:id],
+                                          insulation_assembly_r_value: floor_r)
       end
       # FIXME: Should be zero (or two?) gable walls per HES zone_roof?
       # Uses ERI Reference Home for vented attic specific leakage area
     end
   end
 
-  def self.set_enclosure_foundations(new_enclosure, orig_details)
-    new_foundations = XMLHelper.add_element(new_enclosure, "Foundations")
-
+  def self.set_enclosure_foundations(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
-      foundation_id = HPXML.get_id(orig_foundation)
-      fnd_type = XMLHelper.get_child_name(orig_foundation, "FoundationType")
-      if fnd_type == "Basement"
-        if Boolean(XMLHelper.get_value(orig_foundation, "FoundationType/Basement/Conditioned"))
-          fnd_type = "ConditionedBasement"
-        else
-          fnd_type = "UnconditionedBasement"
-        end
-      elsif fnd_type == "Crawlspace"
-        if Boolean(XMLHelper.get_value(orig_foundation, "FoundationType/Crawlspace/Vented"))
-          fnd_type = "VentedCrawlspace"
-        else
-          fnd_type = "UnventedCrawlspace"
-        end
-      end
+      orig_foundation_values = HPXML.get_foundation_values(foundation: orig_foundation)
+      fnd_type = orig_foundation_values[:foundation_type]
 
-      new_foundation = HPXML.add_foundation(foundations: new_foundations,
-                                            id: foundation_id,
+      new_foundation = HPXML.add_foundation(hpxml: hpxml,
+                                            id: orig_foundation_values[:id],
                                             foundation_type: fnd_type)
 
       # FrameFloor
       if ["UnconditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
         orig_framefloor = orig_foundation.elements["FrameFloor"]
-        floor_id = HPXML.get_id(orig_framefloor)
+        orig_frameflooor_values = HPXML.get_floor_values(floor: orig_framefloor)
         floor_r_cavity = Integer(XMLHelper.get_value(orig_foundation, "FrameFloor/Insulation/Layer[InstallationType='cavity']/NominalRValue"))
         floor_r = get_floor_assembly_r(floor_r_cavity)
-        floor_area = XMLHelper.get_value(orig_framefloor, "Area")
+        insulation_id = orig_framefloor.elements["Insulation/SystemIdentifier"].attributes["id"]
 
         new_framefloor = HPXML.add_frame_floor(foundation: new_foundation,
-                                               id: floor_id,
+                                               id: orig_framefloor_values[:id],
                                                adjacent_to: "living space",
-                                               area: floor_area)
-
-        orig_framefloor_ins = orig_framefloor.elements["Insulation"]
-        framefloor_ins_id = HPXML.get_id(orig_framefloor_ins)
-        HPXML.add_insulation(parent: new_framefloor,
-                             id: framefloor_ins_id,
-                             assembly_effective_r_value: floor_r)
+                                               area: orig_framefloor_values[:area],
+                                               insulation_id: insulation_id,
+                                               insulation_assembly_r_value: floor_r)
 
       end
 
       # FoundationWall
       if ["UnconditionedBasement", "ConditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
         orig_fndwall = orig_foundation.elements["FoundationWall"]
-        wall_id = HPXML.get_id(orig_fndwall)
+        orig_fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: orig_fndwall)
         wall_r = 10 # FIXME: Hard-coded
+        insulation_id = orig_fndwall.elements["Insulation/SystemIdentifier"].attributes["id"]
 
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
         if ["UnconditionedBasement", "ConditionedBasement"].include? fnd_type
@@ -259,18 +229,14 @@ class HEScoreRuleset
         end
 
         new_fndwall = HPXML.add_foundation_wall(foundation: new_foundation,
-                                                id: wall_id,
+                                                id: orig_fndwall_values[:id],
                                                 height: wall_height,
                                                 area: wall_height * @bldg_perimeter, # FIXME: Verify
                                                 thickness: 8, # FIXME: Verify
                                                 depth_below_grade: wall_height, # FIXME: Verify
-                                                adjacent_to: "ground")
-
-        orig_fndwall_ins = orig_fndwall.elements["Insulation"]
-        fndwall_ins_id = HPXML.get_id(orig_fndwall_ins)
-        HPXML.add_insulation(parent: new_fndwall,
-                             id: fndwall_ins_id,
-                             assembly_effective_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
+                                                adjacent_to: "ground",
+                                                insulation_id: insulation_id,
+                                                insulation_assembly_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
 
       end
 
@@ -278,17 +244,16 @@ class HEScoreRuleset
       if fnd_type == "SlabOnGrade"
         slab_perim_r = Integer(XMLHelper.get_value(orig_foundation, "Slab/PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue"))
         slab_area = XMLHelper.get_value(orig_foundation, "Slab/Area")
-        fnd_id = HPXML.get_id(orig_foundation)
+        fnd_id = orig_foundation_values[:id]
         slab_id = orig_foundation.elements["Slab/SystemIdentifier"].attributes["id"]
         slab_perim_id = orig_foundation.elements["Slab/PerimeterInsulation/SystemIdentifier"].attributes["id"]
-        slab_under_id = "#{fnd_id}_slab_under_insulation"
+        slab_under_id = "#{slab_id}_under_insulation"
       else
         slab_perim_r = 0
         slab_area = Float(XMLHelper.get_value(orig_foundation, "FrameFloor/Area"))
-        fnd_id = HPXML.get_id(orig_foundation)
-        slab_id = "#{fnd_id}_slab"
-        slab_perim_id = "#{fnd_id}_slab_perim_insulation"
-        slab_under_id = "#{fnd_id}_slab_under_insulation"
+        slab_id = "#{orig_foundation_values[:id]}_slab"
+        slab_perim_id = "#{slab_id}_perim_insulation"
+        slab_under_id = "#{slab_id}_under_insulation"
       end
       new_slab = HPXML.add_slab(foundation: new_foundation,
                                 id: slab_id,
@@ -297,21 +262,11 @@ class HEScoreRuleset
                                 exposed_perimeter: @bldg_perimeter, # FIXME: Verify
                                 perimeter_insulation_depth: 1, # FIXME: Hard-coded
                                 under_slab_insulation_width: 0, # FIXME: Verify
-                                depth_below_grade: 0) # FIXME: Verify
-
-      new_slab_perim_ins = HPXML.add_perimeter_insulation(slab: new_slab,
-                                                          id: slab_perim_id)
-
-      HPXML.add_layer(insulation: new_slab_perim_ins,
-                      installation_type: "continuous",
-                      nominal_r_value: slab_perim_r)
-
-      new_slab_under_ins = HPXML.add_under_slab_insulation(slab: new_slab,
-                                                           id: slab_under_id)
-
-      HPXML.add_layer(insulation: new_slab_under_ins,
-                      installation_type: "continuous",
-                      nominal_r_value: 0)
+                                depth_below_grade: 0, # FIXME: Verify
+                                perimeter_insulation_id: slab_perim_id,
+                                perimeter_insulation_r_value: slab_perim_r,
+                                under_slab_insulation_id: slab_under_id,
+                                under_slab_insulation_r_value: 0)
 
       HPXML.add_extension(parent: new_slab,
                           extensions: { "CarpetFraction": 0.5, # FIXME: Hard-coded
@@ -321,17 +276,16 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_rim_joists(new_enclosure, orig_details)
+  def self.set_enclosure_rim_joists(orig_details, hpxml)
     # No rim joists
   end
 
-  def self.set_enclosure_walls(new_enclosure, orig_details)
-    new_walls = XMLHelper.add_element(new_enclosure, "Walls")
-
+  def self.set_enclosure_walls(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Walls/Wall") do |orig_wall|
-      wall_id = HPXML.get_id(orig_wall)
-      wall_type = XMLHelper.get_child_name(orig_wall, "WallType")
-      wall_orient = XMLHelper.get_value(orig_wall, "Orientation")
+      orig_wall_values = HPXML.get_wall_values(wall: orig_wall)
+
+      wall_type = orig_wall_values[:wall_type]
+      wall_orient = orig_wall_values[:orientation]
       wall_area = nil
       if @bldg_orient == wall_orient or @bldg_orient == reverse_orientation(wall_orient)
         wall_area = @ceil_height * @bldg_width # FIXME: Verify
@@ -340,164 +294,131 @@ class HEScoreRuleset
       end
 
       if wall_type == "WoodStud"
-        wall_siding = XMLHelper.get_value(orig_wall, "Siding")
         wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
         wall_r_cont = XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='continuous']/NominalRValue").to_i
         wall_ove = Boolean(XMLHelper.get_value(orig_wall, "WallType/WoodStud/OptimumValueEngineering"))
 
-        wall_r = get_wood_stud_wall_assembly_r(wall_r_cavity, wall_r_cont, wall_siding, wall_ove)
+        wall_r = get_wood_stud_wall_assembly_r(wall_r_cavity, wall_r_cont, orig_wall_values[:siding], wall_ove)
       elsif wall_type == "StructuralBrick"
         wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
 
         wall_r = get_structural_block_wall_assembly_r(wall_r_cavity)
       elsif wall_type == "ConcreteMasonryUnit"
-        wall_siding = XMLHelper.get_value(orig_wall, "Siding")
         wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
 
-        wall_r = get_concrete_block_wall_assembly_r(wall_r_cavity, wall_siding)
+        wall_r = get_concrete_block_wall_assembly_r(wall_r_cavity, orig_wall_values[:siding])
       elsif wall_type == "StrawBale"
-        wall_siding = XMLHelper.get_value(orig_wall, "Siding")
-
-        wall_r = get_straw_bale_wall_assembly_r(wall_siding)
+        wall_r = get_straw_bale_wall_assembly_r(orig_wall_values[:siding])
       else
         fail "Unexpected wall type '#{wall_type}'."
       end
 
-      new_wall = HPXML.add_wall(walls: new_walls,
-                                id: wall_id,
+      orig_wall_ins = orig_wall.elements["Insulation"]
+      wall_ins_id = HPXML.get_id(orig_wall_ins)
+
+      new_wall = HPXML.add_wall(hpxml: hpxml,
+                                id: orig_wall_values[:id],
                                 exterior_adjacent_to: "outside",
                                 interior_adjacent_to: "living space",
                                 wall_type: wall_type,
                                 area: wall_area,
                                 azimuth: 0, # FIXME: Hard-coded
                                 solar_absorptance: 0.75, # FIXME: Verify. Make optional element and remove from here.
-                                emittance: 0.9) # FIXME: Verify. Make optional element and remove from here.
-
-      orig_wall_ins = orig_wall.elements["Insulation"]
-      wall_ins_id = HPXML.get_id(orig_wall_ins)
-      new_wall_ins = HPXML.add_insulation(parent: new_wall,
-                                          id: wall_ins_id,
-                                          assembly_effective_r_value: wall_r)
+                                emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
+                                insulation_id: wall_ins_id,
+                                insulation_assembly_r_value: wall_r)
     end
   end
 
-  def self.set_enclosure_windows(new_enclosure, orig_details)
-    return if not XMLHelper.has_element(orig_details, "Enclosure/Windows")
-
-    new_windows = XMLHelper.add_element(new_enclosure, "Windows")
-
+  def self.set_enclosure_windows(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Windows/Window") do |orig_window|
-      win_id = HPXML.get_id(orig_window)
-      wall_id = HPXML.get_idref(orig_window, "AttachedToWall")
-      orig_wall = get_attached(wall_id, orig_details, "Enclosure/Walls/Wall")
-      win_area = XMLHelper.get_value(orig_window, "Area")
-      win_orient = XMLHelper.get_value(orig_wall, "Orientation")
-      win_ufactor = XMLHelper.get_value(orig_window, "UFactor")
+      orig_window_values = HPXML.get_window_values(window: orig_window)
+      win_ufactor = orig_window_values[:ufactor]
+      win_shgc = orig_window_values[:shgc]
       # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
 
-      if not win_ufactor.nil?
-        win_ufactor = Float(win_ufactor)
-        win_shgc = Float(XMLHelper.get_value(orig_window, "SHGC"))
-      else
-        win_frame_type = XMLHelper.get_child_name(orig_window, "FrameType")
+      if win_ufactor.nil?
+        win_frame_type = orig_window_values[:frame_type]
         if win_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_window, "FrameType/Aluminum/ThermalBreak"))
           win_frame_type += "ThermalBreak"
         end
-        win_glass_layers = XMLHelper.get_value(orig_window, "GlassLayers")
-        win_glass_type = XMLHelper.get_value(orig_window, "GlassType")
-        win_gas_fill = XMLHelper.get_value(orig_window, "GasFill")
 
-        win_ufactor, win_shgc = get_window_ufactor_shgc(win_frame_type, win_glass_layers, win_glass_type, win_gas_fill)
+        win_ufactor, win_shgc = get_window_ufactor_shgc(win_frame_type, orig_window_values[:glass_layers], orig_window_values[:glass_type], orig_window_values[:gas_fill])
       end
 
-      new_window = HPXML.add_window(windows: new_windows,
-                                    id: win_id,
-                                    area: win_area,
-                                    azimuth: orientation_to_azimuth(win_orient),
+      new_window = HPXML.add_window(hpxml: hpxml,
+                                    id: orig_window_values[:id],
+                                    area: orig_window_values[:area],
+                                    azimuth: orientation_to_azimuth(orig_window_values[:orientation]),
                                     ufactor: win_ufactor,
                                     shgc: win_shgc,
-                                    idref: wall_id)
+                                    wall_idref: orig_window_values[:wall_idref])
       # No overhangs FIXME: Verify
       # No neighboring buildings FIXME: Verify
       # Uses ERI Reference Home for interior shading
     end
   end
 
-  def self.set_enclosure_skylights(new_enclosure, orig_details)
-    return if not XMLHelper.has_element(orig_details, "Enclosure/Skylights")
-
-    new_skylights = XMLHelper.add_element(new_enclosure, "Skylights")
-
+  def self.set_enclosure_skylights(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Skylights/Skylight") do |orig_skylight|
-      sky_id = HPXML.get_id(orig_skylight)
-      roof_id = HPXML.get_idref(orig_skylight, "AttachedToRoof")
-      sky_ufactor = XMLHelper.get_value(orig_skylight, "UFactor")
-      sky_area = Float(XMLHelper.get_value(orig_skylight, "Area"))
+      orig_skylight_values = HPXML.get_skylight_values(skylight: orig_skylight)
+      sky_ufactor = orig_skylight_values[:ufactor]
+      sky_shgc = orig_skylight_values[:shgc]
 
-      if not sky_ufactor.nil?
-        sky_ufactor = Float(sky_ufactor)
-        sky_shgc = Float(XMLHelper.get_value(orig_skylight, "SHGC"))
-      else
-        sky_frame_type = XMLHelper.get_child_name(orig_skylight, "FrameType")
+      if sky_ufactor.nil?
+        sky_frame_type = orig_skylight_values[:frame_type]
         if sky_frame_type == "Aluminum" and Boolean(XMLHelper.get_value(orig_skylight, "FrameType/Aluminum/ThermalBreak"))
           sky_frame_type += "ThermalBreak"
         end
-        sky_glass_layers = XMLHelper.get_value(orig_skylight, "GlassLayers")
-        sky_glass_type = XMLHelper.get_value(orig_skylight, "GlassType")
-        sky_gas_fill = XMLHelper.get_value(orig_skylight, "GasFill")
-
-        sky_ufactor, sky_shgc = get_skylight_ufactor_shgc(sky_frame_type, sky_glass_layers, sky_glass_type, sky_gas_fill)
+        sky_ufactor, sky_shgc = get_skylight_ufactor_shgc(sky_frame_type, orig_skylight_values[:glass_layers], orig_skylight_values[:glass_type], orig_skylight_values[:gas_fill])
       end
 
-      new_skylight = HPXML.add_skylight(skylights: new_skylights,
-                                        id: sky_id,
-                                        area: sky_area,
+      new_skylight = HPXML.add_skylight(hpxml: hpxml,
+                                        id: orig_skylight_values[:id],
+                                        area: orig_skylight_values[:area],
                                         azimuth: orientation_to_azimuth("north"), # FIXME: Hard-coded
                                         ufactor: sky_ufactor,
                                         shgc: sky_shgc,
-                                        idref: roof_id)
+                                        roof_idref: orig_skylight_values[:roof_idref])
       # No overhangs
     end
   end
 
-  def self.set_enclosure_doors(new_enclosure, orig_details)
-    new_doors = XMLHelper.add_element(new_enclosure, "Doors")
-
+  def self.set_enclosure_doors(orig_details, hpxml)
     front_wall = nil
-    orig_details.elements.each("Enclosure/Walls/Wall") do |wall|
-      next if XMLHelper.get_value(wall, "Orientation") != @bldg_orient
+    orig_details.elements.each("Enclosure/Walls/Wall") do |orig_wall|
+      orig_wall_values = HPXML.get_wall_values(wall: orig_wall)
+      next if orig_wall_values[:orientation] != @bldg_orient
 
-      front_wall = wall
+      front_wall = orig_wall
       break
     end
 
-    wall_id = HPXML.get_id(front_wall)
-    new_door = HPXML.add_door(doors: new_doors,
+    front_wall_values = HPXML.get_wall_values(wall: front_wall)
+    new_door = HPXML.add_door(hpxml: hpxml,
                               id: "Door",
-                              idref: wall_id,
+                              wall_idref: front_wall_values[:id],
                               azimuth: orientation_to_azimuth(@bldg_orient))
     # Uses ERI Reference Home for Area
     # Uses ERI Reference Home for RValue
   end
 
-  def self.set_systems_hvac(new_systems, orig_details)
-    new_hvac = XMLHelper.add_element(new_systems, "HVAC")
-    new_hvac_plant = XMLHelper.add_element(new_hvac, "HVACPlant")
-
+  def self.set_systems_hvac(orig_details, hpxml)
     # HeatingSystem
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |orig_heating|
-      hvac_id = HPXML.get_id(orig_heating)
+      orig_heating_values = HPXML.get_heating_system_values(heating_system: orig_heating)
+
       distribution_system_id = nil
       if XMLHelper.has_element(orig_heating, "DistributionSystem")
-        distribution_system_id = HPXML.get_idref(orig_heating, "DistributionSystem")
+        distribution_system_id = orig_heating_values[:distribution_system_idref]
       end
-      hvac_type = XMLHelper.get_child_name(orig_heating, "HeatingSystemType")
-      hvac_fuel = XMLHelper.get_value(orig_heating, "HeatingSystemFuel")
-      hvac_frac = XMLHelper.get_value(orig_heating, "FractionHeatLoadServed")
+      hvac_type = orig_heating_values[:heating_system_type]
+      hvac_fuel = orig_heating_values[:heating_system_fuel]
+      hvac_frac = orig_heating_values[:fraction_heat_load_served]
       hvac_units = nil
       hvac_value = nil
       if ["Furnace", "WallFurnace", "Boiler"].include? hvac_type
-        hvac_year = XMLHelper.get_value(orig_heating, "YearInstalled")
+        hvac_year = orig_heating_values[:year_installed]
         hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='AFUE']/Value")
         hvac_units = "AFUE"
         if not hvac_year.nil?
@@ -506,8 +427,6 @@ class HEScoreRuleset
           else
             hvac_value = get_default_boiler_afue(Integer(hvac_year), hvac_type, hvac_fuel)
           end
-        else
-          hvac_value = Float(hvac_value)
         end
       elsif hvac_type == "ElectricResistance"
         # FIXME: Verify
@@ -529,125 +448,118 @@ class HEScoreRuleset
         fail "Unexpected heating system type '#{hvac_type}'."
       end
 
-      new_heating = HPXML.add_heating_system(hvac_plant: new_hvac_plant,
-                                             id: hvac_id,
-                                             idref: distribution_system_id,
+      new_heating = HPXML.add_heating_system(hpxml: hpxml,
+                                             id: orig_heating_values[:id],
+                                             distribution_system_idref: distribution_system_id,
                                              heating_system_type: hvac_type,
                                              heating_system_fuel: hvac_fuel,
                                              heating_capacity: -1, # Use Manual J auto-sizing
-                                             annual_heating_efficiency_units: hvac_units,
-                                             annual_heating_efficiency_value: hvac_value,
+                                             heating_efficiency_units: hvac_units,
+                                             heating_efficiency_value: hvac_value,
                                              fraction_heat_load_served: hvac_frac)
     end
 
     # CoolingSystem
     orig_details.elements.each("Systems/HVAC/HVACPlant/CoolingSystem") do |orig_cooling|
-      hvac_id = HPXML.get_id(orig_cooling)
+      orig_cooling_values = HPXML.get_cooling_system_values(cooling_system: orig_cooling)
+
       distribution_system_id = nil
       if XMLHelper.has_element(orig_cooling, "DistributionSystem")
-        distribution_system_id = HPXML.get_idref(orig_cooling, "DistributionSystem")
+        distribution_system_id = orig_cooling_values[:distribution_system_idref]
       end
-      hvac_type = XMLHelper.get_value(orig_cooling, "CoolingSystemType")
-      hvac_frac = XMLHelper.get_value(orig_cooling, "FractionCoolLoadServed")
+      hvac_type = orig_cooling_values[:cooling_system_type]
+      hvac_frac = orig_cooling_values[:fraction_cool_load_served]
       hvac_units = nil
       hvac_value = nil
       if hvac_type == "central air conditioning"
-        hvac_year = XMLHelper.get_value(orig_cooling, "YearInstalled")
+        hvac_year = orig_cooling_values[:year_installed]
         hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='SEER']/Value")
         hvac_units = "SEER"
         if not hvac_year.nil?
           hvac_value = get_default_central_ac_seer(Integer(hvac_year))
-        else
-          hvac_value = Float(hvac_value)
         end
       elsif hvac_type == "room air conditioner"
-        hvac_year = XMLHelper.get_value(orig_cooling, "YearInstalled")
+        hvac_year = orig_cooling_values[:year_installed]
         hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='EER']/Value")
         hvac_units = "EER"
         if not hvac_year.nil?
           hvac_value = get_default_room_ac_eer(Integer(hvac_year))
-        else
-          hvac_value = Float(hvac_value)
         end
       else
         fail "Unexpected cooling system type '#{hvac_type}'."
       end
 
-      new_cooling = HPXML.add_cooling_system(hvac_plant: new_hvac_plant,
-                                             id: hvac_id,
-                                             idref: distribution_system_id,
+      new_cooling = HPXML.add_cooling_system(hpxml: hpxml,
+                                             id: orig_cooling_values[:id],
+                                             distribution_system_idref: distribution_system_id,
                                              cooling_system_type: hvac_type,
                                              cooling_system_fuel: "electricity",
                                              cooling_capacity: -1, # Use Manual J auto-sizing
                                              fraction_cool_load_served: hvac_frac,
-                                             annual_cooling_efficiency_units: hvac_units,
-                                             annual_cooling_efficiency_value: hvac_value)
+                                             cooling_efficiency_units: hvac_units,
+                                             cooling_efficiency_value: hvac_value)
     end
 
     # HeatPump
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatPump") do |orig_hp|
-      hvac_id = HPXML.get_id(orig_hp)
+      orig_hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
+
       distribution_system_id = nil
       if XMLHelper.has_element(orig_hp, "DistributionSystem")
-        distribution_system_id = HPXML.get_idref(orig_hp, "DistributionSystem")
+        distribution_system_id = orig_hp_values[:distribution_system_idref]
       end
-      hvac_type = XMLHelper.get_value(orig_hp, "HeatPumpType")
-      hvac_frac_heat = XMLHelper.get_value(orig_hp, "FractionHeatLoadServed")
-      hvac_frac_cool = XMLHelper.get_value(orig_hp, "FractionCoolLoadServed")
+      hvac_type = orig_hp_values[:heat_pump_type]
+      hvac_frac_heat = orig_hp_values[:fraction_heat_load_served]
+      hvac_frac_cool = orig_hp_values[:fraction_cool_load_served]
       hvac_units_heat = nil
       hvac_value_heat = nil
       hvac_units_cool = nil
       hvac_value_cool = nil
       if ["air-to-air", "mini-split"].include? hvac_type
-        hvac_year = XMLHelper.get_value(orig_hp, "YearInstalled")
+        hvac_year = orig_hp_values[:year_installed]
         hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='SEER']/Value")
         hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='HSPF']/Value")
         hvac_units_cool = "SEER"
         hvac_units_heat = "HSPF"
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(Integer(hvac_year))
-        else
-          hvac_value_cool = Float(hvac_value_cool)
-          hvac_value_heat = Float(hvac_value_heat)
         end
       elsif hvac_type == "ground-to-air"
-        hvac_year = XMLHelper.get_value(orig_hp, "YearInstalled")
+        hvac_year = orig_hp_values[:year_installed]
         hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='EER']/Value")
         hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='COP']/Value")
         hvac_units_cool = "EER"
         hvac_units_heat = "COP"
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_gshp_eer_cop(Integer(hvac_year))
-        else
-          hvac_value_cool = Float(hvac_value_cool)
-          hvac_value_heat = Float(hvac_value_heat)
         end
       else
         fail "Unexpected peat pump system type '#{hvac_type}'."
       end
 
-      new_hp = HPXML.add_heat_pump(hvac_plant: new_hvac_plant,
-                                   id: hvac_id,
-                                   idref: distribution_system_id,
+      new_hp = HPXML.add_heat_pump(hpxml: hpxml,
+                                   id: orig_hp_values[:id],
+                                   distribution_system_idref: distribution_system_id,
                                    heat_pump_type: hvac_type,
                                    heating_capacity: -1, # Use Manual J auto-sizing
                                    cooling_capacity: -1, # Use Manual J auto-sizing
                                    fraction_heat_load_served: hvac_frac_heat,
                                    fraction_cool_load_served: hvac_frac_cool,
-                                   annual_heating_efficiency_units: hvac_units_heat,
-                                   annual_heating_efficiency_value: hvac_value_heat,
-                                   annual_cooling_efficiency_units: hvac_units_cool,
-                                   annual_cooling_efficiency_value: hvac_value_cool)
+                                   heating_efficiency_units: hvac_units_heat,
+                                   heating_efficiency_value: hvac_value_heat,
+                                   cooling_efficiency_units: hvac_units_cool,
+                                   cooling_efficiency_value: hvac_value_cool)
     end
 
     # HVACControl
-    new_hvac_control = HPXML.add_hvac_control(hvac: new_hvac,
+    new_hvac_control = HPXML.add_hvac_control(hpxml: hpxml,
                                               id: "HVACControl",
                                               control_type: "manual thermostat")
 
     # HVACDistribution
     orig_details.elements.each("Systems/HVAC/HVACDistribution") do |orig_dist|
-      ducts_sealed = Boolean(XMLHelper.get_value(orig_dist, "HVACDistributionImprovement/DuctSystemSealed"))
+      orig_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: orig_dist)
+      ducts_sealed = orig_dist_values[:duct_system_sealed]
 
       # Leakage fraction of total air handler flow
       # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/thermal-distribution-efficiency/thermal-distribution-efficiency
@@ -666,33 +578,30 @@ class HEScoreRuleset
       return_duct_area = 0.05 * @nfl * @cfa
 
       dist_id = HPXML.get_id(orig_dist)
-      new_dist = HPXML.add_hvac_distribution(hvac: new_hvac,
-                                             id: dist_id)
-      new_air_dist = XMLHelper.add_element(new_dist, "DistributionSystemType/AirDistribution")
+      new_dist = HPXML.add_hvac_distribution(hpxml: hpxml,
+                                             id: dist_id,
+                                             distribution_system_type: "AirDistribution")
+      new_air_dist = new_dist.elements["DistributionSystemType/AirDistribution"]
 
       # Supply duct leakage
       new_supply_measurement = HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                                                   duct_type: "supply",
-                                                                  duct_leakage_units: "CFM25",
-                                                                  duct_leakage_value: 100, # FIXME: Hard-coded
-                                                                  duct_leakage_total_or_to_outside: "to outside") # FIXME: Hard-coded
+                                                                  duct_leakage_value: 100) # FIXME: Hard-coded
 
       # Return duct leakage
       new_return_measurement = HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                                                   duct_type: "return",
-                                                                  duct_leakage_units: "CFM25",
-                                                                  duct_leakage_value: 100, # FIXME: Hard-coded
-                                                                  duct_leakage_total_or_to_outside: "to outside") # FIXME: Hard-coded
+                                                                  duct_leakage_value: 100) # FIXME: Hard-coded
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
+        orig_duct_values = HPXML.get_ducts_values(ducts: orig_duct)
         hpxml_v23_to_v30_map = { "conditioned space" => "living space",
                                  "unconditioned basement" => "basement - unconditioned",
                                  "unvented crawlspace" => "crawlspace - unvented",
                                  "vented crawlspace" => "crawlspace - vented",
                                  "unconditioned attic" => "attic - vented" } # FIXME: Change to "attic - unconditioned"
-        duct_location = XMLHelper.get_value(orig_duct, "DuctLocation")
-        duct_frac_area = Float(XMLHelper.get_value(orig_duct, "FractionDuctArea"))
-        duct_insulated = Boolean(XMLHelper.get_value(orig_duct, "extension/hescore_ducts_insulated"))
+        duct_location = orig_duct_values[:duct_location]
+        duct_insulated = orig_duct_values[:hescore_ducts_insulated]
 
         next if duct_location == "conditioned space"
 
@@ -708,36 +617,32 @@ class HEScoreRuleset
                                           duct_type: "supply",
                                           duct_insulation_r_value: duct_rvalue,
                                           duct_location: hpxml_v23_to_v30_map[duct_location],
-                                          duct_surface_area: duct_frac_area * supply_duct_area)
+                                          duct_surface_area: orig_duct_values[:duct_fraction_area] * supply_duct_area)
 
         # Return duct
         new_supply_duct = HPXML.add_ducts(air_distribution: new_air_dist,
                                           duct_type: "return",
                                           duct_insulation_r_value: duct_rvalue,
                                           duct_location: hpxml_v23_to_v30_map[duct_location],
-                                          duct_surface_area: duct_frac_area * return_duct_area)
+                                          duct_surface_area: orig_duct_values[:duct_fraction_area] * return_duct_area)
       end
     end
   end
 
-  def self.set_systems_mechanical_ventilation(new_systems, orig_details)
+  def self.set_systems_mechanical_ventilation(orig_details, hpxml)
     # No mechanical ventilation
   end
 
-  def self.set_systems_water_heater(new_systems, orig_details)
-    new_water_heating = XMLHelper.add_element(new_systems, "WaterHeating")
-
+  def self.set_systems_water_heater(orig_details, hpxml)
     orig_details.elements.each("Systems/WaterHeating/WaterHeatingSystem") do |orig_wh_sys|
-      wh_id = HPXML.get_id(orig_wh_sys)
-      wh_year = XMLHelper.get_value(orig_wh_sys, "YearInstalled")
-      wh_ef = XMLHelper.get_value(orig_wh_sys, "EnergyFactor")
-      wh_fuel = XMLHelper.get_value(orig_wh_sys, "FuelType")
-      wh_type = XMLHelper.get_value(orig_wh_sys, "WaterHeaterType")
+      orig_wh_sys_values = HPXML.get_water_heating_system_values(water_heating_system: orig_wh_sys)
+      wh_year = orig_wh_sys_values[:year_installed]
+      wh_ef = orig_wh_sys_values[:energy_factor]
+      wh_fuel = orig_wh_sys_values[:fuel_type]
+      wh_type = orig_wh_sys_values[:water_heater_type]
 
       if not wh_year.nil?
         wh_ef = get_default_water_heater_ef(Integer(wh_year), wh_fuel)
-      else
-        wh_ef = Float(wh_ef)
       end
 
       wh_capacity = nil
@@ -745,11 +650,11 @@ class HEScoreRuleset
         wh_capacity = get_default_water_heater_capacity(wh_fuel)
       end
       wh_recovery_efficiency = nil
-      if wh_type == "storage water heater" and XMLHelper.get_value(orig_wh_sys, "FuelType") != "electricity"
+      if wh_type == "storage water heater" and wh_fuel != "electricity"
         wh_recovery_efficiency = get_default_water_heater_re(wh_fuel)
       end
-      new_wh_sys = HPXML.add_water_heating_system(water_heating: new_water_heating,
-                                                  id: wh_id,
+      new_wh_sys = HPXML.add_water_heating_system(hpxml: hpxml,
+                                                  id: orig_wh_sys_values[:id],
                                                   fuel_type: wh_fuel,
                                                   water_heater_type: wh_type,
                                                   location: "living space", # FIXME: Verify
@@ -761,97 +666,93 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_systems_water_heating_use(new_systems)
-    new_water_heating = new_systems.elements["WaterHeating"]
-
-    new_hw_dist = HPXML.add_hot_water_distribution(water_heating: new_water_heating,
+  def self.set_systems_water_heating_use(hpxml)
+    new_hw_dist = HPXML.add_hot_water_distribution(hpxml: hpxml,
                                                    id: "HotWaterDistribution",
                                                    system_type: "Standard", # FIXME: Verify
                                                    pipe_r_value: 0) # FIXME: Verify
 
-    new_fixture = HPXML.add_water_fixture(water_heating: new_water_heating,
+    new_fixture = HPXML.add_water_fixture(hpxml: hpxml,
                                           id: "ShowerHead",
                                           water_fixture_type: "shower head",
                                           low_flow: false) # FIXME: Verify
   end
 
-  def self.set_systems_photovoltaics(new_systems, orig_details)
+  def self.set_systems_photovoltaics(orig_details, hpxml)
     return if not XMLHelper.has_element(orig_details, "Systems/Photovoltaics")
 
-    pv_power = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/MaxPowerOutput")
-    pv_num_panels = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/extension/hescore_num_panels")
-    pv_orientation = XMLHelper.get_value(orig_details, "Systems/Photovoltaics/PVSystem/ArrayOrientation")
+    orig_pv_system_values = HPXML.get_pv_system_values(pv_system: orig_details.elements["Systems/Photovoltaics/PVSystem"])
+    pv_power = orig_pv_system_values[:max_power_output]
+    pv_num_panels = orig_pv_system_values[:hescore_num_panels]
 
-    if not pv_power.nil?
-      pv_power = Float(pv_power)
-    else
-      pv_power = Float(pv_num_panels) * 300.0 # FIXME: Hard-coded
+    if pv_power.nil?
+      pv_power = pv_num_panels * 300.0 # FIXME: Hard-coded
     end
 
-    new_pvs = XMLHelper.add_element(new_systems, "Photovoltaics")
-    new_pv = HPXML.add_pv_system(photovoltaics: new_pvs,
+    new_pv = HPXML.add_pv_system(hpxml: hpxml,
                                  id: "PVSystem",
                                  module_type: "standard", # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                                  array_type: "fixed roof mount", # FIXME: Verify. HEScore was using "fixed open rack"??
-                                 array_azimuth: orientation_to_azimuth(pv_orientation),
+                                 array_azimuth: orientation_to_azimuth(orig_pv_system_values[:array_orientation]),
                                  array_tilt: 30, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                                  max_power_output: pv_power,
                                  inverter_efficiency: 0.96, # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                                  system_losses_fraction: 0.14) # FIXME: Verify
   end
 
-  def self.set_appliances_clothes_washer(new_appliances)
-    new_washer = HPXML.add_clothes_washer(appliances: new_appliances,
+  def self.set_appliances_clothes_washer(hpxml)
+    new_washer = HPXML.add_clothes_washer(hpxml: hpxml,
                                           id: "ClothesWasher")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_clothes_dryer(new_appliances)
-    new_dryer = HPXML.add_clothes_dryer(appliances: new_appliances,
+  def self.set_appliances_clothes_dryer(hpxml)
+    new_dryer = HPXML.add_clothes_dryer(hpxml: hpxml,
                                         id: "ClothesDryer",
                                         fuel_type: "electricity") # FIXME: Verify
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_dishwasher(new_appliances)
-    new_dishwasher = HPXML.add_dishwasher(appliances: new_appliances,
+  def self.set_appliances_dishwasher(hpxml)
+    new_dishwasher = HPXML.add_dishwasher(hpxml: hpxml,
                                           id: "Dishwasher")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_refrigerator(new_appliances)
-    new_fridge = HPXML.add_refrigerator(appliances: new_appliances,
+  def self.set_appliances_refrigerator(hpxml)
+    new_fridge = HPXML.add_refrigerator(hpxml: hpxml,
                                         id: "Refrigerator")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_appliances_cooking_range_oven(new_appliances)
-    new_range = HPXML.add_cooking_range(appliances: new_appliances,
+  def self.set_appliances_cooking_range_oven(hpxml)
+    new_range = HPXML.add_cooking_range(hpxml: hpxml,
                                         id: "CookingRange",
                                         fuel_type: "electricity") # FIXME: Verify
 
-    new_oven = HPXML.add_oven(appliances: new_appliances,
+    new_oven = HPXML.add_oven(hpxml: hpxml,
                               id: "Oven")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_lighting(new_lighting, orig_details)
+  def self.set_lighting(orig_details, hpxml)
+    new_lighting = HPXML.add_lighting_fractions(hpxml: hpxml)
     # Uses ERI Reference Home
   end
 
-  def self.set_ceiling_fans(new_lighting, orig_details)
+  def self.set_ceiling_fans(orig_details, hpxml)
     # No ceiling fans
   end
 
-  def self.set_misc_plug_loads(new_misc_loads)
-    new_plug_load = HPXML.add_plug_load(misc_loads: new_misc_loads,
+  def self.set_misc_plug_loads(hpxml)
+    new_plug_load = HPXML.add_plug_load(hpxml: hpxml,
                                         id: "PlugLoadOther",
                                         plug_load_type: "other")
     # Uses ERI Reference Home for performance
   end
 
-  def self.set_misc_television(new_misc_loads)
-    new_plug_load = HPXML.add_plug_load(misc_loads: new_misc_loads,
+  def self.set_misc_television(hpxml)
+    new_plug_load = HPXML.add_plug_load(hpxml: hpxml,
                                         id: "PlugLoadTV",
                                         plug_load_type: "TV other")
     # Uses ERI Reference Home for performance

@@ -17,6 +17,20 @@ class XMLHelper
     return added
   end
 
+  # Creates a hierarchy of elements under the parent element based on the supplied
+  # list of element names. If a given child element already exists, it is reused.
+  # Returns the final element.
+  def self.create_elements_as_needed(parent, element_names)
+    this_parent = parent
+    element_names.each do |element_name|
+      if this_parent.elements[element_name].nil?
+        XMLHelper.add_element(this_parent, element_name)
+      end
+      this_parent = this_parent.elements[element_name]
+    end
+    return this_parent
+  end
+
   # Deletes the child element with element_name. Returns the deleted element.
   def self.delete_element(parent, element_name)
     element = nil
@@ -29,7 +43,6 @@ class XMLHelper
 
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
-    return if parent.nil?
     val = parent.elements[element_name]
     if val.nil?
       return val
@@ -40,7 +53,6 @@ class XMLHelper
 
   # Returns the value(s) of 'element_name' in the parent element or [].
   def self.get_values(parent, element_name)
-    return if parent.nil?
     vals = []
     parent.elements.each(element_name) do |val|
       vals << val.text
@@ -121,6 +133,19 @@ class XMLHelper
     end
   end
 
+  def self.create_doc(version = nil, encoding = nil, standalone = nil)
+    doc = REXML::Document.new
+    decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
+    doc << decl
+    return doc
+  end
+
+  def self.parse_file(hpxml_path)
+    file_read = File.read(hpxml_path)
+    hpxml_doc = REXML::Document.new(file_read)
+    return hpxml_doc
+  end
+
   def self.write_file(doc, out_path)
     # Write XML file
     formatter = REXML::Formatters::Pretty.new(2)
@@ -133,7 +158,11 @@ class XMLHelper
 end
 
 def Boolean(val)
-  if val.downcase.to_s == "true" or val == "1"
+  if val.is_a? TrueClass
+    return true
+  elsif val.is_a? FalseClass
+    return false
+  elsif val.downcase.to_s == "true" or val == "1"
     return true
   elsif val.downcase.to_s == "false" or val == "0"
     return false
