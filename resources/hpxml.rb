@@ -8,7 +8,8 @@ class HPXML
                         software_program_version:,
                         eri_calculation_version:,
                         building_id:,
-                        event_type:)
+                        event_type:,
+                        **remainder)
     doc = XMLHelper.create_doc(version = "1.0", encoding = "UTF-8")
     hpxml = XMLHelper.add_element(doc, "HPXML")
     XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2014/6")
