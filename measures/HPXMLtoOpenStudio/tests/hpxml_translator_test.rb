@@ -701,6 +701,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       if bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0] | Systems/HVAC/HVACPlant/HeatPump[FractionHeatLoadServed > 0])'] == 1
         bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0] | Systems/HVAC/HVACPlant/HeatPump[FractionHeatLoadServed > 0]') do |htg_sys|
           next unless XMLHelper.has_element(htg_sys, "DistributionSystem")
+          next unless htg_sys.elements["DistributionSystem"].attributes["idref"] == bldg_details.elements['Systems/HVAC/HVACDistribution[DistributionSystemType/AirDistribution]/SystemIdentifier'].attributes["id"]
 
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%HTG SUPPLY FAN%' AND ColumnName='Rated Power Per Max Air Flow Rate' AND Units='W-s/m3'"
           htg_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get / UnitConversions.convert(1.0, "m^3/s", "cfm")
@@ -711,6 +712,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       if bldg_details.elements['count(Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0] | Systems/HVAC/HVACPlant/HeatPump[FractionCoolLoadServed > 0])'] == 1
         bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0] | Systems/HVAC/HVACPlant/HeatPump[FractionCoolLoadServed > 0]') do |clg_sys|
           next unless XMLHelper.has_element(clg_sys, "DistributionSystem")
+          next unless clg_sys.elements["DistributionSystem"].attributes["idref"] == bldg_details.elements['Systems/HVAC/HVACDistribution[DistributionSystemType/AirDistribution]/SystemIdentifier'].attributes["id"]
 
           query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%CLG SUPPLY FAN%' AND ColumnName='Rated Power Per Max Air Flow Rate' AND Units='W-s/m3'"
           clg_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get / UnitConversions.convert(1.0, "m^3/s", "cfm")
