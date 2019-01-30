@@ -1782,7 +1782,7 @@ class Airflow
         duct_program.addLine("   Set cfis_m3s = (#{max_supply_fan_mfr.name} / 1.16097654) * #{cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
         duct_program.addLine("   Set temp1 = 1.0 - #{fan_rtf_sensor.name}")
         duct_program.addLine("   Set #{ah_vfr_var.name} = temp1*#{cfis_output.f_damper_open_var.name}*cfis_m3s")
-        duct_program.addLine("   Set rho_in = (@RhoAirFnPbTdbW #{tin_sensor.name} #{win_sensor.name} #{pbar_sensor.name})")
+        duct_program.addLine("   Set rho_in = (@RhoAirFnPbTdbW #{pbar_sensor.name} #{tin_sensor.name} #{win_sensor.name})")
         duct_program.addLine("   Set #{ah_mfr_var.name} = #{ah_vfr_sensor.name} * rho_in")
         duct_program.addLine("   Set temp2 = 1.0 - #{fan_rtf_sensor.name}")
         duct_program.addLine("   Set #{fan_rtf_var.name} = temp2*#{cfis_output.f_damper_open_var.name}")
