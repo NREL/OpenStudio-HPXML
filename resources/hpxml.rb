@@ -1,3 +1,5 @@
+require_relative 'xmlhelper'
+
 class HPXML
   def self.create_hpxml(xml_type:,
                         xml_generated_by:,
