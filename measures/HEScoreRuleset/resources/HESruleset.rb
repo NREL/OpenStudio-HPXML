@@ -5,31 +5,18 @@ require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
 
 class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
-    building = hpxml_doc.elements["/HPXML/Building"]
-
     orig_details = hpxml_doc.elements["/HPXML/Building/BuildingDetails"]
 
-    xml_transaction_header_information_values = HPXML.get_xml_transaction_header_information_values(xml_transaction_header_information: hpxml_doc.elements["/HPXML/XMLTransactionHeaderInformation"])
-    software_info_values = HPXML.get_software_info_values(software_info: hpxml_doc.elements["/HPXML/SoftwareInfo"])
-    building_values = HPXML.get_building_values(building: hpxml_doc.elements["/HPXML/Building"])
-    project_status_values = HPXML.get_project_status_values(project_status: hpxml_doc.elements["/HPXML/Building/ProjectStatus"])
-
-    hpxml_doc = HPXML.create_hpxml(xml_type: xml_transaction_header_information_values[:xml_type],
-                                   xml_generated_by: xml_transaction_header_information_values[:xml_generated_by],
-                                   transaction: xml_transaction_header_information_values[:transaction],
-                                   software_program_used: software_info_values[:software_program_used],
-                                   software_program_version: software_info_values[:software_program_version],
-                                   eri_calculation_version: "2014AEG", # FIXME: Verify
-                                   building_id: building_values[:id],
-                                   event_type: project_status_values[:event_type])
+    # Create new HPXML doc
+    hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml_doc.elements["/HPXML"])
+    hpxml_values[:eri_calculation_version] = "2014AEG" # FIXME: Verify
+    hpxml_doc = HPXML.create_hpxml(**hpxml_values)
 
     hpxml = hpxml_doc.elements["HPXML"]
 
     # Global variables
-    orig_building_construction = building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"]
-    orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_building_construction)
-    orig_site = building.elements["BuildingDetails/BuildingSummary/Site"]
-    orig_site_values = HPXML.get_site_values(site: orig_site)
+    orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_details.elements["BuildingSummary/BuildingConstruction"])
+    orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
     @nbeds = orig_building_construction_values[:number_of_bedrooms]
     @cfa = orig_building_construction_values[:conditioned_floor_area]
     @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
@@ -179,7 +166,7 @@ class HEScoreRuleset
                                       pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                                       radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
                                       insulation_id: orig_roof_ins_values[:id],
-                                      insulation_assembly_effective_r_value: roof_r)
+                                      insulation_assembly_r_value: roof_r)
 
       # Floor
       if ["unvented attic", "vented attic"].include? orig_attic_values[:attic_type]
@@ -194,7 +181,7 @@ class HEScoreRuleset
                                           adjacent_to: "living space",
                                           area: XMLHelper.get_value(orig_attic, "Area"), # FIXME: Verify. This is the attic floor area and not the roof area?
                                           insulation_id: orig_floor_ins_values[:id],
-                                          insulation_assembly_effective_r_value: floor_r)
+                                          insulation_assembly_r_value: floor_r)
       end
       # FIXME: Should be zero (or two?) gable walls per HES zone_roof?
       # Uses ERI Reference Home for vented attic specific leakage area
@@ -223,7 +210,7 @@ class HEScoreRuleset
                                                adjacent_to: "living space",
                                                area: orig_framefloor_values[:area],
                                                insulation_id: insulation_id,
-                                               insulation_assembly_effective_r_value: floor_r)
+                                               insulation_assembly_r_value: floor_r)
 
       end
 
@@ -249,7 +236,7 @@ class HEScoreRuleset
                                                 depth_below_grade: wall_height, # FIXME: Verify
                                                 adjacent_to: "ground",
                                                 insulation_id: insulation_id,
-                                                insulation_assembly_effective_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
+                                                insulation_assembly_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
 
       end
 
@@ -277,9 +264,9 @@ class HEScoreRuleset
                                 under_slab_insulation_width: 0, # FIXME: Verify
                                 depth_below_grade: 0, # FIXME: Verify
                                 perimeter_insulation_id: slab_perim_id,
-                                perimeter_insulation_nominal_r_value: slab_perim_r,
+                                perimeter_insulation_r_value: slab_perim_r,
                                 under_slab_insulation_id: slab_under_id,
-                                under_slab_insulation_nominal_r_value: 0)
+                                under_slab_insulation_r_value: 0)
 
       HPXML.add_extension(parent: new_slab,
                           extensions: { "CarpetFraction": 0.5, # FIXME: Hard-coded
@@ -339,7 +326,7 @@ class HEScoreRuleset
                                 solar_absorptance: 0.75, # FIXME: Verify. Make optional element and remove from here.
                                 emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
                                 insulation_id: wall_ins_id,
-                                insulation_assembly_effective_r_value: wall_r)
+                                insulation_assembly_r_value: wall_r)
     end
   end
 
@@ -467,8 +454,8 @@ class HEScoreRuleset
                                              heating_system_type: hvac_type,
                                              heating_system_fuel: hvac_fuel,
                                              heating_capacity: -1, # Use Manual J auto-sizing
-                                             annual_heating_efficiency_units: hvac_units,
-                                             annual_heating_efficiency_value: hvac_value,
+                                             heating_efficiency_units: hvac_units,
+                                             heating_efficiency_value: hvac_value,
                                              fraction_heat_load_served: hvac_frac)
     end
 
@@ -509,8 +496,8 @@ class HEScoreRuleset
                                              cooling_system_fuel: "electricity",
                                              cooling_capacity: -1, # Use Manual J auto-sizing
                                              fraction_cool_load_served: hvac_frac,
-                                             annual_cooling_efficiency_units: hvac_units,
-                                             annual_cooling_efficiency_value: hvac_value)
+                                             cooling_efficiency_units: hvac_units,
+                                             cooling_efficiency_value: hvac_value)
     end
 
     # HeatPump
@@ -558,10 +545,10 @@ class HEScoreRuleset
                                    cooling_capacity: -1, # Use Manual J auto-sizing
                                    fraction_heat_load_served: hvac_frac_heat,
                                    fraction_cool_load_served: hvac_frac_cool,
-                                   annual_heating_efficiency_units: hvac_units_heat,
-                                   annual_heating_efficiency_value: hvac_value_heat,
-                                   annual_cooling_efficiency_units: hvac_units_cool,
-                                   annual_cooling_efficiency_value: hvac_value_cool)
+                                   heating_efficiency_units: hvac_units_heat,
+                                   heating_efficiency_value: hvac_value_heat,
+                                   cooling_efficiency_units: hvac_units_cool,
+                                   cooling_efficiency_value: hvac_value_cool)
     end
 
     # HVACControl
@@ -599,14 +586,12 @@ class HEScoreRuleset
       # Supply duct leakage
       new_supply_measurement = HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                                                   duct_type: "supply",
-                                                                  duct_leakage_units: "CFM25",
                                                                   duct_leakage_value: 100, # FIXME: Hard-coded
                                                                   duct_leakage_total_or_to_outside: "to outside") # FIXME: Hard-coded
 
       # Return duct leakage
       new_return_measurement = HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                                                   duct_type: "return",
-                                                                  duct_leakage_units: "CFM25",
                                                                   duct_leakage_value: 100, # FIXME: Hard-coded
                                                                   duct_leakage_total_or_to_outside: "to outside") # FIXME: Hard-coded
 
