@@ -1346,7 +1346,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:hescore_num_panels])
+                    expected_kwargs: [:array_orientation, :hescore_num_panels])
 
     return pv_system
   end
