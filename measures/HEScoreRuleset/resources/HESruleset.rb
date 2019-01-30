@@ -586,14 +586,12 @@ class HEScoreRuleset
       # Supply duct leakage
       new_supply_measurement = HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                                                   duct_type: "supply",
-                                                                  duct_leakage_value: 100, # FIXME: Hard-coded
-                                                                  duct_leakage_total_or_to_outside: "to outside") # FIXME: Hard-coded
+                                                                  duct_leakage_value: 100) # FIXME: Hard-coded
 
       # Return duct leakage
       new_return_measurement = HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                                                   duct_type: "return",
-                                                                  duct_leakage_value: 100, # FIXME: Hard-coded
-                                                                  duct_leakage_total_or_to_outside: "to outside") # FIXME: Hard-coded
+                                                                  duct_leakage_value: 100) # FIXME: Hard-coded
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
         orig_duct_values = HPXML.get_ducts_values(ducts: orig_duct)
