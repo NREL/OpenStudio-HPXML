@@ -77,7 +77,7 @@ class HPXML
              :fuels => XMLHelper.get_values(site, "FuelTypesAvailable/Fuel"),
              :shelter_coefficient => to_float(XMLHelper.get_value(site, "extension/ShelterCoefficient")) }
   end
-  
+
   def self.add_building_occupancy(hpxml:,
                                   number_of_residents: nil,
                                   **remainder)
