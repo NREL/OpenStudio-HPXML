@@ -2921,7 +2921,7 @@ class OSModel
         mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
       end
       mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
-      mech_vent_w = [:fan_power]
+      mech_vent_w = whole_house_fan_values[:fan_power]
       mech_vent_fan_power = mech_vent_w / mech_vent_cfm / num_fans
     end
     mech_vent_ashrae_std = '2013'
