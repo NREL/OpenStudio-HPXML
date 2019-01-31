@@ -2633,6 +2633,8 @@ class OSModel
 
     # Get attached distribution system
     ducts = nil
+    annual_cooling_dse = nil
+    annual_heating_dse = nil
     duct_id = system.elements["DistributionSystem"].attributes["idref"]
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
@@ -2640,13 +2642,15 @@ class OSModel
       next if dist.elements["DistributionSystemType[Other='DSE']"].nil?
 
       ducts = dist
+      annual_cooling_dse = hvac_distribution_values[:annual_cooling_dse]
+      annual_heating_dse = hvac_distribution_values[:annual_heating_dse]
     end
     if ducts.nil? # No attached DSEs for system
       return 1.0, 1.0, false
     end
 
-    dse_cool = hvac_distribution_values[:annual_cooling_dse]
-    dse_heat = hvac_distribution_values[:annual_heating_dse]
+    dse_cool = annual_cooling_dse
+    dse_heat = annual_heating_dse
     return dse_heat, dse_cool, true
   end
 
