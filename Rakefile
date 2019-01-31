@@ -65,12 +65,12 @@ task :update_hpxmls do
       building_summary = building_details.elements["BuildingSummary"]
       unless parent[:site].nil?
         HPXML.add_site(building_summary: building_summary,
-                      fuels: parent[:site][:fuels],
-                      shelter_coefficient: parent[:site][:shelter_coefficient])
+                       fuels: parent[:site][:fuels],
+                       shelter_coefficient: parent[:site][:shelter_coefficient])
       end
       unless parent[:building_occupancy].nil?
         HPXML.add_building_occupancy(building_summary: building_summary,
-                                    number_of_residents: parent[:building_occupancy][:number_of_residents])
+                                     number_of_residents: parent[:building_occupancy][:number_of_residents])
       end
       HPXML.add_building_construction(building_summary: building_summary,
                                       number_of_conditioned_floors: parent[:building_construction][:number_of_conditioned_floors],
@@ -110,8 +110,8 @@ task :update_hpxmls do
       # RimJoists
       # Walls
       # Windows
-      # Doors      
-      # TODO: ...                  
+      # Doors
+      # TODO: ...
 
       formatter = REXML::Formatters::Pretty.new(2)
       formatter.compact = true # This is the magic line that does what you need!

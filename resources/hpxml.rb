@@ -213,7 +213,7 @@ class HPXML
     end
     XMLHelper.add_element(air_infiltration_measurement, "EffectiveLeakageArea", to_float(effective_leakage_area)) unless effective_leakage_area.nil?
     HPXML.add_extension(parent: air_infiltration_measurement,
-                        extensions: {"ConstantACHnatural": to_float(constant_ach_natural) })
+                        extensions: { "ConstantACHnatural": to_float(constant_ach_natural) })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -245,8 +245,8 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(attic, "AtticType", attic_type) unless attic_type.nil?
     HPXML.add_extension(parent: attic,
-                        extension: {"AtticSpecificLeakageArea": attic_specific_leakage_area,
-                                    "AtticConstantACHnatural": attic_constant_ach_natural})
+                        extension: { "AtticSpecificLeakageArea": attic_specific_leakage_area,
+                                     "AtticConstantACHnatural": attic_constant_ach_natural })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -972,7 +972,7 @@ class HPXML
                          heating_efficiency_units: nil,
                          heating_efficiency_value: nil,
                          cooling_efficiency_units: nil,
-                         cooling_efficiency_value: nil,                         
+                         cooling_efficiency_value: nil,
                          **remainder)
     hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     heat_pump = XMLHelper.add_element(hvac_plant, "HeatPump")
@@ -998,7 +998,7 @@ class HPXML
       annual_heating_efficiency = XMLHelper.add_element(heat_pump, "AnnualHeatingEfficiency")
       XMLHelper.add_element(annual_heating_efficiency, "Units", heating_efficiency_units)
       XMLHelper.add_element(annual_heating_efficiency, "Value", to_float(heating_efficiency_value))
-    end    
+    end
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -1023,7 +1023,7 @@ class HPXML
              :heating_efficiency_units => XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency/Units"),
              :heating_efficiency_value => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency/Value")),
              :cooling_efficiency_units => XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency/Units"),
-             :cooling_efficiency_value => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency/Value")) }             
+             :cooling_efficiency_value => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency/Value")) }
   end
 
   def self.add_hvac_control(hpxml:,
@@ -1210,10 +1210,10 @@ class HPXML
                             **remainder)
     hvac = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC"])
     HPXML.add_extension(parent: hvac,
-                        extensions: {"EnergyFactor": energy_factor,
-                                     "WaterRemovalRate": water_removal_rate,
-                                     "AirFlowRate": air_flow_rate,
-                                     "HumiditySetpoint": humidity_setpoint})
+                        extensions: { "EnergyFactor": energy_factor,
+                                      "WaterRemovalRate": water_removal_rate,
+                                      "AirFlowRate": air_flow_rate,
+                                      "HumiditySetpoint": humidity_setpoint })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -1228,7 +1228,7 @@ class HPXML
     return { :energy_factor => XMLHelper.get_value(hvac, "extension/EnergyFactor"),
              :water_removal_rate => XMLHelper.get_value(hvac, "extension/WaterRemovalRate"),
              :air_flow_rate => XMLHelper.get_value(hvac, "extension/AirFlowRate"),
-             :humidity_setpoint => XMLHelper.get_value(hvac, "extension/HumiditySetpoint")}
+             :humidity_setpoint => XMLHelper.get_value(hvac, "extension/HumiditySetpoint") }
   end
 
   def self.add_water_heating_system(hpxml:,

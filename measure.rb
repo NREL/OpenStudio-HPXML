@@ -227,7 +227,7 @@ class OSModel
 
     @eri_version = hpxml_values[:eri_calculation_version]
     fail "Could not find ERI Version" if @eri_version.nil?
-    
+
     # Global variables
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = building_construction_values[:conditioned_floor_area]
@@ -244,7 +244,7 @@ class OSModel
     loop_dhws = {}  # mapping between HPXML Water Heating systems and plant loops
 
     hvac_extension_values = HPXML.get_extension_values(parent: building.elements["BuildingDetails/Systems/HVAC"])
-    use_only_ideal_air = false    
+    use_only_ideal_air = false
     if not hvac_extension_values[:use_only_ideal_air_system].nil?
       use_only_ideal_air = hvac_extension_values[:use_only_ideal_air_system]
     end
@@ -1234,7 +1234,7 @@ class OSModel
       z_origin = foundation_top
       wall_azimuth = 0 # TODO
       if not wall_values[:azimuth].nil?
-        wall_azimuth = wall_values[:azimuth]        
+        wall_azimuth = wall_values[:azimuth]
       end
 
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
@@ -1268,7 +1268,7 @@ class OSModel
         mat_ext_finish = nil
       end
 
-      apply_wall_construction(runner, model, surface, wall_id, wall_values[:wall_type],  wall_values[:insulation_assembly_r_value],
+      apply_wall_construction(runner, model, surface, wall_id, wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
                               drywall_thick_in, film_r, mat_ext_finish, wall_values[:solar_absorptance], wall_values[:emittance])
     end
 
@@ -1512,8 +1512,7 @@ class OSModel
         wall_height = 8.0
         wall_length = wall_net_area / wall_height
         z_origin = walls_top
-        wall_azimuth = 
-        wall_azimuth = 0.0 # TODO
+        wall_azimuth = 0 # TODO
         if not attic_wall_values[:azimuth].nil?
           wall_azimuth = attic_wall_values[:azimuth]
         end
@@ -1656,7 +1655,7 @@ class OSModel
 
         attic.elements.each("Roofs/Roof") do |roof|
           attic_roof_values = HPXML.get_attic_roof_values(roof: roof)
-          next unless roor_values[:id] == skylight_values[:roof_idref]
+          next unless attic_roof_values[:id] == skylight_values[:roof_idref]
 
           skylight_tilt = attic_roof_values[:pitch] / 12.0
         end
@@ -1718,7 +1717,7 @@ class OSModel
 
       door_area = SubsurfaceConstructions.get_default_door_area()
       if not door_values[:area].nil?
-        door_area = door_values[:area] 
+        door_area = door_values[:area]
       end
 
       door_height = 6.67 # ft
@@ -1823,7 +1822,6 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
-
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1962,7 +1960,7 @@ class OSModel
         end
         recirc_branch_length = hot_water_distirbution_values[:recirculation_branch_piping_length]
         recirc_control_type = hot_water_distirbution_values[:recirculation_control_type]
-        recirc_pump_power = hot_water_distirbution_values[:reirculation_pump_power]
+        recirc_pump_power = hot_water_distirbution_values[:recirculation_pump_power]
         std_pipe_length = nil
       end
       pipe_r = hot_water_distirbution_values[:pipe_r_value]
@@ -2000,9 +1998,9 @@ class OSModel
           uef = water_heating_system_values[:uniform_energy_factor]
           ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
         end
-        
+
         ef_adj = water_heating_system_values[:energy_factor_multiplier]
-        if ef_adj.nil?          
+        if ef_adj.nil?
           ef_adj = Waterheater.get_ef_multiplier(to_beopt_wh_type(wh_type))
         end
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
@@ -2307,7 +2305,7 @@ class OSModel
         cool_capacity_btuh = Float(cool_capacity_btuh)
       end
 
-      load_frac_heat = heat_pump_values[:fraction_head_load_served]
+      load_frac_heat = heat_pump_values[:fraction_heat_load_served]
       load_frac_cool = heat_pump_values[:fraction_cool_load_served]
 
       backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity] # TODO: Require in ERI Use Case?
@@ -3773,6 +3771,7 @@ class OSModel
       cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
       next unless cooling_system_values[:cooling_system_type] == "central air conditioning"
       next unless heating_system_values[:distribution_system_idref] == cooling_system_values[:distribution_system_idref]
+
       if cooling_system_values[:cooling_efficiency_units] == "SEER"
         seer = cooling_system_values[:cooling_efficiency_value]
       end
