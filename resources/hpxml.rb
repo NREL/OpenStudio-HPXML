@@ -1202,35 +1202,6 @@ class HPXML
              :distribution_system_idref => HPXML.get_idref(ventilation_fan, "AttachedToHVACDistributionSystem") }
   end
 
-  def self.add_dehumidifier(hpxml:,
-                            energy_factor: nil,
-                            water_removal_rate: nil,
-                            air_flow_rate: nil,
-                            humidity_setpoint: nil,
-                            **remainder)
-    hvac = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC"])
-    HPXML.add_extension(parent: hvac,
-                        extensions: { "EnergyFactor": energy_factor,
-                                      "WaterRemovalRate": water_removal_rate,
-                                      "AirFlowRate": air_flow_rate,
-                                      "HumiditySetpoint": humidity_setpoint })
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
-    return hvac
-  end
-
-  def self.get_dehumidifier_values(hvac:)
-    return nil if hvac.nil?
-
-    return { :energy_factor => XMLHelper.get_value(hvac, "extension/EnergyFactor"),
-             :water_removal_rate => XMLHelper.get_value(hvac, "extension/WaterRemovalRate"),
-             :air_flow_rate => XMLHelper.get_value(hvac, "extension/AirFlowRate"),
-             :humidity_setpoint => XMLHelper.get_value(hvac, "extension/HumiditySetpoint") }
-  end
-
   def self.add_water_heating_system(hpxml:,
                                     id:,
                                     fuel_type: nil,

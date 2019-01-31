@@ -282,9 +282,6 @@ class OSModel
     success = add_setpoints(runner, model, building, weather)
     return false if not success
 
-    success = add_dehumidifier(runner, model, building, unit)
-    return false if not success
-
     success = add_ceiling_fans(runner, model, building, unit)
     return false if not success
 
@@ -2594,22 +2591,6 @@ class OSModel
     clg_season_end_month = 12
     success = HVAC.apply_cooling_setpoints(model, runner, weather, clg_weekday_setpoints, clg_weekend_setpoints,
                                            clg_use_auto_season, clg_season_start_month, clg_season_end_month)
-    return false if not success
-
-    return true
-  end
-
-  def self.add_dehumidifier(runner, model, building, unit)
-    return true if building.elements["BuildingDetails/Systems/HVAC"].nil?
-    dehumidifier_values = HPXML.get_dehumidifier_values(hvac: building.elements["BuildingDetails/Systems/HVAC"])
-    return true if dehumidifier_values[:energy_factor].nil?
-
-    energy_factor = dehumidifier_values[:energy_factor]
-    water_removal_rate = dehumidifier_values[:water_removal_rate]
-    air_flow_rate = dehumidifier_values[:air_flow_rate]
-    humidity_setpoint = dehumidifier_values[:humidity_setpoint]
-    success = HVAC.apply_dehumidifier(model, unit, runner, energy_factor,
-                                      water_removal_rate, air_flow_rate, humidity_setpoint)
     return false if not success
 
     return true
