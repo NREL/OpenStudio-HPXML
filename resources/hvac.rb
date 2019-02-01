@@ -2506,9 +2506,9 @@ class HVAC
   def self.apply_heating_setpoints(model, runner, weather, htg_wkdy_monthly, htg_wked_monthly,
                                    use_auto_season, season_start_month, season_end_month)
 
-    # Get heating and cooling seasons
+    # Get heating season
     if use_auto_season
-      heating_season, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
+      heating_season, _ = calc_heating_and_cooling_seasons(model, weather, runner)
     else
       if season_start_month <= season_end_month
         heating_season = Array.new(season_start_month - 1, 0) + Array.new(season_end_month - season_start_month + 1, 1) + Array.new(12 - season_end_month, 0)
@@ -2520,7 +2520,7 @@ class HVAC
       return false
     end
 
-    cooling_season = get_cooling_season(model, weather, runner)
+    _, cooling_season = get_heating_and_cooling_seasons(model, weather, runner)
 
     # Remove existing heating season schedule
     model.getScheduleRulesets.each do |sch|
@@ -2670,9 +2670,9 @@ class HVAC
   def self.apply_cooling_setpoints(model, runner, weather, clg_wkdy_monthly, clg_wked_monthly,
                                    use_auto_season, season_start_month, season_end_month)
 
-    # Get heating and cooling seasons
+    # Get cooling season
     if use_auto_season
-      heating_season, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
+      _, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
     else
       if season_start_month <= season_end_month
         cooling_season = Array.new(season_start_month - 1, 0) + Array.new(season_end_month - season_start_month + 1, 1) + Array.new(12 - season_end_month, 0)
@@ -2684,7 +2684,7 @@ class HVAC
       return false
     end
 
-    heating_season = get_heating_season(model, weather, runner)
+    heating_season, _ = get_heating_and_cooling_seasons(model, weather, runner)
 
     # Remove existing cooling season schedule
     model.getScheduleRulesets.each do |sch|
@@ -2866,36 +2866,29 @@ class HVAC
     return values
   end
 
-  def self.get_heating_season(model, weather, runner)
+  def self.get_heating_and_cooling_seasons(model, weather, runner)
     heating_season = []
+    cooling_season = []
     model.getScheduleRulesets.each do |sch|
-      next unless sch.name.to_s == Constants.ObjectNameHeatingSeason
-
-      sch.scheduleRules.each do |rule|
-        ix = rule.startDate.get.monthOfYear.value.to_i - 1
-        heating_season[ix] = rule.daySchedule.values[0]
+      if sch.name.to_s == Constants.ObjectNameHeatingSeason
+        sch.scheduleRules.each do |rule|
+          ix = rule.startDate.get.monthOfYear.value.to_i - 1
+          heating_season[ix] = rule.daySchedule.values[0]
+        end
+      elsif sch.name.to_s == Constants.ObjectNameCoolingSeason
+        sch.scheduleRules.each do |rule|
+          ix = rule.startDate.get.monthOfYear.value.to_i - 1
+          cooling_season[ix] = rule.daySchedule.values[0]
+        end
       end
     end
     if heating_season.empty?
-      heating_season, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
-    end
-    return heating_season
-  end
-
-  def self.get_cooling_season(model, weather, runner)
-    cooling_season = []
-    model.getScheduleRulesets.each do |sch|
-      next unless sch.name.to_s == Constants.ObjectNameCoolingSeason
-
-      sch.scheduleRules.each do |rule|
-        ix = rule.startDate.get.monthOfYear.value.to_i - 1
-        cooling_season[ix] = rule.daySchedule.values[0]
-      end
+      heating_season, _ = calc_heating_and_cooling_seasons(model, weather, runner)
     end
     if cooling_season.empty?
-      heating_season, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
+      _, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
     end
-    return cooling_season
+    return heating_season, cooling_season
   end
 
   def self.get_default_heating_setpoint(control_type)
