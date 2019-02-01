@@ -2520,7 +2520,7 @@ class HVAC
       return false
     end
 
-    _, cooling_season = get_heating_and_cooling_seasons(model, weather, runner)
+    _, cooling_season = get_season(model, weather, runner, ObjectNameCoolingSeason)
 
     # Remove existing heating season schedule
     model.getScheduleRulesets.each do |sch|
@@ -2684,7 +2684,7 @@ class HVAC
       return false
     end
 
-    heating_season, _ = get_heating_and_cooling_seasons(model, weather, runner)
+    heating_season, _ = get_season(model, weather, runner, ObjectNameHeatingSeason)
 
     # Remove existing cooling season schedule
     model.getScheduleRulesets.each do |sch|
@@ -2866,29 +2866,25 @@ class HVAC
     return values
   end
 
-  def self.get_heating_and_cooling_seasons(model, weather, runner)
-    heating_season = []
-    cooling_season = []
+  def self.get_season(model, weather, runner, sch_name)
+    season = []
     model.getScheduleRulesets.each do |sch|
-      if sch.name.to_s == Constants.ObjectNameHeatingSeason
+      if sch.name.to_s == sch_name
         sch.scheduleRules.each do |rule|
           ix = rule.startDate.get.monthOfYear.value.to_i - 1
-          heating_season[ix] = rule.daySchedule.values[0]
-        end
-      elsif sch.name.to_s == Constants.ObjectNameCoolingSeason
-        sch.scheduleRules.each do |rule|
-          ix = rule.startDate.get.monthOfYear.value.to_i - 1
-          cooling_season[ix] = rule.daySchedule.values[0]
+          season[ix] = rule.daySchedule.values[0]
         end
       end
     end
-    if heating_season.empty?
-      heating_season, _ = calc_heating_and_cooling_seasons(model, weather, runner)
+    if season.empty?
+      heating_season, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
+      if sch_name == Constants.ObjectNameHeatingSeason
+        season = heating_season
+      else
+        season = cooling_season
+      end
     end
-    if cooling_season.empty?
-      _, cooling_season = calc_heating_and_cooling_seasons(model, weather, runner)
-    end
-    return heating_season, cooling_season
+    return season
   end
 
   def self.get_default_heating_setpoint(control_type)
