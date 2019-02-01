@@ -104,7 +104,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic' => {
         '[AtticType="unvented attic" or AtticType="vented attic" or AtticType="flat roof" or AtticType="cathedral ceiling" or AtticType="cape cod"]' => one, # See [AtticType=Unvented] or [AtticType=Vented] or [AtticType=Cape]
         'Roofs/Roof' => one_or_more, # See [AtticRoof]
-        'Walls/Wall' => zero_or_one, # See [AtticWall]
+        'Walls/Wall' => zero_or_more, # See [AtticWall]
       },
 
       ## [AtticType=Unvented]
