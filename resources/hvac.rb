@@ -2520,7 +2520,7 @@ class HVAC
       return false
     end
 
-    _, cooling_season = get_season(model, weather, runner, ObjectNameCoolingSeason)
+    cooling_season = get_season(model, weather, runner, Constants.ObjectNameCoolingSeason)
 
     # Remove existing heating season schedule
     model.getScheduleRulesets.each do |sch|
@@ -2684,7 +2684,7 @@ class HVAC
       return false
     end
 
-    heating_season, _ = get_season(model, weather, runner, ObjectNameHeatingSeason)
+    heating_season = get_season(model, weather, runner, Constants.ObjectNameHeatingSeason)
 
     # Remove existing cooling season schedule
     model.getScheduleRulesets.each do |sch|
