@@ -274,9 +274,6 @@ class OSModel
     success = add_setpoints(runner, model, building, weather)
     return false if not success
 
-    success = add_dehumidifier(runner, model, building, unit)
-    return false if not success
-
     success = add_ceiling_fans(runner, model, building, unit)
     return false if not success
 
@@ -2575,21 +2572,6 @@ class OSModel
     return true
   end
 
-  def self.add_dehumidifier(runner, model, building, unit)
-    dehumidifier = building.elements["BuildingDetails/Systems/HVAC/extension/Dehumidifier"]
-    return true if dehumidifier.nil?
-
-    energy_factor = XMLHelper.get_value(dehumidifier, "EnergyFactor")
-    water_removal_rate = XMLHelper.get_value(dehumidifier, "WaterRemovalRrate")
-    air_flow_rate = XMLHelper.get_value(dehumidifier, "AirFlowRate")
-    humidity_setpoint = XMLHelper.get_value(dehumidifier, "HumiditySetpoint")
-    success = HVAC.apply_dehumidifier(model, unit, runner, energy_factor,
-                                      water_removal_rate, air_flow_rate, humidity_setpoint)
-    return false if not success
-
-    return true
-  end
-
   def self.add_ceiling_fans(runner, model, building, unit)
     cf = building.elements["BuildingDetails/Lighting/CeilingFan"]
     return true if cf.nil?
@@ -2971,25 +2953,34 @@ class OSModel
 
     # Ducts
     duct_systems = {}
+    location_map = { 'living space' => Constants.SpaceTypeLiving,
+                     'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
+                     'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                     'crawlspace - vented' => Constants.SpaceTypeCrawl,
+                     'crawlspace - unvented' => Constants.SpaceTypeCrawl,
+                     'attic - vented' => Constants.SpaceTypeUnfinishedAttic,
+                     'attic - unvented' => Constants.SpaceTypeUnfinishedAttic,
+                     'attic - conditioned' => Constants.SpaceTypeLiving,
+                     'garage' => Constants.SpaceTypeGarage }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
       # Ducts
+      # FIXME: Values below
       supply_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
       return_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
       supply_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctInsulationRValue"))
       return_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctInsulationRValue"))
       supply_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctSurfaceArea"))
       return_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctSurfaceArea"))
-      # FIXME: Values below
-      duct_location = Constants.Auto
+      duct_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctLocation")]
       duct_total_leakage = 0.3
       duct_supply_frac = 0.6
       duct_return_frac = 0.067
       duct_ah_supply_frac = 0.067
       duct_ah_return_frac = 0.267
-      duct_location_frac = Constants.Auto
+      duct_location_frac = 1.0
       duct_num_returns = 1
       duct_supply_area_mult = supply_area / 100.0
       duct_return_area_mult = return_area / 100.0
