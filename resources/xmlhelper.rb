@@ -37,6 +37,16 @@ class XMLHelper
     return val.text
   end
 
+  # Returns the value(s) of 'element_name' in the parent element or [].
+  def self.get_values(parent, element_name)
+    vals = []
+    parent.elements.each(element_name) do |val|
+      vals << val.text
+    end
+
+    return vals
+  end
+
   # Returns the name of the first child element of the 'element_name'
   # element on the parent element.
   def self.get_child_name(parent, element_name)
@@ -107,6 +117,19 @@ class XMLHelper
       end
       return []
     end
+  end
+
+  def self.create_doc(version = nil, encoding = nil, standalone = nil)
+    doc = REXML::Document.new
+    decl = REXML::XMLDecl.new(version = version, encoding = encoding, standalone = standalone)
+    doc << decl
+    return doc
+  end
+
+  def self.parse_file(hpxml_path)
+    file_read = File.read(hpxml_path)
+    hpxml_doc = REXML::Document.new(file_read)
+    return hpxml_doc
   end
 
   def self.write_file(doc, out_path)
