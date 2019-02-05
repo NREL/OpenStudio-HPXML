@@ -245,8 +245,8 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(attic, "AtticType", attic_type) unless attic_type.nil?
     HPXML.add_extension(parent: attic,
-                        extension: { "AtticSpecificLeakageArea": attic_specific_leakage_area,
-                                     "AtticConstantACHnatural": attic_constant_ach_natural })
+                        extensions: { "AtticSpecificLeakageArea": attic_specific_leakage_area,
+                                      "AtticConstantACHnatural": attic_constant_ach_natural })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
