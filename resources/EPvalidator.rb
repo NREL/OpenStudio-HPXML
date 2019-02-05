@@ -66,7 +66,6 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump' => zero_or_more, # See [HeatPump]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl' => zero_or_one, # See [HVACControl]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => zero_or_more, # See [HVACDistribution]
-        '/HPXML/Building/BuildingDetails/Systems/HVAC/extension/Dehumidifier' => zero_or_one, # See [Dehumidifier]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/extension/NaturalVentilation' => zero_or_one, # See [NaturalVentilation]
 
         '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_one, # See [MechanicalVentilation]
@@ -425,14 +424,6 @@ class EnergyPlusValidator
         '[ControlType="manual thermostat" or ControlType="programmable thermostat"]' => one,
         'SetpointTempHeatingSeason' => zero_or_one, # Uses ERI assumption if not provided
         'SetpointTempCoolingSeason' => zero_or_one, # Uses ERI assumption if not provided
-      },
-
-      # [Dehumidifier]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/extension/Dehumidifier' => {
-        'EnergyFactor' => one,
-        'WaterRemovalRrate' => one,
-        'AirFlowRate' => one,
-        'HumiditySetpoint' => one,
       },
 
       # [HVACDistribution]
