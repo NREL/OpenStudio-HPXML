@@ -981,7 +981,7 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel) unless heat_pump_fuel.nil?
     XMLHelper.add_element(heat_pump, "HeatingCapacity", to_float(heating_capacity)) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", to_float(cooling_capacity)) unless cooling_capacity.nil?
-    XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", backup_heating_capacity) unless backup_heating_capacity.nil?
+    XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", to_float(backup_heating_capacity)) unless backup_heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", to_float(fraction_heat_load_served)) unless fraction_heat_load_served.nil?
     XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", to_float(fraction_cool_load_served)) unless fraction_cool_load_served.nil?
     if not cooling_efficiency_units.nil? and not cooling_efficiency_value.nil?
@@ -1032,8 +1032,8 @@ class HPXML
     sys_id = XMLHelper.add_element(hvac_control, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(hvac_control, "ControlType", control_type) unless control_type.nil?
-    XMLHelper.add_element(hvac_control, "SetpointTempHeatingSeason", setpoint_temp_heating_season) unless setpoint_temp_heating_season.nil?
-    XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", setpoint_temp_cooling_season) unless setpoint_temp_cooling_season.nil?
+    XMLHelper.add_element(hvac_control, "SetpointTempHeatingSeason", to_float(setpoint_temp_heating_season)) unless setpoint_temp_heating_season.nil?
+    XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", to_float(setpoint_temp_cooling_season)) unless setpoint_temp_cooling_season.nil?
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -1047,8 +1047,8 @@ class HPXML
 
     return { :id => HPXML.get_id(hvac_control),
              :control_type => XMLHelper.get_value(hvac_control, "ControlType"),
-             :setpoint_temp_heating_season => XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason"),
-             :setpoint_temp_cooling_season => XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason") }
+             :setpoint_temp_heating_season => to_float(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason")),
+             :setpoint_temp_cooling_season => to_float(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason")) }
   end
 
   def self.add_hvac_distribution(hpxml:,
