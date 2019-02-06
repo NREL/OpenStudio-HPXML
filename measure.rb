@@ -22,6 +22,7 @@ require_relative "resources/unit_conversions"
 require_relative "resources/util"
 require_relative "resources/waterheater"
 require_relative "resources/xmlhelper"
+require_relative "resources/hpxml"
 
 # start the measure
 class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
@@ -109,7 +110,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    hpxml_doc = REXML::Document.new(File.read(hpxml_path))
+    hpxml_doc = XMLHelper.parse_file(hpxml_path)
 
     # Check for invalid HPXML file up front?
     if not skip_validation
@@ -120,7 +121,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
     begin
       # Weather file
-      weather_wmo = XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO")
+      weather_station_values = HPXML.get_weather_station_values(weather_station: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation"])
+      weather_wmo = weather_station_values[:wmo]
       epw_path = nil
       CSV.foreach(File.join(weather_dir, "data.csv"), headers: true) do |row|
         next if row["wmo"] != weather_wmo
@@ -219,26 +221,32 @@ class OSModel
     success = add_simulation_params(runner, model)
     return false if not success
 
-    @eri_version = XMLHelper.get_value(hpxml_doc, "/HPXML/SoftwareInfo/extension/ERICalculation/Version")
+    hpxml = hpxml_doc.elements["HPXML"]
+    hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
+    building = hpxml_doc.elements["/HPXML/Building"]
+
+    @eri_version = hpxml_values[:eri_calculation_version]
     fail "Could not find ERI Version" if @eri_version.nil?
 
-    building = hpxml_doc.elements["/HPXML/Building"]
-    @cfa = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"))
-    @ncfl = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors"))
-    @nbeds = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms"))
-    @garage_present = Boolean(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent"))
-    @has_uncond_bsmnt = (not building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"].nil?)
-    @iecc_zone_2006 = XMLHelper.get_value(building, "BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year='2006']/ClimateZone")
+    # Global variables
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    @cfa = building_construction_values[:conditioned_floor_area]
+    @ncfl = building_construction_values[:number_of_conditioned_floors]
+    @nbeds = building_construction_values[:number_of_bedrooms]
+    @garage_present = building_construction_values[:garage_present]
+    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"])
+    @has_uncond_bsmnt = (not foundation_values.nil?)
+    climate_zone_iecc_values = HPXML.get_climate_zone_iecc_values(climate_zone_iecc: building.elements["BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year='2006']"])
+    @iecc_zone_2006 = climate_zone_iecc_values[:climate_zone]
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
     loop_dhws = {}  # mapping between HPXML Water Heating systems and plant loops
 
-    use_only_ideal_air = XMLHelper.get_value(building, "BuildingDetails/Systems/HVAC/extension/UseOnlyIdealAirSystem")
-    if use_only_ideal_air.nil?
-      use_only_ideal_air = false
-    else
-      use_only_ideal_air = Boolean(use_only_ideal_air)
+    hvac_extension_values = HPXML.get_extension_values(parent: building.elements["BuildingDetails/Systems/HVAC"])
+    use_only_ideal_air = false
+    if not hvac_extension_values[:use_only_ideal_air_system].nil?
+      use_only_ideal_air = hvac_extension_values[:use_only_ideal_air_system]
     end
 
     # Geometry/Envelope
@@ -274,14 +282,11 @@ class OSModel
     success = add_setpoints(runner, model, building, weather)
     return false if not success
 
-    success = add_dehumidifier(runner, model, building, unit)
-    return false if not success
-
     success = add_ceiling_fans(runner, model, building, unit)
     return false if not success
 
     # FIXME: remove the following logic eventually
-    load_distribution = XMLHelper.get_value(building, "BuildingDetails/Systems/HVAC/extension/LoadDistributionScheme")
+    load_distribution = hvac_extension_values[:load_distribution_scheme]
     if not load_distribution.nil?
       if not ["UniformLoad", "SequentialLoad"].include? load_distribution
         fail "Unexpected load distribution scheme #{load_distribution}."
@@ -401,7 +406,8 @@ class OSModel
   end
 
   def self.set_zone_volumes(runner, model, building)
-    total_conditioned_volume = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume"))
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    total_conditioned_volume = building_construction_values[:conditioned_building_volume]
     thermal_zones = model.getThermalZones
 
     # Init
@@ -483,7 +489,7 @@ class OSModel
       next unless ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
 
       surfaces << surface
-      azimuth = surface.additionalProperties.getFeatureAsDouble("Azimuth").get
+      azimuth = surface.additionalProperties.getFeatureAsInteger("Azimuth").get
       if azimuth_lengths[azimuth].nil?
         azimuth_lengths[azimuth] = 0.0
       end
@@ -505,7 +511,7 @@ class OSModel
         next if surfaces_moved.include? surface.adjacentSurface.get
       end
 
-      azimuth = surface.additionalProperties.getFeatureAsDouble("Azimuth").get
+      azimuth = surface.additionalProperties.getFeatureAsInteger("Azimuth").get
       azimuth_rad = UnitConversions.convert(azimuth, "deg", "rad")
 
       # Push out horizontally
@@ -630,10 +636,9 @@ class OSModel
     model.getBuilding.setStandardsNumberOfLivingUnits(1)
 
     # Store number of stories
-    num_stories = Integer(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors"))
-    model.getBuilding.setStandardsNumberOfStories(num_stories)
-    num_stories_above_grade = Integer(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade"))
-    model.getBuilding.setStandardsNumberOfAboveGroundStories(num_stories_above_grade)
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    model.getBuilding.setStandardsNumberOfStories(building_construction_values[:number_of_conditioned_floors])
+    model.getBuilding.setStandardsNumberOfAboveGroundStories(building_construction_values[:number_of_conditioned_floors_above_grade])
 
     # Store info for HVAC Sizing measure
     if @garage_present
@@ -756,18 +761,21 @@ class OSModel
   end
 
   def self.add_num_bedrooms_occupants(model, building, runner)
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    building_occupancy_values = HPXML.get_building_occupancy_values(building_occupancy: building.elements["BuildingDetails/BuildingSummary/BuildingOccupancy"])
+
     # Bedrooms
-    num_bedrooms = Integer(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms"))
+    num_bedrooms = building_construction_values[:number_of_bedrooms]
     num_bathrooms = 3.0 # Arbitrary, no impact on results since water heater capacity is required
     success = Geometry.process_beds_and_baths(model, runner, [num_bedrooms], [num_bathrooms])
     return false if not success
 
     # Occupants
-    num_occ = XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents")
-    if num_occ.nil?
-      num_occ = Geometry.get_occupancy_default_num(num_bedrooms)
-    else
-      num_occ = Float(num_occ)
+    num_occ = Geometry.get_occupancy_default_num(num_bedrooms)
+    unless building_occupancy_values.nil?
+      unless building_occupancy_values[:number_of_residents].nil?
+        num_occ = building_occupancy_values[:number_of_residents]
+      end
     end
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
@@ -786,35 +794,36 @@ class OSModel
 
     # Windows
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
-      wall_id = window.elements["AttachedToWall"].attributes["idref"]
+      window_values = HPXML.get_window_values(window: window)
+      wall_id = window_values[:wall_idref]
       if not subsurface_areas.keys.include? wall_id
         subsurface_areas[wall_id] = 0
       end
-      window_area = Float(XMLHelper.get_value(window, "Area"))
+      window_area = window_values[:area]
       subsurface_areas[wall_id] += window_area
     end
 
     # Skylights
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
-      roof_id = skylight.elements["AttachedToRoof"].attributes["idref"]
+      skylight_values = HPXML.get_skylight_values(skylight: skylight)
+      roof_id = skylight_values[:roof_idref]
       if not subsurface_areas.keys.include? roof_id
         subsurface_areas[roof_id] = 0
       end
-      skylight_area = Float(XMLHelper.get_value(skylight, "Area"))
+      skylight_area = skylight_values[:area]
       subsurface_areas[roof_id] += skylight_area
     end
 
     # Doors
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
-      wall_id = door.elements["AttachedToWall"].attributes["idref"]
+      door_values = HPXML.get_door_values(door: door)
+      wall_id = door_values[:wall_idref]
       if not subsurface_areas.keys.include? wall_id
         subsurface_areas[wall_id] = 0
       end
-      door_area = XMLHelper.get_value(door, "Area")
-      if not door_area.nil?
-        door_area = Float(door_area)
-      else
-        door_area = SubsurfaceConstructions.get_default_door_area()
+      door_area = SubsurfaceConstructions.get_default_door_area()
+      if not door_values[:area].nil?
+        door_area = door_values[:area]
       end
       subsurface_areas[wall_id] += door_area
     end
@@ -831,7 +840,8 @@ class OSModel
 
   def self.add_foundations(runner, model, building, spaces, subsurface_areas)
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
-      foundation_id = foundation.elements["SystemIdentifier"].attributes["id"]
+      foundation_values = HPXML.get_foundation_values(foundation: foundation)
+
       foundation_type = foundation.elements["FoundationType"]
       interior_adjacent_to = get_foundation_adjacent_to(foundation_type)
 
@@ -842,14 +852,15 @@ class OSModel
       slab_whole_r, slab_concrete_thick_in = nil
       num_slabs = 0
       foundation.elements.each("Slab") do |fnd_slab|
-        num_slabs += 1
-        slab_id = fnd_slab.elements["SystemIdentifier"].attributes["id"]
+        slab_values = HPXML.get_slab_values(slab: fnd_slab)
 
-        slab_perim = Float(XMLHelper.get_value(fnd_slab, "ExposedPerimeter"))
+        num_slabs += 1
+        slab_id = slab_values[:id]
+
+        slab_perim = slab_values[:exposed_perimeter]
         perim_exp += slab_perim
-        slab_area = Float(XMLHelper.get_value(fnd_slab, "Area"))
         # Calculate length/width given perimeter/area
-        sqrt_term = slab_perim**2 - 16.0 * slab_area
+        sqrt_term = slab_perim**2 - 16.0 * slab_values[:area]
         if sqrt_term < 0
           slab_length = slab_perim / 4.0
           slab_width = slab_perim / 4.0
@@ -858,7 +869,7 @@ class OSModel
           slab_width = slab_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
         end
 
-        z_origin = -1 * Float(XMLHelper.get_value(fnd_slab, "DepthBelowGrade"))
+        z_origin = -1 * slab_values[:depth_below_grade]
 
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
 
@@ -872,11 +883,11 @@ class OSModel
 
         slab_gap_r = 0.0 # FIXME
         slab_whole_r = 0.0 # FIXME
-        slab_concrete_thick_in = Float(XMLHelper.get_value(fnd_slab, "Thickness"))
+        slab_concrete_thick_in = slab_values[:thickness]
 
         fnd_slab_perim = fnd_slab.elements["PerimeterInsulation/Layer[InstallationType='continuous']"]
-        slab_ext_r = Float(XMLHelper.get_value(fnd_slab_perim, "NominalRValue"))
-        slab_ext_depth = Float(XMLHelper.get_value(fnd_slab, "PerimeterInsulationDepth"))
+        slab_ext_r = slab_values[:perimeter_insulation_r_value]
+        slab_ext_depth = slab_values[:perimeter_insulation_depth]
         if not slab_ext_r.nil? and not slab_ext_depth.nil?
           slab_ext_r = Float(slab_ext_r)
           slab_ext_depth = Float(slab_ext_depth)
@@ -889,8 +900,8 @@ class OSModel
         end
 
         fnd_slab_under = fnd_slab.elements["UnderSlabInsulation/Layer[InstallationType='continuous']"]
-        slab_perim_r = Float(XMLHelper.get_value(fnd_slab_under, "NominalRValue"))
-        slab_perim_width = Float(XMLHelper.get_value(fnd_slab, "UnderSlabInsulationWidth"))
+        slab_perim_r = slab_values[:under_slab_insulation_r_value]
+        slab_perim_width = slab_values[:under_slab_insulation_width]
         if not slab_perim_r.nil? and not slab_perim_width.nil?
           slab_perim_r = Float(slab_perim_r)
           slab_perim_width = Float(slab_perim_width)
@@ -908,34 +919,34 @@ class OSModel
 
       # Foundation wall surfaces
 
-      fnd_id = foundation.elements["SystemIdentifier"].attributes["id"]
+      fnd_id = foundation_values[:id]
       wall_surface = nil
       wall_height, wall_cav_r, wall_cav_depth, wall_grade, wall_ff, wall_cont_height, wall_cont_r = nil
       wall_cont_depth, walls_filled_cavity, walls_drywall_thick_in, walls_concrete_thick_in = nil
       wall_assembly_r, wall_film_r = nil
       num_walls = 0
+      foundation_wall_values = nil
       foundation.elements.each("FoundationWall") do |fnd_wall|
+        foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+
         num_walls += 1
-        wall_id = fnd_wall.elements["SystemIdentifier"].attributes["id"]
+        wall_id = foundation_wall_values[:id]
 
-        exterior_adjacent_to = XMLHelper.get_value(fnd_wall, "AdjacentTo")
+        exterior_adjacent_to = foundation_wall_values[:adjacent_to]
 
-        wall_height = Float(XMLHelper.get_value(fnd_wall, "Height"))
-        wall_gross_area = Float(XMLHelper.get_value(fnd_wall, "Area"))
-        wall_net_area = net_wall_area(wall_gross_area, subsurface_areas, fnd_id)
+        wall_height = foundation_wall_values[:height]
+        wall_net_area = net_wall_area(foundation_wall_values[:area], subsurface_areas, fnd_id)
         if wall_net_area <= 0
           fail "Calculated a negative net surface area for Wall '#{wall_id}'."
         end
 
         wall_length = wall_net_area / wall_height
 
-        z_origin = -1 * Float(XMLHelper.get_value(fnd_wall, "DepthBelowGrade"))
+        z_origin = -1 * foundation_wall_values[:depth_below_grade]
 
-        wall_azimuth = XMLHelper.get_value(fnd_wall, "Azimuth")
-        if not wall_azimuth.nil?
-          wall_azimuth = Float(wall_azimuth)
-        else
-          wall_azimuth = 0.0 # TODO
+        wall_azimuth = 0 # TODO
+        if not foundation_wall_values[:azimuth].nil?
+          wall_azimuth = foundation_wall_values[:azimuth]
         end
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
@@ -955,8 +966,8 @@ class OSModel
           walls_drywall_thick_in = 0.0
         end
         walls_filled_cavity = true
-        walls_concrete_thick_in = Float(XMLHelper.get_value(fnd_wall, "Thickness"))
-        wall_assembly_r = XMLHelper.get_value(fnd_wall, "Insulation/AssemblyEffectiveRValue")
+        walls_concrete_thick_in = foundation_wall_values[:thickness]
+        wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
         if not wall_assembly_r.nil?
           wall_assembly_r = Float(wall_assembly_r)
         else
@@ -967,7 +978,7 @@ class OSModel
         wall_cav_depth = 0.0
         wall_grade = 1
         wall_ff = 0.0
-        wall_cont_height = Float(XMLHelper.get_value(fnd_wall, "Height"))
+        wall_cont_height = foundation_wall_values[:height]
         wall_cont_r = wall_assembly_r - Material.Concrete(walls_concrete_thick_in).rvalue - Material.GypsumWall(walls_drywall_thick_in).rvalue - wall_film_r
         if wall_cont_r < 0 # Try without drywall
           walls_drywall_thick_in = 0.0
@@ -986,11 +997,13 @@ class OSModel
       plywood_thick_in, mat_floor_covering, mat_carpet = nil
       floor_assembly_r, floor_film_r = nil
       foundation.elements.each("FrameFloor") do |fnd_floor|
-        floor_id = fnd_floor.elements["SystemIdentifier"].attributes["id"]
+        frame_floor_values = HPXML.get_frame_floor_values(floor: fnd_floor)
 
-        exterior_adjacent_to = XMLHelper.get_value(fnd_floor, "AdjacentTo")
+        floor_id = frame_floor_values[:id]
 
-        framefloor_area = Float(XMLHelper.get_value(fnd_floor, "Area"))
+        exterior_adjacent_to = frame_floor_values[:adjacent_to]
+
+        framefloor_area = frame_floor_values[:area]
         framefloor_width = Math::sqrt(framefloor_area)
         framefloor_length = framefloor_area / framefloor_width
 
@@ -999,8 +1012,7 @@ class OSModel
         elsif foundation_type.elements["SlabOnGrade"]
           z_origin = 0.0
         elsif foundation_type.elements["Basement"] or foundation_type.elements["Crawlspace"]
-          z_origin = -1 * Float(XMLHelper.get_value(foundation, "FoundationWall/DepthBelowGrade")) +
-                     Float(XMLHelper.get_value(foundation, "FoundationWall/Height"))
+          z_origin = -1 * foundation_wall_values[:depth_below_grade] + wall_height
         end
 
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(framefloor_length, framefloor_width, z_origin), model)
@@ -1021,7 +1033,7 @@ class OSModel
 
         floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
 
-        floor_assembly_r = XMLHelper.get_value(fnd_floor, "Insulation/AssemblyEffectiveRValue")
+        floor_assembly_r = frame_floor_values[:insulation_assembly_r_value]
         if not floor_assembly_r.nil?
           floor_assembly_r = Float(floor_assembly_r)
         else
@@ -1101,7 +1113,8 @@ class OSModel
   end
 
   def self.add_finished_floor_area(runner, model, building, spaces)
-    ffa = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea")).round(1)
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    ffa = building_construction_values[:conditioned_floor_area].round(1)
 
     # First check if we need to add a finished basement ceiling
     foundation_top = get_foundation_top(model)
@@ -1145,7 +1158,8 @@ class OSModel
 
     # Calculate ffa already added to model
     model_ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces).round(1)
-    nstories_ag = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade"))
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    nstories_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
 
     if model_ffa > ffa
       runner.registerError("Sum of conditioned floor surface areas #{model_ffa.to_s} is greater than ConditionedFloorArea specified #{ffa.to_s}.")
@@ -1199,28 +1213,25 @@ class OSModel
 
   def self.add_walls(runner, model, building, spaces, subsurface_areas)
     foundation_top = get_foundation_top(model)
-    nstories_ag = Float(XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade"))
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      interior_adjacent_to = XMLHelper.get_value(wall, "InteriorAdjacentTo")
-      exterior_adjacent_to = XMLHelper.get_value(wall, "ExteriorAdjacentTo")
+      wall_values = HPXML.get_wall_values(wall: wall)
+      interior_adjacent_to = wall_values[:interior_adjacent_to]
+      exterior_adjacent_to = wall_values[:exterior_adjacent_to]
+      wall_id = wall_values[:id]
 
-      wall_id = wall.elements["SystemIdentifier"].attributes["id"]
-
-      wall_gross_area = Float(XMLHelper.get_value(wall, "Area"))
-      wall_net_area = net_wall_area(wall_gross_area, subsurface_areas, wall_id)
+      wall_net_area = net_wall_area(wall_values[:area], subsurface_areas, wall_id)
       if wall_net_area <= 0
         fail "Calculated a negative net surface area for Wall '#{wall_id}'."
       end
 
-      wall_height = 8.0 * nstories_ag
+      wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
       wall_length = wall_net_area / wall_height
       z_origin = foundation_top
-      wall_azimuth = XMLHelper.get_value(wall, "Azimuth")
-      if not wall_azimuth.nil?
-        wall_azimuth = Float(wall_azimuth)
-      else
-        wall_azimuth = 0.0 # TODO
+      wall_azimuth = 0 # TODO
+      if not wall_values[:azimuth].nil?
+        wall_azimuth = wall_values[:azimuth]
       end
 
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
@@ -1253,13 +1264,9 @@ class OSModel
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
       end
-      solar_abs = Float(XMLHelper.get_value(wall, "SolarAbsorptance"))
-      emitt = Float(XMLHelper.get_value(wall, "Emittance"))
-      assembly_r = XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue")
-      wall_type = XMLHelper.get_child_name(wall, "WallType")
 
-      apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
-                              drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
+      apply_wall_construction(runner, model, surface, wall_id, wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
+                              drywall_thick_in, film_r, mat_ext_finish, wall_values[:solar_absorptance], wall_values[:emittance])
     end
 
     return true
@@ -1269,20 +1276,17 @@ class OSModel
     foundation_top = get_foundation_top(model)
 
     building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
-      interior_adjacent_to = XMLHelper.get_value(rim_joist, "InteriorAdjacentTo")
-      exterior_adjacent_to = XMLHelper.get_value(rim_joist, "ExteriorAdjacentTo")
+      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
+      interior_adjacent_to = rim_joist_values[:interior_adjacent_to]
+      exterior_adjacent_to = rim_joist_values[:exterior_adjacent_to]
+      rim_joist_id = rim_joist_values[:id]
 
-      rim_joist_id = rim_joist.elements["SystemIdentifier"].attributes["id"]
-
-      rim_joist_area = Float(XMLHelper.get_value(rim_joist, "Area"))
       rim_joist_height = 1.0
-      rim_joist_length = rim_joist_area / rim_joist_height
+      rim_joist_length = rim_joist_values[:area] / rim_joist_height
       z_origin = foundation_top
-      rim_joist_azimuth = XMLHelper.get_value(rim_joist, "Azimuth")
-      if not rim_joist_azimuth.nil?
-        rim_joist_azimuth = Float(rim_joist_azimuth)
-      else
-        rim_joist_azimuth = 0.0 # TODO
+      rim_joist_azimuth = 0 # TODO
+      if not rim_joist_values[:azimuth].nil?
+        rim_joist_azimuth = rim_joist_values[:azimuth]
       end
 
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(rim_joist_length, rim_joist_height, z_origin,
@@ -1316,7 +1320,7 @@ class OSModel
       solar_abs = 0.75
       emitt = 0.9
 
-      assembly_r = Float(XMLHelper.get_value(rim_joist, "Insulation/AssemblyEffectiveRValue"))
+      assembly_r = rim_joist_values[:insulation_assembly_r_value]
 
       constr_sets = [
         WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, drywall_thick_in, mat_ext_finish),  # 2x4 + R10
@@ -1346,15 +1350,17 @@ class OSModel
     walls_top = get_walls_top(model)
 
     building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
-      attic_type = XMLHelper.get_value(attic, "AtticType")
-      interior_adjacent_to = get_attic_adjacent_to(attic_type)
+      attic_values = HPXML.get_attic_values(attic: attic)
+      interior_adjacent_to = get_attic_adjacent_to(attic_values[:attic_type])
 
       # Attic floors
       attic.elements.each("Floors/Floor") do |floor|
-        floor_id = floor.elements["SystemIdentifier"].attributes["id"]
-        exterior_adjacent_to = XMLHelper.get_value(floor, "AdjacentTo")
+        attic_floor_values = HPXML.get_attic_floor_values(floor: floor)
 
-        floor_area = Float(XMLHelper.get_value(floor, "Area"))
+        floor_id = attic_floor_values[:id]
+        exterior_adjacent_to = attic_floor_values[:adjacent_to]
+
+        floor_area = attic_floor_values[:area]
         floor_width = Math::sqrt(floor_area)
         floor_length = floor_area / floor_width
         z_origin = walls_top
@@ -1377,11 +1383,9 @@ class OSModel
         end
         film_r = 2 * Material.AirFilmFloorAverage.rvalue
 
-        assembly_r = XMLHelper.get_value(floor, "Insulation/AssemblyEffectiveRValue")
-        if not assembly_r.nil?
-          assembly_r = Float(assembly_r)
-        else
-          assembly_r = FloorConstructions.get_default_ceiling_ufactor(@iecc_zone_2006)
+        assembly_r = FloorConstructions.get_default_ceiling_ufactor(@iecc_zone_2006)
+        if not attic_floor_values[:insulation_assembly_r_value].nil?
+          assembly_r = attic_floor_values[:insulation_assembly_r_value]
         end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.11, 0.0, 0.0, drywall_thick_in, nil), # 2x6, 24" o.c.
@@ -1410,23 +1414,21 @@ class OSModel
 
       # Attic roofs
       attic.elements.each("Roofs/Roof") do |roof|
-        roof_id = roof.elements["SystemIdentifier"].attributes["id"]
+        attic_roof_values = HPXML.get_attic_roof_values(roof: roof)
 
-        roof_gross_area = Float(XMLHelper.get_value(roof, "Area"))
-        roof_net_area = net_wall_area(roof_gross_area, subsurface_areas, roof_id)
+        roof_id = attic_roof_values[:id]
+        roof_net_area = net_wall_area(attic_roof_values[:area], subsurface_areas, roof_id)
         if roof_net_area <= 0
           fail "Calculated a negative net surface area for Roof '#{roof_id}'."
         end
 
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
-        roof_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
+        roof_tilt = attic_roof_values[:pitch] / 12.0
         z_origin = walls_top + 0.5 * Math.sin(Math.atan(roof_tilt)) * roof_width
-        roof_azimuth = XMLHelper.get_value(roof, "Azimuth")
-        if not roof_azimuth.nil?
-          roof_azimuth = Float(roof_azimuth)
-        else
-          roof_azimuth = 0.0 # TODO
+        roof_azimuth = 0 # TODO
+        if not attic_roof_values[:azimuth].nil?
+          roof_azimuth = attic_roof_values[:azimuth]
         end
 
         surface = OpenStudio::Model::Surface.new(add_roof_polygon(roof_length, roof_width, z_origin,
@@ -1449,10 +1451,10 @@ class OSModel
         end
         film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surface])).rvalue
         mat_roofing = Material.RoofingAsphaltShinglesDark
-        solar_abs = Float(XMLHelper.get_value(roof, "SolarAbsorptance"))
-        emitt = Float(XMLHelper.get_value(roof, "Emittance"))
+        solar_abs = attic_roof_values[:solar_absorptance]
+        emitt = attic_roof_values[:emittance]
 
-        assembly_r = Float(XMLHelper.get_value(roof, "Insulation/AssemblyEffectiveRValue"))
+        assembly_r = attic_roof_values[:insulation_assembly_r_value]
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, drywall_thick_in, mat_roofing), # 2x8, 24" o.c. + R10
           WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 5.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c. + R5
@@ -1494,12 +1496,12 @@ class OSModel
 
       # Attic walls
       attic.elements.each("Walls/Wall") do |wall|
-        exterior_adjacent_to = XMLHelper.get_value(wall, "AdjacentTo")
+        attic_wall_values = HPXML.get_attic_wall_values(wall: wall)
 
-        wall_id = wall.elements["SystemIdentifier"].attributes["id"]
+        exterior_adjacent_to = attic_wall_values[:adjacent_to]
+        wall_id = attic_wall_values[:id]
 
-        wall_gross_area = Float(XMLHelper.get_value(wall, "Area"))
-        wall_net_area = net_wall_area(wall_gross_area, subsurface_areas, wall_id)
+        wall_net_area = net_wall_area(attic_wall_values[:area], subsurface_areas, wall_id)
         if wall_net_area <= 0
           fail "Calculated a negative net surface area for Wall '#{wall_id}'."
         end
@@ -1507,11 +1509,9 @@ class OSModel
         wall_height = 8.0
         wall_length = wall_net_area / wall_height
         z_origin = walls_top
-        wall_azimuth = XMLHelper.get_value(wall, "Azimuth")
-        if not wall_azimuth.nil?
-          wall_azimuth = Float(wall_azimuth)
-        else
-          wall_azimuth = 0.0 # TODO
+        wall_azimuth = 0 # TODO
+        if not attic_wall_values[:azimuth].nil?
+          wall_azimuth = attic_wall_values[:azimuth]
         end
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
@@ -1542,13 +1542,9 @@ class OSModel
           film_r = 2.0 * Material.AirFilmVertical.rvalue
           mat_ext_finish = nil
         end
-        solar_abs = Float(XMLHelper.get_value(wall, "SolarAbsorptance"))
-        emitt = Float(XMLHelper.get_value(wall, "Emittance"))
-        wall_type = XMLHelper.get_child_name(wall, "WallType")
-        assembly_r = Float(XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue"))
 
-        apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
-                                drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
+        apply_wall_construction(runner, model, surface, wall_id, attic_wall_values[:wall_type], attic_wall_values[:insulation_assembly_r_value],
+                                drywall_thick_in, film_r, mat_ext_finish, attic_wall_values[:solar_absorptance], attic_wall_values[:emittance])
       end
     end
 
@@ -1560,21 +1556,23 @@ class OSModel
 
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
-      window_id = window.elements["SystemIdentifier"].attributes["id"]
+      window_values = HPXML.get_window_values(window: window)
+
+      window_id = window_values[:id]
 
       window_height = 4.0 # ft, default
       overhang_depth = nil
       if not window.elements["Overhangs"].nil?
-        overhang_depth = Float(XMLHelper.get_value(window, "Overhangs/Depth"))
-        overhang_distance_to_top = Float(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
-        overhang_distance_to_bottom = Float(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
+        overhang_depth = window_values[:overhangs_depth]
+        overhang_distance_to_top = window_values[:overhangs_distance_to_top_of_window]
+        overhang_distance_to_bottom = window_values[:overhangs_distance_to_bottom_of_window]
         window_height = overhang_distance_to_bottom - overhang_distance_to_top
       end
 
-      window_area = Float(XMLHelper.get_value(window, "Area"))
+      window_area = window_values[:area]
       window_width = window_area / window_height
       z_origin = foundation_top
-      window_azimuth = Float(XMLHelper.get_value(window, "Azimuth"))
+      window_azimuth = window_values[:azimuth]
 
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
                                                                 window_azimuth, [0, 0.001, 0.001 * 2, 0.001]), model) # offsets B, L, T, R
@@ -1585,9 +1583,11 @@ class OSModel
       surface.setSurfaceType("Wall")
       surface_space = nil
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-        next unless wall.elements["SystemIdentifier"].attributes["id"] == window.elements["AttachedToWall"].attributes["idref"]
+        wall_values = HPXML.get_wall_values(wall: wall)
 
-        interior_adjacent_to = XMLHelper.get_value(wall, "InteriorAdjacentTo")
+        next unless wall_values[:id] == window_values[:wall_idref]
+
+        interior_adjacent_to = wall_values[:interior_adjacent_to]
         set_surface_interior(model, spaces, surface, window_id, interior_adjacent_to)
       end
       if not surface.space.is_initialized
@@ -1612,20 +1612,16 @@ class OSModel
       end
 
       # Apply construction
-      ufactor = Float(XMLHelper.get_value(window, "UFactor"))
-      shgc = Float(XMLHelper.get_value(window, "SHGC"))
+      ufactor = window_values[:ufactor]
+      shgc = window_values[:shgc]
       default_shade_summer, default_shade_winter = SubsurfaceConstructions.get_default_interior_shading_factors()
-      cool_shade_mult = XMLHelper.get_value(window, "extension/InteriorShadingFactorSummer")
-      if cool_shade_mult.nil?
-        cool_shade_mult = default_shade_summer
-      else
-        cool_shade_mult = Float(cool_shade_mult)
+      cool_shade_mult = default_shade_summer
+      if not window_values[:interior_shading_factor_summer].nil?
+        cool_shade_mult = window_values[:interior_shading_factor_summer]
       end
-      heat_shade_mult = XMLHelper.get_value(window, "extension/InteriorShadingFactorWinter")
-      if heat_shade_mult.nil?
-        heat_shade_mult = default_shade_winter
-      else
-        heat_shade_mult = Float(heat_shade_mult)
+      heat_shade_mult = default_shade_winter
+      if not window_values[:interior_shading_factor_winter].nil?
+        heat_shade_mult = window_values[:interior_shading_factor_winter]
       end
       success = SubsurfaceConstructions.apply_window(runner, model, [sub_surface],
                                                      "WindowConstruction",
@@ -1645,27 +1641,31 @@ class OSModel
 
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
-      skylight_id = skylight.elements["SystemIdentifier"].attributes["id"]
+      skylight_values = HPXML.get_skylight_values(skylight: skylight)
+
+      skylight_id = skylight_values[:id]
 
       # Obtain skylight tilt from attached roof
       skylight_tilt = nil
       building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
-        attic_type = XMLHelper.get_value(attic, "AtticType")
-        attic.elements.each("Roofs/Roof") do |roof|
-          next unless roof.elements["SystemIdentifier"].attributes["id"] == skylight.elements["AttachedToRoof"].attributes["idref"]
+        attic_values = HPXML.get_attic_values(attic: attic)
 
-          skylight_tilt = Float(XMLHelper.get_value(roof, "Pitch")) / 12.0
+        attic.elements.each("Roofs/Roof") do |roof|
+          attic_roof_values = HPXML.get_attic_roof_values(roof: roof)
+          next unless attic_roof_values[:id] == skylight_values[:roof_idref]
+
+          skylight_tilt = attic_roof_values[:pitch] / 12.0
         end
       end
       if skylight_tilt.nil?
-        fail "Attached roof '#{skylight.elements['AttachedToRoof'].attributes['idref']}' not found for skylight '#{skylight_id}'."
+        fail "Attached roof '#{skylight_values[:roof_idref]}' not found for skylight '#{skylight_id}'."
       end
 
-      skylight_area = Float(XMLHelper.get_value(skylight, "Area"))
+      skylight_area = skylight_values[:area]
       skylight_height = Math::sqrt(skylight_area)
       skylight_width = skylight_area / skylight_height
       z_origin = walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
-      skylight_azimuth = Float(XMLHelper.get_value(skylight, "Azimuth"))
+      skylight_azimuth = skylight_values[:azimuth]
 
       surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.001, skylight_height + 0.001, z_origin,
                                                                 skylight_azimuth, skylight_tilt), model) # base surface must be at least slightly larger than subsurface
@@ -1687,8 +1687,8 @@ class OSModel
       sub_surface.setSubSurfaceType("Skylight")
 
       # Apply construction
-      ufactor = Float(XMLHelper.get_value(skylight, "UFactor"))
-      shgc = Float(XMLHelper.get_value(skylight, "SHGC"))
+      ufactor = skylight_values[:ufactor]
+      shgc = skylight_values[:shgc]
       cool_shade_mult = 1.0
       heat_shade_mult = 1.0
       success = SubsurfaceConstructions.apply_skylight(runner, model, [sub_surface],
@@ -1709,19 +1709,18 @@ class OSModel
 
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
-      door_id = door.elements["SystemIdentifier"].attributes["id"]
+      door_values = HPXML.get_door_values(door: door)
+      door_id = door_values[:id]
 
-      door_area = XMLHelper.get_value(door, "Area")
-      if not door_area.nil?
-        door_area = Float(door_area)
-      else
-        door_area = SubsurfaceConstructions.get_default_door_area()
+      door_area = SubsurfaceConstructions.get_default_door_area()
+      if not door_values[:area].nil?
+        door_area = door_values[:area]
       end
 
       door_height = 6.67 # ft
       door_width = door_area / door_height
       z_origin = foundation_top
-      door_azimuth = Float(XMLHelper.get_value(door, "Azimuth"))
+      door_azimuth = door_values[:azimuth]
 
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
                                                                 door_azimuth, [0, 0.001, 0.001, 0.001]), model) # offsets B, L, T, R
@@ -1732,9 +1731,10 @@ class OSModel
       surface.setSurfaceType("Wall")
       surface_space = nil
       building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-        next unless wall.elements["SystemIdentifier"].attributes["id"] == door.elements["AttachedToWall"].attributes["idref"]
+        wall_values = HPXML.get_wall_values(wall: wall)
+        next unless wall_values[:id] == door_values[:wall_idref]
 
-        interior_adjacent_to = XMLHelper.get_value(wall, "InteriorAdjacentTo")
+        interior_adjacent_to = wall_values[:interior_adjacent_to]
         set_surface_interior(model, spaces, surface, door_id, interior_adjacent_to)
       end
       if not surface.space.is_initialized
@@ -1751,8 +1751,7 @@ class OSModel
       sub_surface.setSubSurfaceType("Door")
 
       # Apply construction
-      name = door.elements["SystemIdentifier"].attributes["id"]
-      rvalue = XMLHelper.get_value(door, "RValue")
+      rvalue = door_values[:r_value]
       if not rvalue.nil?
         ufactor = 1.0 / Float(rvalue)
       else
@@ -1820,15 +1819,12 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
-    wh = building.elements["BuildingDetails/Systems/WaterHeating"]
-
     # Clothes Washer
-    cw = building.elements["BuildingDetails/Appliances/ClothesWasher"]
-    if not cw.nil?
-      cw_location = XMLHelper.get_value(cw, "Location")
-      cw_space = get_space_from_location(cw_location, "ClothesWasher", model, spaces)
-      cw_mef = XMLHelper.get_value(cw, "ModifiedEnergyFactor")
-      cw_imef = XMLHelper.get_value(cw, "IntegratedModifiedEnergyFactor")
+    clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
+    if not clothes_washer_values.nil?
+      cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
+      cw_mef = clothes_washer_values[:modified_energy_factor]
+      cw_imef = clothes_washer_values[:integrated_modified_energy_factor]
       if cw_mef.nil? and cw_imef.nil?
         cw_mef = HotWaterAndAppliances.get_clothes_washer_reference_mef()
         cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
@@ -1842,24 +1838,23 @@ class OSModel
         elsif not cw_imef.nil?
           cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(Float(cw_imef))
         end
-        cw_ler = Float(XMLHelper.get_value(cw, "RatedAnnualkWh"))
-        cw_elec_rate = Float(XMLHelper.get_value(cw, "LabelElectricRate"))
-        cw_gas_rate = Float(XMLHelper.get_value(cw, "LabelGasRate"))
-        cw_agc = Float(XMLHelper.get_value(cw, "LabelAnnualGasCost"))
-        cw_cap = Float(XMLHelper.get_value(cw, "Capacity"))
+        cw_ler = clothes_washer_values[:rated_annual_kwh]
+        cw_elec_rate = clothes_washer_values[:label_electric_rate]
+        cw_gas_rate = clothes_washer_values[:label_gas_rate]
+        cw_agc = clothes_washer_values[:label_annual_gas_cost]
+        cw_cap = clothes_washer_values[:capacity]
       end
     else
       cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = nil
     end
 
     # Clothes Dryer
-    cd = building.elements["BuildingDetails/Appliances/ClothesDryer"]
-    if not cd.nil?
-      cd_location = XMLHelper.get_value(cd, "Location")
-      cd_space = get_space_from_location(cd_location, "ClothesDryer", model, spaces)
-      cd_fuel = to_beopt_fuel(XMLHelper.get_value(cd, "FuelType"))
-      cd_ef = XMLHelper.get_value(cd, "EnergyFactor")
-      cd_cef = XMLHelper.get_value(cd, "CombinedEnergyFactor")
+    clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
+    if not clothes_dryer_values.nil?
+      cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
+      cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
+      cd_ef = clothes_dryer_values[:energy_factor]
+      cd_cef = clothes_dryer_values[:combined_energy_factor]
       if cd_ef.nil? and cd_cef.nil?
         cd_ef = HotWaterAndAppliances.get_clothes_dryer_reference_ef(cd_fuel)
         cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
@@ -1869,17 +1864,17 @@ class OSModel
         elsif not cd_cef.nil?
           cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(Float(cd_cef))
         end
-        cd_control = XMLHelper.get_value(cd, "ControlType")
+        cd_control = clothes_dryer_values[:control_type]
       end
     else
       cd_ef = cd_control = cd_fuel = nil
     end
 
     # Dishwasher
-    dw = building.elements["BuildingDetails/Appliances/Dishwasher"]
-    if not dw.nil?
-      dw_ef = XMLHelper.get_value(dw, "EnergyFactor")
-      dw_annual_kwh = XMLHelper.get_value(dw, "RatedAnnualkWh")
+    dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
+    if not dishwasher_values.nil?
+      dw_ef = dishwasher_values[:energy_factor]
+      dw_annual_kwh = dishwasher_values[:rated_annual_kwh]
       if dw_ef.nil? and dw_annual_kwh.nil?
         dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
         dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
@@ -1889,50 +1884,48 @@ class OSModel
         elsif not dw_annual_kwh.nil?
           dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(Float(dw_annual_kwh))
         end
-        dw_cap = Float(XMLHelper.get_value(dw, "PlaceSettingCapacity"))
+        dw_cap = dishwasher_values[:place_setting_capacity]
       end
     else
       dw_ef = dw_cap = nil
     end
 
     # Refrigerator
-    fridge = building.elements["BuildingDetails/Appliances/Refrigerator"]
-    if not fridge.nil?
-      fridge_location = XMLHelper.get_value(fridge, "Location")
-      fridge_space = get_space_from_location(fridge_location, "Refrigerator", model, spaces)
-      fridge_annual_kwh = XMLHelper.get_value(fridge, "RatedAnnualkWh")
-      if fridge_annual_kwh.nil?
-        fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
-      else
-        fridge_annual_kwh = Float(fridge_annual_kwh)
+    refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
+    if not refrigerator_values.nil?
+      fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
+      fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
+      if not refrigerator_values[:rated_annual_kwh].nil?
+        fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
       end
     else
       fridge_annual_kwh = nil
     end
 
     # Cooking Range/Oven
-    cook = building.elements["BuildingDetails/Appliances/CookingRange"]
-    oven = building.elements["BuildingDetails/Appliances/Oven"]
-    if not cook.nil? and not oven.nil?
-      cook_fuel_type = to_beopt_fuel(XMLHelper.get_value(cook, "FuelType"))
-      cook_is_induction = XMLHelper.get_value(cook, "IsInduction")
-      if cook_is_induction.nil?
-        cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
-        oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
-      else
-        cook_is_induction = Boolean(cook_is_induction)
-        oven_is_convection = Boolean(XMLHelper.get_value(oven, "IsConvection"))
+    cooking_range_values = HPXML.get_cooking_range_values(cooking_range: building.elements["BuildingDetails/Appliances/CookingRange"])
+    oven_values = HPXML.get_oven_values(oven: building.elements["BuildingDetails/Appliances/Oven"])
+    if not cooking_range_values.nil? and not oven_values.nil?
+      cook_fuel_type = to_beopt_fuel(cooking_range_values[:fuel_type])
+      cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
+      oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
+      if not cooking_range_values[:is_induction].nil?
+        cook_is_induction = cooking_range_values[:is_induction]
+        oven_is_convection = oven_values[:is_convection]
       end
     else
       cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
+
+    wh = building.elements["BuildingDetails/Systems/WaterHeating"]
 
     # Fixtures
     has_low_flow_fixtures = false
     if not wh.nil?
       low_flow_fixtures_list = []
       wh.elements.each("WaterFixture[WaterFixtureType='shower head' or WaterFixtureType='faucet']") do |wf|
-        low_flow_fixtures_list << Boolean(XMLHelper.get_value(wf, "LowFlow"))
+        water_fixture_values = HPXML.get_water_fixture_values(water_fixture: wf)
+        low_flow_fixtures_list << water_fixture_values[:low_flow]
       end
       low_flow_fixtures_list.uniq!
       if low_flow_fixtures_list.size == 1 and low_flow_fixtures_list[0]
@@ -1943,32 +1936,31 @@ class OSModel
     # Distribution
     if not wh.nil?
       dist = wh.elements["HotWaterDistribution"]
-      dist_type = XMLHelper.get_child_name(dist, "SystemType").downcase
+      hot_water_distirbution_values = HPXML.get_hot_water_distribution_values(hot_water_distribution: wh.elements["HotWaterDistribution"])
+      dist_type = hot_water_distirbution_values[:system_type].downcase
       if dist_type == "standard"
-        std_pipe_length = XMLHelper.get_value(dist, "SystemType/Standard/PipingLength")
-        if std_pipe_length.nil?
+        std_pipe_length = hot_water_distirbution_values[:standard_piping_length]
+        if hot_water_distirbution_values[:standard_piping_length].nil?
           std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
-        else
-          std_pipe_length = Float(std_pipe_length)
         end
         recirc_loop_length = nil
         recirc_branch_length = nil
         recirc_control_type = nil
         recirc_pump_power = nil
       elsif dist_type == "recirculation"
-        recirc_loop_length = XMLHelper.get_value(dist, "SystemType/Recirculation/RecirculationPipingLoopLength")
+        recirc_loop_length = hot_water_distirbution_values[:recirculation_piping_length]
         if recirc_loop_length.nil?
           std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
           recirc_loop_length = HotWaterAndAppliances.get_default_recirc_loop_length(std_pipe_length)
         else
           recirc_loop_length = Float(recirc_loop_length)
         end
-        recirc_branch_length = Float(XMLHelper.get_value(dist, "SystemType/Recirculation/BranchPipingLoopLength"))
-        recirc_control_type = XMLHelper.get_value(dist, "SystemType/Recirculation/ControlType")
-        recirc_pump_power = Float(XMLHelper.get_value(dist, "SystemType/Recirculation/PumpPower"))
+        recirc_branch_length = hot_water_distirbution_values[:recirculation_branch_piping_length]
+        recirc_control_type = hot_water_distirbution_values[:recirculation_control_type]
+        recirc_pump_power = hot_water_distirbution_values[:recirculation_pump_power]
         std_pipe_length = nil
       end
-      pipe_r = Float(XMLHelper.get_value(dist, "PipeInsulation/PipeRValue"))
+      pipe_r = hot_water_distirbution_values[:pipe_r_value]
     end
 
     # Drain Water Heat Recovery
@@ -1979,9 +1971,9 @@ class OSModel
     if not wh.nil?
       if XMLHelper.has_element(dist, "DrainWaterHeatRecovery")
         dwhr_present = true
-        dwhr_facilities_connected = XMLHelper.get_value(dist, "DrainWaterHeatRecovery/FacilitiesConnected")
-        dwhr_is_equal_flow = Boolean(XMLHelper.get_value(dist, "DrainWaterHeatRecovery/EqualFlow"))
-        dwhr_efficiency = Float(XMLHelper.get_value(dist, "DrainWaterHeatRecovery/Efficiency"))
+        dwhr_facilities_connected = hot_water_distirbution_values[:dwhr_facilities_connected]
+        dwhr_is_equal_flow = hot_water_distirbution_values[:dwhr_equal_flow]
+        dwhr_efficiency = hot_water_distirbution_values[:dwhr_efficiency]
       end
     end
 
@@ -1989,42 +1981,40 @@ class OSModel
     dhw_loop_fracs = {}
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
+        water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
+
         orig_plant_loops = model.getPlantLoops
 
-        location = XMLHelper.get_value(dhw, "Location")
-        space = get_space_from_location(location, "WaterHeatingSystem", model, spaces)
+        space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
-        wh_type = XMLHelper.get_value(dhw, "WaterHeaterType")
-        fuel = XMLHelper.get_value(dhw, "FuelType")
+        wh_type = water_heating_system_values[:water_heater_type]
+        fuel = water_heating_system_values[:fuel_type]
 
-        ef = XMLHelper.get_value(dhw, "EnergyFactor")
+        ef = water_heating_system_values[:energy_factor]
         if ef.nil?
-          uef = Float(XMLHelper.get_value(dhw, "UniformEnergyFactor"))
+          uef = water_heating_system_values[:uniform_energy_factor]
           ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
-        else
-          ef = Float(ef)
         end
-        ef_adj = XMLHelper.get_value(dhw, "extension/EnergyFactorMultiplier")
+
+        ef_adj = water_heating_system_values[:energy_factor_multiplier]
         if ef_adj.nil?
           ef_adj = Waterheater.get_ef_multiplier(to_beopt_wh_type(wh_type))
-        else
-          ef_adj = Float(ef_adj)
         end
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
-        dhw_load_frac = Float(XMLHelper.get_value(dhw, "FractionDHWLoadServed"))
+        dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
         if wh_type == "storage water heater"
 
-          tank_vol = Float(XMLHelper.get_value(dhw, "TankVolume"))
+          tank_vol = water_heating_system_values[:tank_volume]
           if fuel != "electricity"
-            re = Float(XMLHelper.get_value(dhw, "RecoveryEfficiency"))
+            re = water_heating_system_values[:recovery_efficiency]
           else
             re = 0.98
           end
-          capacity_kbtuh = Float(XMLHelper.get_value(dhw, "HeatingCapacity")) / 1000.0
+          capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_tank(model, unit, runner, nil, space, to_beopt_fuel(fuel),
@@ -2045,7 +2035,7 @@ class OSModel
 
         elsif wh_type == "heat pump water heater"
 
-          tank_vol = Float(XMLHelper.get_value(dhw, "TankVolume"))
+          tank_vol = water_heating_system_values[:tank_volume]
           e_cap = 4.5 # FIXME
           min_temp = 45.0 # FIXME
           max_temp = 120.0 # FIXME
@@ -2101,14 +2091,16 @@ class OSModel
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
-      clg_type = XMLHelper.get_value(clgsys, "CoolingSystemType")
+      cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
 
-      cool_capacity_btuh = Float(XMLHelper.get_value(clgsys, "CoolingCapacity"))
+      clg_type = cooling_system_values[:cooling_system_type]
+
+      cool_capacity_btuh = cooling_system_values[:cooling_capacity]
       if cool_capacity_btuh <= 0.0
         cool_capacity_btuh = Constants.SizingAuto
       end
 
-      load_frac = Float(XMLHelper.get_value(clgsys, "FractionCoolLoadServed"))
+      load_frac = cooling_system_values[:fraction_cool_load_served]
 
       dse_heat, dse_cool, has_dse = get_dse(building, clgsys)
 
@@ -2119,7 +2111,9 @@ class OSModel
       if clg_type == "central air conditioning"
 
         # FIXME: Generalize
-        seer = Float(XMLHelper.get_value(clgsys, "AnnualCoolingEfficiency[Units='SEER']/Value"))
+        if cooling_system_values[:cooling_efficiency_units] == "SEER"
+          seer = cooling_system_values[:cooling_efficiency_value]
+        end
         num_speeds = get_ac_num_speeds(seer)
         crankcase_kw = 0.0
         crankcase_temp = 55.0
@@ -2180,7 +2174,9 @@ class OSModel
 
       elsif clg_type == "room air conditioner"
 
-        eer = Float(XMLHelper.get_value(clgsys, "AnnualCoolingEfficiency[Units='EER']/Value"))
+        if cooling_system_values[:cooling_efficiency_units] == "EER"
+          eer = cooling_system_values[:cooling_efficiency_value]
+        end
         shr = 0.65
         airflow_rate = 350.0
 
@@ -2200,15 +2196,17 @@ class OSModel
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
-      fuel = to_beopt_fuel(XMLHelper.get_value(htgsys, "HeatingSystemFuel"))
+      heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
 
-      heat_capacity_btuh = Float(XMLHelper.get_value(htgsys, "HeatingCapacity"))
+      fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
+
+      heat_capacity_btuh = heating_system_values[:heating_capacity]
       if heat_capacity_btuh <= 0.0
         heat_capacity_btuh = Constants.SizingAuto
       end
-      htg_type = XMLHelper.get_child_name(htgsys, "HeatingSystemType")
+      htg_type = heating_system_values[:heating_system_type]
 
-      load_frac = Float(XMLHelper.get_value(htgsys, "FractionHeatLoadServed"))
+      load_frac = heating_system_values[:fraction_heat_load_served]
 
       dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
 
@@ -2218,9 +2216,11 @@ class OSModel
 
       if htg_type == "Furnace"
 
-        afue = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
+        if heating_system_values[:heating_efficiency_units] == "AFUE"
+          afue = heating_system_values[:heating_efficiency_value]
+        end
         fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
-        attached_to_multispeed_ac = get_attached_to_multispeed_ac(htgsys, building)
+        attached_to_multispeed_ac = get_attached_to_multispeed_ac(heating_system_values, building)
         success = HVAC.apply_furnace(model, unit, runner, fuel, afue,
                                      heat_capacity_btuh, fan_power, dse_heat,
                                      load_frac, attached_to_multispeed_ac)
@@ -2228,7 +2228,9 @@ class OSModel
 
       elsif htg_type == "WallFurnace"
 
-        efficiency = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
+        if heating_system_values[:heating_efficiency_units] == "AFUE"
+          efficiency = heating_system_values[:heating_efficiency_value]
+        end
         fan_power = 0.0
         airflow_rate = 0.0
         # TODO: Allow DSE
@@ -2240,7 +2242,9 @@ class OSModel
       elsif htg_type == "Boiler"
 
         system_type = Constants.BoilerTypeForcedDraft
-        afue = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
+        if heating_system_values[:heating_efficiency_units] == "AFUE"
+          afue = heating_system_values[:heating_efficiency_value]
+        end
         oat_reset_enabled = false
         oat_high = nil
         oat_low = nil
@@ -2254,7 +2258,9 @@ class OSModel
 
       elsif htg_type == "ElectricResistance"
 
-        efficiency = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='Percent']/Value"))
+        if heating_system_values[:heating_efficiency_units] == "Percent"
+          efficiency = heating_system_values[:heating_efficiency_value]
+        end
         # TODO: Allow DSE
         success = HVAC.apply_electric_baseboard(model, unit, runner, efficiency,
                                                 heat_capacity_btuh, load_frac)
@@ -2262,7 +2268,9 @@ class OSModel
 
       elsif htg_type == "Stove"
 
-        efficiency = Float(XMLHelper.get_value(htgsys, "AnnualHeatingEfficiency[Units='Percent']/Value"))
+        if heating_system_values[:heating_efficiency_units] == "Percent"
+          efficiency = heating_system_values[:heating_efficiency_value]
+        end
         airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
         fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
         # TODO: Allow DSE
@@ -2283,19 +2291,21 @@ class OSModel
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
-      hp_type = XMLHelper.get_value(hp, "HeatPumpType")
+      heat_pump_values = HPXML.get_heat_pump_values(heat_pump: hp)
 
-      cool_capacity_btuh = XMLHelper.get_value(hp, "CoolingCapacity")
+      hp_type = heat_pump_values[:heat_pump_type]
+
+      cool_capacity_btuh = heat_pump_values[:cooling_capacity]
       if cool_capacity_btuh.nil?
         cool_capacity_btuh = Constants.SizingAuto
       else
         cool_capacity_btuh = Float(cool_capacity_btuh)
       end
 
-      load_frac_heat = Float(XMLHelper.get_value(hp, "FractionHeatLoadServed"))
-      load_frac_cool = Float(XMLHelper.get_value(hp, "FractionCoolLoadServed"))
+      load_frac_heat = heat_pump_values[:fraction_heat_load_served]
+      load_frac_cool = heat_pump_values[:fraction_cool_load_served]
 
-      backup_heat_capacity_btuh = XMLHelper.get_value(hp, "BackupHeatingCapacity") # TODO: Require in ERI Use Case?
+      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity] # TODO: Require in ERI Use Case?
       if backup_heat_capacity_btuh.nil?
         backup_heat_capacity_btuh = Constants.SizingAuto
       else
@@ -2315,8 +2325,12 @@ class OSModel
 
       if hp_type == "air-to-air"
 
-        seer = Float(XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value"))
-        hspf = Float(XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value"))
+        if heat_pump_values[:cooling_efficiency_units] == "SEER"
+          seer = heat_pump_values[:cooling_efficiency_value]
+        end
+        if heat_pump_values[:heating_efficiency_units] == "HSPF"
+          hspf = heat_pump_values[:heating_efficiency_value]
+        end
         num_speeds = get_ashp_num_speeds(seer)
 
         crankcase_kw = 0.02
@@ -2401,8 +2415,12 @@ class OSModel
       elsif hp_type == "mini-split"
 
         # FIXME: Generalize
-        seer = Float(XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value"))
-        hspf = Float(XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value"))
+        if heat_pump_values[:cooling_efficiency_units] == "SEER"
+          seer = heat_pump_values[:cooling_efficiency_value]
+        end
+        if heat_pump_values[:heating_efficiency_units] == "HSPF"
+          hspf = heat_pump_values[:heating_efficiency_value]
+        end
         shr = 0.73
         min_cooling_capacity = 0.4
         max_cooling_capacity = 1.2
@@ -2434,8 +2452,12 @@ class OSModel
       elsif hp_type == "ground-to-air"
 
         # FIXME: Generalize
-        cop = Float(XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='COP']/Value"))
-        eer = Float(XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='EER']/Value"))
+        if heat_pump_values[:cooling_efficiency_units] == "EER"
+          eer = heat_pump_values[:cooling_efficiency_value]
+        end
+        if heat_pump_values[:heating_efficiency_units] == "COP"
+          cop = heat_pump_values[:heating_efficiency_value]
+        end
         shr = 0.732
         ground_conductivity = 0.6
         grout_conductivity = 0.4
@@ -2509,12 +2531,11 @@ class OSModel
   end
 
   def self.add_setpoints(runner, model, building, weather)
-    control = building.elements["BuildingDetails/Systems/HVAC/HVACControl"]
-    return true if control.nil?
+    hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
+    return true if hvac_control_values.nil?
 
-    control_type = XMLHelper.get_value(control, "ControlType")
-
-    heating_temp = XMLHelper.get_value(control, "SetpointTempHeatingSeason")
+    control_type = hvac_control_values[:control_type]
+    heating_temp = hvac_control_values[:setpoint_temp_heating_season]
     if not heating_temp.nil? # Use provided value
       htg_weekday_setpoints = [[Float(heating_temp)] * 24] * 12
     else # Use ERI default
@@ -2538,7 +2559,7 @@ class OSModel
                                            htg_use_auto_season, htg_season_start_month, htg_season_end_month)
     return false if not success
 
-    cooling_temp = XMLHelper.get_value(control, "SetpointTempCoolingSeason")
+    cooling_temp = hvac_control_values[:setpoint_temp_cooling_season]
     if not cooling_temp.nil? # Use provided value
       clg_weekday_setpoints = [[Float(cooling_temp)] * 24] * 12
     else # Use ERI default
@@ -2575,38 +2596,23 @@ class OSModel
     return true
   end
 
-  def self.add_dehumidifier(runner, model, building, unit)
-    dehumidifier = building.elements["BuildingDetails/Systems/HVAC/extension/Dehumidifier"]
-    return true if dehumidifier.nil?
-
-    energy_factor = XMLHelper.get_value(dehumidifier, "EnergyFactor")
-    water_removal_rate = XMLHelper.get_value(dehumidifier, "WaterRemovalRrate")
-    air_flow_rate = XMLHelper.get_value(dehumidifier, "AirFlowRate")
-    humidity_setpoint = XMLHelper.get_value(dehumidifier, "HumiditySetpoint")
-    success = HVAC.apply_dehumidifier(model, unit, runner, energy_factor,
-                                      water_removal_rate, air_flow_rate, humidity_setpoint)
-    return false if not success
-
-    return true
-  end
-
   def self.add_ceiling_fans(runner, model, building, unit)
-    cf = building.elements["BuildingDetails/Lighting/CeilingFan"]
-    return true if cf.nil?
+    ceiling_fan_values = HPXML.get_ceiling_fan_values(ceiling_fan: building.elements["BuildingDetails/Lighting/CeilingFan"])
+    return true if ceiling_fan_values.nil?
 
     medium_cfm = 3000.0
     weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     weekend_sch = weekday_sch
     hrs_per_day = weekday_sch.inject { |sum, n| sum + n }
 
-    cfm_per_w = XMLHelper.get_value(cf, "Airflow[FanSpeed='medium']/Efficiency")
+    cfm_per_w = ceiling_fan_values[:efficiency]
     if cfm_per_w.nil?
       fan_power_w = HVAC.get_default_ceiling_fan_power()
       cfm_per_w = medium_cfm / fan_power_w
     else
       cfm_per_w = Float(cfm_per_w)
     end
-    quantity = XMLHelper.get_value(cf, "Quantity")
+    quantity = ceiling_fan_values[:quantity]
     if quantity.nil?
       quantity = HVAC.get_default_ceiling_fan_quantity(@nbeds)
     else
@@ -2627,19 +2633,24 @@ class OSModel
 
     # Get attached distribution system
     ducts = nil
+    annual_cooling_dse = nil
+    annual_heating_dse = nil
     duct_id = system.elements["DistributionSystem"].attributes["idref"]
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
-      next if duct_id != dist.elements["SystemIdentifier"].attributes["id"]
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
+      next if duct_id != hvac_distribution_values[:id]
       next if dist.elements["DistributionSystemType[Other='DSE']"].nil?
 
       ducts = dist
+      annual_cooling_dse = hvac_distribution_values[:annual_cooling_dse]
+      annual_heating_dse = hvac_distribution_values[:annual_heating_dse]
     end
     if ducts.nil? # No attached DSEs for system
       return 1.0, 1.0, false
     end
 
-    dse_cool = Float(XMLHelper.get_value(ducts, "AnnualCoolingDistributionSystemEfficiency"))
-    dse_heat = Float(XMLHelper.get_value(ducts, "AnnualHeatingDistributionSystemEfficiency"))
+    dse_cool = annual_cooling_dse
+    dse_heat = annual_heating_dse
     return dse_heat, dse_cool, true
   end
 
@@ -2712,40 +2723,35 @@ class OSModel
     living_space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
 
     # Misc
-    misc = building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']"]
-    if not misc.nil?
-      misc_annual_kwh = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/Load[Units='kWh/year']/Value")
+    plug_load_values = HPXML.get_plug_load_values(plug_load: building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']"])
+    if not plug_load_values.nil?
+      misc_annual_kwh = plug_load_values[:kWh_per_year]
       if misc_annual_kwh.nil?
         misc_annual_kwh = MiscLoads.get_residual_mels_values(@cfa)[0]
-      else
-        misc_annual_kwh = Float(misc_annual_kwh)
       end
 
-      misc_sens_frac = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/extension/FracSensible")
+      misc_sens_frac = plug_load_values[:frac_sensible]
       if misc_sens_frac.nil?
         misc_sens_frac = MiscLoads.get_residual_mels_values(@cfa)[1]
-      else
-        misc_sens_frac = Float(misc_sens_frac)
       end
 
-      misc_lat_frac = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']/extension/FracLatent")
+      misc_lat_frac = plug_load_values[:frac_latent]
       if misc_lat_frac.nil?
         misc_lat_frac = MiscLoads.get_residual_mels_values(@cfa)[2]
-      else
-        misc_lat_frac = Float(misc_lat_frac)
       end
 
-      misc_weekday_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/WeekdayScheduleFractions")
+      misc_loads_schedule_values = HPXML.get_misc_loads_schedule_values(misc_loads: building.elements["BuildingDetails/MiscLoads"])
+      misc_weekday_sch = misc_loads_schedule_values[:weekday_fractions]
       if misc_weekday_sch.nil?
         misc_weekday_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
       end
 
-      misc_weekend_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/WeekendScheduleFractions")
+      misc_weekend_sch = misc_loads_schedule_values[:weekend_fractions]
       if misc_weekend_sch.nil?
         misc_weekend_sch = "0.04, 0.037, 0.037, 0.036, 0.033, 0.036, 0.043, 0.047, 0.034, 0.023, 0.024, 0.025, 0.024, 0.028, 0.031, 0.032, 0.039, 0.053, 0.063, 0.067, 0.071, 0.069, 0.059, 0.05"
       end
 
-      misc_monthly_sch = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/extension/MonthlyScheduleMultipliers")
+      misc_monthly_sch = misc_loads_schedule_values[:monthly_multipliers]
       if misc_monthly_sch.nil?
         misc_monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
       end
@@ -2757,13 +2763,11 @@ class OSModel
     end
 
     # Television
-    tv = building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']"]
-    if not tv.nil?
-      tv_annual_kwh = XMLHelper.get_value(building, "BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']/Load[Units='kWh/year']/Value")
+    plug_load_values = HPXML.get_plug_load_values(plug_load: building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']"])
+    if not plug_load_values.nil?
+      tv_annual_kwh = plug_load_values[:kWh_per_year]
       if tv_annual_kwh.nil?
         tv_annual_kwh, tv_sens_frac, tv_lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
-      else
-        tv_annual_kwh = Float(tv_annual_kwh)
       end
 
       success = MiscLoads.apply_tv(model, unit, runner, tv_annual_kwh, sch, living_space)
@@ -2774,18 +2778,18 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, building, unit, weather)
-    return true if building.elements["BuildingDetails/Lighting"].nil?
+    lighting_fraction_values = HPXML.get_lighting_fractions_values(lighting_fractions: building.elements["BuildingDetails/Lighting/LightingFractions"])
+    return true if lighting_fraction_values.nil?
 
-    lighting_fractions = building.elements["BuildingDetails/Lighting/LightingFractions"]
-    if lighting_fractions.nil?
+    if lighting_fraction_values.nil?
       fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
     else
-      fFI_int = Float(XMLHelper.get_value(lighting_fractions, "extension/FractionQualifyingTierIFixturesInterior"))
-      fFI_ext = Float(XMLHelper.get_value(lighting_fractions, "extension/FractionQualifyingTierIFixturesExterior"))
-      fFI_grg = Float(XMLHelper.get_value(lighting_fractions, "extension/FractionQualifyingTierIFixturesGarage"))
-      fFII_int = Float(XMLHelper.get_value(lighting_fractions, "extension/FractionQualifyingTierIIFixturesInterior"))
-      fFII_ext = Float(XMLHelper.get_value(lighting_fractions, "extension/FractionQualifyingTierIIFixturesExterior"))
-      fFII_grg = Float(XMLHelper.get_value(lighting_fractions, "extension/FractionQualifyingTierIIFixturesGarage"))
+      fFI_int = lighting_fraction_values[:fraction_tier_i_interior]
+      fFI_ext = lighting_fraction_values[:fraction_tier_i_exterior]
+      fFI_grg = lighting_fraction_values[:fraction_tier_i_garage]
+      fFII_int = lighting_fraction_values[:fraction_tier_ii_interior]
+      fFII_ext = lighting_fraction_values[:fraction_tier_ii_exterior]
+      fFII_grg = lighting_fraction_values[:fraction_tier_ii_garage]
     end
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present, fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg)
 
@@ -2803,9 +2807,9 @@ class OSModel
 
   def self.add_airflow(runner, model, building, unit, loop_hvacs)
     # Infiltration
-    infiltration = building.elements["BuildingDetails/Enclosure/AirInfiltration"]
-    infil_ach50 = XMLHelper.get_value(infiltration, "AirInfiltrationMeasurement[HousePressure='50']/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage")
-    infil_const_ach = XMLHelper.get_value(infiltration, "AirInfiltrationMeasurement/extension/ConstantACHnatural")
+    air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[HousePressure='50']"])
+    infil_ach50 = air_infiltration_measurement_values[:air_leakage]
+    infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
     if not infil_ach50.nil?
       infil_ach50 = Float(infil_ach50)
     elsif not infil_const_ach.nil?
@@ -2816,8 +2820,10 @@ class OSModel
     vented_crawl_area = 0.0
     vented_crawl_sla_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
-      area = REXML::XPath.first(vented_crawl, "sum(FrameFloor/Area)")
-      vented_crawl_sla = XMLHelper.get_value(vented_crawl, "extension/CrawlspaceSpecificLeakageArea")
+      foundation_values = HPXML.get_foundation_values(foundation: vented_crawl)
+      frame_floor_values = HPXML.get_frame_floor_values(floor: vented_crawl.elements["FrameFloor"])
+      area = frame_floor_values[:area]
+      vented_crawl_sla = foundation_values[:crawlspace_specific_leakage_area]
       if not vented_crawl_sla.nil?
         vented_crawl_sla = Float(vented_crawl_sla)
       else
@@ -2837,9 +2843,11 @@ class OSModel
     vented_attic_sla_area = 0.0
     vented_attic_const_ach = nil
     building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType='vented attic']") do |vented_attic|
-      area = REXML::XPath.first(vented_attic, "sum(Floors/Floor/Area)")
-      vented_attic_sla = XMLHelper.get_value(vented_attic, "extension/AtticSpecificLeakageArea")
-      vented_attic_const_ach = XMLHelper.get_value(vented_attic, "extension/AtticConstantACHnatural")
+      attic_values = HPXML.get_attic_values(attic: vented_attic)
+      attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
+      area = attic_floor_values[:area]
+      vented_attic_sla = attic_values[:attic_specific_leakage_area]
+      vented_attic_const_ach = attic_values[:attic_constant_ach_natural]
       if not vented_attic_sla.nil?
         vented_attic_sla = Float(vented_attic_sla)
         vented_attic_sla_area += (vented_attic_sla * area)
@@ -2869,7 +2877,8 @@ class OSModel
     unfinished_basement_ach = 0.1 # TODO: Need to handle above-grade basement
     crawl_ach = crawl_sla # FIXME: sla vs ach
     pier_beam_ach = 100
-    shelter_coef = XMLHelper.get_value(building, "BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient")
+    site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
+    shelter_coef = site_values[:shelter_coefficient]
     if shelter_coef.nil?
       shelter_coef = Airflow.get_default_shelter_coefficient()
     else
@@ -2883,7 +2892,8 @@ class OSModel
 
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
-    if whole_house_fan.nil?
+    whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
+    if whole_house_fan_values.nil?
       mech_vent_type = Constants.VentTypeNone
       mech_vent_total_efficiency = 0.0
       mech_vent_sensible_efficiency = 0.0
@@ -2892,7 +2902,7 @@ class OSModel
     else
       # FIXME: HoursInOperation isn't hooked up
       # FIXME: AttachedToHVACDistributionSystem isn't hooked up
-      fan_type = XMLHelper.get_value(whole_house_fan, "FanType")
+      fan_type = whole_house_fan_values[:fan_type]
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
         num_fans = 1.0
@@ -2909,13 +2919,13 @@ class OSModel
       mech_vent_total_efficiency = 0.0
       mech_vent_sensible_efficiency = 0.0
       if fan_type == "energy recovery ventilator" or fan_type == "heat recovery ventilator"
-        mech_vent_sensible_efficiency = Float(XMLHelper.get_value(whole_house_fan, "SensibleRecoveryEfficiency"))
+        mech_vent_sensible_efficiency = whole_house_fan_values[:sensible_recovery_efficiency]
       end
       if fan_type == "energy recovery ventilator"
-        mech_vent_total_efficiency = Float(XMLHelper.get_value(whole_house_fan, "TotalRecoveryEfficiency"))
+        mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
       end
-      mech_vent_cfm = Float(XMLHelper.get_value(whole_house_fan, "RatedFlowRate"))
-      mech_vent_w = Float(XMLHelper.get_value(whole_house_fan, "FanPower"))
+      mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
+      mech_vent_w = whole_house_fan_values[:fan_power]
       mech_vent_fan_power = mech_vent_w / mech_vent_cfm / num_fans
     end
     mech_vent_ashrae_std = '2013'
@@ -2936,8 +2946,9 @@ class OSModel
     cfis_systems = { cfis => model.getAirLoopHVACs }
 
     # Natural Ventilation
-    disable_nat_vent = XMLHelper.get_value(building, "BuildingDetails/Enclosure/extension/DisableNaturalVentilation")
-    if not disable_nat_vent.nil? and Boolean(disable_nat_vent)
+    enclosure_extension_values = HPXML.get_extension_values(parent: building.elements["BuildingDetails/Enclosure"])
+    disable_nat_vent = enclosure_extension_values[:disable_natural_ventilation]
+    if not disable_nat_vent.nil? and disable_nat_vent
       nat_vent_htg_offset = 0
       nat_vent_clg_offset = 0
       nat_vent_ovlp_offset = 0
@@ -2981,18 +2992,23 @@ class OSModel
                      'attic - conditioned' => Constants.SpaceTypeLiving,
                      'garage' => Constants.SpaceTypeGarage }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
       # Ducts
       # FIXME: Values below
-      supply_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      return_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      supply_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctInsulationRValue"))
-      return_r = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctInsulationRValue"))
-      supply_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctSurfaceArea"))
-      return_area = Float(XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctSurfaceArea"))
-      duct_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctLocation")]
+      supply_duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: air_distribution.elements["DuctLeakageMeasurement[DuctType='supply']"])
+      supply_cfm25 = supply_duct_leakage_measurement_values[:duct_leakage_value]
+      return_duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: air_distribution.elements["DuctLeakageMeasurement[DuctType='return']"])
+      return_cfm25 = return_duct_leakage_measurement_values[:duct_leakage_value]
+      supply_ducts_values = HPXML.get_ducts_values(ducts: air_distribution.elements["Ducts[DuctType='supply']"])
+      supply_r = supply_ducts_values[:duct_insulation_r_value]
+      return_ducts_values = HPXML.get_ducts_values(ducts: air_distribution.elements["Ducts[DuctType='return']"])
+      return_r = return_ducts_values[:duct_insulation_r_value]
+      supply_area = supply_ducts_values[:duct_surface_area]
+      return_area = return_ducts_values[:duct_surface_area]
+      duct_location = location_map[supply_ducts_values[:duct_location]]
       duct_total_leakage = 0.3
       duct_supply_frac = 0.6
       duct_return_frac = 0.067
@@ -3011,7 +3027,7 @@ class OSModel
 
       # Connect AirLoopHVACs to ducts
       systems_for_this_duct = []
-      duct_id = hvac_distribution.elements["SystemIdentifier"].attributes["id"]
+      duct_id = hvac_distribution_values[:id]
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0] |
                               BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0] |
                               BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[FractionHeatLoadServed > 0 && FractionCoolLoadServed > 0]") do |sys|
@@ -3071,22 +3087,23 @@ class OSModel
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0]") do |htgsys|
-      htg_type = XMLHelper.get_child_name(htgsys, "HeatingSystemType")
+      heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
+      htg_type = heating_system_values[:heating_system_type]
       next if not ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
 
-      fuel = to_beopt_fuel(XMLHelper.get_value(htgsys, "HeatingSystemFuel"))
+      fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
       next if fuel == Constants.FuelTypeElectric
 
-      fuel_eae = XMLHelper.get_value(htgsys, "ElectricAuxiliaryEnergy")
+      fuel_eae = heating_system_values[:electric_auxiliary_energy]
       if not fuel_eae.nil?
         fuel_eae = Float(fuel_eae)
       end
 
-      load_frac = Float(XMLHelper.get_value(htgsys, "FractionHeatLoadServed"))
+      load_frac = heating_system_values[:fraction_heat_load_served]
 
       dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
 
-      sys_id = htgsys.elements["SystemIdentifier"].attributes["id"]
+      sys_id = heating_system_values[:id]
 
       eae_loop_hvac = nil
       eae_zone_hvacs = nil
@@ -3100,11 +3117,12 @@ class OSModel
           # Check for cooling system on the same supply fan
           htgdist = htgsys.elements["DistributionSystem"]
           building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0]") do |clgsys|
+            cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
             clgdist = clgsys.elements["DistributionSystem"]
             next if htgdist.nil? or clgdist.nil?
-            next if clgdist.attributes["idref"] != htgdist.attributes["idref"]
+            next if cooling_system_values[:distribution_system_idref] != heating_system_values[:distribution_system_idref]
 
-            eae_loop_hvac_cool = loop_hvacs[clgsys.elements["SystemIdentifier"].attributes["id"]][0]
+            eae_loop_hvac_cool = loop_hvacs[cooling_system_values[:id]][0]
           end
         end
       elsif zone_hvacs.keys.include? sys_id
@@ -3120,7 +3138,8 @@ class OSModel
   end
 
   def self.add_photovoltaics(runner, model, building)
-    return true if building.elements["BuildingDetails/Systems/Photovoltaics/PVSystem"].nil?
+    pv_system_values = HPXML.get_pv_system_values(pv_system: building.elements["BuildingDetails/Systems/Photovoltaics/PVSystem"])
+    return true if pv_system_values.nil?
 
     modules_map = { "standard" => Constants.PVModuleTypeStandard,
                     "premium" => Constants.PVModuleTypePremium,
@@ -3133,14 +3152,15 @@ class OSModel
                    "2-axis" => Constants.PVArrayTypeFixed2Axis }
 
     building.elements.each("BuildingDetails/Systems/Photovoltaics/PVSystem") do |pvsys|
-      pv_id = pvsys.elements["SystemIdentifier"].attributes["id"]
-      module_type = modules_map[XMLHelper.get_value(pvsys, "ModuleType")]
-      array_type = arrays_map[XMLHelper.get_value(pvsys, "ArrayType")]
-      az = Float(XMLHelper.get_value(pvsys, "ArrayAzimuth"))
-      tilt = Float(XMLHelper.get_value(pvsys, "ArrayTilt"))
-      power_w = Float(XMLHelper.get_value(pvsys, "MaxPowerOutput"))
-      inv_eff = Float(XMLHelper.get_value(pvsys, "InverterEfficiency"))
-      system_losses = Float(XMLHelper.get_value(pvsys, "SystemLossesFraction"))
+      pv_system_values = HPXML.get_pv_system_values(pv_system: pvsys)
+      pv_id = pv_system_values[:id]
+      module_type = pv_system_values[:module_type]
+      array_type = pv_system_values[:array_type]
+      az = pv_system_values[:array_azimuth]
+      tilt = pv_system_values[:array_tilt]
+      power_w = pv_system_values[:max_power_output]
+      inv_eff = pv_system_values[:inverter_efficiency]
+      system_losses = pv_system_values[:system_losses_fraction]
 
       success = PV.apply(model, runner, pv_id, power_w, module_type,
                          system_losses, inv_eff, tilt, az, array_type)
@@ -3731,12 +3751,17 @@ class OSModel
     end
   end
 
-  def self.get_attached_to_multispeed_ac(htgsys, building)
+  def self.get_attached_to_multispeed_ac(heating_system_values, building)
     attached_to_multispeed_ac = false
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
-      next unless XMLHelper.get_value(clgsys, "CoolingSystemType") == "central air conditioning"
-      next unless htgsys.elements["DistributionSystem"].attributes["idref"] == clgsys.elements["DistributionSystem"].attributes["idref"]
-      next unless get_ac_num_speeds(Float(XMLHelper.get_value(clgsys, "AnnualCoolingEfficiency[Units='SEER']/Value"))) != "1-Speed"
+      cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
+      next unless cooling_system_values[:cooling_system_type] == "central air conditioning"
+      next unless heating_system_values[:distribution_system_idref] == cooling_system_values[:distribution_system_idref]
+
+      if cooling_system_values[:cooling_efficiency_units] == "SEER"
+        seer = cooling_system_values[:cooling_efficiency_value]
+      end
+      next unless get_ac_num_speeds(seer) != "1-Speed"
 
       attached_to_multispeed_ac = true
     end
