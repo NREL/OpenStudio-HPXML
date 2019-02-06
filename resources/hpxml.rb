@@ -236,21 +236,16 @@ class HPXML
   def self.add_attic(hpxml:,
                      id:,
                      attic_type: nil,
-                     attic_specific_leakage_area: nil,
-                     attic_constant_ach_natural: nil,
                      **remainder)
     attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
     attic = XMLHelper.add_element(attics, "Attic")
     sys_id = XMLHelper.add_element(attic, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(attic, "AtticType", attic_type) unless attic_type.nil?
-    HPXML.add_extension(parent: attic,
-                        extensions: { "AtticSpecificLeakageArea": attic_specific_leakage_area,
-                                      "AtticConstantACHnatural": attic_constant_ach_natural })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:attic_specific_leakage_area])
+                    expected_kwargs: [:attic_specific_leakage_area, :attic_constant_ach_natural])
 
     return attic
   end
