@@ -231,7 +231,7 @@ def create_output(designdir, resultsdir)
   sqlFile.close
 
   # Write results to XML
-  data = { "end_uses" => [] }
+  data = { "end_use" => [] }
   results.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
     to_units = get_fuel_site_units(hes_resource_type)
@@ -242,7 +242,7 @@ def create_output(designdir, resultsdir)
                   "end_use" => hes_end_use,
                   "resource_type" => hes_resource_type,
                   "units" => to_units }
-      data["end_uses"] << end_use
+      data["end_use"] << end_use
     end
   end
 
