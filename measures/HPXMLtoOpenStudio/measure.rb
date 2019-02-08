@@ -2752,8 +2752,10 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, building, unit, weather)
-    lighting_fraction_values = HPXML.get_lighting_fractions_values(lighting_fractions: building.elements["BuildingDetails/Lighting/LightingFractions"])
-    return true if lighting_fraction_values.nil?
+    lighting = building.elements["BuildingDetails/Lighting"]
+    return true if lighting.nil?
+
+    lighting_fraction_values = HPXML.get_lighting_fractions_values(lighting_fractions: lighting.elements["LightingFractions"])
 
     if lighting_fraction_values.nil?
       fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
