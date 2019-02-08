@@ -1,11 +1,10 @@
 start_time = Time.now
 
 require 'optparse'
+require 'json'
 require 'pathname'
 require_relative "../measures/HPXMLtoOpenStudio/resources/meta_measure"
-
-# TODO: Add error-checking
-# TODO: Add standardized reporting of errors
+require_relative "../measures/HPXMLtoOpenStudio/resources/unit_conversions"
 
 basedir = File.expand_path(File.dirname(__FILE__))
 
@@ -28,23 +27,74 @@ def get_output_hpxml_path(resultsdir, designdir)
   return File.join(resultsdir, File.basename(designdir) + ".xml")
 end
 
-def run_design(basedir, design, resultsdir, hpxml, debug, skip_validation)
-  # Use print instead of puts in here (see https://stackoverflow.com/a/5044669)
-  print "Creating input...\n"
-  output_hpxml_path, rundir = create_idf(design, basedir, resultsdir, hpxml, debug, skip_validation)
+def run_design(designdir, design, resultsdir, hpxml, debug, skip_validation)
+  puts "Creating input..."
+  create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
 
-  print "Running simulation...\n"
-  run_energyplus(design, rundir)
-
-  return output_hpxml_path
+  puts "Running simulation..."
+  run_energyplus(design, designdir)
 end
 
-def create_idf(design, basedir, resultsdir, hpxml, debug, skip_validation)
-  designdir = get_designdir(basedir, design)
-  Dir.mkdir(designdir)
+def get_fuel_site_units(hes_resource_type)
+  return { :electric => 'kWh',
+           :natural_gas => 'kBtu',
+           :lpg => 'kBtu',
+           :fuel_oil => 'kBtu' }[hes_resource_type]
+end
 
-  rundir = File.join(designdir, "run")
-  Dir.mkdir(rundir)
+def get_output_meter_requests
+  # Mapping between HEScore output [end_use, resource_type] and a list of E+ output meters
+  # TODO: Add hot water and cold water resource_types? Anything else?
+  return { [:heating, :electric] => ["Heating:Electricity"],
+           [:heating, :natural_gas] => ['Heating:Gas'],
+           [:heating, :lpg] => ['Heating:Propane'],
+           [:heating, :fuel_oil] => ['Heating:FuelOil#1'],
+
+           [:cooling, :electric] => ["Cooling:Electricity"],
+           [:cooling, :natural_gas] => ['Cooling:Gas'],
+           [:cooling, :lpg] => ["Cooling:Propane"],
+           [:cooling, :fuel_oil] => ['Cooling:FuelOil#1'],
+
+           [:hot_water, :electric] => ["WaterSystems:Electricity"],
+           [:hot_water, :natural_gas] => ["WaterSystems:Gas"],
+           [:hot_water, :lpg] => ["WaterSystems:Propane"],
+           [:hot_water, :fuel_oil] => ["WaterSystems:FuelOil#1"],
+
+           # Note: Large appliances include Refrigerator, Dishwasher, Clothes Washer, and Clothes Dryer per LBNL
+           [:large_appliance, :electric] => ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
+                                             "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
+                                             "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
+                                             "#{Constants.ObjectNameClothesDryer(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity"],
+           [:large_appliance, :natural_gas] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeGas)}:InteriorEquipment:Gas"],
+           [:large_appliance, :lpg] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypePropane)}:InteriorEquipment:Propane",
+                                        "#{Constants.ObjectNameCookingRange(Constants.FuelTypePropane)}:InteriorEquipment:Propane"],
+           [:large_appliance, :fuel_oil] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeOil)}:InteriorEquipment:FuelOil#1"],
+
+           # Note: large appliances are subtracted out from small appliances later
+           [:small_appliance, :electric] => ["InteriorEquipment:Electricity"],
+           [:small_appliance, :natural_gas] => ["InteriorEquipment:Gas"],
+           [:small_appliance, :lpg] => ["InteriorEquipment:Propane"],
+           [:small_appliance, :fuel_oil] => ["InteriorEquipment:FuelOil#1"],
+
+           [:lighting, :electric] => ["InteriorLighting:Electricity"],
+           [:lighting, :natural_gas] => ["InteriorLighting:Gas"],
+           [:lighting, :lpg] => ["InteriorLighting:Propane"],
+           [:lighting, :fuel_oil] => ["InteriorLighting:FuelOil#1"],
+
+           [:circulation, :electric] => ["Fans:Electricity",
+                                         "Pumps:Electricity"],
+           [:circulation, :natural_gas] => [],
+           [:circulation, :lpg] => [],
+           [:circulation, :fuel_oil] => [],
+
+           [:generation, :electric] => ["ElectricityProduced:Facility"],
+           [:generation, :natural_gas] => [],
+           [:generation, :lpg] => [],
+           [:generation, :fuel_oil] => [] }
+end
+
+def create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
+  Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
 
@@ -60,8 +110,6 @@ def create_idf(design, basedir, resultsdir, hpxml, debug, skip_validation)
   measure_subdir = "HEScoreRuleset"
   args = {}
   args['hpxml_path'] = hpxml
-  # args['weather_dir'] = File.absolute_path(File.join(basedir, "..", "weather"))
-  # args['schemas_dir'] = File.absolute_path(File.join(basedir, "..", "hpxml_schemas"))
   args['hpxml_output_path'] = output_hpxml_path
   args['skip_validation'] = skip_validation
   update_args_hash(measures, measure_subdir, args)
@@ -70,11 +118,10 @@ def create_idf(design, basedir, resultsdir, hpxml, debug, skip_validation)
   measure_subdir = "HPXMLtoOpenStudio"
   args = {}
   args['hpxml_path'] = output_hpxml_path
-  args['weather_dir'] = File.absolute_path(File.join(basedir, "..", "weather"))
-  # args['schemas_dir'] = File.absolute_path(File.join(basedir, "..", "hpxml_schemas"))
-  args['epw_output_path'] = File.join(rundir, "in.epw")
+  args['weather_dir'] = File.absolute_path(File.join(designdir, "..", "..", "weather"))
+  args['epw_output_path'] = File.join(designdir, "in.epw")
   if debug
-    args['osm_output_path'] = File.join(rundir, "in.osm")
+    args['osm_output_path'] = File.join(designdir, "in.osm")
   end
   args['skip_validation'] = skip_validation
   update_args_hash(measures, measure_subdir, args)
@@ -101,12 +148,21 @@ def create_idf(design, basedir, resultsdir, hpxml, debug, skip_validation)
     fail "Simulation unsuccessful for #{design}."
   end
 
-  # Write model to IDF
+  # Add monthly output requests
+  get_output_meter_requests.each do |hes_key, ep_meters|
+    ep_meters.each do |ep_meter|
+      output_meter = OpenStudio::Model::OutputMeter.new(model)
+      output_meter.setName(ep_meter)
+      output_meter.setReportingFrequency('monthly')
+    end
+  end
+
+  # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
   model_idf = forward_translator.translateModel(model)
-  File.open(File.join(rundir, "in.idf"), 'w') { |f| f << model_idf.to_s }
 
-  return output_hpxml_path, rundir
+  # Write IDF to file
+  File.open(File.join(designdir, "in.idf"), 'w') { |f| f << model_idf.to_s }
 end
 
 def run_energyplus(design, rundir)
@@ -114,6 +170,90 @@ def run_energyplus(design, rundir)
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
   command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
   system(command, :err => File::NULL)
+end
+
+def create_output(designdir, resultsdir)
+  puts "Compiling outputs..."
+  sql_path = File.join(designdir, "eplusout.sql")
+  if not File.exists?(sql_path)
+    fail "Processing output unsuccessful."
+  end
+
+  sqlFile = OpenStudio::SqlFile.new(sql_path, false)
+
+  # Initialize
+  results = {}
+  results_gj = {}
+  get_output_meter_requests.each do |hes_key, ep_meters|
+    results[hes_key] = [0.0] * 12
+    results_gj[hes_key] = [0.0] * 12
+  end
+
+  # Retrieve outputs
+  get_output_meter_requests.each do |hes_key, ep_meters|
+    hes_end_use, hes_resource_type = hes_key
+    to_units = get_fuel_site_units(hes_resource_type)
+
+    ep_meters.each do |ep_meter|
+      query = "SELECT VariableValue FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex=(SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{ep_meter}' AND ReportingFrequency='Monthly' AND VariableUnits='J') ORDER BY TimeIndex"
+      sql_result = sqlFile.execAndReturnVectorOfDouble(query)
+      next unless sql_result.is_initialized
+
+      sql_result = sql_result.get
+      for i in 1..12
+        next if sql_result[i - 1].nil?
+
+        result = UnitConversions.convert(sql_result[i - 1], "J", to_units) # convert from J to site energy units
+        result_gj = sql_result[i - 1] / 1000000000.0 # convert from J to GJ
+
+        results[hes_key][i - 1] += result
+        results_gj[hes_key][i - 1] += result_gj
+
+        if hes_end_use == :large_appliance
+          # Subtract out from small appliance end use
+          results[[:small_appliance, hes_resource_type]][i - 1] -= result
+          results_gj[[:small_appliance, hes_resource_type]][i - 1] -= result_gj
+        end
+      end
+    end
+  end
+
+  # Error-checking
+  net_energy_gj = sqlFile.netSiteEnergy.get
+  sum_energy_gj = 0
+  results_gj.each do |hes_key, values|
+    hes_end_use, hes_resource_type = hes_key
+    if hes_end_use == :generation
+      sum_energy_gj -= values.inject(0, :+)
+    else
+      sum_energy_gj += values.inject(0, :+)
+    end
+  end
+  if (net_energy_gj - sum_energy_gj).abs > 0.1
+    fail "Sum of retrieved outputs #{sum_energy_gj} does not match total net value #{net_energy_gj}."
+  end
+
+  sqlFile.close
+
+  # Write results to XML
+  data = { "end_use" => [] }
+  results.each do |hes_key, values|
+    hes_end_use, hes_resource_type = hes_key
+    to_units = get_fuel_site_units(hes_resource_type)
+    values.each_with_index do |value, idx|
+      end_use = { "quantity" => value,
+                  "period_type" => "month",
+                  "period_number" => idx.to_s,
+                  "end_use" => hes_end_use,
+                  "resource_type" => hes_resource_type,
+                  "units" => to_units }
+      data["end_use"] << end_use
+    end
+  end
+
+  File.open(File.join(resultsdir, "results.json"), "w") do |f|
+    f.write(JSON.pretty_generate(data))
+  end
 end
 
 options = {}
@@ -167,8 +307,9 @@ puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
 designdir = get_designdir(basedir, design)
 rm_path(designdir)
-output_hpxml_path = run_design(basedir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_validation])
+rundir = run_design(designdir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_validation])
 
-# TODO: Output...
+# Create output
+create_output(designdir, resultsdir)
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."

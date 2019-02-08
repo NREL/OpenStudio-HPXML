@@ -35,14 +35,14 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     system(command)
     runtime = Time.now - start_time
 
-    results_csv = File.join(parent_dir, "results", "Results.csv")
+    results_json = File.join(parent_dir, "results", "results.json")
     if expect_error
-      assert(!File.exists?(results_csv))
+      assert(!File.exists?(results_json))
     else
       # Check all output files exist
       hes_hpxml = File.join(parent_dir, "results", "HEScoreDesign.xml")
       assert(File.exists?(hes_hpxml))
-      # assert(File.exists?(results_csv))
+      assert(File.exists?(results_json))
 
       # Check HPXMLs are valid
       schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HEScoreRuleset", "hpxml_schemas"))
@@ -55,7 +55,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
   end
 
   def _get_results(parent_dir, runtime)
-    sql_path = File.join(parent_dir, "HEScoreDesign", "run", "eplusout.sql")
+    sql_path = File.join(parent_dir, "HEScoreDesign", "eplusout.sql")
     sqlFile = OpenStudio::SqlFile.new(sql_path, false)
     enduses = sqlFile.endUses.get
     results = {}
