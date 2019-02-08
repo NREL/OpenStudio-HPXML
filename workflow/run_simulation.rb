@@ -45,8 +45,7 @@ end
 def get_output_meter_requests
   # Mapping between HEScore output [end_use, resource_type] and a list of E+ output meters
   # TODO: Add hot water and cold water resource_types? Anything else?
-  return { [:heating, :electric] => ["Heating:Electricity",
-                                     "Fans:Electricity"], # FIXME: Need to disaggregate heating vs cooling
+  return { [:heating, :electric] => ["Heating:Electricity"],
            [:heating, :natural_gas] => ['Heating:Gas'],
            [:heating, :lpg] => ['Heating:Propane'],
            [:heating, :fuel_oil] => ['Heating:FuelOil#1'],
@@ -81,6 +80,12 @@ def get_output_meter_requests
            [:lighting, :natural_gas] => ["InteriorLighting:Gas"],
            [:lighting, :lpg] => ["InteriorLighting:Propane"],
            [:lighting, :fuel_oil] => ["InteriorLighting:FuelOil#1"],
+
+           [:circulation, :electric] => ["Fans:Electricity",
+                                         "Pumps:Electricity"],
+           [:circulation, :natural_gas] => [],
+           [:circulation, :lpg] => [],
+           [:circulation, :fuel_oil] => [],
 
            [:generation, :electric] => ["ElectricityProduced:Facility"],
            [:generation, :natural_gas] => [],
