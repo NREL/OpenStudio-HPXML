@@ -65,10 +65,13 @@ def get_output_meter_requests
                                              "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
                                              "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
                                              "#{Constants.ObjectNameClothesDryer(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity"],
-           [:large_appliance, :natural_gas] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeGas)}:InteriorEquipment:Gas"],
+                                             "#{Constants.ObjectNameCookingRange(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity"],
+           [:large_appliance, :natural_gas] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeGas)}:InteriorEquipment:Gas",
+                                                "#{Constants.ObjectNameCookingRange(Constants.FuelTypeGas)}:InteriorEquipment:Gas"],
            [:large_appliance, :lpg] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypePropane)}:InteriorEquipment:Propane",
                                         "#{Constants.ObjectNameCookingRange(Constants.FuelTypePropane)}:InteriorEquipment:Propane"],
-           [:large_appliance, :fuel_oil] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeOil)}:InteriorEquipment:FuelOil#1"],
+           [:large_appliance, :fuel_oil] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeOil)}:InteriorEquipment:FuelOil#1",
+                                             "#{Constants.ObjectNameCookingRange(Constants.FuelTypeOil)}:InteriorEquipment:FuelOil#1"],
 
            # Note: large appliances are subtracted out from small appliances later
            [:small_appliance, :electric] => ["InteriorEquipment:Electricity"],
