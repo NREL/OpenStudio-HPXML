@@ -76,10 +76,11 @@ def get_output_meter_requests
            [:small_appliance, :lpg] => ["InteriorEquipment:Propane"],
            [:small_appliance, :fuel_oil] => ["InteriorEquipment:FuelOil#1"],
 
-           [:lighting, :electric] => ["InteriorLighting:Electricity"],
-           [:lighting, :natural_gas] => ["InteriorLighting:Gas"],
-           [:lighting, :lpg] => ["InteriorLighting:Propane"],
-           [:lighting, :fuel_oil] => ["InteriorLighting:FuelOil#1"],
+           [:lighting, :electric] => ["InteriorLights:Electricity",
+                                      "ExteriorLights:Electricity"],
+           [:lighting, :natural_gas] => ["InteriorLights:Gas"],
+           [:lighting, :lpg] => ["InteriorLights:Propane"],
+           [:lighting, :fuel_oil] => ["InteriorLights:FuelOil#1"],
 
            [:circulation, :electric] => ["Fans:Electricity",
                                          "Pumps:Electricity"],
