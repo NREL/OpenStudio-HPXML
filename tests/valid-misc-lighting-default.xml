@@ -259,9 +259,20 @@
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>700</ElectricAuxiliaryEnergy>
+              <FractionHeatLoadServed>1</FractionHeatLoadServed>
             </HeatingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='SpaceCool_ID1'/>
+              <DistributionSystem idref='HVAC_Dist_ID1'/>
+              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>48000</CoolingCapacity>
+              <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13</Value>
+              </AnnualCoolingEfficiency>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
@@ -375,44 +386,7 @@
           <IsConvection>true</IsConvection>
         </Oven>
       </Appliances>
-      <Lighting>
-        <LightingGroup>
-          <SystemIdentifier id="LightingInteriorTierI"/>
-          <Location>interior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id="LightingExteriorTierI"/>
-          <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id="LightingGarageTierI"/>
-          <Location>garage</Location>
-          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id="LightingInteriorTierII"/>
-          <Location>interior</Location>
-          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id="LightingExteriorTierII"/>
-          <Location>exterior</Location>
-          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
-        </LightingGroup>
-        <LightingGroup>
-          <SystemIdentifier id="LightingGarageTierII"/>
-          <Location>garage</Location>
-          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
-          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
-        </LightingGroup>
-      </Lighting>
+      <Lighting/>
     </BuildingDetails>
   </Building>
 </HPXML>
