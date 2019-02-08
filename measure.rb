@@ -3942,7 +3942,9 @@ def to_beopt_fuel(fuel)
   return { "natural gas" => Constants.FuelTypeGas,
            "fuel oil" => Constants.FuelTypeOil,
            "propane" => Constants.FuelTypePropane,
-           "electricity" => Constants.FuelTypeElectric }[fuel]
+           "electricity" => Constants.FuelTypeElectric,
+           "wood" => Constants.FuelTypeWood,
+           "wood pellets" => Constants.FuelTypeWoodPellets }[fuel]
 end
 
 def to_beopt_wh_type(type)
