@@ -286,7 +286,7 @@ class HPXML
     elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
       attic_type = "CathedralCeiling"
     end
-    
+
     return { :id => HPXML.get_id(attic),
              :attic_type => attic_type,
              :attic_specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")),
@@ -1668,12 +1668,12 @@ class HPXML
   def self.get_lighting_values(lighting:)
     return nil if lighting.nil?
 
-    return { :fraction_tier_i_interior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I'][Location='interior']/FractionofUnitsInLocation")),
-             :fraction_tier_i_exterior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I'][Location='exterior']/FractionofUnitsInLocation")),
-             :fraction_tier_i_garage => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I'][Location='garage']/FractionofUnitsInLocation")),
-             :fraction_tier_ii_interior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II'][Location='interior']/FractionofUnitsInLocation")),
-             :fraction_tier_ii_exterior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II'][Location='exterior']/FractionofUnitsInLocation")),
-             :fraction_tier_ii_garage => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II'][Location='garage']/FractionofUnitsInLocation")) }
+    return { :fraction_tier_i_interior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='interior']/FractionofUnitsInLocation")),
+             :fraction_tier_i_exterior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='exterior']/FractionofUnitsInLocation")),
+             :fraction_tier_i_garage => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='garage']/FractionofUnitsInLocation")),
+             :fraction_tier_ii_interior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='interior']/FractionofUnitsInLocation")),
+             :fraction_tier_ii_exterior => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='exterior']/FractionofUnitsInLocation")),
+             :fraction_tier_ii_garage => to_float(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='garage']/FractionofUnitsInLocation")) }
   end
 
   def self.add_ceiling_fan(hpxml:,

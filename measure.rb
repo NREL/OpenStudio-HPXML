@@ -1340,7 +1340,7 @@ class OSModel
 
     building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
       attic_values = HPXML.get_attic_values(attic: attic)
-      
+
       interior_adjacent_to = get_attic_adjacent_to(attic_values[:attic_type])
 
       # Attic floors
@@ -2752,19 +2752,33 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, building, unit, weather)
-    lighting_values = HPXML.get_lighting_values(lighting: building.elements["BuildingDetails/Lighting"])
-    return true if lighting_values.nil?
+    lighting = building.elements["BuildingDetails/Lighting"]
+    return true if lighting.nil?
 
-    if lighting_values.nil?
-      fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
-    else
+    lighting_values = HPXML.get_lighting_values(lighting: lighting)
+
+    # Default
+    fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
+
+    unless lighting_values[:fraction_tier_i_interior].nil?
       fFI_int = lighting_values[:fraction_tier_i_interior]
+    end
+    unless lighting_values[:fraction_tier_i_exterior].nil?
       fFI_ext = lighting_values[:fraction_tier_i_exterior]
+    end
+    unless lighting_values[:fraction_tier_i_garage].nil?
       fFI_grg = lighting_values[:fraction_tier_i_garage]
+    end
+    unless lighting_values[:fraction_tier_ii_interior].nil?
       fFII_int = lighting_values[:fraction_tier_ii_interior]
+    end
+    unless lighting_values[:fraction_tier_ii_exterior].nil?
       fFII_ext = lighting_values[:fraction_tier_ii_exterior]
+    end
+    unless lighting_values[:fraction_tier_ii_garage].nil?
       fFII_grg = lighting_values[:fraction_tier_ii_garage]
     end
+
     if fFI_int + fFII_int > 1
       fail "Fraction of qualifying interior lighting fixtures #{fFI_int + fFII_int} is greater than 1."
     end
@@ -2774,6 +2788,7 @@ class OSModel
     if fFI_grg + fFII_grg > 1
       fail "Fraction of qualifying garage lighting fixtures #{fFI_grg + fFII_grg} is greater than 1."
     end
+
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present, fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg)
 
     success, sch = Lighting.apply_interior(model, unit, runner, weather, nil, int_kwh)

@@ -624,7 +624,7 @@ class EnergyPlusValidator
         'LightingGroup[ThirdPartyCertification="ERI Tier II" and Location="exterior"]' => zero_or_one, # Uses ERI Reference Home if not provided; otherwise see [LightingGroup]
         'LightingGroup[ThirdPartyCertification="ERI Tier II" and Location="garage"]' => zero_or_one, # Uses ERI Reference Home if not provided; otherwise see [LightingGroup]
       },
-      
+
       ## [LightingGroup]
       '/HPXML/Building/BuildingDetails/Lighting/LightingGroup[ThirdPartyCertification="ERI Tier I" or ThirdPartyCertification="ERI Tier II"][Location="interior" or Location="exterior" or Location="garage"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
