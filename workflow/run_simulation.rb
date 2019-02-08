@@ -58,9 +58,6 @@ def get_output_meter_requests
 
     # Cooling
     [:cooling, :electric] => ["Cooling:Electricity"],
-    [:cooling, :natural_gas] => ['Cooling:Gas'],
-    [:cooling, :lpg] => ["Cooling:Propane"],
-    [:cooling, :fuel_oil] => ['Cooling:FuelOil#1'],
 
     # Hot Water
     [:hot_water, :electric] => ["WaterSystems:Electricity"],
@@ -74,25 +71,14 @@ def get_output_meter_requests
                                       "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameClothesDryer(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameCookingRange(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity"],
-    [:large_appliance, :natural_gas] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeGas)}:InteriorEquipment:Gas",
-                                         "#{Constants.ObjectNameCookingRange(Constants.FuelTypeGas)}:InteriorEquipment:Gas"],
-    [:large_appliance, :lpg] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypePropane)}:InteriorEquipment:Propane",
-                                 "#{Constants.ObjectNameCookingRange(Constants.FuelTypePropane)}:InteriorEquipment:Propane"],
-    [:large_appliance, :fuel_oil] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeOil)}:InteriorEquipment:FuelOil#1",
-                                      "#{Constants.ObjectNameCookingRange(Constants.FuelTypeOil)}:InteriorEquipment:FuelOil#1"],
 
     # Small Appliances
     # Note: large appliances are subtracted out from small appliances later
     [:small_appliance, :electric] => ["InteriorEquipment:Electricity"],
-    [:small_appliance, :natural_gas] => ["InteriorEquipment:Gas"],
-    [:small_appliance, :lpg] => ["InteriorEquipment:Propane"],
-    [:small_appliance, :fuel_oil] => ["InteriorEquipment:FuelOil#1"],
 
     # Lighting
-    [:lighting, :electric] => ["InteriorLighting:Electricity"],
-    [:lighting, :natural_gas] => ["InteriorLighting:Gas"],
-    [:lighting, :lpg] => ["InteriorLighting:Propane"],
-    [:lighting, :fuel_oil] => ["InteriorLighting:FuelOil#1"],
+    [:lighting, :electric] => ["InteriorLights:Electricity",
+                               "ExteriorLights:Electricity"],
 
     # Circulation
     [:circulation, :electric] => ["Fans:Electricity",

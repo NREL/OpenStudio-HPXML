@@ -57,7 +57,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
   def _get_results(parent_dir, runtime)
     json_path = File.join(parent_dir, "results", "results.json")
     data = JSON.parse(File.read(json_path))
-    
+
     results = {}
     data["end_use"].each do |result|
       fuel = result["resource_type"]
