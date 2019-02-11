@@ -87,7 +87,7 @@ class HEScoreRuleset
 
   def self.set_summary(hpxml)
     HPXML.add_site(hpxml: hpxml,
-                   fuels: ["electricity"],
+                   fuels: ["electricity"], # FIXME: Hard-coded
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
@@ -709,7 +709,7 @@ class HEScoreRuleset
   def self.set_appliances_clothes_dryer(hpxml)
     new_dryer = HPXML.add_clothes_dryer(hpxml: hpxml,
                                         id: "ClothesDryer",
-                                        fuel_type: "electricity") # FIXME: Verify
+                                        fuel_type: "electricity")
     # Uses ERI Reference Home for performance
   end
 
@@ -728,7 +728,7 @@ class HEScoreRuleset
   def self.set_appliances_cooking_range_oven(hpxml)
     new_range = HPXML.add_cooking_range(hpxml: hpxml,
                                         id: "CookingRange",
-                                        fuel_type: "electricity") # FIXME: Verify
+                                        fuel_type: "electricity")
 
     new_oven = HPXML.add_oven(hpxml: hpxml,
                               id: "Oven")

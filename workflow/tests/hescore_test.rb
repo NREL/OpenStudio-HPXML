@@ -55,19 +55,20 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
   end
 
   def _get_results(parent_dir, runtime)
-    sql_path = File.join(parent_dir, "HEScoreDesign", "eplusout.sql")
-    sqlFile = OpenStudio::SqlFile.new(sql_path, false)
-    enduses = sqlFile.endUses.get
+    json_path = File.join(parent_dir, "results", "results.json")
+    data = JSON.parse(File.read(json_path))
+
     results = {}
-    OpenStudio::EndUses.fuelTypes.each do |fueltype|
-      units = OpenStudio::EndUses.getUnitsForFuelType(fueltype)
-      OpenStudio::EndUses.categories.each do |category|
-        results[[fueltype.valueName, category.valueName, units]] = enduses.getEndUse(fueltype, category)
+    data["end_use"].each do |result|
+      fuel = result["resource_type"]
+      category = result["end_use"]
+      units = result["units"]
+      key = [fuel, category, units]
+      if results[key].nil?
+        results[key] = 0.0
       end
+      results[key] += Float(result["quantity"]) # Just store annual results
     end
-
-    sqlFile.close
-
     results["Runtime"] = runtime
 
     return results
@@ -86,7 +87,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     end
 
     # Append runtime at the end
-    column_headers << "Runtime"
+    column_headers << "Runtime [s]"
 
     require 'csv'
     CSV.open(csv_out, 'w') do |csv|

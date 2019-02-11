@@ -39,59 +39,54 @@ def get_fuel_site_units(hes_resource_type)
   return { :electric => 'kWh',
            :natural_gas => 'kBtu',
            :lpg => 'kBtu',
-           :fuel_oil => 'kBtu' }[hes_resource_type]
+           :fuel_oil => 'kBtu',
+           :cord_wood => 'kBtu',
+           :pellet_wood => 'kBtu' }[hes_resource_type]
 end
 
 def get_output_meter_requests
   # Mapping between HEScore output [end_use, resource_type] and a list of E+ output meters
   # TODO: Add hot water and cold water resource_types? Anything else?
-  return { [:heating, :electric] => ["Heating:Electricity"],
-           [:heating, :natural_gas] => ['Heating:Gas'],
-           [:heating, :lpg] => ['Heating:Propane'],
-           [:heating, :fuel_oil] => ['Heating:FuelOil#1'],
+  return {
+    # Heating
+    [:heating, :electric] => ["Heating:Electricity"],
+    [:heating, :natural_gas] => ['Heating:Gas'],
+    [:heating, :lpg] => ['Heating:Propane'],
+    [:heating, :fuel_oil] => ['Heating:FuelOil#1'],
+    [:heating, :cord_wood] => ['Heating:OtherFuel1'],
+    [:heating, :pellet_wood] => ['Heating:OtherFuel2'],
 
-           [:cooling, :electric] => ["Cooling:Electricity"],
-           [:cooling, :natural_gas] => ['Cooling:Gas'],
-           [:cooling, :lpg] => ["Cooling:Propane"],
-           [:cooling, :fuel_oil] => ['Cooling:FuelOil#1'],
+    # Cooling
+    [:cooling, :electric] => ["Cooling:Electricity"],
 
-           [:hot_water, :electric] => ["WaterSystems:Electricity"],
-           [:hot_water, :natural_gas] => ["WaterSystems:Gas"],
-           [:hot_water, :lpg] => ["WaterSystems:Propane"],
-           [:hot_water, :fuel_oil] => ["WaterSystems:FuelOil#1"],
+    # Hot Water
+    [:hot_water, :electric] => ["WaterSystems:Electricity"],
+    [:hot_water, :natural_gas] => ["WaterSystems:Gas"],
+    [:hot_water, :lpg] => ["WaterSystems:Propane"],
+    [:hot_water, :fuel_oil] => ["WaterSystems:FuelOil#1"],
 
-           # Note: Large appliances include Refrigerator, Dishwasher, Clothes Washer, and Clothes Dryer per LBNL
-           [:large_appliance, :electric] => ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
-                                             "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
-                                             "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
-                                             "#{Constants.ObjectNameClothesDryer(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity"],
-           [:large_appliance, :natural_gas] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeGas)}:InteriorEquipment:Gas"],
-           [:large_appliance, :lpg] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypePropane)}:InteriorEquipment:Propane",
-                                        "#{Constants.ObjectNameCookingRange(Constants.FuelTypePropane)}:InteriorEquipment:Propane"],
-           [:large_appliance, :fuel_oil] => ["#{Constants.ObjectNameClothesDryer(Constants.FuelTypeOil)}:InteriorEquipment:FuelOil#1"],
+    # Large Appliances
+    [:large_appliance, :electric] => ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
+                                      "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
+                                      "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
+                                      "#{Constants.ObjectNameClothesDryer(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity",
+                                      "#{Constants.ObjectNameCookingRange(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity"],
 
-           # Note: large appliances are subtracted out from small appliances later
-           [:small_appliance, :electric] => ["InteriorEquipment:Electricity"],
-           [:small_appliance, :natural_gas] => ["InteriorEquipment:Gas"],
-           [:small_appliance, :lpg] => ["InteriorEquipment:Propane"],
-           [:small_appliance, :fuel_oil] => ["InteriorEquipment:FuelOil#1"],
+    # Small Appliances
+    # Note: large appliances are subtracted out from small appliances later
+    [:small_appliance, :electric] => ["InteriorEquipment:Electricity"],
 
-           [:lighting, :electric] => ["InteriorLights:Electricity",
-                                      "ExteriorLights:Electricity"],
-           [:lighting, :natural_gas] => ["InteriorLights:Gas"],
-           [:lighting, :lpg] => ["InteriorLights:Propane"],
-           [:lighting, :fuel_oil] => ["InteriorLights:FuelOil#1"],
+    # Lighting
+    [:lighting, :electric] => ["InteriorLights:Electricity",
+                               "ExteriorLights:Electricity"],
 
-           [:circulation, :electric] => ["Fans:Electricity",
-                                         "Pumps:Electricity"],
-           [:circulation, :natural_gas] => [],
-           [:circulation, :lpg] => [],
-           [:circulation, :fuel_oil] => [],
+    # Circulation
+    [:circulation, :electric] => ["Fans:Electricity",
+                                  "Pumps:Electricity"],
 
-           [:generation, :electric] => ["ElectricityProduced:Facility"],
-           [:generation, :natural_gas] => [],
-           [:generation, :lpg] => [],
-           [:generation, :fuel_oil] => [] }
+    # Generation
+    [:generation, :electric] => ["ElectricityProduced:Facility"]
+  }
 end
 
 def create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
@@ -244,7 +239,7 @@ def create_output(designdir, resultsdir)
     values.each_with_index do |value, idx|
       end_use = { "quantity" => value,
                   "period_type" => "month",
-                  "period_number" => idx.to_s,
+                  "period_number" => (idx + 1).to_s,
                   "end_use" => hes_end_use,
                   "resource_type" => hes_resource_type,
                   "units" => to_units }
