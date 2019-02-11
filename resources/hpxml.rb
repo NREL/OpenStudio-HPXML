@@ -239,7 +239,7 @@ class HPXML
   def self.add_attic(hpxml:,
                      id:,
                      attic_type: nil,
-                     attic_specific_leakage_area: nil,
+                     specific_leakage_area: nil,
                      **remainder)
     attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
     attic = XMLHelper.add_element(attics, "Attic")
@@ -253,7 +253,7 @@ class HPXML
       elsif attic_type == "VentedAttic"
         attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
         XMLHelper.add_element(attic_type_attic, "Vented", true)
-        XMLHelper.add_element(attic_type_attic, "SpecificLeakageArea", to_float(attic_specific_leakage_area)) unless attic_specific_leakage_area.nil?
+        XMLHelper.add_element(attic_type_attic, "SpecificLeakageArea", to_float(specific_leakage_area)) unless specific_leakage_area.nil?
       elsif attic_type == "ConditionedAttic"
         attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
         XMLHelper.add_element(attic_type_attic, "Conditioned", true)
@@ -289,7 +289,7 @@ class HPXML
 
     return { :id => HPXML.get_id(attic),
              :attic_type => attic_type,
-             :attic_specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")),
+             :specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")),
              :attic_constant_ach_natural => to_float(XMLHelper.get_value(attic, "extension/AtticConstantACHnatural")) }
   end
 
@@ -435,7 +435,7 @@ class HPXML
   def self.add_foundation(hpxml:,
                           id:,
                           foundation_type: nil,
-                          crawlspace_specific_leakage_area: nil,
+                          specific_leakage_area: nil,
                           **remainder)
     foundations = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Foundations"])
     foundation = XMLHelper.add_element(foundations, "Foundation")
@@ -454,7 +454,7 @@ class HPXML
       elsif foundation_type == "VentedCrawlspace"
         crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
         XMLHelper.add_element(crawlspace, "Vented", true)
-        XMLHelper.add_element(crawlspace, "SpecificLeakageArea", to_float(crawlspace_specific_leakage_area)) unless crawlspace_specific_leakage_area.nil?
+        XMLHelper.add_element(crawlspace, "SpecificLeakageArea", to_float(specific_leakage_area)) unless specific_leakage_area.nil?
       elsif foundation_type == "UnventedCrawlspace"
         crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
         XMLHelper.add_element(crawlspace, "Vented", false)
@@ -490,7 +490,7 @@ class HPXML
 
     return { :id => HPXML.get_id(foundation),
              :foundation_type => foundation_type,
-             :crawlspace_specific_leakage_area => to_float(XMLHelper.get_value(foundation, "FoundationType/Crawlspace[Vented='true']/SpecificLeakageArea")) }
+             :specific_leakage_area => to_float(XMLHelper.get_value(foundation, "FoundationType/Crawlspace[Vented='true']/SpecificLeakageArea")) }
   end
 
   def self.add_frame_floor(foundation:,
@@ -1623,39 +1623,45 @@ class HPXML
     lighting = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Lighting"])
     if not fraction_tier_i_interior.nil?
       lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
-      XMLHelper.add_element("Location", "interior")
-      XMLHelper.add_element("FractionofUnitsInLocation", fraction_tier_i_interior)
-      XMLHelper.add_element("ThirdPartyCertification", "ERI Tier I")
+      XMLHelper.add_element(lighting_group, "SystemIdentifier", "Lighting_TierI_Interior")
+      XMLHelper.add_element(lighting_group, "Location", "interior")
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_i_interior)
+      XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier I")
     end
     if not fraction_tier_i_exterior.nil?
       lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
-      XMLHelper.add_element("Location", "exterior")
-      XMLHelper.add_element("FractionofUnitsInLocation", fraction_tier_i_exterior)
-      XMLHelper.add_element("ThirdPartyCertification", "ERI Tier I")
+      XMLHelper.add_element(lighting_group, "SystemIdentifier", "Lighting_TierI_Exterior")
+      XMLHelper.add_element(lighting_group, "Location", "exterior")
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_i_exterior)
+      XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier I")
     end
     if not fraction_tier_i_garage.nil?
       lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
-      XMLHelper.add_element("Location", "garage")
-      XMLHelper.add_element("FractionofUnitsInLocation", fraction_tier_i_garage)
-      XMLHelper.add_element("ThirdPartyCertification", "ERI Tier I")
+      XMLHelper.add_element(lighting_group, "SystemIdentifier", "Lighting_TierI_Garage")
+      XMLHelper.add_element(lighting_group, "Location", "garage")
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_i_garage)
+      XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier I")
     end
     if not fraction_tier_ii_interior.nil?
       lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
-      XMLHelper.add_element("Location", "interior")
-      XMLHelper.add_element("FractionofUnitsInLocation", fraction_tier_ii_interior)
-      XMLHelper.add_element("ThirdPartyCertification", "ERI Tier II")
+      XMLHelper.add_element(lighting_group, "SystemIdentifier", "Lighting_TierII_Interior")
+      XMLHelper.add_element(lighting_group, "Location", "interior")
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_ii_interior)
+      XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier II")
     end
     if not fraction_tier_ii_exterior.nil?
       lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
-      XMLHelper.add_element("Location", "exterior")
-      XMLHelper.add_element("FractionofUnitsInLocation", fraction_tier_ii_exterior)
-      XMLHelper.add_element("ThirdPartyCertification", "ERI Tier II")
+      XMLHelper.add_element(lighting_group, "SystemIdentifier", "Lighting_TierII_Exterior")
+      XMLHelper.add_element(lighting_group, "Location", "exterior")
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_ii_exterior)
+      XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier II")
     end
     if not fraction_tier_ii_garage.nil?
       lighting_group = XMLHelper.add_element(lighting, "LightingGroup")
-      XMLHelper.add_element("Location", "garage")
-      XMLHelper.add_element("FractionofUnitsInLocation", fraction_tier_ii_garage)
-      XMLHelper.add_element("ThirdPartyCertification", "ERI Tier II")
+      XMLHelper.add_element(lighting_group, "SystemIdentifier", "Lighting_TierII_Garage")
+      XMLHelper.add_element(lighting_group, "Location", "garage")
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_ii_garage)
+      XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier II")
     end
 
     check_remainder(remainder,
