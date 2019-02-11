@@ -231,6 +231,7 @@ class OSModel
     # Global variables
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = building_construction_values[:conditioned_floor_area]
+    @cvolume = building_construction_values[:conditioned_building_volume]
     @ncfl = building_construction_values[:number_of_conditioned_floors]
     @nbeds = building_construction_values[:number_of_bedrooms]
     @garage_present = building_construction_values[:garage_present]
@@ -406,12 +407,10 @@ class OSModel
   end
 
   def self.set_zone_volumes(runner, model, building)
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    total_conditioned_volume = building_construction_values[:conditioned_building_volume]
     thermal_zones = model.getThermalZones
 
     # Init
-    living_volume = total_conditioned_volume
+    living_volume = @cvolume
     zones_updated = 0
 
     # Basements, crawl, garage
@@ -427,7 +426,7 @@ class OSModel
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
 
         if Geometry.is_finished_basement(thermal_zone)
-          living_volume = total_conditioned_volume - zone_volume
+          living_volume = @cvolume - zone_volume
         end
 
       end
@@ -842,7 +841,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
       foundation_values = HPXML.get_foundation_values(foundation: foundation)
 
-      foundation_type = foundation.elements["FoundationType"]
+      foundation_type = foundation_values[:foundation_type]
       interior_adjacent_to = get_foundation_adjacent_to(foundation_type)
 
       # Foundation slab surfaces
@@ -999,11 +998,11 @@ class OSModel
         framefloor_width = Math::sqrt(framefloor_area)
         framefloor_length = framefloor_area / framefloor_width
 
-        if foundation_type.elements["Ambient"]
+        if foundation_type == "Ambient"
           z_origin = 2.0
-        elsif foundation_type.elements["SlabOnGrade"]
+        elsif foundation_type == "SlabOnGrade"
           z_origin = 0.0
-        elsif foundation_type.elements["Basement"] or foundation_type.elements["Crawlspace"]
+        elsif foundation_type.include? "Basement" or foundation_type.include? "Crawlspace"
           z_origin = -1 * foundation_wall_values[:depth_below_grade] + wall_height
         end
 
@@ -1341,6 +1340,7 @@ class OSModel
 
     building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
       attic_values = HPXML.get_attic_values(attic: attic)
+
       interior_adjacent_to = get_attic_adjacent_to(attic_values[:attic_type])
 
       # Attic floors
@@ -2752,19 +2752,43 @@ class OSModel
   end
 
   def self.add_lighting(runner, model, building, unit, weather)
-    lighting_fraction_values = HPXML.get_lighting_fractions_values(lighting_fractions: building.elements["BuildingDetails/Lighting/LightingFractions"])
-    return true if lighting_fraction_values.nil?
+    lighting = building.elements["BuildingDetails/Lighting"]
+    return true if lighting.nil?
 
-    if lighting_fraction_values.nil?
-      fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
-    else
-      fFI_int = lighting_fraction_values[:fraction_tier_i_interior]
-      fFI_ext = lighting_fraction_values[:fraction_tier_i_exterior]
-      fFI_grg = lighting_fraction_values[:fraction_tier_i_garage]
-      fFII_int = lighting_fraction_values[:fraction_tier_ii_interior]
-      fFII_ext = lighting_fraction_values[:fraction_tier_ii_exterior]
-      fFII_grg = lighting_fraction_values[:fraction_tier_ii_garage]
+    lighting_values = HPXML.get_lighting_values(lighting: lighting)
+
+    # Default
+    fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
+
+    unless lighting_values[:fraction_tier_i_interior].nil?
+      fFI_int = lighting_values[:fraction_tier_i_interior]
     end
+    unless lighting_values[:fraction_tier_i_exterior].nil?
+      fFI_ext = lighting_values[:fraction_tier_i_exterior]
+    end
+    unless lighting_values[:fraction_tier_i_garage].nil?
+      fFI_grg = lighting_values[:fraction_tier_i_garage]
+    end
+    unless lighting_values[:fraction_tier_ii_interior].nil?
+      fFII_int = lighting_values[:fraction_tier_ii_interior]
+    end
+    unless lighting_values[:fraction_tier_ii_exterior].nil?
+      fFII_ext = lighting_values[:fraction_tier_ii_exterior]
+    end
+    unless lighting_values[:fraction_tier_ii_garage].nil?
+      fFII_grg = lighting_values[:fraction_tier_ii_garage]
+    end
+
+    if fFI_int + fFII_int > 1
+      fail "Fraction of qualifying interior lighting fixtures #{fFI_int + fFII_int} is greater than 1."
+    end
+    if fFI_ext + fFII_ext > 1
+      fail "Fraction of qualifying exterior lighting fixtures #{fFI_ext + fFII_ext} is greater than 1."
+    end
+    if fFI_grg + fFII_grg > 1
+      fail "Fraction of qualifying garage lighting fixtures #{fFI_grg + fFII_grg} is greater than 1."
+    end
+
     int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present, fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg)
 
     success, sch = Lighting.apply_interior(model, unit, runner, weather, nil, int_kwh)
@@ -2783,12 +2807,18 @@ class OSModel
     # Infiltration
     infil_ach50 = nil
     infil_const_ach = nil
+    infil_volume = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
       air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
+      end
+      # FIXME: Pass infil_volume to infiltration model
+      infil_volume = air_infiltration_measurement_values[:infiltration_volume]
+      if infil_volume.nil?
+        infil_volume = @cvolume
       end
     end
 
@@ -2816,7 +2846,7 @@ class OSModel
     vented_attic_area = 0.0
     vented_attic_sla_area = 0.0
     vented_attic_const_ach = nil
-    building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType='vented attic']") do |vented_attic|
+    building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
       attic_values = HPXML.get_attic_values(attic: vented_attic)
       attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
       area = attic_floor_values[:area]
@@ -3952,37 +3982,37 @@ def to_beopt_wh_type(type)
 end
 
 def get_foundation_adjacent_to(fnd_type)
-  if fnd_type.elements["Basement[Conditioned='true']"]
+  if fnd_type == "ConditionedBasement"
     return "basement - conditioned"
-  elsif fnd_type.elements["Basement[Conditioned='false']"]
+  elsif fnd_type == "UnconditionedBasement"
     return "basement - unconditioned"
-  elsif fnd_type.elements["Crawlspace[Vented='true']"]
+  elsif fnd_type == "VentedCrawlspace"
     return "crawlspace - vented"
-  elsif fnd_type.elements["Crawlspace[Vented='false']"]
+  elsif fnd_type == "UnventedCrawlspace"
     return "crawlspace - unvented"
-  elsif fnd_type.elements["SlabOnGrade"]
+  elsif fnd_type == "SlabOnGrade"
     return "living space"
-  elsif fnd_type.elements["Ambient"]
+  elsif fnd_type == "Ambient"
     return "outside"
   end
 
-  fail "Unexpected foundation type."
+  fail "Unexpected foundation type (#{fnd_type})."
 end
 
 def get_attic_adjacent_to(attic_type)
-  if attic_type == "unvented attic"
+  if attic_type == "UnventedAttic"
     return "attic - unvented"
-  elsif attic_type == "vented attic"
+  elsif attic_type == "VentedAttic"
     return "attic - vented"
-  elsif attic_type == "cape cod"
+  elsif attic_type == "ConditionedAttic"
     return "attic - conditioned"
-  elsif attic_type == "cathedral ceiling"
+  elsif attic_type == "CathedralCeiling"
     return "living space"
-  elsif attic_type == "flat roof"
+  elsif attic_type == "FlatRoof"
     return "living space"
   end
 
-  fail "Unexpected attic type."
+  fail "Unexpected attic type (#{attic_type})."
 end
 
 def is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)

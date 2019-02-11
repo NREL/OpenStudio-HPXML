@@ -64,7 +64,11 @@
         <Attics>
           <Attic>
             <SystemIdentifier id='Attic_ID1'/>
-            <AtticType>unvented attic</AtticType>
+            <AtticType>
+              <Attic>
+                <Vented>false</Vented>
+              </Attic>
+            </AtticType>
             <Roofs>
               <Roof>
                 <SystemIdentifier id='attic-roof-1'/>
@@ -388,16 +392,42 @@
         </Oven>
       </Appliances>
       <Lighting>
-        <LightingFractions>
-          <extension>
-            <FractionQualifyingTierIFixturesInterior>0.5</FractionQualifyingTierIFixturesInterior>
-            <FractionQualifyingTierIFixturesExterior>0.5</FractionQualifyingTierIFixturesExterior>
-            <FractionQualifyingTierIFixturesGarage>0.5</FractionQualifyingTierIFixturesGarage>
-            <FractionQualifyingTierIIFixturesInterior>0.25</FractionQualifyingTierIIFixturesInterior>
-            <FractionQualifyingTierIIFixturesExterior>0.25</FractionQualifyingTierIIFixturesExterior>
-            <FractionQualifyingTierIIFixturesGarage>0.25</FractionQualifyingTierIIFixturesGarage>
-          </extension>
-        </LightingFractions>
+        <LightingGroup>
+          <SystemIdentifier id="LightingInteriorTierI"/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
+          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id="LightingExteriorTierI"/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
+          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id="LightingGarageTierI"/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.5</FractionofUnitsInLocation>
+          <ThirdPartyCertification>ERI Tier I</ThirdPartyCertification>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id="LightingInteriorTierII"/>
+          <Location>interior</Location>
+          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
+          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id="LightingExteriorTierII"/>
+          <Location>exterior</Location>
+          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
+          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+        </LightingGroup>
+        <LightingGroup>
+          <SystemIdentifier id="LightingGarageTierII"/>
+          <Location>garage</Location>
+          <FractionofUnitsInLocation>0.25</FractionofUnitsInLocation>
+          <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
+        </LightingGroup>
       </Lighting>
     </BuildingDetails>
   </Building>
