@@ -143,6 +143,9 @@ class HEScoreRuleset
       orig_roof_values = HPXML.get_attic_roof_values(roof: orig_roof)
       orig_roof_ins = orig_attic.elements["AtticRoofInsulation"]
       orig_roof_ins_values = HPXML.get_assembly_insulation_values(insulation: orig_roof_ins)
+      orig_attic_values[:attic_type] = { "vented attic" => "VentedAttic",
+                                         "cape cod" => "CapeCod",
+                                         "cathedral ceiling" => "CathedralCeiling" }[XMLHelper.get_value(orig_attic, "AtticType")]
 
       new_attic = HPXML.add_attic(hpxml: hpxml,
                                   id: orig_attic_values[:id],
@@ -169,7 +172,7 @@ class HEScoreRuleset
                                       insulation_assembly_r_value: roof_r)
 
       # Floor
-      if ["unvented attic", "vented attic"].include? orig_attic_values[:attic_type]
+      if ["UnventedAttic", "VentedAttic"].include? orig_attic_values[:attic_type]
         floor_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticFloorInsulation/Layer[InstallationType='cavity']/NominalRValue"))
         floor_r = get_ceiling_assembly_r(floor_r_cavity)
 
@@ -736,7 +739,7 @@ class HEScoreRuleset
   end
 
   def self.set_lighting(orig_details, hpxml)
-    new_lighting = HPXML.add_lighting_fractions(hpxml: hpxml)
+    new_lighting = HPXML.add_lighting(hpxml: hpxml)
     # Uses ERI Reference Home
   end
 
