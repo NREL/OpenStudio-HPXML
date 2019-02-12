@@ -59,12 +59,17 @@
               <UnitofMeasure>ACH</UnitofMeasure>
               <AirLeakage>3.0</AirLeakage>
             </BuildingAirLeakage>
+            <InfiltrationVolume>67575</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
           <Attic>
             <SystemIdentifier id='Attic_ID1'/>
-            <AtticType>unvented attic</AtticType>
+            <AtticType>
+              <Attic>
+                <Vented>false</Vented>
+              </Attic>
+            </AtticType>
             <Roofs>
               <Roof>
                 <SystemIdentifier id='attic-roof-1'/>
