@@ -812,6 +812,15 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_equal(hpxml_value, sql_value)
     end
 
+    # Lighting
+    found_ltg_energy = false
+    results.keys.each do |k|
+      next unless k[1].include? 'Lighting'
+
+      found_ltg_energy = true
+    end
+    assert_equal(bldg_details.elements["Lighting"].nil?, !found_ltg_energy)
+
     sqlFile.close
   end
 
