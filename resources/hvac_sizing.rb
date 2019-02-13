@@ -2170,59 +2170,7 @@ class HVACSizing
       capacity_ratio = 1.0
     end
 
-    if hvac.MinOutdoorTemp < weather.design.HeatingDrybulb
-      heat_db = weather.design.HeatingDrybulb
-      heat_pump_load = unit_final.Heat_Load
-    else
-
-      # Calculate the heating load at the minimum compressor temperature to limit unutilized capacity
-      heat_db = hvac.MinOutdoorTemp
-      htd = mj8.heat_setpoint - heat_db
-
-      # Update the buffer space temperatures for the minimum
-      (unit.spaces + Geometry.get_unit_adjacent_common_spaces(unit)).each do |space|
-        if not Geometry.space_is_finished(space)
-          mj8.heat_design_temps[space] = process_design_temp_heating(runner, mj8, weather, space, heat_db, unit)
-        end
-
-        # Calculate the cooling design temperature for the unfinished attic based on Figure A12-14
-        if Geometry.is_unfinished_attic(space)
-          attic_floor_r = get_space_r_value(runner, space, "floor", true)
-          return nil if attic_floor_r.nil?
-
-          attic_roof_r = get_space_r_value(runner, space, "roofceiling", true)
-          return nil if attic_roof_r.nil?
-
-          if attic_floor_r > attic_roof_r
-            mj8.heat_design_temps[space] = heat_db
-          end
-        end
-      end
-
-      # Calculate heating loads at the minimum compressor temperature
-      min_temp_zones_loads = process_zone_loads(runner, mj8, unit, weather, htd, nbeds, unit_ffa, unit_shelter_class)
-      return nil if min_temp_zones_loads.nil?
-
-      min_temp_unit_init = process_intermediate_total_loads(runner, mj8, min_temp_zones_loads, weather, hvac)
-      return nil if min_temp_unit_init.nil?
-
-      # TODO: Combine with code in process_duct_loads_heating
-      if ducts.Has and ducts.NotInLiving
-        if not Geometry.is_unfinished_basement(ducts.LocationSpace)
-          dse_Tamb_heating = mj8.heat_design_temps[ducts.LocationSpace]
-          duct_load_heating = calc_heat_duct_load(ducts, mj8.acf, mj8.heat_setpoint, unit_final.dse_Fregain, min_temp_unit_init.Heat_Load, hvac.HtgSupplyAirTemp, dse_Tamb_heating)
-        else
-          # Ducts in the finished basement does not impact equipment capacity
-          duct_load_heating = 0
-        end
-      else
-        duct_load_heating = 0
-      end
-
-      heat_pump_load = min_temp_unit_init.Heat_Load + duct_load_heating
-    end
-
-    heatCap_Rated = (heat_pump_load / MathTools.biquadratic(mj8.heat_setpoint, heat_db, coefficients)) / capacity_ratio
+    heatCap_Rated = (unit_final.Heat_Load / MathTools.biquadratic(mj8.heat_setpoint, weather.design.HeatingDrybulb, coefficients)) / capacity_ratio
 
     if heatCap_Rated < unit_final.Cool_Capacity
       if hvac.HasAirSourceHeatPump

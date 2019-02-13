@@ -47,7 +47,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/valid.xml"].sort.each do |xml|
+      Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
         next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
 
         xmls << File.absolute_path(xml)
