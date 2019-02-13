@@ -525,8 +525,8 @@ class Airflow
   end
 
   def self.process_infiltration_for_unit(model, runner, unit, obj_name_infil, infil, wind_speed, building, weather, unit_living, unit_finished_basement)
-    unit_ag_ext_wall_area = Geometry.calculate_above_grade_exterior_wall_area(unit.spaces, false)
-    unit_ag_ffa = Geometry.get_above_grade_finished_floor_area_from_spaces(unit.spaces, false, runner)
+    unit_ag_ext_wall_area = Geometry.calculate_above_grade_exterior_wall_area(unit.spaces)
+    unit_ag_ffa = Geometry.get_above_grade_finished_floor_area_from_spaces(unit.spaces, runner)
   
     spaces = []
     spaces << unit_living
@@ -987,7 +987,7 @@ class Airflow
   end
 
   def self.process_nat_vent_for_unit(model, runner, unit, obj_name_natvent, unit_living, nat_vent, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather)
-    unit_window_area = Geometry.get_window_area_from_spaces(unit.spaces, false)
+    unit_window_area = Geometry.get_window_area_from_spaces(unit.spaces)
   
     thermostatsetpointdualsetpoint = unit_living.zone.thermostatSetpointDualSetpoint
 
