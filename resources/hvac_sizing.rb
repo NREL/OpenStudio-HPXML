@@ -1485,7 +1485,6 @@ class HVACSizing
     unit_final = process_slave_zone_flow_ratios(runner, zones_loads, ducts, unit_final)
     unit_final = process_fixed_equipment(runner, unit_final, hvac)
     unit_final = process_finalize(runner, mj8, unit, zones_loads, unit_init, unit_final, weather, hvac, ducts, nbeds, unit_ffa, unit_shelter_class)
-    unit_final = process_efficiency_capacity_derate(runner, hvac, unit_final)
     unit_final = process_dehumidifier_sizing(runner, mj8, unit_init, unit_final, weather, hvac)
     return unit_init, unit_final
   end
@@ -2317,65 +2316,6 @@ class HVACSizing
     return unit_final
   end
 
-  def self.process_efficiency_capacity_derate(runner, hvac, unit_final)
-    '''
-    AC & HP Efficiency Capacity Derate
-    '''
-
-    return nil if unit_final.nil?
-
-    # Initialize
-    unit_final.EER_Multiplier = 1.0
-    unit_final.COP_Multiplier = 1.0
-
-    if not hvac.HasCentralAirConditioner and not hvac.HasAirSourceHeatPump
-      return unit_final
-    end
-
-    tonnages = [1.5, 2, 3, 4, 5]
-
-    # capacityDerateFactorEER values correspond to 1.5, 2, 3, 4, 5 ton equipment. Interpolate in between nominal sizes.
-    tons = UnitConversions.convert(unit_final.Cool_Capacity, "Btu/hr", "ton")
-
-    if tons <= 1.5
-      unit_final.EER_Multiplier = hvac.CapacityDerateFactorEER[0]
-    elsif tons <= 5
-      index = (tons.floor - 1).to_i
-      unit_final.EER_Multiplier = MathTools.interp2(tons, tonnages[index - 1], tonnages[index],
-                                                    hvac.CapacityDerateFactorEER[index - 1],
-                                                    hvac.CapacityDerateFactorEER[index])
-    elsif tons <= 10
-      index = ((tons / 2.0).floor - 1).to_i
-      unit_final.EER_Multiplier = MathTools.interp2(tons / 2.0, tonnages[index - 1], tonnages[index],
-                                                    hvac.CapacityDerateFactorEER[index - 1],
-                                                    hvac.CapacityDerateFactorEER[index])
-    else
-      unit_final.EER_Multiplier = hvac.CapacityDerateFactorEER[-1]
-    end
-
-    if hvac.HasAirSourceHeatPump
-
-      if tons <= 1.5
-        unit_final.COP_Multiplier = hvac.CapacityDerateFactorCOP[0]
-      elsif tons <= 5
-        index = (tons.floor - 1).to_i
-        unit_final.COP_Multiplier = MathTools.interp2(tons, tonnages[index - 1], tonnages[index],
-                                                      hvac.CapacityDerateFactorCOP[index - 1],
-                                                      hvac.CapacityDerateFactorCOP[index])
-      elsif tons <= 10
-        index = ((tons / 2.0).floor - 1).to_i
-        unit_final.COP_Multiplier = MathTools.interp2(tons / 2.0, tonnages[index - 1], tonnages[index],
-                                                      hvac.CapacityDerateFactorCOP[index - 1],
-                                                      hvac.CapacityDerateFactorCOP[index])
-      else
-        unit_final.COP_Multiplier = hvac.CapacityDerateFactorCOP[-1]
-      end
-
-    end
-
-    return unit_final
-  end
-
   def self.process_dehumidifier_sizing(runner, mj8, unit_init, unit_final, weather, hvac)
     '''
     Dehumidifier Sizing
@@ -2961,8 +2901,6 @@ class HVACSizing
     hvac.CoolingCFMs = nil
     hvac.HeatingCFMs = nil
     hvac.FanspeedRatioCooling = [1.0]
-    hvac.CapacityDerateFactorEER = nil
-    hvac.CapacityDerateFactorCOP = nil
     hvac.BoilerDesignTemp = nil
     hvac.Dehumidifier_Water_Remove_Cap_Ft_DB_RH = nil
     hvac.GroundHXVertical = nil
@@ -3062,13 +3000,6 @@ class HVACSizing
             hvac.FixedCoolingCapacity = UnitConversions.convert(clg_coil.ratedTotalCoolingCapacity.get, "W", "ton")
           end
 
-          if not hvac.HasRoomAirConditioner
-            capacityDerateFactorEER = get_feature(runner, clg_equip, Constants.SizingInfoHVACCapacityDerateFactorEER, 'string')
-            return nil if capacityDerateFactorEER.nil?
-
-            hvac.CapacityDerateFactorEER = capacityDerateFactorEER.split(",").map(&:to_f)
-          end
-
         elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
           hvac.NumSpeedsCooling = clg_coil.stages.size
           if hvac.NumSpeedsCooling == 2
@@ -3110,13 +3041,6 @@ class HVACSizing
             hvac.FixedCoolingCapacity = UnitConversions.convert(stage.grossRatedTotalCoolingCapacity.get, "W", "ton")
           end
           hvac.COOL_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsCooling)
-
-          if clg_equip.name.to_s.start_with? Constants.ObjectNameCentralAirConditioner or clg_equip.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump
-            capacityDerateFactorEER = get_feature(runner, clg_equip, Constants.SizingInfoHVACCapacityDerateFactorEER, 'string')
-            return nil if capacityDerateFactorEER.nil?
-
-            hvac.CapacityDerateFactorEER = capacityDerateFactorEER.split(",").map(&:to_f)
-          end
 
           if clg_equip.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
             coolingCFMs = get_feature(runner, clg_equip, Constants.SizingInfoHVACCoolingCFMs, 'string')
@@ -3231,11 +3155,6 @@ class HVACSizing
             hvac.FixedHeatingCapacity = UnitConversions.convert(htg_coil.ratedTotalHeatingCapacity.get, "W", "ton")
           end
 
-          capacityDerateFactorCOP = get_feature(runner, htg_equip, Constants.SizingInfoHVACCapacityDerateFactorCOP, 'string')
-          return nil if capacityDerateFactorCOP.nil?
-
-          hvac.CapacityDerateFactorCOP = capacityDerateFactorCOP.split(",").map(&:to_f)
-
         elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
           hvac.NumSpeedsHeating = htg_coil.stages.size
           hvac.MinOutdoorTemp = UnitConversions.convert(htg_coil.minimumOutdoorDryBulbTemperatureforCompressorOperation, "C", "F")
@@ -3253,13 +3172,6 @@ class HVACSizing
             hvac.FixedHeatingCapacity = UnitConversions.convert(stage.grossRatedHeatingCapacity.get, "W", "ton")
           end
           hvac.HEAT_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsHeating)
-
-          if htg_equip.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump
-            capacityDerateFactorCOP = get_feature(runner, htg_equip, Constants.SizingInfoHVACCapacityDerateFactorCOP, 'string')
-            return nil if capacityDerateFactorCOP.nil?
-
-            hvac.CapacityDerateFactorCOP = capacityDerateFactorCOP.split(",").map(&:to_f)
-          end
 
           if htg_equip.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
             heatingCFMs = get_feature(runner, htg_equip, Constants.SizingInfoHVACHeatingCFMs, 'string')
@@ -4379,9 +4291,6 @@ class HVACSizing
       clg_coil.setRatedTotalCoolingCapacity(zone_ratio * UnitConversions.convert(unit_final.Cool_Capacity, "Btu/hr", "W"))
       clg_coil.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(unit_final.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonCooling[0], "cfm", "m^3/s"))
 
-      # Adjust COP as appropriate
-      clg_coil.setRatedCOP(clg_coil.ratedCOP.get * unit_final.EER_Multiplier)
-
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
       clg_coil.stages.each_with_index do |stage, speed|
         stage.setGrossRatedTotalCoolingCapacity(zone_ratio * UnitConversions.convert(unit_final.Cool_Capacity, "Btu/hr", "W") * hvac.CapacityRatioCooling[speed])
@@ -4390,9 +4299,6 @@ class HVACSizing
         elsif clg_coil.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
           stage.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(unit_final.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.CoolingCFMs[speed], "cfm", "m^3/s"))
         end
-
-        # Adjust COP as appropriate
-        stage.setGrossRatedCoolingCOP(stage.grossRatedCoolingCOP * unit_final.EER_Multiplier)
       end
 
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
@@ -4416,9 +4322,6 @@ class HVACSizing
       htg_coil.setRatedTotalHeatingCapacity(zone_ratio * UnitConversions.convert(unit_final.Heat_Capacity, "Btu/hr", "W"))
       htg_coil.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(unit_final.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonHeating[0], "cfm", "m^3/s"))
 
-      # Adjust COP as appropriate
-      htg_coil.setRatedCOP(htg_coil.ratedCOP * unit_final.COP_Multiplier)
-
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
       htg_coil.stages.each_with_index do |stage, speed|
         stage.setGrossRatedHeatingCapacity(zone_ratio * UnitConversions.convert(unit_final.Heat_Capacity, "Btu/hr", "W") * hvac.CapacityRatioHeating[speed])
@@ -4427,9 +4330,6 @@ class HVACSizing
         elsif htg_coil.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
           stage.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(unit_final.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.HeatingCFMs[speed], "cfm", "m^3/s"))
         end
-
-        # Adjust COP as appropriate
-        stage.setGrossRatedHeatingCOP(stage.grossRatedHeatingCOP * unit_final.COP_Multiplier)
       end
 
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
@@ -4571,8 +4471,7 @@ class UnitFinalValues
                 :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
                 :dse_Fregains, :Dehumid_WaterRemoval,
                 :TotalCap_CurveValue, :SensibleCap_CurveValue, :BypassFactor_CurveValue,
-                :Zone_Ratios, :EER_Multiplier, :COP_Multiplier,
-                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
+                :Zone_Ratios, :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
 end
 
 class HVACInfo
@@ -4588,8 +4487,7 @@ class HVACInfo
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
                 :HtgSupplyAirTemp, :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
                 :MinOutdoorTemp, :HeatingCapacityOffset, :OverSizeLimit, :HPSizedForMaxLoad,
-                :FanspeedRatioCooling, :CapacityDerateFactorEER, :CapacityDerateFactorCOP,
-                :BoilerDesignTemp, :Dehumidifier_Water_Remove_Cap_Ft_DB_RH, :CoilBF,
+                :FanspeedRatioCooling, :BoilerDesignTemp, :Dehumidifier_Water_Remove_Cap_Ft_DB_RH, :CoilBF,
                 :GroundHXVertical, :HeatingEIR, :CoolingEIR,
                 :HXDTDesign, :HXCHWDesign, :HXHWDesign,
                 :RatedCFMperTonCooling, :RatedCFMperTonHeating,
