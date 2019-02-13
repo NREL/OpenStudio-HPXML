@@ -36,6 +36,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     runtime = Time.now - start_time
 
     results_json = File.join(parent_dir, "results", "results.json")
+    results = nil
     if expect_error
       assert(!File.exists?(results_json))
     else
@@ -49,9 +50,12 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
       _test_schema_validation(parent_dir, xml, schemas_dir)
       schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HPXMLtoOpenStudio", "hpxml_schemas"))
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
+
+      results = _get_results(parent_dir, runtime)
+      _test_results(xml, results)
     end
 
-    return _get_results(parent_dir, runtime)
+    return results
   end
 
   def _get_results(parent_dir, runtime)
@@ -72,6 +76,116 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     results["Runtime"] = runtime
 
     return results
+  end
+
+  def _test_results(xml, results)
+    hpxml_doc = REXML::Document.new(File.read(xml))
+
+    fuel_map = { "electricity" => "electric",
+                 "natural gas" => "natural_gas",
+                 "fuel oil" => "fuel_oil",
+                 "propane" => "lpg",
+                 "wood" => "cord_wood",
+                 "wood pellets" => "pellet_wood" }
+
+    # Get HPXML values for Building Summary
+    cfa = Float(XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"))
+    nbr = Float(XMLHelper.get_value(hpxml_doc, "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms"))
+
+    # Get HPXML values for HVAC
+    hvac_plant = hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant"]
+    htg_fuels = []
+    hvac_plant.elements.each("HeatingSystem[FractionHeatLoadServed>0] | HeatPump[FractionHeatLoadServed>0]") do |htg_sys|
+      htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, "HeatingSystemFuel")]
+    end
+    has_clg = !hvac_plant.elements["CoolingSystem[FractionCoolLoadServed>0] | HeatPump[FractionCoolLoadServed>0]"].nil?
+
+    # Get HPXML values for Water Heating
+    hw_fuels = []
+    hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |hw_sys|
+      hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, "FuelType")]
+    end
+
+    # Get HPXML values for PV
+    has_pv = !hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem"].nil?
+
+    tested_categories = []
+    results.each do |key, value|
+      fuel, category, units = key
+
+      # Check lighting end use matches ERI calculation
+      if category == "lighting" and fuel == "electric" and units == "kWh"
+        eri_int_ltg = 455.0 + 0.80 * cfa
+        eri_ext_ltg = 100.0 + 0.05 * cfa
+        eri_ltg = eri_int_ltg + eri_ext_ltg
+        assert_in_epsilon(eri_ltg, value, 0.01)
+        tested_categories << category
+      end
+
+      # Check large_appliance end use matches ERI calculation
+      if category == "large_appliance" and fuel == "electric" and units == "kWh"
+        eri_fridge = 637.0 + 18.0 * nbr
+        eri_range_oven = 331.0 + 39.0 * nbr
+        eri_clothes_dryer = 524.0 + 149.0 * nbr
+        eri_clothes_washer = 38.0 + 10.0 * nbr
+        eri_dishwasher = 78.0 + 31.0 * nbr
+        eri_large_appl = eri_fridge + eri_range_oven + eri_clothes_dryer + eri_clothes_washer + eri_dishwasher
+        assert_in_epsilon(eri_large_appl, value, 0.01)
+        tested_categories << category
+      end
+
+      # Check small_appliance end use matches ERI calculation
+      if category == "small_appliance" and fuel == "electric" and units == "kWh"
+        eri_mels = 0.91 * cfa
+        eri_tv = 413.0 + 69.0 * nbr
+        eri_small_appl = eri_mels + eri_tv
+        assert_in_epsilon(eri_small_appl, value, 0.01)
+        tested_categories << category
+      end
+
+      # Check heating end use by fuel reflects presence of system
+      if category == "heating"
+        if htg_fuels.include? fuel
+          assert_operator(value, :>, 0)
+        else
+          assert_equal(0, value)
+        end
+        tested_categories << category
+      end
+
+      # Check cooling end use reflects presence of cooling system
+      if category == "cooling" and fuel == "electric"
+        if has_clg
+          assert_operator(value, :>, 0)
+        else
+          assert_equal(0, value)
+        end
+        tested_categories << category
+      end
+
+      # Check hot_water end use by fuel reflects presence of system
+      if category == "hot_water"
+        if hw_fuels.include? fuel
+          assert_operator(value, :>, 0)
+        else
+          assert_equal(0, value)
+        end
+        tested_categories << category
+      end
+
+      # Check generation end use reflects presence of PV system
+      if category == "generation" and fuel == "electric"
+        if has_pv
+          assert_operator(value, :>, 0)
+        else
+          assert_equal(0, value)
+        end
+        tested_categories << category
+      end
+    end
+
+    # Check we actually tested the right number of categories
+    assert_equal(tested_categories.uniq.size, 7)
   end
 
   def _write_summary_results(parent_dir, results)
