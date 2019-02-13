@@ -109,6 +109,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     # Get HPXML values for PV
     has_pv = !hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem"].nil?
 
+    tested_categories = []
     results.each do |key, value|
       fuel, category, units = key
 
@@ -118,6 +119,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         eri_ext_ltg = 100.0 + 0.05 * cfa
         eri_ltg = eri_int_ltg + eri_ext_ltg
         assert_in_epsilon(eri_ltg, value, 0.01)
+        tested_categories << category
       end
 
       # Check large_appliance end use matches ERI calculation
@@ -129,6 +131,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         eri_dishwasher = 78.0 + 31.0 * nbr
         eri_large_appl = eri_fridge + eri_range_oven + eri_clothes_dryer + eri_clothes_washer + eri_dishwasher
         assert_in_epsilon(eri_large_appl, value, 0.01)
+        tested_categories << category
       end
 
       # Check small_appliance end use matches ERI calculation
@@ -137,6 +140,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         eri_tv = 413.0 + 69.0 * nbr
         eri_small_appl = eri_mels + eri_tv
         assert_in_epsilon(eri_small_appl, value, 0.01)
+        tested_categories << category
       end
 
       # Check heating end use by fuel reflects presence of system
@@ -146,6 +150,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         else
           assert_equal(0, value)
         end
+        tested_categories << category
       end
 
       # Check cooling end use reflects presence of cooling system
@@ -155,6 +160,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         else
           assert_equal(0, value)
         end
+        tested_categories << category
       end
 
       # Check hot_water end use by fuel reflects presence of system
@@ -164,6 +170,7 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         else
           assert_equal(0, value)
         end
+        tested_categories << category
       end
 
       # Check generation end use reflects presence of PV system
@@ -173,8 +180,12 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
         else
           assert_equal(0, value)
         end
+        tested_categories << category
       end
     end
+
+    # Check we actually tested the right number of categories
+    assert_equal(tested_categories.uniq.size, 7)
   end
 
   def _write_summary_results(parent_dir, results)
