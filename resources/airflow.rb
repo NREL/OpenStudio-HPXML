@@ -12,12 +12,14 @@ class Airflow
     raise "Expected Infiltration object" if not infil.is_a? Infiltration
     raise "Expected MechanicalVentilation object" if not mech_vent.is_a? MechanicalVentilation
     raise "Expected NaturalVentilation object" if not nat_vent.is_a? NaturalVentilation
+
     duct_systems.each do |ducts, air_loops|
       ducts.each do |duct|
         raise "Expected Duct object" if not duct.is_a? Duct
       end
     end
     raise "At most one CFIS system can currently be handled." if cfis_systems.size > 1
+
     cfis_systems.each do |cfis, air_loops|
       raise "Expected CFIS object" if not cfis.is_a? CFIS
     end
@@ -168,7 +170,7 @@ class Airflow
       duct_systems.each do |ducts, air_loops|
         success = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, air_loops)
         return false if not success
-        
+
         success = create_ducts_objects(model, runner, building, unit, ducts, unit_living, unit_finished_basement, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_systems)
         return false if not success
       end
@@ -207,7 +209,7 @@ class Airflow
     model.getAirLoopHVACs.each do |air_loop|
       has_ducts = air_loop.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoDuctExist)
       next if has_ducts.is_initialized
-      
+
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, false)
     end
 
@@ -527,7 +529,7 @@ class Airflow
   def self.process_infiltration_for_unit(model, runner, unit, obj_name_infil, infil, wind_speed, building, weather, unit_living, unit_finished_basement)
     unit_ag_ext_wall_area = Geometry.calculate_above_grade_exterior_wall_area(unit.spaces)
     unit_ag_ffa = Geometry.get_above_grade_finished_floor_area_from_spaces(unit.spaces, runner)
-  
+
     spaces = []
     spaces << unit_living
     spaces << unit_finished_basement if not unit_finished_basement.nil?
@@ -679,7 +681,7 @@ class Airflow
     infil.wind_coef = wind_coef
     infil.y_i = y_i
     infil.s_wflue = s_wflue
-    
+
     return true
   end
 
@@ -903,7 +905,7 @@ class Airflow
     mech_vent.sensible_effectiveness = sensible_effectiveness
     mech_vent.dryer_exhaust_day_shift = dryer_exhaust_day_shift
     mech_vent.has_dryer = has_dryer
-    
+
     return true
   end
 
@@ -922,7 +924,6 @@ class Airflow
   end
 
   def self.process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, air_loops)
-  
     # Validate Inputs
     ducts.each do |duct|
       if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
@@ -964,16 +965,16 @@ class Airflow
     elsif ducts.size == 0 and has_ducted_equip
       runner.registerWarning("Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.")
     end
-    
+
     ducts.each do |duct|
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
       duct.location_zone = get_duct_zone(duct.location, unit, unit_index, unit_living.zone)
     end
-    
+
     # Store info for HVAC Sizing measure
     air_loops.each do |air_loop|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
-      
+
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(","))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationZones, ducts.map { |duct| duct.location_zone.handle.to_s }.join(","))
@@ -988,7 +989,7 @@ class Airflow
 
   def self.process_nat_vent_for_unit(model, runner, unit, obj_name_natvent, unit_living, nat_vent, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather)
     unit_window_area = Geometry.get_window_area_from_spaces(unit.spaces)
-  
+
     thermostatsetpointdualsetpoint = unit_living.zone.thermostatSetpointDualSetpoint
 
     # Get heating setpoints
@@ -1137,7 +1138,7 @@ class Airflow
 
     wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Humidity Ratio")
     wout_sensor.setName("#{Constants.ObjectNameNaturalVentilation} wt s")
-    
+
     avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
     avail_sch.setName(obj_name_natvent + " avail schedule")
 
@@ -1293,7 +1294,7 @@ class Airflow
   def self.create_ducts_objects(model, runner, building, unit, ducts, unit_living, unit_finished_basement, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_systems)
     duct_zones = ducts.map { |duct| duct.location_zone }.uniq!
     living_space = unit_living.zone.spaces[0]
-    
+
     def self.create_duct_actuator(model, name, space)
       var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
       other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
@@ -1307,7 +1308,7 @@ class Airflow
       actuator.setName("#{other_equip.name} act")
       return var, actuator
     end
-    
+
     # Obtain data across all air loops (needed for CFIS w/ separate heating and cooling air loops)
     max_supply_fan_mfr_map = {}
     fan_rtf_var_map = {}
@@ -1315,53 +1316,48 @@ class Airflow
     cfis_map = {}
     air_loops.each_with_index do |air_loop, air_loop_index|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
-      
+
       obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
-      
+
       # Get the supply fan
       supply_fan = nil
       if air_loop.to_AirLoopHVAC.is_initialized
-        air_loop.supplyComponents.each do |supply_component|
-          next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
-
-          air_loop_unitary = supply_component.to_AirLoopHVACUnitarySystem.get
-          supply_fan = air_loop_unitary.supplyFan.get
-        end
+        supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(air_loop).supplyFan.get
       end
-      
+
       # Supply fan runtime fraction
       fan_rtf_var_map[air_loop] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} Fan RTF".gsub(" ", "_"))
       fan_rtf_sensor_map[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
       fan_rtf_sensor_map[air_loop].setName("#{fan_rtf_var_map[air_loop].name} s")
       fan_rtf_sensor_map[air_loop].setKeyName(supply_fan.name.to_s)
-      
+
       # Supply fan maximum mass flow rate
       max_supply_fan_mfr_map[air_loop] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
       max_supply_fan_mfr_map[air_loop].setName("#{obj_name_ducts} max sup fan mfr")
       max_supply_fan_mfr_map[air_loop].setInternalDataIndexKeyName(supply_fan.name.to_s)
-      
+
       # Check if cfis applies to this air loop
       cfis_map[air_loop] = nil
       if mech_vent.type == Constants.VentTypeCFIS
         cfis_systems.each do |this_cfis, this_cfis_air_loops|
           next unless this_cfis_air_loops.include? air_loop
-          
+
           this_cfis.fan_rtf_sensors = fan_rtf_sensor_map.values.map { |s| s.name }
           this_cfis.max_supply_fan_mfrs = max_supply_fan_mfr_map.values.map { |s| s.name }
           cfis_map[air_loop] = this_cfis
         end
       end
     end
-    
+
     # Create one duct system per airloop
     air_loop_with_cfis = nil # Used to ensure CFIS is only added to one air loop
     air_loops.each do |air_loop|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
 
       obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
-      
+
       ra_duct_zone = create_return_air_duct_zone(model, obj_name_ducts, adiabatic_const)
-      
+
       # Get the air demand inlet node
       air_demand_inlet_node = nil
       if air_loop.to_AirLoopHVAC.is_initialized
@@ -1387,9 +1383,9 @@ class Airflow
 
         living_zone_return_air_node = return_air_model_obj
       end
-      
+
       # -- Sensors --
-      
+
       # Air handler mass flow rate
       ah_mfr_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} AH MFR".gsub(" ", "_"))
       ah_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Mass Flow Rate")
@@ -1401,19 +1397,19 @@ class Airflow
       ah_vfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Current Density Volume Flow Rate")
       ah_vfr_sensor.setName("#{ah_vfr_var.name} s")
       ah_vfr_sensor.setKeyName(air_demand_inlet_node.name.to_s)
-      
+
       # Air handler outlet temperature
       ah_tout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} AH Tout".gsub(" ", "_"))
       ah_tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Temperature")
       ah_tout_sensor.setName("#{ah_tout_var.name} s")
       ah_tout_sensor.setKeyName(air_demand_inlet_node.name.to_s)
-      
+
       # Air handler outlet humidity ratio
       ah_wout_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} AH Wout".gsub(" ", "_"))
       ah_wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Humidity Ratio")
       ah_wout_sensor.setName("#{ah_wout_var.name} s")
       ah_wout_sensor.setKeyName(air_demand_inlet_node.name.to_s)
-      
+
       # Return air temperature
       ra_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} RA T".gsub(" ", "_"))
       if not living_zone_return_air_node.nil?
@@ -1423,7 +1419,7 @@ class Airflow
       else
         ra_t_sensor = tin_sensor
       end
-      
+
       # Return air humidity ratio
       ra_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} RaW".gsub(" ", "_"))
       if not living_zone_return_air_node.nil?
@@ -1435,29 +1431,29 @@ class Airflow
         ra_w_sensor.setName("#{ra_w_var.name} s")
         ra_w_sensor.setKeyName(unit_living.zone.name.to_s)
       end
-      
+
       # Living zone humidity ratio
       win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Humidity Ratio")
       win_sensor.setName("#{obj_name_ducts} win s")
       win_sensor.setKeyName(unit_living.zone.name.to_s)
-      
+
       max_supply_fan_mfr = max_supply_fan_mfr_map[air_loop]
       fan_rtf_sensor = fan_rtf_sensor_map[air_loop]
       fan_rtf_var = fan_rtf_var_map[air_loop]
       cfis = cfis_map[air_loop]
-      
+
       # Create one duct program for each duct location zone
-      
+
       duct_zones.each_with_index do |duct_zone, i|
         duct_zone_name = duct_zone.name.to_s
         next if duct_zone_name == unit_living.zone.name.to_s
-        
+
         if i > 0
           obj_name_ducts = "#{obj_name_ducts}_#{i}"
         end
-        
+
         # -- Sensors --
-        
+
         # Duct zone temperature
         dz_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} DZ T".gsub(" ", "_"))
         dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
@@ -1469,40 +1465,40 @@ class Airflow
         dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Humidity Ratio")
         dz_w_sensor.setName("#{dz_w_var.name} s")
         dz_w_sensor.setKeyName(duct_zone_name)
-        
+
         # -- Actuators --
-        
+
         # Other equipment objects to cancel out the supply air leakage directly into the return plenum
         supply_sens_lk_to_liv_var, supply_sens_lk_to_liv_actuator = create_duct_actuator(model, "#{obj_name_ducts} SupSensLkToLv", living_space)
         supply_lat_lk_to_liv_var, supply_lat_lk_to_liv_actuator = create_duct_actuator(model, "#{obj_name_ducts} SupLatLkToLv", living_space)
-        
+
         # Supply duct conduction load added to the living space
         supply_cond_to_liv_var, supply_cond_to_liv_actuator = create_duct_actuator(model, "#{obj_name_ducts} SupCondToLv", living_space)
-        
+
         # Return duct conduction load added to the return plenum zone
         return_cond_to_rp_var, return_cond_to_rp_actuator = create_duct_actuator(model, "#{obj_name_ducts} RetCondToRP", ra_duct_zone.spaces[0])
-        
+
         # Return duct sensible leakage impact on the return plenum
         return_sens_lk_to_rp_var, return_sens_lk_to_rp_actuator = create_duct_actuator(model, "#{obj_name_ducts} RetSensLkToRP", ra_duct_zone.spaces[0])
 
         # Return duct latent leakage impact on the return plenum
         return_lat_lk_to_rp_var, return_lat_lk_to_rp_actuator = create_duct_actuator(model, "#{obj_name_ducts} RetLatLkToRP", ra_duct_zone.spaces[0])
-      
+
         # Supply duct conduction impact on the duct zone
         supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator(model, "#{obj_name_ducts} SupCondToDZ", duct_zone.spaces[0])
-        
+
         # Return duct conduction impact on the duct zone
         return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator(model, "#{obj_name_ducts} RetCondToDZ", duct_zone.spaces[0])
-        
+
         # Supply duct sensible leakage impact on the duct zone
         supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator(model, "#{obj_name_ducts} SupSensLkToDZ", duct_zone.spaces[0])
-        
+
         # Supply duct latent leakage impact on the duct zone
         supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator(model, "#{obj_name_ducts} SupLatLkToDZ", duct_zone.spaces[0])
-        
+
         # Two objects are required to model the air exchange between the duct zone and the living space since
         # ZoneMixing objects can not account for direction of air flow (both are controlled by EMS)
-         
+
         # Accounts for leaks from the duct zone to the living zone
         dz_to_liv_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} ZoneMixDZToLv".gsub(" ", "_"))
         zone_mixing = OpenStudio::Model::ZoneMixing.new(unit_living.zone)
@@ -1510,7 +1506,7 @@ class Airflow
         zone_mixing.setSourceZone(duct_zone)
         dz_to_liv_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
         dz_to_liv_flow_rate_actuator.setName("#{zone_mixing.name} act")
-          
+
         # Accounts for leaks from the living zone to the duct zone
         liv_to_dz_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} ZoneMixLvToDZ".gsub(" ", "_"))
         zone_mixing = OpenStudio::Model::ZoneMixing.new(duct_zone)
@@ -1518,20 +1514,20 @@ class Airflow
         zone_mixing.setSourceZone(unit_living.zone)
         liv_to_dz_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
         liv_to_dz_flow_rate_actuator.setName("#{zone_mixing.name} act")
-        
+
         # -- Global Variables --
-        
+
         duct_lk_supply_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} LkSupFanEquiv".gsub(" ", "_"))
         duct_lk_exhaust_fan_equiv_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} LkExhFanEquiv".gsub(" ", "_"))
         duct_lks[obj_name_ducts] = [duct_lk_supply_fan_equiv_var, duct_lk_exhaust_fan_equiv_var]
-        
+
         # Obtain aggregate values for all ducts in the current duct location
         leakage_fracs = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
         leakage_cfm25s = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
         ua_values = { Constants.DuctSideSupply => 0, Constants.DuctSideReturn => 0 }
         ducts.each do |duct|
           next unless duct.location_zone.name.to_s == duct_zone_name
-          
+
           if not duct.leakage_frac.nil?
             leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
             leakage_fracs[duct.side] += duct.leakage_frac
@@ -1541,7 +1537,7 @@ class Airflow
           end
           ua_values[duct.side] += duct.area / duct.rvalue
         end
-        
+
         # Calculate fraction of outside air specific to this duct location
         f_oa = 1.0
         if not unit_finished_basement.nil? and unit_finished_basement.zone.name.to_s == duct_zone_name
@@ -1555,7 +1551,7 @@ class Airflow
         elsif not building.unfinished_attic.nil? and building.unfinished_attic.zone.name.to_s == duct_zone_name and building.unfinished_attic.ACH == 0
           f_oa = 0.0
         end
-        
+
         # Duct Subroutine
 
         duct_subroutine = OpenStudio::Model::EnergyManagementSystemSubroutine.new(model)
@@ -1571,7 +1567,7 @@ class Airflow
         duct_subroutine.addLine("  Set h_RA = (@HFnTdbW RA_T RA_W)") # J/kg
         duct_subroutine.addLine("  Set h_fg = (@HfgAirFnWTdb AH_Wout AH_Tout)") # J/kg
         duct_subroutine.addLine("  Set air_cp = 1006.0") # J/kg-C
-        
+
         if not leakage_fracs[Constants.DuctSideSupply].nil?
           duct_subroutine.addLine("  Set f_sup = #{leakage_fracs[Constants.DuctSideSupply]}") # frac
           duct_subroutine.addLine("  Set f_ret = #{leakage_fracs[Constants.DuctSideReturn]}") # frac
@@ -1581,30 +1577,30 @@ class Airflow
         end
         duct_subroutine.addLine("  Set sup_lk_mfr = f_sup * AH_MFR") # kg/s
         duct_subroutine.addLine("  Set ret_lk_mfr = f_ret * AH_MFR") # kg/s
-        
+
         # Supply leakage to living
         duct_subroutine.addLine("  Set SupTotLkToLiv = sup_lk_mfr*(h_RA - h_SA)") # W
         duct_subroutine.addLine("  Set #{supply_lat_lk_to_liv_var.name} = sup_lk_mfr*h_fg*(RA_W-AH_Wout)") # W
         duct_subroutine.addLine("  Set #{supply_sens_lk_to_liv_var.name} = SupTotLkToLiv-#{supply_lat_lk_to_liv_var.name}") # W
-        
+
         # Supply conduction
         duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{UnitConversions.convert(ua_values[Constants.DuctSideSupply], "Btu/(hr*F)", "W/K").round(3)}")
         duct_subroutine.addLine("  Set eTm = 0-eTm")
         duct_subroutine.addLine("  Set t_sup = #{dz_t_var.name}+((AH_Tout-#{dz_t_var.name})*(@Exp eTm))") # deg-C
         duct_subroutine.addLine("  Set #{supply_cond_to_liv_var.name} = AH_MFR*air_cp*(t_sup-AH_Tout)") # W
         duct_subroutine.addLine("  Set #{supply_cond_to_dz_var.name} = 0-#{supply_cond_to_liv_var.name}") # W
-        
+
         # Return conduction
         duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{UnitConversions.convert(ua_values[Constants.DuctSideReturn], "Btu/(hr*F)", "W/K").round(3)}")
         duct_subroutine.addLine("  Set eTm = 0-eTm")
         duct_subroutine.addLine("  Set t_ret = #{dz_t_var.name}+((RA_T-#{dz_t_var.name})*(@Exp eTm))") # deg-C
         duct_subroutine.addLine("  Set #{return_cond_to_rp_var.name} = AH_MFR*air_cp*(t_ret-RA_T)") # W
         duct_subroutine.addLine("  Set #{return_cond_to_dz_var.name} = 0-#{return_cond_to_rp_var.name}") # W
-        
+
         # Return leakage to return plenum
         duct_subroutine.addLine("  Set #{return_lat_lk_to_rp_var.name} = 0") # W
         duct_subroutine.addLine("  Set #{return_sens_lk_to_rp_var.name} = ret_lk_mfr*air_cp*(#{dz_t_var.name}-RA_T)") # W
-        
+
         # Supply leakage to duct zone
         # The below terms are not the same as supply_lat_lk_to_liv_var and supply_sens_lk_to_liv_var.
         # To understand why, suppose the AHzone temperature equals the supply air temperature. In this case, the terms below
@@ -1668,9 +1664,9 @@ class Airflow
         duct_program.addLine("Run #{duct_subroutine.name}")
 
         if not cfis.nil? and (air_loop_with_cfis.nil? or air_loop_with_cfis == air_loop) # Has CFIS (only run once even though there can be separate heating/cooling air loops)
-        
+
           air_loop_with_cfis = air_loop
-        
+
           # Calculate CFIS duct losses
 
           duct_program.addLine("Set dl_1 = #{supply_sens_lk_to_liv_var.name}")
@@ -1687,7 +1683,7 @@ class Airflow
           duct_program.addLine("Set dl_12 = #{liv_to_dz_flow_rate_var.name}")
 
           duct_program.addLine("If #{cfis.on_for_hour_var.name}")
-          
+
           duct_program.addLine("  Set mxsfmfr=@MAX(#{cfis.max_supply_fan_mfrs.join(' ')})") # CFIS value across heating/cooling air loops
           duct_program.addLine("  Set cfis_m3s = (mxsfmfr / 1.16097654) * #{cfis.airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
           duct_program.addLine("  Set fan_rtf = (#{cfis.fan_rtf_sensors.join('+')})") # CFIS value across heating/cooling air loops
@@ -1715,7 +1711,7 @@ class Airflow
           duct_program.addLine("  Set #{liv_to_dz_flow_rate_actuator.name} = #{liv_to_dz_flow_rate_var.name} + dl_12")
 
           duct_program.addLine("Else")
-          
+
           duct_program.addLine("  Set #{supply_sens_lk_to_liv_actuator.name} = dl_1")
           duct_program.addLine("  Set #{supply_lat_lk_to_liv_actuator.name} = dl_2")
           duct_program.addLine("  Set #{supply_cond_to_liv_actuator.name} = dl_3")
@@ -1728,11 +1724,11 @@ class Airflow
           duct_program.addLine("  Set #{supply_lat_lk_to_dz_actuator.name} = dl_10")
           duct_program.addLine("  Set #{dz_to_liv_flow_rate_actuator.name} = dl_11")
           duct_program.addLine("  Set #{liv_to_dz_flow_rate_actuator.name} = dl_12")
-          
+
           duct_program.addLine("EndIf")
-          
+
         else
-          
+
           duct_program.addLine("Set #{supply_sens_lk_to_liv_actuator.name} = #{supply_sens_lk_to_liv_var.name}")
           duct_program.addLine("Set #{supply_lat_lk_to_liv_actuator.name} = #{supply_lat_lk_to_liv_var.name}")
           duct_program.addLine("Set #{supply_cond_to_liv_actuator.name} = #{supply_cond_to_liv_var.name}")
@@ -1745,7 +1741,7 @@ class Airflow
           duct_program.addLine("Set #{supply_lat_lk_to_dz_actuator.name} = #{supply_lat_lk_to_dz_var.name}")
           duct_program.addLine("Set #{dz_to_liv_flow_rate_actuator.name} = #{dz_to_liv_flow_rate_var.name}")
           duct_program.addLine("Set #{liv_to_dz_flow_rate_actuator.name} = #{liv_to_dz_flow_rate_var.name}")
-          
+
         end
 
         duct_programs[obj_name_ducts] = duct_program
@@ -1761,19 +1757,14 @@ class Airflow
     cfis.t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_mech_vent.gsub(" ", "_")}_cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
     cfis.on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_mech_vent.gsub(" ", "_")}_cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
     cfis.f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_mech_vent.gsub(" ", "_")}_cfis_f_damper_open") # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
-    
+
     supply_fan = nil
     air_loops.each do |air_loop|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
 
-      air_loop.supplyComponents.each do |supply_component|
-        next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
-
-        air_loop_unitary = supply_component.to_AirLoopHVACUnitarySystem.get
-        supply_fan = air_loop_unitary.supplyFan.get.to_FanOnOff.get
-      end
+      supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(air_loop).supplyFan.get.to_FanOnOff.get
     end
-    
+
     cfis.supply_fan_pressure_rise = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Pressure Rise")
     cfis.supply_fan_pressure_rise.setName("#{obj_name_mech_vent} sup fan press".gsub(" ", "_"))
     cfis.supply_fan_pressure_rise.setInternalDataIndexKeyName(supply_fan.name.to_s)
@@ -1781,7 +1772,7 @@ class Airflow
     cfis.supply_fan_efficiency = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Total Efficiency")
     cfis.supply_fan_efficiency.setName("#{obj_name_mech_vent} sup fan eff".gsub(" ", "_"))
     cfis.supply_fan_efficiency.setInternalDataIndexKeyName(supply_fan.name.to_s)
-    
+
     # CFIS Program
     cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     cfis_program.setName(obj_name_mech_vent + " cfis init program")
@@ -1957,9 +1948,7 @@ class Airflow
     infil_program.addLine("Set dT = @Abs Tdiff")
     infil_program.addLine("Set QWHV = #{wh_sch_sensor.name}*#{UnitConversions.convert(mech_vent.whole_house_vent_rate, "cfm", "m^3/s").round(4)}")
 
-    
     cfis_systems.each do |cfis, air_loops|
-    
       cfis_outdoor_airflow = 0.0
       if cfis.open_time > 0.0
         cfis_outdoor_airflow = mech_vent.whole_house_vent_rate * (60.0 / cfis.open_time)
@@ -2128,7 +2117,7 @@ class Airflow
     # Get space
     space = Geometry.get_space_from_location(unit, location, location_hierarchy)
     return location_zone if space.nil?
-    
+
     location_zone = space.thermalZone.get
     return location_zone
   end
@@ -2270,7 +2259,7 @@ class Duct
 end
 
 class Infiltration
-  def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, unfinished_attic_sla, unfinished_attic_const_ach, 
+  def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, unfinished_attic_sla, unfinished_attic_const_ach,
                  unfinished_basement_ach, finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
     @living_ach50 = living_ach50
     @living_constant_ach = living_constant_ach
@@ -2286,7 +2275,7 @@ class Infiltration
     @is_existing_home = is_existing_home
     @terrain = terrain
   end
-  attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :crawl_ach, :unfinished_attic_sla, :unfinished_attic_const_ach, 
+  attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :crawl_ach, :unfinished_attic_sla, :unfinished_attic_const_ach,
                 :unfinished_basement_ach, :finished_basement_ach, :pier_beam_ach, :has_flue_chimney, :is_existing_home, :terrain,
                 :a_o, :c_i, :n_i, :stack_coef, :wind_coef, :y_i, :s_wflue)
 end
@@ -2310,7 +2299,7 @@ class NaturalVentilation
 end
 
 class MechanicalVentilation
-  def initialize(type, infil_credit, total_efficiency, frac_62_2, whole_house_cfm, fan_power, sensible_efficiency, ashrae_std, 
+  def initialize(type, infil_credit, total_efficiency, frac_62_2, whole_house_cfm, fan_power, sensible_efficiency, ashrae_std,
                  dryer_exhaust, range_exhaust, range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour)
     @type = type
     @infil_credit = infil_credit
@@ -2326,7 +2315,7 @@ class MechanicalVentilation
     @bathroom_exhaust = bathroom_exhaust
     @bathroom_exhaust_hour = bathroom_exhaust_hour
   end
-  attr_accessor(:type, :infil_credit, :total_efficiency, :frac_62_2, :whole_house_cfm, :fan_power, :sensible_efficiency, :ashrae_std, 
+  attr_accessor(:type, :infil_credit, :total_efficiency, :frac_62_2, :whole_house_cfm, :fan_power, :sensible_efficiency, :ashrae_std,
                 :dryer_exhaust, :range_exhaust, :range_exhaust_hour, :bathroom_exhaust, :bathroom_exhaust_hour,
                 :frac_fan_heat, :num_fans, :whole_house_vent_rate, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust,
                 :spot_fan_power, :latent_effectiveness, :sensible_effectiveness, :dryer_exhaust_day_shift, :has_dryer)

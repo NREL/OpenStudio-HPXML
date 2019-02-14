@@ -2099,6 +2099,8 @@ class OSModel
         num_speeds = get_ac_num_speeds(seer)
         crankcase_kw = 0.0
         crankcase_temp = 55.0
+        attached_heating_system = get_attached_system(cooling_system_values, building,
+                                                      "HeatingSystem", loop_hvacs)
 
         if num_speeds == "1-Speed"
 
@@ -2109,7 +2111,8 @@ class OSModel
           success = HVAC.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 attached_heating_system)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2124,7 +2127,8 @@ class OSModel
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 attached_heating_system)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2139,7 +2143,8 @@ class OSModel
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 attached_heating_system)
           return false if not success
 
         else
@@ -2196,10 +2201,11 @@ class OSModel
           afue = heating_system_values[:heating_efficiency_value]
         end
         fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
-        attached_to_multispeed_ac = get_attached_to_multispeed_ac(heating_system_values, building)
+        attached_cooling_system = get_attached_system(heating_system_values, building,
+                                                      "CoolingSystem", loop_hvacs)
         success = HVAC.apply_furnace(model, unit, runner, fuel, afue,
                                      heat_capacity_btuh, fan_power, dse_heat,
-                                     load_frac, attached_to_multispeed_ac)
+                                     load_frac, attached_cooling_system)
         return false if not success
 
       elsif htg_type == "WallFurnace"
@@ -2925,34 +2931,34 @@ class OSModel
                                           nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
                                           mech_vent_ashrae_std, clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour)
-    
+
     if mech_vent_type == Constants.VentTypeCFIS
       # Get HVAC distribution system CFIS is attached to
       cfis_hvac_dist = nil
       building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_dist|
         next unless hvac_dist.elements["SystemIdentifier"].attributes["id"] == whole_house_fan.elements["AttachedToHVACDistributionSystem"].attributes["idref"]
-        
+
         cfis_hvac_dist = hvac_dist
       end
       if cfis_hvac_dist.nil?
         fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
       end
-      
+
       # Get HVAC systems attached to this distribution system
       cfis_sys_ids = []
       hvac_plant = building.elements["BuildingDetails/Systems/HVAC/HVACPlant"]
       hvac_plant.elements.each("HeatingSystem | CoolingSystem | HeatPump") do |hvac|
         next unless XMLHelper.has_element(hvac, "DistributionSystem")
         next unless cfis_hvac_dist.elements["SystemIdentifier"].attributes["id"] == hvac.elements["DistributionSystem"].attributes["idref"]
-        
+
         cfis_sys_ids << hvac.elements["SystemIdentifier"].attributes["id"]
       end
-      
+
       # Get AirLoopHVACs associated with these HVAC systems
       cfis_airloops = []
       loop_hvacs.each do |sys_id, loops|
         next unless cfis_sys_ids.include? sys_id
-        
+
         cfis_airloops.concat(loops)
       end
       cfis = CFIS.new(mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac)
@@ -3013,7 +3019,7 @@ class OSModel
       next if air_distribution.nil?
 
       ducts = []
-      
+
       # Supply Ducts
       supply_duct_total_leakage_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
       supply_duct_total_area = Float(air_distribution.elements["sum(Ducts[DuctType='supply']/DuctSurfaceArea)"])
@@ -3022,7 +3028,7 @@ class OSModel
         supply_duct_area = Float(XMLHelper.get_value(supply_duct, "DuctSurfaceArea"))
         supply_duct_location = location_map[XMLHelper.get_value(supply_duct, "DuctLocation")]
         supply_duct_leakage_cfm25 = supply_duct_total_leakage_cfm25 * supply_duct_area / supply_duct_total_area
-        
+
         ducts << Duct.new(Constants.DuctSideSupply, supply_duct_location, nil, supply_duct_leakage_cfm25, supply_duct_area, supply_duct_r)
       end
 
@@ -3034,10 +3040,10 @@ class OSModel
         return_duct_area = Float(XMLHelper.get_value(return_duct, "DuctSurfaceArea"))
         return_duct_location = location_map[XMLHelper.get_value(return_duct, "DuctLocation")]
         return_duct_leakage_cfm25 = return_duct_total_leakage_cfm25 * return_duct_area / return_duct_total_area
-        
+
         ducts << Duct.new(Constants.DuctSideReturn, return_duct_location, nil, return_duct_leakage_cfm25, return_duct_area, return_duct_r)
       end
-      
+
       # FIXME FIXME FIXME
       # TEMPORARY FOR COMPARISON TO MASTER BRANCH
       supply_area_mult = supply_duct_total_area / 100.0
@@ -3049,7 +3055,7 @@ class OSModel
       ducts = [Duct.new(Constants.DuctSideSupply, supply_duct_location, 0.2, nil, supply_area, 4.0),
                Duct.new(Constants.DuctSideReturn, return_duct_location, 0.1, nil, return_area, 4.0)]
       # FIXME FIXME FIXME
-      
+
       # Connect AirLoopHVACs to ducts
       systems_for_this_duct = []
       duct_id = hvac_distribution_values[:id]
@@ -3086,6 +3092,7 @@ class OSModel
 
   def self.add_fuel_heating_eae(runner, model, building, loop_hvacs, zone_hvacs)
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
+    # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0]") do |htgsys|
       heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
@@ -3180,21 +3187,18 @@ class OSModel
       loops.each do |loop|
         next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
 
-        loop.supplyComponents.each do |comp|
-          next unless comp.to_AirLoopHVACUnitarySystem.is_initialized
+        unitary_system = HVAC.get_unitary_system_from_air_loop_hvac(loop)
 
-          unitary_system = comp.to_AirLoopHVACUnitarySystem.get
-          if unitary_system.coolingCoil.is_initialized
-            # Cooling system: Cooling coil, supply fan
-            clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.coolingCoil.get)
-            clg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
-          elsif unitary_system.heatingCoil.is_initialized
-            # Heating system: Heating coil, supply fan, supplemental coil
-            htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.heatingCoil.get)
-            htg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
-            if unitary_system.supplementalHeatingCoil.is_initialized
-              htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.supplementalHeatingCoil.get)
-            end
+        if unitary_system.coolingCoil.is_initialized
+          # Cooling system: Cooling coil, supply fan
+          clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.coolingCoil.get)
+          clg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
+        elsif unitary_system.heatingCoil.is_initialized
+          # Heating system: Heating coil, supply fan, supplemental coil
+          htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.heatingCoil.get)
+          htg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
+          if unitary_system.supplementalHeatingCoil.is_initialized
+            htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.supplementalHeatingCoil.get)
           end
         end
       end
@@ -3739,22 +3743,26 @@ class OSModel
     end
   end
 
-  def self.get_attached_to_multispeed_ac(heating_system_values, building)
-    attached_to_multispeed_ac = false
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
-      cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
-      next unless cooling_system_values[:cooling_system_type] == "central air conditioning"
-      next unless heating_system_values[:distribution_system_idref] == cooling_system_values[:distribution_system_idref]
+  def self.get_attached_system(system_values, building, system_to_search, loop_hvacs)
+    return nil if system_values[:distribution_system_idref].nil?
 
-      if cooling_system_values[:cooling_efficiency_units] == "SEER"
-        seer = cooling_system_values[:cooling_efficiency_value]
+    # Finds the OpenStudio object of the heating (or cooling) system attached (i.e., on the same
+    # distribution system) to the current cooling (or heating) system.
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{system_to_search}") do |other_sys|
+      if system_to_search == "CoolingSystem"
+        attached_system_values = HPXML.get_cooling_system_values(cooling_system: other_sys)
+      elsif system_to_search == "HeatingSystem"
+        attached_system_values = HPXML.get_heating_system_values(heating_system: other_sys)
       end
-      next unless get_ac_num_speeds(seer) != "1-Speed"
+      next unless system_values[:distribution_system_idref] == attached_system_values[:distribution_system_idref]
 
-      attached_to_multispeed_ac = true
+      air_loop = loop_hvacs[attached_system_values[:id]]
+      if not air_loop.nil?
+        return HVAC.get_unitary_system_from_air_loop_hvac(air_loop[0])
+      end
     end
 
-    return attached_to_multispeed_ac
+    return nil
   end
 
   def self.set_surface_interior(model, spaces, surface, surface_id, interior_adjacent_to)

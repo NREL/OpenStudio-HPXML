@@ -258,11 +258,11 @@ class Constants
   def self.CondenserTypeWater
     return 'watercooled'
   end
-  
+
   def self.DuctSideReturn
     return 'return'
   end
-  
+
   def self.DuctSideSupply
     return 'supply'
   end
@@ -411,12 +411,18 @@ class Constants
     return "res af#{s_unit}"
   end
 
-  def self.ObjectNameAirSourceHeatPump(unit_name = self.ObjectNameBuildingUnit)
+  def self.ObjectNameAirSourceHeatPump(mode = nil, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
-    return "res ashp#{s_unit}"
+    s_mode = ""
+    if not mode.nil?
+      fail "Mode '#{mode}' should be either #{:htg} or #{:clg}." unless [:htg, :clg].include? mode
+
+      s_mode = " #{mode}"
+    end
+    return "res ashp#{s_mode}#{s_unit}"
   end
 
   def self.ObjectNameBath(unit_name = self.ObjectNameBuildingUnit)
@@ -590,12 +596,18 @@ class Constants
     return "res gas lighting#{s_unit}"
   end
 
-  def self.ObjectNameGroundSourceHeatPumpVerticalBore(unit_name = self.ObjectNameBuildingUnit)
+  def self.ObjectNameGroundSourceHeatPump(mode = nil, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
-    return "res gshp vert bore#{s_unit}"
+    s_mode = ""
+    if not mode.nil?
+      fail "Mode '#{mode}' should be either #{:htg} or #{:clg}." unless [:htg, :clg].include? mode
+
+      s_mode = " #{mode}"
+    end
+    return "res gshp#{s_mode}#{s_unit}"
   end
 
   def self.ObjectNameHeatingSeason
@@ -638,6 +650,22 @@ class Constants
     return "res hot water distribution#{s_unit}"
   end
 
+  def self.ObjectNameIdealAirSystemCooling(unit_name = self.ObjectNameBuildingUnit)
+    s_unit = ""
+    if unit_name != self.ObjectNameBuildingUnit
+      s_unit = "|#{unit_name}"
+    end
+    return "res ideal cool#{s_unit}"
+  end
+
+  def self.ObjectNameIdealAirSystemHeating(unit_name = self.ObjectNameBuildingUnit)
+    s_unit = ""
+    if unit_name != self.ObjectNameBuildingUnit
+      s_unit = "|#{unit_name}"
+    end
+    return "res ideal heat#{s_unit}"
+  end
+
   def self.ObjectNameInfiltration(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
@@ -662,12 +690,18 @@ class Constants
     return "res mv#{s_unit}"
   end
 
-  def self.ObjectNameMiniSplitHeatPump(unit_name = self.ObjectNameBuildingUnit)
+  def self.ObjectNameMiniSplitHeatPump(mode = nil, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
-    return "res ms#{s_unit}"
+    s_mode = ""
+    if not mode.nil?
+      fail "Mode '#{mode}' should be either #{:htg} or #{:clg}." unless [:htg, :clg].include? mode
+
+      s_mode = " #{mode}"
+    end
+    return "res ms#{s_mode}#{s_unit}"
   end
 
   def self.ObjectNameMiscPlugLoads(unit_name = self.ObjectNameBuildingUnit)
@@ -955,15 +989,15 @@ class Constants
   def self.SizingInfoCMUWallFurringInsRvalue
     return __method__.to_s
   end
-  
+
   def self.SizingInfoDuctExist
     return __method__.to_s
   end
-  
+
   def self.SizingInfoDuctSides
     return __method__.to_s
   end
-  
+
   def self.SizingInfoDuctLocationZones
     return __method__.to_s
   end
@@ -984,11 +1018,23 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoHVACCompanionObject # Link between, e.g., heat pump heating/cooling systems or air conditioner and furnace
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACOtherZoneObject # Link between zonal equipment in control zone and slave zones
+    return __method__.to_s
+  end
+
   def self.SizingInfoHVACFracHeatLoadServed
     return __method__.to_s
   end
 
   def self.SizingInfoHVACFracCoolLoadServed
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACType
     return __method__.to_s
   end
 
