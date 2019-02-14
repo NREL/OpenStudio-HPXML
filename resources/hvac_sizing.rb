@@ -52,28 +52,28 @@ class HVACSizing
     return false if zones_loads.nil?
 
     # Aggregate zone loads into initial unit loads
-    init_values = aggregate_zone_loads(zones_loads)
-    return false if init_values.nil?
+    init_loads = aggregate_zone_loads(zones_loads)
+    return false if init_loads.nil?
 
     # Get HVAC system info
     hvacs = get_hvacs_for_unit(runner, model, unit)
     return false if hvacs.nil?
 
     hvacs.each do |hvac|
-      hvac = calculate_hvac_temperatures(init_values, hvac)
-      return false if init_values.nil?
+      hvac = calculate_hvac_temperatures(init_loads, hvac)
+      return false if init_loads.nil?
 
-      hvac_init_values = apply_hvac_load_fractions(init_values, hvac)
-      return false if hvac_init_values.nil?
+      hvac_init_loads = apply_hvac_load_fractions(init_loads, hvac)
+      return false if hvac_init_loads.nil?
 
-      final_values = UnitFinalValues.new
+      final_values = FinalValues.new
 
       # Calculate heating ducts load
-      final_values = process_duct_loads_heating(runner, final_values, weather, hvac, hvac_init_values.Heat_Load)
+      final_values = process_duct_loads_heating(runner, final_values, weather, hvac, hvac_init_loads.Heat)
       return false if final_values.nil?
 
       # Calculate cooling ducts load
-      final_values = process_duct_loads_cooling(runner, final_values, weather, hvac, hvac_init_values.Cool_Load_Sens, hvac_init_values.Cool_Load_Lat)
+      final_values = process_duct_loads_cooling(runner, final_values, weather, hvac, hvac_init_loads.Cool_Sens, hvac_init_loads.Cool_Lat)
       return false if final_values.nil?
 
       # FIXME: Ask Jon about order of process_cooling_equipment_adjustments, process_fixed_equipment, and process_finalize
@@ -418,7 +418,7 @@ class HVACSizing
     thermal_zones.each do |thermal_zone|
       next if not Geometry.zone_is_finished(thermal_zone)
 
-      zone_loads = ZoneValues.new
+      zone_loads = ZoneLoads.new
       zone_loads = process_load_windows_skylights(runner, thermal_zone, zone_loads, weather)
       zone_loads = process_load_doors(runner, thermal_zone, zone_loads, weather)
       zone_loads = process_load_walls(runner, unit, thermal_zone, zone_loads, weather)
@@ -1338,43 +1338,41 @@ class HVACSizing
 
     return nil if zones_loads.nil?
 
-    # TODO: Ideally this would use an iterative procedure.
-
-    init_values = UnitInitialValues.new
-    init_values.Heat_Load = 0
-    init_values.Cool_Load_Sens = 0
-    init_values.Cool_Load_Lat = 0
+    init_loads = InitialLoads.new
+    init_loads.Heat = 0
+    init_loads.Cool_Sens = 0
+    init_loads.Cool_Lat = 0
     zones_loads.keys.each do |thermal_zone|
       zone_loads = zones_loads[thermal_zone]
 
       # Heating
-      init_values.Heat_Load += [zone_loads.Heat_Windows + zone_loads.Heat_Skylights +
+      init_loads.Heat += [zone_loads.Heat_Windows + zone_loads.Heat_Skylights +
         zone_loads.Heat_Doors + zone_loads.Heat_Walls +
         zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0].max +
-                               zone_loads.Heat_Infil
+                         zone_loads.Heat_Infil
 
       # Cooling
-      init_values.Cool_Load_Sens += zone_loads.Cool_Windows + zone_loads.Cool_Skylights +
-                                    zone_loads.Cool_Doors + zone_loads.Cool_Walls +
-                                    zone_loads.Cool_Floors + zone_loads.Cool_Roofs +
-                                    zone_loads.Cool_Infil_Sens + zone_loads.Cool_IntGains_Sens
-      init_values.Cool_Load_Lat += zone_loads.Cool_Infil_Lat + zone_loads.Cool_IntGains_Lat
+      init_loads.Cool_Sens += zone_loads.Cool_Windows + zone_loads.Cool_Skylights +
+                              zone_loads.Cool_Doors + zone_loads.Cool_Walls +
+                              zone_loads.Cool_Floors + zone_loads.Cool_Roofs +
+                              zone_loads.Cool_Infil_Sens + zone_loads.Cool_IntGains_Sens
+      init_loads.Cool_Lat += zone_loads.Cool_Infil_Lat + zone_loads.Cool_IntGains_Lat
     end
 
-    init_values.Cool_Load_Lat = [init_values.Cool_Load_Lat, 0].max
-    init_values.Cool_Load_Tot = init_values.Cool_Load_Sens + init_values.Cool_Load_Lat
+    init_loads.Cool_Lat = [init_loads.Cool_Lat, 0].max
+    init_loads.Cool_Tot = init_loads.Cool_Sens + init_loads.Cool_Lat
 
-    return init_values
+    return init_loads
   end
 
-  def self.calculate_hvac_temperatures(init_values, hvac)
+  def self.calculate_hvac_temperatures(init_loads, hvac)
     '''
     HVAC Temperatures
     '''
-    return nil if init_values.nil?
+    return nil if init_loads.nil?
 
     # Calculate Leaving Air Temperature
-    shr = [init_values.Cool_Load_Sens / init_values.Cool_Load_Tot, 1.0].min
+    shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
     # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
     if shr < 0.80
       hvac.LeavingAirTemp = 54 # F
@@ -1396,19 +1394,19 @@ class HVACSizing
     return hvac
   end
 
-  def self.apply_hvac_load_fractions(init_values, hvac)
+  def self.apply_hvac_load_fractions(init_loads, hvac)
     '''
     Intermediate Loads (HVAC-specific)
     '''
-    return nil if init_values.nil?
+    return nil if init_loads.nil?
 
-    hvac_init_values = init_values.dup
-    hvac_init_values.Heat_Load *= hvac.HeatingLoadFraction
-    hvac_init_values.Cool_Load_Sens *= hvac.CoolingLoadFraction
-    hvac_init_values.Cool_Load_Lat *= hvac.CoolingLoadFraction
-    hvac_init_values.Cool_Load_Tot *= hvac.CoolingLoadFraction
+    hvac_init_loads = init_loads.dup
+    hvac_init_loads.Heat *= hvac.HeatingLoadFraction
+    hvac_init_loads.Cool_Sens *= hvac.CoolingLoadFraction
+    hvac_init_loads.Cool_Lat *= hvac.CoolingLoadFraction
+    hvac_init_loads.Cool_Tot *= hvac.CoolingLoadFraction
 
-    return hvac_init_values
+    return hvac_init_loads
   end
 
   def self.get_duct_regain_factor(runner, duct)
@@ -2927,17 +2925,7 @@ class HVACSizing
       end
 
       # Supplemental heating
-      if htg_equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric
-        if htg_equip.nominalCapacity.is_initialized
-          hvac.FixedSuppHeatingCapacity = UnitConversions.convert(htg_equip.nominalCapacity.get, "W", "ton")
-        end
-
-      elsif supp_htg_coil.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric
-        if supp_htg_coil.nominalCapacity.is_initialized
-          hvac.FixedSuppHeatingCapacity = UnitConversions.convert(supp_htg_coil.nominalCapacity.get, "W", "ton")
-        end
-
-      elsif supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
+      if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
         if supp_htg_coil.nominalCapacity.is_initialized
           hvac.FixedSuppHeatingCapacity = UnitConversions.convert(supp_htg_coil.nominalCapacity.get, "W", "ton")
         end
@@ -4089,25 +4077,25 @@ class HVACSizing
   end
 end
 
-class ZoneValues
+class ZoneLoads
   # Thermal zone loads
   def initialize
   end
   attr_accessor(:Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors,
-                :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
                 :Cool_Infil_Sens, :Cool_Infil_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
+                :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
                 :Heat_Infil)
 end
 
-class UnitInitialValues
-  # Unit initial loads (aggregated across thermal zones and excluding ducts)
+class InitialLoads
+  # Initial loads (aggregated across thermal zones and excluding ducts)
   def initialize
   end
-  attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot, :Heat_Load)
+  attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat)
 end
 
-class UnitFinalValues
-  # Unit final loads (including ducts), airflow rates, and equipment capacities
+class FinalValues
+  # Final loads (including ducts), airflow rates, equipment capacities, etc.
   def initialize
   end
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot,
