@@ -76,8 +76,6 @@ class HVACSizing
       hvac_final_values = process_duct_loads_cooling(runner, hvac_final_values, weather, hvac, hvac_init_loads.Cool_Sens, hvac_init_loads.Cool_Lat)
       return false if hvac_final_values.nil?
 
-      # FIXME: Ask Jon about order of process_cooling_equipment_adjustments, process_fixed_equipment, and process_finalize
-
       hvac_final_values = process_cooling_equipment_adjustments(runner, hvac_final_values, weather, hvac)
       return false if hvac_final_values.nil?
 
@@ -2351,8 +2349,8 @@ class HVACSizing
     '''
     Calculate the Distribution System Efficiency for cooling (using the method of ASHRAE Standard 152).
     '''
-
     dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+    dse_dTe *= -1
     dse_DE, coolingLoad_Ducts_Sens = _calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens)
     dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
 
@@ -2367,7 +2365,7 @@ class HVACSizing
     dse_a_s = (system_cfm - dse_Qs) / system_cfm
     dse_a_r = (system_cfm - dse_Qr) / system_cfm
 
-    dse_dTe = load_sens / (1.1 * @acf * system_cfm)
+    dse_dTe = load_sens / (60 * system_cfm * @inside_air_dens * Gas.Air.cp)
     dse_dT_s = t_setpoint - dse_Tamb_s
     dse_dT_r = t_setpoint - dse_Tamb_r
 
