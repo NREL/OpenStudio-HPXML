@@ -2598,6 +2598,7 @@ class HVACSizing
     # Cooling equipment
     clg_equips.each do |clg_equip, control_zone|
       hvac = HVACInfo.new
+      hvacs << hvac
 
       hvac.Objects = [clg_equip]
 
@@ -2753,8 +2754,6 @@ class HVACSizing
         runner.registerError("Unexpected cooling coil: #{clg_coil.name}.")
         return nil
       end
-
-      hvacs << hvac
     end
 
     # Heating equipment
@@ -2774,6 +2773,7 @@ class HVACSizing
         end
       else
         hvac = HVACInfo.new
+        hvacs << hvac
         hvac.Objects = [htg_equip]
       end
 
@@ -2929,8 +2929,6 @@ class HVACSizing
         runner.registerError("Unexpected supplemental heating coil: #{supp_htg_coil.name}.")
         return nil
       end
-
-      hvacs << hvac
     end
 
     # Populate other zone objects (e.g., in a finished basement) related to a given HVAC object
