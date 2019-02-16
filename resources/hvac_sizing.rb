@@ -1573,7 +1573,7 @@ class HVACSizing
       dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
 
       # Calculate the air enthalpy in the return duct location for DSE calculations
-      dse_h_cooling_r = (1.006 * UnitConversions.convert(dse_Tamb_cooling_r, "F", "C") + weather.design.CoolingHumidityRatio * (2501 + 1.86 * UnitConversions.convert(dse_Tamb_cooling_r, "F", "C"))) * UnitConversions.convert(1, "kJ", "Btu") * UnitConversions.convert(1, "lbm", "kg")
+      dse_h_r = (1.006 * UnitConversions.convert(dse_Tamb_cooling_r, "F", "C") + weather.design.CoolingHumidityRatio * (2501 + 1.86 * UnitConversions.convert(dse_Tamb_cooling_r, "F", "C"))) * UnitConversions.convert(1, "kJ", "Btu") * UnitConversions.convert(1, "lbm", "kg")
 
       # Initialize for the iteration
       delta = 1
@@ -1604,7 +1604,7 @@ class HVACSizing
 
         dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_Airflow)
 
-        dse, dse_dTe_cooling, hvac_final_values.Cool_Load_Ducts_Sens = calc_dse_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_Airflow, hvac_final_values.Cool_Load_Sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, hvac_final_values.Cool_Load_Tot, dse_h_cooling_r, supply_r, return_r)
+        dse, dse_dTe_cooling, hvac_final_values.Cool_Load_Ducts_Sens = calc_dse_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_Airflow, hvac_final_values.Cool_Load_Sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, hvac_final_values.Cool_Load_Tot, dse_h_r, supply_r, return_r)
         dse_precorrect = 1 - (hvac_final_values.Cool_Load_Ducts_Sens / hvac_final_values.Cool_Load_Sens)
 
         coolingLoad_Tot_Next = (init_cool_load_sens + init_cool_load_lat) / dse
@@ -3137,8 +3137,8 @@ class HVACSizing
         elsif ua_type == "total"
         # skip
         else
-            runner.registerError("Unexpected space ua type: '#{ua_type}'.")
-            return nil
+          runner.registerError("Unexpected space ua type: '#{ua_type}'.")
+          return nil
         end
       end
       design_temp = sum_uat / space_UAs["total"]
@@ -3169,8 +3169,8 @@ class HVACSizing
         elsif ua_type == "total" or ua_type == "foundation"
         # skip
         else
-            runner.registerError("Unexpected space ua type: '#{ua_type}'.")
-            return nil
+          runner.registerError("Unexpected space ua type: '#{ua_type}'.")
+          return nil
         end
       end
       percent_ua_finished = ua_finished / (ua_finished + ua_outside)
