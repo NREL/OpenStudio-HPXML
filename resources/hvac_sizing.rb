@@ -59,6 +59,11 @@ class HVACSizing
     hvacs = get_hvacs_for_unit(runner, model, unit)
     return false if hvacs.nil?
 
+    # Display debug info
+    if show_debug_info
+      display_zone_loads(runner, unit, zones_loads)
+    end
+
     hvacs.each do |hvac|
       hvac = calculate_hvac_temperatures(init_loads, hvac)
       return false if init_loads.nil?
@@ -92,12 +97,11 @@ class HVACSizing
       if not set_object_values(runner, unit, hvac, hvac_final_values)
         return false
       end
-    end
 
-    # Display debug info
-    if show_debug_info
-      display_zone_loads(runner, unit, zones_loads)
-      display_hvac_final_values_results(runner, unit, hvac_final_values)
+      # Display debug info
+      if show_debug_info
+        display_hvac_final_values_results(runner, unit, hvac_final_values)
+      end
     end
 
     return true
@@ -1519,10 +1523,10 @@ class HVACSizing
 
         dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, heat_cfm)
 
-        dse = calc_dse_heating(dse_Qs, dse_Qr, heat_cfm, heatingLoad_Prev, dse_Tamb_heating_s, dse_Tamb_heating_r, dse_As, dse_Ar, @heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
+        dse_DE = calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, heat_cfm, heatingLoad_Prev, dse_Tamb_heating_s, dse_Tamb_heating_r, dse_As, dse_Ar, @heat_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
 
         # Calculate the increase in heating load due to ducts (Approach: DE = Qload/Qequip -> Qducts = Qequip-Qload)
-        heatingLoad_Next = init_heat_load / dse
+        heatingLoad_Next = init_heat_load / dse_DE
 
         # Calculate the change since the last iteration
         delta = (heatingLoad_Next - heatingLoad_Prev) / heatingLoad_Prev
@@ -1604,10 +1608,9 @@ class HVACSizing
 
         dse_Qs, dse_Qr = calc_ducts_leakages(hvac.Ducts, cool_Airflow)
 
-        dse, dse_dTe_cooling, hvac_final_values.Cool_Load_Ducts_Sens = calc_dse_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_Airflow, hvac_final_values.Cool_Load_Sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, hvac_final_values.Cool_Load_Tot, dse_h_r, supply_r, return_r)
-        dse_precorrect = 1 - (hvac_final_values.Cool_Load_Ducts_Sens / hvac_final_values.Cool_Load_Sens)
+        dse_DE, dse_dTe_cooling, hvac_final_values.Cool_Load_Ducts_Sens = calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, hvac.LeavingAirTemp, cool_Airflow, hvac_final_values.Cool_Load_Sens, dse_Tamb_cooling_s, dse_Tamb_cooling_r, dse_As, dse_Ar, @cool_setpoint, dse_Fregain_s, dse_Fregain_r, hvac_final_values.Cool_Load_Tot, dse_h_r, supply_r, return_r)
 
-        coolingLoad_Tot_Next = (init_cool_load_sens + init_cool_load_lat) / dse
+        coolingLoad_Tot_Next = (init_cool_load_sens + init_cool_load_lat) / dse_DE
 
         # Calculate the change since the last iteration
         delta = (coolingLoad_Tot_Next - coolingLoad_Tot_Prev) / coolingLoad_Tot_Prev
@@ -2334,9 +2337,9 @@ class HVACSizing
     return load_or_capacity / (1.1 * @acf * deltaT)
   end
 
-  def self.calc_dse_heating(dse_Qs, dse_Qr, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
+  def self.calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
     '''
-    Calculate the Distribution System Efficiency for heating (using the method of ASHRAE Standard 152).
+    Calculate the Delivery Effectiveness for heating (using the method of ASHRAE Standard 152).
     '''
     dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
     dse_DE = _calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
@@ -2345,9 +2348,9 @@ class HVACSizing
     return dse_DEcorr
   end
 
-  def self.calc_dse_cooling(dse_Qs, dse_Qr, leavingAirTemp, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, load_total, dse_h_r, supply_r, return_r)
+  def self.calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, leavingAirTemp, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, load_total, dse_h_r, supply_r, return_r)
     '''
-    Calculate the Distribution System Efficiency for cooling (using the method of ASHRAE Standard 152).
+    Calculate the Delivery Effectiveness for cooling (using the method of ASHRAE Standard 152).
     '''
     dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
     dse_dTe *= -1

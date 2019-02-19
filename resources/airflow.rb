@@ -2110,20 +2110,6 @@ class Airflow
     return location_zone
   end
 
-  def self.get_location_frac_leakage(location_frac, stories)
-    if location_frac == Constants.Auto
-      # Duct location fraction per 2010 BA Benchmark
-      if stories == 1
-        location_frac_leakage = 1
-      else
-        location_frac_leakage = 0.65
-      end
-    else
-      location_frac_leakage = location_frac.to_f
-    end
-    return location_frac_leakage
-  end
-
   def self.get_infiltration_ACH_from_SLA(sla, numStories, weather)
     # Returns the infiltration annual average ACH given a SLA.
     w = calc_infiltration_w_factor(weather)
@@ -2175,38 +2161,6 @@ class Airflow
     elsif side == Constants.DuctSideReturn
       return 2.0388 + 0.7053 * nominal_rvalue
     end
-  end
-
-  # TODO: Unused here. Move to Airflow measure.
-  def self.get_duct_supply_surface_area(mult, ffa, num_stories)
-    # Duct Surface Areas per 2010 BA Benchmark
-    if num_stories == 1
-      return 0.27 * ffa * mult # ft^2
-    else
-      return 0.2 * ffa * mult
-    end
-  end
-
-  # TODO: Unused here. Move to Airflow measure.
-  def self.get_return_surface_area(mult, ffa, num_stories, num_returns)
-    # Duct Surface Areas per 2010 BA Benchmark
-    if num_stories == 1
-      return [0.05 * num_returns * ffa, 0.25 * ffa].min * mult
-    else
-      return [0.04 * num_returns * ffa, 0.19 * ffa].min * mult
-    end
-  end
-
-  # TODO: Unused here. Move to Airflow measure.
-  def self.get_num_returns(num_returns, num_stories)
-    if num_returns.nil?
-      return 0
-    elsif num_returns == Constants.Auto
-      # Duct Number Returns per 2010 BA Benchmark Addendum
-      return 1 + num_stories
-    end
-
-    return num_returns.to_i
   end
 
   def self.get_mech_vent_whole_house_cfm(frac622, num_beds, ffa, std)
