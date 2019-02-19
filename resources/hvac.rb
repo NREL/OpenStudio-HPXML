@@ -2277,24 +2277,117 @@ class HVAC
   end
 
   def self.remove_heating(model, runner, thermal_zone, unit)
-    removed_furnace = remove_furnace(model, runner, thermal_zone)
-    removed_boiler = remove_boiler(model, runner, thermal_zone)
-    removed_heater = remove_unit_heater(model, runner, thermal_zone)
-    removed_elec_baseboard = remove_electric_baseboard(model, runner, thermal_zone)
-    removed_ashp = remove_ashp(model, runner, thermal_zone)
-    removed_mshp = remove_mshp(model, runner, thermal_zone, unit)
-    removed_gshp = remove_gshp(model, runner, thermal_zone)
+    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
+    unitary_system_air_loops.each do |unitary_system_air_loop|
+      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
+      next if htg_coil.nil?
+
+      unless clg_coil.nil?
+        runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
+        system.resetCoolingCoil
+        clg_coil.remove
+      end
+
+      unless htg_coil.nil?
+        runner.registerInfo("Removed '#{htg_coil.name}' from '#{air_loop.name}'.")
+        system.resetHeatingCoil
+        htg_coil.remove
+      end
+
+      system.supplyFan.get.remove
+      runner.registerInfo("Removed '#{air_loop.name}' from #{thermal_zone.name}.")
+      air_loop.remove
+    end
+
+    self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
+    baseboards = self.get_baseboard_waters(model, runner, thermal_zone)
+    baseboards.each do |baseboard|
+      runner.registerInfo("Removed '#{baseboard.name}' from #{thermal_zone.name}.")
+      baseboard.remove
+    end
+
+    unitary_system_zone_hvacs = self.get_unitary_system_zone_hvacs(model, runner, thermal_zone)
+    unitary_system_zone_hvacs.each do |unitary_system_zone_hvac|
+      system, clg_coil, htg_coil = unitary_system_zone_hvac
+      runner.registerInfo("Removed '#{system.name}' from '#{thermal_zone.name}'.")
+      system.resetHeatingCoil
+      htg_coil.remove
+      if system.supplyFan.is_initialized
+        system.supplyFan.get.remove
+      end
+      system.remove
+    end
+
+    baseboards = self.get_baseboard_electrics(model, runner, thermal_zone)
+    baseboards.each do |baseboard|
+      runner.registerInfo("Removed '#{baseboard.name}' from #{thermal_zone.name}.")
+      baseboard.remove
+    end
+
+    # Remove any MSHP pan heater objects
+    obj_name = Constants.ObjectNameMiniSplitHeatPump(:htg, unit.name.to_s)
+    model.getEnergyManagementSystemSensors.each do |sensor|
+      next unless sensor.name.to_s == "#{obj_name} vrf energy sensor".gsub(" ", "_").gsub("|", "_")
+
+      sensor.remove
+    end
+    model.getEnergyManagementSystemSensors.each do |sensor|
+      next unless sensor.name.to_s == "#{obj_name} tout sensor".gsub(" ", "_").gsub("|", "_")
+
+      sensor.remove
+    end
+    model.getEnergyManagementSystemActuators.each do |actuator|
+      next unless actuator.name.to_s == "#{obj_name} pan heater actuator".gsub(" ", "_").gsub("|", "_")
+
+      actuator.remove
+    end
+    model.getEnergyManagementSystemPrograms.each do |program|
+      next unless program.name.to_s == "#{obj_name} pan heater program".gsub(" ", "_")
+
+      program.remove
+    end
+    model.getEnergyManagementSystemProgramCallingManagers.each do |program_calling_manager|
+      next unless program_calling_manager.name.to_s == obj_name + " pan heater program calling manager"
+
+      program_calling_manager.remove
+    end
+    thermal_zone.spaces.each do |space|
+      space.electricEquipment.each do |equip|
+        next unless equip.name.to_s == obj_name + " pan heater equip"
+
+        equip.electricEquipmentDefinition.remove
+      end
+    end
   end
 
   def self.remove_cooling(model, runner, thermal_zone, unit)
-    removed_ac = remove_central_ac(model, runner, thermal_zone)
-    removed_room_ac = remove_room_ac(model, runner, thermal_zone)
-    removed_ashp = remove_ashp(model, runner, thermal_zone)
-    removed_mshp = remove_mshp(model, runner, thermal_zone, unit)
-    if removed_mshp
-      removed_elec_baseboard = remove_electric_baseboard(model, runner, thermal_zone)
+    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
+    unitary_system_air_loops.each do |unitary_system_air_loop|
+      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
+      next if clg_coil.nil?
+
+      unless clg_coil.nil?
+        runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
+        system.resetCoolingCoil
+        clg_coil.remove
+      end
+
+      unless htg_coil.nil?
+        runner.registerInfo("Removed '#{htg_coil.name}' from '#{air_loop.name}'.")
+        system.resetHeatingCoil
+        htg_coil.remove
+      end
+
+      system.supplyFan.get.remove
+      runner.registerInfo("Removed '#{air_loop.name}' from #{thermal_zone.name}.")
+      air_loop.remove
     end
-    removed_gshp = remove_gshp(model, runner, thermal_zone)
+
+    ptacs = self.get_ptacs(model, runner, thermal_zone)
+    ptacs.each do |ptac|
+      runner.registerInfo("Removed '#{ptac.name}' from #{thermal_zone.name}.")
+      ptac.remove
+    end
   end
 
   def self.apply_heating_setpoints(model, runner, weather, weekday_setpoints, weekend_setpoints,
@@ -3705,21 +3798,7 @@ class HVAC
     # Returns a list of cooling equipment objects
 
     cooling_equipment = []
-    if self.has_ashp(model, runner, thermal_zone)
-      runner.registerInfo("Found air source heat pump providing cooling in #{thermal_zone.name}.")
-    end
-    if self.has_central_ac(model, runner, thermal_zone)
-      runner.registerInfo("Found central air conditioner in #{thermal_zone.name}.")
-    end
-    if self.has_gshp(model, runner, thermal_zone)
-      runner.registerInfo("Found ground source heat pump providing cooling in #{thermal_zone.name}.")
-    end
-    if self.has_room_ac(model, runner, thermal_zone)
-      runner.registerInfo("Found room air conditioner in #{thermal_zone.name}.")
-    end
-    if self.has_mshp(model, runner, thermal_zone)
-      runner.registerInfo("Found mini split heat pump providing cooling in #{thermal_zone.name}.")
-    end
+    hvac_types = []
 
     unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
     unitary_system_air_loops.each do |unitary_system_air_loop|
@@ -3727,17 +3806,35 @@ class HVAC
       next if clg_coil.nil?
 
       cooling_equipment << system
+      hvac_types << system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
     end
 
     ptacs = self.get_ptacs(model, runner, thermal_zone)
     ptacs.each do |ptac|
       cooling_equipment << ptac
+      hvac_types << ptac.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
     end
 
-    if self.has_ideal_air_cooling(model, runner, thermal_zone)
-      runner.registerInfo("Found ideal air system in #{thermal_zone.name}.")
-      ideal_air = self.get_ideal_air_cooling(model, runner, thermal_zone)
+    ideal_air = self.get_ideal_air_cooling(model, runner, thermal_zone)
+    if not ideal_air.nil?
       cooling_equipment << ideal_air
+      hvac_types << ideal_air.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
+    end
+
+    hvac_types.uniq.each do |hvac_type|
+      if hvac_type == Constants.ObjectNameCentralAirConditioner
+        runner.registerInfo("Found central air conditioner in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameAirSourceHeatPump
+        runner.registerInfo("Found air source heat pump providing cooling in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameGroundSourceHeatPump
+        runner.registerInfo("Found ground source heat pump providing cooling in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameMiniSplitHeatPump
+        runner.registerInfo("Found mini split heat pump providing cooling in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameRoomAirConditioner
+        runner.registerInfo("Found room air conditioner in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameIdealAirSystemCooling
+        runner.registerInfo("Found ideal air system providing cooling in #{thermal_zone.name}.")
+      end
     end
 
     return cooling_equipment
@@ -3747,27 +3844,7 @@ class HVAC
     # Returns a list of heating equipment objects
 
     heating_equipment = []
-    if self.has_ashp(model, runner, thermal_zone)
-      runner.registerInfo("Found air source heat pump providing heating in #{thermal_zone.name}.")
-    end
-    if self.has_furnace(model, runner, thermal_zone)
-      runner.registerInfo("Found furnace in #{thermal_zone.name}.")
-    end
-    if self.has_gshp(model, runner, thermal_zone)
-      runner.registerInfo("Found ground source heat pump providing heating in #{thermal_zone.name}.")
-    end
-    if self.has_boiler(model, runner, thermal_zone)
-      runner.registerInfo("Found boiler serving #{thermal_zone.name}.")
-    end
-    if self.has_electric_baseboard(model, runner, thermal_zone)
-      runner.registerInfo("Found electric baseboard in #{thermal_zone.name}.")
-    end
-    if self.has_mshp(model, runner, thermal_zone)
-      runner.registerInfo("Found mini split heat pump providing heating in #{thermal_zone.name}.")
-    end
-    if self.has_unit_heater(model, runner, thermal_zone)
-      runner.registerInfo("Found unit heater in #{thermal_zone.name}.")
-    end
+    hvac_types = []
 
     unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
     unitary_system_air_loops.each do |unitary_system_air_loop|
@@ -3775,16 +3852,19 @@ class HVAC
       next if htg_coil.nil?
 
       heating_equipment << system
+      hvac_types << system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
     end
 
     baseboards = self.get_baseboard_waters(model, runner, thermal_zone)
     baseboards.each do |baseboard|
       heating_equipment << baseboard
+      hvac_types << baseboard.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
     end
 
     baseboards = self.get_baseboard_electrics(model, runner, thermal_zone)
     baseboards.each do |baseboard|
       heating_equipment << baseboard
+      hvac_types << baseboard.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
     end
 
     unitary_system_zone_hvacs = self.get_unitary_system_zone_hvacs(model, runner, thermal_zone)
@@ -3793,12 +3873,31 @@ class HVAC
       next if htg_coil.nil?
 
       heating_equipment << system
+      hvac_types << system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
     end
 
-    if self.has_ideal_air_heating(model, runner, thermal_zone)
-      runner.registerInfo("Found ideal air system in #{thermal_zone.name}.")
-      ideal_air = self.get_ideal_air_heating(model, runner, thermal_zone)
+    ideal_air = self.get_ideal_air_heating(model, runner, thermal_zone)
+    if not ideal_air.nil?
       heating_equipment << ideal_air
+      hvac_types << ideal_air.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
+    end
+
+    hvac_types.uniq.each do |hvac_type|
+      if hvac_type == Constants.ObjectNameAirSourceHeatPump
+        runner.registerInfo("Found air source heat pump providing heating in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameFurnace
+        runner.registerInfo("Found furnace in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameGroundSourceHeatPump
+        runner.registerInfo("Found ground source heat pump providing heating in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameMiniSplitHeatPump
+        runner.registerInfo("Found mini split heat pump providing heating in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameElectricBaseboard
+        runner.registerInfo("Found electric baseboard in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameBoiler
+        runner.registerInfo("Found boiler serving #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameIdealAirSystemHeating
+        runner.registerInfo("Found ideal air system providing heating in #{thermal_zone.name}.")
+      end
     end
 
     return heating_equipment
@@ -3973,340 +4072,26 @@ class HVAC
     return nil
   end
 
-  # Has Equipment methods
+  def self.has_ducted_equipment(model, runner, air_loop)
+    system = get_unitary_system_from_air_loop_hvac(air_loop)
 
-  def self.has_central_ac(model, runner, thermal_zone)
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameCentralAirConditioner
-
+    hvac_type = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
+    if [Constants.ObjectNameCentralAirConditioner,
+        Constants.ObjectNameFurnace,
+        Constants.ObjectNameAirSourceHeatPump,
+        Constants.ObjectNameGroundSourceHeatPump].include? hvac_type
       return true
-    end
-    return false
-  end
-
-  def self.has_ashp(model, runner, thermal_zone)
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump
-
-      return true
-    end
-    return false
-  end
-
-  def self.has_gshp(model, runner, thermal_zone)
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameGroundSourceHeatPump
-
-      return true
-    end
-    return false
-  end
-
-  def self.has_furnace(model, runner, thermal_zone)
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameFurnace
-
-      return true
-    end
-    return false
-  end
-
-  def self.has_mshp(model, runner, thermal_zone)
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
-
-      return true
-    end
-    return false
-  end
-
-  def self.has_ducted_mshp(model, runner, thermal_zone)
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
-
+    elsif hvac_type == Constants.ObjectNameMiniSplitHeatPump
       is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPump).get
-      return is_ducted
-    end
-    return false
-  end
-
-  def self.has_room_ac(model, runner, thermal_zone)
-    return self.get_ptacs(model, runner, thermal_zone).length > 0
-  end
-
-  def self.has_boiler(model, runner, thermal_zone)
-    return self.get_baseboard_waters(model, runner, thermal_zone).length > 0
-  end
-
-  def self.has_electric_baseboard(model, runner, thermal_zone)
-    return self.get_baseboard_electrics(model, runner, thermal_zone).length > 0
-  end
-
-  def self.has_unit_heater(model, runner, thermal_zone)
-    return self.get_unitary_system_zone_hvacs(model, runner, thermal_zone).length > 0
-  end
-
-  def self.has_dehumidifier(model, runner, thermal_zone)
-    dehums = self.get_dehumidifiers(model, runner, thermal_zone)
-    unless dehums.empty?
-      return false
-    end
-
-    return true
-  end
-
-  def self.has_ideal_air_heating(model, runner, thermal_zone)
-    ideal_air = self.get_ideal_air_heating(model, runner, thermal_zone)
-    if not ideal_air.nil?
-      return true
-    end
-
-    return false
-  end
-
-  def self.has_ideal_air_cooling(model, runner, thermal_zone)
-    ideal_air = self.get_ideal_air_heating(model, runner, thermal_zone)
-    if not ideal_air.nil?
-      return true
-    end
-
-    return false
-  end
-
-  def self.has_ducted_equipment(model, runner, thermal_zone)
-    if has_central_ac(model, runner, thermal_zone)
-      return true
-    elsif has_furnace(model, runner, thermal_zone)
-      return true
-    elsif has_ashp(model, runner, thermal_zone)
-      return true
-    elsif has_gshp(model, runner, thermal_zone)
-      return true
-    elsif has_ducted_mshp(model, runner, thermal_zone)
-      return true
+      if is_ducted
+        return true
+      end
     end
 
     return false
   end
 
   # Remove Equipment methods
-
-  def self.remove_central_ac(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_central_ac(model, runner, thermal_zone)
-
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameCentralAirConditioner
-
-      runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
-      system.resetCoolingCoil
-      clg_coil.remove
-      system.supplyFan.get.remove
-      runner.registerInfo("Removed '#{air_loop.name}' from #{thermal_zone.name}.")
-      air_loop.remove
-    end
-    return true
-  end
-
-  def self.remove_ashp(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_ashp(model, runner, thermal_zone)
-
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump
-
-      unless htg_coil.nil?
-        runner.registerInfo("Removed '#{htg_coil.name}' from '#{air_loop.name}'.")
-        system.resetHeatingCoil
-        htg_coil.remove
-      end
-      unless clg_coil.nil?
-        runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
-        system.resetCoolingCoil
-        clg_coil.remove
-      end
-      system.supplyFan.get.remove
-      runner.registerInfo("Removed '#{air_loop.name}' from #{thermal_zone.name}.")
-      air_loop.remove
-    end
-    return true
-  end
-
-  def self.remove_gshp(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_gshp(model, runner, thermal_zone)
-
-    self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameGroundSourceHeatPump
-
-      unless htg_coil.nil?
-        runner.registerInfo("Removed '#{htg_coil.name}' from '#{air_loop.name}'.")
-        system.resetHeatingCoil
-        htg_coil.remove
-      end
-      unless clg_coil.nil?
-        runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
-        system.resetCoolingCoil
-        clg_coil.remove
-      end
-      system.supplyFan.get.remove
-      air_loop.remove
-      runner.registerInfo("Removed '#{air_loop.name}' from #{thermal_zone.name}.")
-    end
-    return true
-  end
-
-  def self.remove_furnace(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_furnace(model, runner, thermal_zone)
-
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameFurnace
-
-      runner.registerInfo("Removed '#{htg_coil.name}' from '#{air_loop.name}'.")
-      system.resetHeatingCoil
-      htg_coil.remove
-      system.supplyFan.get.remove
-      runner.registerInfo("Removed '#{air_loop.name}' from #{thermal_zone.name}.")
-      air_loop.remove
-    end
-    return true
-  end
-
-  def self.remove_mshp(model, runner, thermal_zone, unit)
-    # Returns true if the object was removed
-    return false if not self.has_mshp(model, runner, thermal_zone)
-
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next unless system.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
-
-      unless htg_coil.nil?
-        runner.registerInfo("Removed '#{htg_coil.name}' from '#{air_loop.name}'.")
-        system.resetHeatingCoil
-        htg_coil.remove
-      end
-      unless clg_coil.nil?
-        runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
-        system.resetCoolingCoil
-        clg_coil.remove
-      end
-      system.supplyFan.get.remove
-      runner.registerInfo("Removed '#{air_loop.name}' from #{thermal_zone.name}.")
-      air_loop.remove
-    end
-    obj_name = Constants.ObjectNameMiniSplitHeatPump(:htg, unit.name.to_s)
-    model.getEnergyManagementSystemSensors.each do |sensor|
-      next unless sensor.name.to_s == "#{obj_name} vrf energy sensor".gsub(" ", "_").gsub("|", "_")
-
-      sensor.remove
-    end
-    model.getEnergyManagementSystemSensors.each do |sensor|
-      next unless sensor.name.to_s == "#{obj_name} tout sensor".gsub(" ", "_").gsub("|", "_")
-
-      sensor.remove
-    end
-    model.getEnergyManagementSystemActuators.each do |actuator|
-      next unless actuator.name.to_s == "#{obj_name} pan heater actuator".gsub(" ", "_").gsub("|", "_")
-
-      actuator.remove
-    end
-    model.getEnergyManagementSystemPrograms.each do |program|
-      next unless program.name.to_s == "#{obj_name} pan heater program".gsub(" ", "_")
-
-      program.remove
-    end
-    model.getEnergyManagementSystemProgramCallingManagers.each do |program_calling_manager|
-      next unless program_calling_manager.name.to_s == obj_name + " pan heater program calling manager"
-
-      program_calling_manager.remove
-    end
-    thermal_zone.spaces.each do |space|
-      space.electricEquipment.each do |equip|
-        next unless equip.name.to_s == obj_name + " pan heater equip"
-
-        equip.electricEquipmentDefinition.remove
-      end
-    end
-    return true
-  end
-
-  def self.remove_room_ac(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_room_ac(model, runner, thermal_zone)
-
-    ptacs = self.get_ptacs(model, runner, thermal_zone)
-    ptacs.each do |ptac|
-      runner.registerInfo("Removed '#{ptac.name}' from #{thermal_zone.name}.")
-      ptac.remove
-    end
-    return true
-  end
-
-  def self.remove_boiler(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_boiler(model, runner, thermal_zone)
-
-    self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
-    baseboards = self.get_baseboard_waters(model, runner, thermal_zone)
-    baseboards.each do |baseboard|
-      runner.registerInfo("Removed '#{baseboard.name}' from #{thermal_zone.name}.")
-      baseboard.remove
-    end
-    return true
-  end
-
-  def self.remove_electric_baseboard(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_electric_baseboard(model, runner, thermal_zone)
-
-    baseboards = self.get_baseboard_electrics(model, runner, thermal_zone)
-    baseboards.each do |baseboard|
-      runner.registerInfo("Removed '#{baseboard.name}' from #{thermal_zone.name}.")
-      baseboard.remove
-    end
-    return true
-  end
-
-  def self.remove_unit_heater(model, runner, thermal_zone)
-    # Returns true if the object was removed
-    return false if not self.has_unit_heater(model, runner, thermal_zone)
-
-    unitary_system_zone_hvacs = self.get_unitary_system_zone_hvacs(model, runner, thermal_zone)
-    unitary_system_zone_hvacs.each do |unitary_system_zone_hvac|
-      system, clg_coil, htg_coil = unitary_system_zone_hvac
-      runner.registerInfo("Removed '#{system.name}' from '#{thermal_zone.name}'.")
-      system.resetHeatingCoil
-      htg_coil.remove
-      if system.supplyFan.is_initialized
-        system.supplyFan.get.remove
-      end
-      system.remove
-    end
-    return true
-  end
 
   def self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
     model.getPlantLoops.each do |plant_loop|

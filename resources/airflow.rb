@@ -136,7 +136,7 @@ class Airflow
       success = process_infiltration_for_unit(model, runner, unit, obj_name_infil, infil, wind_speed, building, weather, unit_living, unit_finished_basement)
       return false if not success
 
-      success = process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, infil.is_existing_home, infil.a_o, mech_vent, building, nbeds, nbaths, weather, unit_ffa, unit_living, units.size)
+      success = process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, infil.is_existing_home, infil.a_o, mech_vent, building, nbeds, nbaths, weather, unit_ffa, unit_living, units.size, cfis_systems)
       return false if not success
 
       cfis_program = nil
@@ -156,7 +156,7 @@ class Airflow
       duct_programs = {}
       duct_lks = {}
       duct_systems.each do |ducts, air_loops|
-        success = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_living, unit_finished_basement, air_loops)
+        success = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_living, air_loops)
         return false if not success
 
         success = create_ducts_objects(model, runner, building, unit, ducts, unit_living, unit_finished_basement, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_systems)
@@ -716,13 +716,16 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, is_existing_home, ela, mech_vent, building, nbeds, nbaths, weather, unit_ffa, unit_living, num_units)
+  def self.process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, is_existing_home, ela, mech_vent, building, nbeds, nbaths, weather, unit_ffa, unit_living, num_units, cfis_systems)
     if mech_vent.type == Constants.VentTypeCFIS
-      # FIXME: Need to update this logic
-      # if not has_forced_air_equipment
-      #  runner.registerError("A CFIS ventilation system has been selected but the building does not have central, forced air equipment.")
-      #  return false
-      # end
+      cfis_systems.each do |cfis, air_loops|
+        air_loops.each do |air_loop|
+          if not HVAC.has_ducted_equipment(model, runner, air_loop)
+            runner.registerError("A CFIS ventilation system has been specified but the building does not have central, forced air equipment.")
+            return false
+          end
+        end
+      end
     end
 
     if not mech_vent.frac_62_2.nil?
@@ -912,7 +915,7 @@ class Airflow
     return true
   end
 
-  def self.process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_living, unit_finished_basement, air_loops)
+  def self.process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_living, air_loops)
     # Validate Inputs
     ducts.each do |duct|
       if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
@@ -937,26 +940,15 @@ class Airflow
       end
     end
 
-    # FIXME: Logic below needs to be hvac-specific
-    # if unit_has_mshp # has mshp
-    #  miniSplitHPIsDucted = HVAC.has_ducted_mshp(model, runner, unit_living.zone)
-    #  if ducts.size > 0 and not miniSplitHPIsDucted # if not ducted but specified ducts, warning and override
-    #    runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
-    #    ducts.clear
-    #  elsif ducts.size == 0 and miniSplitHPIsDucted # if ducted but specified no ducts, warning
-    #    runner.registerWarning("A ducted mini-split heat pump was found but no ducts were specified.")
-    #  end
-    # end
-
-    # FIXME: Logic below needs to be hvac-specific
-    # has_ducted_equip = HVAC.has_ducted_equipment(model, runner, unit_living.zone)
-    # puts "has_ducted_equip #{has_ducted_equip}"
-    # if ducts.size > 0 and not has_ducted_equip
-    #  runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
-    #  ducts.clear
-    # elsif ducts.size == 0 and has_ducted_equip
-    #  runner.registerWarning("Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.")
-    # end
+    air_loops.each do |air_loop|
+      has_ducted_hvac = HVAC.has_ducted_equipment(model, runner, air_loop)
+      if ducts.size > 0 and not has_ducted_hvac
+        runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
+        ducts.clear
+      elsif ducts.size == 0 and has_ducted_hvac
+        runner.registerWarning("Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.")
+      end
+    end
 
     ducts.each do |duct|
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
