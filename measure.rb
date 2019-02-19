@@ -2958,7 +2958,11 @@ class OSModel
       loop_hvacs.each do |sys_id, loops|
         next unless cfis_sys_ids.include? sys_id
 
-        cfis_airloops.concat(loops)
+        loops.each do |loop|
+          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+
+          cfis_airloops << loop
+        end
       end
       cfis = CFIS.new(mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac)
       cfis_systems = { cfis => cfis_airloops }
@@ -3065,7 +3069,7 @@ class OSModel
 
         sys_id = sys.elements["SystemIdentifier"].attributes["id"]
         loop_hvacs[sys_id].each do |loop|
-          next if not loop.is_a? OpenStudio::Model::AirLoopHVAC
+          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
 
           systems_for_this_duct << loop
         end
@@ -3096,7 +3100,7 @@ class OSModel
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0]") do |htgsys|
       heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
       htg_type = heating_system_values[:heating_system_type]
-      next if not ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
+      next unless ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
 
       fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
       next if fuel == Constants.FuelTypeElectric
@@ -3541,7 +3545,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? WoodStudConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? WoodStudConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3562,7 +3566,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? SteelStudConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? SteelStudConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3582,7 +3586,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? DoubleStudConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? DoubleStudConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3612,7 +3616,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? SIPConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? SIPConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
       non_cavity_r += Material.new(nil, constr_set.sheath_thick_in, BaseMaterial.Wood).rvalue
@@ -3647,7 +3651,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? CMUConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? CMUConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3673,7 +3677,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? ICFConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? ICFConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3698,7 +3702,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? GenericConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? GenericConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
