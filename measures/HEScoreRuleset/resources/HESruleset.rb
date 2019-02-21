@@ -301,9 +301,9 @@ class HEScoreRuleset
 
         wall_r = get_wood_stud_wall_assembly_r(wall_r_cavity, wall_r_cont, orig_wall_values[:siding], wall_ove)
       elsif wall_type == "StructuralBrick"
-        wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
+        wall_r_cont = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='continuous']/NominalRValue"))
 
-        wall_r = get_structural_block_wall_assembly_r(wall_r_cavity)
+        wall_r = get_structural_block_wall_assembly_r(wall_r_cont)
       elsif wall_type == "ConcreteMasonryUnit"
         wall_r_cavity = Integer(XMLHelper.get_value(orig_wall, "Insulation/Layer[InstallationType='cavity']/NominalRValue"))
 
@@ -336,7 +336,7 @@ class HEScoreRuleset
       orig_window_values = HPXML.get_window_values(window: orig_window)
       win_ufactor = orig_window_values[:ufactor]
       win_shgc = orig_window_values[:shgc]
-      # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
+      win_has_solar_screen = (orig_window_values[:exterior_shading] == "solar screens") # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
 
       if win_ufactor.nil?
         win_frame_type = orig_window_values[:frame_type]
@@ -365,6 +365,7 @@ class HEScoreRuleset
       orig_skylight_values = HPXML.get_skylight_values(skylight: orig_skylight)
       sky_ufactor = orig_skylight_values[:ufactor]
       sky_shgc = orig_skylight_values[:shgc]
+      sky_has_solar_screen = (orig_skylight_values[:exterior_shading] == "solar screens") # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
 
       if sky_ufactor.nil?
         sky_frame_type = orig_skylight_values[:frame_type]
@@ -947,16 +948,16 @@ def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   fail "Could not get default wood stud wall assembly R-value for R-cavity '#{r_cavity}' and R-cont '#{r_cont}' and siding '#{siding}' and ove '#{ove}'"
 end
 
-def get_structural_block_wall_assembly_r(r_cavity)
+def get_structural_block_wall_assembly_r(r_cont)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  val = { 0 => 2.9,              # ewbr00nn
-          5 => 7.9,              # ewbr05nn
-          10 => 12.8 }[r_cavity] # ewbr10nn
+  val = { 0 => 2.9,            # ewbr00nn
+          5 => 7.9,            # ewbr05nn
+          10 => 12.8 }[r_cont] # ewbr10nn
   return val if not val.nil?
 
-  fail "Could not get default structural block wall assembly R-value for R-cavity '#{r_cavity}'"
+  fail "Could not get default structural block wall assembly R-value for R-cavity '#{r_cont}'"
 end
 
 def get_concrete_block_wall_assembly_r(r_cavity, siding)

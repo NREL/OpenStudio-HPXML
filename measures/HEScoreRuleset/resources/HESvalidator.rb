@@ -141,8 +141,8 @@ class HEScoreValidator
       ## [WallType=Brick]
       '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/StructuralBrick]' => {
         'Siding' => zero,
-        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
-        'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero,
+        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => zero,
+        'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => one,
       },
 
       ## [WallType=CMU]
@@ -164,6 +164,7 @@ class HEScoreValidator
         'Area' => one,
         'AttachedToWall' => one,
         '[FrameType | UFactor]' => one, # See [WindowType=Detailed] or [WindowType=Simple]
+        '[ExteriorShading="none" or ExteriorShading="solar screens"]' => one,
       },
 
       ## [WindowType=Detailed]
@@ -184,6 +185,7 @@ class HEScoreValidator
         'Area' => one,
         'AttachedToRoof' => one,
         '[FrameType | UFactor]' => one, # See [SkylightType=Detailed] or [SkylightType=Simple]
+        '[ExteriorShading="none" or ExteriorShading="solar screens"]' => one,
       },
 
       ## [SkylightType=Detailed]

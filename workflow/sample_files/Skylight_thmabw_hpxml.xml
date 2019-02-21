@@ -270,6 +270,7 @@
             <GlassLayers>triple-pane</GlassLayers>
             <GlassType>low-e</GlassType>
             <GasFill>argon</GasFill>
+            <ExteriorShading>none</ExteriorShading>
             <AttachedToRoof idref="roof1"/>
             <extension>
               <hescore_skylight_code>thmabw</hescore_skylight_code>

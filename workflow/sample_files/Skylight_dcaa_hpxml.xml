@@ -271,6 +271,7 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
+            <ExteriorShading>none</ExteriorShading>
             <AttachedToRoof idref="roof1"/>
             <extension>
               <hescore_skylight_code>dcaa</hescore_skylight_code>

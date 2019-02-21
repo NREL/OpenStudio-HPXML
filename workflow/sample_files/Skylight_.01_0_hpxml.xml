@@ -266,6 +266,7 @@
             <Area>20</Area>
             <UFactor>0.01</UFactor>
             <SHGC>0.01</SHGC>
+            <ExteriorShading>none</ExteriorShading>
             <AttachedToRoof idref="roof1"/>
           </Skylight>
         </Skylights>
