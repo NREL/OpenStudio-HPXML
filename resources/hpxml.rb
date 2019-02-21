@@ -770,7 +770,7 @@ class HPXML
                                       "InteriorShadingFactorWinter": to_float(interior_shading_factor_winter) })
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill])
+                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading])
 
     return window
   end
@@ -825,7 +825,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill])
+                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading])
 
     return skylight
   end
