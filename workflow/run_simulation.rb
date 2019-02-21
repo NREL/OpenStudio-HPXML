@@ -252,12 +252,73 @@ def create_output(designdir, resultsdir)
   end
 end
 
+def download_epws
+  weather_dir = File.join(File.dirname(__FILE__), "..", "weather")
+
+  num_epws_expected = File.readlines(File.join(weather_dir, "data.csv")).size - 1
+  num_epws_actual = Dir[File.join(weather_dir, "*.epw")].count
+  num_cache_expcted = num_epws_expected
+  num_cache_actual = Dir[File.join(weather_dir, "*.cache")].count
+  if num_epws_actual == num_epws_expected and num_cache_actual == num_cache_expcted
+    puts "Weather directory is already up-to-date."
+    puts "#{num_epws_actual} weather files are available in the weather directory."
+    puts "Completed."
+    exit!
+  end
+
+  require 'net/http'
+  require 'tempfile'
+
+  tmpfile = Tempfile.new("epw")
+
+  url = URI.parse("http://s3.amazonaws.com/epwweatherfiles/openstudio-eri-tmy3s-cache.zip")
+  http = Net::HTTP.new(url.host, url.port)
+
+  params = { 'User-Agent' => 'curl/7.43.0', 'Accept-Encoding' => 'identity' }
+  request = Net::HTTP::Get.new(url.path, params)
+  request.content_type = 'application/zip, application/octet-stream'
+
+  http.request request do |response|
+    total = response.header["Content-Length"].to_i
+    if total == 0
+      fail "Did not successfully download zip file."
+    end
+
+    size = 0
+    progress = 0
+    open tmpfile, 'wb' do |io|
+      response.read_body do |chunk|
+        io.write chunk
+        size += chunk.size
+        new_progress = (size * 100) / total
+        unless new_progress == progress
+          puts "Downloading %s (%3d%%) " % [url.path, new_progress]
+        end
+        progress = new_progress
+      end
+    end
+  end
+
+  puts "Extracting weather files..."
+  unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
+  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
+
+  num_epws_actual = Dir[File.join(weather_dir, "*.epw")].count
+  puts "#{num_epws_actual} weather files are available in the weather directory."
+  puts "Completed."
+  exit!
+end
+
 options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename(__FILE__)} -x building.xml\n e.g., #{File.basename(__FILE__)} -s -x sample_files/valid.xml\n"
 
   opts.on('-x', '--xml <FILE>', 'HPXML file') do |t|
     options[:hpxml] = t
+  end
+
+  opts.on('-w', '--download-weather', 'Downloads all weather files') do |t|
+    options[:epws] = t
   end
 
   options[:debug] = false
@@ -275,6 +336,10 @@ OptionParser.new do |opts|
     exit!
   end
 end.parse!
+
+if options[:epws]
+  download_epws
+end
 
 if not options[:hpxml]
   fail "HPXML argument is required. Call #{File.basename(__FILE__)} -h for usage."

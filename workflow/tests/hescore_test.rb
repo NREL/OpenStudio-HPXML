@@ -10,7 +10,23 @@ require_relative '../../measures/HPXMLtoOpenStudio/resources/constants'
 require_relative '../../measures/HPXMLtoOpenStudio/resources/unit_conversions'
 require_relative '../../measures/HPXMLtoOpenStudio/resources/hotwater_appliances'
 
-class EnergyRatingIndexTest < Minitest::Unit::TestCase
+class HEScoreTest < Minitest::Unit::TestCase
+  def before_setup
+    # Download weather files
+    this_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
+    cli_path = OpenStudio.getOpenStudioCLI
+    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "..", "run_simulation.rb")}\" --download-weather"
+    system(command)
+
+    num_epws_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
+    num_epws_actual = Dir[File.join(this_dir, "..", "weather", "*.epw")].count
+    assert_equal(num_epws_expected, num_epws_actual)
+
+    num_cache_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
+    num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*.cache")].count
+    assert_equal(num_cache_expected, num_cache_actual)
+  end
+
   def test_valid_simulations
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
@@ -28,9 +44,9 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     # Check input HPXML is valid
     xml = File.absolute_path(xml)
 
-    # Run energy_rating_index workflow
+    # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "../run_simulation.rb")}\" -s -x #{xml}"
+    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "../run_simulation.rb")}\" -x #{xml}"
     start_time = Time.now
     system(command)
     runtime = Time.now - start_time
@@ -95,8 +111,11 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
     # Get HPXML values for HVAC
     hvac_plant = hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant"]
     htg_fuels = []
-    hvac_plant.elements.each("HeatingSystem[FractionHeatLoadServed>0] | HeatPump[FractionHeatLoadServed>0]") do |htg_sys|
+    hvac_plant.elements.each("HeatingSystem[FractionHeatLoadServed>0]") do |htg_sys|
       htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, "HeatingSystemFuel")]
+    end
+    hvac_plant.elements.each("HeatPump[FractionHeatLoadServed>0]") do |hp|
+      htg_fuels << fuel_map["electricity"]
     end
     has_clg = !hvac_plant.elements["CoolingSystem[FractionCoolLoadServed>0] | HeatPump[FractionCoolLoadServed>0]"].nil?
 
@@ -145,7 +164,9 @@ class EnergyRatingIndexTest < Minitest::Unit::TestCase
 
       # Check heating end use by fuel reflects presence of system
       if category == "heating"
-        if htg_fuels.include? fuel
+        if xml.include? "sample_files/Location_CZ09_hpxml.xml"
+          # skip test: hot climate so potentially no heating energy
+        elsif htg_fuels.include? fuel
           assert_operator(value, :>, 0)
         else
           assert_equal(0, value)
