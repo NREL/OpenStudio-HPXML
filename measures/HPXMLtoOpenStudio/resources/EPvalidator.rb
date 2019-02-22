@@ -377,7 +377,7 @@ class EnergyPlusValidator
       },
 
       ## [CoolingType=RoomAC]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioning"]' => {
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioner"]' => {
         'DistributionSystem' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
       },
