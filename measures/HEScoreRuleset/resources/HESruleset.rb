@@ -646,6 +646,7 @@ class HEScoreRuleset
       orig_wh_sys_values = HPXML.get_water_heating_system_values(water_heating_system: orig_wh_sys)
       wh_year = orig_wh_sys_values[:year_installed]
       wh_ef = orig_wh_sys_values[:energy_factor]
+      wh_uef = orig_wh_sys_values[:uniform_energy_factor]
       wh_fuel = orig_wh_sys_values[:fuel_type]
       wh_type = orig_wh_sys_values[:water_heater_type]
 
@@ -661,15 +662,20 @@ class HEScoreRuleset
       if wh_type == "storage water heater" and wh_fuel != "electricity"
         wh_recovery_efficiency = get_default_water_heater_re(wh_fuel)
       end
+      wh_tank_volume = nil
+      if wh_type != "instantaneous water heater"
+        wh_tank_volume = get_default_water_heater_volume(wh_fuel)
+      end
       HPXML.add_water_heating_system(hpxml: hpxml,
                                      id: orig_wh_sys_values[:id],
                                      fuel_type: wh_fuel,
                                      water_heater_type: wh_type,
                                      location: "living space", # FIXME: Verify
-                                     tank_volume: get_default_water_heater_volume(wh_fuel),
+                                     tank_volume: wh_tank_volume,
                                      fraction_dhw_load_served: 1.0,
                                      heating_capacity: wh_capacity,
                                      energy_factor: wh_ef,
+                                     uniform_energy_factor: wh_uef,
                                      recovery_efficiency: wh_recovery_efficiency)
     end
   end

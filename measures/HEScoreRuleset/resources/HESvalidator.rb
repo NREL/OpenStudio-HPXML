@@ -305,18 +305,24 @@ class HEScoreValidator
 
       # [WaterHeatingSystem]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => {
-        '[WaterHeaterType="storage water heater" or WaterHeaterType="heat pump water heater"]' => one, # See [WHType=Tank] or [WHType=HeatPump]
+        '[WaterHeaterType="storage water heater" or WaterHeaterType="instantaneous water heater" or WaterHeaterType="heat pump water heater"]' => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump]
       },
 
       ## [WHType=Tank]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]' => {
-        '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity"]' => one, # If not electricity, see [WHType=FuelTank]
-        '[YearInstalled | EnergyFactor]' => one,
+        '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity"]' => one,
+        '[YearInstalled | EnergyFactor | UniformEnergyFactor]' => one,
+      },
+
+      ## [WHType=Tankless]
+      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="instantaneous water heater"]' => {
+        '[FuelType="natural gas" or FuelType="fuel oil" or FuelType="propane" or FuelType="electricity"]' => one,
+        '[EnergyFactor | UniformEnergyFactor]' => one,
       },
 
       ## [WHType=HeatPump]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="heat pump water heater"]' => {
-        'EnergyFactor' => one,
+        '[EnergyFactor | UniformEnergyFactor]' => one,
       },
 
       # [PVSystem]
