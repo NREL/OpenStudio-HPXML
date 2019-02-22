@@ -1,4 +1,4 @@
-require_relative '../../../workflow/tests/minitest_helper'
+require_relative '../../HPXMLtoOpenStudio/tests/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
