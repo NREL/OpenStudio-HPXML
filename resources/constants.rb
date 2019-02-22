@@ -406,7 +406,7 @@ class Constants
   def self.ObjectNameAirflow(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res af#{s_unit}"
   end
@@ -414,7 +414,7 @@ class Constants
   def self.ObjectNameAirSourceHeatPump(mode = nil, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     s_mode = ""
     if not mode.nil?
@@ -428,7 +428,7 @@ class Constants
   def self.ObjectNameBath(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res bath#{s_unit}"
   end
@@ -436,27 +436,27 @@ class Constants
   def self.ObjectNameBathDist(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res bath dist#{s_unit}"
   end
 
-  def self.ObjectNameBoiler(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
+  def self.ObjectNameBoiler(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
-    return "res boiler #{fueltype}#{s_unit}"
+    return "res boiler#{s_unit}"
   end
 
   def self.ObjectNameBuildingUnit(unit_num = 1)
-    return "unit #{unit_num}"
+    return "u#{unit_num}"
   end
 
   def self.ObjectNameCeilingFan(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res ceil fan#{s_unit}"
   end
@@ -464,7 +464,7 @@ class Constants
   def self.ObjectNameCentralAirConditioner(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res ac#{s_unit}"
   end
@@ -472,7 +472,7 @@ class Constants
   def self.ObjectNameClothesWasher(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res cw#{s_unit}"
   end
@@ -484,7 +484,7 @@ class Constants
     end
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res cd#{s_fuel}#{s_unit}"
   end
@@ -496,7 +496,7 @@ class Constants
     end
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res range#{s_fuel}#{s_unit}"
   end
@@ -512,7 +512,7 @@ class Constants
   def self.ObjectNameDehumidifier(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res dehumid#{s_unit}"
   end
@@ -520,13 +520,13 @@ class Constants
   def self.ObjectNameDishwasher(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res dw#{s_unit}"
   end
 
   def self.ObjectNameDucts(airloop_name)
-    return "res ds #{airloop_name}"
+    return "res ds #{airloop_name.gsub('res ', '')}"
   end
 
   def self.ObjectNameEaves(facade = "")
@@ -539,7 +539,7 @@ class Constants
   def self.ObjectNameElectricBaseboard(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res bb#{s_unit}"
   end
@@ -547,7 +547,7 @@ class Constants
   def self.ObjectNameExtraRefrigerator(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res extra refrig#{s_unit}"
   end
@@ -555,17 +555,16 @@ class Constants
   def self.ObjectNameFreezer(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res freezer#{s_unit}"
   end
 
-  def self.ObjectNameFurnace(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+  def self.ObjectNameFurnace(unit_name = self.ObjectNameBuildingUnit)
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
-    return "res fur #{fueltype}#{s_unit}"
+    return "res fur#{s_unit}"
   end
 
   def self.ObjectNameFurniture
@@ -575,7 +574,7 @@ class Constants
   def self.ObjectNameGasFireplace(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res gas fireplace#{s_unit}"
   end
@@ -583,7 +582,7 @@ class Constants
   def self.ObjectNameGasGrill(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res gas grill#{s_unit}"
   end
@@ -591,7 +590,7 @@ class Constants
   def self.ObjectNameGasLighting(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res gas lighting#{s_unit}"
   end
@@ -599,7 +598,7 @@ class Constants
   def self.ObjectNameGroundSourceHeatPump(mode = nil, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     s_mode = ""
     if not mode.nil?
@@ -621,7 +620,7 @@ class Constants
   def self.ObjectNameHotTubHeater(fueltype, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res hot tub heater #{fueltype}#{s_unit}"
   end
@@ -629,7 +628,7 @@ class Constants
   def self.ObjectNameHotTubPump(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res hot tub pump#{s_unit}"
   end
@@ -637,7 +636,7 @@ class Constants
   def self.ObjectNameHotWaterRecircPump(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res hot water recirc pump#{s_unit}"
   end
@@ -645,7 +644,7 @@ class Constants
   def self.ObjectNameHotWaterDistribution(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res hot water distribution#{s_unit}"
   end
@@ -653,7 +652,7 @@ class Constants
   def self.ObjectNameIdealAirSystemCooling(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res ideal cool#{s_unit}"
   end
@@ -661,7 +660,7 @@ class Constants
   def self.ObjectNameIdealAirSystemHeating(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res ideal heat#{s_unit}"
   end
@@ -669,7 +668,7 @@ class Constants
   def self.ObjectNameInfiltration(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res infil#{s_unit}"
   end
@@ -677,7 +676,7 @@ class Constants
   def self.ObjectNameLighting(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res lighting#{s_unit}"
   end
@@ -685,7 +684,7 @@ class Constants
   def self.ObjectNameMechanicalVentilation(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res mv#{s_unit}"
   end
@@ -693,7 +692,7 @@ class Constants
   def self.ObjectNameMiniSplitHeatPump(mode = nil, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     s_mode = ""
     if not mode.nil?
@@ -707,7 +706,7 @@ class Constants
   def self.ObjectNameMiscPlugLoads(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res misc plug loads#{s_unit}"
   end
@@ -715,7 +714,7 @@ class Constants
   def self.ObjectNameMiscTelevision(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res misc television#{s_unit}"
   end
@@ -723,7 +722,7 @@ class Constants
   def self.ObjectNameNaturalVentilation(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res nv#{s_unit}"
   end
@@ -738,7 +737,7 @@ class Constants
   def self.ObjectNameOccupants(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res occupants#{s_unit}"
   end
@@ -753,7 +752,7 @@ class Constants
   def self.ObjectNamePhotovoltaics(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res photovoltaics#{s_unit}"
   end
@@ -761,7 +760,7 @@ class Constants
   def self.ObjectNamePoolHeater(fueltype, unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res pool heater #{fueltype}#{s_unit}"
   end
@@ -769,7 +768,7 @@ class Constants
   def self.ObjectNamePoolPump(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res pool pump#{s_unit}"
   end
@@ -777,7 +776,7 @@ class Constants
   def self.ObjectNameRefrigerator(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res refrig#{s_unit}"
   end
@@ -785,7 +784,7 @@ class Constants
   def self.ObjectNameRelativeHumiditySetpoint(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res rh setpoint#{s_unit}"
   end
@@ -793,7 +792,7 @@ class Constants
   def self.ObjectNameRoomAirConditioner(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res room ac#{s_unit}"
   end
@@ -801,7 +800,7 @@ class Constants
   def self.ObjectNameShower(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res shower#{s_unit}"
   end
@@ -809,7 +808,7 @@ class Constants
   def self.ObjectNameShowerDist(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res shower dist#{s_unit}"
   end
@@ -817,7 +816,7 @@ class Constants
   def self.ObjectNameSink(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res sink#{s_unit}"
   end
@@ -825,7 +824,7 @@ class Constants
   def self.ObjectNameSinkDist(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res sink dist#{s_unit}"
   end
@@ -833,23 +832,23 @@ class Constants
   def self.ObjectNameSolarHotWater(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res solar hot water#{s_unit}"
   end
 
-  def self.ObjectNameUnitHeater(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
+  def self.ObjectNameUnitHeater(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
-    return "res unit heater #{fueltype}#{s_unit}"
+    return "res unit heater#{s_unit}"
   end
 
   def self.ObjectNameWaterHeater(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res wh#{s_unit}"
   end
@@ -857,7 +856,7 @@ class Constants
   def self.ObjectNameWellPump(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "res well pump#{s_unit}"
   end
@@ -889,7 +888,7 @@ class Constants
   def self.PlantLoopDomesticWater(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "Domestic Hot Water Loop#{s_unit}"
   end
@@ -897,7 +896,7 @@ class Constants
   def self.PlantLoopSolarHotWater(unit_name = self.ObjectNameBuildingUnit)
     s_unit = ""
     if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
+      s_unit = " #{unit_name}"
     end
     return "Solar Hot Water Loop#{s_unit}"
   end

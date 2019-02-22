@@ -225,7 +225,7 @@ class Waterheater
       return false
     end
 
-    obj_name_hpwh = Constants.ObjectNameWaterHeater(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
+    obj_name_hpwh = Constants.ObjectNameWaterHeater(unit.name.to_s)
 
     alt = weather.header.Altitude
     water_heater_tz = space.thermalZone.get

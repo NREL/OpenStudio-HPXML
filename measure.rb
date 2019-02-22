@@ -3046,7 +3046,7 @@ class OSModel
 
         ducts << Duct.new(Constants.DuctSideReturn, return_duct_location, nil, return_duct_leakage_cfm25, return_duct_area, return_duct_r)
       end
-      
+
       # FIXME FIXME FIXME
       # TEMPORARY FOR COMPARISON TO MASTER BRANCH
       def self.get_duct_supply_surface_area(mult, ffa, num_stories)
@@ -3057,6 +3057,7 @@ class OSModel
           return 0.2 * ffa * mult
         end
       end
+
       def self.get_return_surface_area(mult, ffa, num_stories, num_returns)
         # Duct Surface Areas per 2010 BA Benchmark
         if num_stories == 1

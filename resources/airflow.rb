@@ -98,10 +98,10 @@ class Airflow
     adiabatic_const.insertLayer(0, adiabatic_mat)
 
     units.each_with_index do |unit, unit_index|
-      obj_name_airflow = Constants.ObjectNameAirflow(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
-      obj_name_infil = Constants.ObjectNameInfiltration(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
-      obj_name_natvent = Constants.ObjectNameNaturalVentilation(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
-      obj_name_mech_vent = Constants.ObjectNameMechanicalVentilation(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
+      obj_name_airflow = Constants.ObjectNameAirflow(unit.name.to_s)
+      obj_name_infil = Constants.ObjectNameInfiltration(unit.name.to_s)
+      obj_name_natvent = Constants.ObjectNameNaturalVentilation(unit.name.to_s)
+      obj_name_mech_vent = Constants.ObjectNameMechanicalVentilation(unit.name.to_s)
 
       nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
       if nbeds.nil? or nbaths.nil?
@@ -719,11 +719,15 @@ class Airflow
   def self.process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, is_existing_home, ela, mech_vent, building, nbeds, nbaths, weather, unit_ffa, unit_living, num_units, cfis_systems)
     if mech_vent.type == Constants.VentTypeCFIS
       cfis_systems.each do |cfis, air_loops|
+        has_ducted_hvac = false
         air_loops.each do |air_loop|
-          if not HVAC.has_ducted_equipment(model, runner, air_loop)
-            runner.registerError("A CFIS ventilation system has been specified but the building does not have central, forced air equipment.")
-            return false
+          if HVAC.has_ducted_equipment(model, runner, air_loop)
+            has_ducted_hvac = true
           end
+        end
+        if not has_ducted_hvac
+          runner.registerError("A CFIS ventilation system has been specified but the building does not have central, forced air equipment.")
+          return false
         end
       end
     end
@@ -940,14 +944,17 @@ class Airflow
       end
     end
 
+    has_ducted_hvac = false
     air_loops.each do |air_loop|
-      has_ducted_hvac = HVAC.has_ducted_equipment(model, runner, air_loop)
-      if ducts.size > 0 and not has_ducted_hvac
-        runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
-        ducts.clear
-      elsif ducts.size == 0 and has_ducted_hvac
-        runner.registerWarning("Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.")
+      if HVAC.has_ducted_equipment(model, runner, air_loop)
+        has_ducted_hvac = true
       end
+    end
+    if ducts.size > 0 and not has_ducted_hvac
+      runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
+      ducts.clear
+    elsif ducts.size == 0 and has_ducted_hvac
+      runner.registerWarning("Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.")
     end
 
     ducts.each do |duct|
@@ -1283,20 +1290,6 @@ class Airflow
     duct_zones = ducts.map { |duct| duct.location_zone }.uniq!
     living_space = unit_living.zone.spaces[0]
 
-    def self.create_duct_actuator(model, name, space)
-      var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
-      other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-      other_equip_def.setName("#{var.name} equip")
-      other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
-      other_equip.setName(other_equip_def.name.to_s)
-      other_equip.setFuelType("None")
-      other_equip.setSchedule(model.alwaysOnDiscreteSchedule)
-      other_equip.setSpace(space)
-      actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, "OtherEquipment", "Power Level")
-      actuator.setName("#{other_equip.name} act")
-      return var, actuator
-    end
-
     # Obtain data across all air loops (needed for CFIS w/ separate heating and cooling air loops)
     max_supply_fan_mfr_map = {}
     fan_rtf_var_map = {}
@@ -1305,7 +1298,7 @@ class Airflow
     air_loops.each_with_index do |air_loop, air_loop_index|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
 
-      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
+      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name.to_s)
 
       # Get the supply fan
       supply_fan = nil
@@ -1337,12 +1330,28 @@ class Airflow
       end
     end
 
+    return true if duct_zones.size == 1 and Geometry.is_living(duct_zones[0])
+
+    def self.create_duct_actuator(model, name, space)
+      var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
+      other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
+      other_equip_def.setName("#{var.name} equip")
+      other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
+      other_equip.setName(other_equip_def.name.to_s)
+      other_equip.setFuelType("None")
+      other_equip.setSchedule(model.alwaysOnDiscreteSchedule)
+      other_equip.setSpace(space)
+      actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, "OtherEquipment", "Power Level")
+      actuator.setName("#{other_equip.name} act")
+      return var, actuator
+    end
+
     # Create one duct system per airloop
     air_loop_with_cfis = nil # Used to ensure CFIS is only added to one air loop
     air_loops.each do |air_loop|
       next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
 
-      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name).gsub("|", "_")
+      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name.to_s)
 
       ra_duct_zone = create_return_air_duct_zone(model, obj_name_ducts, adiabatic_const)
 

@@ -1298,10 +1298,8 @@ class HVAC
         end
         air_loop_unitary.setFanPlacement("BlowThrough")
         air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
-        if mode == :htg
-          air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(supp_htg_max_supply_temp, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-          air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
-        end
+        air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(supp_htg_max_supply_temp, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
+        air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
         air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
         air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
 
@@ -1355,7 +1353,7 @@ class HVAC
         if mode == :htg and pan_heater_power > 0
 
           mshp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating Coil Electric Energy")
-          mshp_sensor.setName("#{obj_name} vrf energy sensor".gsub("|", "_"))
+          mshp_sensor.setName("#{obj_name} vrf energy sensor")
           mshp_sensor.setKeyName(obj_name + " coil")
 
           equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
@@ -1370,10 +1368,10 @@ class HVAC
           equip.setEndUseSubcategory(obj_name + " pan heater")
 
           pan_heater_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(equip, "ElectricEquipment", "Electric Power Level")
-          pan_heater_actuator.setName("#{obj_name} pan heater actuator".gsub("|", "_"))
+          pan_heater_actuator.setName("#{obj_name} pan heater actuator")
 
           tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Outdoor Air Drybulb Temperature")
-          tout_sensor.setName("#{obj_name} tout sensor".gsub("|", "_"))
+          tout_sensor.setName("#{obj_name} tout sensor")
           thermal_zones.each do |thermal_zone|
             if Geometry.is_living(thermal_zone)
               tout_sensor.setKeyName(thermal_zone.name.to_s)
@@ -1821,7 +1819,7 @@ class HVAC
 
     # _processAirSystem
 
-    obj_name = Constants.ObjectNameFurnace(fuel_type, unit.name.to_s)
+    obj_name = Constants.ObjectNameFurnace(unit.name.to_s)
 
     thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
 
@@ -1961,7 +1959,7 @@ class HVAC
 
     boiler_eff_curve = get_boiler_curve(model, system_type == Constants.BoilerTypeCondensing)
 
-    obj_name = Constants.ObjectNameBoiler(fuel_type, unit.name.to_s)
+    obj_name = Constants.ObjectNameBoiler(unit.name.to_s)
 
     # _processSystemHydronic
 
@@ -2139,7 +2137,7 @@ class HVAC
       return false
     end
 
-    obj_name = Constants.ObjectNameUnitHeater(fuel_type, unit.name.to_s)
+    obj_name = Constants.ObjectNameUnitHeater(unit.name.to_s)
 
     thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
 
@@ -2280,7 +2278,15 @@ class HVAC
     unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
     unitary_system_air_loops.each do |unitary_system_air_loop|
       system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next if htg_coil.nil?
+      hvac_type = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
+      next unless [Constants.ObjectNameAirSourceHeatPump,
+                   Constants.ObjectNameFurnace,
+                   Constants.ObjectNameMiniSplitHeatPump,
+                   Constants.ObjectNameGroundSourceHeatPump].include? hvac_type
+
+      if hvac_type == Constants.ObjectNameGroundSourceHeatPump
+        self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
+      end
 
       unless clg_coil.nil?
         runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
@@ -2299,9 +2305,9 @@ class HVAC
       air_loop.remove
     end
 
-    self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
     baseboards = self.get_baseboard_waters(model, runner, thermal_zone)
     baseboards.each do |baseboard|
+      self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
       runner.registerInfo("Removed '#{baseboard.name}' from #{thermal_zone.name}.")
       baseboard.remove
     end
@@ -2327,17 +2333,17 @@ class HVAC
     # Remove any MSHP pan heater objects
     obj_name = Constants.ObjectNameMiniSplitHeatPump(:htg, unit.name.to_s)
     model.getEnergyManagementSystemSensors.each do |sensor|
-      next unless sensor.name.to_s == "#{obj_name} vrf energy sensor".gsub(" ", "_").gsub("|", "_")
+      next unless sensor.name.to_s == "#{obj_name} vrf energy sensor".gsub(" ", "_")
 
       sensor.remove
     end
     model.getEnergyManagementSystemSensors.each do |sensor|
-      next unless sensor.name.to_s == "#{obj_name} tout sensor".gsub(" ", "_").gsub("|", "_")
+      next unless sensor.name.to_s == "#{obj_name} tout sensor".gsub(" ", "_")
 
       sensor.remove
     end
     model.getEnergyManagementSystemActuators.each do |actuator|
-      next unless actuator.name.to_s == "#{obj_name} pan heater actuator".gsub(" ", "_").gsub("|", "_")
+      next unless actuator.name.to_s == "#{obj_name} pan heater actuator".gsub(" ", "_")
 
       actuator.remove
     end
@@ -2364,7 +2370,15 @@ class HVAC
     unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
     unitary_system_air_loops.each do |unitary_system_air_loop|
       system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      next if clg_coil.nil?
+      hvac_type = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACType).get
+      next unless [Constants.ObjectNameAirSourceHeatPump,
+                   Constants.ObjectNameCentralAirConditioner,
+                   Constants.ObjectNameMiniSplitHeatPump,
+                   Constants.ObjectNameGroundSourceHeatPump].include? hvac_type
+
+      if hvac_type == Constants.ObjectNameGroundSourceHeatPump
+        self.remove_boiler_and_gshp_loops(model, runner, thermal_zone)
+      end
 
       unless clg_coil.nil?
         runner.registerInfo("Removed '#{clg_coil.name}' from '#{air_loop.name}'.")
@@ -3098,16 +3112,16 @@ class HVAC
 
     # Sensor that reports the value of the schedule CeilingFan (0 if cooling setpoint setup is in effect, 1 otherwise).
     sched_val_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    sched_val_sensor.setName("#{obj_name} sched val sensor".gsub("|", "_"))
+    sched_val_sensor.setName("#{obj_name} sched val sensor")
     sched_val_sensor.setKeyName(obj_name + " schedule")
 
     tin_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Temperature")
-    tin_sensor.setName("#{obj_name} tin sensor".gsub("|", "_"))
+    tin_sensor.setName("#{obj_name} tin sensor")
     tin_sensor.setKeyName(living_zone.name.to_s)
 
     # Actuator that overrides the master ceiling fan schedule.
     sched_override_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(ceiling_fan_master_sch, "Schedule:Constant", "Schedule Value")
-    sched_override_actuator.setName("#{obj_name} sched override".gsub("|", "_"))
+    sched_override_actuator.setName("#{obj_name} sched override")
 
     # Program that turns the ceiling fans off in the situations described above.
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -3217,12 +3231,12 @@ class HVAC
       schedule.remove
     end
     model.getEnergyManagementSystemSensors.each do |sensor|
-      next unless sensor.name.to_s == "#{obj_name} sched val sensor".gsub(" ", "_").gsub("|", "_") or sensor.name.to_s == "#{obj_name} tin sensor".gsub(" ", "_").gsub("|", "_")
+      next unless sensor.name.to_s == "#{obj_name} sched val sensor".gsub(" ", "_") or sensor.name.to_s == "#{obj_name} tin sensor".gsub(" ", "_")
 
       sensor.remove
     end
     model.getEnergyManagementSystemActuators.each do |actuator|
-      next unless actuator.name.to_s == "#{obj_name} sched override".gsub(" ", "_").gsub("|", "_")
+      next unless actuator.name.to_s == "#{obj_name} sched override".gsub(" ", "_")
 
       actuator.remove
     end
@@ -3897,6 +3911,8 @@ class HVAC
         runner.registerInfo("Found boiler serving #{thermal_zone.name}.")
       elsif hvac_type == Constants.ObjectNameIdealAirSystemHeating
         runner.registerInfo("Found ideal air system providing heating in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameUnitHeater
+        runner.registerInfo("Found unit heater in #{thermal_zone.name}.")
       end
     end
 
