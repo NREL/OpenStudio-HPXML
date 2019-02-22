@@ -133,6 +133,9 @@ class Airflow
 
       # Update model
 
+      air_loop_objects = create_air_loop_objects(model, runner, model.getAirLoopHVACs, mech_vent, cfis_systems, unit_living)
+      return false if air_loop_objects.nil?
+
       success = process_infiltration_for_unit(model, runner, unit, obj_name_infil, infil, wind_speed, building, weather, unit_living, unit_finished_basement)
       return false if not success
 
@@ -159,7 +162,7 @@ class Airflow
         success = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_living, air_loops)
         return false if not success
 
-        success = create_ducts_objects(model, runner, building, unit, ducts, unit_living, unit_finished_basement, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_systems)
+        success = create_ducts_objects(model, runner, building, unit, ducts, unit_living, unit_finished_basement, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_systems, air_loop_objects)
         return false if not success
       end
 
@@ -512,6 +515,55 @@ class Airflow
     process_infiltration_for_spaces(model, spaces, wind_speed)
 
     return true
+  end
+
+  def self.create_air_loop_objects(model, runner, air_loops, mech_vent, cfis_systems, unit_living)
+    # Obtain data across all air loops (needed for ducts, CFIS w/ separate heating and cooling air loops)
+    air_loop_objects = {}
+    air_loops.each_with_index do |air_loop, air_loop_index|
+      next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
+
+      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name.to_s)
+
+      # Get the supply fan
+      supply_fan = nil
+      if air_loop.to_AirLoopHVAC.is_initialized
+        supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(air_loop).supplyFan.get
+      end
+
+      # Supply fan runtime fraction
+      fan_rtf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} Fan RTF".gsub(" ", "_"))
+      fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
+      fan_rtf_sensor.setName("#{fan_rtf_var.name} s")
+      fan_rtf_sensor.setKeyName(supply_fan.name.to_s)
+
+      # Supply fan maximum mass flow rate
+      fan_mfr_max_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
+      fan_mfr_max_var.setName("#{obj_name_ducts} max sup fan mfr")
+      fan_mfr_max_var.setInternalDataIndexKeyName(supply_fan.name.to_s)
+
+      air_loop_objects[air_loop] = { :fan_rtf_var => fan_rtf_var,
+                                     :fan_rtf_sensor => fan_rtf_sensor,
+                                     :fan_mfr_max_var => fan_mfr_max_var }
+
+      if mech_vent.type == Constants.VentTypeCFIS
+        cfis_systems.each do |this_cfis, this_cfis_air_loops|
+          next unless this_cfis_air_loops.include? air_loop # Check if cfis applies to this air loop
+
+          if this_cfis.fan_rtf_sensors.nil?
+            this_cfis.fan_rtf_sensors = []
+          end
+          this_cfis.fan_rtf_sensors << fan_rtf_sensor.name
+
+          if this_cfis.fan_mfr_max_vars.nil?
+            this_cfis.fan_mfr_max_vars = []
+          end
+          this_cfis.fan_mfr_max_vars << fan_mfr_max_var.name
+        end
+      end
+    end
+
+    return air_loop_objects
   end
 
   def self.process_infiltration_for_unit(model, runner, unit, obj_name_infil, infil, wind_speed, building, weather, unit_living, unit_finished_basement)
@@ -1284,51 +1336,11 @@ class Airflow
     return ra_duct_zone
   end
 
-  def self.create_ducts_objects(model, runner, building, unit, ducts, unit_living, unit_finished_basement, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_systems)
+  def self.create_ducts_objects(model, runner, building, unit, ducts, unit_living, unit_finished_basement, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, cfis_systems, air_loop_objects)
     return true if ducts.size == 0
 
     duct_zones = ducts.map { |duct| duct.location_zone }.uniq!
     living_space = unit_living.zone.spaces[0]
-
-    # Obtain data across all air loops (needed for CFIS w/ separate heating and cooling air loops)
-    max_supply_fan_mfr_map = {}
-    fan_rtf_var_map = {}
-    fan_rtf_sensor_map = {}
-    cfis_map = {}
-    air_loops.each_with_index do |air_loop, air_loop_index|
-      next unless unit_living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this unit
-
-      obj_name_ducts = Constants.ObjectNameDucts(air_loop.name.to_s)
-
-      # Get the supply fan
-      supply_fan = nil
-      if air_loop.to_AirLoopHVAC.is_initialized
-        supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(air_loop).supplyFan.get
-      end
-
-      # Supply fan runtime fraction
-      fan_rtf_var_map[air_loop] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{obj_name_ducts} Fan RTF".gsub(" ", "_"))
-      fan_rtf_sensor_map[air_loop] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
-      fan_rtf_sensor_map[air_loop].setName("#{fan_rtf_var_map[air_loop].name} s")
-      fan_rtf_sensor_map[air_loop].setKeyName(supply_fan.name.to_s)
-
-      # Supply fan maximum mass flow rate
-      max_supply_fan_mfr_map[air_loop] = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
-      max_supply_fan_mfr_map[air_loop].setName("#{obj_name_ducts} max sup fan mfr")
-      max_supply_fan_mfr_map[air_loop].setInternalDataIndexKeyName(supply_fan.name.to_s)
-
-      # Check if cfis applies to this air loop
-      cfis_map[air_loop] = nil
-      if mech_vent.type == Constants.VentTypeCFIS
-        cfis_systems.each do |this_cfis, this_cfis_air_loops|
-          next unless this_cfis_air_loops.include? air_loop
-
-          this_cfis.fan_rtf_sensors = fan_rtf_sensor_map.values.map { |s| s.name }
-          this_cfis.max_supply_fan_mfrs = max_supply_fan_mfr_map.values.map { |s| s.name }
-          cfis_map[air_loop] = this_cfis
-        end
-      end
-    end
 
     return true if duct_zones.size == 1 and Geometry.is_living(duct_zones[0])
 
@@ -1434,10 +1446,18 @@ class Airflow
       win_sensor.setName("#{obj_name_ducts} win s")
       win_sensor.setKeyName(unit_living.zone.name.to_s)
 
-      max_supply_fan_mfr = max_supply_fan_mfr_map[air_loop]
-      fan_rtf_sensor = fan_rtf_sensor_map[air_loop]
-      fan_rtf_var = fan_rtf_var_map[air_loop]
-      cfis = cfis_map[air_loop]
+      fan_mfr_max_var = air_loop_objects[air_loop][:fan_mfr_max_var]
+      fan_rtf_sensor = air_loop_objects[air_loop][:fan_rtf_sensor]
+      fan_rtf_var = air_loop_objects[air_loop][:fan_rtf_var]
+
+      cfis = nil
+      cfis_systems.each do |this_cfis, this_cfis_air_loops|
+        this_cfis_air_loops.each do |this_cfis_air_loop|
+          next unless this_cfis_air_loop.handle.to_s == air_loop.handle.to_s
+
+          cfis = this_cfis
+        end
+      end
 
       # Create one duct program for each duct location zone
 
@@ -1569,8 +1589,8 @@ class Airflow
           duct_subroutine.addLine("  Set f_sup = #{leakage_fracs[Constants.DuctSideSupply]}") # frac
           duct_subroutine.addLine("  Set f_ret = #{leakage_fracs[Constants.DuctSideReturn]}") # frac
         elsif not leakage_cfm25s[Constants.DuctSideSupply].nil?
-          duct_subroutine.addLine("  Set f_sup = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideSupply], "cfm", "m^3/s").round(6)} / (#{max_supply_fan_mfr.name} / 1.0135)") # frac
-          duct_subroutine.addLine("  Set f_ret = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideReturn], "cfm", "m^3/s").round(6)} / (#{max_supply_fan_mfr.name} / 1.0135)") # frac
+          duct_subroutine.addLine("  Set f_sup = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideSupply], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} / 1.0135)") # frac
+          duct_subroutine.addLine("  Set f_ret = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideReturn], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} / 1.0135)") # frac
         end
         duct_subroutine.addLine("  Set sup_lk_mfr = f_sup * AH_MFR") # kg/s
         duct_subroutine.addLine("  Set ret_lk_mfr = f_ret * AH_MFR") # kg/s
@@ -1681,7 +1701,7 @@ class Airflow
 
           duct_program.addLine("If #{cfis.on_for_hour_var.name}")
 
-          duct_program.addLine("  Set mxsfmfr=@MAX(#{cfis.max_supply_fan_mfrs.join(' ')})") # CFIS value across heating/cooling air loops
+          duct_program.addLine("  Set mxsfmfr=@MAX(#{cfis.fan_mfr_max_vars.join(' ')})") # CFIS value across heating/cooling air loops
           duct_program.addLine("  Set cfis_m3s = (mxsfmfr / 1.16097654) * #{cfis.airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
           duct_program.addLine("  Set fan_rtf = (#{cfis.fan_rtf_sensors.join('+')})") # CFIS value across heating/cooling air loops
           duct_program.addLine("  Set cfis_rtf = 1.0 - fan_rtf")
@@ -1945,74 +1965,76 @@ class Airflow
     infil_program.addLine("Set dT = @Abs Tdiff")
     infil_program.addLine("Set QWHV = #{wh_sch_sensor.name}*#{UnitConversions.convert(mech_vent.whole_house_vent_rate, "cfm", "m^3/s").round(4)}")
 
-    cfis_systems.each do |cfis, air_loops|
-      cfis_outdoor_airflow = 0.0
-      if cfis.open_time > 0.0
-        cfis_outdoor_airflow = mech_vent.whole_house_vent_rate * (60.0 / cfis.open_time)
+    if mech_vent.type == Constants.VentTypeCFIS
+      cfis_systems.each do |cfis, air_loops|
+        cfis_outdoor_airflow = 0.0
+        if cfis.open_time > 0.0
+          cfis_outdoor_airflow = mech_vent.whole_house_vent_rate * (60.0 / cfis.open_time)
+        end
+
+        infil_program.addLine("Set fan_rtf = (#{cfis.fan_rtf_sensors.join('+')})") # CFIS value across heating/cooling air loops
+        infil_program.addLine("Set CFIS_fan_power = #{cfis.supply_fan_pressure_rise.name} / #{cfis.supply_fan_efficiency.name} * #{UnitConversions.convert(1.0, 'cfm', 'm^3/s').round(6)}") # W/cfm
+
+        infil_program.addLine("If @ABS(Minute - ZoneTimeStep*60) < 0.1")
+        infil_program.addLine("  Set #{cfis.t_sum_open_var.name} = 0") # New hour, time on summation re-initializes to 0
+        infil_program.addLine("  Set #{cfis.on_for_hour_var.name} = 0")
+        infil_program.addLine("EndIf")
+
+        infil_program.addLine("Set CFIS_t_min_hr_open = #{cfis.open_time}") # minutes per hour the CFIS damper is open
+        infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(cfis_outdoor_airflow, 'cfm', 'm^3/s')}")
+        infil_program.addLine("Set #{cfis.f_damper_open_var.name} = 0") # fraction of the timestep the CFIS damper is open
+
+        infil_program.addLine("If #{cfis.t_sum_open_var.name} < CFIS_t_min_hr_open")
+        infil_program.addLine("  Set CFIS_t_fan_on = 60 - (CFIS_t_min_hr_open - #{cfis.t_sum_open_var.name})") # minute at which the blower needs to turn on to meet the ventilation requirements
+        infil_program.addLine("  If ((Minute+0.00001) >= CFIS_t_fan_on) || #{cfis.on_for_hour_var.name}")
+
+        # Supply fan needs to run for remainder of hour to achieve target minutes per hour of operation
+        infil_program.addLine("    If #{cfis.on_for_hour_var.name}")
+        infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = 1")
+        infil_program.addLine("    Else")
+        infil_program.addLine("      Set cfistemp1 = (@Mod (60.0-CFIS_t_fan_on) (60.0*ZoneTimeStep))")
+        infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = cfistemp1/(60.0*ZoneTimeStep)") # calculates the portion of the current timestep the CFIS damper needs to be open
+        infil_program.addLine("      Set #{cfis.on_for_hour_var.name} = 1") # CFIS damper will need to open for all the remaining timesteps in this hour
+        infil_program.addLine("    EndIf")
+        infil_program.addLine("    Set QWHV = #{cfis.f_damper_open_var.name}*CFIS_Q_duct")
+        infil_program.addLine("    Set cfistemp2 = #{cfis.f_damper_open_var.name}*(ZoneTimeStep*60)")
+        infil_program.addLine("    Set #{cfis.t_sum_open_var.name} = #{cfis.t_sum_open_var.name}+cfistemp2")
+        infil_program.addLine("    Set mxsfmfr=@MAX(#{cfis.fan_mfr_max_vars.join(' ')})") # CFIS value across heating/cooling air loops
+        infil_program.addLine("    Set cfis_cfm = (mxsfmfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
+        infil_program.addLine("    Set cfis_frac = #{cfis.f_damper_open_var.name}*(1-fan_rtf)")
+        infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*cfis_frac")
+        infil_program.addLine("  Else")
+        infil_program.addLine("    Set cfistemp4 = fan_rtf*ZoneTimeStep*60")
+        infil_program.addLine("    If (#{cfis.t_sum_open_var.name}+cfistemp4) > CFIS_t_min_hr_open")
+        # Damper is only open for a portion of this time step to achieve target minutes per hour
+        infil_program.addLine("      Set cfistemp5 = CFIS_t_min_hr_open-#{cfis.t_sum_open_var.name}")
+        infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = cfistemp5/(ZoneTimeStep*60)")
+        infil_program.addLine("      Set QWHV = #{cfis.f_damper_open_var.name}*CFIS_Q_duct")
+        infil_program.addLine("      Set #{cfis.t_sum_open_var.name} = CFIS_t_min_hr_open")
+        infil_program.addLine("    Else")
+        # Damper is open and using call for heat/cool to supply fresh air
+        infil_program.addLine("      Set cfistemp6 = fan_rtf*ZoneTimeStep*60")
+        infil_program.addLine("      Set #{cfis.t_sum_open_var.name} = #{cfis.t_sum_open_var.name}+cfistemp6")
+        infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = 1")
+        infil_program.addLine("      Set QWHV = fan_rtf*CFIS_Q_duct")
+        infil_program.addLine("    EndIf")
+        # Fan power is metered under fan cooling and heating meters
+        infil_program.addLine("    Set #{whole_house_fan_actuator.name} = 0")
+        infil_program.addLine("  EndIf")
+        infil_program.addLine("Else")
+        # The ventilation requirement for the hour has been met
+        infil_program.addLine("  Set QWHV = 0")
+        infil_program.addLine("  Set #{whole_house_fan_actuator.name} = 0")
+        infil_program.addLine("EndIf")
+
+        # Create EMS output variable for CFIS tests
+        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "CFIS_fan_power")
+        ems_output_var.setName("#{obj_name_mech_vent} cfis fan power".gsub(" ", "_"))
+        ems_output_var.setTypeOfDataInVariable("Averaged")
+        ems_output_var.setUpdateFrequency("ZoneTimestep")
+        ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+        ems_output_var.setUnits("W/cfm")
       end
-
-      infil_program.addLine("Set fan_rtf = (#{cfis.fan_rtf_sensors.join('+')})") # CFIS value across heating/cooling air loops
-      infil_program.addLine("Set CFIS_fan_power = #{cfis.supply_fan_pressure_rise.name} / #{cfis.supply_fan_efficiency.name} * #{UnitConversions.convert(1.0, 'cfm', 'm^3/s').round(6)}") # W/cfm
-
-      infil_program.addLine("If @ABS(Minute - ZoneTimeStep*60) < 0.1")
-      infil_program.addLine("  Set #{cfis.t_sum_open_var.name} = 0") # New hour, time on summation re-initializes to 0
-      infil_program.addLine("  Set #{cfis.on_for_hour_var.name} = 0")
-      infil_program.addLine("EndIf")
-
-      infil_program.addLine("Set CFIS_t_min_hr_open = #{cfis.open_time}") # minutes per hour the CFIS damper is open
-      infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(cfis_outdoor_airflow, 'cfm', 'm^3/s')}")
-      infil_program.addLine("Set #{cfis.f_damper_open_var.name} = 0") # fraction of the timestep the CFIS damper is open
-
-      infil_program.addLine("If #{cfis.t_sum_open_var.name} < CFIS_t_min_hr_open")
-      infil_program.addLine("  Set CFIS_t_fan_on = 60 - (CFIS_t_min_hr_open - #{cfis.t_sum_open_var.name})") # minute at which the blower needs to turn on to meet the ventilation requirements
-      infil_program.addLine("  If ((Minute+0.00001) >= CFIS_t_fan_on) || #{cfis.on_for_hour_var.name}")
-
-      # Supply fan needs to run for remainder of hour to achieve target minutes per hour of operation
-      infil_program.addLine("    If #{cfis.on_for_hour_var.name}")
-      infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = 1")
-      infil_program.addLine("    Else")
-      infil_program.addLine("      Set cfistemp1 = (@Mod (60.0-CFIS_t_fan_on) (60.0*ZoneTimeStep))")
-      infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = cfistemp1/(60.0*ZoneTimeStep)") # calculates the portion of the current timestep the CFIS damper needs to be open
-      infil_program.addLine("      Set #{cfis.on_for_hour_var.name} = 1") # CFIS damper will need to open for all the remaining timesteps in this hour
-      infil_program.addLine("    EndIf")
-      infil_program.addLine("    Set QWHV = #{cfis.f_damper_open_var.name}*CFIS_Q_duct")
-      infil_program.addLine("    Set cfistemp2 = #{cfis.f_damper_open_var.name}*(ZoneTimeStep*60)")
-      infil_program.addLine("    Set #{cfis.t_sum_open_var.name} = #{cfis.t_sum_open_var.name}+cfistemp2")
-      infil_program.addLine("    Set mxsfmfr=@MAX(#{cfis.max_supply_fan_mfrs.join(' ')})") # CFIS value across heating/cooling air loops
-      infil_program.addLine("    Set cfis_cfm = (mxsfmfr/1.16097654)*#{cfis.airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
-      infil_program.addLine("    Set cfis_frac = #{cfis.f_damper_open_var.name}*(1-fan_rtf)")
-      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*cfis_frac")
-      infil_program.addLine("  Else")
-      infil_program.addLine("    Set cfistemp4 = fan_rtf*ZoneTimeStep*60")
-      infil_program.addLine("    If (#{cfis.t_sum_open_var.name}+cfistemp4) > CFIS_t_min_hr_open")
-      # Damper is only open for a portion of this time step to achieve target minutes per hour
-      infil_program.addLine("      Set cfistemp5 = CFIS_t_min_hr_open-#{cfis.t_sum_open_var.name}")
-      infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = cfistemp5/(ZoneTimeStep*60)")
-      infil_program.addLine("      Set QWHV = #{cfis.f_damper_open_var.name}*CFIS_Q_duct")
-      infil_program.addLine("      Set #{cfis.t_sum_open_var.name} = CFIS_t_min_hr_open")
-      infil_program.addLine("    Else")
-      # Damper is open and using call for heat/cool to supply fresh air
-      infil_program.addLine("      Set cfistemp6 = fan_rtf*ZoneTimeStep*60")
-      infil_program.addLine("      Set #{cfis.t_sum_open_var.name} = #{cfis.t_sum_open_var.name}+cfistemp6")
-      infil_program.addLine("      Set #{cfis.f_damper_open_var.name} = 1")
-      infil_program.addLine("      Set QWHV = fan_rtf*CFIS_Q_duct")
-      infil_program.addLine("    EndIf")
-      # Fan power is metered under fan cooling and heating meters
-      infil_program.addLine("    Set #{whole_house_fan_actuator.name} = 0")
-      infil_program.addLine("  EndIf")
-      infil_program.addLine("Else")
-      # The ventilation requirement for the hour has been met
-      infil_program.addLine("  Set QWHV = 0")
-      infil_program.addLine("  Set #{whole_house_fan_actuator.name} = 0")
-      infil_program.addLine("EndIf")
-
-      # Create EMS output variable for CFIS tests
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "CFIS_fan_power")
-      ems_output_var.setName("#{obj_name_mech_vent} cfis fan power".gsub(" ", "_"))
-      ems_output_var.setTypeOfDataInVariable("Averaged")
-      ems_output_var.setUpdateFrequency("ZoneTimestep")
-      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits("W/cfm")
     end
 
     infil_program.addLine("Set Qrange = #{range_sch_sensor.name}*#{UnitConversions.convert(mech_vent.range_hood_hour_avg_exhaust, "cfm", "m^3/s").round(4)}")
@@ -2278,7 +2300,7 @@ class CFIS
     @airflow_frac = airflow_frac
   end
   attr_accessor(:open_time, :airflow_frac,
-                :t_sum_open_var, :on_for_hour_var, :f_damper_open_var, :max_supply_fan_mfrs, :fan_rtf_sensors, :supply_fan_pressure_rise, :supply_fan_efficiency)
+                :t_sum_open_var, :on_for_hour_var, :f_damper_open_var, :fan_mfr_max_vars, :fan_rtf_sensors, :supply_fan_pressure_rise, :supply_fan_efficiency)
 end
 
 class ZoneInfo
