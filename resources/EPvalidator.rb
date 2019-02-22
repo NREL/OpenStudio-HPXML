@@ -351,7 +351,7 @@ class EnergyPlusValidator
       ## [HeatingType=Stove]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]' => {
         'DistributionSystem' => zero,
-        '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity"]' => one, # See [HeatingType=FuelEquipment] if not electricity
+        '[HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane" or HeatingSystemFuel="electricity" or HeatingSystemFuel="wood" or HeatingSystemFuel="wood pellets"]' => one, # See [HeatingType=FuelEquipment] if not electricity
         'AnnualHeatingEfficiency[Units="Percent"]/Value' => one,
       },
 
@@ -377,7 +377,7 @@ class EnergyPlusValidator
       },
 
       ## [CoolingType=RoomAC]
-      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioning"]' => {
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioner"]' => {
         'DistributionSystem' => zero,
         'AnnualCoolingEfficiency[Units="EER"]/Value' => one,
       },
