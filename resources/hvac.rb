@@ -2534,28 +2534,6 @@ class HVAC
       return false
     end
 
-    # assign the availability schedules to the equipment objects
-    model.getThermalZones.each do |thermal_zone|
-      heating_equipment = existing_heating_equipment(model, runner, thermal_zone)
-      heating_equipment.each do |htg_equip|
-        htg_obj = nil
-        supp_htg_obj = nil
-        if htg_equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-          clg_obj, htg_obj, supp_htg_obj = get_coils_from_hvac_equip(htg_equip)
-        elsif htg_equip.to_ZoneHVACComponent.is_initialized
-          htg_obj = htg_equip
-        end
-        unless htg_obj.nil? or htg_obj.to_CoilHeatingWaterToAirHeatPumpEquationFit.is_initialized
-          htg_equip.setAvailabilitySchedule(heating_season_schedule.schedule)
-          runner.registerInfo("Added availability schedule to #{htg_equip.name}.")
-        end
-        unless supp_htg_obj.nil?
-          supp_htg_obj.setAvailabilitySchedule(heating_season_schedule.schedule)
-          runner.registerInfo("Added availability schedule to #{supp_htg_obj.name}.")
-        end
-      end
-    end
-
     htg_wkdy_monthly = htg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
     htg_wked_monthly = htg_wked_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
 
@@ -2696,18 +2674,6 @@ class HVAC
     cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false)
     unless cooling_season_sch.validated?
       return false
-    end
-
-    # assign the availability schedules to the equipment objects
-    model.getThermalZones.each do |thermal_zone|
-      cooling_equipment = existing_cooling_equipment(model, runner, thermal_zone)
-      cooling_equipment.each do |clg_equip|
-        clg_coil, htg_coil, supp_htg_coil = get_coils_from_hvac_equip(clg_equip)
-        unless clg_coil.nil? or clg_coil.to_CoilCoolingWaterToAirHeatPumpEquationFit.is_initialized
-          clg_equip.setAvailabilitySchedule(cooling_season_sch.schedule)
-          runner.registerInfo("Added availability schedule to #{clg_equip.name}.")
-        end
-      end
     end
 
     clg_wkdy_monthly = clg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
@@ -3114,8 +3080,9 @@ class HVAC
 
       thermostatsetpointdualsetpoint.get.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get.scheduleRules.each do |rule|
         month = rule.startDate.get.monthOfYear.value.to_i - 1
-        next if htg_wkdy_monthly[month].zip(clg_wkdy_monthly[month]).any? { |h, c| c < h}
-        next if htg_wked_monthly[month].zip(clg_wked_monthly[month]).any? { |h, c| c < h}
+        next if htg_wkdy_monthly[month].zip(clg_wkdy_monthly[month]).any? { |h, c| c < h }
+        next if htg_wked_monthly[month].zip(clg_wked_monthly[month]).any? { |h, c| c < h }
+
         rule.daySchedule.clearValues
         if weekday_or_weekend_rule(rule).include? 'weekday'
           clg_wkdy_monthly[month].each_with_index do |value, hour|
