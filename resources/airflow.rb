@@ -483,7 +483,7 @@ class Airflow
       building.garage.inf_method = @infMethodSG
       building.garage.hor_lk_frac = 0.4 # DOE-2 Default
       building.garage.neutral_level = 0.5 # DOE-2 Default
-      building.garage.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.garage_ach50, 0.67, building.garage.area, building.garage.volume)
+      building.garage.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.garage_ach50, 0.65, building.garage.area, building.garage.volume)
       building.garage.ACH = Airflow.get_infiltration_ACH_from_SLA(building.garage.SLA, 1.0, weather)
       building.garage.inf_flow = building.garage.ACH / UnitConversions.convert(1.0, "hr", "min") * building.garage.volume # cfm
     end
@@ -537,7 +537,7 @@ class Airflow
       # Wind Driven Air Infiltration Calculations" by Walker and Wilson (1998)
 
       # Pressure Exponent
-      n_i = 0.67
+      n_i = 0.65
 
       # Calculate SLA for above-grade portion of the building
       building.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.living_ach50, n_i, building.ag_ffa, building.above_grade_volume)
@@ -2292,12 +2292,12 @@ class Airflow
 
   def self.get_infiltration_SLA_from_ACH50(ach50, n_i, conditionedFloorArea, conditionedVolume, pressure_difference_Pa = 50)
     # Returns the infiltration SLA given a ACH50.
-    return ((ach50 * 0.2835 * 4.0**n_i * conditionedVolume) / (conditionedFloorArea * UnitConversions.convert(1.0, "ft^2", "in^2") * pressure_difference_Pa**n_i * 60.0))
+    return ((ach50 * 0.283316478 * 4.0**n_i * conditionedVolume) / (conditionedFloorArea * UnitConversions.convert(1.0, "ft^2", "in^2") * pressure_difference_Pa**n_i * 60.0))
   end
 
   def self.get_infiltration_ACH50_from_SLA(sla, n_i, conditionedFloorArea, conditionedVolume, pressure_difference_Pa = 50)
     # Returns the infiltration ACH50 given a SLA.
-    return ((sla * conditionedFloorArea * UnitConversions.convert(1.0, "ft^2", "in^2") * pressure_difference_Pa**n_i * 60.0) / (0.2835 * 4.0**n_i * conditionedVolume))
+    return ((sla * conditionedFloorArea * UnitConversions.convert(1.0, "ft^2", "in^2") * pressure_difference_Pa**n_i * 60.0) / (0.283316478 * 4.0**n_i * conditionedVolume))
   end
 
   def self.calc_duct_leakage_at_diff_pressure(q_old, p_old, p_new)
