@@ -323,6 +323,10 @@ class Constants
     return 'wood'
   end
 
+  def self.FuelTypeWoodPellets
+    return 'pellets'
+  end
+
   def self.LocationInterior
     return 'interior'
   end
