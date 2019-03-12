@@ -2923,9 +2923,7 @@ class OSModel
         mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
       end
     end
-    mech_vent_ashrae_std = '2013'
-    mech_vent_infil_credit = true
-    cfis_airflow_frac = 1.0 # FIXME
+    cfis_airflow_frac = 1.0
     clothes_dryer_exhaust = 0.0
     range_exhaust = 0.0
     range_exhaust_hour = 16
@@ -2968,9 +2966,9 @@ class OSModel
       end
     end
 
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_infil_credit, mech_vent_total_efficiency,
+    mech_vent = MechanicalVentilation.new(mech_vent_type, nil, mech_vent_total_efficiency,
                                           nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
-                                          mech_vent_ashrae_std, clothes_dryer_exhaust, range_exhaust,
+                                          nil, clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloops)
 
