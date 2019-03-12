@@ -798,13 +798,11 @@ class Airflow
       ashrae_vent_rate = [ashrae_mv_without_infil_credit - rate_credit, 0.0].max # cfm
 
       # Apply fraction of ASHRAE value
-      whole_house_vent_rate = mech_vent.frac_62_2 * ashrae_vent_rate # cfm
-    elsif not mech_vent.whole_house_cfm.nil?
-      whole_house_vent_rate = mech_vent.whole_house_cfm
+      mech_vent.whole_house_cfm = mech_vent.frac_62_2 * ashrae_vent_rate # cfm
     end
 
     # Spot Ventilation
-    spot_fan_power = 0.3 # W/cfm/fan, per HSP
+    spot_fan_w_per_cfm = 0.3 # W/cfm/fan, per HSP
     bath_exhaust_sch_operation = 60.0 # min/day, per HSP
     range_hood_exhaust_operation = 60.0 # min/day, per HSP
 
@@ -857,16 +855,16 @@ class Airflow
     sensible_effectiveness = 0.0
     latent_effectiveness = 0.0
 
-    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_efficiency > 0 and whole_house_vent_rate > 0
+    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_efficiency > 0 and mech_vent.whole_house_cfm > 0
       # Must assume an operating condition (HVI seems to use CSA 439)
       t_sup_in = 0
       w_sup_in = 0.0028
       t_exh_in = 22
       w_exh_in = 0.0065
       cp_a = 1006
-      p_fan = whole_house_vent_rate * mech_vent.fan_power # Watts
+      p_fan = mech_vent.fan_power_w # Watts
 
-      m_fan = UnitConversions.convert(whole_house_vent_rate, "cfm", "m^3/s") * 16.02 * Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, "C", "F"), w_sup_in, 14.7) # kg/s
+      m_fan = UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s") * 16.02 * Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, "C", "F"), w_sup_in, 14.7) # kg/s
 
       # The following is derived from (taken from CSA 439):
       #    E_SHR = (m_sup,fan * Cp * (Tsup,out - Tsup,in) - P_sup,fan) / (m_exh,fan * Cp * (Texh,in - Tsup,in) + P_exh,fan)
@@ -894,7 +892,7 @@ class Airflow
         t_exh_in = 24.0
         w_exh_in = 0.0092
 
-        m_fan = UnitConversions.convert(whole_house_vent_rate, "cfm", "m^3/s") * UnitConversions.convert(Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, "C", "F"), w_sup_in, 14.7), "lbm/ft^3", "kg/m^3") # kg/s
+        m_fan = UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s") * UnitConversions.convert(Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, "C", "F"), w_sup_in, 14.7), "lbm/ft^3", "kg/m^3") # kg/s
 
         t_sup_out_gross = t_sup_in - sensible_effectiveness * (t_sup_in - t_exh_in)
         t_sup_out = t_sup_out_gross + p_fan / (m_fan * cp_a)
@@ -927,14 +925,13 @@ class Airflow
     unit.additionalProperties.setFeature(Constants.SizingInfoMechVentTotalEfficiency, mech_vent.total_efficiency.to_f)
     unit.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, latent_effectiveness.to_f)
     unit.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, apparent_sensible_effectiveness.to_f)
-    unit.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRate, whole_house_vent_rate.to_f)
+    unit.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRate, mech_vent.whole_house_cfm.to_f)
 
     mech_vent.frac_fan_heat = frac_fan_heat
     mech_vent.num_fans = num_fans
-    mech_vent.whole_house_vent_rate = whole_house_vent_rate
     mech_vent.bathroom_hour_avg_exhaust = bathroom_hour_avg_exhaust
     mech_vent.range_hood_hour_avg_exhaust = range_hood_hour_avg_exhaust
-    mech_vent.spot_fan_power = spot_fan_power
+    mech_vent.spot_fan_w_per_cfm = spot_fan_w_per_cfm
     mech_vent.latent_effectiveness = latent_effectiveness
     mech_vent.sensible_effectiveness = sensible_effectiveness
     mech_vent.dryer_exhaust_day_shift = dryer_exhaust_day_shift
@@ -1809,7 +1806,7 @@ class Airflow
 
     if mech_vent.type == Constants.VentTypeBalanced
 
-      balanced_flow_rate = [UnitConversions.convert(mech_vent.whole_house_vent_rate, "cfm", "m^3/s"), 0.0000001].max
+      balanced_flow_rate = [UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s"), 0.0000001].max
 
       supply_fan = OpenStudio::Model::FanOnOff.new(model)
       supply_fan.setName(obj_name_mech_vent + " erv supply fan")
@@ -1938,18 +1935,23 @@ class Airflow
       infil_program.addLine("Set Qn = #{unit_living.ACH * UnitConversions.convert(unit_living.volume, "ft^3", "m^3") / UnitConversions.convert(1.0, "hr", "s")}")
     end
 
-    infil_program.addLine("Set Tdiff = #{tin_sensor.name}-#{tout_sensor.name}")
-    infil_program.addLine("Set dT = @Abs Tdiff")
-    infil_program.addLine("Set QWHV = #{wh_sch_sensor.name}*#{UnitConversions.convert(mech_vent.whole_house_vent_rate, "cfm", "m^3/s").round(4)}")
-
     if mech_vent.type == Constants.VentTypeCFIS
       cfis_outdoor_airflow = 0.0
       if mech_vent.cfis_open_time > 0.0
-        cfis_outdoor_airflow = mech_vent.whole_house_vent_rate * (60.0 / mech_vent.cfis_open_time)
+        cfis_outdoor_airflow = mech_vent.whole_house_cfm * (60.0 / mech_vent.cfis_open_time)
       end
 
       infil_program.addLine("Set fan_rtf = (#{mech_vent.cfis_fan_rtf_sensors.join('+')})") # CFIS value across heating/cooling air loops
-      infil_program.addLine("Set CFIS_fan_power = #{mech_vent.cfis_fan_pressure_rise.name} / #{mech_vent.cfis_fan_efficiency.name} * #{UnitConversions.convert(1.0, 'cfm', 'm^3/s').round(6)}") # W/cfm
+      if mech_vent.fan_power_w.nil?
+        # Use supply fan W/cfm
+        infil_program.addLine("Set CFIS_fan_power = #{mech_vent.cfis_fan_pressure_rise.name} / #{mech_vent.cfis_fan_efficiency.name} * #{UnitConversions.convert(1.0, 'cfm', 'm^3/s').round(6)}") # W/cfm
+      else
+        # Use specified CFIS fan W
+        infil_program.addLine("Set mxsfmfr=@MAX(#{mech_vent.cfis_fan_mfr_max_vars.join(' ')})") # CFIS value across heating/cooling air loops
+        infil_program.addLine("Set airloop_cfm = (mxsfmfr / 1.16097654) * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
+        infil_program.addLine("Set CFIS_fan_w = #{mech_vent.fan_power_w}") # W
+        infil_program.addLine("Set CFIS_fan_power = CFIS_fan_w / airloop_cfm") # W/cfm
+      end
 
       infil_program.addLine("If @ABS(Minute - ZoneTimeStep*60) < 0.1")
       infil_program.addLine("  Set #{mech_vent.cfis_t_sum_open_var.name} = 0") # New hour, time on summation re-initializes to 0
@@ -1975,8 +1977,7 @@ class Airflow
       infil_program.addLine("    Set QWHV = #{mech_vent.cfis_f_damper_open_var.name}*CFIS_Q_duct")
       infil_program.addLine("    Set cfistemp2 = #{mech_vent.cfis_f_damper_open_var.name}*(ZoneTimeStep*60)")
       infil_program.addLine("    Set #{mech_vent.cfis_t_sum_open_var.name} = #{mech_vent.cfis_t_sum_open_var.name}+cfistemp2")
-      infil_program.addLine("    Set mxsfmfr=@MAX(#{mech_vent.cfis_fan_mfr_max_vars.join(' ')})") # CFIS value across heating/cooling air loops
-      infil_program.addLine("    Set cfis_cfm = (mxsfmfr/1.16097654)*#{mech_vent.cfis_airflow_frac} * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
+      infil_program.addLine("    Set cfis_cfm = airloop_cfm*#{mech_vent.cfis_airflow_frac}")
       infil_program.addLine("    Set cfis_frac = #{mech_vent.cfis_f_damper_open_var.name}*(1-fan_rtf)")
       infil_program.addLine("    Set #{whole_house_fan_actuator.name} = CFIS_fan_power*cfis_cfm*cfis_frac")
       infil_program.addLine("  Else")
@@ -2003,13 +2004,23 @@ class Airflow
       infil_program.addLine("  Set #{whole_house_fan_actuator.name} = 0")
       infil_program.addLine("EndIf")
 
-      # Create EMS output variable for CFIS tests
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "CFIS_fan_power")
+      # Create EMS output variables for CFIS tests
+
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "CFIS_fan_w")
       ems_output_var.setName("#{obj_name_mech_vent} cfis fan power".gsub(" ", "_"))
       ems_output_var.setTypeOfDataInVariable("Averaged")
       ems_output_var.setUpdateFrequency("ZoneTimestep")
       ems_output_var.setEMSProgramOrSubroutineName(infil_program)
       ems_output_var.setUnits("W/cfm")
+
+      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "QWHV")
+      ems_output_var.setName("#{obj_name_mech_vent} cfis flow rate".gsub(" ", "_"))
+      ems_output_var.setTypeOfDataInVariable("Averaged")
+      ems_output_var.setUpdateFrequency("ZoneTimestep")
+      ems_output_var.setEMSProgramOrSubroutineName(infil_program)
+      ems_output_var.setUnits("m3/s")
+    else
+      infil_program.addLine("Set QWHV = #{wh_sch_sensor.name}*#{UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s").round(4)}")
     end
 
     infil_program.addLine("Set Qrange = #{range_sch_sensor.name}*#{UnitConversions.convert(mech_vent.range_hood_hour_avg_exhaust, "cfm", "m^3/s").round(4)}")
@@ -2047,16 +2058,16 @@ class Airflow
       end
     end
     if mech_vent.type != Constants.VentTypeCFIS
-      if mech_vent.fan_power != 0
-        infil_program.addLine("Set faneff_wh = #{UnitConversions.convert(300.0 / mech_vent.fan_power, "cfm", "m^3/s")}")
+      if mech_vent.fan_power_w != 0
+        infil_program.addLine("Set faneff_wh = #{UnitConversions.convert(300.0 / (mech_vent.fan_power_w / mech_vent.whole_house_cfm / mech_vent.num_fans), "cfm", "m^3/s")}")
       else
         infil_program.addLine("Set faneff_wh = 1")
       end
       infil_program.addLine("Set #{whole_house_fan_actuator.name} = (QWHV*300)/faneff_wh*#{mech_vent.num_fans}")
     end
 
-    if mech_vent.spot_fan_power != 0
-      infil_program.addLine("Set faneff_sp = #{UnitConversions.convert(300.0 / mech_vent.spot_fan_power, "cfm", "m^3/s")}")
+    if mech_vent.spot_fan_w_per_cfm != 0
+      infil_program.addLine("Set faneff_sp = #{UnitConversions.convert(300.0 / mech_vent.spot_fan_w_per_cfm, "cfm", "m^3/s")}")
     else
       infil_program.addLine("Set faneff_sp = 1")
     end
@@ -2247,7 +2258,7 @@ class NaturalVentilation
 end
 
 class MechanicalVentilation
-  def initialize(type, infil_credit, total_efficiency, frac_62_2, whole_house_cfm, fan_power, sensible_efficiency, ashrae_std,
+  def initialize(type, infil_credit, total_efficiency, frac_62_2, whole_house_cfm, fan_power_w, sensible_efficiency, ashrae_std,
                  dryer_exhaust, range_exhaust, range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                  cfis_open_time, cfis_airflow_frac, cfis_air_loops)
     @type = type
@@ -2255,7 +2266,7 @@ class MechanicalVentilation
     @total_efficiency = total_efficiency
     @frac_62_2 = frac_62_2
     @whole_house_cfm = whole_house_cfm
-    @fan_power = fan_power
+    @fan_power_w = fan_power_w
     @sensible_efficiency = sensible_efficiency
     @ashrae_std = ashrae_std
     @dryer_exhaust = dryer_exhaust
@@ -2267,12 +2278,12 @@ class MechanicalVentilation
     @cfis_airflow_frac = cfis_airflow_frac
     @cfis_air_loops = cfis_air_loops
   end
-  attr_accessor(:type, :infil_credit, :total_efficiency, :frac_62_2, :whole_house_cfm, :fan_power, :sensible_efficiency, :ashrae_std,
+  attr_accessor(:type, :infil_credit, :total_efficiency, :frac_62_2, :whole_house_cfm, :fan_power_w, :sensible_efficiency, :ashrae_std,
                 :dryer_exhaust, :range_exhaust, :range_exhaust_hour, :bathroom_exhaust, :bathroom_exhaust_hour,
-                :cfis_open_time, :cfis_airflow_frac, :cfis_air_loops, :cfis_t_sum_open_var, :cfis_on_for_hour_var, :cfis_f_damper_open_var,
-                :cfis_fan_mfr_max_vars, :cfis_fan_rtf_sensors, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
-                :frac_fan_heat, :num_fans, :whole_house_vent_rate, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust,
-                :spot_fan_power, :latent_effectiveness, :sensible_effectiveness, :dryer_exhaust_day_shift, :has_dryer)
+                :cfis_open_time, :cfis_airflow_frac, :cfis_air_loops, :cfis_t_sum_open_var, :cfis_on_for_hour_var,
+                :cfis_f_damper_open_var, :cfis_fan_mfr_max_vars, :cfis_fan_rtf_sensors, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
+                :frac_fan_heat, :num_fans, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust,
+                :spot_fan_w_per_cfm, :latent_effectiveness, :sensible_effectiveness, :dryer_exhaust_day_shift, :has_dryer)
 end
 
 class ZoneInfo

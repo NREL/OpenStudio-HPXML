@@ -261,8 +261,12 @@ class HPXMLTranslatorTest < MiniTest::Test
       output_var.setKeyValue('*')
     end
 
-    # Add output variable for CFIS fan power
+    # Add output variables for CFIS tests
     output_var = OpenStudio::Model::OutputVariable.new("res_mv_cfis_fan_power", model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('EMS')
+
+    output_var = OpenStudio::Model::OutputVariable.new("res_mv_cfis_flow_rate", model)
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('EMS')
 
@@ -722,19 +726,23 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_equal(htg_fan_w_per_cfm, clg_fan_w_per_cfm)
       end
 
-      # CFIS fan power
-      cfis_fan_w_per_airflow = nil
-      if XMLHelper.get_value(bldg_details, "Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']/FanType") == "central fan integrated supply"
+      # CFIS
+      mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
+      if not mv.nil? and XMLHelper.get_value(mv, "FanType") == "central fan integrated supply"
+        # Fan power
+        hpxml_value = Float(XMLHelper.get_value(mv, "FanPower"))
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_cfis_fan_power')"
-        cfis_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get
-        # Ensure CFIS fan power equals heating/cooling fan power
-        if not htg_fan_w_per_cfm.nil?
-          assert_in_delta(htg_fan_w_per_cfm, cfis_fan_w_per_cfm, 0.001)
-        else
-          assert_in_delta(clg_fan_w_per_cfm, cfis_fan_w_per_cfm, 0.001)
-        end
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_delta(hpxml_value, sql_value, 0.001)
+
+        # Flow rate
+        hpxml_value = Float(XMLHelper.get_value(mv, "RatedFlowRate"))
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_cfis_flow_rate')"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
+        assert_in_delta(hpxml_value, sql_value, 0.001)
       end
 
+      # CFIS flow rate
     end
 
     # Water Heater
@@ -749,8 +757,12 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         found_mv_energy = true
         if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
-          # CFIS, check for positive mech vent energy
+          # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
           assert_operator(results[k], :>, 0)
+          fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
+          hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
+          fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
+          assert_operator(results[k], :<, fan_kwhs)
         else
           # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
           fan_w = Float(XMLHelper.get_value(mv, "FanPower"))

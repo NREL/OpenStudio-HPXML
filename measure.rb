@@ -2886,7 +2886,7 @@ class OSModel
     mech_vent_type = Constants.VentTypeNone
     mech_vent_total_efficiency = 0.0
     mech_vent_sensible_efficiency = 0.0
-    mech_vent_fan_power = 0.0
+    mech_vent_fan_w = 0.0
     mech_vent_cfm = 0.0
     cfis_open_time = 0.0
     if not whole_house_fan_values.nil?
@@ -2913,8 +2913,7 @@ class OSModel
         mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
       end
       mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
-      mech_vent_w = whole_house_fan_values[:fan_power]
-      mech_vent_fan_power = mech_vent_w / mech_vent_cfm / num_fans
+      mech_vent_fan_w = whole_house_fan_values[:fan_power]
       if mech_vent_type == Constants.VentTypeCFIS
         # CFIS: Specify minimum open time in minutes
         cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
@@ -2967,7 +2966,7 @@ class OSModel
     end
 
     mech_vent = MechanicalVentilation.new(mech_vent_type, nil, mech_vent_total_efficiency,
-                                          nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
+                                          nil, mech_vent_cfm, mech_vent_fan_w, mech_vent_sensible_efficiency,
                                           nil, clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloops)
