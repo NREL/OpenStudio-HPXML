@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxml_translator</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>69046d6b-eac1-4847-ba06-e35fc65a056e</version_id>
-  <version_modified>20190225T222459Z</version_modified>
+  <version_id>252ab3a4-14c0-4682-9dfd-dc9414c44200</version_id>
+  <version_modified>20190312T174512Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLTranslator</class_name>
   <display_name>HPXML Translator</display_name>
@@ -327,12 +327,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>07B0E841</checksum>
-    </file>
-    <file>
-      <filename>weather.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>A452A666</checksum>
     </file>
     <file>
       <filename>util.rb</filename>
@@ -1144,16 +1138,22 @@
       <checksum>B56723FC</checksum>
     </file>
     <file>
-      <filename>hvac.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>56EAE4E7</checksum>
-    </file>
-    <file>
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>431FAC39</checksum>
+    </file>
+    <file>
+      <filename>weather.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3468AC3A</checksum>
+    </file>
+    <file>
+      <filename>hvac.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>F3F3DDD0</checksum>
     </file>
   </files>
 </measure>
