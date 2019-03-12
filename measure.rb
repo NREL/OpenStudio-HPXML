@@ -2883,14 +2883,13 @@ class OSModel
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
-    if whole_house_fan_values.nil?
-      mech_vent_type = Constants.VentTypeNone
-      mech_vent_total_efficiency = 0.0
-      mech_vent_sensible_efficiency = 0.0
-      mech_vent_fan_power = 0.0
-      mech_vent_cfm = 0.0
-    else
-      # FIXME: HoursInOperation isn't hooked up
+    mech_vent_type = Constants.VentTypeNone
+    mech_vent_total_efficiency = 0.0
+    mech_vent_sensible_efficiency = 0.0
+    mech_vent_fan_power = 0.0
+    mech_vent_cfm = 0.0
+    cfis_open_time = 0.0
+    if not whole_house_fan_values.nil?
       fan_type = whole_house_fan_values[:fan_type]
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
@@ -2916,21 +2915,25 @@ class OSModel
       mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
       mech_vent_w = whole_house_fan_values[:fan_power]
       mech_vent_fan_power = mech_vent_w / mech_vent_cfm / num_fans
+      if mech_vent_type = Constants.VentTypeCFIS
+        # CFIS: Specify minimum open time in minutes
+        cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
+      else
+        # Other: Adjust CFM based on hours/day of operation
+        mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
+      end
     end
     mech_vent_ashrae_std = '2013'
     mech_vent_infil_credit = true
-    mech_vent_cfis_open_time = 20.0
-    mech_vent_cfis_airflow_frac = 1.0
+    cfis_airflow_frac = 1.0 # FIXME
     clothes_dryer_exhaust = 0.0
     range_exhaust = 0.0
     range_exhaust_hour = 16
     bathroom_exhaust = 0.0
     bathroom_exhaust_hour = 5
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_infil_credit, mech_vent_total_efficiency,
-                                          nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
-                                          mech_vent_ashrae_std, clothes_dryer_exhaust, range_exhaust,
-                                          range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour)
 
+    # Get AirLoops associated with CFIS
+    cfis_airloops = []
     if mech_vent_type == Constants.VentTypeCFIS
       # Get HVAC distribution system CFIS is attached to
       cfis_hvac_dist = nil
@@ -2954,7 +2957,6 @@ class OSModel
       end
 
       # Get AirLoopHVACs associated with these HVAC systems
-      cfis_airloops = []
       loop_hvacs.each do |sys_id, loops|
         next unless cfis_sys_ids.include? sys_id
 
@@ -2964,11 +2966,13 @@ class OSModel
           cfis_airloops << loop
         end
       end
-      cfis = CFIS.new(mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac)
-      cfis_systems = { cfis => cfis_airloops }
-    else
-      cfis_systems = {}
     end
+
+    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_infil_credit, mech_vent_total_efficiency,
+                                          nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
+                                          mech_vent_ashrae_std, clothes_dryer_exhaust, range_exhaust,
+                                          range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
+                                          cfis_open_time, cfis_airflow_frac, cfis_airloops)
 
     # Natural Ventilation
     enclosure_extension_values = HPXML.get_extension_values(parent: building.elements["BuildingDetails/Enclosure"])
@@ -3097,7 +3101,7 @@ class OSModel
 
     # TODO: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)
+    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems)
     return false if not success
 
     return true
