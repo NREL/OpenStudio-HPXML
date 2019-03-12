@@ -2915,7 +2915,7 @@ class OSModel
       mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
       mech_vent_w = whole_house_fan_values[:fan_power]
       mech_vent_fan_power = mech_vent_w / mech_vent_cfm / num_fans
-      if mech_vent_type = Constants.VentTypeCFIS
+      if mech_vent_type == Constants.VentTypeCFIS
         # CFIS: Specify minimum open time in minutes
         cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
       else
