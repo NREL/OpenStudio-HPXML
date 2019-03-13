@@ -17,8 +17,9 @@ class HEScoreRuleset
     # Global variables
     orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_details.elements["BuildingSummary/BuildingConstruction"])
     orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
+    @year_built = orig_building_construction_values[:year_built]
     @nbeds = orig_building_construction_values[:number_of_bedrooms]
-    @cfa = orig_building_construction_values[:conditioned_floor_area]
+    @cfa = orig_building_construction_values[:conditioned_floor_area] # ft^2
     @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
     @ncfl = @ncfl_ag # Number above-grade stories plus any conditioned basement
     if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='true']").nil?
@@ -28,8 +29,9 @@ class HEScoreRuleset
     if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement").nil?
       @nfl += 1
     end
-    @ceil_height = orig_building_construction_values[:average_ceiling_height]
+    @ceil_height = orig_building_construction_values[:average_ceiling_height] # ft
     @bldg_orient = orig_site_values[:orientation_of_front_of_home]
+    @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
 
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
@@ -38,11 +40,13 @@ class HEScoreRuleset
     orig_details.elements.each("Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |cond_basement|
       @cfa_basement += Float(XMLHelper.get_value(cond_basement, "FrameFloor/Area"))
     end
-    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag
-    @bldg_length = (3.0 * @bldg_footprint / 5.0)**0.5
-    @bldg_width = (5.0 / 3.0) * @bldg_length
-    @bldg_perimeter = 2.0 * @bldg_length + 2.0 * @bldg_width
-    @cvolume = @cfa * @ceil_height # FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
+    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
+    @bldg_length_side = (3.0 * @bldg_footprint / 5.0)**0.5 # ft
+    @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
+    @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
+    @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
+    @height = @ceil_height * @ncfl_ag # ft FIXME: Verify. Used for infiltration.
+    @roof_angle = 30.0 # deg
 
     # BuildingSummary
     set_summary(hpxml)
@@ -86,15 +90,16 @@ class HEScoreRuleset
   end
 
   def self.set_summary(hpxml)
+    # TODO: Neighboring buildings to left/right, 12ft offset, same height as building
     HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
     HPXML.add_building_construction(hpxml: hpxml,
-                                    number_of_conditioned_floors: Integer(@ncfl),
-                                    number_of_conditioned_floors_above_grade: Integer(@ncfl_ag),
-                                    number_of_bedrooms: Integer(@nbeds),
+                                    number_of_conditioned_floors: @ncfl,
+                                    number_of_conditioned_floors_above_grade: @ncfl_ag,
+                                    number_of_bedrooms: @nbeds,
                                     conditioned_floor_area: @cfa,
                                     conditioned_building_volume: @cvolume,
                                     garage_present: false)
@@ -103,7 +108,7 @@ class HEScoreRuleset
   def self.set_climate(orig_details, hpxml)
     HPXML.add_climate_zone_iecc(hpxml: hpxml,
                                 year: 2006,
-                                climate_zone: "1A") # TODO Check if changing this would ever influence results; if it does, talk to Leo
+                                climate_zone: "6A") # TODO Get from input
 
     orig_weather_station = orig_details.elements["ClimateandRiskZones/WeatherStation"]
     orig_name = XMLHelper.get_value(orig_weather_station, "Name")
@@ -121,12 +126,8 @@ class HEScoreRuleset
     if not cfm50.nil?
       ach50 = Float(cfm50) * 60.0 / @cvolume
     else
-      # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/infiltration/infiltration
-      if desc == "tight" # sealed
-        ach50 = 15.0 # FIXME: Hard-coded
-      elsif desc == "average" # not sealed
-        ach50 = 5.0 # FIXME: Hard-coded
-      end
+      iecc_cz = "6A" # FIXME: Get from input when it's available
+      ach50 = calc_ach50(@ncfl_ag, @cfa, @height, @cvolume, desc, @year_built, iecc_cz, orig_details)
     end
 
     HPXML.add_air_infiltration_measurement(hpxml: hpxml,
@@ -151,25 +152,26 @@ class HEScoreRuleset
                                   id: orig_attic_values[:id],
                                   attic_type: orig_attic_values[:attic_type])
 
-      # Roof
+      # Roof: Two surfaces per HES zone_roof
       roof_r_cavity = Integer(XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='cavity']/NominalRValue"))
       roof_r_cont = XMLHelper.get_value(orig_attic, "AtticRoofInsulation/Layer[InstallationType='continuous']/NominalRValue").to_i
       roof_solar_abs = orig_roof_values[:solar_absorptance]
       roof_solar_abs = get_roof_solar_absorptance(orig_roof_values[:roof_color]) if orig_roof_values[:solar_absorptance].nil?
       roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, orig_roof_values[:roof_type], orig_roof_values[:radiant_barrier])
-      # FIXME: Roof area for cathedral and ceiling area for attic
 
-      # FIXME: Should be two roofs + two gable walls per HES zone_roof
-      HPXML.add_attic_roof(attic: new_attic,
-                           id: orig_roof_values[:id],
-                           area: 1000, # FIXME: Hard-coded
-                           azimuth: 0, # FIXME: Hard-coded
-                           solar_absorptance: roof_solar_abs,
-                           emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
-                           pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12,
-                           radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
-                           insulation_id: orig_roof_ins_values[:id],
-                           insulation_assembly_r_value: roof_r)
+      roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180] # FIXME: Verify
+      roof_azimuths.each_with_index do |roof_azimuth, idx|
+        HPXML.add_attic_roof(attic: new_attic,
+                             id: "#{orig_roof_values[:id]}_#{idx}",
+                             area: 1000.0 / 2, # FIXME: Hard-coded
+                             azimuth: roof_azimuth,
+                             solar_absorptance: roof_solar_abs,
+                             emittance: 0.9, # ERI assumption; TODO get values from method
+                             pitch: Math.tan(UnitConversions.convert(@roof_angle, "deg", "rad")) * 12,
+                             radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
+                             insulation_id: "#{orig_roof_ins_values[:id]}_#{idx}",
+                             insulation_assembly_r_value: roof_r)
+      end
 
       # Floor
       if ["UnventedAttic", "VentedAttic"].include? orig_attic_values[:attic_type]
@@ -182,10 +184,28 @@ class HEScoreRuleset
         HPXML.add_attic_floor(attic: new_attic,
                               id: "#{orig_attic_values[:id]}_floor",
                               adjacent_to: "living space",
-                              area: XMLHelper.get_value(orig_attic, "Area"), # FIXME: Verify. This is the attic floor area and not the roof area?
+                              area: 1000.0, # FIXME: Hard-coded
                               insulation_id: orig_floor_ins_values[:id],
                               insulation_assembly_r_value: floor_r)
       end
+
+      # Gable wall: Two surfaces per HES zone_roof
+      gable_height = @bldg_length_side / 2 * Math.sin(UnitConversions.convert(@roof_angle, "deg", "rad"))
+      gable_area = @bldg_length_side / 2 * gable_height
+      gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270] # FIXME: Verify
+      gable_azimuths.each_with_index do |gable_azimuth, idx|
+        HPXML.add_attic_wall(attic: new_attic,
+                             id: "#{orig_roof_values[:id]}_gable_#{idx}",
+                             adjacent_to: "outside",
+                             wall_type: "WoodStud",
+                             area: gable_area, # FIXME: Verify
+                             azimuth: gable_azimuth,
+                             solar_absorptance: 0.75, # ERI assumption; TODO get values from method
+                             emittance: 0.9, # ERI assumption; TODO get values from method
+                             insulation_id: "#{orig_roof_values[:id]}_gable_ins_#{idx}",
+                             insulation_assembly_r_value: 4.0) # FIXME: Hard-coded
+      end
+
       # Uses ERI Reference Home for vented attic specific leakage area
     end
   end
@@ -220,7 +240,7 @@ class HEScoreRuleset
       if ["UnconditionedBasement", "ConditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
         orig_fndwall = orig_foundation.elements["FoundationWall"]
         orig_fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: orig_fndwall)
-        wall_r = 10 # FIXME: Connect to input
+        wall_r = Float(XMLHelper.get_value(orig_foundation, "FoundationWall/Insulation/Layer[InstallationType='continuous']/NominalRValue"))
         insulation_id = orig_fndwall.elements["Insulation/SystemIdentifier"].attributes["id"]
 
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
@@ -288,9 +308,9 @@ class HEScoreRuleset
       wall_orient = orig_wall_values[:orientation]
       wall_area = nil
       if @bldg_orient == wall_orient or @bldg_orient == reverse_orientation(wall_orient)
-        wall_area = @ceil_height * @bldg_width # FIXME: Verify
+        wall_area = @ceil_height * @bldg_length_front * @ncfl_ag # FIXME: Verify
       else
-        wall_area = @ceil_height * @bldg_length # FIXME: Verify
+        wall_area = @ceil_height * @bldg_length_side * @ncfl_ag # FIXME: Verify
       end
 
       if wall_type == "WoodStud"
@@ -322,9 +342,9 @@ class HEScoreRuleset
                      interior_adjacent_to: "living space",
                      wall_type: wall_type,
                      area: wall_area,
-                     azimuth: 0, # FIXME: Hard-coded
-                     solar_absorptance: 0.75, # ERI assumptions; TODO get values from method
-                     emittance: 0.9, # ERI assumptions; TODO get values from method
+                     azimuth: orientation_to_azimuth(wall_orient),
+                     solar_absorptance: 0.75, # ERI assumption; TODO get values from method
+                     emittance: 0.9, # ERI assumption; TODO get values from method
                      insulation_id: wall_ins_id,
                      insulation_assembly_r_value: wall_r)
     end
@@ -346,16 +366,20 @@ class HEScoreRuleset
         win_ufactor, win_shgc = get_window_ufactor_shgc(win_frame_type, orig_window_values[:glass_layers], orig_window_values[:glass_type], orig_window_values[:gas_fill])
       end
 
-      # TODO: Equally split up windows by story (no windows on basement/attic)
-      # FIXME: overhangs of 1 ft horizontal extension on all four sides
-      # TODO: Neighboring buildings to left/right, 12ft offset, same height as building
-      HPXML.add_window(hpxml: hpxml,
-                       id: orig_window_values[:id],
-                       area: orig_window_values[:area],
-                       azimuth: orientation_to_azimuth(orig_window_values[:orientation]),
-                       ufactor: win_ufactor,
-                       shgc: win_shgc,
-                       wall_idref: orig_window_values[:wall_idref])
+      # Add one HPXML window per story (for this facade) to accommodate different overhang distances
+      window_height = 4.0 # FIXME: Hard-coded
+      for story in 1..@ncfl_ag
+        HPXML.add_window(hpxml: hpxml,
+                         id: "#{orig_window_values[:id]}_story#{story}",
+                         area: orig_window_values[:area] / @ncfl_ag,
+                         azimuth: orientation_to_azimuth(orig_window_values[:orientation]),
+                         ufactor: win_ufactor,
+                         shgc: win_shgc,
+                         overhangs_depth: 1.0, # FIXME: Verify
+                         overhangs_distance_to_top_of_window: 2.0, # FIXME: Hard-coded
+                         overhangs_distance_to_bottom_of_window: 6.0, # FIXME: Hard-coded
+                         wall_idref: orig_window_values[:wall_idref])
+      end
       # Uses ERI Reference Home for interior shading
     end
   end
@@ -378,7 +402,7 @@ class HEScoreRuleset
       HPXML.add_skylight(hpxml: hpxml,
                          id: orig_skylight_values[:id],
                          area: orig_skylight_values[:area],
-                         azimuth: orientation_to_azimuth("north"), # FIXME: Hard-coded
+                         azimuth: orientation_to_azimuth(@bldg_orient), # FIXME: Hard-coded
                          ufactor: sky_ufactor,
                          shgc: sky_shgc,
                          roof_idref: orig_skylight_values[:roof_idref])
@@ -393,8 +417,8 @@ class HEScoreRuleset
       next if orig_wall_values[:orientation] != @bldg_orient
 
       front_wall = orig_wall
-      break
     end
+    fail "Could not find front wall." if front_wall.nil?
 
     front_wall_values = HPXML.get_wall_values(wall: front_wall)
     HPXML.add_door(hpxml: hpxml,
@@ -605,7 +629,7 @@ class HEScoreRuleset
         duct_location = orig_duct_values[:duct_location]
         duct_insulated = orig_duct_values[:hescore_ducts_insulated]
 
-        # FIXME: Verify. Includes air film?
+        # FIXME: Verify nominal insulation and not assembly
         if duct_insulated
           duct_rvalue = 6
         else
@@ -668,7 +692,7 @@ class HEScoreRuleset
                                      id: orig_wh_sys_values[:id],
                                      fuel_type: wh_fuel,
                                      water_heater_type: wh_type,
-                                     location: "living space", # FIXME: Verify
+                                     location: "living space", # FIXME: To be decided later
                                      tank_volume: wh_tank_volume,
                                      fraction_dhw_load_served: 1.0,
                                      heating_capacity: wh_capacity,
@@ -706,7 +730,7 @@ class HEScoreRuleset
                         module_type: "standard", # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                         array_type: "fixed roof mount", # FIXME: Verify. HEScore was using "fixed open rack"??
                         array_azimuth: orientation_to_azimuth(orig_pv_system_values[:array_orientation]),
-                        array_tilt: 30,
+                        array_tilt: @roof_angle,
                         max_power_output: pv_power,
                         inverter_efficiency: 0.96, # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                         system_losses_fraction: 0.14) # FIXME: Needs to be calculated
@@ -1128,6 +1152,104 @@ def get_roof_solar_absorptance(roof_color)
   fail "Could not get roof absorptance for color '#{roof_color}'"
 end
 
+def calc_ach50(ncfl_ag, cfa, height, cvolume, desc, year_built, iecc_cz, orig_details)
+  # FIXME: Verify
+  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/infiltration/infiltration
+  c_floor_area = -2.08E-03
+  c_height = 6.38E-02
+
+  c_vintage = nil
+  if year_built < 1960
+    c_vintage = -2.50E-01
+  elsif year_built <= 1969
+    c_vintage = -4.33E-01
+  elsif year_built <= 1979
+    c_vintage = -4.52E-01
+  elsif year_built <= 1989
+    c_vintage = -6.54E-01
+  elsif year_built <= 1999
+    c_vintage = -9.15E-01
+  elsif year_built >= 2000
+    c_vintage = -1.06E+00
+  end
+  fail "Could not look up infiltration c_vintage." if c_vintage.nil?
+
+  # FIXME: A-7 vs AK-7?
+  c_iecc = nil
+  if iecc_cz == "1A" or iecc_cz == "2A"
+    c_iecc = 4.73E-01
+  elsif iecc_cz == "3A"
+    c_iecc = 2.53E-01
+  elsif iecc_cz == "4A"
+    c_iecc = 3.26E-01
+  elsif iecc_cz == "5A"
+    c_iecc = 1.12E-01
+  elsif iecc_cz == "6A" or iecc_cz == "7"
+    c_iecc = 0.0
+  elsif iecc_cz == "2B" or iecc_cz == "3B"
+    c_iecc = -3.76E-02
+  elsif iecc_cz == "4B" or iecc_cz == "5B"
+    c_iecc = -8.77E-03
+  elsif iecc_cz == "6B"
+    c_iecc = 1.94E-02
+  elsif iecc_cz == "3C"
+    c_iecc = 4.83E-02
+  elsif iecc_cz == "4C"
+    c_iecc = 2.58E-01
+  elsif iecc_cz == "8"
+    c_iecc = -5.12E-01
+  end
+  fail "Could not look up infiltration c_iecc." if c_iecc.nil?
+
+  # FIXME: How to handle multiple foundations?
+  c_foundation = nil
+  foundation_type = "slab" # FIXME: Connect to input
+  if foundation_type == "slab"
+    c_foundation = -0.036992
+  elsif foundation_type == "conditioned basement" or foundation_type == "unvented crawlspace"
+    c_foundation = 0.108713
+  elsif foundation_type == "unconditioned basement" or foundation_type == "vented crawlspace"
+    c_foundation = 0.180352
+  end
+  fail "Could not look up infiltration c_foundation." if c_foundation.nil?
+
+  # FIXME: How to handle no ducts or multiple duct locations?
+  # FIXME: How to handle ducts in unvented crawlspace?
+  c_duct = nil
+  duct_location = "conditioned space" # FIXME: Connect to input
+  if duct_location == "conditioned space"
+    c_duct = -0.12381
+  elsif duct_location == "unconditioned attic" or duct_location == "unconditioned basement"
+    c_duct = 0.07126
+  elsif duct_location == "vented crawlspace"
+    c_duct = 0.18072
+  end
+  fail "Could not look up infiltration c_duct." if c_duct.nil?
+
+  c_sealed = nil
+  if desc == "tight"
+    c_sealed = -0.384 # FIXME: Hard-coded. Not included in Table 1
+  elsif desc == "average"
+    c_sealed = 0.0
+  end
+  fail "Could not look up infiltration c_sealed." if c_sealed.nil?
+
+  floor_area_m2 = UnitConversions.convert(cfa, "ft^2", "m^2")
+  height_m = UnitConversions.convert(height, "ft", "m")
+
+  # Normalized leakage
+  nl = Math.exp(floor_area_m2 * c_floor_area +
+                height_m * c_height +
+                c_sealed + c_vintage + c_iecc + c_foundation + c_duct)
+
+  # Specific Leakage Area
+  sla = nl / 1000.0 * ncfl_ag**0.3
+
+  ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, cvolume)
+
+  return ach50
+end
+
 def orientation_to_azimuth(orientation)
   return { "northeast" => 45,
            "east" => 90,
@@ -1137,15 +1259,6 @@ def orientation_to_azimuth(orientation)
            "west" => 270,
            "northwest" => 315,
            "north" => 0 }[orientation]
-end
-
-def get_attached(attached_name, orig_details, search_in)
-  orig_details.elements.each(search_in) do |other_element|
-    next if attached_name != HPXML.get_id(other_element)
-
-    return other_element
-  end
-  fail "Could not find attached element for '#{attached_name}'."
 end
 
 def reverse_orientation(orientation)
@@ -1161,4 +1274,13 @@ def reverse_orientation(orientation)
     reverse = reverse.gsub("west", "east")
   end
   return reverse
+end
+
+def get_attached(attached_name, orig_details, search_in)
+  orig_details.elements.each(search_in) do |other_element|
+    next if attached_name != HPXML.get_id(other_element)
+
+    return other_element
+  end
+  fail "Could not find attached element for '#{attached_name}'."
 end
