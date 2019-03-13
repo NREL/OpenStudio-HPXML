@@ -259,7 +259,7 @@ class HEScoreRuleset
                                   depth_below_grade: wall_height, # FIXME: Verify
                                   adjacent_to: "ground",
                                   insulation_id: insulation_id,
-                                  insulation_assembly_r_value: wall_r) # FIXME: need to convert from insulation R-value to assembly R-value
+                                  insulation_assembly_r_value: wall_r + 3.0) # FIXME: need to convert from insulation R-value to assembly R-value
 
       end
 
