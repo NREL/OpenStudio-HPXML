@@ -90,7 +90,7 @@ class HEScoreRuleset
   end
 
   def self.set_summary(hpxml)
-    # TODO: Neighboring buildings to left/right, 12ft offset, same height as building
+    # TODO: Neighboring buildings to left/right, 12ft offset, same height as building; what about townhouses?
     HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
@@ -163,8 +163,8 @@ class HEScoreRuleset
       roof_azimuths.each_with_index do |roof_azimuth, idx|
         HPXML.add_attic_roof(attic: new_attic,
                              id: "#{orig_roof_values[:id]}_#{idx}",
-                             area: 1000.0 / 2, # FIXME: Hard-coded
-                             azimuth: roof_azimuth,
+                             area: 1000.0 / 2, # FIXME: Hard-coded. Use input if cathedral ceiling or conditioned attic, otherwise calculate default?
+                             azimuth: sanitize_azimuth(roof_azimuth),
                              solar_absorptance: roof_solar_abs,
                              emittance: 0.9, # ERI assumption; TODO get values from method
                              pitch: Math.tan(UnitConversions.convert(@roof_angle, "deg", "rad")) * 12,
@@ -184,12 +184,13 @@ class HEScoreRuleset
         HPXML.add_attic_floor(attic: new_attic,
                               id: "#{orig_attic_values[:id]}_floor",
                               adjacent_to: "living space",
-                              area: 1000.0, # FIXME: Hard-coded
+                              area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
                               insulation_id: orig_floor_ins_values[:id],
                               insulation_assembly_r_value: floor_r)
       end
 
       # Gable wall: Two surfaces per HES zone_roof
+      # FIXME: Do we want gable walls even for cathedral ceiling and conditioned attic where roof area is provided by the user?
       gable_height = @bldg_length_side / 2 * Math.sin(UnitConversions.convert(@roof_angle, "deg", "rad"))
       gable_area = @bldg_length_side / 2 * gable_height
       gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270] # FIXME: Verify
@@ -199,7 +200,7 @@ class HEScoreRuleset
                              adjacent_to: "outside",
                              wall_type: "WoodStud",
                              area: gable_area, # FIXME: Verify
-                             azimuth: gable_azimuth,
+                             azimuth: sanitize_azimuth(gable_azimuth),
                              solar_absorptance: 0.75, # ERI assumption; TODO get values from method
                              emittance: 0.9, # ERI assumption; TODO get values from method
                              insulation_id: "#{orig_roof_values[:id]}_gable_ins_#{idx}",
@@ -449,8 +450,8 @@ class HEScoreRuleset
       hvac_value = nil
       if ["Furnace", "WallFurnace", "Boiler"].include? hvac_type
         hvac_year = orig_heating_values[:year_installed]
-        hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='AFUE']/Value")
         hvac_units = "AFUE"
+        hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
         if not hvac_year.nil?
           if ["Furnace", "WallFurnace"].include? hvac_type
             hvac_value = get_default_furnace_afue(Integer(hvac_year), hvac_fuel)
@@ -459,16 +460,14 @@ class HEScoreRuleset
           end
         end
       elsif hvac_type == "ElectricResistance"
-        # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
         hvac_units = "Percent"
-        hvac_value = 0.98
+        hvac_value = 0.98 # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
       elsif hvac_type == "Stove"
-        # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
         hvac_units = "Percent"
         if hvac_fuel == "wood"
-          hvac_value = 0.60
+          hvac_value = 0.60 # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
         elsif hvac_fuel == "wood pellets"
-          hvac_value = 0.78
+          hvac_value = 0.78 # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
         else
           fail "Unexpected fuel type '#{hvac_fuel}' for stove heating system."
         end
@@ -498,15 +497,15 @@ class HEScoreRuleset
       hvac_value = nil
       if hvac_type == "central air conditioning"
         hvac_year = orig_cooling_values[:year_installed]
-        hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='SEER']/Value")
         hvac_units = "SEER"
+        hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
         if not hvac_year.nil?
           hvac_value = get_default_central_ac_seer(Integer(hvac_year))
         end
       elsif hvac_type == "room air conditioner"
         hvac_year = orig_cooling_values[:year_installed]
-        hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='EER']/Value")
         hvac_units = "EER"
+        hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
         if not hvac_year.nil?
           hvac_value = get_default_room_ac_eer(Integer(hvac_year))
         end
@@ -542,19 +541,19 @@ class HEScoreRuleset
       hvac_value_cool = nil
       if ["air-to-air", "mini-split"].include? hvac_type
         hvac_year = orig_hp_values[:year_installed]
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='SEER']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='HSPF']/Value")
         hvac_units_cool = "SEER"
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
         hvac_units_heat = "HSPF"
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(Integer(hvac_year))
         end
       elsif hvac_type == "ground-to-air"
         hvac_year = orig_hp_values[:year_installed]
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='EER']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='COP']/Value")
         hvac_units_cool = "EER"
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
         hvac_units_heat = "COP"
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_gshp_eer_cop(Integer(hvac_year))
         end
@@ -796,6 +795,7 @@ class HEScoreRuleset
 end
 
 def get_default_furnace_afue(year, fuel)
+  # Furnace AFUE by year/fuel
   # FIXME: Verify
   # TODO: Pull out methods and make available for ERI use case
   # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
@@ -813,6 +813,7 @@ def get_default_furnace_afue(year, fuel)
 end
 
 def get_default_boiler_afue(year, fuel)
+  # Boiler AFUE by year/fuel
   # FIXME: Verify
   # TODO: Pull out methods and make available for ERI use case
   # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
@@ -830,6 +831,7 @@ def get_default_boiler_afue(year, fuel)
 end
 
 def get_default_central_ac_seer(year)
+  # Central Air Conditioner SEER by year
   # FIXME: Verify
   # TODO: Pull out methods and make available for ERI use case
   # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
@@ -844,6 +846,7 @@ def get_default_central_ac_seer(year)
 end
 
 def get_default_room_ac_eer(year)
+  # Room Air Conditioner EER by year
   # FIXME: Verify
   # TODO: Pull out methods and make available for ERI use case
   # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
@@ -858,6 +861,7 @@ def get_default_room_ac_eer(year)
 end
 
 def get_default_ashp_seer_hspf(year)
+  # Air Source Heat Pump SEER/HSPF by year
   # FIXME: Verify
   # TODO: Pull out methods and make available for ERI use case
   # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
@@ -873,6 +877,7 @@ def get_default_ashp_seer_hspf(year)
 end
 
 def get_default_gshp_eer_cop(year)
+  # Ground Source Heat Pump EER/COP by year
   # FIXME: Verify
   # TODO: Pull out methods and make available for ERI use case
   # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
@@ -888,6 +893,7 @@ def get_default_gshp_eer_cop(year)
 end
 
 def get_default_water_heater_ef(year, fuel)
+  # Water Heater Energy Factor by year/fuel
   # FIXME: Verify
   # TODO: Pull out methods and make available for ERI use case
   # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
@@ -905,6 +911,7 @@ def get_default_water_heater_ef(year, fuel)
 end
 
 def get_default_water_heater_volume(fuel)
+  # Water Heater Tank Volume by fuel
   # FIXME: Verify
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
   val = { "electricity" => 50,
@@ -917,6 +924,7 @@ def get_default_water_heater_volume(fuel)
 end
 
 def get_default_water_heater_re(fuel)
+  # Water Heater Recovery Efficiency by fuel
   # FIXME: Verify
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
   val = { "electricity" => 0.98,
@@ -929,6 +937,7 @@ def get_default_water_heater_re(fuel)
 end
 
 def get_default_water_heater_capacity(fuel)
+  # Water Heater Rated Input Capacity by fuel
   # FIXME: Verify
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
   val = { "electricity" => UnitConversions.convert(4.5, "kwh", "btu"),
@@ -941,6 +950,7 @@ def get_default_water_heater_capacity(fuel)
 end
 
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
+  # Walls Wood Stud Assembly R-value
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
@@ -977,6 +987,7 @@ def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
 end
 
 def get_structural_block_wall_assembly_r(r_cont)
+  # Walls Structural Block Assembly R-value
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
@@ -989,6 +1000,7 @@ def get_structural_block_wall_assembly_r(r_cont)
 end
 
 def get_concrete_block_wall_assembly_r(r_cavity, siding)
+  # Walls Concrete Block Assembly R-value
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
@@ -1003,6 +1015,7 @@ def get_concrete_block_wall_assembly_r(r_cavity, siding)
 end
 
 def get_straw_bale_wall_assembly_r(siding)
+  # Walls Straw Bale Assembly R-value
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
@@ -1012,6 +1025,7 @@ def get_straw_bale_wall_assembly_r(siding)
 end
 
 def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
+  # Roof Assembly R-value
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/roof-construction-types
@@ -1045,6 +1059,7 @@ def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
 end
 
 def get_ceiling_assembly_r(r_cavity)
+  # Ceiling Assembly R-value
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/ceiling-construction-types
@@ -1067,6 +1082,7 @@ def get_ceiling_assembly_r(r_cavity)
 end
 
 def get_floor_assembly_r(r_cavity)
+  # Floor Assembly R-value
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/floor-construction-types
@@ -1085,6 +1101,7 @@ def get_floor_assembly_r(r_cavity)
 end
 
 def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
+  # Window U-factor/SHGC
   # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, glass_layers, glass_type, gas_fill]
@@ -1112,6 +1129,7 @@ def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
 end
 
 def get_skylight_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
+  # Skylight U-factor/SHGC
   # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, glass_layers, glass_type, gas_fill]
@@ -1262,6 +1280,7 @@ def orientation_to_azimuth(orientation)
 end
 
 def reverse_orientation(orientation)
+  # Converts, e.g., "northwest" to "southeast"
   reverse = orientation
   if reverse.include? "north"
     reverse = reverse.gsub("north", "south")
@@ -1274,6 +1293,17 @@ def reverse_orientation(orientation)
     reverse = reverse.gsub("west", "east")
   end
   return reverse
+end
+
+def sanitize_azimuth(azimuth)
+  # Ensure 0 <= orientation < 360
+  while azimuth < 0
+    azimtuh += 360
+  end
+  while azimuth >= 360
+    azimuth -= 360
+  end
+  return azimuth
 end
 
 def get_attached(attached_name, orig_details, search_in)
