@@ -129,12 +129,12 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
         epw_path = File.join(weather_dir, row["filename"])
         if not File.exists?(epw_path)
-          runner.registerError("'#{epw_path}' could not be found. Perhaps you need to run: openstudio energy_rating_index.rb --download-weather")
+          runner.registerError("'#{epw_path}' could not be found.")
           return false
         end
         cache_path = epw_path.gsub('.epw', '.cache')
         if not File.exists?(cache_path)
-          runner.registerError("'#{cache_path}' could not be found. Perhaps you need to run: openstudio energy_rating_index.rb --download-weather")
+          runner.registerError("'#{cache_path}' could not be found.")
           return false
         end
         break
@@ -3768,9 +3768,7 @@ class OSModel
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
     elsif ["attic - unvented", "attic - vented"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic))
-    elsif ["attic - conditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeFinishedAttic))
-    elsif ["flat roof", "cathedral ceiling"].include? interior_adjacent_to
+    elsif ["attic - conditioned", "flat roof", "cathedral ceiling"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     else
       fail "Unhandled AdjacentTo value (#{interior_adjacent_to}) for surface '#{surface_id}'."
@@ -3795,7 +3793,7 @@ class OSModel
     elsif ["attic - unvented", "attic - vented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic))
     elsif ["attic - conditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeFinishedAttic))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     else
       fail "Unhandled AdjacentTo value (#{exterior_adjacent_to}) for surface '#{surface_id}'."
     end
@@ -3972,7 +3970,9 @@ def to_beopt_fuel(fuel)
   return { "natural gas" => Constants.FuelTypeGas,
            "fuel oil" => Constants.FuelTypeOil,
            "propane" => Constants.FuelTypePropane,
-           "electricity" => Constants.FuelTypeElectric }[fuel]
+           "electricity" => Constants.FuelTypeElectric,
+           "wood" => Constants.FuelTypeWood,
+           "wood pellets" => Constants.FuelTypeWoodPellets }[fuel]
 end
 
 def to_beopt_wh_type(type)
