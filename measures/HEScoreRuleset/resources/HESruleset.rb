@@ -33,7 +33,7 @@ class HEScoreRuleset
 
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
-    # FIXME: Verify. Does this change for shape=townhouse?
+    # FIXME: Verify. Does this change for shape=townhouse? Maybe ridge changes to front-back instead of left-right
     @cfa_basement = 0.0
     orig_details.elements.each("Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |cond_basement|
       @cfa_basement += Float(XMLHelper.get_value(cond_basement, "FrameFloor/Area"))
@@ -87,7 +87,7 @@ class HEScoreRuleset
 
   def self.set_summary(hpxml)
     HPXML.add_site(hpxml: hpxml,
-                   fuels: ["electricity"], # FIXME: Hard-coded
+                   fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
@@ -103,7 +103,7 @@ class HEScoreRuleset
   def self.set_climate(orig_details, hpxml)
     HPXML.add_climate_zone_iecc(hpxml: hpxml,
                                 year: 2006,
-                                climate_zone: "1A") # FIXME: Hard-coded
+                                climate_zone: "1A") # TODO Check if changing this would ever influence results; if it does, talk to Leo
 
     orig_weather_station = orig_details.elements["ClimateandRiskZones/WeatherStation"]
     orig_name = XMLHelper.get_value(orig_weather_station, "Name")
@@ -122,9 +122,9 @@ class HEScoreRuleset
       ach50 = Float(cfm50) * 60.0 / @cvolume
     else
       # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/infiltration/infiltration
-      if desc == "tight"
+      if desc == "tight" # sealed
         ach50 = 15.0 # FIXME: Hard-coded
-      elsif desc == "average"
+      elsif desc == "average" # not sealed
         ach50 = 5.0 # FIXME: Hard-coded
       end
     end
@@ -157,16 +157,16 @@ class HEScoreRuleset
       roof_solar_abs = orig_roof_values[:solar_absorptance]
       roof_solar_abs = get_roof_solar_absorptance(orig_roof_values[:roof_color]) if orig_roof_values[:solar_absorptance].nil?
       roof_r = get_roof_assembly_r(roof_r_cavity, roof_r_cont, orig_roof_values[:roof_type], orig_roof_values[:radiant_barrier])
-      # FIXME: Get roof area; is roof area for cathedral and ceiling area for attic?
+      # FIXME: Roof area for cathedral and ceiling area for attic
 
-      # FIXME: Should be two (or four?) roofs per HES zone_roof?
+      # FIXME: Should be two roofs + two gable walls per HES zone_roof
       HPXML.add_attic_roof(attic: new_attic,
                            id: orig_roof_values[:id],
                            area: 1000, # FIXME: Hard-coded
                            azimuth: 0, # FIXME: Hard-coded
                            solar_absorptance: roof_solar_abs,
                            emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
-                           pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                           pitch: Math.tan(UnitConversions.convert(30, "deg", "rad")) * 12,
                            radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
                            insulation_id: orig_roof_ins_values[:id],
                            insulation_assembly_r_value: roof_r)
@@ -186,7 +186,6 @@ class HEScoreRuleset
                               insulation_id: orig_floor_ins_values[:id],
                               insulation_assembly_r_value: floor_r)
       end
-      # FIXME: Should be zero (or two?) gable walls per HES zone_roof?
       # Uses ERI Reference Home for vented attic specific leakage area
     end
   end
@@ -221,7 +220,7 @@ class HEScoreRuleset
       if ["UnconditionedBasement", "ConditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? fnd_type
         orig_fndwall = orig_foundation.elements["FoundationWall"]
         orig_fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: orig_fndwall)
-        wall_r = 10 # FIXME: Hard-coded
+        wall_r = 10 # FIXME: Connect to input
         insulation_id = orig_fndwall.elements["Insulation/SystemIdentifier"].attributes["id"]
 
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
@@ -324,8 +323,8 @@ class HEScoreRuleset
                      wall_type: wall_type,
                      area: wall_area,
                      azimuth: 0, # FIXME: Hard-coded
-                     solar_absorptance: 0.75, # FIXME: Verify. Make optional element and remove from here.
-                     emittance: 0.9, # FIXME: Verify. Make optional element and remove from here.
+                     solar_absorptance: 0.75, # ERI assumptions; TODO get values from method
+                     emittance: 0.9, # ERI assumptions; TODO get values from method
                      insulation_id: wall_ins_id,
                      insulation_assembly_r_value: wall_r)
     end
@@ -347,6 +346,9 @@ class HEScoreRuleset
         win_ufactor, win_shgc = get_window_ufactor_shgc(win_frame_type, orig_window_values[:glass_layers], orig_window_values[:glass_type], orig_window_values[:gas_fill])
       end
 
+      # TODO: Equally split up windows by story (no windows on basement/attic)
+      # FIXME: overhangs of 1 ft horizontal extension on all four sides
+      # TODO: Neighboring buildings to left/right, 12ft offset, same height as building
       HPXML.add_window(hpxml: hpxml,
                        id: orig_window_values[:id],
                        area: orig_window_values[:area],
@@ -354,8 +356,6 @@ class HEScoreRuleset
                        ufactor: win_ufactor,
                        shgc: win_shgc,
                        wall_idref: orig_window_values[:wall_idref])
-      # No overhangs FIXME: Verify
-      # No neighboring buildings FIXME: Verify
       # Uses ERI Reference Home for interior shading
     end
   end
@@ -435,12 +435,10 @@ class HEScoreRuleset
           end
         end
       elsif hvac_type == "ElectricResistance"
-        # FIXME: Verify
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
         hvac_units = "Percent"
         hvac_value = 0.98
       elsif hvac_type == "Stove"
-        # FIXME: Verify
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
         hvac_units = "Percent"
         if hvac_fuel == "wood"
@@ -683,13 +681,13 @@ class HEScoreRuleset
   def self.set_systems_water_heating_use(hpxml)
     HPXML.add_hot_water_distribution(hpxml: hpxml,
                                      id: "HotWaterDistribution",
-                                     system_type: "Standard", # FIXME: Verify
-                                     pipe_r_value: 0) # FIXME: Verify
+                                     system_type: "Standard",
+                                     pipe_r_value: 0)
 
     HPXML.add_water_fixture(hpxml: hpxml,
                             id: "ShowerHead",
                             water_fixture_type: "shower head",
-                            low_flow: false) # FIXME: Verify
+                            low_flow: false)
   end
 
   def self.set_systems_photovoltaics(orig_details, hpxml)
@@ -708,10 +706,10 @@ class HEScoreRuleset
                         module_type: "standard", # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                         array_type: "fixed roof mount", # FIXME: Verify. HEScore was using "fixed open rack"??
                         array_azimuth: orientation_to_azimuth(orig_pv_system_values[:array_orientation]),
-                        array_tilt: 30, # FIXME: Verify. From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
+                        array_tilt: 30,
                         max_power_output: pv_power,
                         inverter_efficiency: 0.96, # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                        system_losses_fraction: 0.14) # FIXME: Verify
+                        system_losses_fraction: 0.14) # FIXME: Needs to be calculated
   end
 
   def self.set_appliances_clothes_washer(hpxml)
