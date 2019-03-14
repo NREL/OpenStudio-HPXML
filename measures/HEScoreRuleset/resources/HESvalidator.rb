@@ -210,33 +210,42 @@ class HEScoreValidator
       ## [HeatingType=Resistance]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/ElectricResistance]' => {
         'DistributionSystem' => zero,
+        '[YearInstalled | AnnualHeatingEfficiency]' => zero,
       },
 
       ## [HeatingType=Furnace]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]' => {
         'DistributionSystem' => one, # See [HVACDistribution]
-        '[HeatingSystemFuel="electricity" or HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane"]' => one,
-        '[YearInstalled | AnnualHeatingEfficiency[Units="AFUE"]/Value]' => one,
+        '[HeatingSystemFuel="electricity" or HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane"]' => one, # See [HeatingType=ElecFurnaceBoiler] or [HeatingType=FuelFurnaceBoiler]
       },
 
       ## [HeatingType=WallFurnace]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/WallFurnace]' => {
         'DistributionSystem' => zero,
-        '[HeatingSystemFuel="electricity" or HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane"]' => one,
-        '[YearInstalled | AnnualHeatingEfficiency[Units="AFUE"]/Value]' => one,
+        '[HeatingSystemFuel="electricity" or HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane"]' => one, # See [HeatingType=ElecFurnaceBoiler] or [HeatingType=FuelFurnaceBoiler]
       },
 
       ## [HeatingType=Boiler]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler]' => {
         'DistributionSystem' => zero,
-        '[HeatingSystemFuel="electricity" or HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane"]' => one,
-        '[YearInstalled | AnnualHeatingEfficiency[Units="AFUE"]/Value]' => one,
+        '[HeatingSystemFuel="electricity" or HeatingSystemFuel="natural gas" or HeatingSystemFuel="fuel oil" or HeatingSystemFuel="propane"]' => one, # See [HeatingType=ElecFurnaceBoiler] or [HeatingType=FuelFurnaceBoiler]
       },
 
       ## [HeatingType=Stove]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]' => {
         'DistributionSystem' => zero,
         '[HeatingSystemFuel="wood" or HeatingSystemFuel="wood pellets"]' => one,
+        '[YearInstalled | AnnualHeatingEfficiency]' => zero,
+      },
+
+      ## [HeatingType=ElecFurnaceBoiler]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace | HeatingSystemType/WallFurnace | HeatingSystemType/Boiler][HeatingSystemFuel="electricity"]' => {
+        '[YearInstalled | AnnualHeatingEfficiency]' => zero, # No input, assumed efficiency
+      },
+
+      ## [HeatingType=FuelFurnaceBoiler]
+      '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace | HeatingSystemType/WallFurnace | HeatingSystemType/Boiler][HeatingSystemFuel!="electricity"]' => {
+        '[YearInstalled | AnnualHeatingEfficiency[Units="AFUE"]/Value]' => one,
       },
 
       # [CoolingSystem]
@@ -260,6 +269,7 @@ class HEScoreValidator
       ## [CoolingType=EvapCooler]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler"]' => {
         'DistributionSystem' => zero,
+        '[YearInstalled | AnnualCoolingEfficiency]' => zero,
       },
 
       # [HeatPump]
