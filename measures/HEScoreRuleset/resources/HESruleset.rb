@@ -399,14 +399,14 @@ class HEScoreRuleset
         end
         sky_ufactor, sky_shgc = get_skylight_ufactor_shgc(sky_frame_type, orig_skylight_values[:glass_layers], orig_skylight_values[:glass_type], orig_skylight_values[:gas_fill])
       end
-
+      
       HPXML.add_skylight(hpxml: hpxml,
                          id: orig_skylight_values[:id],
                          area: orig_skylight_values[:area],
                          azimuth: orientation_to_azimuth(@bldg_orient), # FIXME: Hard-coded
                          ufactor: sky_ufactor,
                          shgc: sky_shgc,
-                         roof_idref: orig_skylight_values[:roof_idref])
+                         roof_idref: "#{orig_skylight_values[:roof_idref]}_0") # FIXME: Hard-coded
       # No overhangs
     end
   end
