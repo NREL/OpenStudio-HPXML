@@ -126,7 +126,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [])
+                    expected_kwargs: [:year_built])
 
     return building_construction
   end
@@ -134,7 +134,8 @@ class HPXML
   def self.get_building_construction_values(building_construction:)
     return nil if building_construction.nil?
 
-    return { :number_of_conditioned_floors => to_integer(XMLHelper.get_value(building_construction, "NumberofConditionedFloors")),
+    return { :year_built => to_integer(XMLHelper.get_value(building_construction, "YearBuilt")),
+             :number_of_conditioned_floors => to_integer(XMLHelper.get_value(building_construction, "NumberofConditionedFloors")),
              :number_of_conditioned_floors_above_grade => to_integer(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade")),
              :average_ceiling_height => to_float(XMLHelper.get_value(building_construction, "AverageCeilingHeight")),
              :number_of_bedrooms => to_integer(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
