@@ -1060,12 +1060,12 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def _test_heat_pump_no_heating_or_cooling(xmls, hvac_load_fracs_dir, all_results)
     # Compares either:
-    #   1. Heat pumps without heating and differing cooling efficiencies
-    #   2. Heat pumps without cooling and differing heating efficiencies
-    # to ensure equal heating/cooling energy consumption.
+    #   1. Heat pumps without heating and differing heating efficiencies
+    #   2. Heat pumps without cooling and differing cooling efficiencies
+    # to ensure consistent heating/cooling energy consumption.
     #
     # This means that if we have, e.g., a heat pump used only for heating and where only
-    # the heating efficiency is provided, we can use an arbitrary cooling efficiency
+    # the heating efficiency is provided, an arbitrary cooling efficiency can be used
     # without heating end use results being affected.
     xmls.sort.each do |xml|
       next if not xml.include? hvac_load_fracs_dir
