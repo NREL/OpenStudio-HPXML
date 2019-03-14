@@ -2946,7 +2946,7 @@ class OSModel
 
     # Natural Ventilation
     enclosure_extension_values = HPXML.get_extension_values(parent: building.elements["BuildingDetails/Enclosure"])
-    disable_nat_vent = true # FIXME REVERT enclosure_extension_values[:disable_natural_ventilation]
+    disable_nat_vent = enclosure_extension_values[:disable_natural_ventilation]
     if not disable_nat_vent.nil? and disable_nat_vent
       nat_vent_htg_offset = 0
       nat_vent_clg_offset = 0
