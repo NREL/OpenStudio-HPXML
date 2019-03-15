@@ -2309,15 +2309,20 @@ class OSModel
         if heat_pump_values[:heating_efficiency_units] == "HSPF"
           hspf = heat_pump_values[:heating_efficiency_value]
         end
-        num_speeds = get_ashp_num_speeds(seer)
+
+        if load_frac_cool > 0
+          num_speeds = get_ashp_num_speeds_by_seer(seer)
+        else
+          num_speeds = get_ashp_num_speeds_by_hspf(hspf)
+        end
 
         crankcase_kw = 0.02
         crankcase_temp = 55.0
 
         if num_speeds == "1-Speed"
 
-          eers = [0.80 * seer + 1.0]
-          cops = [0.45 * seer - 0.34]
+          eers = [0.80 * seer + 1.00]
+          cops = [0.57 * hspf - 1.30]
           shrs = [0.73]
           fan_power_rated = 0.365
           fan_power_installed = 0.5
@@ -2336,8 +2341,8 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          eers = [0.78 * seer + 0.6, 0.68 * seer + 1.0]
-          cops = [0.60 * seer - 1.40, 0.50 * seer - 0.94]
+          eers = [0.78 * seer + 0.60, 0.68 * seer + 1.00]
+          cops = [0.60 * hspf - 1.40, 0.50 * hspf - 0.94]
           shrs = [0.71, 0.724]
           capacity_ratios = [0.72, 1.0]
           fan_speed_ratios_cooling = [0.86, 1.0]
@@ -2362,7 +2367,7 @@ class OSModel
         elsif num_speeds == "Variable-Speed"
 
           eers = [0.80 * seer, 0.75 * seer, 0.65 * seer, 0.60 * seer]
-          cops = [0.48 * seer, 0.45 * seer, 0.39 * seer, 0.39 * seer]
+          cops = [0.48 * hspf, 0.45 * hspf, 0.39 * hspf, 0.39 * hspf]
           shrs = [0.84, 0.79, 0.76, 0.77]
           capacity_ratios = [0.49, 0.67, 1.0, 1.2]
           fan_speed_ratios_cooling = [0.7, 0.9, 1.0, 1.26]
@@ -4054,18 +4059,28 @@ def get_ac_num_speeds(seer)
     return "1-Speed"
   elsif seer <= 21
     return "2-Speed"
-  else
+  elsif seer > 21
     return "Variable-Speed"
   end
 end
 
-def get_ashp_num_speeds(seer)
+def get_ashp_num_speeds_by_seer(seer)
   if seer <= 15
-    num_speeds = "1-Speed"
+    return "1-Speed"
   elsif seer <= 21
-    num_speeds = "2-Speed"
-  else
-    num_speeds = "Variable-Speed"
+    return "2-Speed"
+  elsif seer > 21
+    return "Variable-Speed"
+  end
+end
+
+def get_ashp_num_speeds_by_hspf(hspf)
+  if hspf <= 8.5
+    return "1-Speed"
+  elsif hspf <= 9.5
+    return "2-Speed"
+  elsif hspf > 9.5
+    return "Variable-Speed"
   end
 end
 
