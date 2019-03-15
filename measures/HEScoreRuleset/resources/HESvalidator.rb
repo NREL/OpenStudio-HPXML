@@ -282,22 +282,22 @@ class HEScoreValidator
       ## [HeatPumpType=ASHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
         'DistributionSystem' => one, # See [HVACDistribution]
-        '[YearInstalled | AnnualCoolEfficiency[Units="SEER"]/Value]' => one,
-        '[YearInstalled | AnnualHeatEfficiency[Units="HSPF"]/Value]' => one,
+        '[YearInstalled | AnnualCoolEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[YearInstalled | AnnualHeatEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       ## [HeatPumpType=MSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split"]' => {
         # FIXME: 'DistributionSystem' => one, # See [HVACDistribution]
-        '[YearInstalled | AnnualCoolEfficiency[Units="SEER"]/Value]' => one,
-        '[YearInstalled | AnnualHeatEfficiency[Units="HSPF"]/Value]' => one,
+        '[YearInstalled | AnnualCoolEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[YearInstalled | AnnualHeatEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       ## [HeatPumpType=GSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air"]' => {
         'DistributionSystem' => one, # See [HVACDistribution]
-        '[YearInstalled | AnnualCoolEfficiency[Units="EER"]/Value]' => one,
-        '[YearInstalled | AnnualHeatEfficiency[Units="COP"]/Value]' => one,
+        '[YearInstalled | AnnualCoolEfficiency[Units="EER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[YearInstalled | AnnualHeatEfficiency[Units="COP"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       # [HVACDistribution]

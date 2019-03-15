@@ -564,6 +564,12 @@ class HEScoreRuleset
         else
           hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(Integer(hvac_year))
         end
+        if hvac_frac_cool == 0 and hvac_value_cool.nil?
+          hvac_value_cool = 13.0 # Arbitrary value; not used
+        end
+        if hvac_frac_heat == 0 and hvac_value_heat.nil?
+          hvac_value_heat = 7.7 # Arbitrary value; not used
+        end
       elsif hvac_type == "ground-to-air"
         hvac_units_cool = "EER"
         hvac_units_heat = "COP"
@@ -573,6 +579,12 @@ class HEScoreRuleset
           hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
         else
           hvac_value_cool, hvac_value_heat = get_default_gshp_eer_cop(Integer(hvac_year))
+        end
+        if hvac_frac_cool == 0 and hvac_value_cool.nil?
+          hvac_value_cool = 15.0 # Arbitrary value; not used
+        end
+        if hvac_frac_heat == 0 and hvac_value_heat.nil?
+          hvac_value_heat = 3.0 # Arbitrary value; not used
         end
       else
         fail "Unexpected peat pump system type '#{hvac_type}'."
