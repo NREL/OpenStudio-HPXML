@@ -399,7 +399,7 @@ class HEScoreRuleset
         end
         sky_ufactor, sky_shgc = get_skylight_ufactor_shgc(sky_frame_type, orig_skylight_values[:glass_layers], orig_skylight_values[:glass_type], orig_skylight_values[:gas_fill])
       end
-      
+
       HPXML.add_skylight(hpxml: hpxml,
                          id: orig_skylight_values[:id],
                          area: orig_skylight_values[:area],
@@ -548,6 +548,12 @@ class HEScoreRuleset
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(Integer(hvac_year))
         end
+        if hvac_frac_cool == 0 and hvac_value_cool.nil?
+          hvac_value_cool = 13.0 # Arbitrary value; not used
+        end
+        if hvac_frac_heat == 0 and hvac_value_heat.nil?
+          hvac_value_heat = 7.7 # Arbitrary value; not used
+        end
       elsif hvac_type == "ground-to-air"
         hvac_year = orig_hp_values[:year_installed]
         hvac_units_cool = "EER"
@@ -556,6 +562,12 @@ class HEScoreRuleset
         hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
         if not hvac_year.nil?
           hvac_value_cool, hvac_value_heat = get_default_gshp_eer_cop(Integer(hvac_year))
+        end
+        if hvac_frac_cool == 0 and hvac_value_cool.nil?
+          hvac_value_cool = 15.0 # Arbitrary value; not used
+        end
+        if hvac_frac_heat == 0 and hvac_value_heat.nil?
+          hvac_value_heat = 3.0 # Arbitrary value; not used
         end
       else
         fail "Unexpected peat pump system type '#{hvac_type}'."
