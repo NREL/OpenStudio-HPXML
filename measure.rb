@@ -121,8 +121,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
     begin
       # Weather file
-      weather_station_values = HPXML.get_weather_station_values(weather_station: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation"])
-      weather_wmo = weather_station_values[:wmo]
+      climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones"])
+      weather_wmo = climate_and_risk_zones_values[:weather_station_wmo]
       epw_path = nil
       CSV.foreach(File.join(weather_dir, "data.csv"), headers: true) do |row|
         next if row["wmo"] != weather_wmo
@@ -237,8 +237,8 @@ class OSModel
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
-    climate_zone_iecc_values = HPXML.get_climate_zone_iecc_values(climate_zone_iecc: building.elements["BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year='2006']"])
-    @iecc_zone_2006 = climate_zone_iecc_values[:climate_zone]
+    climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: building.elements["BuildingDetails/ClimateandRiskZones"])
+    @iecc_zone_2006 = climate_and_risk_zones_values[:iecc2006]
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs

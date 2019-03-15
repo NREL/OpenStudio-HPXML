@@ -143,54 +143,62 @@ class HPXML
              :garage_present => to_bool(XMLHelper.get_value(building_construction, "GaragePresent")) }
   end
 
-  def self.add_climate_zone_iecc(hpxml:,
-                                 year: nil,
-                                 climate_zone: nil,
-                                 **remainder)
-    zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
-    climate_zone_iecc = XMLHelper.add_element(zones, "ClimateZoneIECC")
-    XMLHelper.add_element(climate_zone_iecc, "Year", to_integer(year)) unless year.nil?
-    XMLHelper.add_element(climate_zone_iecc, "ClimateZone", climate_zone) unless climate_zone.nil?
+  def self.add_climate_and_risk_zones(hpxml:,
+                                      iecc2003: nil,
+                                      iecc2006: nil,
+                                      iecc2009: nil,
+                                      iecc2012: nil,
+                                      iecc2015: nil,
+                                      iecc2018: nil,
+                                      weather_station_id: nil,
+                                      weather_station_name: nil,
+                                      weather_station_wmo: nil,
+                                      **remainder)
+    climate_and_risk_zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
+
+    climate_zones = { 2003 => iecc2003,
+                      2006 => iecc2006,
+                      2009 => iecc2009,
+                      2012 => iecc2012,
+                      2015 => iecc2015,
+                      2018 => iecc2018 }
+    climate_zones.each do |year, zone|
+      next if zone.nil?
+
+      climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, "ClimateZoneIECC")
+      XMLHelper.add_element(climate_zone_iecc, "Year", to_integer(year)) unless year.nil?
+      XMLHelper.add_element(climate_zone_iecc, "ClimateZone", zone) unless zone.nil?
+    end
+
+    if weather_station_id.nil?
+      weather_station = XMLHelper.add_element(climate_and_risk_zones, "WeatherStation")
+      sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
+      XMLHelper.add_attribute(sys_id, "id", weather_station_id)
+      XMLHelper.add_element(weather_station, "Name", weather_station_name) unless weather_station_name.nil?
+      XMLHelper.add_element(weather_station, "WMO", weather_station_wmo) unless weather_station_wmo.nil?
+    end
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
                     expected_kwargs: [])
 
-    return climate_zone_iecc
+    return climate_and_risk_zones
   end
 
-  def self.get_climate_zone_iecc_values(climate_zone_iecc:)
-    return nil if climate_zone_iecc.nil?
+  def self.get_climate_and_risk_zones_values(climate_and_risk_zones:)
+    return nil if climate_and_risk_zones.nil?
 
-    return { :year => to_integer(XMLHelper.get_value(climate_zone_iecc, "Year")),
-             :climate_zone => XMLHelper.get_value(climate_zone_iecc, "ClimateZone") }
-  end
+    weather_station = climate_and_risk_zones.elements["WeatherStation"]
 
-  def self.add_weather_station(hpxml:,
-                               id:,
-                               name: nil,
-                               wmo: nil,
-                               **remainder)
-    zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
-    weather_station = XMLHelper.add_element(zones, "WeatherStation")
-    sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(weather_station, "Name", name) unless name.nil?
-    XMLHelper.add_element(weather_station, "WMO", wmo) unless wmo.nil?
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
-    return weather_station
-  end
-
-  def self.get_weather_station_values(weather_station:)
-    return nil if weather_station.nil?
-
-    return { :id => HPXML.get_id(weather_station),
-             :name => XMLHelper.get_value(weather_station, "Name"),
-             :wmo => XMLHelper.get_value(weather_station, "WMO") }
+    return { :iecc2003 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2003']/ClimateZone")),
+             :iecc2006 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2006']/ClimateZone")),
+             :iecc2009 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2009']/ClimateZone")),
+             :iecc2012 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2012']/ClimateZone")),
+             :iecc2015 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2015']/ClimateZone")),
+             :iecc2018 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2018']/ClimateZone")),
+             :weather_station_id => HPXML.get_id(weather_station),
+             :weather_station_name => XMLHelper.get_value(weather_station, "Name"),
+             :weather_station_wmo => XMLHelper.get_value(weather_station, "WMO") }
   end
 
   def self.add_air_infiltration_measurement(hpxml:,
