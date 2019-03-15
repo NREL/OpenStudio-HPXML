@@ -1101,10 +1101,10 @@ class HPXML
              :heating_efficiency_afue => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='AFUE']/Value")),
              :heating_efficiency_cop => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='COP']/Value")),
              :heating_efficiency_hspf => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='HSPF']/Value")),
-             :cooling_efficiency_kw_per_ton => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
-             :cooling_efficiency_cop => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='COP']/Value")),
-             :cooling_efficiency_eer => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
+             :cooling_efficiency_kw_per_ton => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
+             :cooling_efficiency_cop => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='COP']/Value")),
+             :cooling_efficiency_eer => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='EER']/Value")),
+             :cooling_efficiency_seer => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
   end
 
   def self.add_hvac_control(hpxml:,
