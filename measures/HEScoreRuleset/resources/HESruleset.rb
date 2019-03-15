@@ -399,7 +399,7 @@ class HEScoreRuleset
         end
         sky_ufactor, sky_shgc = get_skylight_ufactor_shgc(sky_frame_type, orig_skylight_values[:glass_layers], orig_skylight_values[:glass_type], orig_skylight_values[:gas_fill])
       end
-      
+
       HPXML.add_skylight(hpxml: hpxml,
                          id: orig_skylight_values[:id],
                          area: orig_skylight_values[:area],
@@ -448,13 +448,26 @@ class HEScoreRuleset
       end
       hvac_units = nil
       hvac_value = nil
-      if ["Furnace", "WallFurnace", "Boiler"].include? hvac_type
-        hvac_year = orig_heating_values[:year_installed]
+      if ["Furnace", "WallFurnace"].include? hvac_type
         hvac_units = "AFUE"
-        hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
-        if not hvac_year.nil?
-          if ["Furnace", "WallFurnace"].include? hvac_type
+        if hvac_fuel == "electricity"
+          hvac_value = 0.98
+        else
+          hvac_year = orig_heating_values[:year_installed]
+          if hvac_year.nil?
+            hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
+          else
             hvac_value = get_default_furnace_afue(Integer(hvac_year), hvac_fuel)
+          end
+        end
+      elsif hvac_type == "Boiler"
+        hvac_units = "AFUE"
+        if hvac_fuel == "electricity"
+          hvac_value = 0.98
+        else
+          hvac_year = orig_heating_values[:year_installed]
+          if hvac_year.nil?
+            hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
           else
             hvac_value = get_default_boiler_afue(Integer(hvac_year), hvac_fuel)
           end
@@ -496,17 +509,19 @@ class HEScoreRuleset
       hvac_units = nil
       hvac_value = nil
       if hvac_type == "central air conditioning"
-        hvac_year = orig_cooling_values[:year_installed]
         hvac_units = "SEER"
-        hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
-        if not hvac_year.nil?
+        hvac_year = orig_cooling_values[:year_installed]
+        if hvac_year.nil?
+          hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
+        else
           hvac_value = get_default_central_ac_seer(Integer(hvac_year))
         end
       elsif hvac_type == "room air conditioner"
-        hvac_year = orig_cooling_values[:year_installed]
         hvac_units = "EER"
-        hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
-        if not hvac_year.nil?
+        hvac_year = orig_cooling_values[:year_installed]
+        if hvac_year.nil?
+          hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
+        else
           hvac_value = get_default_room_ac_eer(Integer(hvac_year))
         end
       else
@@ -540,21 +555,23 @@ class HEScoreRuleset
       hvac_units_cool = nil
       hvac_value_cool = nil
       if ["air-to-air", "mini-split"].include? hvac_type
-        hvac_year = orig_hp_values[:year_installed]
         hvac_units_cool = "SEER"
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
         hvac_units_heat = "HSPF"
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
-        if not hvac_year.nil?
+        hvac_year = orig_hp_values[:year_installed]
+        if hvac_year.nil?
+          hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
+          hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
+        else
           hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(Integer(hvac_year))
         end
       elsif hvac_type == "ground-to-air"
-        hvac_year = orig_hp_values[:year_installed]
         hvac_units_cool = "EER"
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
         hvac_units_heat = "COP"
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
-        if not hvac_year.nil?
+        hvac_year = orig_hp_values[:year_installed]
+        if hvac_year.nil?
+          hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
+          hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
+        else
           hvac_value_cool, hvac_value_heat = get_default_gshp_eer_cop(Integer(hvac_year))
         end
       else

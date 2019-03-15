@@ -274,10 +274,6 @@
                 <Boiler/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.95</Value>
-              </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
