@@ -2342,7 +2342,7 @@ class OSModel
         elsif num_speeds == "2-Speed"
 
           eers = [0.78 * seer + 0.60, 0.68 * seer + 1.00]
-          cops = [0.60 * hspf - 1.40, 0.17 * hspf - 2.96]
+          cops = [0.60 * hspf - 1.40, 0.50 * hspf - 0.94]
           shrs = [0.71, 0.724]
           capacity_ratios = [0.72, 1.0]
           fan_speed_ratios_cooling = [0.86, 1.0]
