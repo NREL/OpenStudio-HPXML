@@ -210,7 +210,8 @@ class HEScoreValidator
       ## [HeatingType=Resistance]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/ElectricResistance]' => {
         'DistributionSystem' => zero,
-        '[YearInstalled | AnnualHeatingEfficiency]' => zero,
+        'YearInstalled' => zero,
+        'AnnualHeatingEfficiency' => zero,
       },
 
       ## [HeatingType=Furnace]
@@ -235,12 +236,14 @@ class HEScoreValidator
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]' => {
         'DistributionSystem' => zero,
         '[HeatingSystemFuel="wood" or HeatingSystemFuel="wood pellets"]' => one,
-        '[YearInstalled | AnnualHeatingEfficiency]' => zero,
+        'YearInstalled' => zero,
+        'AnnualHeatingEfficiency' => zero,
       },
 
       ## [HeatingType=ElecFurnaceBoiler]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace | HeatingSystemType/WallFurnace | HeatingSystemType/Boiler][HeatingSystemFuel="electricity"]' => {
-        '[YearInstalled | AnnualHeatingEfficiency]' => zero, # No input, assumed efficiency
+        'YearInstalled' => zero,
+        'AnnualHeatingEfficiency' => zero,
       },
 
       ## [HeatingType=FuelFurnaceBoiler]
@@ -269,7 +272,8 @@ class HEScoreValidator
       ## [CoolingType=EvapCooler]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="evaporative cooler"]' => {
         'DistributionSystem' => zero,
-        '[YearInstalled | AnnualCoolingEfficiency]' => zero,
+        'YearInstalled' => zero,
+        'AnnualCoolingEfficiency' => zero,
       },
 
       # [HeatPump]
@@ -289,15 +293,17 @@ class HEScoreValidator
       ## [HeatPumpType=MSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split"]' => {
         # FIXME: 'DistributionSystem' => one, # See [HVACDistribution]
-        '[YearInstalled | AnnualCoolEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
-        '[YearInstalled | AnnualHeatEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
+        'YearInstalled' => zero,
+        '[AnnualCoolEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[AnnualHeatEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       ## [HeatPumpType=GSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air"]' => {
         'DistributionSystem' => one, # See [HVACDistribution]
-        '[YearInstalled | AnnualCoolEfficiency[Units="EER"]/Value | [FractionCoolLoadServed=0]]' => one,
-        '[YearInstalled | AnnualHeatEfficiency[Units="COP"]/Value | [FractionHeatLoadServed=0]]' => one,
+        'YearInstalled' => zero,
+        '[AnnualCoolEfficiency[Units="EER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[AnnualHeatEfficiency[Units="COP"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       # [HVACDistribution]

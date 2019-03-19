@@ -475,13 +475,13 @@ class HEScoreRuleset
         end
       elsif hvac_type == "ElectricResistance"
         hvac_units = "Percent"
-        hvac_value = 0.98 # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
+        hvac_value = 0.98
       elsif hvac_type == "Stove"
         hvac_units = "Percent"
         if hvac_fuel == "wood"
-          hvac_value = 0.60 # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
+          hvac_value = 0.60
         elsif hvac_fuel == "wood pellets"
-          hvac_value = 0.78 # From http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/heating-and-cooling-equipment/heating-and-cooling-equipment-efficiencies
+          hvac_value = 0.78
         else
           fail "Unexpected fuel type '#{hvac_fuel}' for stove heating system."
         end
@@ -557,7 +557,7 @@ class HEScoreRuleset
       hvac_value_heat = nil
       hvac_units_cool = nil
       hvac_value_cool = nil
-      if ["air-to-air", "mini-split"].include? hvac_type
+      if hvac_type == "air-to-air"
         hvac_units_cool = "SEER"
         hvac_units_heat = "HSPF"
         hvac_year = orig_hp_values[:year_installed]
@@ -568,31 +568,24 @@ class HEScoreRuleset
           hvac_value_cool = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units_cool)
           hvac_value_heat = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units_heat)
         end
-        if hvac_frac_cool == 0 and hvac_value_cool.nil?
-          hvac_value_cool = 13.0 # Arbitrary value; not used
-        end
-        if hvac_frac_heat == 0 and hvac_value_heat.nil?
-          hvac_value_heat = 7.7 # Arbitrary value; not used
-        end
+      elsif hvac_type == "mini-split"
+        hvac_units_cool = "SEER"
+        hvac_units_heat = "HSPF"
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
       elsif hvac_type == "ground-to-air"
         hvac_units_cool = "EER"
         hvac_units_heat = "COP"
-        hvac_year = orig_hp_values[:year_installed]
-        if hvac_year.nil?
-          hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
-          hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
-        else
-          hvac_value_cool = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units_cool)
-          hvac_value_heat = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units_heat)
-        end
-        if hvac_frac_cool == 0 and hvac_value_cool.nil?
-          hvac_value_cool = 15.0 # Arbitrary value; not used
-        end
-        if hvac_frac_heat == 0 and hvac_value_heat.nil?
-          hvac_value_heat = 3.0 # Arbitrary value; not used
-        end
+        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
+        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
       else
         fail "Unexpected peat pump system type '#{hvac_type}'."
+      end
+      if hvac_frac_cool == 0 and hvac_value_cool.nil?
+        hvac_value_cool = 14.0 # Arbitrary value; not used
+      end
+      if hvac_frac_heat == 0 and hvac_value_heat.nil?
+        hvac_value_heat = 5.0 # Arbitrary value; not used
       end
 
       HPXML.add_heat_pump(hpxml: hpxml,
