@@ -706,7 +706,7 @@ class HEScoreRuleset
       wh_type = orig_wh_sys_values[:water_heater_type]
 
       if not wh_year.nil?
-        wh_ef = get_default_water_heater_ef(Integer(wh_year), wh_fuel)
+        wh_ef = lookup_water_heater_efficiency(Integer(wh_year), wh_fuel)
       end
 
       wh_capacity = nil
@@ -843,10 +843,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
               'Boiler' => 'boiler' }[hvac_type]
   fail "Unexpected hvac_type #{hvac_type}." if type_id.nil?
 
-  fuel_primary_id = { 'electricity' => 'electric',
-                      'natural gas' => 'natural_gas',
-                      'fuel oil' => 'fuel_oil',
-                      'propane' => 'lpg' }[fuel_type]
+  fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
   fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
 
   metric_id = units.downcase
@@ -862,6 +859,29 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
     break
   end
   fail "Could not lookup default HVAC efficiency." if value.nil?
+
+  return value
+end
+
+def lookup_water_heater_efficiency(year, fuel_type)
+  if year < 1972
+    year = 1972
+  elsif year > 2010
+    year = 2010
+  end
+
+  fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
+  fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
+
+  value = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), "lu_water_heater_efficiency.csv"), headers: true) do |row|
+    next unless Integer(row['year']) == year
+    next unless row['fuel_primary_id'] == fuel_primary_id
+
+    value = Float(row['value'])
+    break
+  end
+  fail "Could not lookup default water heating efficiency." if value.nil?
 
   return value
 end
@@ -1278,6 +1298,13 @@ def sanitize_azimuth(azimuth)
     azimuth -= 360
   end
   return azimuth
+end
+
+def hpxml_to_hescore_fuel(fuel_type)
+  return { 'electricity' => 'electric',
+           'natural gas' => 'natural_gas',
+           'fuel oil' => 'fuel_oil',
+           'propane' => 'lpg' }[fuel_type]
 end
 
 def get_attached(attached_name, orig_details, search_in)
