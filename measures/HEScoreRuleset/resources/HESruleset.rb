@@ -598,6 +598,10 @@ class HEScoreRuleset
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
         duct_values = HPXML.get_ducts_values(ducts: orig_duct)
 
+        if duct_values[:duct_location] == "attic - unconditioned"
+          duct_values[:duct_location] = "attic - vented"
+        end
+
         # FIXME: Verify nominal insulation and not assembly
         if duct_values[:hescore_ducts_insulated]
           duct_rvalue = 6
