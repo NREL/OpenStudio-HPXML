@@ -206,10 +206,8 @@ class HEScoreRuleset
       new_foundation = HPXML.add_foundation(hpxml: hpxml, **foundation_values)
 
       # FrameFloor
-      framefloor_area = nil
+      framefloor_values = HPXML.get_frame_floor_values(floor: orig_foundation.elements["FrameFloor"])
       if ["UnconditionedBasement", "VentedCrawlspace", "UnventedCrawlspace"].include? foundation_values[:foundation_type]
-        framefloor_values = HPXML.get_frame_floor_values(floor: orig_foundation.elements["FrameFloor"])
-        framefloor_area = framefloor_values[:area]
         floor_r = get_floor_assembly_r(framefloor_values[:insulation_cavity_r_value])
 
         HPXML.add_frame_floor(foundation: new_foundation,
@@ -247,7 +245,7 @@ class HEScoreRuleset
       else
         slab_values = {}
         slab_values[:id] = "#{foundation_values[:id]}_slab"
-        slab_values[:area] = framefloor_area
+        slab_values[:area] = framefloor_values[:area]
         slab_values[:perimeter_insulation_id] = "#{slab_values[:id]}_perim_insulation"
         slab_values[:perimeter_insulation_r_value] = 0
       end
