@@ -1,3 +1,4 @@
+require 'csv'
 require_relative "../../HPXMLtoOpenStudio/resources/airflow"
 require_relative "../../HPXMLtoOpenStudio/resources/geometry"
 require_relative "../../HPXMLtoOpenStudio/resources/xmlhelper"
@@ -457,7 +458,7 @@ class HEScoreRuleset
           if hvac_year.nil?
             hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
           else
-            hvac_value = get_default_furnace_afue(Integer(hvac_year), hvac_fuel)
+            hvac_value = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units)
           end
         end
       elsif hvac_type == "Boiler"
@@ -469,7 +470,7 @@ class HEScoreRuleset
           if hvac_year.nil?
             hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
           else
-            hvac_value = get_default_boiler_afue(Integer(hvac_year), hvac_fuel)
+            hvac_value = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units)
           end
         end
       elsif hvac_type == "ElectricResistance"
@@ -503,6 +504,7 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACPlant/CoolingSystem") do |orig_cooling|
       orig_cooling_values = HPXML.get_cooling_system_values(cooling_system: orig_cooling)
 
+      hvac_fuel = "electricity"
       hvac_type = orig_cooling_values[:cooling_system_type]
       hvac_frac = orig_cooling_values[:fraction_cool_load_served]
       distribution_system_id = orig_cooling_values[:distribution_system_idref]
@@ -514,7 +516,7 @@ class HEScoreRuleset
         if hvac_year.nil?
           hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
         else
-          hvac_value = get_default_central_ac_seer(Integer(hvac_year))
+          hvac_value = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units)
         end
       elsif hvac_type == "room air conditioner"
         hvac_units = "EER"
@@ -522,7 +524,7 @@ class HEScoreRuleset
         if hvac_year.nil?
           hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
         else
-          hvac_value = get_default_room_ac_eer(Integer(hvac_year))
+          hvac_value = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units)
         end
       else
         fail "Unexpected cooling system type '#{hvac_type}'."
@@ -547,6 +549,7 @@ class HEScoreRuleset
       if XMLHelper.has_element(orig_hp, "DistributionSystem")
         distribution_system_id = orig_hp_values[:distribution_system_idref]
       end
+      hvac_fuel = "electricity"
       hvac_type = orig_hp_values[:heat_pump_type]
       hvac_frac_heat = orig_hp_values[:fraction_heat_load_served]
       hvac_frac_cool = orig_hp_values[:fraction_cool_load_served]
@@ -562,7 +565,8 @@ class HEScoreRuleset
           hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
           hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
         else
-          hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(Integer(hvac_year))
+          hvac_value_cool = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units_cool)
+          hvac_value_heat = lookup_hvac_efficiency(Integer(hvac_year), hvac_type, hvac_fuel, hvac_units_heat)
         end
       elsif hvac_type == "mini-split"
         hvac_units_cool = "SEER"
@@ -695,7 +699,7 @@ class HEScoreRuleset
       wh_type = orig_wh_sys_values[:water_heater_type]
 
       if not wh_year.nil?
-        wh_ef = get_default_water_heater_ef(Integer(wh_year), wh_fuel)
+        wh_ef = lookup_water_heater_efficiency(Integer(wh_year), wh_fuel)
       end
 
       wh_capacity = nil
@@ -817,86 +821,62 @@ class HEScoreRuleset
   end
 end
 
-def get_default_furnace_afue(year, fuel)
-  # Furnace AFUE by year/fuel
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_afues = { "electricity" => [0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98],
-                    "natural gas" => [0.72, 0.72, 0.72, 0.72, 0.72, 0.76, 0.78, 0.78],
-                    "propane" => [0.72, 0.72, 0.72, 0.72, 0.72, 0.76, 0.78, 0.78],
-                    "fuel oil" => [0.60, 0.65, 0.72, 0.75, 0.80, 0.80, 0.80, 0.80] }[fuel]
-  ending_years.zip(default_afues).each do |ending_year, default_afue|
-    next if year > ending_year
-
-    return default_afue
+def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
+  if year < 1970
+    year = 1970
+  elsif year > 2010
+    year = 2010
   end
-  fail "Could not get default furnace AFUE for year '#{year}' and fuel '#{fuel}'"
+
+  type_id = { 'central air conditioning' => 'split_dx',
+              'room air conditioner' => 'packaged_dx',
+              'air-to-air' => 'heat_pump',
+              'Furnace' => 'central_furnace',
+              'WallFurnace' => 'wall_furnace',
+              'Boiler' => 'boiler' }[hvac_type]
+  fail "Unexpected hvac_type #{hvac_type}." if type_id.nil?
+
+  fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
+  fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
+
+  metric_id = units.downcase
+
+  value = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), "lu_hvac_equipment_efficiency.csv"), headers: true) do |row|
+    next unless Integer(row['year']) == year
+    next unless row['type_id'] == type_id
+    next unless row['fuel_primary_id'] == fuel_primary_id
+    next unless row['metric_id'] == metric_id
+
+    value = Float(row['value'])
+    break
+  end
+  fail "Could not lookup default HVAC efficiency." if value.nil?
+
+  return value
 end
 
-def get_default_boiler_afue(year, fuel)
-  # Boiler AFUE by year/fuel
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_afues = { "electricity" => [0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98],
-                    "natural gas" => [0.60, 0.60, 0.65, 0.65, 0.70, 0.77, 0.80, 0.80],
-                    "propane" => [0.60, 0.60, 0.65, 0.65, 0.70, 0.77, 0.80, 0.80],
-                    "fuel oil" => [0.60, 0.65, 0.72, 0.75, 0.80, 0.80, 0.80, 0.80] }[fuel]
-  ending_years.zip(default_afues).each do |ending_year, default_afue|
-    next if year > ending_year
-
-    return default_afue
+def lookup_water_heater_efficiency(year, fuel_type)
+  if year < 1972
+    year = 1972
+  elsif year > 2010
+    year = 2010
   end
-  fail "Could not get default boiler AFUE for year '#{year}' and fuel '#{fuel}'"
-end
 
-def get_default_central_ac_seer(year)
-  # Central Air Conditioner SEER by year
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_seers = [9.0, 9.0, 9.0, 9.0, 9.0, 9.40, 10.0, 13.0]
-  ending_years.zip(default_seers).each do |ending_year, default_seer|
-    next if year > ending_year
+  fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
+  fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
 
-    return default_seer
+  value = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), "lu_water_heater_efficiency.csv"), headers: true) do |row|
+    next unless Integer(row['year']) == year
+    next unless row['fuel_primary_id'] == fuel_primary_id
+
+    value = Float(row['value'])
+    break
   end
-  fail "Could not get default central air conditioner SEER for year '#{year}'"
-end
+  fail "Could not lookup default water heating efficiency." if value.nil?
 
-def get_default_room_ac_eer(year)
-  # Room Air Conditioner EER by year
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_eers = [8.0, 8.0, 8.0, 8.0, 8.0, 8.10, 8.5, 8.5]
-  ending_years.zip(default_eers).each do |ending_year, default_eer|
-    next if year > ending_year
-
-    return default_eer
-  end
-  fail "Could not get default room air conditioner EER for year '#{year}'"
-end
-
-def get_default_ashp_seer_hspf(year)
-  # Air Source Heat Pump SEER/HSPF by year
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_seers = [9.0, 9.0, 9.0, 9.0, 9.0, 9.40, 10.0, 13.0]
-  default_hspfs = [6.5, 6.5, 6.5, 6.5, 6.5, 6.80, 6.80, 7.7]
-  ending_years.zip(default_seers, default_hspfs).each do |ending_year, default_seer, default_hspf|
-    next if year > ending_year
-
-    return default_seer, default_hspf
-  end
-  fail "Could not get default air source heat pump SEER/HSPF for year '#{year}'"
+  return value
 end
 
 def get_default_water_heater_ef(year, fuel)
@@ -1326,6 +1306,13 @@ def sanitize_azimuth(azimuth)
     azimuth -= 360
   end
   return azimuth
+end
+
+def hpxml_to_hescore_fuel(fuel_type)
+  return { 'electricity' => 'electric',
+           'natural gas' => 'natural_gas',
+           'fuel oil' => 'fuel_oil',
+           'propane' => 'lpg' }[fuel_type]
 end
 
 def get_attached(attached_name, orig_details, search_in)
