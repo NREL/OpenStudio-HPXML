@@ -14,6 +14,8 @@ class HEScoreRuleset
 
     hpxml = hpxml_doc.elements["HPXML"]
 
+    fnd_types, @cfa_basement = get_foundation_details(orig_details)
+
     # Global variables
     orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_details.elements["BuildingSummary/BuildingConstruction"])
     orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
@@ -22,11 +24,11 @@ class HEScoreRuleset
     @cfa = orig_building_construction_values[:conditioned_floor_area] # ft^2
     @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
     @ncfl = @ncfl_ag # Number above-grade stories plus any conditioned basement
-    if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement[Conditioned='true']").nil?
+    if fnd_types.include? "ConditionedBasement"
       @ncfl += 1
     end
     @nfl = @ncfl_ag # Number above-grade stories plus any basement
-    if not XMLHelper.get_value(orig_details, "Enclosure/Foundations/Foundation/FoundationType/Basement").nil?
+    if fnd_types.include? "ConditionedBasement" or fnd_types.include? "UnconditionedBasement"
       @nfl += 1
     end
     @ceil_height = orig_building_construction_values[:average_ceiling_height] # ft
@@ -36,10 +38,6 @@ class HEScoreRuleset
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
     # FIXME: Verify. Does this change for shape=townhouse? Maybe ridge changes to front-back instead of left-right
-    @cfa_basement = 0.0
-    orig_details.elements.each("Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |cond_basement|
-      @cfa_basement += Float(XMLHelper.get_value(cond_basement, "FrameFloor/Area"))
-    end
     @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
     @bldg_length_side = (3.0 * @bldg_footprint / 5.0)**0.5 # ft
     @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
@@ -426,8 +424,8 @@ class HEScoreRuleset
           hvac_value = 0.98
         else
           hvac_year = heating_values[:year_installed]
-          if hvac_year.nil?
-            hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
+          if not hvac_year.nil?
+            hvac_value = heating_values[:heating_efficiency_value]
           else
             hvac_value = get_default_furnace_afue(hvac_year, heating_values[:heating_system_fuel])
           end
@@ -439,7 +437,7 @@ class HEScoreRuleset
         else
           hvac_year = heating_values[:year_installed]
           if hvac_year.nil?
-            hvac_value = XMLHelper.get_value(orig_heating, "AnnualHeatingEfficiency[Units='#{hvac_units}']/Value")
+            hvac_value = heating_values[:heating_efficiency_value]
           else
             hvac_value = get_default_boiler_afue(hvac_year, heating_values[:heating_system_fuel])
           end
@@ -482,7 +480,7 @@ class HEScoreRuleset
         hvac_units = "SEER"
         hvac_year = cooling_values[:year_installed]
         if hvac_year.nil?
-          hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
+          hvac_value = cooling_values[:cooling_efficiency_value]
         else
           hvac_value = get_default_central_ac_seer(hvac_year)
         end
@@ -490,7 +488,7 @@ class HEScoreRuleset
         hvac_units = "EER"
         hvac_year = cooling_values[:year_installed]
         if hvac_year.nil?
-          hvac_value = XMLHelper.get_value(orig_cooling, "AnnualCoolingEfficiency[Units='#{hvac_units}']/Value")
+          hvac_value = cooling_values[:cooling_efficiency_value]
         else
           hvac_value = get_default_room_ac_eer(hvac_year)
         end
@@ -513,10 +511,7 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatPump") do |orig_hp|
       hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
 
-      distribution_system_id = nil
-      if XMLHelper.has_element(orig_hp, "DistributionSystem")
-        distribution_system_id = hp_values[:distribution_system_idref]
-      end
+      distribution_system_id = hp_values[:distribution_system_idref]
       hvac_units_heat = nil
       hvac_value_heat = nil
       hvac_units_cool = nil
@@ -526,21 +521,21 @@ class HEScoreRuleset
         hvac_units_heat = "HSPF"
         hvac_year = hp_values[:year_installed]
         if hvac_year.nil?
-          hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
-          hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
+          hvac_value_cool = hp_values[:cooling_efficiency_value]
+          hvac_value_heat = hp_values[:heating_efficiency_value]
         else
           hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(hvac_year)
         end
       elsif hp_values[:heat_pump_type] == "mini-split"
         hvac_units_cool = "SEER"
         hvac_units_heat = "HSPF"
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
+        hvac_value_cool = hp_values[:cooling_efficiency_value]
+        hvac_value_heat = hp_values[:heating_efficiency_value]
       elsif hp_values[:heat_pump_type] == "ground-to-air"
         hvac_units_cool = "EER"
         hvac_units_heat = "COP"
-        hvac_value_cool = XMLHelper.get_value(orig_hp, "AnnualCoolEfficiency[Units='#{hvac_units_cool}']/Value")
-        hvac_value_heat = XMLHelper.get_value(orig_hp, "AnnualHeatEfficiency[Units='#{hvac_units_heat}']/Value")
+        hvac_value_cool = hp_values[:cooling_efficiency_value]
+        hvac_value_heat = hp_values[:heating_efficiency_value]
       else
         fail "Unexpected peat pump system type '#{hp_values[:heat_pump_type]}'."
       end
@@ -1271,4 +1266,18 @@ def get_attached(attached_name, orig_details, search_in)
     return other_element
   end
   fail "Could not find attached element for '#{attached_name}'."
+end
+
+def get_foundation_details(orig_details)
+  fnd_types = []
+  fnd_cfa = 0.0
+  orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
+    foundation_values = HPXML.get_foundation_values(foundation: orig_foundation)
+    fnd_types << foundation_values[:foundation_type]
+    if foundation_values[:foundation_type] == "ConditionedBasement"
+      framefloor_values = HPXML.get_frame_floor_values(floor: orig_foundation.elements["FrameFloor"])
+      fnd_cfa += framefloor_values[:area]
+    end
+  end
+  return fnd_types, fnd_cfa
 end
