@@ -959,11 +959,17 @@ end
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
   # FIXME: Verify
+  # FIXME: Need values below where nil
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  sidings = ["wood siding", "stucco", "vinyl siding", "aluminum siding", "brick veneer"]
+  sidings = ["wood siding",     # Wood Siding
+             "stucco",          # Stucco Finish
+             "vinyl siding",    # Vinyl Siding
+             "aluminum siding", # Aluminum Siding
+             "brick veneer"]    # Brick Veneer
   siding_index = sidings.index(siding)
   if r_cont == 0 and not ove
+    # Wood Frame
     val = { 0 => [4.6, 3.2, 3.8, 3.7, 4.7],                                # ewwf00wo, ewwf00st, ewwf00vi, ewwf00al, ewwf00br
             3 => [7.0, 5.8, 6.3, 6.2, 7.1],                                # ewwf03wo, ewwf03st, ewwf03vi, ewwf03al, ewwf03br
             7 => [9.7, 8.5, 9.0, 8.8, 9.8],                                # ewwf07wo, ewwf07st, ewwf07vi, ewwf07al, ewwf07br
@@ -973,20 +979,22 @@ def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
             19 => [16.9, 15.4, 16.1, 15.9, 16.9],                          # ewwf19wo, ewwf19st, ewwf19vi, ewwf19al, ewwf19br
             21 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index] # ewwf21wo, ewwf21st, ewwf21vi, ewwf21al, ewwf21br
   elsif r_cont == 5 and not ove
-    val = { 11 => [16.7, 15.4, 15.9, 15.9, 16.9],                          # ewps11wo, ewps11st, ewps11vi, ewps11al, ewps11br
+    # Wood Frame with Rigid Foam Sheathing
+    val = { 0 => [nil, nil, nil, nil, nil],                                # ewps00wo, ewps00st, ewps00vi, ewps00al, ewps00br
+            3 => [nil, nil, nil, nil, nil],                                # ewps03wo, ewps03st, ewps03vi, ewps03al, ewps03br
+            7 => [nil, nil, nil, nil, nil],                                # ewps07wo, ewps07st, ewps07vi, ewps07al, ewps07br
+            11 => [16.7, 15.4, 15.9, 15.9, 16.9],                          # ewps11wo, ewps11st, ewps11vi, ewps11al, ewps11br
             13 => [17.9, 16.4, 16.9, 16.9, 17.9],                          # ewps13wo, ewps13st, ewps13vi, ewps13al, ewps13br
             15 => [18.5, 17.2, 17.9, 17.9, 18.9],                          # ewps15wo, ewps15st, ewps15vi, ewps15al, ewps15br
             19 => [22.2, 20.8, 21.3, 21.3, 22.2],                          # ewps19wo, ewps19st, ewps19vi, ewps19al, ewps19br
             21 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index] # ewps21wo, ewps21st, ewps21vi, ewps21al, ewps21br
   elsif r_cont == 0 and ove
+    # Wood Frame with Optimal Value Engineering
     val = { 19 => [19.2, 17.9, 18.5, 18.2, 19.2],                          # ewov19wo, ewov19st, ewov19vi, ewov19al, ewov19br
             21 => [20.4, 18.9, 19.6, 19.6, 20.4],                          # ewov21wo, ewov21st, ewov21vi, ewov21al, ewov21br
             27 => [25.6, 24.4, 25.0, 24.4, 25.6],                          # ewov27wo, ewov27st, ewov27vi, ewov27al, ewov27br
             33 => [30.3, 29.4, 29.4, 29.4, 30.3],                          # ewov33wo, ewov33st, ewov33vi, ewov33al, ewov33br
             38 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index] # ewov38wo, ewov38st, ewov38vi, ewov38al, ewov38br
-  elsif r_cont == 5 and ove
-    val = { 19 => [24.4, 23.3, 23.8, 23.3, 24.4],                          # ewop19wo, ewop19st, ewop19vi, ewop19al, ewop19br
-            21 => [25.6, 24.4, 25.0, 25.0, 25.6] }[r_cavity][siding_index] # ewop21wo, ewop21st, ewop21vi, ewop21al, ewop21br
   end
   return val if not val.nil?
 
@@ -1011,7 +1019,9 @@ def get_concrete_block_wall_assembly_r(r_cavity, siding)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  sidings = ["stucco", "brick veneer", nil]
+  sidings = ["stucco",       # Stucco Finish
+             "brick veneer", # Brick Veneer
+             nil]            # None
   siding_index = sidings.index(siding)
   val = { 0 => [4.1, 5.6, 4.0],                           # ewcb00st, ewcb00br, ewcb00nn
           3 => [5.7, 7.2, 5.6],                           # ewcb03st, ewcb03br, ewcb03nn
@@ -1034,25 +1044,30 @@ end
 def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
   # Roof Assembly R-value
   # FIXME: Verify
+  # FIXME: Need values below where nil
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/roof-construction-types
-  materials = ["asphalt or fiberglass shingles",
-               "wood shingles or shakes",
-               "slate or tile shingles",
-               "concrete",
-               "plastic/rubber/synthetic sheeting"]
+  materials = ["asphalt or fiberglass shingles",    # Composition Shingles
+               "wood shingles or shakes",           # Wood Shakes
+               "slate or tile shingles",            # Clay Tile
+               "concrete",                          # Concrete Tile
+               "plastic/rubber/synthetic sheeting"] # Tar and Gravel
   material_index = materials.index(material)
   if r_cont == 0 and not has_radiant_barrier
+    # Wood Frame
     val = { 0 => [3.3, 4.0, 3.4, 3.4, 3.7],                                 # rfwf00co, rfwf00wo, rfwf00rc, rfwf00lc, rfwf00tg
             11 => [13.5, 14.3, 13.7, 13.5, 13.9],                           # rfwf11co, rfwf11wo, rfwf11rc, rfwf11lc, rfwf11tg
             13 => [14.9, 15.6, 15.2, 14.9, 15.4],                           # rfwf13co, rfwf13wo, rfwf13rc, rfwf13lc, rfwf13tg
             15 => [16.4, 16.9, 16.4, 16.4, 16.7],                           # rfwf15co, rfwf15wo, rfwf15rc, rfwf15lc, rfwf15tg
             19 => [20.0, 20.8, 20.4, 20.4, 20.4],                           # rfwf19co, rfwf19wo, rfwf19rc, rfwf19lc, rfwf19tg
             21 => [21.7, 22.2, 21.7, 21.3, 21.7],                           # rfwf21co, rfwf21wo, rfwf21rc, rfwf21lc, rfwf21tg
-            27 => [nil, 27.8, 27.0, 27.0, 27.0] }[r_cavity][material_index] # rfwf27co, rfwf27wo, rfwf27rc, rfwf27lc, rfwf27tg
+            27 => [nil, 27.8, 27.0, 27.0, 27.0],                            # rfwf27co, rfwf27wo, rfwf27rc, rfwf27lc, rfwf27tg
+            30 => [nil, nil, nil, nil, nil] }[r_cavity][material_index]     # rfwf30co, rfwf30wo, rfwf30rc, rfwf30lc, rfwf30tg
   elsif r_cont == 0 and has_radiant_barrier
-    val = { 0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index]      # rfrb00co, rfrb00wo, rfrb00rc, rfrb00lc, rfrb00tg
+    # Wood Frame with Radiant Barrier
+    val = { 0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index] # rfrb00co, rfrb00wo, rfrb00rc, rfrb00lc, rfrb00tg
   elsif r_cont == 5 and not has_radiant_barrier
+    # Wood Frame with Ridgid Foam Sheathing
     val = { 0 => [8.3, 9.0, 8.4, 8.3, 8.7],                                 # rfps00co, rfps00wo, rfps00rc, rfps00lc, rfps00tg
             11 => [18.5, 19.2, 18.5, 18.5, 18.9],                           # rfps11co, rfps11wo, rfps11rc, rfps11lc, rfps11tg
             13 => [20.0, 20.8, 20.0, 20.0, 20.4],                           # rfps13co, rfps13wo, rfps13rc, rfps13lc, rfps13tg
