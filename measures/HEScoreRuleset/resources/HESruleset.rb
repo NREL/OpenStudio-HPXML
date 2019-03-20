@@ -1,6 +1,5 @@
 require_relative "../../HPXMLtoOpenStudio/resources/airflow"
 require_relative "../../HPXMLtoOpenStudio/resources/geometry"
-require_relative "../../HPXMLtoOpenStudio/resources/xmlhelper"
 require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
 
 class HEScoreRuleset
@@ -423,11 +422,10 @@ class HEScoreRuleset
         if heating_values[:heating_system_fuel] == "electricity"
           hvac_value = 0.98
         else
-          hvac_year = heating_values[:year_installed]
-          if not hvac_year.nil?
+          if heating_values[:year_installed].nil?
             hvac_value = heating_values[:heating_efficiency_value]
           else
-            hvac_value = get_default_furnace_afue(hvac_year, heating_values[:heating_system_fuel])
+            hvac_value = get_default_furnace_afue(heating_values[:year_installed], heating_values[:heating_system_fuel])
           end
         end
       elsif heating_values[:heating_system_type] == "Boiler"
@@ -435,11 +433,10 @@ class HEScoreRuleset
         if heating_values[:heating_system_fuel] == "electricity"
           hvac_value = 0.98
         else
-          hvac_year = heating_values[:year_installed]
-          if hvac_year.nil?
+          if heating_values[:year_installed].nil?
             hvac_value = heating_values[:heating_efficiency_value]
           else
-            hvac_value = get_default_boiler_afue(hvac_year, heating_values[:heating_system_fuel])
+            hvac_value = get_default_boiler_afue(heating_values[:year_installed], heating_values[:heating_system_fuel])
           end
         end
       elsif heating_values[:heating_system_type] == "ElectricResistance"
@@ -478,19 +475,17 @@ class HEScoreRuleset
       hvac_value = nil
       if cooling_values[:cooling_system_type] == "central air conditioning"
         hvac_units = "SEER"
-        hvac_year = cooling_values[:year_installed]
-        if hvac_year.nil?
+        if cooling_values[:year_installed].nil?
           hvac_value = cooling_values[:cooling_efficiency_value]
         else
-          hvac_value = get_default_central_ac_seer(hvac_year)
+          hvac_value = get_default_central_ac_seer(cooling_values[:year_installed])
         end
       elsif cooling_values[:cooling_system_type] == "room air conditioner"
         hvac_units = "EER"
-        hvac_year = cooling_values[:year_installed]
-        if hvac_year.nil?
+        if cooling_values[:year_installed].nil?
           hvac_value = cooling_values[:cooling_efficiency_value]
         else
-          hvac_value = get_default_room_ac_eer(hvac_year)
+          hvac_value = get_default_room_ac_eer(cooling_values[:year_installed])
         end
       else
         fail "Unexpected cooling system type '#{cooling_values[:cooling_system_type]}'."
@@ -519,12 +514,11 @@ class HEScoreRuleset
       if hp_values[:heat_pump_type] == "air-to-air"
         hvac_units_cool = "SEER"
         hvac_units_heat = "HSPF"
-        hvac_year = hp_values[:year_installed]
-        if hvac_year.nil?
+        if hp_values[:year_installed].nil?
           hvac_value_cool = hp_values[:cooling_efficiency_value]
           hvac_value_heat = hp_values[:heating_efficiency_value]
         else
-          hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(hvac_year)
+          hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(hp_values[:year_installed])
         end
       elsif hp_values[:heat_pump_type] == "mini-split"
         hvac_units_cool = "SEER"
