@@ -1195,7 +1195,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [])
+                    expected_kwargs: [:duct_leakage_units, :duct_leakage_total_or_to_outside, :duct_leakage_test_method])
 
     return duct_leakage_measurement
   end
@@ -1204,7 +1204,10 @@ class HPXML
     return nil if duct_leakage_measurement.nil?
 
     return { :duct_type => XMLHelper.get_value(duct_leakage_measurement, "DuctType"),
-             :duct_leakage_value => to_float(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value")) }
+             :duct_leakage_test_method => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakageTestMethod"),
+             :duct_leakage_units => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Units"),
+             :duct_leakage_value => to_float(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value")),
+             :duct_leakage_total_or_to_outside => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/TotalOrToOutside") }
   end
 
   def self.add_ducts(air_distribution:,
