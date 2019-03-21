@@ -42,10 +42,12 @@ class HEScoreValidator
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms' => one,
         '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea' => one,
 
+        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year=2012]/ClimateZone' => one,
+        '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation/WMO' => one,
+
         '/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement' => one, # See [AirInfiltration]
 
-        '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof' => one_or_more, # See [Roof]
-        '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic' => one_or_more, # See [Attic]
+        '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic' => one_or_more, # See [Attic]
         '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation' => one_or_more, # See [Foundation]
         '/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall' => one_or_more, # See [Wall]
         '/HPXML/Building/BuildingDetails/Enclosure/Windows/Window' => one_or_more, # See [Window]
@@ -61,40 +63,37 @@ class HEScoreValidator
         '[[HousePressure="50"]/BuildingAirLeakage[UnitofMeasure="CFM"]/AirLeakage] | [LeakinessDescription="tight" or LeakinessDescription="average"]' => one,
       },
 
-      # [Roof]
-      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof' => {
-        '[RoofColor="light" or RoofColor="medium" or RoofColor="medium dark" or RoofColor="dark" or RoofColor="white" or RoofColor="reflective"]' => one, # See [RoofColor=Reflective]
-        '[RoofType="slate or tile shingles" or RoofType="wood shingles or shakes" or RoofType="asphalt or fiberglass shingles" or RoofType="plastic/rubber/synthetic sheeting" or RoofType="concrete"]' => one,
-        'RadiantBarrier' => one,
-        '/HPXML/Building/BuildingDetails/Enclosure/Skylights' => zero_or_one, # See [Skylight]
-      },
-
-      # [RoofColor=Reflective]
-      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Roofs/Roof[RoofColor="reflective"]' => {
-        'SolarAbsorptance' => one,
-      },
-
       # [Attic]
-      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic' => {
-        'AttachedToRoof' => one,
-        '[AtticType="vented attic" or AtticType="cape cod" or AtticType="cathedral ceiling"]' => one, # See [AtticType=Vented] or [AtticType=Cape] or [AtticType=Cathedral]
-        'AtticRoofInsulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
-        'AtticRoofInsulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one,
+      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic' => {
+        'AtticType[Attic[Vented="true"] | Attic[CapeCod="true"] | CathedralCeiling]' => one, # See [AtticType=Vented] or [AtticType=Cathedral]
+        'Roofs/Roof' => one, # See [AtticRoof]
       },
 
       ## [AtticType=Vented]
-      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="vented attic"]' => {
-        'AtticFloorInsulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
-        'Area' => one,
-      },
-
-      ## [AtticType=Cape]
-      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cape cod"]' => {
-        'Area' => one,
+      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]' => {
+        'Floors/Floor' => one, # See [AtticFloor]
       },
 
       ## [AtticType=Cathedral]
-      '/HPXML/Building/BuildingDetails/Enclosure/AtticAndRoof/Attics/Attic[AtticType="cathedral ceiling"]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/CathedralCeiling]' => {
+        'Roofs/Roof/Area' => one,
+      },
+
+      ## AtticRoof
+      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/Roofs/Roof' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        '[RoofType="slate or tile shingles" or RoofType="wood shingles or shakes" or RoofType="asphalt or fiberglass shingles" or RoofType="plastic/rubber/synthetic sheeting" or RoofType="concrete"]' => one,
+        '[SolarAbsorptance | [RoofColor="light" or RoofColor="medium" or RoofColor="medium dark" or RoofColor="dark" or RoofColor="white" or RoofColor="reflective"]]' => one,
+        'RadiantBarrier' => one,
+        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
+        'Insulation/Layer[InstallationType="continuous"]/NominalRValue' => zero_or_one,
+      },
+
+      ## [AtticFloor]
+      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/Floors/Floor' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Area' => one,
+        'Insulation/Layer[InstallationType="cavity"]/NominalRValue' => one,
       },
 
       # [Foundation]
@@ -286,24 +285,24 @@ class HEScoreValidator
       ## [HeatPumpType=ASHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="air-to-air"]' => {
         'DistributionSystem' => one, # See [HVACDistribution]
-        '[YearInstalled | AnnualCoolEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
-        '[YearInstalled | AnnualHeatEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
+        '[YearInstalled | AnnualCoolingEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[YearInstalled | AnnualHeatingEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       ## [HeatPumpType=MSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="mini-split"]' => {
         # FIXME: 'DistributionSystem' => one, # See [HVACDistribution]
         'YearInstalled' => zero,
-        '[AnnualCoolEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
-        '[AnnualHeatEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
+        '[AnnualCoolingEfficiency[Units="SEER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[AnnualHeatingEfficiency[Units="HSPF"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       ## [HeatPumpType=GSHP]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType="ground-to-air"]' => {
         'DistributionSystem' => one, # See [HVACDistribution]
         'YearInstalled' => zero,
-        '[AnnualCoolEfficiency[Units="EER"]/Value | [FractionCoolLoadServed=0]]' => one,
-        '[AnnualHeatEfficiency[Units="COP"]/Value | [FractionHeatLoadServed=0]]' => one,
+        '[AnnualCoolingEfficiency[Units="EER"]/Value | [FractionCoolLoadServed=0]]' => one,
+        '[AnnualHeatingEfficiency[Units="COP"]/Value | [FractionHeatLoadServed=0]]' => one,
       },
 
       # [HVACDistribution]
@@ -314,7 +313,7 @@ class HEScoreValidator
 
       ## [HVACDuct]
       '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts' => {
-        '[DuctLocation="conditioned space" or DuctLocation="unconditioned basement" or DuctLocation="unvented crawlspace" or DuctLocation="vented crawlspace" or DuctLocation="unconditioned attic"]' => one,
+        '[DuctLocation="living space" or DuctLocation="basement - unconditioned" or DuctLocation="crawlspace - unvented" or DuctLocation="crawlspace - vented" or DuctLocation="attic - unconditioned"]' => one,
         'FractionDuctArea' => one,
         'extension/hescore_ducts_insulated' => one,
       },
@@ -344,7 +343,7 @@ class HEScoreValidator
       # [PVSystem]
       '/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem' => {
         'ArrayOrientation' => one,
-        '[MaxPowerOutput | extension/hescore_num_panels]' => one,
+        '[MaxPowerOutput | NumberOfPanels]' => one,
       },
     }
 

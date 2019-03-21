@@ -62,9 +62,8 @@ class HEScoreTest < Minitest::Unit::TestCase
       assert(File.exists?(results_json))
 
       # Check HPXMLs are valid
-      schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HEScoreRuleset", "hpxml_schemas"))
-      _test_schema_validation(parent_dir, xml, schemas_dir)
       schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HPXMLtoOpenStudio", "hpxml_schemas"))
+      _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
       results = _get_results(parent_dir, runtime)

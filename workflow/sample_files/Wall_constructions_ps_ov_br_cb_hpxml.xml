@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
-<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.3">
+<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-02-20T13:53:32-08:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-03-19T10:09:09-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <SoftwareProgramUsed>HES Generate HPXML</SoftwareProgramUsed>
-    <SoftwareProgramVersion>0.1</SoftwareProgramVersion>
+    <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-3605">
+    <BuildingID id="bid-2230">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 5.83</Address1>
+        <Address1>Regression run 6.89</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-01-04</Date>
+      <Date>2019-03-18</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -47,12 +47,16 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Window code dcaa</comments>
+          <comments>Wall constructions ps ov br cb</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
+        <ClimateZoneIECC>
+          <Year>2012</Year>
+          <ClimateZone>4A</ClimateZone>
+        </ClimateZoneIECC>
         <WeatherStation>
-          <SystemIdentifiersInfo id="wmo"/>
+          <SystemIdentifier id="wmo"/>
           <Name>Cahokia St Louis</Name>
           <WMO>725314</WMO>
         </WeatherStation>
@@ -65,38 +69,33 @@
             <LeakinessDescription>average</LeakinessDescription>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
-        <AtticAndRoof>
-          <Roofs>
-            <Roof>
-              <SystemIdentifier id="roof1"/>
-              <RoofColor>medium</RoofColor>
-              <RoofType>asphalt or fiberglass shingles</RoofType>
-              <RoofArea>1000</RoofArea>
-              <RadiantBarrier>false</RadiantBarrier>
-              <extension>
-                <roof_assembly_code>rfwf11co</roof_assembly_code>
-              </extension>
-            </Roof>
-          </Roofs>
-          <Attics>
-            <Attic>
-              <SystemIdentifier id="attic1"/>
-              <AttachedToRoof idref="roof1"/>
-              <AtticType>cathedral ceiling</AtticType>
-              <AtticRoofInsulation>
-                <SystemIdentifier id="roof1_roof_insulation"/>
-                <Layer>
-                  <InstallationType>cavity</InstallationType>
-                  <NominalRValue>11</NominalRValue>
-                </Layer>
-              </AtticRoofInsulation>
-              <Area>1000</Area>
-              <extension>
-                <hescore_roof_type>cathedral ceiling</hescore_roof_type>
-              </extension>
-            </Attic>
-          </Attics>
-        </AtticAndRoof>
+        <Attics>
+          <Attic>
+            <SystemIdentifier id="attic1"/>
+            <AtticType>
+              <CathedralCeiling/>
+            </AtticType>
+            <Roofs>
+              <Roof>
+                <SystemIdentifier id="roof1"/>
+                <Area>1000</Area>
+                <RoofType>asphalt or fiberglass shingles</RoofType>
+                <RoofColor>medium</RoofColor>
+                <RadiantBarrier>false</RadiantBarrier>
+                <Insulation>
+                  <SystemIdentifier id="roof1_insulation"/>
+                  <Layer>
+                    <InstallationType>cavity</InstallationType>
+                    <NominalRValue>11</NominalRValue>
+                  </Layer>
+                </Insulation>
+                <extension>
+                  <roof_assembly_code>rfwf11co</roof_assembly_code>
+                </extension>
+              </Roof>
+            </Roofs>
+          </Attic>
+        </Attics>
         <Foundations>
           <Foundation>
             <SystemIdentifier id="floor1"/>
@@ -125,76 +124,75 @@
               </WoodStud>
             </WallType>
             <Orientation>north</Orientation>
-            <Siding>vinyl siding</Siding>
+            <Siding>wood siding</Siding>
             <Insulation>
               <SystemIdentifier id="front_wall_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <NominalRValue>11</NominalRValue>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>5</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code>ewwf13vi</hescore_wall_code>
+              <hescore_wall_code>ewps11wo</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id="back_wall"/>
             <WallType>
               <WoodStud>
-                <OptimumValueEngineering>false</OptimumValueEngineering>
+                <OptimumValueEngineering>true</OptimumValueEngineering>
               </WoodStud>
             </WallType>
             <Orientation>south</Orientation>
-            <Siding>vinyl siding</Siding>
+            <Siding>wood siding</Siding>
             <Insulation>
               <SystemIdentifier id="back_wall_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <NominalRValue>19</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code/>
+              <hescore_wall_code>ewov19wo</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id="right_wall"/>
             <WallType>
-              <WoodStud>
-                <OptimumValueEngineering>false</OptimumValueEngineering>
-              </WoodStud>
+              <StructuralBrick/>
             </WallType>
             <Orientation>west</Orientation>
-            <Siding>vinyl siding</Siding>
             <Insulation>
               <SystemIdentifier id="right_wall_insulation"/>
               <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>05</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code/>
+              <hescore_wall_code>ewbr05nn</hescore_wall_code>
             </extension>
           </Wall>
           <Wall>
             <SystemIdentifier id="left_wall"/>
             <WallType>
-              <WoodStud>
-                <OptimumValueEngineering>false</OptimumValueEngineering>
-              </WoodStud>
+              <ConcreteMasonryUnit/>
             </WallType>
             <Orientation>east</Orientation>
-            <Siding>vinyl siding</Siding>
+            <Siding>stucco</Siding>
             <Insulation>
               <SystemIdentifier id="left_wall_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>13</NominalRValue>
+                <NominalRValue>03</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <hescore_wall_code/>
+              <hescore_wall_code>ewcb03st</hescore_wall_code>
             </extension>
           </Wall>
         </Walls>
@@ -204,16 +202,14 @@
             <Area>60</Area>
             <Orientation>north</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref="front_wall"/>
             <extension>
-              <hescore_window_code>dcaa</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
           <Window>
@@ -221,16 +217,14 @@
             <Area>50</Area>
             <Orientation>south</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref="back_wall"/>
             <extension>
-              <hescore_window_code>dcaa</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
           <Window>
@@ -238,16 +232,14 @@
             <Area>40</Area>
             <Orientation>west</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref="right_wall"/>
             <extension>
-              <hescore_window_code>dcaa</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
           <Window>
@@ -255,21 +247,19 @@
             <Area>30</Area>
             <Orientation>east</Orientation>
             <FrameType>
-              <Aluminum>
-                <ThermalBreak>false</ThermalBreak>
-              </Aluminum>
+              <Wood/>
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>none</ExteriorShading>
             <AttachedToWall idref="left_wall"/>
             <extension>
-              <hescore_window_code>dcaa</hescore_window_code>
+              <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
         </Windows>
         <extension>
-          <hescore_wall_construction_same>true</hescore_wall_construction_same>
+          <hescore_wall_construction_same>false</hescore_wall_construction_same>
           <hescore_window_construction_same>true</hescore_window_construction_same>
         </extension>
       </Enclosure>
@@ -305,7 +295,7 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctLocation>conditioned space</DuctLocation>
+                  <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                   <extension>
                     <hescore_ducts_insulated>1</hescore_ducts_insulated>
