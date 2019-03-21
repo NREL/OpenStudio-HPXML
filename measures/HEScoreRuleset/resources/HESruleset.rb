@@ -1,3 +1,4 @@
+require 'csv'
 require_relative "../../HPXMLtoOpenStudio/resources/airflow"
 require_relative "../../HPXMLtoOpenStudio/resources/geometry"
 require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
@@ -426,7 +427,10 @@ class HEScoreRuleset
           if heating_values[:year_installed].nil?
             hvac_value = heating_values[:heating_efficiency_value]
           else
-            hvac_value = get_default_furnace_afue(heating_values[:year_installed], heating_values[:heating_system_fuel])
+            hvac_value = lookup_hvac_efficiency(heating_values[:year_installed], 
+                                                heating_values[:heating_system_type], 
+                                                heating_values[:heating_system_fuel], 
+                                                hvac_units)
           end
         end
       elsif heating_values[:heating_system_type] == "Boiler"
@@ -437,7 +441,10 @@ class HEScoreRuleset
           if heating_values[:year_installed].nil?
             hvac_value = heating_values[:heating_efficiency_value]
           else
-            hvac_value = get_default_boiler_afue(heating_values[:year_installed], heating_values[:heating_system_fuel])
+            hvac_value = lookup_hvac_efficiency(heating_values[:year_installed], 
+                                                heating_values[:heating_system_type], 
+                                                heating_values[:heating_system_fuel], 
+                                                hvac_units)
           end
         end
       elsif heating_values[:heating_system_type] == "ElectricResistance"
@@ -471,7 +478,7 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACPlant/CoolingSystem") do |orig_cooling|
       cooling_values = HPXML.get_cooling_system_values(cooling_system: orig_cooling)
 
-      distribution_system_id = cooling_values[:distribution_system_idref]
+      hvac_fuel = "electricity"
       hvac_units = nil
       hvac_value = nil
       if cooling_values[:cooling_system_type] == "central air conditioning"
@@ -479,14 +486,18 @@ class HEScoreRuleset
         if cooling_values[:year_installed].nil?
           hvac_value = cooling_values[:cooling_efficiency_value]
         else
-          hvac_value = get_default_central_ac_seer(cooling_values[:year_installed])
+          hvac_value = lookup_hvac_efficiency(cooling_values[:year_installed], 
+                                              cooling_values[:cooling_system_type], 
+                                              hvac_fuel, hvac_units)
         end
       elsif cooling_values[:cooling_system_type] == "room air conditioner"
         hvac_units = "EER"
         if cooling_values[:year_installed].nil?
           hvac_value = cooling_values[:cooling_efficiency_value]
         else
-          hvac_value = get_default_room_ac_eer(cooling_values[:year_installed])
+          hvac_value = lookup_hvac_efficiency(cooling_values[:year_installed], 
+                                              cooling_values[:cooling_system_type], 
+                                              hvac_fuel, hvac_units)
         end
       else
         fail "Unexpected cooling system type '#{cooling_values[:cooling_system_type]}'."
@@ -494,9 +505,9 @@ class HEScoreRuleset
 
       HPXML.add_cooling_system(hpxml: hpxml,
                                id: cooling_values[:id],
-                               distribution_system_idref: distribution_system_id,
+                               distribution_system_idref: cooling_values[:distribution_system_idref],
                                cooling_system_type: cooling_values[:cooling_system_type],
-                               cooling_system_fuel: "electricity",
+                               cooling_system_fuel: hvac_fuel,
                                cooling_capacity: -1, # Use Manual J auto-sizing
                                fraction_cool_load_served: cooling_values[:fraction_cool_load_served],
                                cooling_efficiency_units: hvac_units,
@@ -507,7 +518,7 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatPump") do |orig_hp|
       hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
 
-      distribution_system_id = hp_values[:distribution_system_idref]
+      hvac_fuel = "electricity"
       hvac_units_heat = nil
       hvac_value_heat = nil
       hvac_units_cool = nil
@@ -519,7 +530,12 @@ class HEScoreRuleset
           hvac_value_cool = hp_values[:cooling_efficiency_value]
           hvac_value_heat = hp_values[:heating_efficiency_value]
         else
-          hvac_value_cool, hvac_value_heat = get_default_ashp_seer_hspf(hp_values[:year_installed])
+          hvac_value_cool = lookup_hvac_efficiency(hp_values[:year_installed], 
+                                                   hp_values[:heat_pump_type], 
+                                                   hvac_fuel, hvac_units_cool)
+          hvac_value_heat = lookup_hvac_efficiency(hp_values[:year_installed], 
+                                                   hp_values[:heat_pump_type], 
+                                                   hvac_fuel, hvac_units_heat)
         end
       elsif hp_values[:heat_pump_type] == "mini-split"
         hvac_units_cool = "SEER"
@@ -762,86 +778,62 @@ class HEScoreRuleset
   end
 end
 
-def get_default_furnace_afue(year, fuel)
-  # Furnace AFUE by year/fuel
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_afues = { "electricity" => [0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98],
-                    "natural gas" => [0.72, 0.72, 0.72, 0.72, 0.72, 0.76, 0.78, 0.78],
-                    "propane" => [0.72, 0.72, 0.72, 0.72, 0.72, 0.76, 0.78, 0.78],
-                    "fuel oil" => [0.60, 0.65, 0.72, 0.75, 0.80, 0.80, 0.80, 0.80] }[fuel]
-  ending_years.zip(default_afues).each do |ending_year, default_afue|
-    next if year > ending_year
-
-    return default_afue
+def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
+  if year < 1970
+    year = 1970
+  elsif year > 2010
+    year = 2010
   end
-  fail "Could not get default furnace AFUE for year '#{year}' and fuel '#{fuel}'"
+
+  type_id = { 'central air conditioning' => 'split_dx',
+              'room air conditioner' => 'packaged_dx',
+              'air-to-air' => 'heat_pump',
+              'Furnace' => 'central_furnace',
+              'WallFurnace' => 'wall_furnace',
+              'Boiler' => 'boiler' }[hvac_type]
+  fail "Unexpected hvac_type #{hvac_type}." if type_id.nil?
+
+  fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
+  fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
+
+  metric_id = units.downcase
+
+  value = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), "lu_hvac_equipment_efficiency.csv"), headers: true) do |row|
+    next unless Integer(row['year']) == year
+    next unless row['type_id'] == type_id
+    next unless row['fuel_primary_id'] == fuel_primary_id
+    next unless row['metric_id'] == metric_id
+
+    value = Float(row['value'])
+    break
+  end
+  fail "Could not lookup default HVAC efficiency." if value.nil?
+
+  return value
 end
 
-def get_default_boiler_afue(year, fuel)
-  # Boiler AFUE by year/fuel
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_afues = { "electricity" => [0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98],
-                    "natural gas" => [0.60, 0.60, 0.65, 0.65, 0.70, 0.77, 0.80, 0.80],
-                    "propane" => [0.60, 0.60, 0.65, 0.65, 0.70, 0.77, 0.80, 0.80],
-                    "fuel oil" => [0.60, 0.65, 0.72, 0.75, 0.80, 0.80, 0.80, 0.80] }[fuel]
-  ending_years.zip(default_afues).each do |ending_year, default_afue|
-    next if year > ending_year
-
-    return default_afue
+def lookup_water_heater_efficiency(year, fuel_type)
+  if year < 1972
+    year = 1972
+  elsif year > 2010
+    year = 2010
   end
-  fail "Could not get default boiler AFUE for year '#{year}' and fuel '#{fuel}'"
-end
 
-def get_default_central_ac_seer(year)
-  # Central Air Conditioner SEER by year
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_seers = [9.0, 9.0, 9.0, 9.0, 9.0, 9.40, 10.0, 13.0]
-  ending_years.zip(default_seers).each do |ending_year, default_seer|
-    next if year > ending_year
+  fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
+  fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
 
-    return default_seer
+  value = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), "lu_water_heater_efficiency.csv"), headers: true) do |row|
+    next unless Integer(row['year']) == year
+    next unless row['fuel_primary_id'] == fuel_primary_id
+
+    value = Float(row['value'])
+    break
   end
-  fail "Could not get default central air conditioner SEER for year '#{year}'"
-end
+  fail "Could not lookup default water heating efficiency." if value.nil?
 
-def get_default_room_ac_eer(year)
-  # Room Air Conditioner EER by year
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_eers = [8.0, 8.0, 8.0, 8.0, 8.0, 8.10, 8.5, 8.5]
-  ending_years.zip(default_eers).each do |ending_year, default_eer|
-    next if year > ending_year
-
-    return default_eer
-  end
-  fail "Could not get default room air conditioner EER for year '#{year}'"
-end
-
-def get_default_ashp_seer_hspf(year)
-  # Air Source Heat Pump SEER/HSPF by year
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_seers = [9.0, 9.0, 9.0, 9.0, 9.0, 9.40, 10.0, 13.0]
-  default_hspfs = [6.5, 6.5, 6.5, 6.5, 6.5, 6.80, 6.80, 7.7]
-  ending_years.zip(default_seers, default_hspfs).each do |ending_year, default_seer, default_hspf|
-    next if year > ending_year
-
-    return default_seer, default_hspf
-  end
-  fail "Could not get default air source heat pump SEER/HSPF for year '#{year}'"
+  return value
 end
 
 def get_default_water_heater_ef(year, fuel)
@@ -904,34 +896,42 @@ end
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
   # FIXME: Verify
+  # FIXME: Need values below where nil
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  sidings = ["wood siding", "stucco", "vinyl siding", "aluminum siding", "brick veneer"]
+  sidings = ["wood siding",     # Wood Siding
+             "stucco",          # Stucco Finish
+             "vinyl siding",    # Vinyl Siding
+             "aluminum siding", # Aluminum Siding
+             "brick veneer"]    # Brick Veneer
   siding_index = sidings.index(siding)
   if r_cont.nil? and not ove
-    val = { 0.0 => [4.6, 3.2, 3.8, 3.7, 4.7],                                # ewwf00wo, ewwf00st, ewwf00vi, ewwf00al, ewwf00br
-            3.0 => [7.0, 5.8, 6.3, 6.2, 7.1],                                # ewwf03wo, ewwf03st, ewwf03vi, ewwf03al, ewwf03br
-            7.0 => [9.7, 8.5, 9.0, 8.8, 9.8],                                # ewwf07wo, ewwf07st, ewwf07vi, ewwf07al, ewwf07br
-            11.0 => [11.5, 10.2, 10.8, 10.6, 11.6],                          # ewwf11wo, ewwf11st, ewwf11vi, ewwf11al, ewwf11br
-            13.0 => [12.5, 11.1, 11.6, 11.5, 12.5],                          # ewwf13wo, ewwf13st, ewwf13vi, ewwf13al, ewwf13br
-            15.0 => [13.3, 11.9, 12.5, 12.3, 13.3],                          # ewwf15wo, ewwf15st, ewwf15vi, ewwf15al, ewwf15br
-            19.0 => [16.9, 15.4, 16.1, 15.9, 16.9],                          # ewwf19wo, ewwf19st, ewwf19vi, ewwf19al, ewwf19br
-            21.0 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index] # ewwf21wo, ewwf21st, ewwf21vi, ewwf21al, ewwf21br
+    # Wood Frame
+    val = { 0 => [4.6, 3.2, 3.8, 3.7, 4.7],                                # ewwf00wo, ewwf00st, ewwf00vi, ewwf00al, ewwf00br
+            3 => [7.0, 5.8, 6.3, 6.2, 7.1],                                # ewwf03wo, ewwf03st, ewwf03vi, ewwf03al, ewwf03br
+            7 => [9.7, 8.5, 9.0, 8.8, 9.8],                                # ewwf07wo, ewwf07st, ewwf07vi, ewwf07al, ewwf07br
+            11 => [11.5, 10.2, 10.8, 10.6, 11.6],                          # ewwf11wo, ewwf11st, ewwf11vi, ewwf11al, ewwf11br
+            13 => [12.5, 11.1, 11.6, 11.5, 12.5],                          # ewwf13wo, ewwf13st, ewwf13vi, ewwf13al, ewwf13br
+            15 => [13.3, 11.9, 12.5, 12.3, 13.3],                          # ewwf15wo, ewwf15st, ewwf15vi, ewwf15al, ewwf15br
+            19 => [16.9, 15.4, 16.1, 15.9, 16.9],                          # ewwf19wo, ewwf19st, ewwf19vi, ewwf19al, ewwf19br
+            21 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index] # ewwf21wo, ewwf21st, ewwf21vi, ewwf21al, ewwf21br
   elsif not r_cont.nil? and not ove
-    val = { 11.0 => [16.7, 15.4, 15.9, 15.9, 16.9],                          # ewps11wo, ewps11st, ewps11vi, ewps11al, ewps11br
-            13.0 => [17.9, 16.4, 16.9, 16.9, 17.9],                          # ewps13wo, ewps13st, ewps13vi, ewps13al, ewps13br
-            15.0 => [18.5, 17.2, 17.9, 17.9, 18.9],                          # ewps15wo, ewps15st, ewps15vi, ewps15al, ewps15br
-            19.0 => [22.2, 20.8, 21.3, 21.3, 22.2],                          # ewps19wo, ewps19st, ewps19vi, ewps19al, ewps19br
-            21.0 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index] # ewps21wo, ewps21st, ewps21vi, ewps21al, ewps21br
+    # Wood Frame with Rigid Foam Sheathing
+    val = { 0 => [nil, nil, nil, nil, nil],                                # ewps00wo, ewps00st, ewps00vi, ewps00al, ewps00br
+            3 => [nil, nil, nil, nil, nil],                                # ewps03wo, ewps03st, ewps03vi, ewps03al, ewps03br
+            7 => [nil, nil, nil, nil, nil],                                # ewps07wo, ewps07st, ewps07vi, ewps07al, ewps07br
+            11 => [16.7, 15.4, 15.9, 15.9, 16.9],                          # ewps11wo, ewps11st, ewps11vi, ewps11al, ewps11br
+            13 => [17.9, 16.4, 16.9, 16.9, 17.9],                          # ewps13wo, ewps13st, ewps13vi, ewps13al, ewps13br
+            15 => [18.5, 17.2, 17.9, 17.9, 18.9],                          # ewps15wo, ewps15st, ewps15vi, ewps15al, ewps15br
+            19 => [22.2, 20.8, 21.3, 21.3, 22.2],                          # ewps19wo, ewps19st, ewps19vi, ewps19al, ewps19br
+            21 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index] # ewps21wo, ewps21st, ewps21vi, ewps21al, ewps21br
   elsif r_cont.nil? and ove
-    val = { 19.0 => [19.2, 17.9, 18.5, 18.2, 19.2],                          # ewov19wo, ewov19st, ewov19vi, ewov19al, ewov19br
-            21.0 => [20.4, 18.9, 19.6, 19.6, 20.4],                          # ewov21wo, ewov21st, ewov21vi, ewov21al, ewov21br
-            27.0 => [25.6, 24.4, 25.0, 24.4, 25.6],                          # ewov27wo, ewov27st, ewov27vi, ewov27al, ewov27br
-            33.0 => [30.3, 29.4, 29.4, 29.4, 30.3],                          # ewov33wo, ewov33st, ewov33vi, ewov33al, ewov33br
-            38.0 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index] # ewov38wo, ewov38st, ewov38vi, ewov38al, ewov38br
-  elsif not r_cont.nil? and ove
-    val = { 19.0 => [24.4, 23.3, 23.8, 23.3, 24.4],                          # ewop19wo, ewop19st, ewop19vi, ewop19al, ewop19br
-            21.0 => [25.6, 24.4, 25.0, 25.0, 25.6] }[r_cavity][siding_index] # ewop21wo, ewop21st, ewop21vi, ewop21al, ewop21br
+    # Wood Frame with Optimal Value Engineering
+    val = { 19 => [19.2, 17.9, 18.5, 18.2, 19.2],                          # ewov19wo, ewov19st, ewov19vi, ewov19al, ewov19br
+            21 => [20.4, 18.9, 19.6, 19.6, 20.4],                          # ewov21wo, ewov21st, ewov21vi, ewov21al, ewov21br
+            27 => [25.6, 24.4, 25.0, 24.4, 25.6],                          # ewov27wo, ewov27st, ewov27vi, ewov27al, ewov27br
+            33 => [30.3, 29.4, 29.4, 29.4, 30.3],                          # ewov33wo, ewov33st, ewov33vi, ewov33al, ewov33br
+            38 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index] # ewov38wo, ewov38st, ewov38vi, ewov38al, ewov38br
   end
   return val if not val.nil?
 
@@ -956,7 +956,9 @@ def get_concrete_block_wall_assembly_r(r_cavity, siding)
   # FIXME: Verify
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  sidings = ["stucco", "brick veneer", nil]
+  sidings = ["stucco",       # Stucco Finish
+             "brick veneer", # Brick Veneer
+             nil]            # None
   siding_index = sidings.index(siding)
   val = { 0.0 => [4.1, 5.6, 4.0],                           # ewcb00st, ewcb00br, ewcb00nn
           3.0 => [5.7, 7.2, 5.6],                           # ewcb03st, ewcb03br, ewcb03nn
@@ -979,31 +981,36 @@ end
 def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
   # Roof Assembly R-value
   # FIXME: Verify
+  # FIXME: Need values below where nil
   # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/roof-construction-types
-  materials = ["asphalt or fiberglass shingles",
-               "wood shingles or shakes",
-               "slate or tile shingles",
-               "concrete",
-               "plastic/rubber/synthetic sheeting"]
+  materials = ["asphalt or fiberglass shingles",    # Composition Shingles
+               "wood shingles or shakes",           # Wood Shakes
+               "slate or tile shingles",            # Clay Tile
+               "concrete",                          # Concrete Tile
+               "plastic/rubber/synthetic sheeting"] # Tar and Gravel
   material_index = materials.index(material)
   if r_cont.nil? and not has_radiant_barrier
-    val = { 0.0 => [3.3, 4.0, 3.4, 3.4, 3.7],                                 # rfwf00co, rfwf00wo, rfwf00rc, rfwf00lc, rfwf00tg
-            11.0 => [13.5, 14.3, 13.7, 13.5, 13.9],                           # rfwf11co, rfwf11wo, rfwf11rc, rfwf11lc, rfwf11tg
-            13.0 => [14.9, 15.6, 15.2, 14.9, 15.4],                           # rfwf13co, rfwf13wo, rfwf13rc, rfwf13lc, rfwf13tg
-            15.0 => [16.4, 16.9, 16.4, 16.4, 16.7],                           # rfwf15co, rfwf15wo, rfwf15rc, rfwf15lc, rfwf15tg
-            19.0 => [20.0, 20.8, 20.4, 20.4, 20.4],                           # rfwf19co, rfwf19wo, rfwf19rc, rfwf19lc, rfwf19tg
-            21.0 => [21.7, 22.2, 21.7, 21.3, 21.7],                           # rfwf21co, rfwf21wo, rfwf21rc, rfwf21lc, rfwf21tg
-            27.0 => [nil, 27.8, 27.0, 27.0, 27.0] }[r_cavity][material_index] # rfwf27co, rfwf27wo, rfwf27rc, rfwf27lc, rfwf27tg
+    # Wood Frame
+    val = { 0 => [3.3, 4.0, 3.4, 3.4, 3.7],                                 # rfwf00co, rfwf00wo, rfwf00rc, rfwf00lc, rfwf00tg
+            11 => [13.5, 14.3, 13.7, 13.5, 13.9],                           # rfwf11co, rfwf11wo, rfwf11rc, rfwf11lc, rfwf11tg
+            13 => [14.9, 15.6, 15.2, 14.9, 15.4],                           # rfwf13co, rfwf13wo, rfwf13rc, rfwf13lc, rfwf13tg
+            15 => [16.4, 16.9, 16.4, 16.4, 16.7],                           # rfwf15co, rfwf15wo, rfwf15rc, rfwf15lc, rfwf15tg
+            19 => [20.0, 20.8, 20.4, 20.4, 20.4],                           # rfwf19co, rfwf19wo, rfwf19rc, rfwf19lc, rfwf19tg
+            21 => [21.7, 22.2, 21.7, 21.3, 21.7],                           # rfwf21co, rfwf21wo, rfwf21rc, rfwf21lc, rfwf21tg
+            27 => [nil, 27.8, 27.0, 27.0, 27.0],                            # rfwf27co, rfwf27wo, rfwf27rc, rfwf27lc, rfwf27tg
+            30 => [nil, nil, nil, nil, nil] }[r_cavity][material_index]     # rfwf30co, rfwf30wo, rfwf30rc, rfwf30lc, rfwf30tg
   elsif r_cont.nil? and has_radiant_barrier
-    val = { 0.0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index]      # rfrb00co, rfrb00wo, rfrb00rc, rfrb00lc, rfrb00tg
+    # Wood Frame with Radiant Barrier
+    val = { 0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index] # rfrb00co, rfrb00wo, rfrb00rc, rfrb00lc, rfrb00tg
   elsif not r_cont.nil? and not has_radiant_barrier
-    val = { 0.0 => [8.3, 9.0, 8.4, 8.3, 8.7],                                 # rfps00co, rfps00wo, rfps00rc, rfps00lc, rfps00tg
-            11.0 => [18.5, 19.2, 18.5, 18.5, 18.9],                           # rfps11co, rfps11wo, rfps11rc, rfps11lc, rfps11tg
-            13.0 => [20.0, 20.8, 20.0, 20.0, 20.4],                           # rfps13co, rfps13wo, rfps13rc, rfps13lc, rfps13tg
-            15.0 => [21.3, 22.2, 21.3, 21.3, 21.7],                           # rfps15co, rfps15wo, rfps15rc, rfps15lc, rfps15tg
-            19.0 => [nil, 25.6, 25.6, 25.0, 25.6],                            # rfps19co, rfps19wo, rfps19rc, rfps19lc, rfps19tg
-            21.0 => [nil, 27.0, 27.0, 26.3, 27.0] }[r_cavity][material_index] # rfps21co, rfps21wo, rfps21rc, rfps21lc, rfps21tg
+    # Wood Frame with Ridgid Foam Sheathing
+    val = { 0 => [8.3, 9.0, 8.4, 8.3, 8.7],                                 # rfps00co, rfps00wo, rfps00rc, rfps00lc, rfps00tg
+            11 => [18.5, 19.2, 18.5, 18.5, 18.9],                           # rfps11co, rfps11wo, rfps11rc, rfps11lc, rfps11tg
+            13 => [20.0, 20.8, 20.0, 20.0, 20.4],                           # rfps13co, rfps13wo, rfps13rc, rfps13lc, rfps13tg
+            15 => [21.3, 22.2, 21.3, 21.3, 21.7],                           # rfps15co, rfps15wo, rfps15rc, rfps15lc, rfps15tg
+            19 => [nil, 25.6, 25.6, 25.0, 25.6],                            # rfps19co, rfps19wo, rfps19rc, rfps19lc, rfps19tg
+            21 => [nil, 27.0, 27.0, 26.3, 27.0] }[r_cavity][material_index] # rfps21co, rfps21wo, rfps21rc, rfps21lc, rfps21tg
   end
   return val if not val.nil?
 
@@ -1256,6 +1263,13 @@ def sanitize_azimuth(azimuth)
     azimuth -= 360
   end
   return azimuth
+end
+
+def hpxml_to_hescore_fuel(fuel_type)
+  return { 'electricity' => 'electric',
+           'natural gas' => 'natural_gas',
+           'fuel oil' => 'fuel_oil',
+           'propane' => 'lpg' }[fuel_type]
 end
 
 def get_attached(attached_name, orig_details, search_in)
