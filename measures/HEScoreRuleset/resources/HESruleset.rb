@@ -657,8 +657,8 @@ class HEScoreRuleset
       wh_sys_values = HPXML.get_water_heating_system_values(water_heating_system: orig_wh_sys)
 
       if not wh_sys_values[:year_installed].nil?
-        wh_sys_values[:energy_factor] = get_default_water_heater_ef(wh_sys_values[:year_installed],
-                                                                    wh_sys_values[:fuel_type])
+        wh_sys_values[:energy_factor] = lookup_water_heater_efficiency(wh_sys_values[:year_installed],
+                                                                       wh_sys_values[:fuel_type])
       end
 
       wh_capacity = nil
@@ -833,24 +833,6 @@ def lookup_water_heater_efficiency(year, fuel_type)
   fail "Could not lookup default water heating efficiency." if value.nil?
 
   return value
-end
-
-def get_default_water_heater_ef(year, fuel)
-  # Water Heater Energy Factor by year/fuel
-  # FIXME: Verify
-  # TODO: Pull out methods and make available for ERI use case
-  # ANSI/RESNET/ICC 301 - Table 4.4.2(3) Default Values for Mechanical System Efficiency (Age-based)
-  ending_years = [1959, 1969, 1974, 1983, 1987, 1991, 2005, 9999]
-  default_efs = { "electricity" => [0.86, 0.86, 0.86, 0.86, 0.86, 0.87, 0.88, 0.92],
-                  "natural gas" => [0.50, 0.50, 0.50, 0.50, 0.55, 0.56, 0.56, 0.59],
-                  "propane" => [0.50, 0.50, 0.50, 0.50, 0.55, 0.56, 0.56, 0.59],
-                  "fuel oil" => [0.47, 0.47, 0.47, 0.48, 0.49, 0.54, 0.56, 0.51] }[fuel]
-  ending_years.zip(default_efs).each do |ending_year, default_ef|
-    next if year > ending_year
-
-    return default_ef
-  end
-  fail "Could not get default water heater EF for year '#{year}' and fuel '#{fuel}'"
 end
 
 def get_default_water_heater_volume(fuel)
@@ -1271,15 +1253,6 @@ def hpxml_to_hescore_fuel(fuel_type)
            'natural gas' => 'natural_gas',
            'fuel oil' => 'fuel_oil',
            'propane' => 'lpg' }[fuel_type]
-end
-
-def get_attached(attached_name, orig_details, search_in)
-  orig_details.elements.each(search_in) do |other_element|
-    next if attached_name != HPXML.get_id(other_element)
-
-    return other_element
-  end
-  fail "Could not find attached element for '#{attached_name}'."
 end
 
 def get_foundation_details(orig_details)
