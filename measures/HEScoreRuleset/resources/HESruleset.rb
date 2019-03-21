@@ -1240,7 +1240,7 @@ end
 def sanitize_azimuth(azimuth)
   # Ensure 0 <= orientation < 360
   while azimuth < 0
-    azimtuh += 360
+    azimuth += 360
   end
   while azimuth >= 360
     azimuth -= 360
