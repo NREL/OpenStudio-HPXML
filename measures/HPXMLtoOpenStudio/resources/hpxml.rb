@@ -261,9 +261,6 @@ class HPXML
         XMLHelper.add_element(attic_type_attic, "Conditioned", true)
       elsif attic_type == "FlatRoof" or attic_type == "CathedralCeiling"
         XMLHelper.add_element(attic_type_e, attic_type)
-      elsif attic_type == "CapeCod"
-        attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
-        XMLHelper.add_element(attic_type_attic, "CapeCod", true)
       else
         fail "Unhandled attic type '#{attic_type}'."
       end
@@ -286,12 +283,12 @@ class HPXML
       attic_type = "VentedAttic"
     elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
       attic_type = "ConditionedAttic"
+    elsif XMLHelper.has_element(attic, "AtticType/Attic[CapeCod='true']")
+      attic_type = "CapeCod"
     elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
       attic_type = "FlatRoof"
     elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
       attic_type = "CathedralCeiling"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[CapeCod='true']")
-      attic_type = "CapeCod"
     end
 
     return { :id => HPXML.get_id(attic),
