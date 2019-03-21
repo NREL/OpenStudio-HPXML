@@ -413,7 +413,8 @@ class HEScoreRuleset
 
       if heating_values[:heating_system_type] == "Boiler" and heating_values[:distribution_system_idref].nil?
         # Need to create hydronic distribution system
-        additional_hydronic_ids << "#{heating_values[:distribution_system_idref]}_dist"
+        heating_values[:distribution_system_idref] = heating_values[:id] + "_dist"
+        additional_hydronic_ids << heating_values[:distribution_system_idref]
       end
       hvac_units = nil
       hvac_value = nil
