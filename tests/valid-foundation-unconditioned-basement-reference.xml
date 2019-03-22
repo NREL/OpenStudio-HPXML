@@ -127,7 +127,6 @@
               <Area>3500</Area>
               <Insulation>
                 <SystemIdentifier id='Floor_Ins_ID1'/>
-                <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
               </Insulation>
               <extension>
                 <CarpetFraction>0.5</CarpetFraction>
@@ -143,7 +142,6 @@
               <AdjacentTo>ground</AdjacentTo>
               <Insulation>
                 <SystemIdentifier id='FWall_Ins_ID1'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
               </Insulation>
             </FoundationWall>
             <Slab>
@@ -151,22 +149,12 @@
               <Area>3500</Area>
               <Thickness>4</Thickness>
               <ExposedPerimeter>240</ExposedPerimeter>
-              <PerimeterInsulationDepth>0</PerimeterInsulationDepth>
-              <UnderSlabInsulationWidth>0</UnderSlabInsulationWidth>
               <DepthBelowGrade>7</DepthBelowGrade>
               <PerimeterInsulation>
                 <SystemIdentifier id='FSlab_PerimIns_ID1'/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>0</NominalRValue>
-                </Layer>
               </PerimeterInsulation>
               <UnderSlabInsulation>
                 <SystemIdentifier id='FSlab_UnderIns_ID1'/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>0</NominalRValue>
-                </Layer>
               </UnderSlabInsulation>
               <extension>
                 <CarpetFraction>0</CarpetFraction>
