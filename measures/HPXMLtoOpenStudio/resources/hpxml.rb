@@ -171,7 +171,7 @@ class HPXML
       XMLHelper.add_element(climate_zone_iecc, "ClimateZone", zone) unless zone.nil?
     end
 
-    if weather_station_id.nil?
+    if not weather_station_id.nil?
       weather_station = XMLHelper.add_element(climate_and_risk_zones, "WeatherStation")
       sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", weather_station_id)
