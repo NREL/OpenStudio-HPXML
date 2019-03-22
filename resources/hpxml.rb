@@ -377,7 +377,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:insulation_cavity_r_value, :continuous_nominal_r_value])
+                    expected_kwargs: [:insulation_cavity_r_value, :insulation_continuous_r_value])
 
     return floor
   end
