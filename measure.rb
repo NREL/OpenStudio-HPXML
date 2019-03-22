@@ -121,8 +121,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
     begin
       # Weather file
-      weather_station_values = HPXML.get_weather_station_values(weather_station: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation"])
-      weather_wmo = weather_station_values[:wmo]
+      climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones"])
+      weather_wmo = climate_and_risk_zones_values[:weather_station_wmo]
       epw_path = nil
       CSV.foreach(File.join(weather_dir, "data.csv"), headers: true) do |row|
         next if row["wmo"] != weather_wmo
@@ -237,8 +237,8 @@ class OSModel
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
-    climate_zone_iecc_values = HPXML.get_climate_zone_iecc_values(climate_zone_iecc: building.elements["BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year='2006']"])
-    @iecc_zone_2006 = climate_zone_iecc_values[:climate_zone]
+    climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: building.elements["BuildingDetails/ClimateandRiskZones"])
+    @iecc_zone_2006 = climate_and_risk_zones_values[:iecc2006]
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
@@ -2093,9 +2093,7 @@ class OSModel
       if clg_type == "central air conditioning"
 
         # FIXME: Generalize
-        if cooling_system_values[:cooling_efficiency_units] == "SEER"
-          seer = cooling_system_values[:cooling_efficiency_value]
-        end
+        seer = cooling_system_values[:cooling_efficiency_seer]
         num_speeds = get_ac_num_speeds(seer)
         crankcase_kw = 0.0
         crankcase_temp = 55.0
@@ -2156,9 +2154,7 @@ class OSModel
 
       elsif clg_type == "room air conditioner"
 
-        if cooling_system_values[:cooling_efficiency_units] == "EER"
-          eer = cooling_system_values[:cooling_efficiency_value]
-        end
+        eer = cooling_system_values[:cooling_efficiency_eer]
         shr = 0.65
         airflow_rate = 350.0
 
@@ -2198,9 +2194,7 @@ class OSModel
 
       if htg_type == "Furnace"
 
-        if heating_system_values[:heating_efficiency_units] == "AFUE"
-          afue = heating_system_values[:heating_efficiency_value]
-        end
+        afue = heating_system_values[:heating_efficiency_afue]
         fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
         attached_to_multispeed_ac = get_attached_to_multispeed_ac(heating_system_values, building)
         success = HVAC.apply_furnace(model, unit, runner, fuel, afue,
@@ -2210,23 +2204,19 @@ class OSModel
 
       elsif htg_type == "WallFurnace"
 
-        if heating_system_values[:heating_efficiency_units] == "AFUE"
-          efficiency = heating_system_values[:heating_efficiency_value]
-        end
+        afue = heating_system_values[:heating_efficiency_afue]
         fan_power = 0.0
         airflow_rate = 0.0
         # TODO: Allow DSE
         success = HVAC.apply_unit_heater(model, unit, runner, fuel,
-                                         efficiency, heat_capacity_btuh, fan_power,
+                                         afue, heat_capacity_btuh, fan_power,
                                          airflow_rate, load_frac)
         return false if not success
 
       elsif htg_type == "Boiler"
 
         system_type = Constants.BoilerTypeForcedDraft
-        if heating_system_values[:heating_efficiency_units] == "AFUE"
-          afue = heating_system_values[:heating_efficiency_value]
-        end
+        afue = heating_system_values[:heating_efficiency_afue]
         oat_reset_enabled = false
         oat_high = nil
         oat_low = nil
@@ -2240,9 +2230,7 @@ class OSModel
 
       elsif htg_type == "ElectricResistance"
 
-        if heating_system_values[:heating_efficiency_units] == "Percent"
-          efficiency = heating_system_values[:heating_efficiency_value]
-        end
+        efficiency = heating_system_values[:heating_efficiency_percent]
         # TODO: Allow DSE
         success = HVAC.apply_electric_baseboard(model, unit, runner, efficiency,
                                                 heat_capacity_btuh, load_frac)
@@ -2250,9 +2238,7 @@ class OSModel
 
       elsif htg_type == "Stove"
 
-        if heating_system_values[:heating_efficiency_units] == "Percent"
-          efficiency = heating_system_values[:heating_efficiency_value]
-        end
+        efficiency = heating_system_values[:heating_efficiency_percent]
         airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
         fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
         # TODO: Allow DSE
@@ -2303,12 +2289,8 @@ class OSModel
 
       if hp_type == "air-to-air"
 
-        if heat_pump_values[:cooling_efficiency_units] == "SEER"
-          seer = heat_pump_values[:cooling_efficiency_value]
-        end
-        if heat_pump_values[:heating_efficiency_units] == "HSPF"
-          hspf = heat_pump_values[:heating_efficiency_value]
-        end
+        seer = heat_pump_values[:cooling_efficiency_seer]
+        hspf = heat_pump_values[:heating_efficiency_hspf]
 
         if load_frac_cool > 0
           num_speeds = get_ashp_num_speeds_by_seer(seer)
@@ -2398,12 +2380,8 @@ class OSModel
       elsif hp_type == "mini-split"
 
         # FIXME: Generalize
-        if heat_pump_values[:cooling_efficiency_units] == "SEER"
-          seer = heat_pump_values[:cooling_efficiency_value]
-        end
-        if heat_pump_values[:heating_efficiency_units] == "HSPF"
-          hspf = heat_pump_values[:heating_efficiency_value]
-        end
+        seer = heat_pump_values[:cooling_efficiency_seer]
+        hspf = heat_pump_values[:heating_efficiency_hspf]
         shr = 0.73
         min_cooling_capacity = 0.4
         max_cooling_capacity = 1.2
@@ -2435,12 +2413,8 @@ class OSModel
       elsif hp_type == "ground-to-air"
 
         # FIXME: Generalize
-        if heat_pump_values[:cooling_efficiency_units] == "EER"
-          eer = heat_pump_values[:cooling_efficiency_value]
-        end
-        if heat_pump_values[:heating_efficiency_units] == "COP"
-          cop = heat_pump_values[:heating_efficiency_value]
-        end
+        eer = heat_pump_values[:cooling_efficiency_eer]
+        cop = heat_pump_values[:heating_efficiency_cop]
         shr = 0.732
         ground_conductivity = 0.6
         grout_conductivity = 0.4
@@ -3749,9 +3723,7 @@ class OSModel
       next unless cooling_system_values[:cooling_system_type] == "central air conditioning"
       next unless heating_system_values[:distribution_system_idref] == cooling_system_values[:distribution_system_idref]
 
-      if cooling_system_values[:cooling_efficiency_units] == "SEER"
-        seer = cooling_system_values[:cooling_efficiency_value]
-      end
+      seer = cooling_system_values[:cooling_efficiency_seer]
       next unless get_ac_num_speeds(seer) != "1-Speed"
 
       attached_to_multispeed_ac = true
