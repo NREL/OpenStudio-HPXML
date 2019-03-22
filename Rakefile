@@ -19,18 +19,22 @@ def create_hpxmls
 
   hpxml_files = [
     'valid.xml',
+    'valid-addenda-exclude-g.xml',
+    'valid-addenda-exclude-g-e.xml',
+    'valid-addenda-exclude-g-e-a.xml',
+    'valid-appliances-dishwasher-ef.xml',
+    'valid-appliances-dryer-cef.xml',
+    'valid-appliances-gas.xml',
+    'valid-appliances-in-basement.xml',
+    'valid-appliances-none.xml',
+    'valid-appliances-reference-elec.xml',
+    'valid-appliances-reference-gas.xml',
     'valid-appliances-washer-imef.xml',
   ]
 
   hpxml_files.each do |hpxml_file|
-    hpxml_doc = HPXML.create_hpxml(xml_type: "HPXML",
-                                   xml_generated_by: "Rakefile",
-                                   transaction: "create",
-                                   software_program_used: nil,
-                                   software_program_version: nil,
-                                   eri_calculation_version: "2014AEG",
-                                   building_id: "MyBuilding",
-                                   event_type: "proposed workscope")
+    hpxml_values = get_hpxml_file_hpxml_values(hpxml_file)
+    hpxml_doc = HPXML.create_hpxml(**hpxml_values)
     hpxml = hpxml_doc.elements["HPXML"]
 
     site_values = get_hpxml_file_site_values(hpxml_file)
@@ -132,23 +136,27 @@ def create_hpxmls
       HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
     end
 
-    clothes_washer_values = get_hpxml_file_clothes_washer_values(hpxml_file)
-    HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values)
+    unless ['valid-appliances-none.xml'].include? hpxml_file
 
-    clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file)
-    HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values)
+      clothes_washer_values = get_hpxml_file_clothes_washer_values(hpxml_file)
+      HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values)
 
-    dishwasher_values = get_hpxml_file_dishwasher_values(hpxml_file)
-    HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values)
+      clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file)
+      HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values)
 
-    refrigerator_values = get_hpxml_file_refrigerator_values(hpxml_file)
-    HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values)
+      dishwasher_values = get_hpxml_file_dishwasher_values(hpxml_file)
+      HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values)
 
-    cooking_range_values = get_hpxml_file_cooking_range_values(hpxml_file)
-    HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values)
+      refrigerator_values = get_hpxml_file_refrigerator_values(hpxml_file)
+      HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values)
 
-    oven_values = get_hpxml_file_oven_values(hpxml_file)
-    HPXML.add_oven(hpxml: hpxml, **oven_values)
+      cooking_range_values = get_hpxml_file_cooking_range_values(hpxml_file)
+      HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values)
+
+      oven_values = get_hpxml_file_oven_values(hpxml_file)
+      HPXML.add_oven(hpxml: hpxml, **oven_values)
+
+    end
 
     lighting_values = get_hpxml_file_lighting_values(hpxml_file)
     HPXML.add_lighting(hpxml: hpxml, **lighting_values)
@@ -156,6 +164,25 @@ def create_hpxmls
     hpxml_path = File.join(tests_dir, hpxml_file)
     XMLHelper.write_file(hpxml_doc, hpxml_path)
   end
+end
+
+def get_hpxml_file_hpxml_values(hpxml_file)
+  hpxml_values = { :xml_type => "HPXML",
+                   :xml_generated_by => "Rakefile",
+                   :transaction => "create",
+                   :software_program_used => nil,
+                   :software_program_version => nil,
+                   :eri_calculation_version => "2014AEG",
+                   :building_id => "MyBuilding",
+                   :event_type => "proposed workscope" }
+  if hpxml_file == 'valid-addenda-exclude-g.xml'
+    hpxml_values[:eri_calculation_version] = "2014AE"
+  elsif hpxml_file == 'valid-addenda-exclude-g-e.xml'
+    hpxml_values[:eri_calculation_version] = "2014A"
+  elsif hpxml_file == 'valid-addenda-exclude-g-e-a.xml'
+    hpxml_values[:eri_calculation_version] = "2014"
+  end
+  return hpxml_values
 end
 
 def get_hpxml_file_site_values(hpxml_file)
@@ -427,6 +454,15 @@ def get_hpxml_file_clothes_washer_values(hpxml_file)
   if hpxml_file == 'valid-appliances-washer-imef.xml'
     clothes_washer_values[:modified_energy_factor] = nil
     clothes_washer_values[:integrated_modified_energy_factor] = 0.73
+  elsif hpxml_file == 'valid-appliances-in-basement.xml'
+    clothes_washer_values[:location] = "basement - conditioned"
+  elsif ['valid-appliances-reference-elec.xml', 'valid-appliances-reference-gas.xml'].include? hpxml_file
+    clothes_washer_values[:modified_energy_factor] = nil
+    clothes_washer_values[:rated_annual_kwh] = nil
+    clothes_washer_values[:label_electric_rate] = nil
+    clothes_washer_values[:label_gas_rate] = nil
+    clothes_washer_values[:label_annual_gas_cost] = nil
+    clothes_washer_values[:capacity] = nil
   end
   return clothes_washer_values
 end
@@ -437,6 +473,24 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file)
                            :fuel_type => "electricity",
                            :energy_factor => 3.01,
                            :control_type => "timer" }
+  if hpxml_file == 'valid-appliances-dryer-cef.xml'
+    clothes_dryer_values[:energy_factor] = nil
+    clothes_dryer_values[:combined_energy_factor] = 2.62
+    clothes_dryer_values[:control_type] = "moisture"
+  elsif hpxml_file == 'valid-appliances-gas.xml'
+    clothes_dryer_values[:fuel_type] = "natural gas"
+    clothes_dryer_values[:energy_factor] = 2.67
+    clothes_dryer_values[:control_type] = "moisture"
+  elsif hpxml_file == 'valid-appliances-in-basement.xml'
+    clothes_dryer_values[:location] = "basement - conditioned"
+  elsif hpxml_file == 'valid-appliances-reference-elec.xml'
+    clothes_dryer_values[:energy_factor] = nil
+    clothes_dryer_values[:control_type] = nil
+  elsif hpxml_file == 'valid-appliances-reference-gas.xml'
+    clothes_dryer_values[:fuel_type] = "natural gas"
+    clothes_dryer_values[:energy_factor] = nil
+    clothes_dryer_values[:control_type] = nil
+  end
   return clothes_dryer_values
 end
 
@@ -444,6 +498,14 @@ def get_hpxml_file_dishwasher_values(hpxml_file)
   dishwasher_values = { :id => "Dishwasher_ID1",
                         :rated_annual_kwh => 100,
                         :place_setting_capacity => 12 }
+  if hpxml_file == 'valid-appliances-dishwasher-ef.xml'
+    dishwasher_values[:rated_annual_kwh] = nil
+    dishwasher_values[:energy_factor] = 0.5
+    dishwasher_values[:place_setting_capacity] = 8
+  elsif ['valid-appliances-reference-elec.xml', 'valid-appliances-reference-gas.xml'].include? hpxml_file
+    dishwasher_values[:rated_annual_kwh] = nil
+    dishwasher_values[:place_setting_capacity] = nil
+  end
   return dishwasher_values
 end
 
@@ -451,6 +513,11 @@ def get_hpxml_file_refrigerator_values(hpxml_file)
   refrigerator_values = { :id => "Refrigerator",
                           :location => "living space",
                           :rated_annual_kwh => 609 }
+  if hpxml_file == 'valid-appliances-in-basement.xml'
+    refrigerator_values[:location] = "basement - conditioned"
+  elsif ['valid-appliances-reference-elec.xml', 'valid-appliances-reference-gas.xml'].include? hpxml_file
+    refrigerator_values[:rated_annual_kwh] = nil
+  end
   return refrigerator_values
 end
 
@@ -458,12 +525,24 @@ def get_hpxml_file_cooking_range_values(hpxml_file)
   cooking_range_values = { :id => "Range_ID1",
                            :fuel_type => "electricity",
                            :is_induction => true }
+  if hpxml_file == 'valid-appliances-gas.xml'
+    cooking_range_values[:fuel_type] = "natural gas"
+    cooking_range_values[:is_induction] = false
+  elsif hpxml_file == 'valid-appliances-reference-elec.xml'
+    cooking_range_values[:is_induction] = nil
+  elsif hpxml_file == 'valid-appliances-reference-gas.xml'
+    cooking_range_values[:fuel_type] = "natural gas"
+    cooking_range_values[:is_induction] = nil
+  end
   return cooking_range_values
 end
 
 def get_hpxml_file_oven_values(hpxml_file)
   oven_values = { :id => "Oven_ID1",
                   :is_convection => true }
+  if ['valid-appliances-reference-elec.xml', 'valid-appliances-reference-gas.xml'].include? hpxml_file
+    oven_values[:is_convection] = nil
+  end
   return oven_values
 end
 

@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-22T14:09:30-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-03-22T16:34:30-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -81,7 +81,7 @@
                 <Pitch>6.0</Pitch>
                 <RadiantBarrier>false</RadiantBarrier>
                 <Insulation>
-                  <SystemIdentifier id='Attic_roof_Ins_ID1'/>
+                  <SystemIdentifier id='Attic_Roof_Ins_ID1'/>
                   <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
                 </Insulation>
               </Roof>
@@ -305,7 +305,7 @@
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>15.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
@@ -321,7 +321,7 @@
           <WaterHeatingSystem>
             <SystemIdentifier id='DHW_ID1'/>
             <FuelType>electricity</FuelType>
-            <WaterHeaterType>sotrage water heater</WaterHeaterType>
+            <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
