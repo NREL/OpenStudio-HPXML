@@ -144,54 +144,62 @@ class HPXML
              :garage_present => to_bool(XMLHelper.get_value(building_construction, "GaragePresent")) }
   end
 
-  def self.add_climate_zone_iecc(hpxml:,
-                                 year: nil,
-                                 climate_zone: nil,
-                                 **remainder)
-    zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
-    climate_zone_iecc = XMLHelper.add_element(zones, "ClimateZoneIECC")
-    XMLHelper.add_element(climate_zone_iecc, "Year", to_integer(year)) unless year.nil?
-    XMLHelper.add_element(climate_zone_iecc, "ClimateZone", climate_zone) unless climate_zone.nil?
+  def self.add_climate_and_risk_zones(hpxml:,
+                                      iecc2003: nil,
+                                      iecc2006: nil,
+                                      iecc2009: nil,
+                                      iecc2012: nil,
+                                      iecc2015: nil,
+                                      iecc2018: nil,
+                                      weather_station_id: nil,
+                                      weather_station_name: nil,
+                                      weather_station_wmo: nil,
+                                      **remainder)
+    climate_and_risk_zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
+
+    climate_zones = { 2003 => iecc2003,
+                      2006 => iecc2006,
+                      2009 => iecc2009,
+                      2012 => iecc2012,
+                      2015 => iecc2015,
+                      2018 => iecc2018 }
+    climate_zones.each do |year, zone|
+      next if zone.nil?
+
+      climate_zone_iecc = XMLHelper.add_element(climate_and_risk_zones, "ClimateZoneIECC")
+      XMLHelper.add_element(climate_zone_iecc, "Year", to_integer(year)) unless year.nil?
+      XMLHelper.add_element(climate_zone_iecc, "ClimateZone", zone) unless zone.nil?
+    end
+
+    if weather_station_id.nil?
+      weather_station = XMLHelper.add_element(climate_and_risk_zones, "WeatherStation")
+      sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
+      XMLHelper.add_attribute(sys_id, "id", weather_station_id)
+      XMLHelper.add_element(weather_station, "Name", weather_station_name) unless weather_station_name.nil?
+      XMLHelper.add_element(weather_station, "WMO", weather_station_wmo) unless weather_station_wmo.nil?
+    end
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
                     expected_kwargs: [])
 
-    return climate_zone_iecc
+    return climate_and_risk_zones
   end
 
-  def self.get_climate_zone_iecc_values(climate_zone_iecc:)
-    return nil if climate_zone_iecc.nil?
+  def self.get_climate_and_risk_zones_values(climate_and_risk_zones:)
+    return nil if climate_and_risk_zones.nil?
 
-    return { :year => to_integer(XMLHelper.get_value(climate_zone_iecc, "Year")),
-             :climate_zone => XMLHelper.get_value(climate_zone_iecc, "ClimateZone") }
-  end
+    weather_station = climate_and_risk_zones.elements["WeatherStation"]
 
-  def self.add_weather_station(hpxml:,
-                               id:,
-                               name: nil,
-                               wmo: nil,
-                               **remainder)
-    zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
-    weather_station = XMLHelper.add_element(zones, "WeatherStation")
-    sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(weather_station, "Name", name) unless name.nil?
-    XMLHelper.add_element(weather_station, "WMO", wmo) unless wmo.nil?
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
-    return weather_station
-  end
-
-  def self.get_weather_station_values(weather_station:)
-    return nil if weather_station.nil?
-
-    return { :id => HPXML.get_id(weather_station),
-             :name => XMLHelper.get_value(weather_station, "Name"),
-             :wmo => XMLHelper.get_value(weather_station, "WMO") }
+    return { :iecc2003 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2003']/ClimateZone")),
+             :iecc2006 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2006']/ClimateZone")),
+             :iecc2009 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2009']/ClimateZone")),
+             :iecc2012 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2012']/ClimateZone")),
+             :iecc2015 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2015']/ClimateZone")),
+             :iecc2018 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2018']/ClimateZone")),
+             :weather_station_id => HPXML.get_id(weather_station),
+             :weather_station_name => XMLHelper.get_value(weather_station, "Name"),
+             :weather_station_wmo => XMLHelper.get_value(weather_station, "WMO") }
   end
 
   def self.add_air_infiltration_measurement(hpxml:,
@@ -895,8 +903,10 @@ class HPXML
                               heating_system_type: nil,
                               heating_system_fuel: nil,
                               heating_capacity: nil,
-                              heating_efficiency_units: nil,
-                              heating_efficiency_value: nil,
+                              heating_efficiency_percent: nil,
+                              heating_efficiency_afue: nil,
+                              heating_efficiency_cop: nil,
+                              heating_efficiency_hspf: nil,
                               fraction_heat_load_served: nil,
                               electric_auxiliary_energy: nil,
                               **remainder)
@@ -914,10 +924,16 @@ class HPXML
     end
     XMLHelper.add_element(heating_system, "HeatingSystemFuel", heating_system_fuel) unless heating_system_fuel.nil?
     XMLHelper.add_element(heating_system, "HeatingCapacity", to_float(heating_capacity)) unless heating_capacity.nil?
-    if not heating_efficiency_units.nil? and not heating_efficiency_value.nil?
-      annual_heating_efficiency = XMLHelper.add_element(heating_system, "AnnualHeatingEfficiency")
-      XMLHelper.add_element(annual_heating_efficiency, "Units", heating_efficiency_units)
-      XMLHelper.add_element(annual_heating_efficiency, "Value", to_float(heating_efficiency_value))
+    efficiencies = { "Percent" => heating_efficiency_percent,
+                     "AFUE" => heating_efficiency_afue,
+                     "COP" => heating_efficiency_cop,
+                     "HSPF" => heating_efficiency_hspf }
+    efficiencies.each do |units, value|
+      next if value.nil?
+
+      annual_efficiency = XMLHelper.add_element(heating_system, "AnnualHeatingEfficiency")
+      XMLHelper.add_element(annual_efficiency, "Units", units)
+      XMLHelper.add_element(annual_efficiency, "Value", to_float(value))
     end
     XMLHelper.add_element(heating_system, "FractionHeatLoadServed", to_float(fraction_heat_load_served)) unless fraction_heat_load_served.nil?
     XMLHelper.add_element(heating_system, "ElectricAuxiliaryEnergy", to_float(electric_auxiliary_energy)) unless electric_auxiliary_energy.nil?
@@ -938,8 +954,10 @@ class HPXML
              :heating_system_type => XMLHelper.get_child_name(heating_system, "HeatingSystemType"),
              :heating_system_fuel => XMLHelper.get_value(heating_system, "HeatingSystemFuel"),
              :heating_capacity => to_float(XMLHelper.get_value(heating_system, "HeatingCapacity")),
-             :heating_efficiency_units => XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency/Units"),
-             :heating_efficiency_value => to_float(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency/Value")),
+             :heating_efficiency_percent => to_float(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='Percent']/Value")),
+             :heating_efficiency_afue => to_float(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='AFUE']/Value")),
+             :heating_efficiency_cop => to_float(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='COP']/Value")),
+             :heating_efficiency_hspf => to_float(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='HSPF']/Value")),
              :fraction_heat_load_served => to_float(XMLHelper.get_value(heating_system, "FractionHeatLoadServed")),
              :electric_auxiliary_energy => to_float(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")) }
   end
@@ -951,8 +969,10 @@ class HPXML
                               cooling_system_fuel: nil,
                               cooling_capacity: nil,
                               fraction_cool_load_served: nil,
-                              cooling_efficiency_units: nil,
-                              cooling_efficiency_value: nil,
+                              cooling_efficiency_kw_per_ton: nil,
+                              cooling_efficiency_cop: nil,
+                              cooling_efficiency_eer: nil,
+                              cooling_efficiency_seer: nil,
                               **remainder)
     hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
@@ -966,10 +986,16 @@ class HPXML
     XMLHelper.add_element(cooling_system, "CoolingSystemFuel", cooling_system_fuel) unless cooling_system_fuel.nil?
     XMLHelper.add_element(cooling_system, "CoolingCapacity", to_float(cooling_capacity)) unless cooling_capacity.nil?
     XMLHelper.add_element(cooling_system, "FractionCoolLoadServed", to_float(fraction_cool_load_served)) unless fraction_cool_load_served.nil?
-    if not cooling_efficiency_units.nil? and not cooling_efficiency_value.nil?
-      annual_cooling_efficiency = XMLHelper.add_element(cooling_system, "AnnualCoolingEfficiency")
-      XMLHelper.add_element(annual_cooling_efficiency, "Units", cooling_efficiency_units)
-      XMLHelper.add_element(annual_cooling_efficiency, "Value", to_float(cooling_efficiency_value))
+    efficiencies = { "kW/ton" => cooling_efficiency_kw_per_ton,
+                     "COP" => cooling_efficiency_cop,
+                     "EER" => cooling_efficiency_eer,
+                     "SEER" => cooling_efficiency_seer }
+    efficiencies.each do |units, value|
+      next if value.nil?
+
+      annual_efficiency = XMLHelper.add_element(cooling_system, "AnnualCoolingEfficiency")
+      XMLHelper.add_element(annual_efficiency, "Units", units)
+      XMLHelper.add_element(annual_efficiency, "Value", to_float(value))
     end
 
     check_remainder(remainder,
@@ -989,8 +1015,10 @@ class HPXML
              :cooling_system_fuel => XMLHelper.get_value(cooling_system, "CoolingSystemFuel"),
              :cooling_capacity => to_float(XMLHelper.get_value(cooling_system, "CoolingCapacity")),
              :fraction_cool_load_served => to_float(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed")),
-             :cooling_efficiency_units => XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency/Units"),
-             :cooling_efficiency_value => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency/Value")) }
+             :cooling_efficiency_kw_per_ton => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
+             :cooling_efficiency_cop => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='COP']/Value")),
+             :cooling_efficiency_eer => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value")),
+             :cooling_efficiency_seer => to_float(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
   end
 
   def self.add_heat_pump(hpxml:,
@@ -1003,10 +1031,14 @@ class HPXML
                          backup_heating_capacity: nil,
                          fraction_heat_load_served: nil,
                          fraction_cool_load_served: nil,
-                         heating_efficiency_units: nil,
-                         heating_efficiency_value: nil,
-                         cooling_efficiency_units: nil,
-                         cooling_efficiency_value: nil,
+                         heating_efficiency_percent: nil,
+                         heating_efficiency_afue: nil,
+                         heating_efficiency_cop: nil,
+                         heating_efficiency_hspf: nil,
+                         cooling_efficiency_kw_per_ton: nil,
+                         cooling_efficiency_cop: nil,
+                         cooling_efficiency_eer: nil,
+                         cooling_efficiency_seer: nil,
                          **remainder)
     hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     heat_pump = XMLHelper.add_element(hvac_plant, "HeatPump")
@@ -1023,15 +1055,27 @@ class HPXML
     XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", to_float(backup_heating_capacity)) unless backup_heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", to_float(fraction_heat_load_served)) unless fraction_heat_load_served.nil?
     XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", to_float(fraction_cool_load_served)) unless fraction_cool_load_served.nil?
-    if not cooling_efficiency_units.nil? and not cooling_efficiency_value.nil?
-      annual_cooling_efficiency = XMLHelper.add_element(heat_pump, "AnnualCoolingEfficiency")
-      XMLHelper.add_element(annual_cooling_efficiency, "Units", cooling_efficiency_units)
-      XMLHelper.add_element(annual_cooling_efficiency, "Value", to_float(cooling_efficiency_value))
+    efficiencies = { "kW/ton" => cooling_efficiency_kw_per_ton,
+                     "COP" => cooling_efficiency_cop,
+                     "EER" => cooling_efficiency_eer,
+                     "SEER" => cooling_efficiency_seer }
+    efficiencies.each do |units, value|
+      next if value.nil?
+
+      annual_efficiency = XMLHelper.add_element(heat_pump, "AnnualCoolingEfficiency")
+      XMLHelper.add_element(annual_efficiency, "Units", units)
+      XMLHelper.add_element(annual_efficiency, "Value", to_float(value))
     end
-    if not heating_efficiency_units.nil? and not heating_efficiency_value.nil?
-      annual_heating_efficiency = XMLHelper.add_element(heat_pump, "AnnualHeatingEfficiency")
-      XMLHelper.add_element(annual_heating_efficiency, "Units", heating_efficiency_units)
-      XMLHelper.add_element(annual_heating_efficiency, "Value", to_float(heating_efficiency_value))
+    efficiencies = { "Percent" => heating_efficiency_percent,
+                     "AFUE" => heating_efficiency_afue,
+                     "COP" => heating_efficiency_cop,
+                     "HSPF" => heating_efficiency_hspf }
+    efficiencies.each do |units, value|
+      next if value.nil?
+
+      annual_efficiency = XMLHelper.add_element(heat_pump, "AnnualHeatingEfficiency")
+      XMLHelper.add_element(annual_efficiency, "Units", units)
+      XMLHelper.add_element(annual_efficiency, "Value", to_float(value))
     end
 
     check_remainder(remainder,
@@ -1054,10 +1098,14 @@ class HPXML
              :backup_heating_capacity => to_float(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")),
              :fraction_heat_load_served => to_float(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")),
              :fraction_cool_load_served => to_float(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed")),
-             :heating_efficiency_units => XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency/Units"),
-             :heating_efficiency_value => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency/Value")),
-             :cooling_efficiency_units => XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency/Units"),
-             :cooling_efficiency_value => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency/Value")) }
+             :heating_efficiency_percent => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='Percent']/Value")),
+             :heating_efficiency_afue => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='AFUE']/Value")),
+             :heating_efficiency_cop => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='COP']/Value")),
+             :heating_efficiency_hspf => to_float(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='HSPF']/Value")),
+             :cooling_efficiency_kw_per_ton => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
+             :cooling_efficiency_cop => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='COP']/Value")),
+             :cooling_efficiency_eer => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='EER']/Value")),
+             :cooling_efficiency_seer => to_float(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
   end
 
   def self.add_hvac_control(hpxml:,
@@ -1148,7 +1196,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [])
+                    expected_kwargs: [:duct_leakage_units, :duct_leakage_total_or_to_outside, :duct_leakage_test_method])
 
     return duct_leakage_measurement
   end
@@ -1157,7 +1205,10 @@ class HPXML
     return nil if duct_leakage_measurement.nil?
 
     return { :duct_type => XMLHelper.get_value(duct_leakage_measurement, "DuctType"),
-             :duct_leakage_value => to_float(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value")) }
+             :duct_leakage_test_method => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakageTestMethod"),
+             :duct_leakage_units => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Units"),
+             :duct_leakage_value => to_float(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value")),
+             :duct_leakage_total_or_to_outside => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/TotalOrToOutside") }
   end
 
   def self.add_ducts(air_distribution:,
