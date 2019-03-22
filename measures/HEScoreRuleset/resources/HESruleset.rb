@@ -104,17 +104,10 @@ class HEScoreRuleset
   end
 
   def self.set_climate(orig_details, hpxml)
-    iecc_values = HPXML.get_climate_zone_iecc_values(climate_zone_iecc: orig_details.elements["ClimateandRiskZones/ClimateZoneIECC"])
-    HPXML.add_climate_zone_iecc(hpxml: hpxml,
-                                year: 2006,
-                                climate_zone: iecc_values[:climate_zone])
-    HPXML.add_climate_zone_iecc(hpxml: hpxml,
-                                year: 2012,
-                                climate_zone: iecc_values[:climate_zone])
-    @iecc_zone = iecc_values[:climate_zone]
-
-    weather_station_values = HPXML.get_weather_station_values(weather_station: orig_details.elements["ClimateandRiskZones/WeatherStation"])
-    HPXML.add_weather_station(hpxml: hpxml, **weather_station_values)
+    climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: orig_details.elements["ClimateandRiskZones"])
+    climate_and_risk_zones_values[:iecc2006] = climate_and_risk_zones_values[:iecc2012]
+    HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
+    @iecc_zone = climate_and_risk_zones_values[:iecc2012]
   end
 
   def self.set_enclosure_air_infiltration(orig_details, hpxml)
@@ -410,165 +403,111 @@ class HEScoreRuleset
     # HeatingSystem
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |orig_heating|
       heating_values = HPXML.get_heating_system_values(heating_system: orig_heating)
+      heating_values[:heating_capacity] = -1 # Use Manual J auto-sizing
 
+      # Need to create hydronic distribution system?
       if heating_values[:heating_system_type] == "Boiler" and heating_values[:distribution_system_idref].nil?
-        # Need to create hydronic distribution system
         heating_values[:distribution_system_idref] = heating_values[:id] + "_dist"
         additional_hydronic_ids << heating_values[:distribution_system_idref]
       end
-      hvac_units = nil
-      hvac_value = nil
+
       if ["Furnace", "WallFurnace"].include? heating_values[:heating_system_type]
-        hvac_units = "AFUE"
         if heating_values[:heating_system_fuel] == "electricity"
-          hvac_value = 0.98
-        else
-          if heating_values[:year_installed].nil?
-            hvac_value = heating_values[:heating_efficiency_value]
-          else
-            hvac_value = lookup_hvac_efficiency(heating_values[:year_installed],
-                                                heating_values[:heating_system_type],
-                                                heating_values[:heating_system_fuel],
-                                                hvac_units)
-          end
+          heating_values[:heating_efficiency_afue] = 0.98
+        elsif not heating_values[:year_installed].nil?
+          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(heating_values[:year_installed],
+                                                                            heating_values[:heating_system_type],
+                                                                            heating_values[:heating_system_fuel],
+                                                                            "AFUE")
         end
+
       elsif heating_values[:heating_system_type] == "Boiler"
-        hvac_units = "AFUE"
         if heating_values[:heating_system_fuel] == "electricity"
-          hvac_value = 0.98
-        else
-          if heating_values[:year_installed].nil?
-            hvac_value = heating_values[:heating_efficiency_value]
-          else
-            hvac_value = lookup_hvac_efficiency(heating_values[:year_installed],
-                                                heating_values[:heating_system_type],
-                                                heating_values[:heating_system_fuel],
-                                                hvac_units)
-          end
+          heating_values[:heating_efficiency_afue] = 0.98
+        elsif not heating_values[:year_installed].nil?
+          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(heating_values[:year_installed],
+                                                                            heating_values[:heating_system_type],
+                                                                            heating_values[:heating_system_fuel],
+                                                                            "AFUE")
         end
+
       elsif heating_values[:heating_system_type] == "ElectricResistance"
-        hvac_units = "Percent"
-        hvac_value = 0.98
+        heating_values[:heating_efficiency_percent] = 0.98
+
       elsif heating_values[:heating_system_type] == "Stove"
-        hvac_units = "Percent"
         if heating_values[:heating_system_fuel] == "wood"
-          hvac_value = 0.60
+          heating_values[:heating_efficiency_percent] = 0.60
         elsif heating_values[:heating_system_fuel] == "wood pellets"
-          hvac_value = 0.78
-        else
-          fail "Unexpected fuel type '#{heating_values[:heating_system_fuel]}' for stove heating system."
+          heating_values[:heating_efficiency_percent] = 0.78
         end
-      else
-        fail "Unexpected heating system type '#{heating_values[:heating_system_type]}'."
       end
 
-      HPXML.add_heating_system(hpxml: hpxml,
-                               id: heating_values[:id],
-                               distribution_system_idref: heating_values[:distribution_system_idref],
-                               heating_system_type: heating_values[:heating_system_type],
-                               heating_system_fuel: heating_values[:heating_system_fuel],
-                               heating_capacity: -1, # Use Manual J auto-sizing
-                               heating_efficiency_units: hvac_units,
-                               heating_efficiency_value: hvac_value,
-                               fraction_heat_load_served: heating_values[:fraction_heat_load_served])
+      HPXML.add_heating_system(hpxml: hpxml, **heating_values)
     end
 
     # CoolingSystem
     orig_details.elements.each("Systems/HVAC/HVACPlant/CoolingSystem") do |orig_cooling|
       cooling_values = HPXML.get_cooling_system_values(cooling_system: orig_cooling)
+      cooling_values[:cooling_system_fuel] = "electricity"
+      cooling_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
 
-      hvac_fuel = "electricity"
-      hvac_units = nil
-      hvac_value = nil
       if cooling_values[:cooling_system_type] == "central air conditioning"
-        hvac_units = "SEER"
-        if cooling_values[:year_installed].nil?
-          hvac_value = cooling_values[:cooling_efficiency_value]
-        else
-          hvac_value = lookup_hvac_efficiency(cooling_values[:year_installed],
-                                              cooling_values[:cooling_system_type],
-                                              hvac_fuel, hvac_units)
+        if not cooling_values[:year_installed].nil?
+          cooling_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(cooling_values[:year_installed],
+                                                                            cooling_values[:cooling_system_type],
+                                                                            cooling_values[:cooling_system_fuel],
+                                                                            "SEER")
         end
+
       elsif cooling_values[:cooling_system_type] == "room air conditioner"
-        hvac_units = "EER"
-        if cooling_values[:year_installed].nil?
-          hvac_value = cooling_values[:cooling_efficiency_value]
-        else
-          hvac_value = lookup_hvac_efficiency(cooling_values[:year_installed],
-                                              cooling_values[:cooling_system_type],
-                                              hvac_fuel, hvac_units)
+        if not cooling_values[:year_installed].nil?
+          cooling_values[:cooling_efficiency_eer] = lookup_hvac_efficiency(cooling_values[:year_installed],
+                                                                           cooling_values[:cooling_system_type],
+                                                                           cooling_values[:cooling_system_fuel],
+                                                                           "EER")
         end
-      else
-        fail "Unexpected cooling system type '#{cooling_values[:cooling_system_type]}'."
       end
 
-      HPXML.add_cooling_system(hpxml: hpxml,
-                               id: cooling_values[:id],
-                               distribution_system_idref: cooling_values[:distribution_system_idref],
-                               cooling_system_type: cooling_values[:cooling_system_type],
-                               cooling_system_fuel: hvac_fuel,
-                               cooling_capacity: -1, # Use Manual J auto-sizing
-                               fraction_cool_load_served: cooling_values[:fraction_cool_load_served],
-                               cooling_efficiency_units: hvac_units,
-                               cooling_efficiency_value: hvac_value)
+      HPXML.add_cooling_system(hpxml: hpxml, **cooling_values)
     end
 
     # HeatPump
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatPump") do |orig_hp|
       hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
+      hp_values[:heat_pump_fuel] = "electricity"
+      hp_values[:heating_capacity] = -1 # Use Manual J auto-sizing
+      hp_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
 
-      hvac_fuel = "electricity"
-      hvac_units_heat = nil
-      hvac_value_heat = nil
-      hvac_units_cool = nil
-      hvac_value_cool = nil
       if hp_values[:heat_pump_type] == "air-to-air"
-        hvac_units_cool = "SEER"
-        hvac_units_heat = "HSPF"
-        if hp_values[:year_installed].nil?
-          hvac_value_cool = hp_values[:cooling_efficiency_value]
-          hvac_value_heat = hp_values[:heating_efficiency_value]
-        else
-          hvac_value_cool = lookup_hvac_efficiency(hp_values[:year_installed],
-                                                   hp_values[:heat_pump_type],
-                                                   hvac_fuel, hvac_units_cool)
-          hvac_value_heat = lookup_hvac_efficiency(hp_values[:year_installed],
-                                                   hp_values[:heat_pump_type],
-                                                   hvac_fuel, hvac_units_heat)
+        if not hp_values[:year_installed].nil?
+          hp_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(hp_values[:year_installed],
+                                                                       hp_values[:heat_pump_type],
+                                                                       hp_values[:heat_pump_fuel],
+                                                                       "SEER")
+          hp_values[:heating_efficiency_hspf] = lookup_hvac_efficiency(hp_values[:year_installed],
+                                                                       hp_values[:heat_pump_type],
+                                                                       hp_values[:heat_pump_fuel],
+                                                                       "HSPF")
         end
-      elsif hp_values[:heat_pump_type] == "mini-split"
-        hvac_units_cool = "SEER"
-        hvac_units_heat = "HSPF"
-        hvac_value_cool = hp_values[:cooling_efficiency_value]
-        hvac_value_heat = hp_values[:heating_efficiency_value]
-      elsif hp_values[:heat_pump_type] == "ground-to-air"
-        hvac_units_cool = "EER"
-        hvac_units_heat = "COP"
-        hvac_value_cool = hp_values[:cooling_efficiency_value]
-        hvac_value_heat = hp_values[:heating_efficiency_value]
-      else
-        fail "Unexpected peat pump system type '#{hp_values[:heat_pump_type]}'."
-      end
-      if hp_values[:fraction_cool_load_served] == 0 and hvac_value_cool.nil?
-        hvac_value_cool = 14.0 # Arbitrary value; not used
-      end
-      if hp_values[:fraction_heat_load_served] == 0 and hvac_value_heat.nil?
-        hvac_value_heat = 5.0 # Arbitrary value; not used
       end
 
-      HPXML.add_heat_pump(hpxml: hpxml,
-                          id: hp_values[:id],
-                          distribution_system_idref: hp_values[:distribution_system_idref],
-                          heat_pump_type: hp_values[:heat_pump_type],
-                          heat_pump_fuel: "electricity",
-                          heating_capacity: -1, # Use Manual J auto-sizing
-                          cooling_capacity: -1, # Use Manual J auto-sizing
-                          fraction_heat_load_served: hp_values[:fraction_heat_load_served],
-                          fraction_cool_load_served: hp_values[:fraction_cool_load_served],
-                          heating_efficiency_units: hvac_units_heat,
-                          heating_efficiency_value: hvac_value_heat,
-                          cooling_efficiency_units: hvac_units_cool,
-                          cooling_efficiency_value: hvac_value_cool)
+      # If heat pump has no cooling/heating load served, assign arbitrary value for cooling/heating efficiency value
+      if hp_values[:fraction_cool_load_served] == 0 and hp_values[:cooling_efficiency_seer].nil? and hp_values[:cooling_efficiency_eer].nil?
+        if hp_values[:heat_pump_type] == "ground-to-air"
+          hp_values[:cooling_efficiency_eer] = 16.6
+        else
+          hp_values[:cooling_efficiency_seer] = 13.0
+        end
+      end
+      if hp_values[:fraction_heat_load_served] == 0 and hp_values[:heating_efficiency_hspf].nil? and hp_values[:heating_efficiency_cop].nil?
+        if hp_values[:heat_pump_type] == "ground-to-air"
+          hp_values[:heating_efficiency_cop] = 3.6
+        else
+          hp_values[:heating_efficiency_hspf] = 7.7
+        end
+      end
+
+      HPXML.add_heat_pump(hpxml: hpxml, **hp_values)
     end
 
     # HVACControl
