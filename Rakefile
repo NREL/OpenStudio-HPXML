@@ -204,7 +204,7 @@ def get_hpxml_file_attic_roofs_values(hpxml_file)
                           :emittance => 0.9,
                           :pitch => 6,
                           :radiant_barrier => false,
-                          :insulation_id => "Attic_roof_Ins_ID1",
+                          :insulation_id => "Attic_Roof_Ins_ID1",
                           :insulation_assembly_r_value => 2.3 }]
   return attic_roofs_values
 end
@@ -377,7 +377,7 @@ def get_hpxml_file_ducts_values(hpxml_file)
   ducts_values = [{ :duct_type => "supply",
                     :duct_insulation_r_value => 4.0,
                     :duct_location => "attic - unvented",
-                    :duct_surface_area => 15.0 },
+                    :duct_surface_area => 150.0 },
                   { :duct_type => "return",
                     :duct_insulation_r_value => 0.0,
                     :duct_location => "attic - unvented",
@@ -388,7 +388,7 @@ end
 def get_hpxml_file_water_heating_system_values(hpxml_file)
   water_heating_system_values = { :id => "DHW_ID1",
                                   :fuel_type => "electricity",
-                                  :water_heater_type => "sotrage water heater",
+                                  :water_heater_type => "storage water heater",
                                   :location => "living space",
                                   :tank_volume => 40,
                                   :fraction_dhw_load_served => 1,
