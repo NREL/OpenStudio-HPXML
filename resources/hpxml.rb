@@ -171,7 +171,7 @@ class HPXML
       XMLHelper.add_element(climate_zone_iecc, "ClimateZone", zone) unless zone.nil?
     end
 
-    if weather_station_id.nil?
+    if not weather_station_id.nil?
       weather_station = XMLHelper.add_element(climate_and_risk_zones, "WeatherStation")
       sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", weather_station_id)
@@ -191,12 +191,12 @@ class HPXML
 
     weather_station = climate_and_risk_zones.elements["WeatherStation"]
 
-    return { :iecc2003 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2003']/ClimateZone")),
-             :iecc2006 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2006']/ClimateZone")),
-             :iecc2009 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2009']/ClimateZone")),
-             :iecc2012 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2012']/ClimateZone")),
-             :iecc2015 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2015']/ClimateZone")),
-             :iecc2018 => to_integer(XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2018']/ClimateZone")),
+    return { :iecc2003 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2003']/ClimateZone"),
+             :iecc2006 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2006']/ClimateZone"),
+             :iecc2009 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2009']/ClimateZone"),
+             :iecc2012 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2012']/ClimateZone"),
+             :iecc2015 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2015']/ClimateZone"),
+             :iecc2018 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2018']/ClimateZone"),
              :weather_station_id => HPXML.get_id(weather_station),
              :weather_station_name => XMLHelper.get_value(weather_station, "Name"),
              :weather_station_wmo => XMLHelper.get_value(weather_station, "WMO") }
@@ -228,7 +228,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [])
+                    expected_kwargs: [:leakiness_description])
 
     return air_infiltration_measurement
   end
@@ -242,7 +242,8 @@ class HPXML
              :air_leakage => to_float(XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/AirLeakage")),
              :effective_leakage_area => to_float(XMLHelper.get_value(air_infiltration_measurement, "EffectiveLeakageArea")),
              :infiltration_volume => to_float(XMLHelper.get_value(air_infiltration_measurement, "InfiltrationVolume")),
-             :constant_ach_natural => to_float(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural")) }
+             :constant_ach_natural => to_float(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural")),
+             :leakiness_description => XMLHelper.get_value(air_infiltration_measurement, "LeakinessDescription") }
   end
 
   def self.add_attic(hpxml:,
@@ -290,6 +291,8 @@ class HPXML
       attic_type = "VentedAttic"
     elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
       attic_type = "ConditionedAttic"
+    elsif XMLHelper.has_element(attic, "AtticType/Attic[CapeCod='true']")
+      attic_type = "CapeCod"
     elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
       attic_type = "FlatRoof"
     elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
@@ -329,7 +332,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:roof_type, :roof_color])
+                    expected_kwargs: [:roof_type, :roof_color, :insulation_cavity_r_value, :insulation_continuous_r_value])
 
     return roof
   end
@@ -338,6 +341,7 @@ class HPXML
     return nil if roof.nil?
 
     insulation_values = get_assembly_insulation_values(insulation: roof.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: roof.elements["Insulation"])
 
     return { :id => HPXML.get_id(roof),
              :area => to_float(XMLHelper.get_value(roof, "Area")),
@@ -349,7 +353,9 @@ class HPXML
              :pitch => to_float(XMLHelper.get_value(roof, "Pitch")),
              :radiant_barrier => to_bool(XMLHelper.get_value(roof, "RadiantBarrier")),
              :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]) }
+             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]),
+             :insulation_cavity_r_value => to_float(insulation_layer_values[:cavity_nominal_r_value]),
+             :insulation_continuous_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_attic_floor(attic:,
@@ -371,7 +377,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [])
+                    expected_kwargs: [:insulation_cavity_r_value, :insulation_continuous_r_value])
 
     return floor
   end
@@ -380,12 +386,15 @@ class HPXML
     return nil if floor.nil?
 
     insulation_values = get_assembly_insulation_values(insulation: floor.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: floor.elements["Insulation"])
 
     return { :id => HPXML.get_id(floor),
              :adjacent_to => XMLHelper.get_value(floor, "AdjacentTo"),
              :area => to_float(XMLHelper.get_value(floor, "Area")),
              :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]) }
+             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]),
+             :insulation_cavity_r_value => to_float(insulation_layer_values[:cavity_nominal_r_value]),
+             :insulation_continuous_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_attic_wall(attic:,
@@ -520,7 +529,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [])
+                    expected_kwargs: [:insulation_cavity_r_value, :insulation_continuous_r_value])
 
     return frame_floor
   end
@@ -529,12 +538,15 @@ class HPXML
     return nil if floor.nil?
 
     insulation_values = get_assembly_insulation_values(insulation: floor.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: floor.elements["Insulation"])
 
     return { :id => HPXML.get_id(floor),
              :adjacent_to => XMLHelper.get_value(floor, "AdjacentTo"),
              :area => to_float(XMLHelper.get_value(floor, "Area")),
              :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]) }
+             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]),
+             :insulation_cavity_r_value => to_float(insulation_layer_values[:cavity_nominal_r_value]),
+             :insulation_continuous_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_foundation_wall(foundation:,
@@ -561,7 +573,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [])
+                    expected_kwargs: [:insulation_continuous_r_value])
 
     return foundation_wall
   end
@@ -570,6 +582,7 @@ class HPXML
     return nil if foundation_wall.nil?
 
     insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
 
     return { :id => HPXML.get_id(foundation_wall),
              :height => to_float(XMLHelper.get_value(foundation_wall, "Height")),
@@ -578,7 +591,8 @@ class HPXML
              :depth_below_grade => to_float(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
              :adjacent_to => XMLHelper.get_value(foundation_wall, "AdjacentTo"),
              :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]) }
+             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]),
+             :insulation_continuous_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_slab(foundation:,
@@ -719,7 +733,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :siding])
+                    expected_kwargs: [:orientation, :siding, :insulation_cavity_r_value, :insulation_continuous_r_value, :optimum_value_engineering])
 
     return wall
   end
@@ -728,11 +742,13 @@ class HPXML
     return nil if wall.nil?
 
     insulation_values = get_assembly_insulation_values(insulation: wall.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: wall.elements["Insulation"])
 
     return { :id => HPXML.get_id(wall),
              :exterior_adjacent_to => XMLHelper.get_value(wall, "ExteriorAdjacentTo"),
              :interior_adjacent_to => XMLHelper.get_value(wall, "InteriorAdjacentTo"),
              :wall_type => XMLHelper.get_child_name(wall, "WallType"),
+             :optimum_value_engineering => to_bool(XMLHelper.get_value(wall, "WallType/WoodStud/OptimumValueEngineering")),
              :area => to_float(XMLHelper.get_value(wall, "Area")),
              :orientation => XMLHelper.get_value(wall, "Orientation"),
              :azimuth => to_integer(XMLHelper.get_value(wall, "Azimuth")),
@@ -740,7 +756,9 @@ class HPXML
              :solar_absorptance => to_float(XMLHelper.get_value(wall, "SolarAbsorptance")),
              :emittance => to_float(XMLHelper.get_value(wall, "Emittance")),
              :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]) }
+             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]),
+             :insulation_cavity_r_value => to_float(insulation_layer_values[:cavity_nominal_r_value]),
+             :insulation_continuous_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_window(hpxml:,
@@ -779,7 +797,7 @@ class HPXML
                                       "InteriorShadingFactorWinter": to_float(interior_shading_factor_winter) })
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading])
+                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading, :aluminum_thermal_break])
 
     return window
   end
@@ -797,6 +815,7 @@ class HPXML
              :azimuth => to_integer(XMLHelper.get_value(window, "Azimuth")),
              :orientation => XMLHelper.get_value(window, "Orientation"),
              :frame_type => frame_type,
+             :aluminum_thermal_break => to_bool(XMLHelper.get_value(window, "FrameType/Aluminum/ThermalBreak")),
              :glass_layers => XMLHelper.get_value(window, "GlassLayers"),
              :glass_type => XMLHelper.get_value(window, "GlassType"),
              :gas_fill => XMLHelper.get_value(window, "GasFill"),
@@ -834,7 +853,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading])
+                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading, :aluminum_thermal_break])
 
     return skylight
   end
@@ -852,6 +871,7 @@ class HPXML
              :azimuth => to_integer(XMLHelper.get_value(skylight, "Azimuth")),
              :orientation => XMLHelper.get_value(skylight, "Orientation"),
              :frame_type => frame_type,
+             :aluminum_thermal_break => to_bool(XMLHelper.get_value(skylight, "FrameType/Aluminum/ThermalBreak")),
              :glass_layers => XMLHelper.get_value(skylight, "GlassLayers"),
              :glass_type => XMLHelper.get_value(skylight, "GlassType"),
              :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
@@ -1457,7 +1477,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:array_orientation, :hescore_num_panels])
+                    expected_kwargs: [:array_orientation, :number_of_panels])
 
     return pv_system
   end
@@ -1474,7 +1494,7 @@ class HPXML
              :max_power_output => to_float(XMLHelper.get_value(pv_system, "MaxPowerOutput")),
              :inverter_efficiency => to_float(XMLHelper.get_value(pv_system, "InverterEfficiency")),
              :system_losses_fraction => to_float(XMLHelper.get_value(pv_system, "SystemLossesFraction")),
-             :hescore_num_panels => to_integer(XMLHelper.get_value(pv_system, "extension/hescore_num_panels")) }
+             :number_of_panels => to_integer(XMLHelper.get_value(pv_system, "NumberOfPanels")) }
   end
 
   def self.add_clothes_washer(hpxml:,
