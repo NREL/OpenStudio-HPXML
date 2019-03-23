@@ -27,11 +27,11 @@
           </FuelTypesAvailable>
         </Site>
         <BuildingConstruction>
-          <NumberofConditionedFloors>2</NumberofConditionedFloors>
+          <NumberofConditionedFloors>3</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>4</NumberofBedrooms>
-          <ConditionedFloorArea>3500</ConditionedFloorArea>
-          <ConditionedBuildingVolume>33787.5</ConditionedBuildingVolume>
+          <ConditionedFloorArea>7000</ConditionedFloorArea>
+          <ConditionedBuildingVolume>67575</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
         </BuildingConstruction>
       </BuildingSummary>
@@ -54,12 +54,9 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='InfiltMeas64'/>
-            <HousePressure>50</HousePressure>
-            <BuildingAirLeakage>
-              <UnitofMeasure>ACH</UnitofMeasure>
-              <AirLeakage>3.0</AirLeakage>
-            </BuildingAirLeakage>
-            <InfiltrationVolume>33787.5</InfiltrationVolume>
+            <extension>
+              <ConstantACHnatural>0.67</ConstantACHnatural>
+            </extension>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -118,22 +115,9 @@
             <SystemIdentifier id='Foundation_ID1'/>
             <FoundationType>
               <Basement>
-                <Conditioned>false</Conditioned>
+                <Conditioned>true</Conditioned>
               </Basement>
             </FoundationType>
-            <FrameFloor>
-              <SystemIdentifier id='Floor_ID1'/>
-              <AdjacentTo>living space</AdjacentTo>
-              <Area>3500</Area>
-              <Insulation>
-                <SystemIdentifier id='Floor_Ins_ID1'/>
-                <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
-              </Insulation>
-              <extension>
-                <CarpetFraction>0.5</CarpetFraction>
-                <CarpetRValue>2.0</CarpetRValue>
-              </extension>
-            </FrameFloor>
             <FoundationWall>
               <SystemIdentifier id='fndwall-1'/>
               <Height>9</Height>
@@ -189,7 +173,7 @@
           <RimJoist>
             <SystemIdentifier id='rimjoist-2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>180</Area>
             <Insulation>
               <SystemIdentifier id='rimjoist_Ins_ID2'/>
@@ -315,13 +299,13 @@
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>basement - unconditioned</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>basement - unconditioned</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
@@ -333,7 +317,7 @@
             <SystemIdentifier id='DHW_ID1'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>basement - unconditioned</Location>
+            <Location>living space</Location>
             <TankVolume>40</TankVolume>
             <FractionDHWLoadServed>1</FractionDHWLoadServed>
             <HeatingCapacity>18767</HeatingCapacity>
