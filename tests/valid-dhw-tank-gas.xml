@@ -323,10 +323,10 @@
             <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>50</TankVolume>
+            <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>4500</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
+            <HeatingCapacity>4500.0</HeatingCapacity>
+            <EnergyFactor>0.95</EnergyFactor>
             <RecoveryEfficiency>0.76</RecoveryEfficiency>
           </WaterHeatingSystem>
           <HotWaterDistribution>

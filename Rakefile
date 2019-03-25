@@ -30,6 +30,27 @@ def create_hpxmls
     'valid-appliances-reference-elec.xml',
     'valid-appliances-reference-gas.xml',
     'valid-appliances-washer-imef.xml',
+    'valid-dhw-dwhr.xml',
+    'valid-dhw-location-attic.xml',
+    'valid-dhw-low-flow-fixtures.xml',
+    'valid-dhw-multiple.xml',
+    'valid-dhw-none.xml',
+    'valid-dhw-recirc-demand.xml',
+    'valid-dhw-recirc-manual.xml',
+    'valid-dhw-recirc-nocontrol.xml',
+    'valid-dhw-recirc-temperature.xml',
+    'valid-dhw-recirc-timer.xml',
+    'valid-dhw-recirc-timer-reference.xml',
+    'valid-dhw-standard-reference.xml',
+    'valid-dhw-tank-gas.xml',
+    'valid-dhw-tank-heat-pump.xml',
+    'valid-dhw-tankless-electric.xml',
+    'valid-dhw-tankless-gas.xml',
+    'valid-dhw-tankless-oil.xml',
+    'valid-dhw-tankless-propane.xml',
+    'valid-dhw-tank-oil.xml',
+    'valid-dhw-tank-propane.xml',
+    'valid-dhw-uef.xml'
   ]
 
   hpxml_files.each do |hpxml_file|
@@ -131,15 +152,21 @@ def create_hpxmls
       HPXML.add_ducts(air_distribution: air_distribution, **duct_values)
     end
 
-    water_heating_system_values = get_hpxml_file_water_heating_system_values(hpxml_file)
-    HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
+    unless ['valid-dhw-none.xml'].include? hpxml_file
 
-    hot_water_distribution_values = get_hpxml_file_hot_water_distribution_values(hpxml_file)
-    HPXML.add_hot_water_distribution(hpxml: hpxml, **hot_water_distribution_values)
+      water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file)
+      water_heating_systems_values.each do |water_heating_system_values|
+        HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
+      end
 
-    water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file)
-    water_fixtures_values.each do |water_fixture_values|
-      HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
+      hot_water_distribution_values = get_hpxml_file_hot_water_distribution_values(hpxml_file)
+      HPXML.add_hot_water_distribution(hpxml: hpxml, **hot_water_distribution_values)
+
+      water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file)
+      water_fixtures_values.each do |water_fixture_values|
+        HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
+      end
+
     end
 
     unless ['valid-appliances-none.xml'].include? hpxml_file
@@ -420,15 +447,96 @@ def get_hpxml_file_ducts_values(hpxml_file)
 end
 
 def get_hpxml_file_water_heating_system_values(hpxml_file)
-  water_heating_system_values = { :id => "DHW_ID1",
-                                  :fuel_type => "electricity",
-                                  :water_heater_type => "storage water heater",
-                                  :location => "living space",
-                                  :tank_volume => 40,
-                                  :fraction_dhw_load_served => 1,
-                                  :heating_capacity => 18767,
-                                  :energy_factor => 0.95 }
-  return water_heating_system_values
+  water_heating_systems_values = [{ :id => "DHW_ID1",
+                                    :fuel_type => "electricity",
+                                    :water_heater_type => "storage water heater",
+                                    :location => "living space",
+                                    :tank_volume => 40,
+                                    :fraction_dhw_load_served => 1,
+                                    :heating_capacity => 18767,
+                                    :energy_factor => 0.95 }]
+  if hpxml_file == 'valid-dhw-location-attic.xml'
+    water_heating_systems_values[0][:location] = "attic - unvented"
+  elsif hpxml_file == 'valid-dhw-multiple.xml'
+    water_heating_systems_values[0][:fraction_dhw_load_served] = 0.2
+    water_heating_systems_values << { :id => "DHW_ID2",
+                                      :fuel_type => "natural gas",
+                                      :water_heater_type => "storage water heater",
+                                      :location => "living space",
+                                      :tank_volume => 50,
+                                      :fraction_dhw_load_served => 0.2,
+                                      :heating_capacity => 4500,
+                                      :energy_factor => 0.59,
+                                      :recovery_efficiency => 0.76 }
+    water_heating_systems_values << { :id => "DHW_ID3",
+                                      :fuel_type => "electricity",
+                                      :water_heater_type => "heat pump water heater",
+                                      :location => "living space",
+                                      :tank_volume => 80,
+                                      :fraction_dhw_load_served => 0.2,
+                                      :energy_factor => 2.3 }
+    water_heating_systems_values << { :id => "DHW_ID4",
+                                      :fuel_type => "electricity",
+                                      :water_heater_type => "instantaneous water heater",
+                                      :location => "living space",
+                                      :fraction_dhw_load_served => 0.2,
+                                      :energy_factor => 0.99 }
+    water_heating_systems_values << { :id => "DHW_ID5",
+                                      :fuel_type => "natural gas",
+                                      :water_heater_type => "instantaneous water heater",
+                                      :location => "living space",
+                                      :fraction_dhw_load_served => 0.2,
+                                      :energy_factor => 0.82 }
+  elsif hpxml_file == 'valid-dhw-tank-gas.xml'
+    water_heating_systems_values[0][:fuel_type] = "natural gas"
+    water_heating_systems_values[0][:tank_volume] = 50
+    water_heating_systems_values[0][:heating_capacity] = 4500
+    water_heating_systems_values[0][:recovery_efficiency] = 0.76
+  elsif hpxml_file == 'valid-dhw-tank-heat-pump.xml'
+    water_heating_systems_values[0][:water_heater_type] = "heat pump water heater"
+    water_heating_systems_values[0][:tank_volume] = 80
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 2.3
+  elsif hpxml_file == 'valid-dhw-tankless-electric.xml'
+    water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
+    water_heating_systems_values[0][:tank_volume] = nil
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 0.99
+  elsif hpxml_file == 'valid-dhw-tankless-gas.xml'
+    water_heating_systems_values[0][:fuel_type] = "natural gas"
+    water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
+    water_heating_systems_values[0][:tank_volume] = nil
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 0.82
+  elsif hpxml_file == 'valid-dhw-tankless-oil.xml'
+    water_heating_systems_values[0][:fuel_type] = "fuel oil"
+    water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
+    water_heating_systems_values[0][:tank_volume] = nil
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 0.82
+  elsif hpxml_file == 'valid-dhw-tankless-propane.xml'
+    water_heating_systems_values[0][:fuel_type] = "propane"
+    water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
+    water_heating_systems_values[0][:tank_volume] = nil
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 0.82
+  elsif hpxml_file == 'valid-dhw-tank-oil.xml'
+    water_heating_systems_values[0][:fuel_type] = "fuel oil"
+    water_heating_systems_values[0][:tank_volume] = 50
+    water_heating_systems_values[0][:heating_capacity] = 4500
+    water_heating_systems_values[0][:energy_factor] = 0.59
+    water_heating_systems_values[0][:recovery_efficiency] = 0.76
+  elsif hpxml_file == 'valid-dhw-tank-propane.xml'
+    water_heating_systems_values[0][:fuel_type] = "propane"
+    water_heating_systems_values[0][:tank_volume] = 50
+    water_heating_systems_values[0][:heating_capacity] = 4500
+    water_heating_systems_values[0][:energy_factor] = 0.59
+    water_heating_systems_values[0][:recovery_efficiency] = 0.76
+  elsif hpxml_file == 'valid-dhw-uef.xml'
+    water_heating_systems_values[0][:energy_factor] = nil
+    water_heating_systems_values[0][:uniform_energy_factor] = 0.93
+  end
+  return water_heating_systems_values
 end
 
 def get_hpxml_file_hot_water_distribution_values(hpxml_file)
@@ -436,6 +544,50 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file)
                                     :system_type => "Standard",
                                     :standard_piping_length => 30,
                                     :pipe_r_value => 0.0 }
+  if hpxml_file == 'valid-dhw-dwhr.xml'
+    hot_water_distribution_values[:dwhr_facilities_connected] = "all"
+    hot_water_distribution_values[:dwhr_equal_flow] = true
+    hot_water_distribution_values[:dwhr_efficiency] = 0.55
+  elsif hpxml_file == 'valid-dhw-recirc-demand.xml'
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "presence sensor demand control"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+    hot_water_distribution_values[:pipe_r_value] = 3
+  elsif hpxml_file == 'valid-dhw-recirc-manual.xml'
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "manual demand control"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+    hot_water_distribution_values[:pipe_r_value] = 3
+  elsif hpxml_file == 'valid-dhw-recirc-nocontrol.xml'
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "no control"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+  elsif hpxml_file == 'valid-dhw-recirc-temperature.xml'
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "temperature"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+  elsif hpxml_file == 'valid-dhw-recirc-timer.xml'
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "timer"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+  elsif hpxml_file == 'valid-dhw-recirc-timer-reference.xml'
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "timer"
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+  elsif hpxml_file == 'valid-dhw-standard-reference.xml'
+    hot_water_distribution_values[:standard_piping_length] = nil
+  end
   return hot_water_distribution_values
 end
 
@@ -446,6 +598,9 @@ def get_hpxml_file_water_fixtures_values(hpxml_file)
                            { :id => "WF_ID2",
                              :water_fixture_type => "faucet",
                              :low_flow => false }]
+  if hpxml_file == 'valid-dhw-low-flow-fixtures.xml'
+    water_fixtures_values[1][:low_flow] = true
+  end
   return water_fixtures_values
 end
 
