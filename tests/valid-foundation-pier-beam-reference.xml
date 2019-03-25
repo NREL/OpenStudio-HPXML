@@ -32,7 +32,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>4</NumberofBedrooms>
-          <ConditionedFloorArea>3500</ConditionedFloorArea>
+          <ConditionedFloorArea>3500.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>33787.5</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
         </BuildingConstruction>
@@ -125,9 +125,6 @@
               <SystemIdentifier id='Floor_ID1'/>
               <AdjacentTo>living space</AdjacentTo>
               <Area>3500.0</Area>
-              <Insulation>
-                <SystemIdentifier id='Floor_Ins_ID1'/>
-              </Insulation>
             </FrameFloor>
           </Foundation>
         </Foundations>

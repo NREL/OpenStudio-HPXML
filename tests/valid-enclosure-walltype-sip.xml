@@ -192,7 +192,7 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <StructurallInsulatedPanel/>
+              <StructurallyInsulatedPanel/>
             </WallType>
             <Area>3796.0</Area>
             <SolarAbsorptance>0.75</SolarAbsorptance>

@@ -130,9 +130,6 @@
               <Thickness>8.0</Thickness>
               <DepthBelowGrade>7.0</DepthBelowGrade>
               <AdjacentTo>ground</AdjacentTo>
-              <Insulation>
-                <SystemIdentifier id='FWall_Ins_ID1'/>
-              </Insulation>
             </FoundationWall>
             <Slab>
               <SystemIdentifier id='fndslab-1'/>
@@ -142,12 +139,6 @@
               <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
               <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
               <DepthBelowGrade>7.0</DepthBelowGrade>
-              <PerimeterInsulation>
-                <SystemIdentifier id='FSlab_PerimIns_ID1'/>
-              </PerimeterInsulation>
-              <UnderSlabInsulation>
-                <SystemIdentifier id='FSlab_UnderIns_ID1'/>
-              </UnderSlabInsulation>
               <extension>
                 <CarpetFraction>0.0</CarpetFraction>
                 <CarpetRValue>0.0</CarpetRValue>

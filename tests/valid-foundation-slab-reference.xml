@@ -32,7 +32,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>4</NumberofBedrooms>
-          <ConditionedFloorArea>3500</ConditionedFloorArea>
+          <ConditionedFloorArea>3500.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>33787.5</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
         </BuildingConstruction>
@@ -126,13 +126,9 @@
               <Area>3500.0</Area>
               <Thickness>4.0</Thickness>
               <ExposedPerimeter>240.0</ExposedPerimeter>
-              <DepthBelowGrade>0</DepthBelowGrade>
-              <PerimeterInsulation>
-                <SystemIdentifier id='PerimeterInsulation_ID1'/>
-              </PerimeterInsulation>
-              <UnderSlabInsulation>
-                <SystemIdentifier id='UnderSlabInsulation_ID1'/>
-              </UnderSlabInsulation>
+              <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
+              <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
+              <DepthBelowGrade>0.0</DepthBelowGrade>
               <extension>
                 <CarpetFraction>1.0</CarpetFraction>
                 <CarpetRValue>2.5</CarpetRValue>

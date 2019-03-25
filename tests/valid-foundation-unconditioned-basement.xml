@@ -32,7 +32,7 @@
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>4</NumberofBedrooms>
-          <ConditionedFloorArea>3500</ConditionedFloorArea>
+          <ConditionedFloorArea>3500.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>33787.5</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
         </BuildingConstruction>
@@ -131,10 +131,6 @@
                 <SystemIdentifier id='Floor_Ins_ID1'/>
                 <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
               </Insulation>
-              <extension>
-                <CarpetFraction>0.5</CarpetFraction>
-                <CarpetRValue>2.0</CarpetRValue>
-              </extension>
             </FrameFloor>
             <FoundationWall>
               <SystemIdentifier id='fndwall-1'/>
