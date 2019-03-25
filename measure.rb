@@ -1003,7 +1003,7 @@ class OSModel
       floor_assembly_r, floor_film_r = nil
       foundation.elements.each("FrameFloor") do |fnd_floor|
         next if foundation_type == "ConditionedBasement"
-        
+
         frame_floor_values = HPXML.get_frame_floor_values(floor: fnd_floor)
 
         floor_id = frame_floor_values[:id]
@@ -1725,7 +1725,7 @@ class OSModel
       if door_azimuth.nil?
         door_azimuth = 0
       end
-      
+
       door_height = 6.67 # ft
       door_width = door_area / door_height
       z_origin = foundation_top
