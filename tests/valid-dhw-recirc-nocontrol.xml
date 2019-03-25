@@ -333,9 +333,9 @@
             <SystemType>
               <Recirculation>
                 <ControlType>no control</ControlType>
-                <RecirculationPipingLoopLength>30</RecirculationPipingLoopLength>
-                <BranchPipingLoopLength>30</BranchPipingLoopLength>
-                <PumpPower>50</PumpPower>
+                <RecirculationPipingLoopLength>30.0</RecirculationPipingLoopLength>
+                <BranchPipingLoopLength>30.0</BranchPipingLoopLength>
+                <PumpPower>50.0</PumpPower>
               </Recirculation>
             </SystemType>
             <PipeInsulation>
