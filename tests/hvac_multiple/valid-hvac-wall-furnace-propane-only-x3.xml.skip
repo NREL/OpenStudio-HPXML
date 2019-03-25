@@ -259,7 +259,7 @@
               <HeatingCapacity>21333</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.80</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.67</ElectricAuxiliaryEnergy>
@@ -273,7 +273,7 @@
               <HeatingCapacity>21333</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.80</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.67</ElectricAuxiliaryEnergy>
@@ -287,7 +287,7 @@
               <HeatingCapacity>21333</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.80</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>66.67</ElectricAuxiliaryEnergy>
