@@ -255,7 +255,7 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
-              <BackupHeatingCapacity>0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>0.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -272,6 +272,41 @@
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
+          <HVACDistribution>
+            <SystemIdentifier id='HVAC_Dist_ID1'/>
+            <DistributionSystemType>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>75.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>25.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
+            </DistributionSystemType>
+          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>

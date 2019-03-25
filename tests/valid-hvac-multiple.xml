@@ -277,7 +277,7 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>200</ElectricAuxiliaryEnergy>
+              <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='ElectricResistance'/>
@@ -319,7 +319,7 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>700</ElectricAuxiliaryEnergy>
+              <ElectricAuxiliaryEnergy>700.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='OilStove'/>
@@ -330,10 +330,10 @@
               <HeatingCapacity>64000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
-                <Value>0.80</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>200</ElectricAuxiliaryEnergy>
+              <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='PropaneWallHeater'/>
@@ -344,10 +344,10 @@
               <HeatingCapacity>64000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.80</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>200</ElectricAuxiliaryEnergy>
+              <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CentralAirConditioner'/>
@@ -579,9 +579,6 @@
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>
-          <extension>
-            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
-          </extension>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
