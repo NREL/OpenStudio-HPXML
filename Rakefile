@@ -50,7 +50,25 @@ def create_hpxmls
     'valid-dhw-tankless-propane.xml',
     'valid-dhw-tank-oil.xml',
     'valid-dhw-tank-propane.xml',
-    'valid-dhw-uef.xml'
+    'valid-dhw-uef.xml',
+    'valid-enclosure-doors-reference.xml',
+    'valid-enclosure-multiple-walls.xml',
+    'valid-enclosure-no-natural-ventilation.xml',
+    'valid-enclosure-orientation-45.xml',
+    'valid-enclosure-overhangs.xml',
+    'valid-enclosure-skylights.xml',
+    'valid-enclosure-walltype-cmu.xml',
+    'valid-enclosure-walltype-doublestud.xml',
+    'valid-enclosure-walltype-icf.xml',
+    'valid-enclosure-walltype-log.xml',
+    'valid-enclosure-walltype-sip.xml',
+    'valid-enclosure-walltype-solidconcrete.xml',
+    'valid-enclosure-walltype-steelstud.xml',
+    'valid-enclosure-walltype-stone.xml',
+    'valid-enclosure-walltype-strawbale.xml',
+    'valid-enclosure-walltype-structuralbrick.xml',
+    'valid-enclosure-walltype-woodstud-reference.xml',
+    'valid-enclosure-windows-interior-shading.xml'
   ]
 
   hpxml_files.each do |hpxml_file|
@@ -120,9 +138,18 @@ def create_hpxmls
       HPXML.add_window(hpxml: hpxml, **window_values)
     end
 
+    skylights_values = get_hpxml_file_skylights_values(hpxml_file)
+    skylights_values.each do |skylight_values|
+      HPXML.add_skylight(hpxml: hpxml, **skylight_values)
+    end
+
     doors_values = get_hpxml_file_doors_values(hpxml_file)
     doors_values.each do |door_values|
       HPXML.add_door(hpxml: hpxml, **door_values)
+    end
+
+    if hpxml_file == 'valid-enclosure-no-natural-ventilation.xml'
+      HPXML.add_extension(parent: hpxml.elements["Building/BuildingDetails/Enclosure"], extensions: { "DisableNaturalVentilation": true })
     end
 
     heating_systems_values = get_hpxml_file_heating_systems_values(hpxml_file)
@@ -352,6 +379,60 @@ def get_hpxml_file_walls_values(hpxml_file)
                     :emittance => 0.9,
                     :insulation_id => "AGW_Ins_ID1",
                     :insulation_assembly_r_value => 23.0 }]
+  if hpxml_file == 'valid-enclosure-multiple-walls.xml'
+    walls_values[0][:id] = "agwall-small"
+    walls_values[0][:area] = 10
+    walls_values << { :id => "agwall-medium",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 300,
+                      :solar_absorptance => 0.75,
+                      :emittance => 0.9,
+                      :insulation_id => "AGW_Ins_ID2",
+                      :insulation_assembly_r_value => 23.0 }
+    walls_values << { :id => "agwall-large",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 3486,
+                      :solar_absorptance => 0.75,
+                      :emittance => 0.9,
+                      :insulation_id => "AGW_Ins_ID3",
+                      :insulation_assembly_r_value => 23.0 }
+  elsif hpxml_file == 'valid-enclosure-walltype-cmu.xml'
+    walls_values[0][:wall_type] = "ConcreteMasonryUnit"
+    walls_values[0][:insulation_assembly_r_value] = 12
+  elsif hpxml_file == 'valid-enclosure-walltype-doublestud.xml'
+    walls_values[0][:wall_type] = "DoubleWoodStud"
+    walls_values[0][:insulation_assembly_r_value] = 28.7
+  elsif hpxml_file == 'valid-enclosure-walltype-icf.xml'
+    walls_values[0][:wall_type] = "InsulatedConcreteForms"
+    walls_values[0][:insulation_assembly_r_value] = 21
+  elsif hpxml_file == 'valid-enclosure-walltype-log.xml'
+    walls_values[0][:wall_type] = "LogWall"
+    walls_values[0][:insulation_assembly_r_value] = 7.1
+  elsif hpxml_file == 'valid-enclosure-walltype-sip.xml'
+    walls_values[0][:wall_type] = "StructurallyInsulatedPanel"
+    walls_values[0][:insulation_assembly_r_value] = 16.1
+  elsif hpxml_file == 'valid-enclosure-walltype-solidconcrete.xml'
+    walls_values[0][:wall_type] = "SolidConcrete"
+    walls_values[0][:insulation_assembly_r_value] = 1.35
+  elsif hpxml_file == 'valid-enclosure-walltype-steelstud.xml'
+    walls_values[0][:wall_type] = "SteelFrame"
+    walls_values[0][:insulation_assembly_r_value] = 8.1
+  elsif hpxml_file == 'valid-enclosure-walltype-stone.xml'
+    walls_values[0][:wall_type] = "Stone"
+    walls_values[0][:insulation_assembly_r_value] = 5.4
+  elsif hpxml_file == 'valid-enclosure-walltype-strawbale.xml'
+    walls_values[0][:wall_type] = "StrawBale"
+    walls_values[0][:insulation_assembly_r_value] = 58.8
+  elsif hpxml_file == 'valid-enclosure-walltype-structuralbrick.xml'
+    walls_values[0][:wall_type] = "StructuralBrick"
+    walls_values[0][:insulation_assembly_r_value] = 7.9
+  elsif hpxml_file == 'valid-enclosure-walltype-woodstud-reference.xml'
+    walls_values[0][:insulation_assembly_r_value] = nil
+  end
   return walls_values
 end
 
@@ -380,7 +461,51 @@ def get_hpxml_file_windows_values(hpxml_file)
                       :ufactor => 0.33,
                       :shgc => 0.45,
                       :wall_idref => "agwall-1" }]
+  if hpxml_file == 'valid-enclosure-orientation-45.xml'
+    windows_values[0][:azimuth] = 225
+    windows_values[1][:azimuth] = 45
+    windows_values[2][:azimuth] = 135
+    windows_values[3][:azimuth] = 315
+  elsif hpxml_file == 'valid-enclosure-overhangs.xml'
+    windows_values[0][:overhangs_depth] = 2.5
+    windows_values[0][:overhangs_distance_to_top_of_window] = 0
+    windows_values[0][:overhangs_distance_to_bottom_of_window] = 4
+    windows_values[2][:overhangs_depth] = 1.5
+    windows_values[2][:overhangs_distance_to_top_of_window] = 2
+    windows_values[2][:overhangs_distance_to_bottom_of_window] = 6
+    windows_values[3][:overhangs_depth] = 1.5
+    windows_values[3][:overhangs_distance_to_top_of_window] = 2
+    windows_values[3][:overhangs_distance_to_bottom_of_window] = 7
+  elsif hpxml_file == 'valid-enclosure-windows-interior-shading.xml'
+    windows_values[0][:interior_shading_factor_summer] = 0.7
+    windows_values[0][:interior_shading_factor_winter] = 0.85
+    windows_values[1][:interior_shading_factor_summer] = 0.01
+    windows_values[1][:interior_shading_factor_winter] = 0.99
+    windows_values[2][:interior_shading_factor_summer] = 0.99
+    windows_values[2][:interior_shading_factor_winter] = 0.01
+    windows_values[3][:interior_shading_factor_summer] = 0.85
+    windows_values[3][:interior_shading_factor_winter] = 0.7
+  end
   return windows_values
+end
+
+def get_hpxml_file_skylights_values(hpxml_file)
+  skylights_values = []
+  if hpxml_file == 'valid-enclosure-skylights.xml'
+    skylights_values << { :id => "Skylight_ID1",
+                          :area => 15,
+                          :azimuth => 90,
+                          :ufactor => 0.33,
+                          :shgc => 0.45,
+                          :roof_idref => "attic-roof-1" }
+    skylights_values << { :id => "Skylight_ID2",
+                          :area => 15,
+                          :azimuth => 270,
+                          :ufactor => 0.35,
+                          :shgc => 0.47,
+                          :roof_idref => "attic-roof-1" }
+  end
+  return skylights_values
 end
 
 def get_hpxml_file_doors_values(hpxml_file)
@@ -389,6 +514,13 @@ def get_hpxml_file_doors_values(hpxml_file)
                     :area => 80,
                     :azimuth => 270,
                     :r_value => 4.4 }]
+  if hpxml_file == 'valid-enclosure-doors-reference.xml'
+    doors_values[0][:area] = nil
+    doors_values[0][:azimuth] = nil
+    doors_values[0][:r_value] = nil
+  elsif hpxml_file == 'valid-enclosure-orientation-45.xml'
+    doors_values[0][:azimuth] = 315
+  end
   return doors_values
 end
 
@@ -491,6 +623,7 @@ def get_hpxml_file_water_heating_system_values(hpxml_file)
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = 4500
+    water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
   elsif hpxml_file == 'valid-dhw-tank-heat-pump.xml'
     water_heating_systems_values[0][:water_heater_type] = "heat pump water heater"

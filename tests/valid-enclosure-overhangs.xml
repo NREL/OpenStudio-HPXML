@@ -212,8 +212,8 @@
             <SHGC>0.45</SHGC>
             <Overhangs>
               <Depth>2.5</Depth>
-              <DistanceToTopOfWindow>0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4</DistanceToBottomOfWindow>
+              <DistanceToTopOfWindow>0.0</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>4.0</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='agwall-1'/>
           </Window>
@@ -233,8 +233,8 @@
             <SHGC>0.45</SHGC>
             <Overhangs>
               <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>6</DistanceToBottomOfWindow>
+              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>6.0</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='agwall-1'/>
           </Window>
@@ -246,8 +246,8 @@
             <SHGC>0.45</SHGC>
             <Overhangs>
               <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>7</DistanceToBottomOfWindow>
+              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
+              <DistanceToBottomOfWindow>7.0</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='agwall-1'/>
           </Window>
