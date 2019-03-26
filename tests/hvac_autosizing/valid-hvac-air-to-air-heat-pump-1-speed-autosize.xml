@@ -255,7 +255,7 @@
               <DistributionSystem idref='HVAC_Dist_ID1'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>-1</CoolingCapacity>
+              <CoolingCapacity>-1.0</CoolingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -264,7 +264,7 @@
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>17.7</Value>
+                <Value>7.7</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
