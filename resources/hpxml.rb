@@ -1861,12 +1861,10 @@ class HPXML
                                    id:,
                                    assembly_r_value: nil,
                                    **remainder)
-    return nil if assembly_r_value.nil?
-
     insulation = XMLHelper.add_element(parent, "Insulation")
     sys_id = XMLHelper.add_element(insulation, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(insulation, "AssemblyEffectiveRValue", to_float(assembly_r_value))
+    XMLHelper.add_element(insulation, "AssemblyEffectiveRValue", to_float(assembly_r_value)) unless assembly_r_value.nil?
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
