@@ -126,8 +126,6 @@
               <Area>3500.0</Area>
               <Thickness>4.0</Thickness>
               <ExposedPerimeter>240.0</ExposedPerimeter>
-              <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-              <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
               <DepthBelowGrade>0.0</DepthBelowGrade>
               <extension>
                 <CarpetFraction>1.0</CarpetFraction>

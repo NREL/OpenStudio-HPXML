@@ -169,7 +169,7 @@
               </UnderSlabInsulation>
               <extension>
                 <CarpetFraction>0.0</CarpetFraction>
-                <CarpetRValue>0.0</CarpetRValue>
+                <CarpetRValue>2.5</CarpetRValue>
               </extension>
             </Slab>
           </Foundation>

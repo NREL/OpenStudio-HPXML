@@ -579,6 +579,9 @@
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>
+          <extension>
+            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
+          </extension>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>

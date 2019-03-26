@@ -277,6 +277,10 @@ def create_hpxmls
       end
     end
 
+    if hpxml_file == 'valid-hvac-multiple.xml'
+      HPXML.add_extension(parent: hpxml.elements["Building/BuildingDetails/Systems/HVAC"], extensions: { "LoadDistributionScheme": "UniformLoad" })
+    end
+
     water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file)
     water_heating_systems_values.each do |water_heating_system_values|
       HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
@@ -476,7 +480,12 @@ def get_hpxml_file_foundation_walls_values(hpxml_file)
     foundation_walls_values[0][:insulation_assembly_r_value] = nil
   elsif hpxml_file == 'valid-foundation-unconditioned-basement-reference.xml'
     foundation_walls_values[0][:insulation_assembly_r_value] = nil
-  elsif ['valid-foundation-unvented-crawlspace.xml', 'valid-foundation-unvented-crawlspace-reference.xml', 'valid-foundation-vented-crawlspace.xml', 'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
+  elsif ['valid-foundation-unvented-crawlspace.xml', 'valid-foundation-vented-crawlspace.xml'].include? hpxml_file
+    foundation_walls_values[0][:height] = 4
+    foundation_walls_values[0][:area] = 960
+    foundation_walls_values[0][:depth_below_grade] = 3
+  elsif ['valid-foundation-unvented-crawlspace-reference.xml', 'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
+    foundation_walls_values[0][:insulation_assembly_r_value] = nil
     foundation_walls_values[0][:height] = 4
     foundation_walls_values[0][:area] = 960
     foundation_walls_values[0][:depth_below_grade] = 3
@@ -515,6 +524,8 @@ def get_hpxml_file_slab_values(hpxml_file)
   elsif hpxml_file == 'valid-foundation-slab-reference.xml'
     slabs_values[0][:id] = "Slab_ID1"
     slabs_values[0][:depth_below_grade] = 0
+    slabs_values[0][:perimeter_insulation_depth] = nil
+    slabs_values[0][:under_slab_insulation_width] = nil
     slabs_values[0][:perimeter_insulation_r_value] = nil
     slabs_values[0][:under_slab_insulation_r_value] = nil
     slabs_values[0][:carpet_fraction] = 1
@@ -524,35 +535,24 @@ def get_hpxml_file_slab_values(hpxml_file)
     slabs_values[0][:under_slab_insulation_width] = nil
     slabs_values[0][:perimeter_insulation_r_value] = nil
     slabs_values[0][:under_slab_insulation_r_value] = nil
-  elsif hpxml_file == 'valid-foundation-unvented-crawlspace.xml'
+  elsif ['valid-foundation-unvented-crawlspace.xml', 'valid-foundation-vented-crawlspace.xml'].include? hpxml_file
     slabs_values[0][:id] = "Slab_ID1"
     slabs_values[0][:thickness] = 0
     slabs_values[0][:depth_below_grade] = 3
     slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
     slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
     slabs_values[0][:carpet_r_value] = 2.5
-  elsif hpxml_file == 'valid-foundation-unvented-crawlspace-reference.xml'
+  elsif ['valid-foundation-unvented-crawlspace-reference.xml', 'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
     slabs_values[0][:id] = "Slab_ID1"
+    slabs_values[0][:perimeter_insulation_depth] = nil
+    slabs_values[0][:under_slab_insulation_width] = nil
     slabs_values[0][:thickness] = 0
     slabs_values[0][:depth_below_grade] = 3
     slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
     slabs_values[0][:perimeter_insulation_r_value] = nil
     slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
     slabs_values[0][:under_slab_insulation_r_value] = nil
-  elsif hpxml_file == 'valid-foundation-vented-crawlspace.xml'
-    slabs_values[0][:id] = "Slab_ID1"
-    slabs_values[0][:thickness] = 0
-    slabs_values[0][:depth_below_grade] = 3
-    slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
-    slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
-  elsif hpxml_file == 'valid-foundation-vented-crawlspace-reference.xml'
-    slabs_values[0][:id] = "Slab_ID1"
-    slabs_values[0][:thickness] = 0
-    slabs_values[0][:depth_below_grade] = 3
-    slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
-    slabs_values[0][:perimeter_insulation_r_value] = nil
-    slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
-    slabs_values[0][:under_slab_insulation_r_value] = nil
+    slabs_values[0][:carpet_r_value] = 2.5
   elsif ['valid-foundation-pier-beam.xml', 'valid-foundation-pier-beam-reference.xml'].include? hpxml_file
     slabs_values = []
   end
@@ -926,9 +926,9 @@ def get_hpxml_file_cooling_systems_values(hpxml_file)
     cooling_systems_values = []
   elsif hpxml_file == 'valid-hvac-boiler-gas-central-ac-1-speed.xml'
     cooling_systems_values[0][:distribution_system_idref] = "HVAC_Dist_ID2"
-  elsif hpxml_file == 'valid-hvac-furnace-gas-central-ac-2-speed.xml'
+  elsif ['valid-hvac-furnace-gas-central-ac-2-speed.xml', 'valid-hvac-central-ac-only-2-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_efficiency_seer] = 18
-  elsif hpxml_file == 'valid-hvac-furnace-gas-central-ac-var-speed.xml'
+  elsif ['valid-hvac-furnace-gas-central-ac-var-speed.xml', 'valid-hvac-central-ac-only-var-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_efficiency_seer] = 24
   elsif ['valid-hvac-furnace-gas-room-ac.xml', 'valid-hvac-room-ac-furnace-gas.xml', 'valid-hvac-room-ac-only.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = nil
@@ -1074,7 +1074,7 @@ def get_hpxml_file_hvac_distribution_values(hpxml_file)
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
     hvac_distributions_values << { :id => "HVAC_Dist_ID2",
                                    :distribution_system_type => "AirDistribution" }
-  elsif ['valid-hvac-none.xml', 'valid-hvac-elec-resistance-only.xml', 'valid-hvac-ideal-air.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'valid-hvac-none-no-fuel-access.xml', 'valid-hvac-room-ac-only.xml', 'valid-hvac-stove-oil-only.xml', 'valid-hvac-stove-oil-only-no-eae.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'valid-hvac-wall-furnace-propane-only-no-eae.xml'].include? hpxml_file
+  elsif ['valid-hvac-none.xml', 'valid-hvac-elec-resistance-only.xml', 'valid-hvac-ideal-air.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'valid-hvac-none-no-fuel-access.xml', 'valid-hvac-room-ac-only.xml', 'valid-hvac-stove-oil-only.xml', 'valid-hvac-stove-oil-only-no-eae.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'valid-hvac-wall-furnace-propane-only-no-eae.xml', 'valid-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
     hvac_distributions_values = []
   elsif hpxml_file == 'valid-hvac-multiple.xml'
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
