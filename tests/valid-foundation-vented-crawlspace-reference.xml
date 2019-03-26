@@ -128,6 +128,9 @@
               <SystemIdentifier id='Floor_ID1'/>
               <AdjacentTo>living space</AdjacentTo>
               <Area>3500.0</Area>
+              <Insulation>
+                <SystemIdentifier id='Floor_Ins_ID1'/>
+              </Insulation>
             </FrameFloor>
             <FoundationWall>
               <SystemIdentifier id='fndwall-1'/>
@@ -136,6 +139,9 @@
               <Thickness>8.0</Thickness>
               <DepthBelowGrade>3.0</DepthBelowGrade>
               <AdjacentTo>ground</AdjacentTo>
+              <Insulation>
+                <SystemIdentifier id='FWall_Ins_ID1'/>
+              </Insulation>
             </FoundationWall>
             <Slab>
               <SystemIdentifier id='Slab_ID1'/>

@@ -197,6 +197,9 @@
             <Area>3796.0</Area>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='AGW_Ins_ID1'/>
+            </Insulation>
           </Wall>
         </Walls>
         <Windows>
