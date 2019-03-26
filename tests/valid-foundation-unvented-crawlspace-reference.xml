@@ -148,6 +148,12 @@
               <Thickness>0.0</Thickness>
               <ExposedPerimeter>240.0</ExposedPerimeter>
               <DepthBelowGrade>3.0</DepthBelowGrade>
+              <PerimeterInsulation>
+                <SystemIdentifier id='PerimeterInsulation_ID1'/>
+              </PerimeterInsulation>
+              <UnderSlabInsulation>
+                <SystemIdentifier id='UnderSlabInsulation_ID1'/>
+              </UnderSlabInsulation>
               <extension>
                 <CarpetFraction>0.0</CarpetFraction>
                 <CarpetRValue>2.5</CarpetRValue>
