@@ -323,7 +323,7 @@
             <FuelType>electricity</FuelType>
             <WaterHeaterType>heat pump water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>80</TankVolume>
+            <TankVolume>80.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <EnergyFactor>2.3</EnergyFactor>
           </WaterHeatingSystem>

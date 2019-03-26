@@ -333,8 +333,8 @@
             <SystemType>
               <Recirculation>
                 <ControlType>timer</ControlType>
-                <BranchPipingLoopLength>30</BranchPipingLoopLength>
-                <PumpPower>50</PumpPower>
+                <BranchPipingLoopLength>30.0</BranchPipingLoopLength>
+                <PumpPower>50.0</PumpPower>
               </Recirculation>
             </SystemType>
             <PipeInsulation>

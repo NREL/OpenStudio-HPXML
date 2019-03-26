@@ -433,11 +433,11 @@
           <PlugLoadType>other</PlugLoadType>
           <Load>
             <Units>kWh/year</Units>
-            <Value>7302</Value>
+            <Value>7302.0</Value>
           </Load>
           <extension>
             <FracSensible>0.82</FracSensible>
-            <FracLatent>.18</FracLatent>
+            <FracLatent>0.18</FracLatent>
           </extension>
         </PlugLoad>
         <PlugLoad>
@@ -445,7 +445,7 @@
           <PlugLoadType>TV other</PlugLoadType>
           <Load>
             <Units>kWh/year</Units>
-            <Value>400</Value>
+            <Value>400.0</Value>
           </Load>
         </PlugLoad>
         <extension>

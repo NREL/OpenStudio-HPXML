@@ -263,7 +263,7 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>700</ElectricAuxiliaryEnergy>
+              <ElectricAuxiliaryEnergy>700.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='SpaceCool_ID1'/>

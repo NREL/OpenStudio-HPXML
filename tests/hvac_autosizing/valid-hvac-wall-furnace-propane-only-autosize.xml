@@ -259,10 +259,10 @@
               <HeatingCapacity>-1</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.80</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>200</ElectricAuxiliaryEnergy>
+              <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
           </HVACPlant>
           <HVACControl>

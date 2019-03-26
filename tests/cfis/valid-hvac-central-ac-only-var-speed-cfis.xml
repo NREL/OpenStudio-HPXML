@@ -259,7 +259,7 @@
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>24</Value>
+                <Value>24.0</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -308,8 +308,8 @@
             <VentilationFan>
               <SystemIdentifier id='Mech_Vent_ID1'/>
               <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate>247</RatedFlowRate>
-              <HoursInOperation>8</HoursInOperation>
+              <RatedFlowRate>247.0</RatedFlowRate>
+              <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>360.0</FanPower>
               <AttachedToHVACDistributionSystem idref='HVAC_Dist_ID1'/>
