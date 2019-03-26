@@ -259,7 +259,7 @@
               <HeatingCapacity>32000</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
-                <Value>0.80</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>100</ElectricAuxiliaryEnergy>
