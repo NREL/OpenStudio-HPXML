@@ -1082,7 +1082,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
   elsif hpxml_file == 'invalid-unattached-hvac.xml.skip'
     heating_systems_values[0][:distribution_system_idref] = "foobar"
-  elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed.xml', 'hvac_autosizing/valid-hvac-boiler-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-elec-resistance-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas.xml', 'hvac_autosizing/valid-hvac-stove-oil-only-autosize.xml', 'hvac_autosizing/valid-hvac-wall-furnace-propane-only-autosize.xml'].include? hpxml_file
+  elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-elec-resistance-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas-autosize.xml', 'hvac_autosizing/valid-hvac-stove-oil-only-autosize.xml', 'hvac_autosizing/valid-hvac-wall-furnace-propane-only-autosize.xml'].include? hpxml_file
     heating_systems_values[0][:heating_capacity] = -1
   end
   return heating_systems_values
@@ -1120,7 +1120,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
                                 :cooling_capacity => 48000,
                                 :fraction_cool_load_served => 0.2,
                                 :cooling_efficiency_eer => 8.5 }
-  elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed.xml', 'hvac_autosizing/valid-hvac-central-ac-only-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas.xml', 'hvac_autosizing/valid-hvac-room-ac-only-autosize.xml'].include? hpxml_file
+  elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-only-autosize.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_capacity] = -1
   end
   return cooling_systems_values
@@ -1223,7 +1223,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 0.2,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
-  elsif ['hvac_autosizing/valid-hvac-air-to-air-heat-pump-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-air-to-air-heat-pump-2-speed-autosize.xml', 'hvac_autoszing/valid-hvac-air-to-air-heat-pump-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-ground-to-air-heat-pump-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ducted-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ductless-autosize.xml'].include? hpxml_file
+  elsif ['hvac_autosizing/valid-hvac-air-to-air-heat-pump-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-air-to-air-heat-pump-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-air-to-air-heat-pump-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-ground-to-air-heat-pump-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ducted-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ductless-autosize.xml'].include? hpxml_file
     heat_pumps_values[0][:cooling_capacity] = -1
   end
   return heat_pumps_values
