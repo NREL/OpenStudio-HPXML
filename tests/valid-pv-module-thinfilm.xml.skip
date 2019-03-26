@@ -177,15 +177,13 @@
           </RimJoist>
           <RimJoist>
             <SystemIdentifier id='rimjoist-2'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>180.0</Area>
             <Insulation>
               <SystemIdentifier id='rimjoist_Ins_ID2'/>
               <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
             </Insulation>
-            <extension>
-              <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-              <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            </extension>
           </RimJoist>
         </RimJoists>
         <Walls>

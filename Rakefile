@@ -117,31 +117,28 @@ def create_hpxmls
     'valid-hvac-stove-oil-only-no-eae.xml',
     'valid-hvac-wall-furnace-propane-only.xml',
     'valid-hvac-wall-furnace-propane-only-no-eae.xml',
-
-    # 'valid-infiltration-ach-natural.xml',
-
-    # 'valid-mechvent-balanced.xml',
-    # 'valid-mechvent-cfis.xml',
-    # 'valid-mechvent-erv.xml',
-    # 'valid-mechvent-exhaust.xml',
-    # 'valid-mechvent-hrv.xml',
-    # 'valid-mechvent-supply.xml',
-
-    # 'valid-misc-appliances-in-basement.xml',
-    # 'valid-misc-ceiling-fans.xml',
-    # 'valid-misc-lighting-default.xml',
-    # 'valid-misc-lighting-none.xml',
-    # 'valid-misc-loads-detailed.xml',
-    # 'valid-misc-number-of-occupants.xml',
-
-    # 'valid-pv-array-1axis.xml',
-    # 'valid-pv-array-1axis-backtracked.xml',
-    # 'valid-pv-array-2axis.xml',
-    # 'valid-pv-array-fixed-open-rack.xml',
-    # 'valid-pv-module-premium.xml',
-    # 'valid-pv-module-standard.xml',
-    # 'valid-pv-module-thinfilm.xml.skip',
-    # 'valid-pv-multiple.xml'
+    'valid-infiltration-ach-natural.xml',
+    'valid-mechvent-balanced.xml',
+    'valid-mechvent-cfis.xml',
+    'valid-mechvent-erv.xml',
+    'valid-mechvent-exhaust.xml',
+    'valid-mechvent-hrv.xml',
+    'valid-mechvent-supply.xml',
+    'valid-misc-appliances-in-basement.xml',
+    'valid-misc-ceiling-fans.xml',
+    'valid-misc-ceiling-fans-reference.xml',
+    'valid-misc-lighting-default.xml',
+    'valid-misc-lighting-none.xml',
+    'valid-misc-loads-detailed.xml',
+    'valid-misc-number-of-occupants.xml',
+    'valid-pv-array-1axis.xml',
+    'valid-pv-array-1axis-backtracked.xml',
+    'valid-pv-array-2axis.xml',
+    'valid-pv-array-fixed-open-rack.xml',
+    'valid-pv-module-premium.xml',
+    'valid-pv-module-standard.xml',
+    'valid-pv-module-thinfilm.xml.skip',
+    'valid-pv-multiple.xml'
   ]
 
   hpxml_files.each do |hpxml_file|
@@ -159,6 +156,11 @@ def create_hpxmls
 
     site_values = get_hpxml_file_site_values(hpxml_file)
     HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
+
+    building_occupancys_values = get_hpxml_file_building_occupancy_values(hpxml_file)
+    building_occupancys_values.each do |building_occupancy_values|
+      HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values)
+    end
 
     building_construction_values = get_hpxml_file_building_construction_values(hpxml_file)
     HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
@@ -281,6 +283,11 @@ def create_hpxmls
       HPXML.add_extension(parent: hpxml.elements["Building/BuildingDetails/Systems/HVAC"], extensions: { "LoadDistributionScheme": "UniformLoad" })
     end
 
+    ventilation_fans_values = get_hpxml_file_ventilation_fan_values(hpxml_file)
+    ventilation_fans_values.each do |ventilation_fan_values|
+      HPXML.add_ventilation_fan(hpxml: hpxml, **ventilation_fan_values)
+    end
+
     water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file)
     water_heating_systems_values.each do |water_heating_system_values|
       HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
@@ -294,6 +301,11 @@ def create_hpxmls
     water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file)
     water_fixtures_values.each do |water_fixture_values|
       HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
+    end
+
+    pv_systems_values = get_hpxml_file_pv_system_values(hpxml_file)
+    pv_systems_values.each do |pv_system_values|
+      HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
     end
 
     unless ['valid-appliances-none.xml'].include? hpxml_file
@@ -318,8 +330,25 @@ def create_hpxmls
 
     end
 
-    lighting_values = get_hpxml_file_lighting_values(hpxml_file)
-    HPXML.add_lighting(hpxml: hpxml, **lighting_values)
+    lightings_values = get_hpxml_file_lighting_values(hpxml_file)
+    lightings_values.each do |lighting_values|
+      HPXML.add_lighting(hpxml: hpxml, **lighting_values)
+    end
+
+    ceiling_fans_values = get_hpxml_file_ceiling_fan_values(hpxml_file)
+    ceiling_fans_values.each do |ceiling_fan_values|
+      HPXML.add_ceiling_fan(hpxml: hpxml, **ceiling_fan_values)
+    end
+
+    plug_loads_values = get_hpxml_file_plug_load_values(hpxml_file)
+    plug_loads_values.each do |plug_load_values|
+      HPXML.add_plug_load(hpxml: hpxml, **plug_load_values)
+    end
+
+    misc_loads_schedules_values = get_hpxml_file_misc_loads_schedule_values(hpxml_file)
+    misc_loads_schedules_values.each do |misc_loads_schedule_values|
+      HPXML.add_misc_loads_schedule(hpxml: hpxml, **misc_loads_schedule_values)
+    end
 
     hpxml_path = File.join(tests_dir, hpxml_file)
     XMLHelper.write_file(hpxml_doc, hpxml_path)
@@ -354,6 +383,14 @@ def get_hpxml_file_site_values(hpxml_file)
   return site_values
 end
 
+def get_hpxml_file_building_occupancy_values(hpxml_file)
+  building_occupancys_values = []
+  if hpxml_file == 'valid-misc-number-of-occupants.xml'
+    building_occupancys_values << { :number_of_residents => 5 }
+  end
+  return building_occupancys_values
+end
+
 def get_hpxml_file_building_construction_values(hpxml_file)
   building_construction_values = { :number_of_conditioned_floors => 3,
                                    :number_of_conditioned_floors_above_grade => 2,
@@ -386,6 +423,12 @@ def get_hpxml_file_air_infiltration_measurement_values(hpxml_file)
                                           :infiltration_volume => 67575 }
   if ['valid-foundation-pier-beam.xml', 'valid-foundation-pier-beam-reference.xml', 'valid-foundation-slab.xml', 'valid-foundation-slab-reference.xml', 'valid-foundation-unconditioned-basement.xml', 'valid-foundation-unconditioned-basement-reference.xml', 'valid-foundation-unvented-crawlspace.xml', 'valid-foundation-unvented-crawlspace-reference.xml', 'valid-foundation-vented-crawlspace.xml', 'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
     air_infiltration_measurement_values[:infiltration_volume] = 33787.5
+  elsif hpxml_file == 'valid-infiltration-ach-natural.xml'
+    air_infiltration_measurement_values[:house_pressure] = nil
+    air_infiltration_measurement_values[:unit_of_measure] = nil
+    air_infiltration_measurement_values[:air_leakage] = nil
+    air_infiltration_measurement_values[:infiltration_volume] = nil
+    air_infiltration_measurement_values[:constant_ach_natural] = 0.67
   end
   return air_infiltration_measurement_values
 end
@@ -1137,6 +1180,52 @@ def get_hpxml_file_ducts_values(hpxml_file)
   return ducts_values
 end
 
+def get_hpxml_file_ventilation_fan_values(hpxml_file)
+  ventilation_fans_values = []
+  if hpxml_file == 'valid-mechvent-balanced.xml'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "balanced",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 123.5 }
+  elsif hpxml_file == 'valid-mechvent-cfis.xml'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "central fan integrated supply",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 8,
+                                 :fan_power => 360,
+                                 :distribution_system_idref => "HVAC_Dist_ID1" }
+  elsif hpxml_file == 'valid-mechvent-erv.xml'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "energy recovery ventilator",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 24,
+                                 :total_recovery_efficiency => 0.48,
+                                 :sensible_recovery_efficiency => 0.72,
+                                 :fan_power => 123.5 }
+  elsif hpxml_file == 'valid-mechvent-exhaust.xml'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "exhaust only",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 60 }
+  elsif hpxml_file == 'valid-mechvent-hrv.xml'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "heat recovery ventilator",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 24,
+                                 :sensible_recovery_efficiency => 0.72,
+                                 :fan_power => 123.5 }
+  elsif hpxml_file == 'valid-mechvent-supply.xml'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "supply only",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 60 }
+  end
+  return ventilation_fans_values
+end
+
 def get_hpxml_file_water_heating_system_values(hpxml_file)
   water_heating_systems_values = [{ :id => "DHW_ID1",
                                     :fuel_type => "electricity",
@@ -1310,6 +1399,92 @@ def get_hpxml_file_water_fixtures_values(hpxml_file)
   return water_fixtures_values
 end
 
+def get_hpxml_file_pv_system_values(hpxml_file)
+  pv_systems_values = []
+  if hpxml_file == 'valid-pv-array-1axis.xml'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "standard",
+                           :array_type => "1-axis",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  elsif hpxml_file == 'valid-pv-array-1axis-backtracked.xml'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "standard",
+                           :array_type => "1-axis backtracked",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  elsif hpxml_file == 'valid-pv-array-2axis.xml'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "standard",
+                           :array_type => "2-axis",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  elsif hpxml_file == 'valid-pv-array-fixed-open-rack.xml'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "standard",
+                           :array_type => "fixed open rack",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  elsif hpxml_file == 'valid-pv-module-premium.xml'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "premium",
+                           :array_type => "fixed roof mount",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  elsif hpxml_file == 'valid-pv-module-standard.xml'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "standard",
+                           :array_type => "fixed roof mount",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  elsif hpxml_file == 'valid-pv-module-thinfilm.xml.skip'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "thin film",
+                           :array_type => "fixed roof mount",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  elsif hpxml_file == 'valid-pv-multiple.xml'
+    pv_systems_values << { :id => "PV_ID1",
+                           :module_type => "standard",
+                           :array_type => "fixed roof mount",
+                           :array_azimuth => 180,
+                           :array_tilt => 20,
+                           :max_power_output => 4000,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+    pv_systems_values << { :id => "PV_ID2",
+                           :module_type => "standard",
+                           :array_type => "fixed roof mount",
+                           :array_azimuth => 90,
+                           :array_tilt => 20,
+                           :max_power_output => 1500,
+                           :inverter_efficiency => 0.96,
+                           :system_losses_fraction => 0.14 }
+  end
+  return pv_systems_values
+end
+
 def get_hpxml_file_clothes_washer_values(hpxml_file)
   clothes_washer_values = { :id => "ClothesWasher",
                             :location => "living space",
@@ -1331,6 +1506,8 @@ def get_hpxml_file_clothes_washer_values(hpxml_file)
     clothes_washer_values[:label_gas_rate] = nil
     clothes_washer_values[:label_annual_gas_cost] = nil
     clothes_washer_values[:capacity] = nil
+  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
+    clothes_washer_values[:location] = "basement - conditioned"
   end
   return clothes_washer_values
 end
@@ -1358,6 +1535,8 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file)
     clothes_dryer_values[:fuel_type] = "natural gas"
     clothes_dryer_values[:energy_factor] = nil
     clothes_dryer_values[:control_type] = nil
+  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
+    clothes_dryer_values[:location] = "basement - conditioned"
   end
   return clothes_dryer_values
 end
@@ -1385,6 +1564,8 @@ def get_hpxml_file_refrigerator_values(hpxml_file)
     refrigerator_values[:location] = "basement - conditioned"
   elsif ['valid-appliances-reference-elec.xml', 'valid-appliances-reference-gas.xml'].include? hpxml_file
     refrigerator_values[:rated_annual_kwh] = nil
+  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
+    refrigerator_values[:location] = "basement - conditioned"
   end
   return refrigerator_values
 end
@@ -1415,11 +1596,53 @@ def get_hpxml_file_oven_values(hpxml_file)
 end
 
 def get_hpxml_file_lighting_values(hpxml_file)
-  lighting_values = { :fraction_tier_i_interior => 0.5,
-                      :fraction_tier_i_exterior => 0.5,
-                      :fraction_tier_i_garage => 0.5,
-                      :fraction_tier_ii_interior => 0.25,
-                      :fraction_tier_ii_exterior => 0.25,
-                      :fraction_tier_ii_garage => 0.25 }
-  return lighting_values
+  lightings_values = [{ :fraction_tier_i_interior => 0.5,
+                        :fraction_tier_i_exterior => 0.5,
+                        :fraction_tier_i_garage => 0.5,
+                        :fraction_tier_ii_interior => 0.25,
+                        :fraction_tier_ii_exterior => 0.25,
+                        :fraction_tier_ii_garage => 0.25 }]
+  if hpxml_file == 'valid-misc-lighting-default.xml'
+    lightings_values = [{}]
+  elsif hpxml_file == 'valid-misc-lighting-none.xml'
+    lightings_values = []
+  end
+  return lightings_values
+end
+
+def get_hpxml_file_ceiling_fan_values(hpxml_file)
+  ceiling_fans_values = []
+  if hpxml_file == 'valid-misc-ceiling-fans.xml'
+    ceiling_fans_values << { :id => "CeilingFan_ID1",
+                             :efficiency => 100,
+                             :quantity => 2 }
+  elsif hpxml_file == 'valid-misc-ceiling-fans-reference.xml'
+    ceiling_fans_values << { :id => "CeilingFan_ID1" }
+  end
+  return ceiling_fans_values
+end
+
+def get_hpxml_file_plug_load_values(hpxml_file)
+  plug_loads_values = []
+  if hpxml_file == 'valid-misc-loads-detailed.xml'
+    plug_loads_values << { :id => "Misc",
+                           :plug_load_type => "other",
+                           :kWh_per_year => 7302,
+                           :frac_sensible => 0.82,
+                           :frac_latent => 0.18 }
+    plug_loads_values << { :id => "TelevisionPlugLoad",
+                           :plug_load_type => "TV other",
+                           :kWh_per_year => 400 }
+  end
+  return plug_loads_values
+end
+
+def get_hpxml_file_misc_loads_schedule_values(hpxml_file)
+  misc_loads_schedules_values = []
+  if hpxml_file == 'valid-misc-loads-detailed.xml'
+    misc_loads_schedules_values << { :weekday_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
+                                     :weekend_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
+                                     :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" }
+  end
+  return misc_loads_schedules_values
 end
