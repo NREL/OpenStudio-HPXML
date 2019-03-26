@@ -234,10 +234,8 @@ def create_hpxmls
       heat_pumps_values = get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
       hvac_controls_values = get_hpxml_file_hvac_control_values(hpxml_file, hvac_controls_values)
       hvac_distributions_values = get_hpxml_file_hvac_distribution_values(hpxml_file, hvac_distributions_values)
-      hvac_distributions_values.each do |hvac_distribution_values|
-        duct_leakage_measurements_values = get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_measurements_values)
-        ducts_values = get_hpxml_file_ducts_values(hpxml_file, ducts_values)
-      end
+      duct_leakage_measurements_values = get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_measurements_values)
+      ducts_values = get_hpxml_file_ducts_values(hpxml_file, ducts_values)
       ventilation_fans_values = get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
       water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems_values)
       hot_water_distributions_values = get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distributions_values)
