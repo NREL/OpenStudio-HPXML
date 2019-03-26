@@ -128,10 +128,10 @@
               <ExposedPerimeter>240.0</ExposedPerimeter>
               <DepthBelowGrade>0.0</DepthBelowGrade>
               <PerimeterInsulation>
-                <SystemIdentifier id='FSlab_PerimIns_ID1'/>
+                <SystemIdentifier id='PerimeterInsulation_ID1'/>
               </PerimeterInsulation>
               <UnderSlabInsulation>
-                <SystemIdentifier id='FSlab_UnderIns_ID1'/>
+                <SystemIdentifier id='UnderSlabInsulation_ID1'/>
               </UnderSlabInsulation>
               <extension>
                 <CarpetFraction>1.0</CarpetFraction>

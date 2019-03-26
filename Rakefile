@@ -567,6 +567,8 @@ def get_hpxml_file_slab_values(hpxml_file)
   elsif hpxml_file == 'valid-foundation-slab-reference.xml'
     slabs_values[0][:id] = "Slab_ID1"
     slabs_values[0][:depth_below_grade] = 0
+    slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
+    slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
     slabs_values[0][:perimeter_insulation_depth] = nil
     slabs_values[0][:under_slab_insulation_width] = nil
     slabs_values[0][:perimeter_insulation_r_value] = nil
