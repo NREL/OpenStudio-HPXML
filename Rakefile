@@ -18,6 +18,16 @@ def create_hpxmls
   tests_dir = File.join(this_dir, "tests")
 
   hpxml_files = [
+    'invalid-bad-wmo.xml',
+    'invalid-missing-elements.xml',
+    'invalid-missing-surfaces.xml',
+    'invalid-net-area-negative-roof.xml',
+    'invalid-net-area-negative-wall.xml',
+    'invalid-unattached-cfis.xml.skip',
+    'invalid-unattached-door.xml',
+    'invalid-unattached-hvac.xml.skip',
+    'invalid-unattached-skylight.xml',
+    'invalid-unattached-window.xml',
     'valid.xml',
     'valid-addenda-exclude-g.xml',
     'valid-addenda-exclude-g-e.xml',
@@ -402,6 +412,9 @@ def get_hpxml_file_building_construction_values(hpxml_file)
     building_construction_values[:number_of_conditioned_floors] = 2
     building_construction_values[:conditioned_floor_area] = 3500
     building_construction_values[:conditioned_building_volume] = 33787.5
+  elsif hpxml_file == 'invalid-missing-elements.xml'
+    building_construction_values[:number_of_conditioned_floors] = nil
+    building_construction_values[:conditioned_floor_area] = nil
   end
   return building_construction_values
 end
@@ -412,6 +425,9 @@ def get_hpxml_file_climate_and_risk_zones_values(hpxml_file)
                                     :weather_station_id => "Weather_Station",
                                     :weather_station_name => "Denver, CO",
                                     :weather_station_wmo => "725650" }
+  if hpxml_file == 'invalid-bad-wmo.xml'
+    climate_and_risk_zones_values[:weather_station_wmo] = "999999"
+  end
   return climate_and_risk_zones_values
 end
 
@@ -689,7 +705,7 @@ def get_hpxml_file_walls_values(hpxml_file)
                     :solar_absorptance => 0.75,
                     :emittance => 0.9,
                     :insulation_id => "AGW_Ins_ID1",
-                    :insulation_assembly_r_value => 23.0 }]
+                    :insulation_assembly_r_value => 23 }]
   if hpxml_file == 'valid-enclosure-multiple-walls.xml'
     walls_values[0][:id] = "agwall-small"
     walls_values[0][:area] = 10
@@ -701,7 +717,7 @@ def get_hpxml_file_walls_values(hpxml_file)
                       :solar_absorptance => 0.75,
                       :emittance => 0.9,
                       :insulation_id => "AGW_Ins_ID2",
-                      :insulation_assembly_r_value => 23.0 }
+                      :insulation_assembly_r_value => 23 }
     walls_values << { :id => "agwall-large",
                       :exterior_adjacent_to => "outside",
                       :interior_adjacent_to => "living space",
@@ -710,7 +726,7 @@ def get_hpxml_file_walls_values(hpxml_file)
                       :solar_absorptance => 0.75,
                       :emittance => 0.9,
                       :insulation_id => "AGW_Ins_ID3",
-                      :insulation_assembly_r_value => 23.0 }
+                      :insulation_assembly_r_value => 23 }
   elsif hpxml_file == 'valid-enclosure-walltype-cmu.xml'
     walls_values[0][:wall_type] = "ConcreteMasonryUnit"
     walls_values[0][:insulation_assembly_r_value] = 12
@@ -743,6 +759,17 @@ def get_hpxml_file_walls_values(hpxml_file)
     walls_values[0][:insulation_assembly_r_value] = 7.9
   elsif hpxml_file == 'valid-enclosure-walltype-woodstud-reference.xml'
     walls_values[0][:insulation_assembly_r_value] = nil
+  elsif hpxml_file == 'invalid-missing-surfaces.xml'
+    walls_values[0][:area] = 3696
+    walls_values << { :id => "agwall-2",
+                      :exterior_adjacent_to => "living space",
+                      :interior_adjacent_to => "garage",
+                      :wall_type => "WoodStud",
+                      :area => 100,
+                      :solar_absorptance => 0.75,
+                      :emittance => 0.9,
+                      :insulation_id => "AGW_Ins_ID2",
+                      :insulation_assembly_r_value => 4 }
   end
   return walls_values
 end
@@ -801,6 +828,10 @@ def get_hpxml_file_windows_values(hpxml_file)
     windows_values[2][:interior_shading_factor_winter] = 0.01
     windows_values[3][:interior_shading_factor_summer] = 0.85
     windows_values[3][:interior_shading_factor_winter] = 0.7
+  elsif hpxml_file == 'invalid-net-area-negative-wall.xml'
+    windows_values[0][:area] = 3500
+  elsif hpxml_file == 'invalid-unattached-window.xml'
+    windows_values[0][:wall_idref] = "foobar"
   end
   return windows_values
 end
@@ -814,6 +845,32 @@ def get_hpxml_file_skylights_values(hpxml_file)
                           :ufactor => 0.33,
                           :shgc => 0.45,
                           :roof_idref => "attic-roof-1" }
+    skylights_values << { :id => "Skylight_ID2",
+                          :area => 15,
+                          :azimuth => 270,
+                          :ufactor => 0.35,
+                          :shgc => 0.47,
+                          :roof_idref => "attic-roof-1" }
+  elsif hpxml_file == 'invalid-net-area-negative-roof.xml'
+    skylights_values << { :id => "Skylight_ID1",
+                          :area => 4199,
+                          :azimuth => 90,
+                          :ufactor => 0.33,
+                          :shgc => 0.45,
+                          :roof_idref => "attic-roof-1" }
+    skylights_values << { :id => "Skylight_ID2",
+                          :area => 15,
+                          :azimuth => 270,
+                          :ufactor => 0.35,
+                          :shgc => 0.47,
+                          :roof_idref => "attic-roof-1" }
+  elsif hpxml_file == 'invalid-unattached-skylight.xml'
+    skylights_values << { :id => "Skylight_ID1",
+                          :area => 15,
+                          :azimuth => 90,
+                          :ufactor => 0.33,
+                          :shgc => 0.45,
+                          :roof_idref => "foobar" }
     skylights_values << { :id => "Skylight_ID2",
                           :area => 15,
                           :azimuth => 270,
@@ -838,6 +895,8 @@ def get_hpxml_file_doors_values(hpxml_file)
     doors_values[0][:wall_idref] = "agwall-large"
   elsif hpxml_file == 'valid-enclosure-orientation-45.xml'
     doors_values[0][:azimuth] = 315
+  elsif hpxml_file == 'invalid-unattached-door.xml'
+    doors_values[0][:wall_idref] = "foobar"
   end
   return doors_values
 end
@@ -955,6 +1014,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file)
     heating_systems_values[0][:heating_system_type] = "WallFurnace"
     heating_systems_values[0][:heating_system_fuel] = "propane"
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
+  elsif hpxml_file == 'invalid-unattached-hvac.xml.skip'
+    heating_systems_values[0][:distribution_system_idref] = "foobar"
   end
   return heating_systems_values
 end
@@ -1224,6 +1285,13 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file)
                                  :rated_flow_rate => 247,
                                  :hours_in_operation => 24,
                                  :fan_power => 60 }
+  elsif hpxml_file == 'invalid-unattached-cfis.xml.skip'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "central fan integrated supply",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 8,
+                                 :fan_power => 360,
+                                 :distribution_system_idref => "HVAC_Dist_ID1" }
   end
   return ventilation_fans_values
 end

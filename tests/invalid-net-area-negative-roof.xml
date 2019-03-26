@@ -240,7 +240,7 @@
         <Skylights>
           <Skylight>
             <SystemIdentifier id='Skylight_ID1'/>
-            <Area>4199</Area>
+            <Area>4199.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
