@@ -1886,20 +1886,18 @@ class HPXML
                                 cavity_nominal_r_value: nil,
                                 continuous_nominal_r_value: nil,
                                 **remainder)
-    return nil if cavity_nominal_r_value.nil? and continuous_nominal_r_value.nil?
-
     insulation = XMLHelper.add_element(parent, element_name)
     sys_id = XMLHelper.add_element(insulation, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     unless cavity_nominal_r_value.nil?
       layer = XMLHelper.add_element(insulation, "Layer")
       XMLHelper.add_element(layer, "InstallationType", "cavity")
-      XMLHelper.add_element(layer, "NominalRValue", to_float(cavity_nominal_r_value))
+      XMLHelper.add_element(layer, "NominalRValue", to_float(cavity_nominal_r_value)) unless cavity_nominal_r_value.nil?
     end
     unless continuous_nominal_r_value.nil?
       layer = XMLHelper.add_element(insulation, "Layer")
       XMLHelper.add_element(layer, "InstallationType", "continuous")
-      XMLHelper.add_element(layer, "NominalRValue", to_float(continuous_nominal_r_value))
+      XMLHelper.add_element(layer, "NominalRValue", to_float(continuous_nominal_r_value)) unless continuous_nominal_r_value.nil?
     end
 
     check_remainder(remainder,
