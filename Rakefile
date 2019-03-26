@@ -148,7 +148,23 @@ def create_hpxmls
     ['valid.xml', 'valid-pv-module-premium.xml'],
     ['valid.xml', 'valid-pv-module-standard.xml'],
     ['valid.xml', 'valid-pv-module-thinfilm.xml.skip'],
-    ['valid.xml', 'valid-pv-multiple.xml']
+    ['valid.xml', 'valid-pv-multiple.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-air-to-air-heat-pump-1-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-air-to-air-heat-pump-2-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-air-to-air-heat-pump-var-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-boiler-gas-central-ac-1-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-central-ac-only-1-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-central-ac-only-2-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-central-ac-only-var-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-furnace-elec-only-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-furnace-gas-central-ac-2-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-furnace-gas-central-ac-var-speed-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-furnace-gas-only-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-furnace-gas-room-ac-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-ground-to-air-heat-pump-cfis.xml'],
+    ['valid.xml', 'cfis/valid-cfis.xml', 'cfis/valid-hvac-room-ac-furnace-gas-cfis.xml'],
+
   ]
 
   hpxmls_files.each do |hpxml_files|
@@ -939,13 +955,13 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
                                 :heating_capacity => 64000,
                                 :heating_efficiency_afue => 0.92,
                                 :fraction_heat_load_served => 1 }]
-  elsif ['valid-hvac-air-to-air-heat-pump-1-speed.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'valid-hvac-central-ac-only-1-speed.xml', 'valid-hvac-central-ac-only-2-speed.xml', 'valid-hvac-central-ac-only-var-speed.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'valid-hvac-mini-split-heat-pump-ductless-no-backup.xml', 'valid-hvac-ideal-air.xml', 'valid-hvac-none.xml', 'valid-hvac-none-no-fuel-access.xml', 'valid-hvac-room-ac-only.xml'].include? hpxml_file
+  elsif ['valid-hvac-air-to-air-heat-pump-1-speed.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'valid-hvac-central-ac-only-1-speed.xml', 'valid-hvac-central-ac-only-2-speed.xml', 'valid-hvac-central-ac-only-var-speed.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'valid-hvac-mini-split-heat-pump-ductless-no-backup.xml', 'valid-hvac-ideal-air.xml', 'valid-hvac-none.xml', 'valid-hvac-none-no-fuel-access.xml', 'valid-hvac-room-ac-only.xml', 'cfis/valid-hvac-air-to-air-heat-pump-1-speed-cfis.xml', 'cfis/valid-hvac-air-to-air-heat-pump-2-speed-cfis.xml', 'cfis/valid-hvac-air-to-air-heat-pump-var-speed-cfis.xml', 'cfis/valid-hvac-central-ac-only-1-speed-cfis.xml', 'cfis/valid-hvac-central-ac-only-2-speed-cfis.xml', 'cfis/valid-hvac-central-ac-only-var-speed-cfis.xml', 'cfis/valid-hvac-ground-to-air-heat-pump-cfis.xml'].include? hpxml_file
     heating_systems_values = []
   elsif hpxml_file == 'valid-hvac-boiler-elec-only.xml'
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:heating_system_fuel] = "electricity"
     heating_systems_values[0][:heating_efficiency_afue] = 1
-  elsif ['valid-hvac-boiler-gas-central-ac-1-speed.xml', 'valid-hvac-boiler-gas-only.xml'].include? hpxml_file
+  elsif ['valid-hvac-boiler-gas-central-ac-1-speed.xml', 'valid-hvac-boiler-gas-only.xml', 'cfis/valid-hvac-boiler-gas-central-ac-1-speed-cfis.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:electric_auxiliary_energy] = 200
   elsif hpxml_file == 'valid-hvac-boiler-gas-only-no-eae.xml'
@@ -962,10 +978,10 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_system_fuel] = "electricity"
     heating_systems_values[0][:heating_efficiency_afue] = nil
     heating_systems_values[0][:heating_efficiency_percent] = 1
-  elsif hpxml_file == 'valid-hvac-furnace-elec-only.xml'
+  elsif ['valid-hvac-furnace-elec-only.xml', 'cfis/valid-hvac-furnace-elec-only-cfis.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_fuel] = "electricity"
     heating_systems_values[0][:heating_efficiency_afue] = 1
-  elsif ['valid-hvac-furnace-gas-only.xml', 'valid-hvac-room-ac-furnace-gas.xml'].include? hpxml_file
+  elsif ['valid-hvac-furnace-gas-only.xml', 'valid-hvac-room-ac-furnace-gas.xml', 'cfis/valid-hvac-furnace-gas-only-cfis.xml', 'cfis/valid-hvac-room-ac-furnace-gas-cfis.xml'].include? hpxml_file
     heating_systems_values[0][:electric_auxiliary_energy] = 700
   elsif hpxml_file == 'valid-hvac-furnace-oil-only.xml'
     heating_systems_values[0][:heating_system_fuel] = "fuel oil"
@@ -1059,15 +1075,15 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
                                 :cooling_capacity => 48000,
                                 :fraction_cool_load_served => 1,
                                 :cooling_efficiency_seer => 13 }]
-  elsif ['valid-hvac-air-to-air-heat-pump-1-speed.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'valid-hvac-boiler-elec-only.xml', 'valid-hvac-boiler-gas-only.xml', 'valid-hvac-boiler-gas-only-no-eae.xml', 'valid-hvac-boiler-oil-only.xml', 'valid-hvac-boiler-propane-only.xml', 'valid-hvac-elec-resistance-only.xml', 'valid-hvac-furnace-elec-only.xml', 'valid-hvac-furnace-gas-only.xml', 'valid-hvac-furnace-gas-only-no-eae.xml', 'valid-hvac-furnace-oil-only.xml', 'valid-hvac-furnace-propane-only.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'valid-hvac-mini-split-heat-pump-ductless-no-backup.xml', 'valid-hvac-ideal-air.xml', 'valid-hvac-none.xml', 'valid-hvac-none-no-fuel-access.xml', 'valid-hvac-stove-oil-only.xml', 'valid-hvac-stove-oil-only-no-eae.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'valid-hvac-wall-furnace-propane-only-no-eae.xml'].include? hpxml_file
+  elsif ['valid-hvac-air-to-air-heat-pump-1-speed.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'valid-hvac-boiler-elec-only.xml', 'valid-hvac-boiler-gas-only.xml', 'valid-hvac-boiler-gas-only-no-eae.xml', 'valid-hvac-boiler-oil-only.xml', 'valid-hvac-boiler-propane-only.xml', 'valid-hvac-elec-resistance-only.xml', 'valid-hvac-furnace-elec-only.xml', 'valid-hvac-furnace-gas-only.xml', 'valid-hvac-furnace-gas-only-no-eae.xml', 'valid-hvac-furnace-oil-only.xml', 'valid-hvac-furnace-propane-only.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'valid-hvac-mini-split-heat-pump-ductless-no-backup.xml', 'valid-hvac-ideal-air.xml', 'valid-hvac-none.xml', 'valid-hvac-none-no-fuel-access.xml', 'valid-hvac-stove-oil-only.xml', 'valid-hvac-stove-oil-only-no-eae.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'valid-hvac-wall-furnace-propane-only-no-eae.xml', 'cfis/valid-hvac-air-to-air-heat-pump-1-speed-cfis.xml', 'cfis/valid-hvac-air-to-air-heat-pump-2-speed-cfis.xml', 'cfis/valid-hvac-air-to-air-heat-pump-var-speed-cfis.xml', 'cfis/valid-hvac-furnace-elec-only-cfis.xml', 'cfis/valid-hvac-furnace-gas-only-cfis.xml', 'cfis/valid-hvac-ground-to-air-heat-pump-cfis.xml'].include? hpxml_file
     cooling_systems_values = []
-  elsif hpxml_file == 'valid-hvac-boiler-gas-central-ac-1-speed.xml'
+  elsif ['valid-hvac-boiler-gas-central-ac-1-speed.xml', 'cfis/valid-hvac-boiler-gas-central-ac-1-speed-cfis.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVAC_Dist_ID2"
-  elsif ['valid-hvac-furnace-gas-central-ac-2-speed.xml', 'valid-hvac-central-ac-only-2-speed.xml'].include? hpxml_file
+  elsif ['valid-hvac-furnace-gas-central-ac-2-speed.xml', 'valid-hvac-central-ac-only-2-speed.xml', 'cfis/valid-hvac-central-ac-only-2-speed-cfis.xml', 'cfis/valid-hvac-furnace-gas-central-ac-2-speed-cfis.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_efficiency_seer] = 18
-  elsif ['valid-hvac-furnace-gas-central-ac-var-speed.xml', 'valid-hvac-central-ac-only-var-speed.xml'].include? hpxml_file
+  elsif ['valid-hvac-furnace-gas-central-ac-var-speed.xml', 'valid-hvac-central-ac-only-var-speed.xml', 'cfis/valid-hvac-central-ac-only-var-speed-cfis.xml', 'cfis/valid-hvac-furnace-gas-central-ac-var-speed-cfis.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_efficiency_seer] = 24
-  elsif ['valid-hvac-furnace-gas-room-ac.xml', 'valid-hvac-room-ac-furnace-gas.xml', 'valid-hvac-room-ac-only.xml'].include? hpxml_file
+  elsif ['valid-hvac-furnace-gas-room-ac.xml', 'valid-hvac-room-ac-furnace-gas.xml', 'valid-hvac-room-ac-only.xml', 'cfis/valid-hvac-furnace-gas-room-ac-cfis.xml', 'cfis/valid-hvac-room-ac-furnace-gas-cfis.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = nil
     cooling_systems_values[0][:cooling_system_type] = "room air conditioner"
     cooling_systems_values[0][:cooling_efficiency_seer] = nil
@@ -1087,7 +1103,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
 end
 
 def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
-  if hpxml_file == 'valid-hvac-air-to-air-heat-pump-1-speed.xml'
+  if ['valid-hvac-air-to-air-heat-pump-1-speed.xml', 'cfis/valid-hvac-air-to-air-heat-pump-1-speed-cfis.xml'].include? hpxml_file
     heat_pumps_values << { :id => "SpaceHeatPump_ID1",
                            :distribution_system_idref => "HVAC_Dist_ID1",
                            :heat_pump_type => "air-to-air",
@@ -1097,7 +1113,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 7.7,
                            :cooling_efficiency_seer => 13 }
-  elsif hpxml_file == 'valid-hvac-air-to-air-heat-pump-2-speed.xml'
+  elsif ['valid-hvac-air-to-air-heat-pump-2-speed.xml', 'cfis/valid-hvac-air-to-air-heat-pump-2-speed-cfis.xml'].include? hpxml_file
     heat_pumps_values << { :id => "SpaceHeatPump_ID1",
                            :distribution_system_idref => "HVAC_Dist_ID1",
                            :heat_pump_type => "air-to-air",
@@ -1107,7 +1123,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 9.3,
                            :cooling_efficiency_seer => 18 }
-  elsif hpxml_file == 'valid-hvac-air-to-air-heat-pump-var-speed.xml'
+  elsif ['valid-hvac-air-to-air-heat-pump-var-speed.xml', 'cfis/valid-hvac-air-to-air-heat-pump-var-speed-cfis.xml'].include? hpxml_file
     heat_pumps_values << { :id => "SpaceHeatPump_ID1",
                            :distribution_system_idref => "HVAC_Dist_ID1",
                            :heat_pump_type => "air-to-air",
@@ -1117,7 +1133,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 22 }
-  elsif hpxml_file == 'valid-hvac-ground-to-air-heat-pump.xml'
+  elsif ['valid-hvac-ground-to-air-heat-pump.xml', 'cfis/valid-hvac-ground-to-air-heat-pump-cfis.xml'].include? hpxml_file
     heat_pumps_values << { :id => "SpaceHeatPump_ID1",
                            :distribution_system_idref => "HVAC_Dist_ID1",
                            :heat_pump_type => "ground-to-air",
@@ -1208,7 +1224,7 @@ def get_hpxml_file_hvac_distribution_values(hpxml_file, hvac_distributions_value
                                    :distribution_system_type => "AirDistribution" }]
   elsif ['valid-hvac-boiler-elec-only.xml', 'valid-hvac-boiler-gas-only.xml', 'valid-hvac-boiler-gas-only-no-eae.xml', 'valid-hvac-boiler-oil-only.xml', 'valid-hvac-boiler-propane-only.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
-  elsif hpxml_file == 'valid-hvac-boiler-gas-central-ac-1-speed.xml'
+  elsif ['valid-hvac-boiler-gas-central-ac-1-speed.xml', 'cfis/valid-hvac-boiler-gas-central-ac-1-speed-cfis.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
     hvac_distributions_values << { :id => "HVAC_Dist_ID2",
                                    :distribution_system_type => "AirDistribution" }
@@ -1325,6 +1341,15 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :hours_in_operation => 8,
                                  :fan_power => 360,
                                  :distribution_system_idref => "HVAC_Dist_ID1" }
+  elsif hpxml_file == 'cfis/valid-cfis.xml'
+    ventilation_fans_values << { :id => "Mech_Vent_ID1",
+                                 :fan_type => "central fan integrated supply",
+                                 :rated_flow_rate => 247,
+                                 :hours_in_operation => 8,
+                                 :fan_power => 360,
+                                 :distribution_system_idref => "HVAC_Dist_ID1" }
+  elsif hpxml_file == 'cfis/valid-hvac-boiler-gas-central-ac-1-speed-cfis.xml'
+    ventilation_fans_values[0][:distribution_system_idref] = "HVAC_Dist_ID2"
   end
   return ventilation_fans_values
 end
