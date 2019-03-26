@@ -186,7 +186,39 @@ def create_hpxmls
     ['valid.xml', 'valid-hvac-room-ac-furnace-gas.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas-autosize.xml'],
     ['valid.xml', 'valid-hvac-room-ac-only.xml', 'hvac_autosizing/valid-hvac-room-ac-only-autosize.xml'],
     ['valid.xml', 'valid-hvac-stove-oil-only.xml', 'hvac_autosizing/valid-hvac-stove-oil-only-autosize.xml'],
-    ['valid.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'hvac_autosizing/valid-hvac-wall-furnace-propane-only-autosize.xml']
+    ['valid.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'hvac_autosizing/valid-hvac-wall-furnace-propane-only-autosize.xml'],
+    ['valid.xml', 'hvac_dse/valid-dse-0.8.xml'],
+    ['valid.xml', 'hvac_dse/valid-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-1-speed.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-1-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-1-speed.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-1-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-2-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-2-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-var-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-var-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-boiler-elec-only.xml', 'hvac_dse/valid-hvac-boiler-elec-only-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-boiler-elec-only.xml', 'hvac_dse/valid-hvac-boiler-elec-only-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-boiler-gas-only.xml', 'hvac_dse/valid-hvac-boiler-gas-only-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-boiler-gas-only.xml', 'hvac_dse/valid-hvac-boiler-gas-only-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-1-speed.xml', 'hvac_dse/valid-hvac-central-ac-only-1-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-1-speed.xml', 'hvac_dse/valid-hvac-central-ac-only-1-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-2-speed.xml', 'hvac_dse/valid-hvac-central-ac-only-2-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-2-speed.xml', 'hvac_dse/valid-hvac-central-ac-only-2-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-var-speed.xml', 'hvac_dse/valid-hvac-central-ac-only-var-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-var-speed.xml', 'hvac_dse/valid-hvac-central-ac-only-var-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-furnace-elec-only.xml', 'hvac_dse/valid-hvac-furnace-elec-only-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-furnace-elec-only.xml', 'hvac_dse/valid-hvac-furnace-elec-only-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-central-ac-2-speed.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-2-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-central-ac-2-speed.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-2-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-central-ac-var-speed.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-var-speed-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-central-ac-var-speed.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-var-speed-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-only.xml', 'hvac_dse/valid-hvac-furnace-gas-only-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-only.xml', 'hvac_dse/valid-hvac-furnace-gas-only-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-room-ac.xml', 'hvac_dse/valid-hvac-furnace-gas-room-ac-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-room-ac.xml', 'hvac_dse/valid-hvac-furnace-gas-room-ac-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-0.8.xml.skip'],
+    ['valid.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-1.0.xml.skip'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-0.8.xml'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-1.0.xml']
   ]
 
   hpxmls_files.each do |hpxml_files|
@@ -1268,6 +1300,14 @@ def get_hpxml_file_hvac_distribution_values(hpxml_file, hvac_distributions_value
                                    :distribution_system_type => "AirDistribution" }
     hvac_distributions_values << { :id => "HVAC_Dist_ID6",
                                    :distribution_system_type => "AirDistribution" }
+  elsif ['hvac_dse/valid-dse-0.8.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-1-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-2-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-var-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-boiler-elec-only-dse-0.8.xml', 'hvac_dse/valid-hvac-boiler-gas-only-dse-0.8.xml', 'hvac_dse/valid-hvac-central-ac-only-1-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-central-ac-only-2-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-central-ac-only-var-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-elec-only-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-2-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-var-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-only-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-room-ac-dse-0.8.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-0.8.xml.skip', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-0.8.xml'].include? hpxml_file
+    hvac_distributions_values[0][:distribution_system_type] = "DSE"
+    hvac_distributions_values[0][:annual_heating_dse] = 0.8
+    hvac_distributions_values[0][:annual_cooling_dse] = 0.8
+  elsif ['hvac_dse/valid-dse-1.0.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-1-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-2-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-var-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-boiler-elec-only-dse-1.0.xml', 'hvac_dse/valid-hvac-boiler-gas-only-dse-1.0.xml', 'hvac_dse/valid-hvac-central-ac-only-1-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-central-ac-only-2-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-central-ac-only-var-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-elec-only-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-2-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-var-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-only-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-room-ac-dse-1.0.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-1.0.xml.skip', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-1.0.xml'].include? hpxml_file
+    hvac_distributions_values[0][:distribution_system_type] = "DSE"
+    hvac_distributions_values[0][:annual_heating_dse] = 1
+    hvac_distributions_values[0][:annual_cooling_dse] = 1
   end
   return hvac_distributions_values
 end
