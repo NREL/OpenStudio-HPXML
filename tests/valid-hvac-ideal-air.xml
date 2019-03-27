@@ -35,6 +35,9 @@
           <ConditionedFloorArea>7000.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>67575.0</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
+          <extension>
+            <UseOnlyIdealAirSystem>true</UseOnlyIdealAirSystem>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -253,9 +256,6 @@
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
-          <extension>
-            <UseOnlyIdealAirSystem>true</UseOnlyIdealAirSystem>
-          </extension>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>

@@ -14,9 +14,12 @@ task :update_measures do
 end
 
 def create_hpxmls
+  puts "Generating HPXML files..."
+
   this_dir = File.dirname(__FILE__)
   tests_dir = File.join(this_dir, "tests")
 
+  # Hash of HPXML -> Parent HPXML
   hpxmls_files = {
     'valid.xml' => nil,
     'invalid-bad-wmo.xml' => 'valid.xml',
@@ -293,6 +296,8 @@ def create_hpxmls
   }
 
   hpxmls_files.each do |derivative, parent|
+    puts "Generating #{derivative}..."
+
     hpxml_files = [derivative]
     unless parent.nil?
       hpxml_files.unshift(parent)
@@ -390,7 +395,6 @@ def create_hpxmls
       plug_loads_values = get_hpxml_file_plug_load_values(hpxml_file, plug_loads_values)
       misc_loads_schedules_values = get_hpxml_file_misc_loads_schedule_values(hpxml_file, misc_loads_schedules_values)
     end
-    puts derivative
 
     hpxml_doc = HPXML.create_hpxml(**hpxml_values)
     hpxml = hpxml_doc.elements["HPXML"]
@@ -443,9 +447,6 @@ def create_hpxmls
     doors_values.each do |door_values|
       HPXML.add_door(hpxml: hpxml, **door_values)
     end
-    if derivative == 'valid-enclosure-no-natural-ventilation.xml'
-      HPXML.add_extension(parent: hpxml.elements["Building/BuildingDetails/Enclosure"], extensions: { "DisableNaturalVentilation": true })
-    end
     heating_systems_values.each do |heating_system_values|
       HPXML.add_heating_system(hpxml: hpxml, **heating_system_values)
     end
@@ -458,10 +459,6 @@ def create_hpxmls
     hvac_controls_values.each do |hvac_control_values|
       HPXML.add_hvac_control(hpxml: hpxml, **hvac_control_values)
     end
-    if derivative == 'valid-hvac-ideal-air.xml'
-      hvac = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC"])
-      HPXML.add_extension(parent: hvac, extensions: { "UseOnlyIdealAirSystem": true })
-    end
     hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
       hvac_distribution = HPXML.add_hvac_distribution(hpxml: hpxml, **hvac_distribution_values)
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
@@ -473,9 +470,6 @@ def create_hpxmls
       ducts_values[i].each do |duct_values|
         HPXML.add_ducts(air_distribution: air_distribution, **duct_values)
       end
-    end
-    if ['valid-hvac-multiple.xml', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-boiler-elec-only-x3.xml', 'hvac_multiple/valid-hvac-boiler-gas-only-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-1-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml', 'hvac_multiple/valid-hvac-elec-resistance-only-x3.xml', 'hvac_multiple/valid-hvac-furnace-elec-only-x3.xml.skip', 'hvac_multiple/valid-hvac-furnace-gas-only-x3.xml.skip', 'hvac_multiple/valid-hvac-ground-to-air-heat-pump-x3.xml.skip', 'hvac_multiple/valid-hvac-mini-split-heat-pump-ducted-x3.xml.skip', 'hvac_multiple/valid-hvac-mini-split-heat-pump-ductless-x3.xml.skip', 'hvac_multiple/valid-hvac-room-ac-only-x3.xml', 'hvac_multiple/valid-hvac-stove-oil-only-x3.xml.skip', 'hvac_multiple/valid-hvac-wall-furnace-propane-only-x3.xml.skip', 'hvac_partial/valid-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-1-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-boiler-elec-only-50percent.xml', 'hvac_partial/valid-hvac-boiler-gas-only-50percent.xml', 'hvac_partial/valid-hvac-central-ac-only-1-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-central-ac-only-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-central-ac-only-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-elec-resistance-only-50percent.xml', 'hvac_partial/valid-hvac-furnace-elec-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-room-ac-50percent.xml.skip', 'hvac_partial/valid-hvac-ground-to-air-heat-pump-50percent.xml.skip', 'hvac_partial/valid-hvac-mini-split-heat-pump-ducted-50percent.xml.skip', 'hvac_partial/valid-hvac-mini-split-heat-pump-ductless-50percent.xml.skip', 'hvac_partial/valid-hvac-room-ac-only-50percent.xml', 'hvac_partial/valid-hvac-stove-oil-only-50percent.xml', 'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml'].include? derivative
-      HPXML.add_extension(parent: hpxml.elements["Building/BuildingDetails/Systems/HVAC"], extensions: { "LoadDistributionScheme": "UniformLoad" })
     end
     ventilation_fans_values.each do |ventilation_fan_values|
       HPXML.add_ventilation_fan(hpxml: hpxml, **ventilation_fan_values)
@@ -526,6 +520,8 @@ def create_hpxmls
     hpxml_path = File.join(tests_dir, derivative)
     XMLHelper.write_file(hpxml_doc, hpxml_path)
   end
+
+  puts "Generated #{hpxmls_files.length} files."
 end
 
 def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
@@ -554,6 +550,8 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values = { :fuels => ["electricity", "natural gas"] }
   elsif hpxml_file == 'valid-hvac-none-no-fuel-access.xml'
     site_values[:fuels] = ["electricity"]
+  elsif hpxml_file == 'valid-enclosure-no-natural-ventilation.xml'
+    site_values[:disable_natural_ventilation] = true
   end
   return site_values
 end
@@ -580,6 +578,10 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
   elsif hpxml_file == 'invalid-missing-elements.xml'
     building_construction_values[:number_of_conditioned_floors] = nil
     building_construction_values[:conditioned_floor_area] = nil
+  elsif ['valid-hvac-multiple.xml', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-boiler-elec-only-x3.xml', 'hvac_multiple/valid-hvac-boiler-gas-only-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-1-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml', 'hvac_multiple/valid-hvac-elec-resistance-only-x3.xml', 'hvac_multiple/valid-hvac-furnace-elec-only-x3.xml.skip', 'hvac_multiple/valid-hvac-furnace-gas-only-x3.xml.skip', 'hvac_multiple/valid-hvac-ground-to-air-heat-pump-x3.xml.skip', 'hvac_multiple/valid-hvac-mini-split-heat-pump-ducted-x3.xml.skip', 'hvac_multiple/valid-hvac-mini-split-heat-pump-ductless-x3.xml.skip', 'hvac_multiple/valid-hvac-room-ac-only-x3.xml', 'hvac_multiple/valid-hvac-stove-oil-only-x3.xml.skip', 'hvac_multiple/valid-hvac-wall-furnace-propane-only-x3.xml.skip', 'hvac_partial/valid-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-1-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-boiler-elec-only-50percent.xml', 'hvac_partial/valid-hvac-boiler-gas-only-50percent.xml', 'hvac_partial/valid-hvac-central-ac-only-1-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-central-ac-only-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-central-ac-only-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-elec-resistance-only-50percent.xml', 'hvac_partial/valid-hvac-furnace-elec-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-room-ac-50percent.xml.skip', 'hvac_partial/valid-hvac-ground-to-air-heat-pump-50percent.xml.skip', 'hvac_partial/valid-hvac-mini-split-heat-pump-ducted-50percent.xml.skip', 'hvac_partial/valid-hvac-mini-split-heat-pump-ductless-50percent.xml.skip', 'hvac_partial/valid-hvac-room-ac-only-50percent.xml', 'hvac_partial/valid-hvac-stove-oil-only-50percent.xml', 'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml'].include? hpxml_file
+    building_construction_values[:load_distribution_scheme] = "UniformLoad"
+  elsif hpxml_file == 'valid-hvac-ideal-air.xml'
+    building_construction_values[:use_only_ideal_air_system] = true
   end
   return building_construction_values
 end

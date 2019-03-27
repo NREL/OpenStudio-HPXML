@@ -27,6 +27,9 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
+          <extension>
+            <DisableNaturalVentilation>true</DisableNaturalVentilation>
+          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>3</NumberofConditionedFloors>
@@ -246,9 +249,6 @@
             <RValue>4.4</RValue>
           </Door>
         </Doors>
-        <extension>
-          <DisableNaturalVentilation>true</DisableNaturalVentilation>
-        </extension>
       </Enclosure>
       <Systems>
         <HVAC>
