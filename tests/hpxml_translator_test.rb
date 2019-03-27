@@ -66,6 +66,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_multiple_hvac(xmls, hvac_multiple_dir, all_results)
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, all_results)
+    _test_heat_pump_no_heating_or_cooling(xmls, hvac_load_fracs_dir, all_results)
   end
 
   def test_invalid
@@ -103,6 +104,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
+    args['map_tsv_dir'] = rundir
     _test_schema_validation(this_dir, xml)
     results = _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
     return results
@@ -486,16 +488,22 @@ class HPXMLTranslatorTest < MiniTest::Test
       door_id = door.elements["SystemIdentifier"].attributes["id"].upcase
 
       # Area
-      hpxml_value = Float(XMLHelper.get_value(door, 'Area'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      door_area = XMLHelper.get_value(door, 'Area')
+      if not door_area.nil?
+        hpxml_value = Float(door_area)
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
 
       # R-Value
-      hpxml_value = Float(XMLHelper.get_value(door, 'RValue'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      door_rvalue = XMLHelper.get_value(door, 'RValue')
+      if not door_rvalue.nil?
+        hpxml_value = Float(door_rvalue)
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
     end
 
     # HVAC Heating Systems
@@ -685,7 +693,7 @@ class HPXMLTranslatorTest < MiniTest::Test
           hpxml_value = hp_cap
           query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Cooling:%' AND ColumnName LIKE '%User-Specified%Total Cooling Capacity' AND Units='W'"
           sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
-          if hp_type == "mini-split" or (hp_type == "air-to-air" and get_ashp_num_speeds(hp_seer) == "Variable-Speed")
+          if hp_type == "mini-split" or (hp_type == "air-to-air" and get_ashp_num_speeds_by_seer(hp_seer) == "Variable-Speed")
             cap_adj = 1.20 # TODO: Generalize this
           else
             cap_adj = 1.0
@@ -1062,6 +1070,41 @@ class HPXMLTranslatorTest < MiniTest::Test
         end
 
         assert_in_delta(result_50, result_100 / 2.0, 0.1)
+      end
+      puts "\n"
+    end
+  end
+
+  def _test_heat_pump_no_heating_or_cooling(xmls, hvac_load_fracs_dir, all_results)
+    # Compares either:
+    #   1. Heat pumps without heating and differing heating efficiencies
+    #   2. Heat pumps without cooling and differing cooling efficiencies
+    # to ensure consistent heating/cooling energy consumption.
+    #
+    # This means that if we have, e.g., a heat pump used only for heating and where only
+    # the heating efficiency is provided, an arbitrary cooling efficiency can be used
+    # without heating end use results being affected.
+    xmls.sort.each do |xml|
+      next if not xml.include? hvac_load_fracs_dir
+
+      xml_1 = File.absolute_path(xml)
+      xml_2 = File.absolute_path(xml.gsub(".xml", "-diff-efficiency.xml"))
+
+      results_1 = all_results[xml_1]
+      results_2 = all_results[xml_2]
+      next if results_2.nil?
+
+      # Compare results
+      puts "\nResults for #{xml}:"
+      results_1.keys.each do |k|
+        next if not ["Heating", "Cooling"].include? k[1]
+
+        result_1 = results_1[k].to_f
+        result_2 = results_2[k].to_f
+
+        puts "1, 2: #{result_1.round(2)}, #{result_2.round(2)} #{k}"
+
+        assert_in_delta(result_1, result_2, 0.3)
       end
       puts "\n"
     end
