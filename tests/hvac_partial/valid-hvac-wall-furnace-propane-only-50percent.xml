@@ -256,13 +256,13 @@
                 <WallFurnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>propane</HeatingSystemFuel>
-              <HeatingCapacity>32000</HeatingCapacity>
+              <HeatingCapacity>32000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>100</ElectricAuxiliaryEnergy>
+              <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
           </HVACPlant>
           <HVACControl>

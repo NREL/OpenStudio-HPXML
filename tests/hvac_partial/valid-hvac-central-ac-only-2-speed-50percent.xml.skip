@@ -255,7 +255,7 @@
               <DistributionSystem idref='HVAC_Dist_ID1'/>
               <CoolingSystemType>central air conditioning</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>24000</CoolingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>

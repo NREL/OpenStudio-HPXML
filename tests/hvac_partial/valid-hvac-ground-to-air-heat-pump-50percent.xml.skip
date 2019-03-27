@@ -255,7 +255,7 @@
               <DistributionSystem idref='HVAC_Dist_ID1'/>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>24000</CoolingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
