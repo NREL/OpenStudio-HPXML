@@ -256,8 +256,8 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
-              <FractionHeatLoadServed>0</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0</FractionCoolLoadServed>
+              <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>19.0</Value>
