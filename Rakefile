@@ -1831,7 +1831,7 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]
-  elsif ['hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-central-ac-only-1-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml', 'hvac_multiple/valid-hvac-furnace-elec-only-x3.xml.skip', 'hvac_multiple/valid-hvac-furnace-gas-only-x3.xml.skip', 'hvac_multiple/valid-hvac-ground-to-air-heat-pump-x3.xml.skip', 'hvac_multiple/valid-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+  elsif ['hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-central-ac-only-1-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml', 'hvac_multiple/valid-hvac-furnace-elec-only-x3.xml.skip', 'hvac_multiple/valid-hvac-furnace-gas-only-x3.xml.skip', 'hvac_multiple/valid-hvac-ground-to-air-heat-pump-x3.xml.skip'].include? hpxml_file
     ducts_values[0][0][:duct_surface_area] = 50
     ducts_values[0][1][:duct_surface_area] = 16.67
     ducts_values << [{ :duct_type => "supply",
@@ -1850,6 +1850,25 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 16.67 }]
+  elsif ['hvac_multiple/valid-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+    ducts_values[0][0][:duct_surface_area] = 10
+    ducts_values[0][1][:duct_surface_area] = 3.33
+    ducts_values << [{ :duct_type => "supply",
+                       :duct_insulation_r_value => 4,
+                       :duct_location => "attic - unvented",
+                       :duct_surface_area => 10 },
+                     { :duct_type => "return",
+                       :duct_insulation_r_value => 0,
+                       :duct_location => "attic - unvented",
+                       :duct_surface_area => 3.33 }]
+    ducts_values << [{ :duct_type => "supply",
+                       :duct_insulation_r_value => 4,
+                       :duct_location => "attic - unvented",
+                       :duct_surface_area => 10 },
+                     { :duct_type => "return",
+                       :duct_insulation_r_value => 0,
+                       :duct_location => "attic - unvented",
+                       :duct_surface_area => 3.33 }]
   end
   return ducts_values
 end
