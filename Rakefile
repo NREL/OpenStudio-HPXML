@@ -218,7 +218,36 @@ def create_hpxmls
     ['valid.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-0.8.xml.skip'],
     ['valid.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-1.0.xml.skip'],
     ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-0.8.xml'],
-    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-1.0.xml']
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-1.0.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-1-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-1-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-1-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-heat-cool.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-2-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-heat-cool.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-air-to-air-heat-pump-var-speed.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-heat-cool.xml'],
+    ['valid.xml', 'valid-hvac-boiler-elec-only.xml', 'hvac_load_fracs/valid-hvac-boiler-elec-only-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-boiler-gas-only.xml', 'hvac_load_fracs/valid-hvac-boiler-gas-only-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-1-speed.xml', 'hvac_load_fracs/valid-hvac-central-ac-only-1-speed-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-2-speed.xml', 'hvac_load_fracs/valid-hvac-central-ac-only-2-speed-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-central-ac-only-var-speed.xml', 'hvac_load_fracs/valid-hvac-central-ac-only-var-speed-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-elec-resistance-only.xml', 'hvac_load_fracs/valid-hvac-elec-resistance-only-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-furnace-elec-only.xml', 'hvac_load_fracs/valid-hvac-furnace-elec-only-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-furnace-gas-only.xml', 'hvac_load_fracs/valid-hvac-furnace-gas-only-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-ground-to-air-heat-pump.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-heat-cool.xml'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ducted.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-heat-cool.xml'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-heat-cool.xml'],
+    ['valid.xml', 'valid-hvac-room-ac-only.xml', 'hvac_load_fracs/valid-hvac-room-ac-only-zero-cool.xml'],
+    ['valid.xml', 'valid-hvac-stove-oil-only.xml', 'hvac_load_fracs/valid-hvac-stove-oil-only-zero-heat.xml'],
+    ['valid.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'hvac_load_fracs/valid-hvac-wall-furnace-propane-only-zero-heat.xml'],
   ]
 
   hpxmls_files.each do |hpxml_files|
@@ -1116,6 +1145,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:distribution_system_idref] = "foobar"
   elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-elec-resistance-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas-autosize.xml', 'hvac_autosizing/valid-hvac-stove-oil-only-autosize.xml', 'hvac_autosizing/valid-hvac-wall-furnace-propane-only-autosize.xml'].include? hpxml_file
     heating_systems_values[0][:heating_capacity] = -1
+  elsif ['hvac_load_fracs/valid-hvac-boiler-elec-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-boiler-gas-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-elec-resistance-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-furnace-elec-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-furnace-gas-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-stove-oil-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-wall-furnace-propane-only-zero-heat.xml'].include? hpxml_file
+    heating_systems_values[0][:fraction_heat_load_served] = 0
   end
   return heating_systems_values
 end
@@ -1154,6 +1185,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
                                 :cooling_efficiency_eer => 8.5 }
   elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-only-autosize.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_capacity] = -1
+  elsif ['hvac_load_fracs/valid-hvac-central-ac-only-1-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-central-ac-only-2-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-central-ac-only-var-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-room-ac-only-zero-cool.xml'].include? hpxml_file
+    cooling_systems_values[0][:fraction_cool_load_served] = 0
   end
   return cooling_systems_values
 end
@@ -1257,6 +1290,13 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :cooling_efficiency_seer => 19 }
   elsif ['hvac_autosizing/valid-hvac-air-to-air-heat-pump-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-air-to-air-heat-pump-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-air-to-air-heat-pump-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-ground-to-air-heat-pump-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ducted-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ductless-autosize.xml'].include? hpxml_file
     heat_pumps_values[0][:cooling_capacity] = -1
+  elsif ['hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-heat-cool.xml'].include? hpxml_file
+    heat_pumps_values[0][:fraction_heat_load_served] = 0
+    heat_pumps_values[0][:fraction_cool_load_served] = 0
+  elsif ['hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-heat.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-heat.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-heat.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-heat.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-heat.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-heat.xml'].include? hpxml_file
+    heat_pumps_values[0][:fraction_heat_load_served] = 0
+  elsif ['hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-cool.xml'].include? hpxml_file
+    heat_pumps_values[0][:fraction_cool_load_served] = 0
   end
   return heat_pumps_values
 end
