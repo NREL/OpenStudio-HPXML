@@ -267,7 +267,7 @@
               </AnnualHeatingEfficiency>
             </HeatPump>
             <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID1'/>
+              <SystemIdentifier id='SpaceHeatPump_ID2'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>16000.0</CoolingCapacity>
@@ -283,10 +283,10 @@
               </AnnualHeatingEfficiency>
             </HeatPump>
             <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID2'/>
+              <SystemIdentifier id='SpaceHeatPump_ID3'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

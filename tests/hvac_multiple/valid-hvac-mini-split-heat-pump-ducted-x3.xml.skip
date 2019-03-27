@@ -268,8 +268,8 @@
               </AnnualHeatingEfficiency>
             </HeatPump>
             <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID1'/>
-              <DistributionSystem idref='HVAC_Dist_ID1'/>
+              <SystemIdentifier id='SpaceHeatPump_ID2'/>
+              <DistributionSystem idref='HVAC_Dist_ID2'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>16000.0</CoolingCapacity>
@@ -285,11 +285,11 @@
               </AnnualHeatingEfficiency>
             </HeatPump>
             <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID2'/>
-              <DistributionSystem idref='HVAC_Dist_ID2'/>
+              <SystemIdentifier id='SpaceHeatPump_ID3'/>
+              <DistributionSystem idref='HVAC_Dist_ID3'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -314,7 +314,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>25.0</Value>
+                    <Value>5.0</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -322,7 +322,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>1.67</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -349,7 +349,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>25.0</Value>
+                    <Value>5.0</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -357,7 +357,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>1.67</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -384,7 +384,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>25.0</Value>
+                    <Value>5.0</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -392,7 +392,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>1.67</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>

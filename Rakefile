@@ -1346,6 +1346,40 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
                                 :cooling_capacity => 16000,
                                 :fraction_cool_load_served => 0.333,
                                 :cooling_efficiency_seer => 13 }
+  elsif ['hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_capacity] = 16000
+    cooling_systems_values[0][:fraction_cool_load_served] = 0.333
+    cooling_systems_values << { :id => "SpaceCool_ID2",
+                                :distribution_system_idref => "HVAC_Dist_ID2",
+                                :cooling_system_type => "central air conditioning",
+                                :cooling_system_fuel => "electricity",
+                                :cooling_capacity => 16000,
+                                :fraction_cool_load_served => 0.333,
+                                :cooling_efficiency_seer => 18 }
+    cooling_systems_values << { :id => "SpaceCool_ID3",
+                                :distribution_system_idref => "HVAC_Dist_ID3",
+                                :cooling_system_type => "central air conditioning",
+                                :cooling_system_fuel => "electricity",
+                                :cooling_capacity => 16000,
+                                :fraction_cool_load_served => 0.333,
+                                :cooling_efficiency_seer => 18 }
+  elsif ['hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_capacity] = 16000
+    cooling_systems_values[0][:fraction_cool_load_served] = 0.333
+    cooling_systems_values << { :id => "SpaceCool_ID2",
+                                :distribution_system_idref => "HVAC_Dist_ID2",
+                                :cooling_system_type => "central air conditioning",
+                                :cooling_system_fuel => "electricity",
+                                :cooling_capacity => 16000,
+                                :fraction_cool_load_served => 0.333,
+                                :cooling_efficiency_seer => 24 }
+    cooling_systems_values << { :id => "SpaceCool_ID3",
+                                :distribution_system_idref => "HVAC_Dist_ID3",
+                                :cooling_system_type => "central air conditioning",
+                                :cooling_system_fuel => "electricity",
+                                :cooling_capacity => 16000,
+                                :fraction_cool_load_served => 0.333,
+                                :cooling_efficiency_seer => 24 }
   elsif ['hvac_multiple/valid-hvac-room-ac-only-x3.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_capacity] = 16000
     cooling_systems_values[0][:fraction_cool_load_served] = 0.333
@@ -1563,8 +1597,8 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:cooling_capacity] = 16000
     heat_pumps_values[0][:fraction_heat_load_served] = 0.333
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
-    heat_pumps_values << { :id => "SpaceHeatPump_ID1",
-                           :distribution_system_idref => "HVAC_Dist_ID1",
+    heat_pumps_values << { :id => "SpaceHeatPump_ID2",
+                           :distribution_system_idref => "HVAC_Dist_ID2",
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 16000,
@@ -1572,11 +1606,11 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 0.333,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
-    heat_pumps_values << { :id => "SpaceHeatPump_ID2",
-                           :distribution_system_idref => "HVAC_Dist_ID2",
+    heat_pumps_values << { :id => "SpaceHeatPump_ID3",
+                           :distribution_system_idref => "HVAC_Dist_ID3",
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
-                           :cooling_capacity => 48000,
+                           :cooling_capacity => 16000,
                            :fraction_heat_load_served => 0.333,
                            :fraction_cool_load_served => 0.333,
                            :heating_efficiency_hspf => 10,
@@ -1585,7 +1619,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:cooling_capacity] = 16000
     heat_pumps_values[0][:fraction_heat_load_served] = 0.333
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
-    heat_pumps_values << { :id => "SpaceHeatPump_ID1",
+    heat_pumps_values << { :id => "SpaceHeatPump_ID2",
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 16000,
@@ -1593,10 +1627,10 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 0.333,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
-    heat_pumps_values << { :id => "SpaceHeatPump_ID2",
+    heat_pumps_values << { :id => "SpaceHeatPump_ID3",
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
-                           :cooling_capacity => 48000,
+                           :cooling_capacity => 16000,
                            :fraction_heat_load_served => 0.333,
                            :fraction_cool_load_served => 0.333,
                            :heating_efficiency_hspf => 10,
@@ -1700,7 +1734,7 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
                                            :duct_leakage_value => 25 }]
-  elsif ['hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-central-ac-only-1-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml', 'hvac_multiple/valid-hvac-furnace-elec-only-x3.xml.skip', 'hvac_multiple/valid-hvac-furnace-gas-only-x3.xml.skip', 'hvac_multiple/valid-hvac-ground-to-air-heat-pump-x3.xml.skip', 'hvac_multiple/valid-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+  elsif ['hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-central-ac-only-1-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml', 'hvac_multiple/valid-hvac-furnace-elec-only-x3.xml.skip', 'hvac_multiple/valid-hvac-furnace-gas-only-x3.xml.skip', 'hvac_multiple/valid-hvac-ground-to-air-heat-pump-x3.xml.skip'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 25
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 8.33
     duct_leakage_measurements_values << [{ :duct_type => "supply",
@@ -1711,6 +1745,17 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                            :duct_leakage_value => 25 },
                                          { :duct_type => "return",
                                            :duct_leakage_value => 8.33 }]
+  elsif ['hvac_multiple/valid-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+    duct_leakage_measurements_values[0][0][:duct_leakage_value] = 5
+    duct_leakage_measurements_values[0][1][:duct_leakage_value] = 1.67
+    duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_value => 5 },
+                                         { :duct_type => "return",
+                                           :duct_leakage_value => 1.67 }]
+    duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_value => 5 },
+                                         { :duct_type => "return",
+                                           :duct_leakage_value => 1.67 }]
   end
   return duct_leakage_measurements_values
 end
