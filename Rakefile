@@ -285,7 +285,11 @@ def create_hpxmls
     ['valid.xml', 'valid-hvac-mini-split-heat-pump-ductless.xml', 'hvac_partial/valid-hvac-mini-split-heat-pump-ductless-50percent.xml.skip'],
     ['valid.xml', 'valid-hvac-room-ac-only.xml', 'hvac_partial/valid-hvac-room-ac-only-50percent.xml'],
     ['valid.xml', 'valid-hvac-stove-oil-only.xml', 'hvac_partial/valid-hvac-stove-oil-only-50percent.xml'],
-    ['valid.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml']
+    ['valid.xml', 'valid-hvac-wall-furnace-propane-only.xml', 'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml'],
+    ['valid.xml', 'valid-dhw-tankless-electric.xml', 'water_heating_multiple/valid-dhw-tankless-electric-x3.xml'],
+    ['valid.xml', 'valid-dhw-tankless-gas.xml', 'water_heating_multiple/valid-dhw-tankless-gas-x3.xml'],
+    ['valid.xml', 'valid-dhw-tankless-oil.xml', 'water_heating_multiple/valid-dhw-tankless-oil-x3.xml'],
+    ['valid.xml', 'valid-dhw-tankless-propane.xml', 'water_heating_multiple/valid-dhw-tankless-propane-x3.xml']
   ]
 
   hpxmls_files.each do |hpxml_files|
@@ -1876,6 +1880,20 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "crawlspace - vented"
   elsif ['valid-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
+  elsif ['water_heating_multiple/valid-dhw-tankless-electric-x3.xml', 'water_heating_multiple/valid-dhw-tankless-gas-x3.xml', 'water_heating_multiple/valid-dhw-tankless-oil-x3.xml', 'water_heating_multiple/valid-dhw-tankless-propane-x3.xml'].include? hpxml_file
+    water_heating_systems_values[0][:fraction_dhw_load_served] = 0.333
+    water_heating_systems_values << { :id => "DHW_ID2",
+                                      :fuel_type => water_heating_systems_values[0][:fuel_type],
+                                      :water_heater_type => water_heating_systems_values[0][:water_heater_type],
+                                      :location => water_heating_systems_values[0][:location],
+                                      :fraction_dhw_load_served => water_heating_systems_values[0][:fraction_dhw_load_served],
+                                      :energy_factor => water_heating_systems_values[0][:energy_factor] }
+    water_heating_systems_values << { :id => "DHW_ID3",
+                                      :fuel_type => water_heating_systems_values[0][:fuel_type],
+                                      :water_heater_type => water_heating_systems_values[0][:water_heater_type],
+                                      :location => water_heating_systems_values[0][:location],
+                                      :fraction_dhw_load_served => water_heating_systems_values[0][:fraction_dhw_load_served],
+                                      :energy_factor => water_heating_systems_values[0][:energy_factor] }
   end
   return water_heating_systems_values
 end
