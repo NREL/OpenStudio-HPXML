@@ -1255,9 +1255,13 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
                                 :heating_efficiency_percent => heating_systems_values[0][:heating_efficiency_percent],
                                 :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served],
                                 :electric_auxiliary_energy => heating_systems_values[0][:electric_auxiliary_energy] }
-  elsif ['hvac_partial/valid-50percent.xml.skip', 'hvac_partial/valid-hvac-boiler-elec-only-50percent.xml', 'hvac_partial/valid-hvac-boiler-gas-only-50percent.xml', 'hvac_partial/valid-hvac-elec-resistance-only-50percent.xml', 'hvac_partial/valid-hvac-furnace-elec-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-room-ac-50percent.xml.skip', 'hvac_partial/valid-hvac-stove-oil-only-50percent.xml', 'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml'].include? hpxml_file
+  elsif ['hvac_partial/valid-50percent.xml.skip', 'hvac_partial/valid-hvac-boiler-elec-only-50percent.xml', 'hvac_partial/valid-hvac-elec-resistance-only-50percent.xml', 'hvac_partial/valid-hvac-furnace-elec-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-room-ac-50percent.xml.skip'].include? hpxml_file
     heating_systems_values[0][:heating_capacity] /= 2.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.5
+  elsif ['hvac_partial/valid-hvac-boiler-gas-only-50percent.xml', 'hvac_partial/valid-hvac-furnace-gas-only-50percent.xml.skip', 'hvac_partial/valid-hvac-stove-oil-only-50percent.xml', 'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml'].include? hpxml_file
+    heating_systems_values[0][:heating_capacity] /= 2.0
+    heating_systems_values[0][:fraction_heat_load_served] = 0.5
+    heating_systems_values[0][:electric_auxiliary_energy] /= 2.0
   end
   return heating_systems_values
 end
