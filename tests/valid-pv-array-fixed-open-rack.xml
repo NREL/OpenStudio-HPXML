@@ -354,7 +354,7 @@
           <PVSystem>
             <SystemIdentifier id='PV_ID1'/>
             <ModuleType>standard</ModuleType>
-            <ArrayType>1-axis</ArrayType>
+            <ArrayType>fixed open rack</ArrayType>
             <ArrayAzimuth>180</ArrayAzimuth>
             <ArrayTilt>20.0</ArrayTilt>
             <MaxPowerOutput>4000.0</MaxPowerOutput>

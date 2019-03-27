@@ -254,7 +254,7 @@
               <SystemIdentifier id='SpaceCool_ID1'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>-1</CoolingCapacity>
+              <CoolingCapacity>-1.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>

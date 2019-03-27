@@ -130,10 +130,6 @@
               <Insulation>
                 <SystemIdentifier id='Floor_Ins_ID1'/>
               </Insulation>
-              <extension>
-                <CarpetFraction>0.5</CarpetFraction>
-                <CarpetRValue>2.0</CarpetRValue>
-              </extension>
             </FrameFloor>
             <FoundationWall>
               <SystemIdentifier id='fndwall-1'/>

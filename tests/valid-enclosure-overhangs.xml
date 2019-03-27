@@ -247,7 +247,7 @@
             <Overhangs>
               <Depth>1.5</Depth>
               <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>7</DistanceToBottomOfWindow>
+              <DistanceToBottomOfWindow>7.0</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='agwall-1'/>
           </Window>
