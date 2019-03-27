@@ -256,7 +256,7 @@
                 <Stove/>
               </HeatingSystemType>
               <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
-              <HeatingCapacity>-1</HeatingCapacity>
+              <HeatingCapacity>-1.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>0.8</Value>
