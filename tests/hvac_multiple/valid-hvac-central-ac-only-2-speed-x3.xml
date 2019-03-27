@@ -307,7 +307,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>8.333333333333334</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -321,7 +321,7 @@
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.666666666666668</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
@@ -342,7 +342,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>8.333333333333334</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -356,7 +356,7 @@
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.666666666666668</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
@@ -377,7 +377,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>8.333333333333334</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -391,7 +391,7 @@
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.666666666666668</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
