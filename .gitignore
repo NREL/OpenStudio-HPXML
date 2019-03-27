@@ -7,4 +7,8 @@
 /.rubocop.yml
 /tests/results
 /coverage
+<<<<<<< HEAD
 doc/
+=======
+/tests/coverage
+>>>>>>> master
