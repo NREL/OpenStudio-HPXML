@@ -255,32 +255,8 @@
               <DistributionSystem idref='HVAC_Dist_ID1'/>
               <CoolingSystemType>central air conditioning</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>18.0</Value>
-              </AnnualCoolingEfficiency>
-            </CoolingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID2'/>
-              <DistributionSystem idref='HVAC_Dist_ID2'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>18.0</Value>
-              </AnnualCoolingEfficiency>
-            </CoolingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='SpaceCool_ID3'/>
-              <DistributionSystem idref='HVAC_Dist_ID3'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>18.0</Value>

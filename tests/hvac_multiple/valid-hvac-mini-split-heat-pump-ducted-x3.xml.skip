@@ -255,7 +255,24 @@
               <DistributionSystem idref='HVAC_Dist_ID1'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
+              <CoolingCapacity>16000.0</CoolingCapacity>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>19.0</Value>
+              </AnnualCoolingEfficiency>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>10.0</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
+            <HeatPump>
+              <SystemIdentifier id='SpaceHeatPump_ID1'/>
+              <DistributionSystem idref='HVAC_Dist_ID1'/>
+              <HeatPumpType>mini-split</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -272,24 +289,7 @@
               <DistributionSystem idref='HVAC_Dist_ID2'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
-              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>19.0</Value>
-              </AnnualCoolingEfficiency>
-              <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
-              </AnnualHeatingEfficiency>
-            </HeatPump>
-            <HeatPump>
-              <SystemIdentifier id='SpaceHeatPump_ID3'/>
-              <DistributionSystem idref='HVAC_Dist_ID3'/>
-              <HeatPumpType>mini-split</HeatPumpType>
-              <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
+              <CoolingCapacity>48000.0</CoolingCapacity>
               <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -306,9 +306,6 @@
             <SystemIdentifier id='HVAC_Ctrl_ID1'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
-          <extension>
-            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
-          </extension>
           <HVACDistribution>
             <SystemIdentifier id='HVAC_Dist_ID1'/>
             <DistributionSystemType>
@@ -317,7 +314,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>5.0</Value>
+                    <Value>25.0</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -325,7 +322,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>1.67</Value>
+                    <Value>8.33</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -333,13 +330,13 @@
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>10.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>3.33</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
@@ -352,7 +349,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>5.0</Value>
+                    <Value>25.0</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -360,21 +357,21 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>1.67</Value>
+                    <Value>8.33</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
                   <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>10.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>3.33</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
@@ -387,7 +384,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>5.0</Value>
+                    <Value>25.0</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -395,25 +392,28 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>1.67</Value>
+                    <Value>8.33</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
                   <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>10.0</DuctSurfaceArea>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>3.33</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>
+          <extension>
+            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
+          </extension>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
