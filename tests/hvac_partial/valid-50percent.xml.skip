@@ -257,7 +257,7 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>32000</HeatingCapacity>
+              <HeatingCapacity>32000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
@@ -269,7 +269,7 @@
               <DistributionSystem idref='HVAC_Dist_ID1'/>
               <CoolingSystemType>central air conditioning</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>24000</CoolingCapacity>
+              <CoolingCapacity>24000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>

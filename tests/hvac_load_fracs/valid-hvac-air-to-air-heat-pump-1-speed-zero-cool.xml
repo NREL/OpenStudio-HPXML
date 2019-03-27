@@ -257,7 +257,7 @@
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>

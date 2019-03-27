@@ -262,7 +262,7 @@
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <ElectricAuxiliaryEnergy>200.0</ElectricAuxiliaryEnergy>
             </HeatingSystem>
           </HVACPlant>

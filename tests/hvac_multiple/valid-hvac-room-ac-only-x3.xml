@@ -254,7 +254,7 @@
               <SystemIdentifier id='SpaceCool_ID1'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
+              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
@@ -265,7 +265,7 @@
               <SystemIdentifier id='SpaceCool_ID2'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
+              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
@@ -276,7 +276,7 @@
               <SystemIdentifier id='SpaceCool_ID3'/>
               <CoolingSystemType>room air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000</CoolingCapacity>
+              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
