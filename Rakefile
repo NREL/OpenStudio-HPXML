@@ -399,12 +399,6 @@ def create_hpxmls
     hpxml_doc = HPXML.create_hpxml(**hpxml_values)
     hpxml = hpxml_doc.elements["HPXML"]
 
-    # FIXME: remove this eventually
-    old_hpxml_doc = XMLHelper.parse_file(File.join(tests_dir, derivative))
-    created_date_and_time = XMLHelper.get_value(old_hpxml_doc.elements["HPXML/XMLTransactionHeaderInformation"], "CreatedDateAndTime")
-    hpxml.elements["XMLTransactionHeaderInformation/CreatedDateAndTime"].text = created_date_and_time
-    ###
-
     HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
     building_occupancys_values.each do |building_occupancy_values|
       HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values)
@@ -527,8 +521,7 @@ end
 def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
   if hpxml_file == 'valid.xml'
     hpxml_values = { :xml_type => "HPXML",
-                     #  :xml_generated_by => "Rakefile", # FIXME: uncomment and remove Hand eventually
-                     :xml_generated_by => "Hand",
+                     :xml_generated_by => "Rakefile",
                      :transaction => "create",
                      :software_program_used => nil,
                      :software_program_version => nil,
