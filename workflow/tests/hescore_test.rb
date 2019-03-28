@@ -29,20 +29,21 @@ class HEScoreTest < Minitest::Unit::TestCase
   end
 
   def test_valid_simulations
+    zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(File.join(@results_dir, "results_jsons.zip")), false)
+
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
     xmldir = "#{parent_dir}/sample_files"
     Dir["#{xmldir}/*.xml"].sort.each do |xml|
-      results[File.basename(xml)] = run_and_check(xml, parent_dir, false)
+      results[File.basename(xml)] = run_and_check(xml, parent_dir, false, zipfile)
     end
 
     _write_summary_results(results)
-    _zip_results_jsons()
   end
 
   private
 
-  def run_and_check(xml, parent_dir, expect_error)
+  def run_and_check(xml, parent_dir, expect_error, zipfile)
     # Check input HPXML is valid
     xml = File.absolute_path(xml)
 
@@ -68,9 +69,8 @@ class HEScoreTest < Minitest::Unit::TestCase
       _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
 
-      # Move results.json to @results_dir for storage on CI
-      results_json_ci = File.join(@results_dir, File.basename(xml.gsub('.xml', '_results.json')))
-      FileUtils.copy_file(results_json, results_json_ci)
+      # Add results.json to zip file for storage on CI
+      zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(xml.gsub('.xml', '_results.json'))))
 
       results = _get_results(parent_dir, runtime)
       _test_results(xml, results)
@@ -237,16 +237,6 @@ class HEScoreTest < Minitest::Unit::TestCase
     end
 
     puts "Wrote results to #{csv_out}."
-  end
-
-  def _zip_results_jsons()
-    # Zip all results.json files and delete individual files.
-    p = OpenStudio::Path.new(File.join(@results_dir, "results_jsons.zip"))
-    z = OpenStudio::ZipFile.new(p, false)
-    Dir["#{@results_dir}/*.json"].each do |results_json|
-      z.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(results_json)))
-      FileUtils.rm_f(results_json)
-    end
   end
 
   def _test_schema_validation(parent_dir, xml, schemas_dir)
