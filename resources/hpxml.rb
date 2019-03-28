@@ -260,6 +260,7 @@ class HPXML
                      id:,
                      attic_type: nil,
                      specific_leakage_area: nil,
+                     attic_constant_ach_natural: nil,
                      **remainder)
     attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
     attic = XMLHelper.add_element(attics, "Attic")
@@ -283,10 +284,12 @@ class HPXML
         fail "Unhandled attic type '#{attic_type}'."
       end
     end
+    HPXML.add_extension(parent: attic,
+                        extensions: { "AtticConstantACHNatural": to_float(attic_constant_ach_natural) })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:attic_constant_ach_natural])
+                    expected_kwargs: [])
 
     return attic
   end
