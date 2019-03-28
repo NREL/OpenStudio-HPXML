@@ -106,6 +106,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
+    args['map_tsv_dir'] = rundir
     _test_schema_validation(this_dir, xml)
     results = _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
     return results
@@ -485,16 +486,22 @@ class HPXMLTranslatorTest < MiniTest::Test
       door_id = door.elements["SystemIdentifier"].attributes["id"].upcase
 
       # Area
-      hpxml_value = Float(XMLHelper.get_value(door, 'Area'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      door_area = XMLHelper.get_value(door, 'Area')
+      if not door_area.nil?
+        hpxml_value = Float(door_area)
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='Gross Area' AND Units='m2'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
 
       # R-Value
-      hpxml_value = Float(XMLHelper.get_value(door, 'RValue'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      door_rvalue = XMLHelper.get_value(door, 'RValue')
+      if not door_rvalue.nil?
+        hpxml_value = Float(door_rvalue)
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
     end
 
     # HVAC Heating Systems
