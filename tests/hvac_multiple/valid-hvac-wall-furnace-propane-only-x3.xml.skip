@@ -269,7 +269,6 @@
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='SpaceHeat_ID2'/>
-              <DistributionSystem idref='HVAC_Dist_ID2'/>
               <HeatingSystemType>
                 <WallFurnace/>
               </HeatingSystemType>
@@ -284,7 +283,6 @@
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='SpaceHeat_ID3'/>
-              <DistributionSystem idref='HVAC_Dist_ID3'/>
               <HeatingSystemType>
                 <WallFurnace/>
               </HeatingSystemType>

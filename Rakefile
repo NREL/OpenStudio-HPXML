@@ -1197,87 +1197,24 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
   elsif hpxml_file == 'invalid-unattached-hvac.xml.skip'
     heating_systems_values[0][:distribution_system_idref] = "foobar"
-  elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-elec-resistance-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-elec-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-only-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas-autosize.xml', 'hvac_autosizing/valid-hvac-stove-oil-only-autosize.xml', 'hvac_autosizing/valid-hvac-wall-furnace-propane-only-autosize.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] = -1
-  elsif ['hvac_load_fracs/valid-hvac-boiler-elec-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-boiler-gas-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-elec-resistance-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-furnace-elec-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-furnace-gas-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-stove-oil-only-zero-heat.xml', 'hvac_load_fracs/valid-hvac-wall-furnace-propane-only-zero-heat.xml'].include? hpxml_file
+  elsif hpxml_file.include? '-zero-heat.xml' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:fraction_heat_load_served] = 0
-  elsif ['hvac_multiple/valid-hvac-boiler-elec-only-x3.xml', 'hvac_multiple/valid-hvac-furnace-elec-only-x3.xml.skip'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_multiple' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] /= 3.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.333
-    heating_systems_values << { :id => "SpaceHeat_ID2",
-                                :distribution_system_idref => "HVAC_Dist_ID2",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_afue => heating_systems_values[0][:heating_efficiency_afue],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served] }
-    heating_systems_values << { :id => "SpaceHeat_ID3",
-                                :distribution_system_idref => "HVAC_Dist_ID3",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_afue => heating_systems_values[0][:heating_efficiency_afue],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served] }
-  elsif ['hvac_multiple/valid-hvac-boiler-gas-only-x3.xml', 'hvac_multiple/valid-hvac-furnace-gas-only-x3.xml.skip', 'hvac_multiple/valid-hvac-wall-furnace-propane-only-x3.xml.skip'].include? hpxml_file
-    heating_systems_values[0][:heating_capacity] /= 3.0
-    heating_systems_values[0][:fraction_heat_load_served] = 0.333
-    heating_systems_values[0][:electric_auxiliary_energy] /= 3.0
-    heating_systems_values << { :id => "SpaceHeat_ID2",
-                                :distribution_system_idref => "HVAC_Dist_ID2",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_afue => heating_systems_values[0][:heating_efficiency_afue],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served],
-                                :electric_auxiliary_energy => heating_systems_values[0][:electric_auxiliary_energy] }
-    heating_systems_values << { :id => "SpaceHeat_ID3",
-                                :distribution_system_idref => "HVAC_Dist_ID3",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_afue => heating_systems_values[0][:heating_efficiency_afue],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served],
-                                :electric_auxiliary_energy => heating_systems_values[0][:electric_auxiliary_energy] }
-  elsif ['hvac_multiple/valid-hvac-elec-resistance-only-x3.xml'].include? hpxml_file
-    heating_systems_values[0][:heating_capacity] /= 3.0
-    heating_systems_values[0][:fraction_heat_load_served] = 0.333
-    heating_systems_values << { :id => "SpaceHeat_ID2",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_percent => heating_systems_values[0][:heating_efficiency_percent],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served] }
-    heating_systems_values << { :id => "SpaceHeat_ID3",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_percent => heating_systems_values[0][:heating_efficiency_percent],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served] }
-  elsif ['hvac_multiple/valid-hvac-stove-oil-only-x3.xml.skip'].include? hpxml_file
-    heating_systems_values[0][:heating_capacity] /= 3.0
-    heating_systems_values[0][:fraction_heat_load_served] = 0.333
-    heating_systems_values[0][:electric_auxiliary_energy] /= 3.0
-    heating_systems_values << { :id => "SpaceHeat_ID2",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_percent => heating_systems_values[0][:heating_efficiency_percent],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served],
-                                :electric_auxiliary_energy => heating_systems_values[0][:electric_auxiliary_energy] }
-    heating_systems_values << { :id => "SpaceHeat_ID3",
-                                :heating_system_type => heating_systems_values[0][:heating_system_type],
-                                :heating_system_fuel => heating_systems_values[0][:heating_system_fuel],
-                                :heating_capacity => heating_systems_values[0][:heating_capacity],
-                                :heating_efficiency_percent => heating_systems_values[0][:heating_efficiency_percent],
-                                :fraction_heat_load_served => heating_systems_values[0][:fraction_heat_load_served],
-                                :electric_auxiliary_energy => heating_systems_values[0][:electric_auxiliary_energy] }
-  elsif ['hvac_partial/valid-50percent.xml.skip', 'hvac_partial/valid-hvac-boiler-elec-only-50percent.xml', 'hvac_partial/valid-hvac-elec-resistance-only-50percent.xml', 'hvac_partial/valid-hvac-furnace-elec-only-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-room-ac-50percent.xml.skip'].include? hpxml_file
+    heating_systems_values[0][:electric_auxiliary_energy] /= 3.0 unless heating_systems_values[0][:electric_auxiliary_energy].nil?
+    heating_systems_values << heating_systems_values[0].dup
+    heating_systems_values[1][:id] = "SpaceHeat_ID2"
+    heating_systems_values[1][:distribution_system_idref] = "HVAC_Dist_ID2" unless heating_systems_values[1][:distribution_system_idref].nil?
+    heating_systems_values << heating_systems_values[0].dup
+    heating_systems_values[2][:id] = "SpaceHeat_ID3"
+    heating_systems_values[2][:distribution_system_idref] = "HVAC_Dist_ID3" unless heating_systems_values[2][:distribution_system_idref].nil?
+  elsif hpxml_file.include? 'hvac_partial' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] /= 2.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.5
-  elsif ['hvac_partial/valid-hvac-boiler-gas-only-50percent.xml', 'hvac_partial/valid-hvac-furnace-gas-only-50percent.xml.skip', 'hvac_partial/valid-hvac-stove-oil-only-50percent.xml', 'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml'].include? hpxml_file
-    heating_systems_values[0][:heating_capacity] /= 2.0
-    heating_systems_values[0][:fraction_heat_load_served] = 0.5
-    heating_systems_values[0][:electric_auxiliary_energy] /= 2.0
+    heating_systems_values[0][:electric_auxiliary_energy] /= 2.0 unless heating_systems_values[0][:electric_auxiliary_energy].nil?
   end
   return heating_systems_values
 end
@@ -1314,43 +1251,20 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
                                 :cooling_capacity => 48000,
                                 :fraction_cool_load_served => 0.2,
                                 :cooling_efficiency_eer => 8.5 }
-  elsif ['hvac_autosizing/valid-autosize.xml', 'hvac_autosizing/valid-hvac-boiler-gas-central-ac-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-central-ac-only-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-central-ac-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-furnace-gas-room-ac-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-furnace-gas-autosize.xml', 'hvac_autosizing/valid-hvac-room-ac-only-autosize.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_autosizing' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] = -1
-  elsif ['hvac_load_fracs/valid-hvac-central-ac-only-1-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-central-ac-only-2-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-central-ac-only-var-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-room-ac-only-zero-cool.xml'].include? hpxml_file
+  elsif hpxml_file.include? '-zero-cool.xml' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:fraction_cool_load_served] = 0
-  elsif ['hvac_multiple/valid-hvac-central-ac-only-1-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-2-speed-x3.xml', 'hvac_multiple/valid-hvac-central-ac-only-var-speed-x3.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_multiple' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] /= 3.0
     cooling_systems_values[0][:fraction_cool_load_served] = 0.333
-    cooling_systems_values << { :id => "SpaceCool_ID2",
-                                :distribution_system_idref => "HVAC_Dist_ID2",
-                                :cooling_system_type => cooling_systems_values[0][:cooling_system_type],
-                                :cooling_system_fuel => cooling_systems_values[0][:cooling_system_fuel],
-                                :cooling_capacity => cooling_systems_values[0][:cooling_capacity],
-                                :fraction_cool_load_served => cooling_systems_values[0][:fraction_cool_load_served],
-                                :cooling_efficiency_seer => cooling_systems_values[0][:cooling_efficiency_seer] }
-    cooling_systems_values << { :id => "SpaceCool_ID3",
-                                :distribution_system_idref => "HVAC_Dist_ID3",
-                                :cooling_system_type => cooling_systems_values[0][:cooling_system_type],
-                                :cooling_system_fuel => cooling_systems_values[0][:cooling_system_fuel],
-                                :cooling_capacity => cooling_systems_values[0][:cooling_capacity],
-                                :fraction_cool_load_served => cooling_systems_values[0][:fraction_cool_load_served],
-                                :cooling_efficiency_seer => cooling_systems_values[0][:cooling_efficiency_seer] }
-  elsif ['hvac_multiple/valid-hvac-room-ac-only-x3.xml'].include? hpxml_file
-    cooling_systems_values[0][:cooling_capacity] /= 3.0
-    cooling_systems_values[0][:fraction_cool_load_served] = 0.333
-    cooling_systems_values << { :id => "SpaceCool_ID2",
-                                :cooling_system_type => cooling_systems_values[0][:cooling_system_type],
-                                :cooling_system_fuel => cooling_systems_values[0][:cooling_system_fuel],
-                                :cooling_capacity => cooling_systems_values[0][:cooling_capacity],
-                                :fraction_cool_load_served => cooling_systems_values[0][:fraction_cool_load_served],
-                                :cooling_efficiency_eer => cooling_systems_values[0][:cooling_efficiency_eer] }
-    cooling_systems_values << { :id => "SpaceCool_ID3",
-                                :cooling_system_type => cooling_systems_values[0][:cooling_system_type],
-                                :cooling_system_fuel => cooling_systems_values[0][:cooling_system_fuel],
-                                :cooling_capacity => cooling_systems_values[0][:cooling_capacity],
-                                :fraction_cool_load_served => cooling_systems_values[0][:fraction_cool_load_served],
-                                :cooling_efficiency_eer => cooling_systems_values[0][:cooling_efficiency_eer] }
-  elsif ['hvac_partial/valid-50percent.xml.skip', 'hvac_partial/valid-hvac-central-ac-only-1-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-central-ac-only-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-central-ac-only-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-furnace-gas-room-ac-50percent.xml.skip', 'hvac_partial/valid-hvac-room-ac-only-50percent.xml'].include? hpxml_file
+    cooling_systems_values << cooling_systems_values[0].dup
+    cooling_systems_values[1][:id] = "SpaceCool_ID2"
+    cooling_systems_values[1][:distribution_system_idref] = "HVAC_Dist_ID2" unless cooling_systems_values[1][:distribution_system_idref].nil?
+    cooling_systems_values << cooling_systems_values[0].dup
+    cooling_systems_values[2][:id] = "SpaceCool_ID3"
+    cooling_systems_values[2][:distribution_system_idref] = "HVAC_Dist_ID3" unless cooling_systems_values[2][:distribution_system_idref].nil?
+  elsif hpxml_file.include? 'hvac_partial' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] /= 2.0
     cooling_systems_values[0][:fraction_cool_load_served] = 0.5
   end
@@ -1454,80 +1368,26 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 0.2,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
-  elsif ['hvac_autosizing/valid-hvac-air-to-air-heat-pump-1-speed-autosize.xml', 'hvac_autosizing/valid-hvac-air-to-air-heat-pump-2-speed-autosize.xml', 'hvac_autosizing/valid-hvac-air-to-air-heat-pump-var-speed-autosize.xml', 'hvac_autosizing/valid-hvac-ground-to-air-heat-pump-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ducted-autosize.xml', 'hvac_autosizing/valid-hvac-mini-split-heat-pump-ductless-autosize.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_autosizing' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] = -1
-  elsif ['hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-heat-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-heat-cool.xml'].include? hpxml_file
+  elsif hpxml_file.include? '-zero-heat-cool.xml' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:fraction_heat_load_served] = 0
     heat_pumps_values[0][:fraction_cool_load_served] = 0
-  elsif ['hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-heat.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-heat.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-heat.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-heat.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-heat.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-heat.xml'].include? hpxml_file
+  elsif hpxml_file.include? '-zero-heat.xml' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:fraction_heat_load_served] = 0
-  elsif ['hvac_load_fracs/valid-hvac-air-to-air-heat-pump-1-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-2-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-air-to-air-heat-pump-var-speed-zero-cool.xml', 'hvac_load_fracs/valid-hvac-ground-to-air-heat-pump-zero-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ducted-zero-cool.xml', 'hvac_load_fracs/valid-hvac-mini-split-heat-pump-ductless-zero-cool.xml'].include? hpxml_file
+  elsif hpxml_file.include? '-zero-cool.xml' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:fraction_cool_load_served] = 0
-  elsif ['hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip', 'hvac_multiple/valid-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_multiple' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] /= 3.0
     heat_pumps_values[0][:fraction_heat_load_served] = 0.333
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
-    heat_pumps_values << { :id => "SpaceHeatPump_ID2",
-                           :distribution_system_idref => "HVAC_Dist_ID2",
-                           :heat_pump_type => heat_pumps_values[0][:heat_pump_type],
-                           :heat_pump_fuel => heat_pumps_values[0][:heat_pump_fuel],
-                           :cooling_capacity => heat_pumps_values[0][:cooling_capacity],
-                           :fraction_heat_load_served => heat_pumps_values[0][:fraction_heat_load_served],
-                           :fraction_cool_load_served => heat_pumps_values[0][:fraction_cool_load_served],
-                           :heating_efficiency_hspf => heat_pumps_values[0][:heating_efficiency_hspf],
-                           :cooling_efficiency_seer => heat_pumps_values[0][:cooling_efficiency_seer] }
-    heat_pumps_values << { :id => "SpaceHeatPump_ID3",
-                           :distribution_system_idref => "HVAC_Dist_ID3",
-                           :heat_pump_type => heat_pumps_values[0][:heat_pump_type],
-                           :heat_pump_fuel => heat_pumps_values[0][:heat_pump_fuel],
-                           :cooling_capacity => heat_pumps_values[0][:cooling_capacity],
-                           :fraction_heat_load_served => heat_pumps_values[0][:fraction_heat_load_served],
-                           :fraction_cool_load_served => heat_pumps_values[0][:fraction_cool_load_served],
-                           :heating_efficiency_hspf => heat_pumps_values[0][:heating_efficiency_hspf],
-                           :cooling_efficiency_seer => heat_pumps_values[0][:cooling_efficiency_seer] }
-  elsif ['hvac_multiple/valid-hvac-ground-to-air-heat-pump-x3.xml.skip'].include? hpxml_file
-    heat_pumps_values[0][:cooling_capacity] /= 3.0
-    heat_pumps_values[0][:fraction_heat_load_served] = 0.333
-    heat_pumps_values[0][:fraction_cool_load_served] = 0.333
-    heat_pumps_values << { :id => "SpaceHeatPump_ID2",
-                           :distribution_system_idref => "HVAC_Dist_ID2",
-                           :heat_pump_type => heat_pumps_values[0][:heat_pump_type],
-                           :heat_pump_fuel => heat_pumps_values[0][:heat_pump_fuel],
-                           :cooling_capacity => heat_pumps_values[0][:cooling_capacity],
-                           :fraction_heat_load_served => heat_pumps_values[0][:fraction_heat_load_served],
-                           :fraction_cool_load_served => heat_pumps_values[0][:fraction_cool_load_served],
-                           :heating_efficiency_cop => heat_pumps_values[0][:heating_efficiency_cop],
-                           :cooling_efficiency_eer => heat_pumps_values[0][:cooling_efficiency_eer] }
-    heat_pumps_values << { :id => "SpaceHeatPump_ID3",
-                           :distribution_system_idref => "HVAC_Dist_ID3",
-                           :heat_pump_type => heat_pumps_values[0][:heat_pump_type],
-                           :heat_pump_fuel => heat_pumps_values[0][:heat_pump_fuel],
-                           :cooling_capacity => heat_pumps_values[0][:cooling_capacity],
-                           :fraction_heat_load_served => heat_pumps_values[0][:fraction_heat_load_served],
-                           :fraction_cool_load_served => heat_pumps_values[0][:fraction_cool_load_served],
-                           :heating_efficiency_cop => heat_pumps_values[0][:heating_efficiency_cop],
-                           :cooling_efficiency_eer => heat_pumps_values[0][:cooling_efficiency_eer] }
-  elsif ['hvac_multiple/valid-hvac-mini-split-heat-pump-ductless-x3.xml.skip'].include? hpxml_file
-    heat_pumps_values[0][:cooling_capacity] /= 3.0
-    heat_pumps_values[0][:fraction_heat_load_served] = 0.333
-    heat_pumps_values[0][:fraction_cool_load_served] = 0.333
-    heat_pumps_values << { :id => "SpaceHeatPump_ID2",
-                           :heat_pump_type => heat_pumps_values[0][:heat_pump_type],
-                           :heat_pump_fuel => heat_pumps_values[0][:heat_pump_fuel],
-                           :cooling_capacity => heat_pumps_values[0][:cooling_capacity],
-                           :fraction_heat_load_served => heat_pumps_values[0][:fraction_heat_load_served],
-                           :fraction_cool_load_served => heat_pumps_values[0][:fraction_cool_load_served],
-                           :heating_efficiency_hspf => heat_pumps_values[0][:heating_efficiency_hspf],
-                           :cooling_efficiency_seer => heat_pumps_values[0][:cooling_efficiency_seer] }
-    heat_pumps_values << { :id => "SpaceHeatPump_ID3",
-                           :heat_pump_type => heat_pumps_values[0][:heat_pump_type],
-                           :heat_pump_fuel => heat_pumps_values[0][:heat_pump_fuel],
-                           :cooling_capacity => heat_pumps_values[0][:cooling_capacity],
-                           :fraction_heat_load_served => heat_pumps_values[0][:fraction_heat_load_served],
-                           :fraction_cool_load_served => heat_pumps_values[0][:fraction_cool_load_served],
-                           :heating_efficiency_hspf => heat_pumps_values[0][:heating_efficiency_hspf],
-                           :cooling_efficiency_seer => heat_pumps_values[0][:cooling_efficiency_seer] }
-  elsif ['hvac_partial/valid-hvac-air-to-air-heat-pump-1-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-2-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-air-to-air-heat-pump-var-speed-50percent.xml.skip', 'hvac_partial/valid-hvac-ground-to-air-heat-pump-50percent.xml.skip', 'hvac_partial/valid-hvac-mini-split-heat-pump-ducted-50percent.xml.skip', 'hvac_partial/valid-hvac-mini-split-heat-pump-ductless-50percent.xml.skip'].include? hpxml_file
+    heat_pumps_values << heat_pumps_values[0].dup
+    heat_pumps_values[1][:id] = "SpaceHeatPump_ID2"
+    heat_pumps_values[1][:distribution_system_idref] = "HVAC_Dist_ID2" unless heat_pumps_values[1][:distribution_system_idref].nil?
+    heat_pumps_values << heat_pumps_values[0].dup
+    heat_pumps_values[2][:id] = "SpaceHeatPump_ID3"
+    heat_pumps_values[2][:distribution_system_idref] = "HVAC_Dist_ID3" unless heat_pumps_values[2][:distribution_system_idref].nil?
+  elsif hpxml_file.include? 'hvac_partial' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] /= 2.0
     heat_pumps_values[0][:fraction_heat_load_served] = 0.5
     heat_pumps_values[0][:fraction_cool_load_served] = 0.5
@@ -1574,11 +1434,11 @@ def get_hpxml_file_hvac_distribution_values(hpxml_file, hvac_distributions_value
                                    :distribution_system_type => "AirDistribution" }
     hvac_distributions_values << { :id => "HVAC_Dist_ID6",
                                    :distribution_system_type => "AirDistribution" }
-  elsif ['hvac_dse/valid-dse-0.8.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-1-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-2-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-var-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-boiler-elec-only-dse-0.8.xml', 'hvac_dse/valid-hvac-boiler-gas-only-dse-0.8.xml', 'hvac_dse/valid-hvac-central-ac-only-1-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-central-ac-only-2-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-central-ac-only-var-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-elec-only-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-2-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-var-speed-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-only-dse-0.8.xml', 'hvac_dse/valid-hvac-furnace-gas-room-ac-dse-0.8.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-0.8.xml.skip', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-0.8.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-0.8.xml'
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
     hvac_distributions_values[0][:annual_heating_dse] = 0.8
     hvac_distributions_values[0][:annual_cooling_dse] = 0.8
-  elsif ['hvac_dse/valid-dse-1.0.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-1-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-2-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-air-to-air-heat-pump-var-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-boiler-elec-only-dse-1.0.xml', 'hvac_dse/valid-hvac-boiler-gas-only-dse-1.0.xml', 'hvac_dse/valid-hvac-central-ac-only-1-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-central-ac-only-2-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-central-ac-only-var-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-elec-only-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-2-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-central-ac-var-speed-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-only-dse-1.0.xml', 'hvac_dse/valid-hvac-furnace-gas-room-ac-dse-1.0.xml', 'hvac_dse/valid-hvac-ground-to-air-heat-pump-dse-1.0.xml.skip', 'hvac_dse/valid-hvac-mini-split-heat-pump-ducted-dse-1.0.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-1.0.xml'
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
     hvac_distributions_values[0][:annual_heating_dse] = 1
     hvac_distributions_values[0][:annual_cooling_dse] = 1
@@ -1892,20 +1752,12 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "crawlspace - vented"
   elsif ['valid-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
-  elsif ['water_heating_multiple/valid-dhw-tankless-electric-x3.xml', 'water_heating_multiple/valid-dhw-tankless-gas-x3.xml', 'water_heating_multiple/valid-dhw-tankless-oil-x3.xml', 'water_heating_multiple/valid-dhw-tankless-propane-x3.xml'].include? hpxml_file
+  elsif hpxml_file.include? 'water_heating_multiple' and not water_heating_systems_values.nil? and water_heating_systems_values.size > 0
     water_heating_systems_values[0][:fraction_dhw_load_served] = 0.333
-    water_heating_systems_values << { :id => "DHW_ID2",
-                                      :fuel_type => water_heating_systems_values[0][:fuel_type],
-                                      :water_heater_type => water_heating_systems_values[0][:water_heater_type],
-                                      :location => water_heating_systems_values[0][:location],
-                                      :fraction_dhw_load_served => water_heating_systems_values[0][:fraction_dhw_load_served],
-                                      :energy_factor => water_heating_systems_values[0][:energy_factor] }
-    water_heating_systems_values << { :id => "DHW_ID3",
-                                      :fuel_type => water_heating_systems_values[0][:fuel_type],
-                                      :water_heater_type => water_heating_systems_values[0][:water_heater_type],
-                                      :location => water_heating_systems_values[0][:location],
-                                      :fraction_dhw_load_served => water_heating_systems_values[0][:fraction_dhw_load_served],
-                                      :energy_factor => water_heating_systems_values[0][:energy_factor] }
+    water_heating_systems_values << water_heating_systems_values[0].dup
+    water_heating_systems_values[1][:id] = "DHW_ID2"
+    water_heating_systems_values << water_heating_systems_values[0].dup
+    water_heating_systems_values[2][:id] = "DHW_ID3"
   end
   return water_heating_systems_values
 end
