@@ -7,8 +7,6 @@
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
-    <SoftwareProgramUsed/>
-    <SoftwareProgramVersion/>
     <extension>
       <ERICalculation>
         <Version>2014A</Version>

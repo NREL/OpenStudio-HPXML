@@ -4,8 +4,8 @@ class HPXML
   def self.create_hpxml(xml_type:,
                         xml_generated_by:,
                         transaction:,
-                        software_program_used:,
-                        software_program_version:,
+                        software_program_used: nil,
+                        software_program_version: nil,
                         eri_calculation_version:,
                         building_id:,
                         event_type:,
@@ -24,8 +24,8 @@ class HPXML
     XMLHelper.add_element(header, "Transaction", transaction)
 
     software_info = XMLHelper.add_element(hpxml, "SoftwareInfo")
-    XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used)
-    XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version)
+    XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used) unless software_program_used.nil?
+    XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version) unless software_program_version.nil?
     eri_calculation = XMLHelper.add_element(software_info, "extension/ERICalculation")
     XMLHelper.add_element(eri_calculation, "Version", eri_calculation_version)
 
