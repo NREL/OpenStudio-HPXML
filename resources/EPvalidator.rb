@@ -69,7 +69,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => zero_or_more, # See [HVACDistribution]
         '/HPXML/Building/BuildingDetails/Systems/HVAC/extension/NaturalVentilation' => zero_or_one, # See [NaturalVentilation]
 
-        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()]' => zero_or_one, # See [MechanicalVentilation]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_one, # See [MechanicalVentilation]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => zero_or_more, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture' => zero_or_more, # See [WaterFixture]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution' => zero_or_one, # See [HotWaterDistribution]
@@ -102,18 +102,18 @@ class EnergyPlusValidator
 
       # [Attic]
       '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic' => {
-        'AtticType[Attic[Vented=false()] | Attic[Vented=true()] | Attic[Conditioned=true()] | FlatRoof | CathedralCeiling]' => one, # See [AtticType=Unvented] or [AtticType=Vented] or [AtticType=Conditioned]
+        'AtticType[Attic[Vented="false"] | Attic[Vented="true"] | Attic[Conditioned="true"] | FlatRoof | CathedralCeiling]' => one, # See [AtticType=Unvented] or [AtticType=Vented] or [AtticType=Conditioned]
         'Roofs/Roof' => one_or_more, # See [AtticRoof]
         'Walls/Wall' => zero_or_more, # See [AtticWall]
       },
 
       ## [AtticType=Unvented]
-      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented=false()]]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="false"]]' => {
         'Floors/Floor' => one_or_more, # See [AtticFloor]
       },
 
       ## [AtticType=Vented]
-      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented=true()]]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented="true"]]' => {
         'Floors/Floor' => one_or_more, # See [AtticFloor]
         '[SpecificLeakageArea | extension/AtticConstantACHnatural]' => zero_or_one, # Uses ERI Reference Home if not provided
       },
@@ -167,7 +167,7 @@ class EnergyPlusValidator
       },
 
       ## [FoundationType=UnconditionedBasement]
-      '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned=false()]]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned="false"]]' => {
         'FrameFloor' => one_or_more, # See [FoundationFrameFloor]
       },
 
@@ -180,7 +180,7 @@ class EnergyPlusValidator
       },
 
       ## [FoundationType=VentedCrawl]
-      '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented=true()]]' => {
+      '/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented="true"]]' => {
         'SpecificLeakageArea' => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
@@ -449,7 +449,7 @@ class EnergyPlusValidator
       },
 
       # [MechanicalVentilation]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()]' => {
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         '[FanType="energy recovery ventilator" or FanType="heat recovery ventilator" or FanType="exhaust only" or FanType="supply only" or FanType="balanced" or FanType="central fan integrated supply"]' => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
         'RatedFlowRate' => one,
@@ -459,18 +459,18 @@ class EnergyPlusValidator
       },
 
       ## [MechVentType=HRV]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()][FanType="heat recovery ventilator"]' => {
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="heat recovery ventilator"]' => {
         'SensibleRecoveryEfficiency' => one,
       },
 
       ## [MechVentType=ERV]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()][FanType="energy recovery ventilator"]' => {
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="energy recovery ventilator"]' => {
         'TotalRecoveryEfficiency' => one,
         'SensibleRecoveryEfficiency' => one,
       },
 
       ## [MechVentType=CFIS]
-      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()][FanType="central fan integrated supply"]' => {
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"][FanType="central fan integrated supply"]' => {
         'AttachedToHVACDistributionSystem' => one,
       },
 

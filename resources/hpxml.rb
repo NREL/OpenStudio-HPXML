@@ -295,13 +295,13 @@ class HPXML
     return nil if attic.nil?
 
     attic_type = nil
-    if XMLHelper.has_element(attic, "AtticType/Attic[Vented=false()]")
+    if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
       attic_type = "UnventedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented=true()]")
+    elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
       attic_type = "VentedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned=true()]")
+    elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
       attic_type = "ConditionedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[CapeCod=true()]")
+    elsif XMLHelper.has_element(attic, "AtticType/Attic[CapeCod='true']")
       attic_type = "CapeCod"
     elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
       attic_type = "FlatRoof"
@@ -311,7 +311,7 @@ class HPXML
 
     return { :id => HPXML.get_id(attic),
              :attic_type => attic_type,
-             :specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented=true()]/SpecificLeakageArea")),
+             :specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")),
              :attic_constant_ach_natural => to_float(XMLHelper.get_value(attic, "extension/AtticConstantACHnatural")) }
   end
 
@@ -504,13 +504,13 @@ class HPXML
     foundation_type = nil
     if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
       foundation_type = "SlabOnGrade"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned=false()]")
+    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
       foundation_type = "UnconditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned=true()]")
+    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
       foundation_type = "ConditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented=false()]")
+    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
       foundation_type = "UnventedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented=true()]")
+    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
       foundation_type = "VentedCrawlspace"
     elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
       foundation_type = "Ambient"
@@ -518,7 +518,7 @@ class HPXML
 
     return { :id => HPXML.get_id(foundation),
              :foundation_type => foundation_type,
-             :specific_leakage_area => to_float(XMLHelper.get_value(foundation, "FoundationType/Crawlspace[Vented=true()]/SpecificLeakageArea")) }
+             :specific_leakage_area => to_float(XMLHelper.get_value(foundation, "FoundationType/Crawlspace[Vented='true']/SpecificLeakageArea")) }
   end
 
   def self.add_frame_floor(foundation:,
