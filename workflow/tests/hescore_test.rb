@@ -5,10 +5,6 @@ require 'fileutils'
 require 'json'
 require_relative '../../measures/HPXMLtoOpenStudio/measure'
 require_relative '../../measures/HPXMLtoOpenStudio/resources/xmlhelper'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/schedules'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/constants'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/unit_conversions'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/hotwater_appliances'
 
 class HEScoreTest < Minitest::Unit::TestCase
   def before_setup
@@ -25,22 +21,29 @@ class HEScoreTest < Minitest::Unit::TestCase
     num_cache_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
     num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*.cache")].count
     assert_equal(num_cache_expected, num_cache_actual)
+
+    # Prepare results dir for CI storage
+    @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), "..", 'test_results'))
+    _rm_path(@results_dir)
+    Dir.mkdir(@results_dir)
   end
 
   def test_valid_simulations
+    zipfile = OpenStudio::ZipFile.new(OpenStudio::Path.new(File.join(@results_dir, "results_jsons.zip")), false)
+
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
     xmldir = "#{parent_dir}/sample_files"
     Dir["#{xmldir}/*.xml"].sort.each do |xml|
-      results[File.basename(xml)] = run_and_check(xml, parent_dir, false)
+      results[File.basename(xml)] = run_and_check(xml, parent_dir, false, zipfile)
     end
 
-    _write_summary_results(parent_dir, results)
+    _write_summary_results(results)
   end
 
   private
 
-  def run_and_check(xml, parent_dir, expect_error)
+  def run_and_check(xml, parent_dir, expect_error, zipfile)
     # Check input HPXML is valid
     xml = File.absolute_path(xml)
 
@@ -65,6 +68,9 @@ class HEScoreTest < Minitest::Unit::TestCase
       schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HPXMLtoOpenStudio", "hpxml_schemas"))
       _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
+
+      # Add results.json to zip file for storage on CI
+      zipfile.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(xml.gsub('.xml', '_results.json'))))
 
       results = _get_results(parent_dir, runtime)
       _test_results(xml, results)
@@ -208,10 +214,9 @@ class HEScoreTest < Minitest::Unit::TestCase
     assert_equal(tested_categories.uniq.size, 7)
   end
 
-  def _write_summary_results(parent_dir, results)
-    csv_out = File.join(parent_dir, 'test_results', 'results.csv')
-    _rm_path(File.dirname(csv_out))
-    Dir.mkdir(File.dirname(csv_out))
+  def _write_summary_results(results)
+    # Writes summary end use results to CSV file.
+    csv_out = File.join(@results_dir, 'results.csv')
 
     column_headers = ['HPXML']
     results[results.keys[0]].keys.each do |key|
