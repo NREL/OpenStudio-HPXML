@@ -4,8 +4,8 @@ class HPXML
   def self.create_hpxml(xml_type:,
                         xml_generated_by:,
                         transaction:,
-                        software_program_used:,
-                        software_program_version:,
+                        software_program_used: nil,
+                        software_program_version: nil,
                         eri_calculation_version:,
                         building_id:,
                         event_type:,
@@ -24,8 +24,8 @@ class HPXML
     XMLHelper.add_element(header, "Transaction", transaction)
 
     software_info = XMLHelper.add_element(hpxml, "SoftwareInfo")
-    XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used)
-    XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version)
+    XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used) unless software_program_used.nil?
+    XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version) unless software_program_version.nil?
     eri_calculation = XMLHelper.add_element(software_info, "extension/ERICalculation")
     XMLHelper.add_element(eri_calculation, "Version", eri_calculation_version)
 
@@ -60,6 +60,7 @@ class HPXML
   def self.add_site(hpxml:,
                     fuels: [],
                     shelter_coefficient: nil,
+                    disable_natural_ventilation: nil,
                     **remainder)
     site = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site"])
     unless fuels.empty?
@@ -69,7 +70,8 @@ class HPXML
       end
     end
     HPXML.add_extension(parent: site,
-                        extensions: { "ShelterCoefficient": to_float(shelter_coefficient) })
+                        extensions: { "ShelterCoefficient": to_float(shelter_coefficient),
+                                      "DisableNaturalVentilation": to_bool(disable_natural_ventilation) })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -84,7 +86,8 @@ class HPXML
     return { :surroundings => XMLHelper.get_value(site, "Surroundings"),
              :orientation_of_front_of_home => XMLHelper.get_value(site, "OrientationOfFrontOfHome"),
              :fuels => XMLHelper.get_values(site, "FuelTypesAvailable/Fuel"),
-             :shelter_coefficient => to_float(XMLHelper.get_value(site, "extension/ShelterCoefficient")) }
+             :shelter_coefficient => to_float(XMLHelper.get_value(site, "extension/ShelterCoefficient")),
+             :disable_natural_ventilation => to_bool(XMLHelper.get_value(site, "extension/DisableNaturalVentilation")) }
   end
 
   def self.add_building_occupancy(hpxml:,
@@ -114,6 +117,8 @@ class HPXML
                                      conditioned_floor_area: nil,
                                      conditioned_building_volume: nil,
                                      garage_present: nil,
+                                     load_distribution_scheme: nil,
+                                     use_only_ideal_air_system: nil,
                                      **remainder)
     building_construction = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", to_integer(number_of_conditioned_floors)) unless number_of_conditioned_floors.nil?
@@ -123,6 +128,9 @@ class HPXML
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", to_float(conditioned_floor_area)) unless conditioned_floor_area.nil?
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", to_float(conditioned_building_volume)) unless conditioned_building_volume.nil?
     XMLHelper.add_element(building_construction, "GaragePresent", to_bool(garage_present)) unless garage_present.nil?
+    HPXML.add_extension(parent: building_construction,
+                        extensions: { "LoadDistributionScheme": load_distribution_scheme,
+                                      "UseOnlyIdealAirSystem": to_bool(use_only_ideal_air_system) })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -141,7 +149,9 @@ class HPXML
              :number_of_bedrooms => to_integer(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
              :conditioned_floor_area => to_float(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
-             :garage_present => to_bool(XMLHelper.get_value(building_construction, "GaragePresent")) }
+             :garage_present => to_bool(XMLHelper.get_value(building_construction, "GaragePresent")),
+             :load_distribution_scheme => XMLHelper.get_value(building_construction, "extension/LoadDistributionScheme"),
+             :use_only_ideal_air_system => to_bool(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
   end
 
   def self.add_climate_and_risk_zones(hpxml:,
@@ -1861,12 +1871,10 @@ class HPXML
                                    id:,
                                    assembly_r_value: nil,
                                    **remainder)
-    return nil if assembly_r_value.nil?
-
     insulation = XMLHelper.add_element(parent, "Insulation")
     sys_id = XMLHelper.add_element(insulation, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(insulation, "AssemblyEffectiveRValue", to_float(assembly_r_value))
+    XMLHelper.add_element(insulation, "AssemblyEffectiveRValue", to_float(assembly_r_value)) unless assembly_r_value.nil?
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -1888,20 +1896,18 @@ class HPXML
                                 cavity_nominal_r_value: nil,
                                 continuous_nominal_r_value: nil,
                                 **remainder)
-    return nil if cavity_nominal_r_value.nil? and continuous_nominal_r_value.nil?
-
     insulation = XMLHelper.add_element(parent, element_name)
     sys_id = XMLHelper.add_element(insulation, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     unless cavity_nominal_r_value.nil?
       layer = XMLHelper.add_element(insulation, "Layer")
       XMLHelper.add_element(layer, "InstallationType", "cavity")
-      XMLHelper.add_element(layer, "NominalRValue", to_float(cavity_nominal_r_value))
+      XMLHelper.add_element(layer, "NominalRValue", to_float(cavity_nominal_r_value)) unless cavity_nominal_r_value.nil?
     end
     unless continuous_nominal_r_value.nil?
       layer = XMLHelper.add_element(insulation, "Layer")
       XMLHelper.add_element(layer, "InstallationType", "continuous")
-      XMLHelper.add_element(layer, "NominalRValue", to_float(continuous_nominal_r_value))
+      XMLHelper.add_element(layer, "NominalRValue", to_float(continuous_nominal_r_value)) unless continuous_nominal_r_value.nil?
     end
 
     check_remainder(remainder,
@@ -1935,14 +1941,6 @@ class HPXML
     end
 
     return extension
-  end
-
-  def self.get_extension_values(parent:)
-    return {} if parent.nil?
-
-    return { :use_only_ideal_air_system => to_bool(XMLHelper.get_value(parent, "extension/UseOnlyIdealAirSystem")),
-             :load_distribution_scheme => XMLHelper.get_value(parent, "extension/LoadDistributionScheme"),
-             :disable_natural_ventilation => to_bool(XMLHelper.get_value(parent, "extension/DisableNaturalVentilation")) }
   end
 
   private
