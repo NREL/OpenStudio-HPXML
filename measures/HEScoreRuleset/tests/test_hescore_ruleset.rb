@@ -13,11 +13,15 @@ class HEScoreRulesetTest < MiniTest::Test
 
     Dir["#{this_dir}/../../../workflow/sample_files/*.xml"].sort.each do |xml|
       puts "Testing #{File.absolute_path(xml)}..."
+
       args_hash['hpxml_path'] = File.absolute_path(xml)
       args_hash['hpxml_output_path'] = File.absolute_path(xml).gsub('.xml', '.xml.out')
+
       _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
       _test_schema_validation(this_dir, xml.gsub('.xml', '.xml.out'))
+
+      FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
     end
   end
 

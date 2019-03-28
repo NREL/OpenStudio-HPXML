@@ -5,10 +5,6 @@ require 'fileutils'
 require 'json'
 require_relative '../../measures/HPXMLtoOpenStudio/measure'
 require_relative '../../measures/HPXMLtoOpenStudio/resources/xmlhelper'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/schedules'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/constants'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/unit_conversions'
-require_relative '../../measures/HPXMLtoOpenStudio/resources/hotwater_appliances'
 
 class HEScoreTest < Minitest::Unit::TestCase
   def before_setup
@@ -25,6 +21,11 @@ class HEScoreTest < Minitest::Unit::TestCase
     num_cache_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
     num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*.cache")].count
     assert_equal(num_cache_expected, num_cache_actual)
+
+    # Prepare results dir for CI storage
+    @results_dir = File.absolute_path(File.join(File.dirname(__FILE__), "..", 'test_results'))
+    _rm_path(@results_dir)
+    Dir.mkdir(@results_dir)
   end
 
   def test_valid_simulations
@@ -35,7 +36,8 @@ class HEScoreTest < Minitest::Unit::TestCase
       results[File.basename(xml)] = run_and_check(xml, parent_dir, false)
     end
 
-    _write_summary_results(parent_dir, results)
+    _write_summary_results(results)
+    _zip_results_jsons()
   end
 
   private
@@ -65,6 +67,10 @@ class HEScoreTest < Minitest::Unit::TestCase
       schemas_dir = File.absolute_path(File.join(parent_dir, "..", "measures", "HPXMLtoOpenStudio", "hpxml_schemas"))
       _test_schema_validation(parent_dir, xml, schemas_dir)
       _test_schema_validation(parent_dir, hes_hpxml, schemas_dir)
+
+      # Move results.json to @results_dir for storage on CI
+      results_json_ci = File.join(@results_dir, File.basename(xml.gsub('.xml', '_results.json')))
+      FileUtils.copy_file(results_json, results_json_ci)
 
       results = _get_results(parent_dir, runtime)
       _test_results(xml, results)
@@ -208,10 +214,9 @@ class HEScoreTest < Minitest::Unit::TestCase
     assert_equal(tested_categories.uniq.size, 7)
   end
 
-  def _write_summary_results(parent_dir, results)
-    csv_out = File.join(parent_dir, 'test_results', 'results.csv')
-    _rm_path(File.dirname(csv_out))
-    Dir.mkdir(File.dirname(csv_out))
+  def _write_summary_results(results)
+    # Writes summary end use results to CSV file.
+    csv_out = File.join(@results_dir, 'results.csv')
 
     column_headers = ['HPXML']
     results[results.keys[0]].keys.each do |key|
@@ -232,6 +237,16 @@ class HEScoreTest < Minitest::Unit::TestCase
     end
 
     puts "Wrote results to #{csv_out}."
+  end
+
+  def _zip_results_jsons()
+    # Zip all results.json files and delete individual files.
+    p = OpenStudio::Path.new(File.join(@results_dir, "results_jsons.zip"))
+    z = OpenStudio::ZipFile.new(p, false)
+    Dir["#{@results_dir}/*.json"].each do |results_json|
+      z.addFile(OpenStudio::Path.new(results_json), OpenStudio::Path.new(File.basename(results_json)))
+      FileUtils.rm_f(results_json)
+    end
   end
 
   def _test_schema_validation(parent_dir, xml, schemas_dir)
