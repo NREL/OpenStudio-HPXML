@@ -734,7 +734,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # CFIS fan power
       cfis_fan_w_per_airflow = nil
-      if XMLHelper.get_value(bldg_details, "Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']/FanType") == "central fan integrated supply"
+      if XMLHelper.get_value(bldg_details, "Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()]/FanType") == "central fan integrated supply"
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_1_cfis_fan_power')"
         cfis_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get
         # Ensure CFIS fan power equals heating/cooling fan power
@@ -751,7 +751,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     wh = bldg_details.elements["Systems/WaterHeating"]
 
     # Mechanical Ventilation
-    mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
+    mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()]"]
     if not mv.nil?
       found_mv_energy = false
       results.keys.each do |k|

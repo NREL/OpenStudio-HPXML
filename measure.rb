@@ -235,7 +235,7 @@ class OSModel
     @ncfl = building_construction_values[:number_of_conditioned_floors]
     @nbeds = building_construction_values[:number_of_bedrooms]
     @garage_present = building_construction_values[:garage_present]
-    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"])
+    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned=false()]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
     climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: building.elements["BuildingDetails/ClimateandRiskZones"])
     @iecc_zone_2006 = climate_and_risk_zones_values[:iecc2006]
@@ -2820,7 +2820,7 @@ class OSModel
     # Vented crawl SLA
     vented_crawl_area = 0.0
     vented_crawl_sla_area = 0.0
-    building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
+    building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented=true()]]") do |vented_crawl|
       foundation_values = HPXML.get_foundation_values(foundation: vented_crawl)
       frame_floor_values = HPXML.get_frame_floor_values(floor: vented_crawl.elements["FrameFloor"])
       area = frame_floor_values[:area]
@@ -2841,7 +2841,7 @@ class OSModel
     vented_attic_area = 0.0
     vented_attic_sla_area = 0.0
     vented_attic_const_ach = nil
-    building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
+    building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented=true()]]") do |vented_attic|
       attic_values = HPXML.get_attic_values(attic: vented_attic)
       attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
       area = attic_floor_values[:area]
@@ -2885,7 +2885,7 @@ class OSModel
                              finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
-    whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
+    whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation=true()]"]
     whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
     if whole_house_fan_values.nil?
       mech_vent_type = Constants.VentTypeNone
