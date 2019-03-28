@@ -2,8 +2,8 @@
 <HPXML xmlns='http://hpxmlonline.com/2014/6' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2014/6' schemaVersion='3.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>Hand</XMLGeneratedBy>
-    <CreatedDateAndTime>2014-11-17T15:17:17.128-07:00</CreatedDateAndTime>
+    <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
+    <CreatedDateAndTime>2019-03-27T16:56:31-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -35,6 +35,9 @@
           <ConditionedFloorArea>7000.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>67575.0</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
+          <extension>
+            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
+          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -257,7 +260,7 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>1.0</Value>
@@ -271,7 +274,7 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>1.0</Value>
@@ -285,7 +288,7 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>21333.33</HeatingCapacity>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>1.0</Value>
@@ -313,7 +316,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>8.333333333333334</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -327,7 +330,7 @@
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.666666666666668</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
@@ -348,7 +351,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>8.333333333333334</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -362,7 +365,7 @@
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.666666666666668</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
@@ -383,7 +386,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>8.33</Value>
+                    <Value>8.333333333333334</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -397,14 +400,11 @@
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
                   <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>16.67</DuctSurfaceArea>
+                  <DuctSurfaceArea>16.666666666666668</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>
-          <extension>
-            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
-          </extension>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
