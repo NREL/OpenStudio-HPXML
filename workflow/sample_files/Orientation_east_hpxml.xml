@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-19T10:01:11-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-03-29T13:24:37-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2175">
+    <BuildingID id="bid-2387">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -296,11 +296,9 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
+                  <DuctInsulationPresent>true</DuctInsulationPresent>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
-                  <extension>
-                    <hescore_ducts_insulated>1</hescore_ducts_insulated>
-                  </extension>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>

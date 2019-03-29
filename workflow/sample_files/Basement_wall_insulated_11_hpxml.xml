@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-29T13:20:45-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-03-29T13:33:50-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2365">
+    <BuildingID id="bid-2437">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,10 +19,10 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.12</Address1>
-        <CityMunicipality>Austin</CityMunicipality>
-        <StateCode>TX</StateCode>
-        <ZipCode>78701</ZipCode>
+        <Address1>Regression run 6.84</Address1>
+        <CityMunicipality>St Louis</CityMunicipality>
+        <StateCode>MO</StateCode>
+        <ZipCode>63101</ZipCode>
       </Address>
     </Site>
     <ProjectStatus>
@@ -47,18 +47,18 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Location CZ13</comments>
+          <comments>Basement wall insulated 11</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2012</Year>
-          <ClimateZone>2A</ClimateZone>
+          <ClimateZone>4A</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id="wmo"/>
-          <Name>Austin Camp Mabry</Name>
-          <WMO>722544</WMO>
+          <Name>Cahokia St Louis</Name>
+          <WMO>725314</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>
@@ -100,18 +100,34 @@
           <Foundation>
             <SystemIdentifier id="floor1"/>
             <FoundationType>
-              <SlabOnGrade/>
+              <Basement>
+                <Conditioned>true</Conditioned>
+              </Basement>
             </FoundationType>
+            <FrameFloor>
+              <SystemIdentifier id="framefloor1"/>
+              <Area>1000</Area>
+              <Insulation>
+                <SystemIdentifier id="foundation1"/>
+                <Layer>
+                  <InstallationType>cavity</InstallationType>
+                  <NominalRValue>00</NominalRValue>
+                </Layer>
+              </Insulation>
+            </FrameFloor>
+            <FoundationWall>
+              <SystemIdentifier id="foundWall1"/>
+              <Insulation>
+                <SystemIdentifier id="insulation1"/>
+                <Layer>
+                  <InstallationType>continuous</InstallationType>
+                  <NominalRValue>11</NominalRValue>
+                </Layer>
+              </Insulation>
+            </FoundationWall>
             <Slab>
               <SystemIdentifier id="slab1"/>
               <Area>1000</Area>
-              <PerimeterInsulation>
-                <SystemIdentifier id="foundation1"/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>0</NominalRValue>
-                </Layer>
-              </PerimeterInsulation>
             </Slab>
           </Foundation>
         </Foundations>

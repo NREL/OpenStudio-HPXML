@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-19T10:10:46-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-03-29T13:37:20-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2242">
+    <BuildingID id="bid-2455">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.101</Address1>
+        <Address1>Regression run 6.102</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -272,12 +272,8 @@
               <DistributionSystem idref="hvac1_dist"/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0</FractionCoolLoadServed>
               <FloorAreaServed>2000</FloorAreaServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>10</Value>
-              </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
                 <Value>6</Value>
@@ -289,11 +285,9 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
+                  <DuctInsulationPresent>true</DuctInsulationPresent>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
-                  <extension>
-                    <hescore_ducts_insulated>1</hescore_ducts_insulated>
-                  </extension>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>

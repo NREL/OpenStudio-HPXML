@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-19T10:11:10-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-03-29T13:37:53-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2245">
+    <BuildingID id="bid-2458">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.104</Address1>
+        <Address1>Regression run 6.105</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -271,12 +271,8 @@
               <SystemIdentifier id="hvac1_heatpump"/>
               <HeatPumpType>mini-split</HeatPumpType>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0</FractionCoolLoadServed>
               <FloorAreaServed>2000</FloorAreaServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>40</Value>
-              </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
                 <Value>20</Value>
