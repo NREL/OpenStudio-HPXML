@@ -65,7 +65,7 @@ class HEScoreValidator
 
       # [Attic]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic" => {
-        "AtticType[Attic[Vented='true'] | Attic[CapeCod='true'] | CathedralCeiling]" => one, # See [AtticType=Vented] or [AtticType=Cathedral]
+        "AtticType[Attic[Vented='true'] | Attic[Conditioned='true'] | CathedralCeiling]" => one, # See [AtticType=Vented] or [AtticType=Cathedral]
         "Roofs/Roof" => one, # See [AtticRoof]
       },
 
@@ -313,9 +313,9 @@ class HEScoreValidator
 
       ## [HVACDuct]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts" => {
+        "DuctInsulationPresent" => one,
         "[DuctLocation='living space' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - unvented' or DuctLocation='crawlspace - vented' or DuctLocation='attic - unconditioned']" => one,
         "FractionDuctArea" => one,
-        "extension/hescore_ducts_insulated" => one,
       },
 
       # [WaterHeatingSystem]
