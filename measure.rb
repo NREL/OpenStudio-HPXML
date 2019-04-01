@@ -2840,13 +2840,11 @@ class OSModel
     # Vented attic SLA
     vented_attic_area = 0.0
     vented_attic_sla_area = 0.0
-    vented_attic_const_ach = nil
     building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
       attic_values = HPXML.get_attic_values(attic: vented_attic)
       attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
       area = attic_floor_values[:area]
       vented_attic_sla = attic_values[:attic_specific_leakage_area]
-      vented_attic_const_ach = attic_values[:attic_constant_ach_natural]
       if not vented_attic_sla.nil?
         vented_attic_sla_area += (vented_attic_sla * area)
       else
@@ -2855,15 +2853,10 @@ class OSModel
       end
       vented_attic_area += area
     end
-    if vented_attic_area == 0
-      attic_sla = 0
-      attic_const_ach = nil
-    elsif vented_attic_sla_area > 0
+    if vented_attic_sla_area > 0
       attic_sla = vented_attic_sla_area / vented_attic_area
-      attic_const_ach = nil
     else
-      attic_sla = nil
-      attic_const_ach = vented_attic_const_ach
+      attic_sla = 0
     end
 
     living_ach50 = infil_ach50
@@ -2881,7 +2874,7 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unfinished_basement_ach,
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, nil, unfinished_basement_ach,
                              finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
