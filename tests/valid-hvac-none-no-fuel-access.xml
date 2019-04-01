@@ -78,7 +78,7 @@
                 <Pitch>6.0</Pitch>
                 <RadiantBarrier>false</RadiantBarrier>
                 <Insulation>
-                  <SystemIdentifier id='Attic_Roof_Ins_ID1'/>
+                  <SystemIdentifier id='Attic_Roof_Ins_north'/>
                   <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
                 </Insulation>
               </Roof>
