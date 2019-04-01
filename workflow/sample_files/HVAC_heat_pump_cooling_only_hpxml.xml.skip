@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-29T13:38:04-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-04-01T12:20:56-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2459">
+    <BuildingID id="bid-2136">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -285,8 +285,12 @@
               <DistributionSystem idref="hvac1_dist"/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <FractionHeatLoadServed>0</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0</FractionCoolLoadServed>
+              <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <FloorAreaServed>2000</FloorAreaServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>10</Value>
+              </AnnualCoolingEfficiency>
             </HeatPump>
           </HVACPlant>
           <HVACDistribution>
