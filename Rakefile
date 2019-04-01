@@ -43,6 +43,10 @@ def create_hpxmls
     'valid-appliances-reference-elec.xml' => 'valid.xml',
     'valid-appliances-reference-gas.xml' => 'valid.xml',
     'valid-appliances-washer-imef.xml' => 'valid.xml',
+    'valid-atticroof-cathedral.xml' => 'valid.xml',
+    'valid-atticroof-conditioned.xml' => 'valid.xml',
+    'valid-atticroof-flat.xml' => 'valid.xml',
+    'valid-atticroof-vented.xml' => 'valid.xml',
     'valid-dhw-dwhr.xml' => 'valid.xml',
     'valid-dhw-location-attic.xml' => 'valid.xml',
     'valid-dhw-low-flow-fixtures.xml' => 'valid.xml',
@@ -581,6 +585,13 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:load_distribution_scheme] = "UniformLoad"
   elsif hpxml_file == 'valid-hvac-ideal-air.xml'
     building_construction_values[:use_only_ideal_air_system] = true
+  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+    building_construction_values[:number_of_conditioned_floors] = 4
+    building_construction_values[:number_of_conditioned_floors_above_grade] = 3
+    building_construction_values[:conditioned_floor_area] = 10500
+    building_construction_values[:conditioned_building_volume] = 89450
+  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+    building_construction_values[:conditioned_building_volume] = 89450
   end
   return building_construction_values
 end
@@ -613,6 +624,10 @@ def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltrat
     air_infiltration_measurement_values[:air_leakage] = nil
     air_infiltration_measurement_values[:infiltration_volume] = nil
     air_infiltration_measurement_values[:constant_ach_natural] = 0.67
+  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+    air_infiltration_measurement_values[:infiltration_volume] = 89450
+  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+    air_infiltration_measurement_values[:infiltration_volume] = 89450
   end
   return air_infiltration_measurement_values
 end
@@ -621,6 +636,15 @@ def get_hpxml_file_attic_values(hpxml_file, attic_values)
   if hpxml_file == 'valid.xml'
     attic_values = { :id => "Attic_ID1",
                      :attic_type => "UnventedAttic" }
+  elsif hpxml_file == 'valid-atticroof-vented.xml'
+    attic_values[:attic_type] = "VentedAttic"
+    attic_values[:specific_leakage_area] = 0.003
+  elsif hpxml_file == 'valid-atticroof-flat.xml'
+    attic_values[:attic_type] = "FlatRoof"
+  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+    attic_values[:attic_type] = "ConditionedAttic"
+  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+    attic_values[:attic_type] = "CathedralCeiling"
   end
   return attic_values
 end
@@ -635,6 +659,14 @@ def get_hpxml_file_attic_roofs_values(hpxml_file, attic_roofs_values)
                             :radiant_barrier => false,
                             :insulation_id => "Attic_Roof_Ins_ID1",
                             :insulation_assembly_r_value => 2.3 }]
+  elsif hpxml_file == 'valid-atticroof-flat.xml'
+    attic_roofs_values[0][:area] = 3500
+    attic_roofs_values[0][:pitch] = 0
+    attic_roofs_values[0][:insulation_assembly_r_value] = 25.8
+  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+    attic_roofs_values[0][:insulation_assembly_r_value] = 25.8
+  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+    attic_roofs_values[0][:insulation_assembly_r_value] = 25.8
   end
   return attic_roofs_values
 end
@@ -646,6 +678,12 @@ def get_hpxml_file_attic_floors_values(hpxml_file, attic_floors_values)
                              :area => 4200,
                              :insulation_id => "Attic_Floor_Ins_ID1",
                              :insulation_assembly_r_value => 39.3 }]
+  elsif hpxml_file == 'valid-atticroof-flat.xml'
+    attic_floors_values.delete_at(0)
+  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+    attic_floors_values.delete_at(0)
+  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+    attic_floors_values.delete_at(0)
   end
   return attic_floors_values
 end
@@ -679,6 +717,12 @@ def get_hpxml_file_attic_walls_values(hpxml_file, attic_walls_values)
                             :emittance => 0.9,
                             :insulation_id => "Attic_Wall_Ins_ID3",
                             :insulation_assembly_r_value => 4.0 }
+  elsif hpxml_file == 'valid-atticroof-flat.xml'
+    attic_walls_values.delete_at(0)
+  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+    attic_walls_values[0][:insulation_assembly_r_value] = 23.0
+  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+    attic_walls_values[0][:insulation_assembly_r_value] = 23.0
   end
   return attic_walls_values
 end
