@@ -2111,8 +2111,8 @@ class OSModel
         # FIXME: Generalize
         seer = cooling_system_values[:cooling_efficiency_seer]
         num_speeds = get_ac_num_speeds(seer)
-        crankcase_kw = 0.0
-        crankcase_temp = 55.0
+        crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
+        crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
         if num_speeds == "1-Speed"
 
@@ -2314,8 +2314,8 @@ class OSModel
           num_speeds = get_ashp_num_speeds_by_hspf(hspf)
         end
 
-        crankcase_kw = 0.02
-        crankcase_temp = 55.0
+        crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
+        crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
         if num_speeds == "1-Speed"
 
