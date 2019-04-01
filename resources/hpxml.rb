@@ -286,7 +286,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:attic_constant_ach_natural])
+                    expected_kwargs: [])
 
     return attic
   end
@@ -311,8 +311,7 @@ class HPXML
 
     return { :id => HPXML.get_id(attic),
              :attic_type => attic_type,
-             :specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")),
-             :attic_constant_ach_natural => to_float(XMLHelper.get_value(attic, "extension/AtticConstantACHnatural")) }
+             :specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")) }
   end
 
   def self.add_attic_roof(attic:,
