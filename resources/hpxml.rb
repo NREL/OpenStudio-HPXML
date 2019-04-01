@@ -260,6 +260,7 @@ class HPXML
                      id:,
                      attic_type: nil,
                      specific_leakage_area: nil,
+                     constant_ach_natural: nil,
                      **remainder)
     attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
     attic = XMLHelper.add_element(attics, "Attic")
@@ -274,6 +275,8 @@ class HPXML
         attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
         XMLHelper.add_element(attic_type_attic, "Vented", true)
         XMLHelper.add_element(attic_type_attic, "SpecificLeakageArea", to_float(specific_leakage_area)) unless specific_leakage_area.nil?
+        HPXML.add_extension(parent: attic_type_attic,
+                            extensions: { "ConstantACHnatural": to_float(constant_ach_natural) })
       elsif attic_type == "ConditionedAttic"
         attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
         XMLHelper.add_element(attic_type_attic, "Conditioned", true)
@@ -311,7 +314,8 @@ class HPXML
 
     return { :id => HPXML.get_id(attic),
              :attic_type => attic_type,
-             :specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")) }
+             :specific_leakage_area => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")),
+             :constant_ach_natural => to_float(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/extension/ConstantACHnatural")) }
   end
 
   def self.add_attic_roof(attic:,
