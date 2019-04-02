@@ -132,9 +132,6 @@ class HEScoreRuleset
   def self.set_enclosure_attics_roofs(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
       attic_values = HPXML.get_attic_values(attic: orig_attic)
-      if attic_values[:attic_type] == "CapeCod" # TODO: Might not need this long-term?
-        attic_values[:attic_type] = "ConditionedAttic"
-      end
       new_attic = HPXML.add_attic(hpxml: hpxml, **attic_values)
 
       # Roof: Two surfaces per HES zone_roof
@@ -558,7 +555,7 @@ class HEScoreRuleset
         end
 
         # FIXME: Verify nominal insulation and not assembly
-        if duct_values[:hescore_ducts_insulated]
+        if duct_values[:duct_insulation_present]
           duct_rvalue = 6
         else
           duct_rvalue = 0

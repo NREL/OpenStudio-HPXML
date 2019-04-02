@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-19T10:12:43-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-04-01T12:22:07-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2256">
+    <BuildingID id="bid-2146">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.115</Address1>
+        <Address1>Regression run 6.116</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -291,11 +291,9 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
+                  <DuctInsulationPresent>true</DuctInsulationPresent>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
-                  <extension>
-                    <hescore_ducts_insulated>1</hescore_ducts_insulated>
-                  </extension>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
