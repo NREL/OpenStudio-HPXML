@@ -321,14 +321,14 @@ def create_hpxmls
     building_construction_values = {}
     climate_and_risk_zones_values = {}
     air_infiltration_measurement_values = {}
-    attic_values = {}
-    attic_roofs_values = []
-    attic_floors_values = []
-    attic_walls_values = []
-    foundation_values = {}
-    frame_floors_values = []
-    foundation_walls_values = []
-    slabs_values = []
+    attics_values = []
+    attics_roofs_values = []
+    attics_floors_values = []
+    attics_walls_values = []
+    foundations_values = []
+    foundations_framefloors_values = []
+    foundations_walls_values = []
+    foundations_slabs_values = []
     rim_joists_values = []
     walls_values = []
     windows_values = []
@@ -363,14 +363,14 @@ def create_hpxmls
       building_construction_values = get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
       climate_and_risk_zones_values = get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
       air_infiltration_measurement_values = get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values)
-      attic_values = get_hpxml_file_attic_values(hpxml_file, attic_values)
-      attic_roofs_values = get_hpxml_file_attic_roofs_values(hpxml_file, attic_roofs_values)
-      attic_floors_values = get_hpxml_file_attic_floors_values(hpxml_file, attic_floors_values)
-      attic_walls_values = get_hpxml_file_attic_walls_values(hpxml_file, attic_walls_values)
-      foundation_values = get_hpxml_file_foundation_values(hpxml_file, foundation_values)
-      frame_floors_values = get_hpxml_file_frame_floor_values(hpxml_file, frame_floors_values)
-      foundation_walls_values = get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
-      slabs_values = get_hpxml_file_slab_values(hpxml_file, slabs_values)
+      attics_values = get_hpxml_file_attics_values(hpxml_file, attics_values)
+      attics_roofs_values = get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
+      attics_floors_values = get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
+      attics_walls_values = get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
+      foundations_values = get_hpxml_file_foundations_values(hpxml_file, foundations_values)
+      foundations_framefloors_values = get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framefloors_values)
+      foundations_walls_values = get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values)
+      foundations_slabs_values = get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values)
       rim_joists_values = get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
       walls_values = get_hpxml_file_walls_values(hpxml_file, walls_values)
       windows_values = get_hpxml_file_windows_values(hpxml_file, windows_values)
@@ -416,25 +416,41 @@ def create_hpxmls
     HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
     HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
     HPXML.add_air_infiltration_measurement(hpxml: hpxml, **air_infiltration_measurement_values)
-    attic = HPXML.add_attic(hpxml: hpxml, **attic_values)
-    attic_roofs_values.each do |attic_roof_values|
-      HPXML.add_attic_roof(attic: attic, **attic_roof_values)
+    attics_values.each do |attic_values|
+      attic = HPXML.add_attic(hpxml: hpxml, **attic_values)
+      attics_roofs_values.each do |attic_roofs_values|
+        attic_roofs_values.each do |attic_roof_values|
+          HPXML.add_attic_roof(attic: attic, **attic_roof_values)
+        end
+      end
+      attics_floors_values.each do |attic_floors_values|
+        attic_floors_values.each do |attic_floor_values|
+          HPXML.add_attic_floor(attic: attic, **attic_floor_values)
+        end
+      end
+      attics_walls_values.each do |attic_walls_values|
+        attic_walls_values.each do |attic_wall_values|
+          HPXML.add_attic_wall(attic: attic, **attic_wall_values)
+        end
+      end
     end
-    attic_floors_values.each do |attic_floor_values|
-      HPXML.add_attic_floor(attic: attic, **attic_floor_values)
-    end
-    attic_walls_values.each do |attic_wall_values|
-      HPXML.add_attic_wall(attic: attic, **attic_wall_values)
-    end
-    foundation = HPXML.add_foundation(hpxml: hpxml, **foundation_values)
-    frame_floors_values.each do |frame_floor_values|
-      HPXML.add_frame_floor(foundation: foundation, **frame_floor_values)
-    end
-    foundation_walls_values.each do |foundation_wall_values|
-      HPXML.add_foundation_wall(foundation: foundation, **foundation_wall_values)
-    end
-    slabs_values.each do |slab_values|
-      HPXML.add_slab(foundation: foundation, **slab_values)
+    foundations_values.each do |foundation_values|
+      foundation = HPXML.add_foundation(hpxml: hpxml, **foundation_values)
+      foundations_framefloors_values.each do |foundation_framefloors_values|
+        foundation_framefloors_values.each do |foundation_framefloor_values|
+          HPXML.add_frame_floor(foundation: foundation, **foundation_framefloor_values)
+        end
+      end
+      foundations_walls_values.each do |foundation_walls_values|
+        foundation_walls_values.each do |foundation_wall_values|
+          HPXML.add_foundation_wall(foundation: foundation, **foundation_wall_values)
+        end
+      end
+      foundations_slabs_values.each do |foundation_slabs_values|
+        foundation_slabs_values.each do |foundation_slab_values|
+          HPXML.add_slab(foundation: foundation, **foundation_slab_values)
+        end
+      end
     end
     rim_joists_values.each do |rim_joist_values|
       HPXML.add_rim_joist(hpxml: hpxml, **rim_joist_values)
@@ -632,264 +648,264 @@ def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltrat
   return air_infiltration_measurement_values
 end
 
-def get_hpxml_file_attic_values(hpxml_file, attic_values)
+def get_hpxml_file_attics_values(hpxml_file, attics_values)
   if hpxml_file == 'valid.xml'
-    attic_values = { :id => "Attic_ID1",
-                     :attic_type => "UnventedAttic" }
+    attics_values = [{ :id => "Attic_ID1",
+                       :attic_type => "UnventedAttic" }]
   elsif hpxml_file == 'valid-atticroof-vented.xml'
-    attic_values[:attic_type] = "VentedAttic"
-    attic_values[:specific_leakage_area] = 0.003
+    attics_values[0][:attic_type] = "VentedAttic"
+    attics_values[0][:specific_leakage_area] = 0.003
   elsif hpxml_file == 'valid-atticroof-flat.xml'
-    attic_values[:attic_type] = "FlatRoof"
+    attics_values[0][:attic_type] = "FlatRoof"
   elsif hpxml_file == 'valid-atticroof-conditioned.xml'
-    attic_values[:attic_type] = "ConditionedAttic"
+    attics_values[0][:attic_type] = "ConditionedAttic"
   elsif hpxml_file == 'valid-atticroof-cathedral.xml'
-    attic_values[:attic_type] = "CathedralCeiling"
+    attics_values[0][:attic_type] = "CathedralCeiling"
   end
-  return attic_values
+  return attics_values
 end
 
-def get_hpxml_file_attic_roofs_values(hpxml_file, attic_roofs_values)
+def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
   if hpxml_file == 'valid.xml'
-    attic_roofs_values = [{ :id => "attic-roof-1",
-                            :area => 4200,
-                            :solar_absorptance => 0.75,
-                            :emittance => 0.9,
-                            :pitch => 6,
-                            :radiant_barrier => false,
-                            :insulation_id => "Attic_Roof_Ins_ID1",
-                            :insulation_assembly_r_value => 2.3 }]
+    attics_roofs_values = [[{ :id => "attic-roof-1",
+                              :area => 4200,
+                              :solar_absorptance => 0.75,
+                              :emittance => 0.9,
+                              :pitch => 6,
+                              :radiant_barrier => false,
+                              :insulation_id => "Attic_Roof_Ins_ID1",
+                              :insulation_assembly_r_value => 2.3 }]]
   elsif hpxml_file == 'valid-atticroof-flat.xml'
-    attic_roofs_values[0][:area] = 3500
-    attic_roofs_values[0][:pitch] = 0
-    attic_roofs_values[0][:insulation_assembly_r_value] = 25.8
+    attics_roofs_values[0][0][:area] = 3500
+    attics_roofs_values[0][0][:pitch] = 0
+    attics_roofs_values[0][0][:insulation_assembly_r_value] = 25.8
   elsif hpxml_file == 'valid-atticroof-conditioned.xml'
-    attic_roofs_values[0][:insulation_assembly_r_value] = 25.8
+    attics_roofs_values[0][0][:insulation_assembly_r_value] = 25.8
   elsif hpxml_file == 'valid-atticroof-cathedral.xml'
-    attic_roofs_values[0][:insulation_assembly_r_value] = 25.8
+    attics_roofs_values[0][0][:insulation_assembly_r_value] = 25.8
   end
-  return attic_roofs_values
+  return attics_roofs_values
 end
 
-def get_hpxml_file_attic_floors_values(hpxml_file, attic_floors_values)
+def get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
   if hpxml_file == 'valid.xml'
-    attic_floors_values = [{ :id => "attic-floor-1",
-                             :adjacent_to => "living space",
-                             :area => 4200,
-                             :insulation_id => "Attic_Floor_Ins_ID1",
-                             :insulation_assembly_r_value => 39.3 }]
+    attics_floors_values = [[{ :id => "attic-floor-1",
+                               :adjacent_to => "living space",
+                               :area => 4200,
+                               :insulation_id => "Attic_Floor_Ins_ID1",
+                               :insulation_assembly_r_value => 39.3 }]]
   elsif hpxml_file == 'valid-atticroof-flat.xml'
-    attic_floors_values.delete_at(0)
+    attics_floors_values[0].delete_at(0)
   elsif hpxml_file == 'valid-atticroof-conditioned.xml'
-    attic_floors_values.delete_at(0)
+    attics_floors_values[0].delete_at(0)
   elsif hpxml_file == 'valid-atticroof-cathedral.xml'
-    attic_floors_values.delete_at(0)
+    attics_floors_values[0].delete_at(0)
   end
-  return attic_floors_values
+  return attics_floors_values
 end
 
-def get_hpxml_file_attic_walls_values(hpxml_file, attic_walls_values)
+def get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
   if hpxml_file == 'valid.xml'
-    attic_walls_values = [{ :id => "attic-wall-1",
-                            :adjacent_to => "living space",
-                            :wall_type => "WoodStud",
-                            :area => 32,
-                            :solar_absorptance => 0.75,
-                            :emittance => 0.9,
-                            :insulation_id => "Attic_Wall_Ins_ID1",
-                            :insulation_assembly_r_value => 4.0 }]
+    attics_walls_values = [[{ :id => "attic-wall-1",
+                              :adjacent_to => "living space",
+                              :wall_type => "WoodStud",
+                              :area => 32,
+                              :solar_absorptance => 0.75,
+                              :emittance => 0.9,
+                              :insulation_id => "Attic_Wall_Ins_ID1",
+                              :insulation_assembly_r_value => 4.0 }]]
   elsif hpxml_file == 'valid-enclosure-multiple-walls.xml'
-    attic_walls_values[0][:id] = "attic-wall-1-small"
-    attic_walls_values[0][:area] = 2
-    attic_walls_values << { :id => "attic-wall-1-medium",
-                            :adjacent_to => "living space",
-                            :wall_type => "WoodStud",
-                            :area => 8,
-                            :solar_absorptance => 0.75,
-                            :emittance => 0.9,
-                            :insulation_id => "Attic_Wall_Ins_ID2",
-                            :insulation_assembly_r_value => 4.0 }
-    attic_walls_values << { :id => "attic-wall-1-large",
-                            :adjacent_to => "living space",
-                            :wall_type => "WoodStud",
-                            :area => 22,
-                            :solar_absorptance => 0.75,
-                            :emittance => 0.9,
-                            :insulation_id => "Attic_Wall_Ins_ID3",
-                            :insulation_assembly_r_value => 4.0 }
+    attics_walls_values[0][0][:id] = "attic-wall-1-small"
+    attics_walls_values[0][0][:area] = 2
+    attics_walls_values[0] << { :id => "attic-wall-1-medium",
+                                :adjacent_to => "living space",
+                                :wall_type => "WoodStud",
+                                :area => 8,
+                                :solar_absorptance => 0.75,
+                                :emittance => 0.9,
+                                :insulation_id => "Attic_Wall_Ins_ID2",
+                                :insulation_assembly_r_value => 4.0 }
+    attics_walls_values[0] << { :id => "attic-wall-1-large",
+                                :adjacent_to => "living space",
+                                :wall_type => "WoodStud",
+                                :area => 22,
+                                :solar_absorptance => 0.75,
+                                :emittance => 0.9,
+                                :insulation_id => "Attic_Wall_Ins_ID3",
+                                :insulation_assembly_r_value => 4.0 }
   elsif hpxml_file == 'valid-atticroof-flat.xml'
-    attic_walls_values.delete_at(0)
+    attics_walls_values[0].delete_at(0)
   elsif hpxml_file == 'valid-atticroof-conditioned.xml'
-    attic_walls_values[0][:insulation_assembly_r_value] = 23.0
+    attics_walls_values[0][0][:insulation_assembly_r_value] = 23.0
   elsif hpxml_file == 'valid-atticroof-cathedral.xml'
-    attic_walls_values[0][:insulation_assembly_r_value] = 23.0
+    attics_walls_values[0][0][:insulation_assembly_r_value] = 23.0
   end
-  return attic_walls_values
+  return attics_walls_values
 end
 
-def get_hpxml_file_foundation_values(hpxml_file, foundation_values)
+def get_hpxml_file_foundations_values(hpxml_file, foundations_values)
   if hpxml_file == 'valid.xml'
-    foundation_values = { :id => "Foundation_ID1",
-                          :foundation_type => "ConditionedBasement" }
+    foundations_values = [{ :id => "Foundation_ID1",
+                            :foundation_type => "ConditionedBasement" }]
   elsif ['valid-foundation-pier-beam.xml', 'valid-foundation-pier-beam-reference.xml'].include? hpxml_file
-    foundation_values[:foundation_type] = "Ambient"
+    foundations_values[0][:foundation_type] = "Ambient"
   elsif ['valid-foundation-slab.xml', 'valid-foundation-slab-reference.xml'].include? hpxml_file
-    foundation_values[:foundation_type] = "SlabOnGrade"
+    foundations_values[0][:foundation_type] = "SlabOnGrade"
   elsif ['valid-foundation-unconditioned-basement.xml', 'valid-foundation-unconditioned-basement-reference.xml'].include? hpxml_file
-    foundation_values[:foundation_type] = "UnconditionedBasement"
+    foundations_values[0][:foundation_type] = "UnconditionedBasement"
   elsif ['valid-foundation-unvented-crawlspace.xml', 'valid-foundation-unvented-crawlspace-reference.xml'].include? hpxml_file
-    foundation_values[:foundation_type] = "UnventedCrawlspace"
+    foundations_values[0][:foundation_type] = "UnventedCrawlspace"
   elsif ['valid-foundation-vented-crawlspace.xml', 'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundation_values[:foundation_type] = "VentedCrawlspace"
-    foundation_values[:specific_leakage_area] = 0.00667
+    foundations_values[0][:foundation_type] = "VentedCrawlspace"
+    foundations_values[0][:specific_leakage_area] = 0.00667
   end
-  return foundation_values
+  return foundations_values
 end
 
-def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
+def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values)
   if hpxml_file == 'valid.xml'
-    foundation_walls_values = [{ :id => "fndwall-1",
-                                 :height => 9,
-                                 :area => 2160,
-                                 :thickness => 8,
-                                 :depth_below_grade => 7,
-                                 :adjacent_to => "ground",
-                                 :insulation_id => "FWall_Ins_ID1",
-                                 :insulation_assembly_r_value => 10.69 }]
+    foundations_walls_values = [[{ :id => "fndwall-1",
+                                   :height => 9,
+                                   :area => 2160,
+                                   :thickness => 8,
+                                   :depth_below_grade => 7,
+                                   :adjacent_to => "ground",
+                                   :insulation_id => "FWall_Ins_ID1",
+                                   :insulation_assembly_r_value => 10.69 }]]
   elsif hpxml_file == 'valid-foundation-conditioned-basement-reference.xml'
-    foundation_walls_values[0][:insulation_assembly_r_value] = nil
+    foundations_walls_values[0][0][:insulation_assembly_r_value] = nil
   elsif hpxml_file == 'valid-foundation-unconditioned-basement-reference.xml'
-    foundation_walls_values[0][:insulation_assembly_r_value] = nil
+    foundations_walls_values[0][0][:insulation_assembly_r_value] = nil
   elsif ['valid-foundation-unvented-crawlspace.xml', 'valid-foundation-vented-crawlspace.xml'].include? hpxml_file
-    foundation_walls_values[0][:height] = 4
-    foundation_walls_values[0][:area] = 960
-    foundation_walls_values[0][:depth_below_grade] = 3
+    foundations_walls_values[0][0][:height] = 4
+    foundations_walls_values[0][0][:area] = 960
+    foundations_walls_values[0][0][:depth_below_grade] = 3
   elsif ['valid-foundation-unvented-crawlspace-reference.xml', 'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundation_walls_values[0][:insulation_assembly_r_value] = nil
-    foundation_walls_values[0][:height] = 4
-    foundation_walls_values[0][:area] = 960
-    foundation_walls_values[0][:depth_below_grade] = 3
+    foundations_walls_values[0][0][:insulation_assembly_r_value] = nil
+    foundations_walls_values[0][0][:height] = 4
+    foundations_walls_values[0][0][:area] = 960
+    foundations_walls_values[0][0][:depth_below_grade] = 3
   elsif ['valid-foundation-pier-beam.xml', 'valid-foundation-pier-beam-reference.xml', 'valid-foundation-slab.xml', 'valid-foundation-slab-reference.xml'].include? hpxml_file
-    foundation_walls_values = []
+    foundations_walls_values = []
   end
-  return foundation_walls_values
+  return foundations_walls_values
 end
 
-def get_hpxml_file_slab_values(hpxml_file, slabs_values)
+def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values)
   if hpxml_file == 'valid.xml'
-    slabs_values = [{ :id => "fndslab-1",
-                      :area => 3500,
-                      :thickness => 4,
-                      :exposed_perimeter => 240,
-                      :perimeter_insulation_depth => 0,
-                      :under_slab_insulation_width => 0,
-                      :depth_below_grade => 7,
-                      :perimeter_insulation_id => "FSlab_PerimIns_ID1",
-                      :perimeter_insulation_r_value => 0,
-                      :under_slab_insulation_id => "FSlab_UnderIns_ID1",
-                      :under_slab_insulation_r_value => 0,
-                      :carpet_fraction => 0,
-                      :carpet_r_value => 0 }]
+    foundations_slabs_values = [[{ :id => "fndslab-1",
+                                   :area => 3500,
+                                   :thickness => 4,
+                                   :exposed_perimeter => 240,
+                                   :perimeter_insulation_depth => 0,
+                                   :under_slab_insulation_width => 0,
+                                   :depth_below_grade => 7,
+                                   :perimeter_insulation_id => "FSlab_PerimIns_ID1",
+                                   :perimeter_insulation_r_value => 0,
+                                   :under_slab_insulation_id => "FSlab_UnderIns_ID1",
+                                   :under_slab_insulation_r_value => 0,
+                                   :carpet_fraction => 0,
+                                   :carpet_r_value => 0 }]]
   elsif hpxml_file == 'valid-foundation-conditioned-basement-reference.xml'
-    slabs_values[0][:perimeter_insulation_r_value] = nil
-    slabs_values[0][:under_slab_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:perimeter_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_r_value] = nil
   elsif hpxml_file == 'valid-foundation-slab.xml'
-    slabs_values[0][:id] = "Slab_ID1"
-    slabs_values[0][:under_slab_insulation_width] = 2
-    slabs_values[0][:depth_below_grade] = 0
-    slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
-    slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
-    slabs_values[0][:under_slab_insulation_r_value] = 5
-    slabs_values[0][:carpet_fraction] = 1
-    slabs_values[0][:carpet_r_value] = 2.5
+    foundations_slabs_values[0][0][:id] = "Slab_ID1"
+    foundations_slabs_values[0][0][:under_slab_insulation_width] = 2
+    foundations_slabs_values[0][0][:depth_below_grade] = 0
+    foundations_slabs_values[0][0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
+    foundations_slabs_values[0][0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
+    foundations_slabs_values[0][0][:under_slab_insulation_r_value] = 5
+    foundations_slabs_values[0][0][:carpet_fraction] = 1
+    foundations_slabs_values[0][0][:carpet_r_value] = 2.5
   elsif hpxml_file == 'valid-foundation-slab-reference.xml'
-    slabs_values[0][:id] = "Slab_ID1"
-    slabs_values[0][:depth_below_grade] = 0
-    slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
-    slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
-    slabs_values[0][:perimeter_insulation_depth] = nil
-    slabs_values[0][:under_slab_insulation_width] = nil
-    slabs_values[0][:perimeter_insulation_r_value] = nil
-    slabs_values[0][:under_slab_insulation_r_value] = nil
-    slabs_values[0][:carpet_fraction] = 1
-    slabs_values[0][:carpet_r_value] = 2.5
+    foundations_slabs_values[0][0][:id] = "Slab_ID1"
+    foundations_slabs_values[0][0][:depth_below_grade] = 0
+    foundations_slabs_values[0][0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
+    foundations_slabs_values[0][0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
+    foundations_slabs_values[0][0][:perimeter_insulation_depth] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_width] = nil
+    foundations_slabs_values[0][0][:perimeter_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:carpet_fraction] = 1
+    foundations_slabs_values[0][0][:carpet_r_value] = 2.5
   elsif hpxml_file == 'valid-foundation-unconditioned-basement-reference.xml'
-    slabs_values[0][:perimeter_insulation_depth] = nil
-    slabs_values[0][:under_slab_insulation_width] = nil
-    slabs_values[0][:perimeter_insulation_r_value] = nil
-    slabs_values[0][:under_slab_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:perimeter_insulation_depth] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_width] = nil
+    foundations_slabs_values[0][0][:perimeter_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_r_value] = nil
   elsif ['valid-foundation-unvented-crawlspace.xml', 'valid-foundation-vented-crawlspace.xml'].include? hpxml_file
-    slabs_values[0][:id] = "Slab_ID1"
-    slabs_values[0][:thickness] = 0
-    slabs_values[0][:depth_below_grade] = 3
-    slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
-    slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
-    slabs_values[0][:carpet_r_value] = 2.5
+    foundations_slabs_values[0][0][:id] = "Slab_ID1"
+    foundations_slabs_values[0][0][:thickness] = 0
+    foundations_slabs_values[0][0][:depth_below_grade] = 3
+    foundations_slabs_values[0][0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
+    foundations_slabs_values[0][0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
+    foundations_slabs_values[0][0][:carpet_r_value] = 2.5
   elsif ['valid-foundation-unvented-crawlspace-reference.xml', 'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    slabs_values[0][:id] = "Slab_ID1"
-    slabs_values[0][:perimeter_insulation_depth] = nil
-    slabs_values[0][:under_slab_insulation_width] = nil
-    slabs_values[0][:thickness] = 0
-    slabs_values[0][:depth_below_grade] = 3
-    slabs_values[0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
-    slabs_values[0][:perimeter_insulation_r_value] = nil
-    slabs_values[0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
-    slabs_values[0][:under_slab_insulation_r_value] = nil
-    slabs_values[0][:carpet_r_value] = 2.5
+    foundations_slabs_values[0][0][:id] = "Slab_ID1"
+    foundations_slabs_values[0][0][:perimeter_insulation_depth] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_width] = nil
+    foundations_slabs_values[0][0][:thickness] = 0
+    foundations_slabs_values[0][0][:depth_below_grade] = 3
+    foundations_slabs_values[0][0][:perimeter_insulation_id] = "PerimeterInsulation_ID1"
+    foundations_slabs_values[0][0][:perimeter_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_id] = "UnderSlabInsulation_ID1"
+    foundations_slabs_values[0][0][:under_slab_insulation_r_value] = nil
+    foundations_slabs_values[0][0][:carpet_r_value] = 2.5
   elsif ['valid-foundation-pier-beam.xml', 'valid-foundation-pier-beam-reference.xml'].include? hpxml_file
-    slabs_values = []
+    foundations_slabs_values = []
   end
-  return slabs_values
+  return foundations_slabs_values
 end
 
-def get_hpxml_file_frame_floor_values(hpxml_file, frame_floors_values)
+def get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framefloors_values)
   if hpxml_file == 'valid-foundation-pier-beam.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1",
-                             :insulation_assembly_r_value => 18.7 }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1",
+                                         :insulation_assembly_r_value => 18.7 }]
   elsif hpxml_file == 'valid-foundation-pier-beam-reference.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1",
-                             :insulation_assembly_r_value => nil }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1",
+                                         :insulation_assembly_r_value => nil }]
   elsif hpxml_file == 'valid-foundation-unconditioned-basement.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1",
-                             :insulation_assembly_r_value => 18.7 }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1",
+                                         :insulation_assembly_r_value => 18.7 }]
   elsif hpxml_file == 'valid-foundation-unconditioned-basement-reference.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1" }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1" }]
   elsif hpxml_file == 'valid-foundation-unvented-crawlspace.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1",
-                             :insulation_assembly_r_value => 18.7 }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1",
+                                         :insulation_assembly_r_value => 18.7 }]
   elsif hpxml_file == 'valid-foundation-unvented-crawlspace-reference.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1" }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1" }]
   elsif hpxml_file == 'valid-foundation-vented-crawlspace.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1",
-                             :insulation_assembly_r_value => 18.7 }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1",
+                                         :insulation_assembly_r_value => 18.7 }]
   elsif hpxml_file == 'valid-foundation-vented-crawlspace-reference.xml'
-    frame_floors_values << { :id => "Floor_ID1",
-                             :adjacent_to => "living space",
-                             :area => 3500,
-                             :insulation_id => "Floor_Ins_ID1" }
+    foundations_framefloors_values << [{ :id => "Floor_ID1",
+                                         :adjacent_to => "living space",
+                                         :area => 3500,
+                                         :insulation_id => "Floor_Ins_ID1" }]
   end
-  return frame_floors_values
+  return foundations_framefloors_values
 end
 
 def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
