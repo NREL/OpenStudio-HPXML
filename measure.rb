@@ -1318,8 +1318,8 @@ class OSModel
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
       end
-      solar_abs = 0.75
-      emitt = 0.9
+      solar_abs = rim_joist_values[:solar_absorptance]
+      emitt = rim_joist_values[:emittance]
 
       assembly_r = rim_joist_values[:insulation_assembly_r_value]
 
