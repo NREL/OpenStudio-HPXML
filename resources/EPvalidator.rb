@@ -240,6 +240,8 @@ class EnergyPlusValidator
         '[InteriorAdjacentTo="living space" or InteriorAdjacentTo="basement - unconditioned" or InteriorAdjacentTo="crawlspace - vented" or InteriorAdjacentTo="crawlspace - unvented" or InteriorAdjacentTo="attic - vented" or InteriorAdjacentTo="attic - unvented" or InteriorAdjacentTo="attic - conditioned" or InteriorAdjacentTo="garage"]' => one,
         'Area' => one,
         'Azimuth' => zero_or_one,
+        'SolarAbsorptance' => one,
+        'Emittance' => one,
         'Insulation/SystemIdentifier' => one, # Required by HPXML schema
         'Insulation/AssemblyEffectiveRValue' => one,
       },

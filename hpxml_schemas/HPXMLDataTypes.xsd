@@ -1559,6 +1559,7 @@
 			<xs:enumeration value="top freezer"/>
 			<xs:enumeration value="bottom freezer"/>
 			<xs:enumeration value="single door"/>
+			<xs:enumeration value="single door with freezer"/>
 			<xs:enumeration value="full-size one door"/>
 			<xs:enumeration value="full-size two doors"/>
 			<xs:enumeration value="half or quarter size"/>
@@ -2161,5 +2162,11 @@
 			<xs:documentation>Specific Leakage Area (SLA) is defined as the Effective Leakage Area (ELA) divided by the floor area.</xs:documentation>
 		</xs:annotation>
 		<xs:restriction base="xs:double"/>
+	</xs:simpleType>
+	<xs:simpleType name="MinutesPerDay">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="1440"/>
+		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>
