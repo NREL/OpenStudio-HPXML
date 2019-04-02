@@ -678,6 +678,8 @@ class HPXML
                          interior_adjacent_to: nil,
                          area: nil,
                          azimuth: nil,
+                         solar_absorptance: nil,
+                         emittance: nil,
                          insulation_id: nil,
                          insulation_assembly_r_value: nil,
                          **remainder)
@@ -689,6 +691,8 @@ class HPXML
     XMLHelper.add_element(rim_joist, "InteriorAdjacentTo", interior_adjacent_to) unless interior_adjacent_to.nil?
     XMLHelper.add_element(rim_joist, "Area", to_float(area)) unless area.nil?
     XMLHelper.add_element(rim_joist, "Azimuth", to_integer(azimuth)) unless azimuth.nil?
+    XMLHelper.add_element(rim_joist, "SolarAbsorptance", to_float(solar_absorptance)) unless solar_absorptance.nil?
+    XMLHelper.add_element(rim_joist, "Emittance", to_float(emittance)) unless emittance.nil?
     add_assembly_insulation(parent: rim_joist,
                             id: insulation_id,
                             assembly_r_value: to_float(insulation_assembly_r_value))
@@ -710,6 +714,8 @@ class HPXML
              :interior_adjacent_to => XMLHelper.get_value(rim_joist, "InteriorAdjacentTo"),
              :area => to_float(XMLHelper.get_value(rim_joist, "Area")),
              :azimuth => to_integer(XMLHelper.get_value(rim_joist, "Azimuth")),
+             :solar_absorptance => to_float(XMLHelper.get_value(rim_joist, "SolarAbsorptance")),
+             :emittance => to_float(XMLHelper.get_value(rim_joist, "Emittance")),
              :insulation_id => insulation_values[:id],
              :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]) }
   end
