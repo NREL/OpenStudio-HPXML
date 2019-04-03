@@ -1269,26 +1269,26 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
                           :azimuth => 90,
                           :ufactor => 0.33,
                           :shgc => 0.45,
-                          :roof_idref => "attic-roof-1" }
+                          :roof_idref => "attic-roof-north" }
     skylights_values << { :id => "Skylight_ID2",
                           :area => 15,
                           :azimuth => 270,
                           :ufactor => 0.35,
                           :shgc => 0.47,
-                          :roof_idref => "attic-roof-1" }
+                          :roof_idref => "attic-roof-north" }
   elsif hpxml_file == 'invalid-net-area-negative-roof.xml'
     skylights_values << { :id => "Skylight_ID1",
                           :area => 4199,
                           :azimuth => 90,
                           :ufactor => 0.33,
                           :shgc => 0.45,
-                          :roof_idref => "attic-roof-1" }
+                          :roof_idref => "attic-roof-north" }
     skylights_values << { :id => "Skylight_ID2",
                           :area => 15,
                           :azimuth => 270,
                           :ufactor => 0.35,
                           :shgc => 0.47,
-                          :roof_idref => "attic-roof-1" }
+                          :roof_idref => "attic-roof-north" }
   elsif hpxml_file == 'invalid-unattached-skylight.xml'
     skylights_values << { :id => "Skylight_ID1",
                           :area => 15,
@@ -1301,7 +1301,7 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
                           :azimuth => 270,
                           :ufactor => 0.35,
                           :shgc => 0.47,
-                          :roof_idref => "attic-roof-1" }
+                          :roof_idref => "attic-roof-north" }
   end
   return skylights_values
 end

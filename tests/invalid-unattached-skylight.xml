@@ -280,7 +280,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.35</UFactor>
             <SHGC>0.47</SHGC>
-            <AttachedToRoof idref='attic-roof-1'/>
+            <AttachedToRoof idref='attic-roof-north'/>
           </Skylight>
         </Skylights>
         <Doors>

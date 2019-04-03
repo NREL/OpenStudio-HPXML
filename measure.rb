@@ -3779,7 +3779,7 @@ class OSModel
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
     elsif ["basement - unconditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement))
-    elsif ["basement - conditioned"].include? interior_adjacent_to
+    elsif ["basement - conditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement))
     elsif ["crawlspace - vented", "crawlspace - unvented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
