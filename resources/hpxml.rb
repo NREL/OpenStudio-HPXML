@@ -1719,7 +1719,7 @@ class HPXML
       sys_id = XMLHelper.add_element(lighting_group, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", "Lighting_TierI_Interior")
       XMLHelper.add_element(lighting_group, "Location", "interior")
-      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_i_interior)
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", to_float(fraction_tier_i_interior))
       XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier I")
     end
     if not fraction_tier_i_exterior.nil?
@@ -1727,7 +1727,7 @@ class HPXML
       sys_id = XMLHelper.add_element(lighting_group, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", "Lighting_TierI_Exterior")
       XMLHelper.add_element(lighting_group, "Location", "exterior")
-      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_i_exterior)
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", to_float(fraction_tier_i_exterior))
       XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier I")
     end
     if not fraction_tier_i_garage.nil?
@@ -1735,7 +1735,7 @@ class HPXML
       sys_id = XMLHelper.add_element(lighting_group, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", "Lighting_TierI_Garage")
       XMLHelper.add_element(lighting_group, "Location", "garage")
-      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_i_garage)
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", to_float(fraction_tier_i_garage))
       XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier I")
     end
     if not fraction_tier_ii_interior.nil?
@@ -1743,7 +1743,7 @@ class HPXML
       sys_id = XMLHelper.add_element(lighting_group, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", "Lighting_TierII_Interior")
       XMLHelper.add_element(lighting_group, "Location", "interior")
-      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_ii_interior)
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", to_float(fraction_tier_ii_interior))
       XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier II")
     end
     if not fraction_tier_ii_exterior.nil?
@@ -1751,7 +1751,7 @@ class HPXML
       sys_id = XMLHelper.add_element(lighting_group, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", "Lighting_TierII_Exterior")
       XMLHelper.add_element(lighting_group, "Location", "exterior")
-      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_ii_exterior)
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", to_float(fraction_tier_ii_exterior))
       XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier II")
     end
     if not fraction_tier_ii_garage.nil?
@@ -1759,7 +1759,7 @@ class HPXML
       sys_id = XMLHelper.add_element(lighting_group, "SystemIdentifier")
       XMLHelper.add_attribute(sys_id, "id", "Lighting_TierII_Garage")
       XMLHelper.add_element(lighting_group, "Location", "garage")
-      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", fraction_tier_ii_garage)
+      XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", to_float(fraction_tier_ii_garage))
       XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier II")
     end
 
