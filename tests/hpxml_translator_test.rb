@@ -347,7 +347,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Azimuth
-      if XMLHelper.has_element(roof, 'Azimuth')
+      if XMLHelper.has_element(roof, 'Azimuth') and Float(XMLHelper.get_value(roof, "Pitch")) > 0
         hpxml_value = Float(XMLHelper.get_value(roof, 'Azimuth'))
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
