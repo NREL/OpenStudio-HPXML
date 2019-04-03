@@ -102,17 +102,17 @@ class EnergyPlusValidator
 
       # [Attic]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic" => {
-        "AtticType[Attic[Vented='false'] | Attic[Vented='true'] | Attic[Conditioned='true'] | FlatRoof | CathedralCeiling]" => one, # See [AtticType=Unvented] or [AtticType=Vented] or [AtticType=Conditioned]
+        "AtticType[Attic[Vented='false'] | Attic[Vented='true'] | Attic[Conditioned='true'] | FlatRoof | CathedralCeiling]" => one, # See [AtticType=UnventedAttic] or [AtticType=VentedAttic]
         "Roofs/Roof" => one_or_more, # See [AtticRoof]
         "Walls/Wall" => zero_or_more, # See [AtticWall]
       },
 
-      ## [AtticType=Unvented]
+      ## [AtticType=UnventedAttic]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='false']]" => {
         "Floors/Floor" => one_or_more, # See [AtticFloor]
       },
 
-      ## [AtticType=Vented]
+      ## [AtticType=VentedAttic]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]" => {
         "Floors/Floor" => one_or_more, # See [AtticFloor]
         "[SpecificLeakageArea | extension/AtticConstantACHnatural]" => zero_or_one, # Uses ERI Reference Home if not provided
@@ -156,12 +156,12 @@ class EnergyPlusValidator
       # [Foundation]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "FoundationType[Basement | Crawlspace | SlabOnGrade | Ambient]" => one, # See [FoundationType=Basement] or [FoundationType=Crawl] or [FoundationType=Slab] or [FoundationType=Ambient]
+        "FoundationType[Basement[Conditioned='true'] | Basement[Conditioned='false'] | Crawlspace[Vented='true'] |  Crawlspace[Vented='false'] | SlabOnGrade | Ambient]" => one, # See [FoundationType=ConditionedBasement] or [FoundationType=UnconditionedBasement] or [FoundationType=VentedCrawlspace] or [FoundationType=UnventedCrawlspace] or [FoundationType=Slab] or [FoundationType=Ambient]
       },
 
-      ## [FoundationType=Basement]
-      "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement]" => {
-        "FoundationType/Basement/Conditioned" => one, # If not conditioned, see [FoundationType=UnconditionedBasement]
+      ## [FoundationType=ConditionedBasement]
+      "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]" => {
+        "FrameFloor" => zero_or_more, # See [FoundationFrameFloor]
         "FoundationWall" => one_or_more, # See [FoundationWall]
         "Slab" => one_or_more, # See [FoundationSlab]
       },
@@ -169,29 +169,37 @@ class EnergyPlusValidator
       ## [FoundationType=UnconditionedBasement]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]" => {
         "FrameFloor" => one_or_more, # See [FoundationFrameFloor]
+        "FoundationWall" => one_or_more, # See [FoundationWall]
+        "Slab" => one_or_more, # See [FoundationSlab]
       },
 
-      ## [FoundationType=Crawl]
-      "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace]" => {
-        "FoundationType/Crawlspace/Vented" => one, # If vented, see [FoundationType=VentedCrawl]
+      ## [FoundationType=VentedCrawlspace]
+      "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]" => {
+        "SpecificLeakageArea" => zero_or_one, # Uses ERI Reference Home if not provided
         "FrameFloor" => one_or_more, # See [FoundationFrameFloor]
         "FoundationWall" => one_or_more, # See [FoundationWall]
         "Slab" => one_or_more, # See [FoundationSlab]; use slab with zero thickness for dirt floor
       },
 
-      ## [FoundationType=VentedCrawl]
-      "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]" => {
-        "SpecificLeakageArea" => zero_or_one, # Uses ERI Reference Home if not provided
+      ## [FoundationType=UnventedCrawlspace]
+      "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='false']]" => {
+        "FrameFloor" => one_or_more, # See [FoundationFrameFloor]
+        "FoundationWall" => one_or_more, # See [FoundationWall]
+        "Slab" => one_or_more, # See [FoundationSlab]; use slab with zero thickness for dirt floor
       },
 
       ## [FoundationType=Slab]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/SlabOnGrade]" => {
+        "FrameFloor" => zero,
+        "FoundationWall" => zero,
         "Slab" => one_or_more, # See [FoundationSlab]
       },
 
       ## [FoundationType=Ambient]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Ambient]" => {
         "FrameFloor" => one_or_more, # See [FoundationFrameFloor]
+        "FoundationWall" => zero,
+        "Slab" => zero,
       },
 
       ## [FoundationFrameFloor]
@@ -329,7 +337,8 @@ class EnergyPlusValidator
 
       ## [HeatingType=Furnace]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]" => {
-        "DistributionSystem" => one, # See [HVACDistribution]
+        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "DistributionSystem" => one,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='AFUE']/Value" => one,
       },
@@ -343,7 +352,8 @@ class EnergyPlusValidator
 
       ## [HeatingType=Boiler]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler]" => {
-        "DistributionSystem" => one, # See [HVACDistribution]
+        "../../HVACDistribution[DistributionSystemType/HydronicDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "DistributionSystem" => one,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='AFUE']/Value" => one,
       },
@@ -372,7 +382,8 @@ class EnergyPlusValidator
 
       ## [CoolingType=CentralAC]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioning']" => {
-        "DistributionSystem" => one, # See [HVACDistribution]
+        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
       },
 
@@ -395,21 +406,24 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=ASHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='air-to-air']" => {
-        "DistributionSystem" => one, # See [HVACDistribution]
+        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
       },
 
       ## [HeatPumpType=MSHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='mini-split']" => {
-        "DistributionSystem" => zero_or_one, # See [HVACDistribution]
+        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => zero_or_more, # See [HVACDistribution]
+        "DistributionSystem" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
       },
 
       ## [HeatPumpType=GSHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='ground-to-air']" => {
-        "DistributionSystem" => one, # See [HVACDistribution]
+        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
         "AnnualHeatingEfficiency[Units='COP']/Value" => one,
       },

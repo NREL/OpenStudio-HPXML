@@ -157,45 +157,6 @@
                 <SystemIdentifier id='Floor_Ins_ID1'/>
               </Insulation>
             </FrameFloor>
-            <FoundationWall>
-              <SystemIdentifier id='fndwall-1'/>
-              <Height>9.0</Height>
-              <Area>2160.0</Area>
-              <Thickness>8.0</Thickness>
-              <DepthBelowGrade>7.0</DepthBelowGrade>
-              <AdjacentTo>ground</AdjacentTo>
-              <Insulation>
-                <SystemIdentifier id='FWall_Ins_ID1'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
-              </Insulation>
-            </FoundationWall>
-            <Slab>
-              <SystemIdentifier id='fndslab-1'/>
-              <Area>3500.0</Area>
-              <Thickness>4.0</Thickness>
-              <ExposedPerimeter>240.0</ExposedPerimeter>
-              <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-              <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
-              <DepthBelowGrade>7.0</DepthBelowGrade>
-              <PerimeterInsulation>
-                <SystemIdentifier id='FSlab_PerimIns_ID1'/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>0.0</NominalRValue>
-                </Layer>
-              </PerimeterInsulation>
-              <UnderSlabInsulation>
-                <SystemIdentifier id='FSlab_UnderIns_ID1'/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>0.0</NominalRValue>
-                </Layer>
-              </UnderSlabInsulation>
-              <extension>
-                <CarpetFraction>0.0</CarpetFraction>
-                <CarpetRValue>0.0</CarpetRValue>
-              </extension>
-            </Slab>
           </Foundation>
         </Foundations>
         <RimJoists>

@@ -149,18 +149,6 @@
             <FoundationType>
               <SlabOnGrade/>
             </FoundationType>
-            <FoundationWall>
-              <SystemIdentifier id='fndwall-1'/>
-              <Height>9.0</Height>
-              <Area>2160.0</Area>
-              <Thickness>8.0</Thickness>
-              <DepthBelowGrade>7.0</DepthBelowGrade>
-              <AdjacentTo>ground</AdjacentTo>
-              <Insulation>
-                <SystemIdentifier id='FWall_Ins_ID1'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
-              </Insulation>
-            </FoundationWall>
             <Slab>
               <SystemIdentifier id='Slab_ID1'/>
               <Area>3500.0</Area>
