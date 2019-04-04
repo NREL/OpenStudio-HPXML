@@ -167,8 +167,6 @@
               <Area>3500.0</Area>
               <Thickness>4.0</Thickness>
               <ExposedPerimeter>240.0</ExposedPerimeter>
-              <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-              <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
               <DepthBelowGrade>7.0</DepthBelowGrade>
               <PerimeterInsulation>
                 <SystemIdentifier id='FSlab_PerimIns_ID1'/>
