@@ -566,6 +566,7 @@ class HPXML
                                id:,
                                height: nil,
                                area: nil,
+                               azimuth: nil,
                                thickness: nil,
                                depth_below_grade: nil,
                                adjacent_to: nil,
@@ -577,6 +578,7 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(foundation_wall, "Height", to_float(height)) unless height.nil?
     XMLHelper.add_element(foundation_wall, "Area", to_float(area)) unless area.nil?
+    XMLHelper.add_element(foundation_wall, "Azimuth", to_integer(azimuth)) unless azimuth.nil?
     XMLHelper.add_element(foundation_wall, "Thickness", to_float(thickness)) unless thickness.nil?
     XMLHelper.add_element(foundation_wall, "DepthBelowGrade", to_float(depth_below_grade)) unless depth_below_grade.nil?
     XMLHelper.add_element(foundation_wall, "AdjacentTo", adjacent_to) unless adjacent_to.nil?
@@ -600,6 +602,7 @@ class HPXML
     return { :id => HPXML.get_id(foundation_wall),
              :height => to_float(XMLHelper.get_value(foundation_wall, "Height")),
              :area => to_float(XMLHelper.get_value(foundation_wall, "Area")),
+             :azimuth => to_integer(XMLHelper.get_value(foundation_wall, "Azimuth")),
              :thickness => to_float(XMLHelper.get_value(foundation_wall, "Thickness")),
              :depth_below_grade => to_float(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
              :adjacent_to => XMLHelper.get_value(foundation_wall, "AdjacentTo"),
