@@ -2,13 +2,11 @@
 <HPXML xmlns='http://hpxmlonline.com/2014/6' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2014/6' schemaVersion='3.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>Hand</XMLGeneratedBy>
-    <CreatedDateAndTime>2014-11-17T15:17:17.128-07:00</CreatedDateAndTime>
+    <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
+    <CreatedDateAndTime>2019-03-27T16:56:26-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
-    <SoftwareProgramUsed/>
-    <SoftwareProgramVersion/>
     <extension>
       <ERICalculation>
         <Version>2014AEG</Version>
@@ -27,6 +25,9 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
+          <extension>
+            <DisableNaturalVentilation>true</DisableNaturalVentilation>
+          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>3</NumberofConditionedFloors>
@@ -246,9 +247,6 @@
             <RValue>4.4</RValue>
           </Door>
         </Doors>
-        <extension>
-          <DisableNaturalVentilation>true</DisableNaturalVentilation>
-        </extension>
       </Enclosure>
       <Systems>
         <HVAC>

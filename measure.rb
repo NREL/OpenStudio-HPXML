@@ -244,10 +244,9 @@ class OSModel
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
     loop_dhws = {}  # mapping between HPXML Water Heating systems and plant loops
 
-    hvac_extension_values = HPXML.get_extension_values(parent: building.elements["BuildingDetails/Systems/HVAC"])
     use_only_ideal_air = false
-    if not hvac_extension_values[:use_only_ideal_air_system].nil?
-      use_only_ideal_air = hvac_extension_values[:use_only_ideal_air_system]
+    if not building_construction_values[:use_only_ideal_air_system].nil?
+      use_only_ideal_air = building_construction_values[:use_only_ideal_air_system]
     end
 
     # Geometry/Envelope
@@ -287,17 +286,16 @@ class OSModel
     return false if not success
 
     # FIXME: remove the following logic eventually
-    load_distribution = hvac_extension_values[:load_distribution_scheme]
-    if not load_distribution.nil?
-      if not ["UniformLoad", "SequentialLoad"].include? load_distribution
-        fail "Unexpected load distribution scheme #{load_distribution}."
+    if not building_construction_values[:load_distribution_scheme].nil?
+      if not ["UniformLoad", "SequentialLoad"].include? building_construction_values[:load_distribution_scheme]
+        fail "Unexpected load distribution scheme #{building_construction_values[:load_distribution_scheme]}."
       end
 
       thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
       control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
       control_slave_zones_hash.each do |control_zone, slave_zones|
         ([control_zone] + slave_zones).each do |zone|
-          HVAC.prioritize_zone_hvac(model, runner, zone, load_distribution)
+          HVAC.prioritize_zone_hvac(model, runner, zone, building_construction_values[:load_distribution_scheme])
         end
       end
     end
@@ -1003,7 +1001,7 @@ class OSModel
       floor_assembly_r, floor_film_r = nil
       foundation.elements.each("FrameFloor") do |fnd_floor|
         next if foundation_type == "ConditionedBasement"
-        
+
         frame_floor_values = HPXML.get_frame_floor_values(floor: fnd_floor)
 
         floor_id = frame_floor_values[:id]
@@ -1725,7 +1723,7 @@ class OSModel
       if door_azimuth.nil?
         door_azimuth = 0
       end
-      
+
       door_height = 6.67 # ft
       door_width = door_area / door_height
       z_origin = foundation_top
@@ -2969,8 +2967,8 @@ class OSModel
                                           cfis_open_time, cfis_airflow_frac, cfis_airloops)
 
     # Natural Ventilation
-    enclosure_extension_values = HPXML.get_extension_values(parent: building.elements["BuildingDetails/Enclosure"])
-    disable_nat_vent = enclosure_extension_values[:disable_natural_ventilation]
+    site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
+    disable_nat_vent = site_values[:disable_natural_ventilation]
     if not disable_nat_vent.nil? and disable_nat_vent
       nat_vent_htg_offset = 0
       nat_vent_clg_offset = 0

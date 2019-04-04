@@ -2,13 +2,11 @@
 <HPXML xmlns='http://hpxmlonline.com/2014/6' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2014/6' schemaVersion='3.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>Hand</XMLGeneratedBy>
-    <CreatedDateAndTime>2014-11-17T15:17:17.128-07:00</CreatedDateAndTime>
+    <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
+    <CreatedDateAndTime>2019-03-27T16:56:26-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
-    <SoftwareProgramUsed/>
-    <SoftwareProgramVersion/>
     <extension>
       <ERICalculation>
         <Version>2014AEG</Version>
@@ -139,8 +137,6 @@
               <Area>3500.0</Area>
               <Thickness>4.0</Thickness>
               <ExposedPerimeter>240.0</ExposedPerimeter>
-              <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-              <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
               <DepthBelowGrade>7.0</DepthBelowGrade>
               <PerimeterInsulation>
                 <SystemIdentifier id='FSlab_PerimIns_ID1'/>

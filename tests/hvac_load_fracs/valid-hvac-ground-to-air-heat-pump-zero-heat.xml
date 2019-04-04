@@ -2,13 +2,11 @@
 <HPXML xmlns='http://hpxmlonline.com/2014/6' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://hpxmlonline.com/2014/6' schemaVersion='3.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
-    <XMLGeneratedBy>Hand</XMLGeneratedBy>
-    <CreatedDateAndTime>2014-11-17T15:17:17.128-07:00</CreatedDateAndTime>
+    <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
+    <CreatedDateAndTime>2019-03-27T16:56:30-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
-    <SoftwareProgramUsed/>
-    <SoftwareProgramVersion/>
     <extension>
       <ERICalculation>
         <Version>2014AEG</Version>
@@ -256,7 +254,7 @@
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
-              <FractionHeatLoadServed>0</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>EER</Units>
