@@ -317,7 +317,7 @@ def create_hpxmls
 
     hpxml_values = {}
     site_values = {}
-    building_occupancys_values = []
+    building_occupancy_values = {}
     building_construction_values = {}
     climate_and_risk_zones_values = {}
     air_infiltration_measurement_values = {}
@@ -337,32 +337,32 @@ def create_hpxmls
     heating_systems_values = []
     cooling_systems_values = []
     heat_pumps_values = []
-    hvac_controls_values = []
+    hvac_control_values = {}
     hvac_distributions_values = []
     duct_leakage_measurements_values = []
     ducts_values = []
     ventilation_fans_values = []
     water_heating_systems_values = []
-    hot_water_distributions_values = []
+    hot_water_distribution_values = {}
     water_fixtures_values = []
     pv_systems_values = []
-    clothes_washers_values = []
-    clothes_dryers_values = []
-    dishwashers_values = []
-    refrigerators_values = []
-    cooking_ranges_values = []
-    ovens_values = []
-    lightings_values = []
+    clothes_washer_values = {}
+    clothes_dryer_values = {}
+    dishwasher_values = {}
+    refrigerator_values = {}
+    cooking_range_values = {}
+    oven_values = {}
+    lighting_values = {}
     ceiling_fans_values = []
     plug_loads_values = []
-    misc_loads_schedules_values = []
+    misc_load_schedule_values = {}
     hpxml_files.each do |hpxml_file|
       hpxml_values = get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
       site_values = get_hpxml_file_site_values(hpxml_file, site_values)
-      building_occupancys_values = get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancys_values)
+      building_occupancy_values = get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
       building_construction_values = get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
       climate_and_risk_zones_values = get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
-      air_infiltration_measurement_values = get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values)
+      air_infiltration_measurement_values = get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values, building_construction_values)
       attics_values = get_hpxml_file_attics_values(hpxml_file, attics_values)
       attics_roofs_values = get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
       attics_floors_values = get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
@@ -379,25 +379,25 @@ def create_hpxmls
       heating_systems_values = get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
       cooling_systems_values = get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
       heat_pumps_values = get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
-      hvac_controls_values = get_hpxml_file_hvac_control_values(hpxml_file, hvac_controls_values)
-      hvac_distributions_values = get_hpxml_file_hvac_distribution_values(hpxml_file, hvac_distributions_values)
+      hvac_control_values = get_hpxml_file_hvac_control_values(hpxml_file, hvac_control_values)
+      hvac_distributions_values = get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_values)
       duct_leakage_measurements_values = get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_measurements_values)
       ducts_values = get_hpxml_file_ducts_values(hpxml_file, ducts_values)
       ventilation_fans_values = get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
       water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems_values)
-      hot_water_distributions_values = get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distributions_values)
+      hot_water_distribution_values = get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribution_values)
       water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
       pv_systems_values = get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
-      clothes_washers_values = get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washers_values)
-      clothes_dryers_values = get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryers_values)
-      dishwashers_values = get_hpxml_file_dishwasher_values(hpxml_file, dishwashers_values)
-      refrigerators_values = get_hpxml_file_refrigerator_values(hpxml_file, refrigerators_values)
-      cooking_ranges_values = get_hpxml_file_cooking_range_values(hpxml_file, cooking_ranges_values)
-      ovens_values = get_hpxml_file_oven_values(hpxml_file, ovens_values)
-      lightings_values = get_hpxml_file_lighting_values(hpxml_file, lightings_values)
+      clothes_washer_values = get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
+      clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
+      dishwasher_values = get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
+      refrigerator_values = get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
+      cooking_range_values = get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
+      oven_values = get_hpxml_file_oven_values(hpxml_file, oven_values)
+      lighting_values = get_hpxml_file_lighting_values(hpxml_file, lighting_values)
       ceiling_fans_values = get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
-      plug_loads_values = get_hpxml_file_plug_load_values(hpxml_file, plug_loads_values)
-      misc_loads_schedules_values = get_hpxml_file_misc_loads_schedule_values(hpxml_file, misc_loads_schedules_values)
+      plug_loads_values = get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
+      misc_load_schedule_values = get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_values)
     end
 
     hpxml_doc = HPXML.create_hpxml(**hpxml_values)
@@ -410,9 +410,7 @@ def create_hpxmls
     end
 
     HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
-    building_occupancys_values.each do |building_occupancy_values|
-      HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values)
-    end
+    HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values) unless building_occupancy_values.empty?
     HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
     HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
     HPXML.add_air_infiltration_measurement(hpxml: hpxml, **air_infiltration_measurement_values)
@@ -464,9 +462,7 @@ def create_hpxmls
     heat_pumps_values.each do |heat_pump_values|
       HPXML.add_heat_pump(hpxml: hpxml, **heat_pump_values)
     end
-    hvac_controls_values.each do |hvac_control_values|
-      HPXML.add_hvac_control(hpxml: hpxml, **hvac_control_values)
-    end
+    HPXML.add_hvac_control(hpxml: hpxml, **hvac_control_values) unless hvac_control_values.empty?
     hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
       hvac_distribution = HPXML.add_hvac_distribution(hpxml: hpxml, **hvac_distribution_values)
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
@@ -485,47 +481,37 @@ def create_hpxmls
     water_heating_systems_values.each do |water_heating_system_values|
       HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
     end
-    hot_water_distributions_values.each do |hot_water_distribution_values|
-      HPXML.add_hot_water_distribution(hpxml: hpxml, **hot_water_distribution_values)
-    end
+    HPXML.add_hot_water_distribution(hpxml: hpxml, **hot_water_distribution_values) unless hot_water_distribution_values.empty?
     water_fixtures_values.each do |water_fixture_values|
       HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
     end
     pv_systems_values.each do |pv_system_values|
       HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
     end
-    clothes_washers_values.each do |clothes_washer_values|
-      HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values)
-    end
-    clothes_dryers_values.each do |clothes_dryer_values|
-      HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values)
-    end
-    dishwashers_values.each do |dishwasher_values|
-      HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values)
-    end
-    refrigerators_values.each do |refrigerator_values|
-      HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values)
-    end
-    cooking_ranges_values.each do |cooking_range_values|
-      HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values)
-    end
-    ovens_values.each do |oven_values|
-      HPXML.add_oven(hpxml: hpxml, **oven_values)
-    end
-    lightings_values.each do |lighting_values|
-      HPXML.add_lighting(hpxml: hpxml, **lighting_values)
-    end
+    HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values) unless clothes_washer_values.empty?
+    HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values) unless clothes_dryer_values.empty?
+    HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values) unless dishwasher_values.empty?
+    HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values) unless refrigerator_values.empty?
+    HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values) unless cooking_range_values.empty?
+    HPXML.add_oven(hpxml: hpxml, **oven_values) unless oven_values.empty?
+    HPXML.add_lighting(hpxml: hpxml, **lighting_values) unless lighting_values.nil?
     ceiling_fans_values.each do |ceiling_fan_values|
       HPXML.add_ceiling_fan(hpxml: hpxml, **ceiling_fan_values)
     end
     plug_loads_values.each do |plug_load_values|
       HPXML.add_plug_load(hpxml: hpxml, **plug_load_values)
     end
-    misc_loads_schedules_values.each do |misc_loads_schedule_values|
-      HPXML.add_misc_loads_schedule(hpxml: hpxml, **misc_loads_schedule_values)
-    end
+    HPXML.add_misc_loads_schedule(hpxml: hpxml, **misc_load_schedule_values) unless misc_load_schedule_values.empty?
 
     hpxml_path = File.join(tests_dir, derivative)
+
+    # Validate file against HPXML schema
+    schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "hpxml_schemas"))
+    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
+    if errors.size > 0
+      fail errors.to_s
+    end
+
     XMLHelper.write_file(hpxml_doc, hpxml_path)
   end
 
@@ -563,11 +549,11 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
   return site_values
 end
 
-def get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancys_values)
+def get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
   if hpxml_file == 'valid-misc-number-of-occupants.xml'
-    building_occupancys_values << { :number_of_residents => 5 }
+    building_occupancy_values = { :number_of_residents => 5 }
   end
-  return building_occupancys_values
+  return building_occupancy_values
 end
 
 def get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
@@ -655,30 +641,17 @@ def get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zo
   return climate_and_risk_zones_values
 end
 
-def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values)
+def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values, building_construction_values)
   if hpxml_file == 'valid.xml'
     air_infiltration_measurement_values = { :id => "InfiltMeas64",
                                             :house_pressure => 50,
                                             :unit_of_measure => "ACH",
-                                            :air_leakage => 3.0,
-                                            :infiltration_volume => 67575 }
-  elsif ['valid-foundation-pier-beam.xml',
-         'valid-foundation-slab.xml',
-         'valid-foundation-unconditioned-basement.xml',
-         'valid-foundation-unvented-crawlspace.xml',
-         'valid-foundation-vented-crawlspace.xml'].include? hpxml_file
-    air_infiltration_measurement_values[:infiltration_volume] = 33787.5
+                                            :air_leakage => 3.0 }
   elsif hpxml_file == 'valid-infiltration-ach-natural.xml'
-    air_infiltration_measurement_values[:house_pressure] = nil
-    air_infiltration_measurement_values[:unit_of_measure] = nil
-    air_infiltration_measurement_values[:air_leakage] = nil
-    air_infiltration_measurement_values[:infiltration_volume] = nil
-    air_infiltration_measurement_values[:constant_ach_natural] = 0.67
-  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
-    air_infiltration_measurement_values[:infiltration_volume] = 85792.5
-  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
-    air_infiltration_measurement_values[:infiltration_volume] = 89450
+    air_infiltration_measurement_values = { :id => "InfiltMeas64",
+                                            :constant_ach_natural => 0.67 }
   end
+  air_infiltration_measurement_values[:infiltration_volume] = building_construction_values[:conditioned_building_volume]
   return air_infiltration_measurement_values
 end
 
@@ -1069,25 +1042,10 @@ end
 def get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framefloors_values)
   if hpxml_file == 'valid.xml'
     foundations_framefloors_values = [[]]
-  elsif hpxml_file == 'valid-foundation-pier-beam.xml'
-    foundations_framefloors_values = [[{ :id => "Floor_ID1",
-                                         :adjacent_to => "living space",
-                                         :area => 3500,
-                                         :insulation_id => "Floor_Ins_ID1",
-                                         :insulation_assembly_r_value => 18.7 }]]
-  elsif hpxml_file == 'valid-foundation-unconditioned-basement.xml'
-    foundations_framefloors_values = [[{ :id => "Floor_ID1",
-                                         :adjacent_to => "living space",
-                                         :area => 3500,
-                                         :insulation_id => "Floor_Ins_ID1",
-                                         :insulation_assembly_r_value => 18.7 }]]
-  elsif hpxml_file == 'valid-foundation-unvented-crawlspace.xml'
-    foundations_framefloors_values = [[{ :id => "Floor_ID1",
-                                         :adjacent_to => "living space",
-                                         :area => 3500,
-                                         :insulation_id => "Floor_Ins_ID1",
-                                         :insulation_assembly_r_value => 18.7 }]]
-  elsif hpxml_file == 'valid-foundation-vented-crawlspace.xml'
+  elsif ['valid-foundation-pier-beam.xml',
+         'valid-foundation-unconditioned-basement.xml',
+         'valid-foundation-unvented-crawlspace.xml',
+         'valid-foundation-vented-crawlspace.xml'].include? hpxml_file
     foundations_framefloors_values = [[{ :id => "Floor_ID1",
                                          :adjacent_to => "living space",
                                          :area => 3500,
@@ -1662,22 +1620,22 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
   return heat_pumps_values
 end
 
-def get_hpxml_file_hvac_control_values(hpxml_file, hvac_controls_values)
+def get_hpxml_file_hvac_control_values(hpxml_file, hvac_control_values)
   if hpxml_file == 'valid.xml'
-    hvac_controls_values = [{ :id => "HVAC_Ctrl_ID1",
-                              :control_type => "manual thermostat" }]
+    hvac_control_values = { :id => "HVAC_Ctrl_ID1",
+                             :control_type => "manual thermostat" }
   elsif ['valid-hvac-none.xml'].include? hpxml_file
-    hvac_controls_values = []
+    hvac_control_values = {}
   elsif hpxml_file == 'valid-hvac-programmable-thermostat.xml'
-    hvac_controls_values[0][:control_type] = "programmable thermostat"
+    hvac_control_values[:control_type] = "programmable thermostat"
   elsif hpxml_file == 'valid-hvac-setpoints.xml'
-    hvac_controls_values[0][:setpoint_temp_heating_season] = 60
-    hvac_controls_values[0][:setpoint_temp_cooling_season] = 80
+    hvac_control_values[:setpoint_temp_heating_season] = 60
+    hvac_control_values[:setpoint_temp_cooling_season] = 80
   end
-  return hvac_controls_values
+  return hvac_control_values
 end
 
-def get_hpxml_file_hvac_distribution_values(hpxml_file, hvac_distributions_values)
+def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_values)
   if hpxml_file == 'valid.xml'
     hvac_distributions_values = [{ :id => "HVAC_Dist_ID1",
                                    :distribution_system_type => "AirDistribution" }]
@@ -2080,56 +2038,56 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   return water_heating_systems_values
 end
 
-def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distributions_values)
+def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribution_values)
   if hpxml_file == 'valid.xml'
-    hot_water_distributions_values = [{ :id => "HWDist_ID1",
-                                        :system_type => "Standard",
-                                        :standard_piping_length => 30,
-                                        :pipe_r_value => 0.0 }]
+    hot_water_distribution_values = { :id => "HWDist_ID1",
+                                      :system_type => "Standard",
+                                      :standard_piping_length => 30,
+                                      :pipe_r_value => 0.0 }
   elsif hpxml_file == 'valid-dhw-dwhr.xml'
-    hot_water_distributions_values[0][:dwhr_facilities_connected] = "all"
-    hot_water_distributions_values[0][:dwhr_equal_flow] = true
-    hot_water_distributions_values[0][:dwhr_efficiency] = 0.55
+    hot_water_distribution_values[:dwhr_facilities_connected] = "all"
+    hot_water_distribution_values[:dwhr_equal_flow] = true
+    hot_water_distribution_values[:dwhr_efficiency] = 0.55
   elsif hpxml_file == 'valid-dhw-recirc-demand.xml'
-    hot_water_distributions_values[0][:system_type] = "Recirculation"
-    hot_water_distributions_values[0][:recirculation_control_type] = "presence sensor demand control"
-    hot_water_distributions_values[0][:recirculation_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_branch_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_pump_power] = 50
-    hot_water_distributions_values[0][:pipe_r_value] = 3
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "presence sensor demand control"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+    hot_water_distribution_values[:pipe_r_value] = 3
   elsif hpxml_file == 'valid-dhw-recirc-manual.xml'
-    hot_water_distributions_values[0][:system_type] = "Recirculation"
-    hot_water_distributions_values[0][:recirculation_control_type] = "manual demand control"
-    hot_water_distributions_values[0][:recirculation_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_branch_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_pump_power] = 50
-    hot_water_distributions_values[0][:pipe_r_value] = 3
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "manual demand control"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
+    hot_water_distribution_values[:pipe_r_value] = 3
   elsif hpxml_file == 'valid-dhw-recirc-nocontrol.xml'
-    hot_water_distributions_values[0][:system_type] = "Recirculation"
-    hot_water_distributions_values[0][:recirculation_control_type] = "no control"
-    hot_water_distributions_values[0][:recirculation_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_branch_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_pump_power] = 50
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "no control"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
   elsif hpxml_file == 'valid-dhw-recirc-temperature.xml'
-    hot_water_distributions_values[0][:system_type] = "Recirculation"
-    hot_water_distributions_values[0][:recirculation_control_type] = "temperature"
-    hot_water_distributions_values[0][:recirculation_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_branch_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_pump_power] = 50
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "temperature"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
   elsif hpxml_file == 'valid-dhw-recirc-timer.xml'
-    hot_water_distributions_values[0][:system_type] = "Recirculation"
-    hot_water_distributions_values[0][:recirculation_control_type] = "timer"
-    hot_water_distributions_values[0][:recirculation_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_branch_piping_length] = 30
-    hot_water_distributions_values[0][:recirculation_pump_power] = 50
+    hot_water_distribution_values[:system_type] = "Recirculation"
+    hot_water_distribution_values[:recirculation_control_type] = "timer"
+    hot_water_distribution_values[:recirculation_piping_length] = 30
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_pump_power] = 50
   elsif hpxml_file == 'valid-dhw-recirc-timer-reference.xml'
-    hot_water_distributions_values[0][:recirculation_piping_length] = nil
+    hot_water_distribution_values[:recirculation_piping_length] = nil
   elsif hpxml_file == 'valid-dhw-standard-reference.xml'
-    hot_water_distributions_values[0][:standard_piping_length] = nil
+    hot_water_distribution_values[:standard_piping_length] = nil
   elsif ['valid-dhw-none.xml'].include? hpxml_file
-    hot_water_distributions_values = []
+    hot_water_distribution_values = {}
   end
-  return hot_water_distributions_values
+  return hot_water_distribution_values
 end
 
 def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
@@ -2233,152 +2191,152 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   return pv_systems_values
 end
 
-def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washers_values)
+def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
   if hpxml_file == 'valid.xml'
-    clothes_washers_values << { :id => "ClothesWasher",
-                                :location => "living space",
-                                :modified_energy_factor => 1.2,
-                                :rated_annual_kwh => 387.0,
-                                :label_electric_rate => 0.127,
-                                :label_gas_rate => 1.003,
-                                :label_annual_gas_cost => 24.0,
-                                :capacity => 3.5 }
-  elsif hpxml_file == 'valid-appliances-none.xml'
-    clothes_washers_values = []
-  elsif hpxml_file == 'valid-appliances-washer-imef.xml'
-    clothes_washers_values[0][:modified_energy_factor] = nil
-    clothes_washers_values[0][:integrated_modified_energy_factor] = 0.73
-  elsif hpxml_file == 'valid-appliances-in-basement.xml'
-    clothes_washers_values[0][:location] = "basement - conditioned"
-  elsif ['valid-appliances-reference-elec.xml',
-         'valid-appliances-reference-gas.xml'].include? hpxml_file
-    clothes_washers_values[0][:modified_energy_factor] = nil
-    clothes_washers_values[0][:rated_annual_kwh] = nil
-    clothes_washers_values[0][:label_electric_rate] = nil
-    clothes_washers_values[0][:label_gas_rate] = nil
-    clothes_washers_values[0][:label_annual_gas_cost] = nil
-    clothes_washers_values[0][:capacity] = nil
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
-    clothes_washers_values[0][:location] = "basement - conditioned"
-  end
-  return clothes_washers_values
-end
-
-def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryers_values)
-  if hpxml_file == 'valid.xml'
-    clothes_dryers_values << { :id => "ClothesDryer",
-                               :location => "living space",
-                               :fuel_type => "electricity",
-                               :energy_factor => 3.01,
-                               :control_type => "timer" }
-  elsif hpxml_file == 'valid-appliances-none.xml'
-    clothes_dryers_values = []
-  elsif hpxml_file == 'valid-appliances-dryer-cef.xml'
-    clothes_dryers_values[0][:energy_factor] = nil
-    clothes_dryers_values[0][:combined_energy_factor] = 2.62
-    clothes_dryers_values[0][:control_type] = "moisture"
-  elsif hpxml_file == 'valid-appliances-gas.xml'
-    clothes_dryers_values[0][:fuel_type] = "natural gas"
-    clothes_dryers_values[0][:energy_factor] = 2.67
-    clothes_dryers_values[0][:control_type] = "moisture"
-  elsif hpxml_file == 'valid-appliances-in-basement.xml'
-    clothes_dryers_values[0][:location] = "basement - conditioned"
-  elsif hpxml_file == 'valid-appliances-reference-elec.xml'
-    clothes_dryers_values[0][:energy_factor] = nil
-    clothes_dryers_values[0][:control_type] = nil
-  elsif hpxml_file == 'valid-appliances-reference-gas.xml'
-    clothes_dryers_values[0][:fuel_type] = "natural gas"
-    clothes_dryers_values[0][:energy_factor] = nil
-    clothes_dryers_values[0][:control_type] = nil
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
-    clothes_dryers_values[0][:location] = "basement - conditioned"
-  end
-  return clothes_dryers_values
-end
-
-def get_hpxml_file_dishwasher_values(hpxml_file, dishwashers_values)
-  if hpxml_file == 'valid.xml'
-    dishwashers_values << { :id => "Dishwasher_ID1",
-                            :rated_annual_kwh => 100,
-                            :place_setting_capacity => 12 }
-  elsif hpxml_file == 'valid-appliances-none.xml'
-    dishwashers_values = []
-  elsif hpxml_file == 'valid-appliances-dishwasher-ef.xml'
-    dishwashers_values[0][:rated_annual_kwh] = nil
-    dishwashers_values[0][:energy_factor] = 0.5
-    dishwashers_values[0][:place_setting_capacity] = 8
-  elsif ['valid-appliances-reference-elec.xml',
-         'valid-appliances-reference-gas.xml'].include? hpxml_file
-    dishwashers_values[0][:rated_annual_kwh] = nil
-    dishwashers_values[0][:place_setting_capacity] = nil
-  end
-  return dishwashers_values
-end
-
-def get_hpxml_file_refrigerator_values(hpxml_file, refrigerators_values)
-  if hpxml_file == 'valid.xml'
-    refrigerators_values << { :id => "Refrigerator",
+    clothes_washer_values = { :id => "ClothesWasher",
                               :location => "living space",
-                              :rated_annual_kwh => 609 }
+                              :modified_energy_factor => 1.2,
+                              :rated_annual_kwh => 387.0,
+                              :label_electric_rate => 0.127,
+                              :label_gas_rate => 1.003,
+                              :label_annual_gas_cost => 24.0,
+                              :capacity => 3.5 }
   elsif hpxml_file == 'valid-appliances-none.xml'
-    refrigerators_values = []
+    clothes_washer_values = {}
+  elsif hpxml_file == 'valid-appliances-washer-imef.xml'
+    clothes_washer_values[:modified_energy_factor] = nil
+    clothes_washer_values[:integrated_modified_energy_factor] = 0.73
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
-    refrigerators_values[0][:location] = "basement - conditioned"
+    clothes_washer_values[:location] = "basement - conditioned"
   elsif ['valid-appliances-reference-elec.xml',
          'valid-appliances-reference-gas.xml'].include? hpxml_file
-    refrigerators_values[0][:rated_annual_kwh] = nil
+    clothes_washer_values[:modified_energy_factor] = nil
+    clothes_washer_values[:rated_annual_kwh] = nil
+    clothes_washer_values[:label_electric_rate] = nil
+    clothes_washer_values[:label_gas_rate] = nil
+    clothes_washer_values[:label_annual_gas_cost] = nil
+    clothes_washer_values[:capacity] = nil
   elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
-    refrigerators_values[0][:location] = "basement - conditioned"
+    clothes_washer_values[:location] = "basement - conditioned"
   end
-  return refrigerators_values
+  return clothes_washer_values
 end
 
-def get_hpxml_file_cooking_range_values(hpxml_file, cooking_ranges_values)
+def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
   if hpxml_file == 'valid.xml'
-    cooking_ranges_values << { :id => "Range_ID1",
-                               :fuel_type => "electricity",
-                               :is_induction => true }
+    clothes_dryer_values = { :id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "electricity",
+                             :energy_factor => 3.01,
+                             :control_type => "timer" }
   elsif hpxml_file == 'valid-appliances-none.xml'
-    cooking_ranges_values = []
+    clothes_dryer_values = {}
+  elsif hpxml_file == 'valid-appliances-dryer-cef.xml'
+    clothes_dryer_values[:energy_factor] = nil
+    clothes_dryer_values[:combined_energy_factor] = 2.62
+    clothes_dryer_values[:control_type] = "moisture"
   elsif hpxml_file == 'valid-appliances-gas.xml'
-    cooking_ranges_values[0][:fuel_type] = "natural gas"
-    cooking_ranges_values[0][:is_induction] = false
+    clothes_dryer_values[:fuel_type] = "natural gas"
+    clothes_dryer_values[:energy_factor] = 2.67
+    clothes_dryer_values[:control_type] = "moisture"
+  elsif hpxml_file == 'valid-appliances-in-basement.xml'
+    clothes_dryer_values[:location] = "basement - conditioned"
   elsif hpxml_file == 'valid-appliances-reference-elec.xml'
-    cooking_ranges_values[0][:is_induction] = nil
+    clothes_dryer_values[:energy_factor] = nil
+    clothes_dryer_values[:control_type] = nil
   elsif hpxml_file == 'valid-appliances-reference-gas.xml'
-    cooking_ranges_values[0][:fuel_type] = "natural gas"
-    cooking_ranges_values[0][:is_induction] = nil
+    clothes_dryer_values[:fuel_type] = "natural gas"
+    clothes_dryer_values[:energy_factor] = nil
+    clothes_dryer_values[:control_type] = nil
+  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
+    clothes_dryer_values[:location] = "basement - conditioned"
   end
-  return cooking_ranges_values
+  return clothes_dryer_values
 end
 
-def get_hpxml_file_oven_values(hpxml_file, ovens_values)
+def get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
   if hpxml_file == 'valid.xml'
-    ovens_values << { :id => "Oven_ID1",
-                      :is_convection => true }
+    dishwasher_values = { :id => "Dishwasher_ID1",
+                          :rated_annual_kwh => 100,
+                          :place_setting_capacity => 12 }
   elsif hpxml_file == 'valid-appliances-none.xml'
-    ovens_values = []
+    dishwasher_values = {}
+  elsif hpxml_file == 'valid-appliances-dishwasher-ef.xml'
+    dishwasher_values[:rated_annual_kwh] = nil
+    dishwasher_values[:energy_factor] = 0.5
+    dishwasher_values[:place_setting_capacity] = 8
   elsif ['valid-appliances-reference-elec.xml',
          'valid-appliances-reference-gas.xml'].include? hpxml_file
-    ovens_values[0][:is_convection] = nil
+    dishwasher_values[:rated_annual_kwh] = nil
+    dishwasher_values[:place_setting_capacity] = nil
   end
-  return ovens_values
+  return dishwasher_values
 end
 
-def get_hpxml_file_lighting_values(hpxml_file, lightings_values)
+def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
   if hpxml_file == 'valid.xml'
-    lightings_values = [{ :fraction_tier_i_interior => 0.5,
-                          :fraction_tier_i_exterior => 0.5,
-                          :fraction_tier_i_garage => 0.5,
-                          :fraction_tier_ii_interior => 0.25,
-                          :fraction_tier_ii_exterior => 0.25,
-                          :fraction_tier_ii_garage => 0.25 }]
-  elsif hpxml_file == 'valid-misc-lighting-default.xml'
-    lightings_values = [{}]
-  elsif hpxml_file == 'valid-misc-lighting-none.xml'
-    lightings_values = []
+    refrigerator_values = { :id => "Refrigerator",
+                            :location => "living space",
+                            :rated_annual_kwh => 609 }
+  elsif hpxml_file == 'valid-appliances-none.xml'
+    refrigerator_values = {}
+  elsif hpxml_file == 'valid-appliances-in-basement.xml'
+    refrigerator_values[:location] = "basement - conditioned"
+  elsif ['valid-appliances-reference-elec.xml',
+         'valid-appliances-reference-gas.xml'].include? hpxml_file
+    refrigerator_values[:rated_annual_kwh] = nil
+  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
+    refrigerator_values[:location] = "basement - conditioned"
   end
-  return lightings_values
+  return refrigerator_values
+end
+
+def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
+  if hpxml_file == 'valid.xml'
+    cooking_range_values = { :id => "Range_ID1",
+                             :fuel_type => "electricity",
+                             :is_induction => true }
+  elsif hpxml_file == 'valid-appliances-none.xml'
+    cooking_range_values = {}
+  elsif hpxml_file == 'valid-appliances-gas.xml'
+    cooking_range_values[:fuel_type] = "natural gas"
+    cooking_range_values[:is_induction] = false
+  elsif hpxml_file == 'valid-appliances-reference-elec.xml'
+    cooking_range_values[:is_induction] = nil
+  elsif hpxml_file == 'valid-appliances-reference-gas.xml'
+    cooking_range_values[:fuel_type] = "natural gas"
+    cooking_range_values[:is_induction] = nil
+  end
+  return cooking_range_values
+end
+
+def get_hpxml_file_oven_values(hpxml_file, oven_values)
+  if hpxml_file == 'valid.xml'
+    oven_values = { :id => "Oven_ID1",
+                    :is_convection => true }
+  elsif hpxml_file == 'valid-appliances-none.xml'
+    oven_values = {}
+  elsif ['valid-appliances-reference-elec.xml',
+         'valid-appliances-reference-gas.xml'].include? hpxml_file
+    oven_values[:is_convection] = nil
+  end
+  return oven_values
+end
+
+def get_hpxml_file_lighting_values(hpxml_file, lighting_values)
+  if hpxml_file == 'valid.xml'
+    lighting_values = { :fraction_tier_i_interior => 0.5,
+                        :fraction_tier_i_exterior => 0.5,
+                        :fraction_tier_i_garage => 0.5,
+                        :fraction_tier_ii_interior => 0.25,
+                        :fraction_tier_ii_exterior => 0.25,
+                        :fraction_tier_ii_garage => 0.25 }
+  elsif hpxml_file == 'valid-misc-lighting-default.xml'
+    lighting_values = {}
+  elsif hpxml_file == 'valid-misc-lighting-none.xml'
+    lighting_values = nil
+  end
+  return lighting_values
 end
 
 def get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
@@ -2393,7 +2351,7 @@ def get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
   return ceiling_fans_values
 end
 
-def get_hpxml_file_plug_load_values(hpxml_file, plug_loads_values)
+def get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
   if hpxml_file == 'valid-misc-loads-detailed.xml'
     plug_loads_values << { :id => "Misc",
                            :plug_load_type => "other",
@@ -2407,11 +2365,11 @@ def get_hpxml_file_plug_load_values(hpxml_file, plug_loads_values)
   return plug_loads_values
 end
 
-def get_hpxml_file_misc_loads_schedule_values(hpxml_file, misc_loads_schedules_values)
+def get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_values)
   if hpxml_file == 'valid-misc-loads-detailed.xml'
-    misc_loads_schedules_values << { :weekday_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
-                                     :weekend_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
-                                     :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" }
+    misc_load_schedule_values = { :weekday_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
+                                   :weekend_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
+                                   :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" }
   end
-  return misc_loads_schedules_values
+  return misc_load_schedule_values
 end
