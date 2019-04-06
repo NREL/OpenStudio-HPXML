@@ -115,7 +115,7 @@ class EnergyPlusValidator
       ## [AtticType=VentedAttic]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]" => {
         "Floors/Floor" => one_or_more, # See [AtticFloor]
-        'AtticType/Attic[SpecificLeakageArea | extension/ConstantACHnatural]' => zero_or_one, # Uses ERI Reference Home if not provided
+        "AtticType/Attic[SpecificLeakageArea | extension/ConstantACHnatural]" => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       ## [AtticRoof]
@@ -242,16 +242,16 @@ class EnergyPlusValidator
       },
 
       # [RimJoist]
-      '/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist' => {
-        'SystemIdentifier' => one, # Required by HPXML schema
-        '[ExteriorAdjacentTo="outside" or ExteriorAdjacentTo="basement - unconditioned" or ExteriorAdjacentTo="crawlspace - vented" or ExteriorAdjacentTo="crawlspace - unvented" or ExteriorAdjacentTo="attic - vented" or ExteriorAdjacentTo="attic - unvented" or ExteriorAdjacentTo="attic - conditioned" or ExteriorAdjacentTo="garage"]' => one,
-        '[InteriorAdjacentTo="living space" or InteriorAdjacentTo="basement - unconditioned" or InteriorAdjacentTo="crawlspace - vented" or InteriorAdjacentTo="crawlspace - unvented" or InteriorAdjacentTo="attic - vented" or InteriorAdjacentTo="attic - unvented" or InteriorAdjacentTo="attic - conditioned" or InteriorAdjacentTo="garage"]' => one,
-        'Area' => one,
-        'Azimuth' => zero_or_one,
-        'SolarAbsorptance' => one,
-        'Emittance' => one,
-        'Insulation/SystemIdentifier' => one, # Required by HPXML schema
-        'Insulation/AssemblyEffectiveRValue' => one,
+      "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[ExteriorAdjacentTo='outside' or ExteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - unvented' or ExteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - unvented' or ExteriorAdjacentTo='attic - conditioned' or ExteriorAdjacentTo='garage']" => one,
+        "[InteriorAdjacentTo='living space' or InteriorAdjacentTo='basement - unconditioned' or InteriorAdjacentTo='crawlspace - vented' or InteriorAdjacentTo='crawlspace - unvented' or InteriorAdjacentTo='attic - vented' or InteriorAdjacentTo='attic - unvented' or InteriorAdjacentTo='attic - conditioned' or InteriorAdjacentTo='garage']" => one,
+        "Area" => one,
+        "Azimuth" => zero_or_one,
+        "SolarAbsorptance" => one,
+        "Emittance" => one,
+        "Insulation/SystemIdentifier" => one, # Required by HPXML schema
+        "Insulation/AssemblyEffectiveRValue" => one,
       },
 
       # [Wall]
