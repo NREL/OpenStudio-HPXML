@@ -86,11 +86,11 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'invalid-missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
                                                                "Thermal zone 'garage' must have at least one roof/ceiling surface.",
                                                                "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
-                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'agwall-1'."],
-                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'attic-roof-north'."],
-                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'Window_ID1'."],
-                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door_ID1'."],
-                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'Skylight_ID1'."],
+                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
+                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
+                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowSouth'."],
+                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door'."],
+                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'invalid-unattached-hvac.xml' => ["TODO"],
                             'invalid-unattached-cfis.xml' => ["TODO"] }
 
