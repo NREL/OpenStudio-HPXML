@@ -201,12 +201,12 @@ class HPXML
 
     weather_station = climate_and_risk_zones.elements["WeatherStation"]
 
-    return { :iecc2003 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2003']/ClimateZone"),
-             :iecc2006 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2006']/ClimateZone"),
-             :iecc2009 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2009']/ClimateZone"),
-             :iecc2012 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2012']/ClimateZone"),
-             :iecc2015 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2015']/ClimateZone"),
-             :iecc2018 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year='2018']/ClimateZone"),
+    return { :iecc2003 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2003]/ClimateZone"),
+             :iecc2006 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2006]/ClimateZone"),
+             :iecc2009 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2009]/ClimateZone"),
+             :iecc2012 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2012]/ClimateZone"),
+             :iecc2015 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2015]/ClimateZone"),
+             :iecc2018 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2018]/ClimateZone"),
              :weather_station_id => HPXML.get_id(weather_station),
              :weather_station_name => XMLHelper.get_value(weather_station, "Name"),
              :weather_station_wmo => XMLHelper.get_value(weather_station, "WMO") }
