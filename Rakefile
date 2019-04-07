@@ -2211,9 +2211,9 @@ def get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
   elsif hpxml_file == 'valid-appliances-none.xml'
     dishwasher_values = {}
   elsif hpxml_file == 'valid-appliances-dishwasher-ef.xml'
-    dishwasher_values[:rated_annual_kwh] = nil
-    dishwasher_values[:energy_factor] = 0.5
-    dishwasher_values[:place_setting_capacity] = 8
+    dishwasher_values = { :id => "Dishwasher",
+                          :energy_factor => 0.5,
+                          :place_setting_capacity => 8 }
   end
   return dishwasher_values
 end

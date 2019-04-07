@@ -1874,20 +1874,10 @@ class OSModel
 
     # Dishwasher
     dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
-    if not dishwasher_values.nil?
-      dw_ef = dishwasher_values[:energy_factor]
-      dw_annual_kwh = dishwasher_values[:rated_annual_kwh]
-      if dw_ef.nil? and dw_annual_kwh.nil?
-        dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
-        dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
-      else
-        if dw_ef.nil?
-          dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dw_annual_kwh)
-        end
-        dw_cap = dishwasher_values[:place_setting_capacity]
-      end
-    else
-      dw_ef = dw_cap = nil
+    dw_cap = dishwasher_values[:place_setting_capacity]
+    dw_ef = dishwasher_values[:energy_factor]
+    if dw_ef.nil?
+      dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
     end
 
     # Refrigerator
