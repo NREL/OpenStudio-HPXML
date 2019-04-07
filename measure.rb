@@ -1827,29 +1827,15 @@ class OSModel
   def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
-    if not clothes_washer_values.nil?
-      cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
-      cw_mef = clothes_washer_values[:modified_energy_factor]
-      cw_imef = clothes_washer_values[:integrated_modified_energy_factor]
-      if cw_mef.nil? and cw_imef.nil?
-        cw_mef = HotWaterAndAppliances.get_clothes_washer_reference_mef()
-        cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
-        cw_elec_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
-        cw_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
-        cw_agc = HotWaterAndAppliances.get_clothes_washer_reference_agc()
-        cw_cap = HotWaterAndAppliances.get_clothes_washer_reference_cap()
-      else
-        if cw_mef.nil?
-          cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(cw_imef)
-        end
-        cw_ler = clothes_washer_values[:rated_annual_kwh]
-        cw_elec_rate = clothes_washer_values[:label_electric_rate]
-        cw_gas_rate = clothes_washer_values[:label_gas_rate]
-        cw_agc = clothes_washer_values[:label_annual_gas_cost]
-        cw_cap = clothes_washer_values[:capacity]
-      end
-    else
-      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = nil
+    cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
+    cw_ler = clothes_washer_values[:rated_annual_kwh]
+    cw_elec_rate = clothes_washer_values[:label_electric_rate]
+    cw_gas_rate = clothes_washer_values[:label_gas_rate]
+    cw_agc = clothes_washer_values[:label_annual_gas_cost]
+    cw_cap = clothes_washer_values[:capacity]
+    cw_mef = clothes_washer_values[:modified_energy_factor]
+    if cw_mef.nil?
+      cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
     end
 
     # Clothes Dryer
@@ -1858,9 +1844,8 @@ class OSModel
     cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
     cd_control = clothes_dryer_values[:control_type]
     cd_ef = clothes_dryer_values[:energy_factor]
-    cd_cef = clothes_dryer_values[:combined_energy_factor]
     if cd_ef.nil?
-      cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cd_cef)
+      cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
     end
 
     # Dishwasher

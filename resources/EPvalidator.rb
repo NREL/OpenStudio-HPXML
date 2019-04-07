@@ -576,11 +576,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => zero_or_one,
-        "[ModifiedEnergyFactor | IntegratedModifiedEnergyFactor]" => zero_or_one, # Uses ERI Reference Home if neither provided; otherwise see [CWType=UserSpecified]
-      },
-
-      ## [CWType=UserSpecified]
-      "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher[ModifiedEnergyFactor | IntegratedModifiedEnergyFactor]" => {
+        "[ModifiedEnergyFactor | IntegratedModifiedEnergyFactor]" => one,
         "RatedAnnualkWh" => one,
         "LabelElectricRate" => one,
         "LabelGasRate" => one,
