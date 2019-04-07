@@ -1827,46 +1827,66 @@ class OSModel
   def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
-    cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
-    cw_ler = clothes_washer_values[:rated_annual_kwh]
-    cw_elec_rate = clothes_washer_values[:label_electric_rate]
-    cw_gas_rate = clothes_washer_values[:label_gas_rate]
-    cw_agc = clothes_washer_values[:label_annual_gas_cost]
-    cw_cap = clothes_washer_values[:capacity]
-    cw_mef = clothes_washer_values[:modified_energy_factor]
-    if cw_mef.nil?
-      cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
+    if not clothes_washer_values.nil?
+      cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
+      cw_ler = clothes_washer_values[:rated_annual_kwh]
+      cw_elec_rate = clothes_washer_values[:label_electric_rate]
+      cw_gas_rate = clothes_washer_values[:label_gas_rate]
+      cw_agc = clothes_washer_values[:label_annual_gas_cost]
+      cw_cap = clothes_washer_values[:capacity]
+      cw_mef = clothes_washer_values[:modified_energy_factor]
+      if cw_mef.nil?
+        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
+      end
+    else
+      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
     end
 
     # Clothes Dryer
     clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
-    cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
-    cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
-    cd_control = clothes_dryer_values[:control_type]
-    cd_ef = clothes_dryer_values[:energy_factor]
-    if cd_ef.nil?
-      cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
+    if not clothes_dryer_values.nil?
+      cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
+      cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
+      cd_control = clothes_dryer_values[:control_type]
+      cd_ef = clothes_dryer_values[:energy_factor]
+      if cd_ef.nil?
+        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
+      end
+    else
+      cd_ef = cd_control = cd_fuel = cd_space = nil
     end
 
     # Dishwasher
     dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
-    dw_cap = dishwasher_values[:place_setting_capacity]
-    dw_ef = dishwasher_values[:energy_factor]
-    if dw_ef.nil?
-      dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
+    if not dishwasher_values.nil?
+      dw_cap = dishwasher_values[:place_setting_capacity]
+      dw_ef = dishwasher_values[:energy_factor]
+      if dw_ef.nil?
+        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
+      end
+    else
+      dw_ef = dw_cap = nil
     end
 
     # Refrigerator
     refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
-    fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
-    fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+    if not refrigerator_values.nil?
+      fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
+      fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+    else
+      fridge_annual_kwh = fridge_space = nil
+    end
 
     # Cooking Range/Oven
     cooking_range_values = HPXML.get_cooking_range_values(cooking_range: building.elements["BuildingDetails/Appliances/CookingRange"])
     oven_values = HPXML.get_oven_values(oven: building.elements["BuildingDetails/Appliances/Oven"])
-    cook_fuel_type = to_beopt_fuel(cooking_range_values[:fuel_type])
-    cook_is_induction = cooking_range_values[:is_induction]
-    oven_is_convection = oven_values[:is_convection]
+    if not cooking_range_values.nil? and not oven_values.nil?
+      cook_fuel_type = to_beopt_fuel(cooking_range_values[:fuel_type])
+      cook_is_induction = cooking_range_values[:is_induction]
+      oven_is_convection = oven_values[:is_convection]
+    else
+      cook_fuel_type = cook_is_induction = oven_is_convection = nil
+    end
 
     wh = building.elements["BuildingDetails/Systems/WaterHeating"]
 
