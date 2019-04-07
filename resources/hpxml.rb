@@ -304,8 +304,6 @@ class HPXML
       attic_type = "VentedAttic"
     elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
       attic_type = "ConditionedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[CapeCod='true']")
-      attic_type = "CapeCod"
     elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
       attic_type = "FlatRoof"
     elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
@@ -1267,7 +1265,7 @@ class HPXML
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:duct_fraction_area, :hescore_ducts_insulated])
+                    expected_kwargs: [:duct_fraction_area, :duct_insulation_present])
 
     return ducts
   end
@@ -1277,10 +1275,10 @@ class HPXML
 
     return { :duct_type => XMLHelper.get_value(ducts, "DuctType"),
              :duct_insulation_r_value => to_float(XMLHelper.get_value(ducts, "DuctInsulationRValue")),
+             :duct_insulation_present => to_bool(XMLHelper.get_value(ducts, "DuctInsulationPresent")),
              :duct_location => XMLHelper.get_value(ducts, "DuctLocation"),
              :duct_fraction_area => to_float(XMLHelper.get_value(ducts, "FractionDuctArea")),
-             :duct_surface_area => to_float(XMLHelper.get_value(ducts, "DuctSurfaceArea")),
-             :hescore_ducts_insulated => to_bool(XMLHelper.get_value(ducts, "extension/hescore_ducts_insulated")) }
+             :duct_surface_area => to_float(XMLHelper.get_value(ducts, "DuctSurfaceArea")) }
   end
 
   def self.add_ventilation_fan(hpxml:,
