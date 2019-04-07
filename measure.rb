@@ -2752,39 +2752,23 @@ class OSModel
 
     lighting_values = HPXML.get_lighting_values(lighting: lighting)
 
-    # Default
-    fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
-
-    unless lighting_values[:fraction_tier_i_interior].nil?
-      fFI_int = lighting_values[:fraction_tier_i_interior]
+    if lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior] > 1
+      fail "Fraction of qualifying interior lighting fixtures #{lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior]} is greater than 1."
     end
-    unless lighting_values[:fraction_tier_i_exterior].nil?
-      fFI_ext = lighting_values[:fraction_tier_i_exterior]
+    if lighting_values[:fraction_tier_i_exterior] + lighting_values[:fraction_tier_ii_exterior] > 1
+      fail "Fraction of qualifying exterior lighting fixtures #{lighting_values[:fraction_tier_i_exterior] + lighting_values[:fraction_tier_ii_exterior]} is greater than 1."
     end
-    unless lighting_values[:fraction_tier_i_garage].nil?
-      fFI_grg = lighting_values[:fraction_tier_i_garage]
-    end
-    unless lighting_values[:fraction_tier_ii_interior].nil?
-      fFII_int = lighting_values[:fraction_tier_ii_interior]
-    end
-    unless lighting_values[:fraction_tier_ii_exterior].nil?
-      fFII_ext = lighting_values[:fraction_tier_ii_exterior]
-    end
-    unless lighting_values[:fraction_tier_ii_garage].nil?
-      fFII_grg = lighting_values[:fraction_tier_ii_garage]
+    if lighting_values[:fraction_tier_i_garage] + lighting_values[:fraction_tier_ii_garage] > 1
+      fail "Fraction of qualifying garage lighting fixtures #{lighting_values[:fraction_tier_i_garage] + lighting_values[:fraction_tier_ii_garage]} is greater than 1."
     end
 
-    if fFI_int + fFII_int > 1
-      fail "Fraction of qualifying interior lighting fixtures #{fFI_int + fFII_int} is greater than 1."
-    end
-    if fFI_ext + fFII_ext > 1
-      fail "Fraction of qualifying exterior lighting fixtures #{fFI_ext + fFII_ext} is greater than 1."
-    end
-    if fFI_grg + fFII_grg > 1
-      fail "Fraction of qualifying garage lighting fixtures #{fFI_grg + fFII_grg} is greater than 1."
-    end
-
-    int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present, fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg)
+    int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present,
+                                                              lighting_values[:fraction_tier_i_interior],
+                                                              lighting_values[:fraction_tier_i_exterior],
+                                                              lighting_values[:fraction_tier_i_garage],
+                                                              lighting_values[:fraction_tier_ii_interior],
+                                                              lighting_values[:fraction_tier_ii_exterior],
+                                                              lighting_values[:fraction_tier_ii_garage])
 
     success, sch = Lighting.apply_interior(model, unit, runner, weather, nil, int_kwh)
     return false if not success
