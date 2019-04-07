@@ -2190,13 +2190,17 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
   elsif hpxml_file == 'valid-appliances-none.xml'
     clothes_dryer_values = {}
   elsif hpxml_file == 'valid-appliances-dryer-cef.xml'
-    clothes_dryer_values[:energy_factor] = nil
-    clothes_dryer_values[:combined_energy_factor] = 2.62
-    clothes_dryer_values[:control_type] = "moisture"
+    clothes_dryer_values = { :id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "electricity",
+                             :combined_energy_factor => 2.62,
+                             :control_type => "moisture" }
   elsif hpxml_file == 'valid-appliances-gas.xml'
-    clothes_dryer_values[:fuel_type] = "natural gas"
-    clothes_dryer_values[:energy_factor] = 2.67
-    clothes_dryer_values[:control_type] = "moisture"
+    clothes_dryer_values = { :id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "natural gas",
+                             :energy_factor => 2.67,
+                             :control_type => "moisture" }
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
     clothes_dryer_values[:location] = "basement - conditioned"
   end

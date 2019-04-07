@@ -593,11 +593,7 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => zero_or_one,
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one,
-        "[EnergyFactor | CombinedEnergyFactor]" => zero_or_one, # Uses ERI Reference Home if neither provided; otherwise see [CDType=UserSpecified]
-      },
-
-      ## [CDType=UserSpecified]
-      "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer[EnergyFactor | CombinedEnergyFactor]" => {
+        "[EnergyFactor | CombinedEnergyFactor]" => one,
         "[ControlType='timer' or ControlType='moisture']" => one,
       },
 
