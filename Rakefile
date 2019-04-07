@@ -2304,7 +2304,12 @@ def get_hpxml_file_lighting_values(hpxml_file, lighting_values)
                         :fraction_tier_ii_exterior => 0.25,
                         :fraction_tier_ii_garage => 0.25 }
   elsif hpxml_file == 'valid-misc-lighting-default.xml'
-    lighting_values = {}
+    lighting_values = { :fraction_tier_i_interior => 0.1,
+                        :fraction_tier_i_exterior => 0.0,
+                        :fraction_tier_i_garage => 0.0,
+                        :fraction_tier_ii_interior => 0.0,
+                        :fraction_tier_ii_exterior => 0.0,
+                        :fraction_tier_ii_garage => 0.0 }
   elsif hpxml_file == 'valid-misc-lighting-none.xml'
     lighting_values = nil
   end
