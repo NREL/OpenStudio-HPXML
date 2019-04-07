@@ -1854,22 +1854,13 @@ class OSModel
 
     # Clothes Dryer
     clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
-    if not clothes_dryer_values.nil?
-      cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
-      cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
-      cd_ef = clothes_dryer_values[:energy_factor]
-      cd_cef = clothes_dryer_values[:combined_energy_factor]
-      if cd_ef.nil? and cd_cef.nil?
-        cd_ef = HotWaterAndAppliances.get_clothes_dryer_reference_ef(cd_fuel)
-        cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
-      else
-        if cd_ef.nil?
-          cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cd_cef)
-        end
-        cd_control = clothes_dryer_values[:control_type]
-      end
-    else
-      cd_ef = cd_control = cd_fuel = nil
+    cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
+    cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
+    cd_control = clothes_dryer_values[:control_type]
+    cd_ef = clothes_dryer_values[:energy_factor]
+    cd_cef = clothes_dryer_values[:combined_energy_factor]
+    if cd_ef.nil?
+      cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cd_cef)
     end
 
     # Dishwasher
