@@ -939,6 +939,9 @@
 											<xs:documentation>[deg]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="SolarAbsorptance"
+										type="SolarAbsorptance"/>
+									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
 									<xs:element minOccurs="0" name="Insulation"
 										type="InsulationInfo"/>
 									<xs:element minOccurs="0" name="FloorJoists"
@@ -1433,8 +1436,38 @@
 												<xs:element minOccurs="0" name="Jacket">
 												<xs:complexType>
 												<xs:sequence>
+												<xs:element minOccurs="0"
+												name="InsulationMaterial"
+												type="InsulationMaterial"/>
 												<xs:element name="JacketRValue" type="RValue"
 												minOccurs="0"/>
+												<xs:element minOccurs="0" name="Thickness"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[in]</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" ref="extension"/>
+												</xs:sequence>
+												</xs:complexType>
+												</xs:element>
+												<xs:element minOccurs="0" name="TankWall">
+												<xs:annotation>
+												<xs:documentation>Refers to the insulation in the tank wall itself. This information is sometimes vailable on the water heater's name plate or the units specification sheet, or can be estimated by removing the water heater's access plate.</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+												<xs:sequence>
+												<xs:element minOccurs="0"
+												name="InsulationMaterial"
+												type="InsulationMaterial"/>
+												<xs:element name="TankWallRValue" type="RValue"
+												minOccurs="0"/>
+												<xs:element minOccurs="0" name="Thickness"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[in]</xs:documentation>
+												</xs:annotation>
+												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 												</xs:sequence>
 												</xs:complexType>
@@ -1572,6 +1605,12 @@
 									</xs:choice>
 									<xs:element minOccurs="1" name="WaterFixtureType"
 										type="WaterFixtureType"/>
+									<xs:element minOccurs="0" name="Quantity"
+										type="IntegerGreaterThanZero">
+										<xs:annotation>
+											<xs:documentation>Number of similar water fixtures.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element minOccurs="0" name="FlowRate" type="xs:double">
 										<xs:annotation>
 											<xs:documentation>[gallons per minute] flow rate of water</xs:documentation>
@@ -1585,6 +1624,12 @@
 									<xs:element minOccurs="0" name="FaucetAerator" type="xs:boolean">
 										<xs:annotation>
 											<xs:documentation>Does this faucet have an aerator?</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="MinutesPerDay"
+										type="MinutesPerDay">
+										<xs:annotation>
+											<xs:documentation>[minutes] Number of minutes per day a water fixture operates.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0"
@@ -2963,14 +3008,6 @@ NOTE: This is for ALL measures that may create entry points for vermin. For exam
 			<xs:element name="Furnace">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="FurnaceType">
-							<xs:simpleType>
-								<xs:restriction base="xs:string">
-									<xs:enumeration value="forced air"/>
-									<xs:enumeration value="gravity"/>
-								</xs:restriction>
-							</xs:simpleType>
-						</xs:element>
 						<xs:element minOccurs="0" name="SealedCombustion" type="xs:boolean"/>
 						<xs:element name="CondensingSystem" type="xs:boolean" minOccurs="0"/>
 						<xs:element minOccurs="0" name="AtmosphericBurner" type="xs:boolean"/>
