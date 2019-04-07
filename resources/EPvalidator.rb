@@ -616,7 +616,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/Refrigerator" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => zero_or_one,
-        "RatedAnnualkWh" => zero_or_one, # Uses ERI Reference Home if not provided
+        "RatedAnnualkWh" => one,
       },
 
       # [CookingRange]

@@ -1892,15 +1892,8 @@ class OSModel
 
     # Refrigerator
     refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
-    if not refrigerator_values.nil?
-      fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
-      fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
-      if not refrigerator_values[:rated_annual_kwh].nil?
-        fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
-      end
-    else
-      fridge_annual_kwh = nil
-    end
+    fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
+    fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
 
     # Cooking Range/Oven
     cooking_range_values = HPXML.get_cooking_range_values(cooking_range: building.elements["BuildingDetails/Appliances/CookingRange"])
