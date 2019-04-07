@@ -139,10 +139,8 @@ def create_hpxmls
     'valid-mechvent-exhaust.xml' => 'valid.xml',
     'valid-mechvent-hrv.xml' => 'valid.xml',
     'valid-mechvent-supply.xml' => 'valid.xml',
-    'valid-misc-appliances-in-basement.xml' => 'valid.xml',
     'valid-misc-ceiling-fans.xml' => 'valid.xml',
     'valid-misc-ceiling-fans-reference.xml' => 'valid-misc-ceiling-fans.xml',
-    'valid-misc-lighting-default.xml' => 'valid.xml',
     'valid-misc-lighting-none.xml' => 'valid.xml',
     'valid-misc-loads-detailed.xml' => 'valid.xml',
     'valid-misc-number-of-occupants.xml' => 'valid.xml',
@@ -2178,8 +2176,6 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
     clothes_washer_values[:integrated_modified_energy_factor] = 0.73
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
     clothes_washer_values[:location] = "basement - conditioned"
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
-    clothes_washer_values[:location] = "basement - conditioned"
   end
   return clothes_washer_values
 end
@@ -2202,8 +2198,6 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
     clothes_dryer_values[:energy_factor] = 2.67
     clothes_dryer_values[:control_type] = "moisture"
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
-    clothes_dryer_values[:location] = "basement - conditioned"
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
     clothes_dryer_values[:location] = "basement - conditioned"
   end
   return clothes_dryer_values
@@ -2232,8 +2226,6 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
   elsif hpxml_file == 'valid-appliances-none.xml'
     refrigerator_values = {}
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
-    refrigerator_values[:location] = "basement - conditioned"
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
     refrigerator_values[:location] = "basement - conditioned"
   end
   return refrigerator_values
@@ -2271,13 +2263,6 @@ def get_hpxml_file_lighting_values(hpxml_file, lighting_values)
                         :fraction_tier_ii_interior => 0.25,
                         :fraction_tier_ii_exterior => 0.25,
                         :fraction_tier_ii_garage => 0.25 }
-  elsif hpxml_file == 'valid-misc-lighting-default.xml'
-    lighting_values = { :fraction_tier_i_interior => 0.1,
-                        :fraction_tier_i_exterior => 0.0,
-                        :fraction_tier_i_garage => 0.0,
-                        :fraction_tier_ii_interior => 0.0,
-                        :fraction_tier_ii_exterior => 0.0,
-                        :fraction_tier_ii_garage => 0.0 }
   elsif hpxml_file == 'valid-misc-lighting-none.xml'
     lighting_values = {}
   end
