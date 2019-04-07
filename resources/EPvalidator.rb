@@ -623,11 +623,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/CookingRange" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one,
-        "IsInduction" => zero_or_one, # Uses ERI Reference Home if not provided; otherwise see [CRType=UserSpecified]
-      },
-
-      ## [CRType=UserSpecified]
-      "/HPXML/Building/BuildingDetails/Appliances/CookingRange[IsInduction]" => {
+        "IsInduction" => one,
         "../Oven/IsConvection" => one,
       },
 

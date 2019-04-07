@@ -1905,17 +1905,9 @@ class OSModel
     # Cooking Range/Oven
     cooking_range_values = HPXML.get_cooking_range_values(cooking_range: building.elements["BuildingDetails/Appliances/CookingRange"])
     oven_values = HPXML.get_oven_values(oven: building.elements["BuildingDetails/Appliances/Oven"])
-    if not cooking_range_values.nil? and not oven_values.nil?
-      cook_fuel_type = to_beopt_fuel(cooking_range_values[:fuel_type])
-      cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
-      oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
-      if not cooking_range_values[:is_induction].nil?
-        cook_is_induction = cooking_range_values[:is_induction]
-        oven_is_convection = oven_values[:is_convection]
-      end
-    else
-      cook_fuel_type = cook_is_induction = oven_is_convection = nil
-    end
+    cook_fuel_type = to_beopt_fuel(cooking_range_values[:fuel_type])
+    cook_is_induction = cooking_range_values[:is_induction]
+    oven_is_convection = oven_values[:is_convection]
 
     wh = building.elements["BuildingDetails/Systems/WaterHeating"]
 
