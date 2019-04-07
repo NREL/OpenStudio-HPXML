@@ -115,7 +115,7 @@ class EnergyPlusValidator
       ## [AtticType=VentedAttic]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]" => {
         "Floors/Floor" => one_or_more, # See [AtticFloor]
-        "[SpecificLeakageArea | extension/AtticConstantACHnatural]" => zero_or_one, # Uses ERI Reference Home if not provided
+        "AtticType/Attic[SpecificLeakageArea | extension/ConstantACHnatural]" => zero_or_one, # Uses ERI Reference Home if not provided
       },
 
       ## [AtticRoof]
@@ -248,6 +248,8 @@ class EnergyPlusValidator
         "[InteriorAdjacentTo='living space' or InteriorAdjacentTo='basement - unconditioned' or InteriorAdjacentTo='crawlspace - vented' or InteriorAdjacentTo='crawlspace - unvented' or InteriorAdjacentTo='attic - vented' or InteriorAdjacentTo='attic - unvented' or InteriorAdjacentTo='attic - conditioned' or InteriorAdjacentTo='garage']" => one,
         "Area" => one,
         "Azimuth" => zero_or_one,
+        "SolarAbsorptance" => one,
+        "Emittance" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
         "Insulation/AssemblyEffectiveRValue" => one,
       },

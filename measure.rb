@@ -1318,8 +1318,8 @@ class OSModel
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
       end
-      solar_abs = 0.75
-      emitt = 0.9
+      solar_abs = rim_joist_values[:solar_absorptance]
+      emitt = rim_joist_values[:emittance]
 
       assembly_r = rim_joist_values[:insulation_assembly_r_value]
 
@@ -2111,8 +2111,8 @@ class OSModel
         # FIXME: Generalize
         seer = cooling_system_values[:cooling_efficiency_seer]
         num_speeds = get_ac_num_speeds(seer)
-        crankcase_kw = 0.0
-        crankcase_temp = 55.0
+        crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
+        crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
         if num_speeds == "1-Speed"
 
@@ -2314,8 +2314,8 @@ class OSModel
           num_speeds = get_ashp_num_speeds_by_hspf(hspf)
         end
 
-        crankcase_kw = 0.02
-        crankcase_temp = 55.0
+        crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
+        crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
 
         if num_speeds == "1-Speed"
 
@@ -2824,7 +2824,7 @@ class OSModel
       foundation_values = HPXML.get_foundation_values(foundation: vented_crawl)
       frame_floor_values = HPXML.get_frame_floor_values(floor: vented_crawl.elements["FrameFloor"])
       area = frame_floor_values[:area]
-      vented_crawl_sla = foundation_values[:crawlspace_specific_leakage_area]
+      vented_crawl_sla = foundation_values[:specific_leakage_area]
       if vented_crawl_sla.nil?
         vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
       end
@@ -2845,8 +2845,8 @@ class OSModel
       attic_values = HPXML.get_attic_values(attic: vented_attic)
       attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
       area = attic_floor_values[:area]
-      vented_attic_sla = attic_values[:attic_specific_leakage_area]
-      vented_attic_const_ach = attic_values[:attic_constant_ach_natural]
+      vented_attic_sla = attic_values[:specific_leakage_area]
+      vented_attic_const_ach = attic_values[:constant_ach_natural]
       if not vented_attic_sla.nil?
         vented_attic_sla_area += (vented_attic_sla * area)
       else
@@ -2855,15 +2855,15 @@ class OSModel
       end
       vented_attic_area += area
     end
-    if vented_attic_area == 0
-      attic_sla = 0
-      attic_const_ach = nil
+    if not vented_attic_const_ach.nil?
+      attic_sla = nil
+      attic_const_ach = vented_attic_const_ach
     elsif vented_attic_sla_area > 0
       attic_sla = vented_attic_sla_area / vented_attic_area
       attic_const_ach = nil
     else
-      attic_sla = nil
-      attic_const_ach = vented_attic_const_ach
+      attic_sla = 0
+      attic_const_ach = nil
     end
 
     living_ach50 = infil_ach50

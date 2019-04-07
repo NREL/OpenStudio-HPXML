@@ -969,6 +969,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
         next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+        next if k[2] == "Crankcase"
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f

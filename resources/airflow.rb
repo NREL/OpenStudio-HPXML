@@ -2245,20 +2245,16 @@ class Airflow
 
   def self.get_infiltration_ACH_from_SLA(sla, numStories, weather)
     # Returns the infiltration annual average ACH given a SLA.
-    w = calc_infiltration_w_factor(weather)
-
     # Equation from ASHRAE 119-1998 (using numStories for simplification)
     norm_lkage = 1000.0 * sla * numStories**0.3
 
     # Equation from ASHRAE 136-1993
-    return norm_lkage * w
+    return norm_lkage * weather.data.WSF
   end
 
   def self.get_infiltration_SLA_from_ACH(ach, numStories, weather)
     # Returns the infiltration SLA given an annual average ACH.
-    w = calc_infiltration_w_factor(weather)
-
-    return ach / (w * 1000 * numStories**0.3)
+    return ach / (weather.data.WSF * 1000 * numStories**0.3)
   end
 
   def self.get_infiltration_SLA_from_ACH50(ach50, n_i, conditionedFloorArea, conditionedVolume, pressure_difference_Pa = 50)
@@ -2332,21 +2328,6 @@ class Airflow
     end
 
     return frac622 * ((num_beds + 1.0) * 7.5 + 0.01 * ffa)
-  end
-
-  def self.calc_infiltration_w_factor(weather)
-    # Returns a w factor for infiltration calculations; see ticket #852 for derivation.
-    hdd65f = weather.data.HDD65F
-    ws = weather.data.AnnualAvgWindspeed
-    a = 0.36250748
-    b = 0.365317169
-    c = 0.028902855
-    d = 0.050181043
-    e = 0.009596674
-    f = -0.041567541
-    # in ACH
-    w = (a + b * hdd65f / 10000.0 + c * (hdd65f / 10000.0)**2.0 + d * ws + e * ws**2 + f * hdd65f / 10000.0 * ws)
-    return w
   end
 end
 
