@@ -2772,11 +2772,7 @@ class OSModel
       foundation_values = HPXML.get_foundation_values(foundation: vented_crawl)
       frame_floor_values = HPXML.get_frame_floor_values(floor: vented_crawl.elements["FrameFloor"])
       area = frame_floor_values[:area]
-      vented_crawl_sla = foundation_values[:specific_leakage_area]
-      if vented_crawl_sla.nil?
-        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
-      end
-      vented_crawl_sla_area += (vented_crawl_sla * area)
+      vented_crawl_sla_area += (foundation_values[:specific_leakage_area] * area)
       vented_crawl_area += area
     end
     if vented_crawl_area > 0
@@ -2793,13 +2789,9 @@ class OSModel
       attic_values = HPXML.get_attic_values(attic: vented_attic)
       attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
       area = attic_floor_values[:area]
-      vented_attic_sla = attic_values[:specific_leakage_area]
       vented_attic_const_ach = attic_values[:constant_ach_natural]
-      if not vented_attic_sla.nil?
-        vented_attic_sla_area += (vented_attic_sla * area)
-      else
-        vented_attic_sla = Airflow.get_default_vented_attic_sla()
-        vented_attic_sla_area += (vented_attic_sla * area)
+      if not attic_values[:specific_leakage_area].nil?
+        vented_attic_sla_area += (attic_values[:specific_leakage_area] * area)
       end
       vented_attic_area += area
     end
