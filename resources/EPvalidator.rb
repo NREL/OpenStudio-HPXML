@@ -175,7 +175,7 @@ class EnergyPlusValidator
 
       ## [FoundationType=VentedCrawlspace]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]" => {
-        "SpecificLeakageArea" => one,
+        "FoundationType/Crawlspace/SpecificLeakageArea" => one,
         "FrameFloor" => one_or_more, # See [FoundationFrameFloor]
         "FoundationWall" => one_or_more, # See [FoundationWall]
         "Slab" => one_or_more, # See [FoundationSlab]; use slab with zero thickness for dirt floor
