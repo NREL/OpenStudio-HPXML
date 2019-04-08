@@ -885,14 +885,6 @@ class OSModel
         fnd_slab_perim = fnd_slab.elements["PerimeterInsulation/Layer[InstallationType='continuous']"]
         slab_ext_r = slab_values[:perimeter_insulation_r_value]
         slab_ext_depth = slab_values[:perimeter_insulation_depth]
-        if slab_ext_r.nil? or slab_ext_depth.nil?
-          if foundation_type == "SlabOnGrade"
-            slab_ext_r, slab_ext_depth = FoundationConstructions.get_default_slab_perimeter_rvalue_depth(@iecc_zone_2006)
-          else
-            slab_ext_r = 0
-            slab_ext_depth = 0
-          end
-        end
         if slab_ext_r == 0 or slab_ext_depth == 0
           slab_ext_r = 0
           slab_ext_depth = 0
@@ -901,14 +893,6 @@ class OSModel
         fnd_slab_under = fnd_slab.elements["UnderSlabInsulation/Layer[InstallationType='continuous']"]
         slab_perim_r = slab_values[:under_slab_insulation_r_value]
         slab_perim_width = slab_values[:under_slab_insulation_width]
-        if slab_perim_r.nil? or slab_perim_width.nil?
-          if foundation_type == "SlabOnGrade"
-            slab_perim_r, slab_perim_width = FoundationConstructions.get_default_slab_under_rvalue_width()
-          else
-            slab_perim_r = 0
-            slab_perim_width = 0
-          end
-        end
         if slab_perim_r == 0 or slab_perim_width == 0
           slab_perim_r = 0
           slab_perim_width = 0
@@ -970,13 +954,6 @@ class OSModel
         walls_concrete_thick_in = foundation_wall_values[:thickness]
         wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
         wall_film_r = Material.AirFilmVertical.rvalue
-        if wall_assembly_r.nil?
-          if foundation_type == "ConditionedBasement"
-            wall_assembly_r = 1.0 / FoundationConstructions.get_default_basement_wall_ufactor(@iecc_zone_2006)
-          else
-            wall_assembly_r = Material.Concrete(walls_concrete_thick_in).rvalue + wall_film_r
-          end
-        end
         wall_cav_r = 0.0
         wall_cav_depth = 0.0
         wall_grade = 1
@@ -1035,11 +1012,7 @@ class OSModel
         ceiling_surfaces << surface
 
         floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
-
         floor_assembly_r = frame_floor_values[:insulation_assembly_r_value]
-        if floor_assembly_r.nil?
-          floor_assembly_r = 1.0 / FloorConstructions.get_default_floor_ufactor(@iecc_zone_2006)
-        end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),  # 2x4, 16" o.c.
@@ -1385,10 +1358,7 @@ class OSModel
         end
         film_r = 2 * Material.AirFilmFloorAverage.rvalue
 
-        assembly_r = FloorConstructions.get_default_ceiling_ufactor(@iecc_zone_2006)
-        if not attic_floor_values[:insulation_assembly_r_value].nil?
-          assembly_r = attic_floor_values[:insulation_assembly_r_value]
-        end
+        assembly_r = attic_floor_values[:insulation_assembly_r_value]
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.11, 0.0, 0.0, drywall_thick_in, nil), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.24, 0.0, 0.0, drywall_thick_in, nil), # 2x4, 16" o.c.
@@ -1715,14 +1685,7 @@ class OSModel
       door_id = door_values[:id]
 
       door_area = door_values[:area]
-      if door_values[:area].nil?
-        door_area = SubsurfaceConstructions.get_default_door_area()
-      end
-
       door_azimuth = door_values[:azimuth]
-      if door_azimuth.nil?
-        door_azimuth = 0
-      end
 
       door_height = 6.67 # ft
       door_width = door_area / door_height
@@ -1757,12 +1720,7 @@ class OSModel
       sub_surface.setSubSurfaceType("Door")
 
       # Apply construction
-      rvalue = door_values[:r_value]
-      if not rvalue.nil?
-        ufactor = 1.0 / rvalue
-      else
-        ufactor, shgc = SubsurfaceConstructions.get_default_ufactor_shgc(@iecc_zone_2006)
-      end
+      rvalue = 1.0 / door_values[:r_value]
 
       success = SubsurfaceConstructions.apply_door(runner, model, [sub_surface], "Door", ufactor)
       return false if not success
@@ -3306,9 +3264,6 @@ class OSModel
   def self.apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
                                    drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
     if wall_type == "WoodStud"
-      if assembly_r.nil?
-        assembly_r = 1.0 / WallConstructions.get_default_frame_wall_ufactor(@iecc_zone_2006)
-      end
       install_grade = 1
       cavity_filled = true
 
