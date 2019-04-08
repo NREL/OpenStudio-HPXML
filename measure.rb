@@ -1720,7 +1720,7 @@ class OSModel
       sub_surface.setSubSurfaceType("Door")
 
       # Apply construction
-      rvalue = 1.0 / door_values[:r_value]
+      ufactor = 1.0 / door_values[:r_value]
 
       success = SubsurfaceConstructions.apply_door(runner, model, [sub_surface], "Door", ufactor)
       return false if not success
