@@ -97,6 +97,7 @@ def create_hpxmls
     'valid-hvac-central-ac-only-1-speed.xml' => 'valid.xml',
     'valid-hvac-central-ac-only-2-speed.xml' => 'valid.xml',
     'valid-hvac-central-ac-only-var-speed.xml' => 'valid.xml',
+    'valid-hvac-dse.xml' => 'valid.xml',
     'valid-hvac-elec-resistance-only.xml' => 'valid.xml',
     'valid-hvac-furnace-elec-only.xml' => 'valid.xml',
     'valid-hvac-furnace-gas-central-ac-2-speed.xml' => 'valid.xml',
@@ -112,6 +113,7 @@ def create_hpxmls
     'valid-hvac-mini-split-heat-pump-ductless.xml' => 'valid-hvac-mini-split-heat-pump-ducted.xml',
     'valid-hvac-mini-split-heat-pump-ductless-no-backup.xml' => 'valid-hvac-mini-split-heat-pump-ductless.xml',
     'valid-hvac-multiple.xml' => 'valid.xml',
+    'valid-hvac-multiple-ducts.xml' => 'valid.xml',
     'valid-hvac-none.xml' => 'valid.xml',
     'valid-hvac-none-no-fuel-access.xml' => 'valid-hvac-none.xml',
     'valid-hvac-programmable-thermostat.xml' => 'valid.xml',
@@ -149,6 +151,7 @@ def create_hpxmls
     'cfis/valid-hvac-central-ac-only-1-speed-cfis.xml' => 'valid-hvac-central-ac-only-1-speed.xml',
     'cfis/valid-hvac-central-ac-only-2-speed-cfis.xml' => 'valid-hvac-central-ac-only-2-speed.xml',
     'cfis/valid-hvac-central-ac-only-var-speed-cfis.xml' => 'valid-hvac-central-ac-only-var-speed.xml',
+    'cfis/valid-hvac-dse-cfis.xml' => 'valid-hvac-dse.xml',
     'cfis/valid-hvac-furnace-elec-only-cfis.xml' => 'valid-hvac-furnace-elec-only.xml',
     'cfis/valid-hvac-furnace-gas-central-ac-2-speed-cfis.xml' => 'valid-hvac-furnace-gas-central-ac-2-speed.xml',
     'cfis/valid-hvac-furnace-gas-central-ac-var-speed-cfis.xml' => 'valid-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -1601,12 +1604,16 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
     hvac_distributions_values << { :id => "HVACDistribution6",
                                    :distribution_system_type => "AirDistribution" }
   elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-0.8.xml'
-    hvac_distributions_values[0][:distribution_system_type] = "DSE"
-    hvac_distributions_values[0][:annual_heating_dse] = 0.8
-    hvac_distributions_values[0][:annual_cooling_dse] = 0.8
-  elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-1.0.xml'
-    hvac_distributions_values[0][:annual_heating_dse] = 1
-    hvac_distributions_values[0][:annual_cooling_dse] = 1
+    hvac_distributions_values = [{ :id => "HVACDistribution",
+                                   :distribution_system_type => "DSE",
+                                   :annual_heating_dse => 0.8,
+                                   :annual_cooling_dse => 0.8 }]
+  elsif (hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-1.0.xml') or
+        hpxml_file == 'valid-hvac-dse.xml'
+    hvac_distributions_values = [{ :id => "HVACDistribution",
+                                   :distribution_system_type => "DSE",
+                                   :annual_heating_dse => 1,
+                                   :annual_cooling_dse => 1 }]
   elsif ['hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
          'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
          'hvac_multiple/valid-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip',
@@ -1785,6 +1792,15 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => ducts_values[0][1][:duct_insulation_r_value],
                        :duct_location => ducts_values[0][1][:duct_location],
                        :duct_surface_area => ducts_values[0][1][:duct_surface_area] }]
+  elsif hpxml_file == 'valid-hvac-multiple-ducts.xml'
+    ducts_values << [{ :duct_type => "supply",
+                       :duct_insulation_r_value => 8,
+                       :duct_location => "crawlspace - vented",
+                       :duct_surface_area => 300 },
+                     { :duct_type => "return",
+                       :duct_insulation_r_value => 4,
+                       :duct_location => "crawlspace - vented",
+                       :duct_surface_area => 100 }]
   end
   return ducts_values
 end
