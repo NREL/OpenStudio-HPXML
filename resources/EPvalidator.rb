@@ -137,7 +137,7 @@ class EnergyPlusValidator
         "[AdjacentTo='living space' or AdjacentTo='garage' or AdjacentTo='outside']" => one,
         "Area" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        "Insulation/AssemblyEffectiveRValue" => zero_or_one, # Uses ERI Reference Home if not provided
+        "Insulation/AssemblyEffectiveRValue" => one,
       },
 
       ## [AtticWall]
@@ -208,7 +208,7 @@ class EnergyPlusValidator
         "[AdjacentTo='living space' or AdjacentTo='garage']" => one,
         "Area" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        "Insulation/AssemblyEffectiveRValue" => zero_or_one, # Uses ERI Reference Home if not provided
+        "Insulation/AssemblyEffectiveRValue" => one,
       },
 
       ## [FoundationWall]
@@ -221,7 +221,7 @@ class EnergyPlusValidator
         "DepthBelowGrade" => one,
         "[AdjacentTo='ground' or AdjacentTo='basement - unconditioned' or AdjacentTo='basement - conditioned' or AdjacentTo='crawlspace - vented' or AdjacentTo='crawlspace - unvented']" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        "Insulation/AssemblyEffectiveRValue" => zero_or_one, # Uses ERI Reference Home if not provided
+        "Insulation/AssemblyEffectiveRValue" => one,
       },
 
       ## [FoundationSlab]
@@ -230,13 +230,13 @@ class EnergyPlusValidator
         "Area" => one,
         "Thickness" => one, # Use zero for dirt floor
         "ExposedPerimeter" => one,
-        "PerimeterInsulationDepth" => zero_or_one, # Uses ERI Reference Home if not provided
-        "UnderSlabInsulationWidth" => zero_or_one, # Uses ERI Reference Home if not provided
+        "PerimeterInsulationDepth" => one,
+        "UnderSlabInsulationWidth" => one,
         "DepthBelowGrade" => one,
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
-        "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => zero_or_one, # Uses ERI Reference Home if not provided
+        "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
-        "UnderSlabInsulation/Layer[InstallationType='continuous']/NominalRValue" => zero_or_one, # Uses ERI Reference Home if not provided
+        "UnderSlabInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "extension/CarpetFraction" => one,
         "extension/CarpetRValue" => one,
       },
@@ -259,21 +259,12 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[ExteriorAdjacentTo='living space' or ExteriorAdjacentTo='garage' or ExteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - unvented' or ExteriorAdjacentTo='attic - conditioned' or ExteriorAdjacentTo='outside']" => one,
         "[InteriorAdjacentTo='living space' or InteriorAdjacentTo='garage' or InteriorAdjacentTo='attic - vented' or InteriorAdjacentTo='attic - unvented' or InteriorAdjacentTo='attic - conditioned']" => one,
-        "WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]" => one, # See [WallType=WoodStud] or [WallType=NotWoodStud]
+        "WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]" => one,
         "Area" => one,
         "Azimuth" => zero_or_one,
         "SolarAbsorptance" => one,
         "Emittance" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-      },
-
-      # [WallType=WoodStud]
-      "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[WallType/WoodStud]" => {
-        "Insulation/AssemblyEffectiveRValue" => zero_or_one, # Uses ERI Reference Home if not provided
-      },
-
-      # [WallType=NotWoodStud]
-      "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall[not(WallType/WoodStud)]" => {
         "Insulation/AssemblyEffectiveRValue" => one,
       },
 
@@ -311,9 +302,9 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Enclosure/Doors/Door" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "AttachedToWall" => one,
-        "Area" => zero_or_one, # Uses ERI Reference Home if not provided
-        "Azimuth" => zero_or_one, # Uses ERI Reference Home if not provided
-        "RValue" => zero_or_one, # Uses ERI Reference Home if not provided
+        "Area" => one,
+        "Azimuth" => one,
+        "RValue" => one,
       },
 
       # [AirInfiltration]
