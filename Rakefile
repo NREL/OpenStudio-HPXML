@@ -64,7 +64,6 @@ def create_hpxmls
     'valid-dhw-tank-oil.xml' => 'valid.xml',
     'valid-dhw-tank-propane.xml' => 'valid.xml',
     'valid-dhw-uef.xml' => 'valid.xml',
-    'valid-enclosure-doors-reference.xml' => 'valid.xml',
     'valid-enclosure-multiple-walls.xml' => 'valid.xml',
     'valid-enclosure-no-natural-ventilation.xml' => 'valid.xml',
     'valid-enclosure-orientation-45.xml' => 'valid.xml',
@@ -80,19 +79,12 @@ def create_hpxmls
     'valid-enclosure-walltype-stone.xml' => 'valid.xml',
     'valid-enclosure-walltype-strawbale.xml' => 'valid.xml',
     'valid-enclosure-walltype-structuralbrick.xml' => 'valid.xml',
-    'valid-enclosure-walltype-woodstud-reference.xml' => 'valid.xml',
     'valid-enclosure-windows-interior-shading.xml' => 'valid.xml',
-    'valid-foundation-conditioned-basement-reference.xml' => 'valid.xml',
     'valid-foundation-pier-beam.xml' => 'valid.xml',
-    'valid-foundation-pier-beam-reference.xml' => 'valid-foundation-pier-beam.xml',
     'valid-foundation-slab.xml' => 'valid.xml',
-    'valid-foundation-slab-reference.xml' => 'valid-foundation-slab.xml',
     'valid-foundation-unconditioned-basement.xml' => 'valid.xml',
-    'valid-foundation-unconditioned-basement-reference.xml' => 'valid-foundation-unconditioned-basement.xml',
     'valid-foundation-unvented-crawlspace.xml' => 'valid.xml',
-    'valid-foundation-unvented-crawlspace-reference.xml' => 'valid-foundation-unvented-crawlspace.xml',
     'valid-foundation-vented-crawlspace.xml' => 'valid.xml',
-    'valid-foundation-vented-crawlspace-reference.xml' => 'valid-foundation-vented-crawlspace.xml',
     'valid-hvac-air-to-air-heat-pump-1-speed.xml' => 'valid.xml',
     'valid-hvac-air-to-air-heat-pump-2-speed.xml' => 'valid.xml',
     'valid-hvac-air-to-air-heat-pump-var-speed.xml' => 'valid.xml',
@@ -138,7 +130,6 @@ def create_hpxmls
     'valid-mechvent-hrv.xml' => 'valid.xml',
     'valid-mechvent-supply.xml' => 'valid.xml',
     'valid-misc-ceiling-fans.xml' => 'valid.xml',
-    'valid-misc-ceiling-fans-reference.xml' => 'valid-misc-ceiling-fans.xml',
     'valid-misc-lighting-none.xml' => 'valid.xml',
     'valid-misc-loads-detailed.xml' => 'valid.xml',
     'valid-misc-number-of-occupants.xml' => 'valid.xml',
@@ -972,11 +963,6 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
     foundations_walls_values[0][0][:height] = 4
     foundations_walls_values[0][0][:area] = 960
     foundations_walls_values[0][0][:depth_below_grade] = 3
-  elsif ['valid-foundation-unconditioned-basement-reference.xml',
-         'valid-foundation-conditioned-basement-reference.xml',
-         'valid-foundation-unvented-crawlspace-reference.xml',
-         'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundations_walls_values[0][0][:insulation_assembly_r_value] = nil
   elsif ['valid-foundation-pier-beam.xml',
          'valid-foundation-slab.xml'].include? hpxml_file
     foundations_walls_values = [[]]
@@ -1010,15 +996,6 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
     foundations_slabs_values[0][0][:thickness] = 0
     foundations_slabs_values[0][0][:depth_below_grade] = 3
     foundations_slabs_values[0][0][:carpet_r_value] = 2.5
-  elsif ['valid-foundation-conditioned-basement-reference.xml',
-         'valid-foundation-slab-reference.xml',
-         'valid-foundation-unconditioned-basement-reference.xml',
-         'valid-foundation-unvented-crawlspace-reference.xml',
-         'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundations_slabs_values[0][0][:perimeter_insulation_depth] = nil
-    foundations_slabs_values[0][0][:under_slab_insulation_width] = nil
-    foundations_slabs_values[0][0][:perimeter_insulation_r_value] = nil
-    foundations_slabs_values[0][0][:under_slab_insulation_r_value] = nil
   elsif ['valid-foundation-pier-beam.xml'].include? hpxml_file
     foundations_slabs_values = [[]]
   end
@@ -1037,11 +1014,6 @@ def get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framef
                                          :area => 3500,
                                          :insulation_id => "FoundationFrameFloorIns",
                                          :insulation_assembly_r_value => 18.7 }]]
-  elsif ['valid-foundation-pier-beam-reference.xml',
-         'valid-foundation-unconditioned-basement-reference.xml',
-         'valid-foundation-unvented-crawlspace-reference.xml',
-         'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundations_framefloors_values[0][0][:insulation_assembly_r_value] = nil
   end
   return foundations_framefloors_values
 end
@@ -1139,8 +1111,6 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
   elsif hpxml_file == 'valid-enclosure-walltype-structuralbrick.xml'
     walls_values[0][:wall_type] = "StructuralBrick"
     walls_values[0][:insulation_assembly_r_value] = 7.9
-  elsif hpxml_file == 'valid-enclosure-walltype-woodstud-reference.xml'
-    walls_values[0][:insulation_assembly_r_value] = nil
   elsif hpxml_file == 'invalid_files/invalid-missing-surfaces.xml'
     walls_values[0][:area] = 3696
     walls_values << { :id => "Wall2",
@@ -1248,10 +1218,6 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
                       :area => 80,
                       :azimuth => 270,
                       :r_value => 4.4 }]
-  elsif hpxml_file == 'valid-enclosure-doors-reference.xml'
-    doors_values[0][:area] = nil
-    doors_values[0][:azimuth] = nil
-    doors_values[0][:r_value] = nil
   elsif hpxml_file == 'valid-enclosure-multiple-walls.xml'
     doors_values[0][:wall_idref] = "WallLarge"
   elsif hpxml_file == 'valid-enclosure-orientation-45.xml'
@@ -1733,9 +1699,6 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]]
-  elsif hpxml_file == 'valid-foundation-conditioned-basement-reference.xml'
-    ducts_values[0][0][:duct_location] = "basement - conditioned"
-    ducts_values[0][1][:duct_location] = "basement - conditioned"
   elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "basement - unconditioned"
     ducts_values[0][1][:duct_location] = "basement - unconditioned"
@@ -1984,8 +1947,6 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif hpxml_file == 'valid-dhw-uef.xml'
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
-  elsif hpxml_file == 'valid-foundation-conditioned-basement-reference.xml'
-    water_heating_systems_values[0][:location] = "basement - conditioned"
   elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['valid-foundation-unvented-crawlspace.xml'].include? hpxml_file
@@ -2272,9 +2233,6 @@ def get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
     ceiling_fans_values << { :id => "CeilingFan",
                              :efficiency => 100,
                              :quantity => 2 }
-  elsif hpxml_file == 'valid-misc-ceiling-fans-reference.xml'
-    ceiling_fans_values[0][:efficiency] = nil
-    ceiling_fans_values[0][:quantity] = nil
   end
   return ceiling_fans_values
 end
