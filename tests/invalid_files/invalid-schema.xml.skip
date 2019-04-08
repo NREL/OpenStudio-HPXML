@@ -33,6 +33,7 @@
           <ConditionedFloorArea>7000.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>67575.0</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
+          <WhatIsThisElementDoingHere>foo</WhatIsThisElementDoingHere>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -168,6 +169,8 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>180.0</Area>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='rimjoist_Ins_ID1'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -178,6 +181,8 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>180.0</Area>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
             <Insulation>
               <SystemIdentifier id='rimjoist_Ins_ID2'/>
               <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
@@ -238,7 +243,7 @@
         <Doors>
           <Door>
             <SystemIdentifier id='Door_ID1'/>
-            <AttachedToWall idref='foobar'/>
+            <AttachedToWall idref='agwall-1'/>
             <Area>80.0</Area>
             <Azimuth>270</Azimuth>
             <RValue>4.4</RValue>
