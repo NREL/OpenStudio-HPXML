@@ -40,8 +40,6 @@ def create_hpxmls
     'valid-appliances-gas.xml' => 'valid.xml',
     'valid-appliances-in-basement.xml' => 'valid.xml',
     'valid-appliances-none.xml' => 'valid.xml',
-    'valid-appliances-reference-elec.xml' => 'valid.xml',
-    'valid-appliances-reference-gas.xml' => 'valid.xml',
     'valid-appliances-washer-imef.xml' => 'valid.xml',
     'valid-atticroof-cathedral.xml' => 'valid.xml',
     'valid-atticroof-conditioned.xml' => 'valid.xml',
@@ -57,8 +55,6 @@ def create_hpxmls
     'valid-dhw-recirc-nocontrol.xml' => 'valid.xml',
     'valid-dhw-recirc-temperature.xml' => 'valid.xml',
     'valid-dhw-recirc-timer.xml' => 'valid.xml',
-    'valid-dhw-recirc-timer-reference.xml' => 'valid-dhw-recirc-timer.xml',
-    'valid-dhw-standard-reference.xml' => 'valid.xml',
     'valid-dhw-tank-gas.xml' => 'valid.xml',
     'valid-dhw-tank-heat-pump.xml' => 'valid.xml',
     'valid-dhw-tankless-electric.xml' => 'valid.xml',
@@ -68,7 +64,6 @@ def create_hpxmls
     'valid-dhw-tank-oil.xml' => 'valid.xml',
     'valid-dhw-tank-propane.xml' => 'valid.xml',
     'valid-dhw-uef.xml' => 'valid.xml',
-    'valid-enclosure-doors-reference.xml' => 'valid.xml',
     'valid-enclosure-multiple-walls.xml' => 'valid.xml',
     'valid-enclosure-no-natural-ventilation.xml' => 'valid.xml',
     'valid-enclosure-orientation-45.xml' => 'valid.xml',
@@ -84,19 +79,12 @@ def create_hpxmls
     'valid-enclosure-walltype-stone.xml' => 'valid.xml',
     'valid-enclosure-walltype-strawbale.xml' => 'valid.xml',
     'valid-enclosure-walltype-structuralbrick.xml' => 'valid.xml',
-    'valid-enclosure-walltype-woodstud-reference.xml' => 'valid.xml',
     'valid-enclosure-windows-interior-shading.xml' => 'valid.xml',
-    'valid-foundation-conditioned-basement-reference.xml' => 'valid.xml',
     'valid-foundation-pier-beam.xml' => 'valid.xml',
-    'valid-foundation-pier-beam-reference.xml' => 'valid-foundation-pier-beam.xml',
     'valid-foundation-slab.xml' => 'valid.xml',
-    'valid-foundation-slab-reference.xml' => 'valid-foundation-slab.xml',
     'valid-foundation-unconditioned-basement.xml' => 'valid.xml',
-    'valid-foundation-unconditioned-basement-reference.xml' => 'valid-foundation-unconditioned-basement.xml',
     'valid-foundation-unvented-crawlspace.xml' => 'valid.xml',
-    'valid-foundation-unvented-crawlspace-reference.xml' => 'valid-foundation-unvented-crawlspace.xml',
     'valid-foundation-vented-crawlspace.xml' => 'valid.xml',
-    'valid-foundation-vented-crawlspace-reference.xml' => 'valid-foundation-vented-crawlspace.xml',
     'valid-hvac-air-to-air-heat-pump-1-speed.xml' => 'valid.xml',
     'valid-hvac-air-to-air-heat-pump-2-speed.xml' => 'valid.xml',
     'valid-hvac-air-to-air-heat-pump-var-speed.xml' => 'valid.xml',
@@ -141,10 +129,7 @@ def create_hpxmls
     'valid-mechvent-exhaust.xml' => 'valid.xml',
     'valid-mechvent-hrv.xml' => 'valid.xml',
     'valid-mechvent-supply.xml' => 'valid.xml',
-    'valid-misc-appliances-in-basement.xml' => 'valid.xml',
     'valid-misc-ceiling-fans.xml' => 'valid.xml',
-    'valid-misc-ceiling-fans-reference.xml' => 'valid-misc-ceiling-fans.xml',
-    'valid-misc-lighting-default.xml' => 'valid.xml',
     'valid-misc-lighting-none.xml' => 'valid.xml',
     'valid-misc-loads-detailed.xml' => 'valid.xml',
     'valid-misc-number-of-occupants.xml' => 'valid.xml',
@@ -494,7 +479,7 @@ def create_hpxmls
     HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values) unless refrigerator_values.empty?
     HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values) unless cooking_range_values.empty?
     HPXML.add_oven(hpxml: hpxml, **oven_values) unless oven_values.empty?
-    HPXML.add_lighting(hpxml: hpxml, **lighting_values) unless lighting_values.nil?
+    HPXML.add_lighting(hpxml: hpxml, **lighting_values) unless lighting_values.empty?
     ceiling_fans_values.each do |ceiling_fan_values|
       HPXML.add_ceiling_fan(hpxml: hpxml, **ceiling_fan_values)
     end
@@ -978,11 +963,6 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
     foundations_walls_values[0][0][:height] = 4
     foundations_walls_values[0][0][:area] = 960
     foundations_walls_values[0][0][:depth_below_grade] = 3
-  elsif ['valid-foundation-unconditioned-basement-reference.xml',
-         'valid-foundation-conditioned-basement-reference.xml',
-         'valid-foundation-unvented-crawlspace-reference.xml',
-         'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundations_walls_values[0][0][:insulation_assembly_r_value] = nil
   elsif ['valid-foundation-pier-beam.xml',
          'valid-foundation-slab.xml'].include? hpxml_file
     foundations_walls_values = [[]]
@@ -1016,15 +996,6 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
     foundations_slabs_values[0][0][:thickness] = 0
     foundations_slabs_values[0][0][:depth_below_grade] = 3
     foundations_slabs_values[0][0][:carpet_r_value] = 2.5
-  elsif ['valid-foundation-conditioned-basement-reference.xml',
-         'valid-foundation-slab-reference.xml',
-         'valid-foundation-unconditioned-basement-reference.xml',
-         'valid-foundation-unvented-crawlspace-reference.xml',
-         'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundations_slabs_values[0][0][:perimeter_insulation_depth] = nil
-    foundations_slabs_values[0][0][:under_slab_insulation_width] = nil
-    foundations_slabs_values[0][0][:perimeter_insulation_r_value] = nil
-    foundations_slabs_values[0][0][:under_slab_insulation_r_value] = nil
   elsif ['valid-foundation-pier-beam.xml'].include? hpxml_file
     foundations_slabs_values = [[]]
   end
@@ -1043,11 +1014,6 @@ def get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framef
                                          :area => 3500,
                                          :insulation_id => "FoundationFrameFloorIns",
                                          :insulation_assembly_r_value => 18.7 }]]
-  elsif ['valid-foundation-pier-beam-reference.xml',
-         'valid-foundation-unconditioned-basement-reference.xml',
-         'valid-foundation-unvented-crawlspace-reference.xml',
-         'valid-foundation-vented-crawlspace-reference.xml'].include? hpxml_file
-    foundations_framefloors_values[0][0][:insulation_assembly_r_value] = nil
   end
   return foundations_framefloors_values
 end
@@ -1145,8 +1111,6 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
   elsif hpxml_file == 'valid-enclosure-walltype-structuralbrick.xml'
     walls_values[0][:wall_type] = "StructuralBrick"
     walls_values[0][:insulation_assembly_r_value] = 7.9
-  elsif hpxml_file == 'valid-enclosure-walltype-woodstud-reference.xml'
-    walls_values[0][:insulation_assembly_r_value] = nil
   elsif hpxml_file == 'invalid_files/invalid-missing-surfaces.xml'
     walls_values[0][:area] = 3696
     walls_values << { :id => "Wall2",
@@ -1254,10 +1218,6 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
                       :area => 80,
                       :azimuth => 270,
                       :r_value => 4.4 }]
-  elsif hpxml_file == 'valid-enclosure-doors-reference.xml'
-    doors_values[0][:area] = nil
-    doors_values[0][:azimuth] = nil
-    doors_values[0][:r_value] = nil
   elsif hpxml_file == 'valid-enclosure-multiple-walls.xml'
     doors_values[0][:wall_idref] = "WallLarge"
   elsif hpxml_file == 'valid-enclosure-orientation-45.xml'
@@ -1739,9 +1699,6 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]]
-  elsif hpxml_file == 'valid-foundation-conditioned-basement-reference.xml'
-    ducts_values[0][0][:duct_location] = "basement - conditioned"
-    ducts_values[0][1][:duct_location] = "basement - conditioned"
   elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "basement - unconditioned"
     ducts_values[0][1][:duct_location] = "basement - unconditioned"
@@ -1990,8 +1947,6 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif hpxml_file == 'valid-dhw-uef.xml'
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
-  elsif hpxml_file == 'valid-foundation-conditioned-basement-reference.xml'
-    water_heating_systems_values[0][:location] = "basement - conditioned"
   elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['valid-foundation-unvented-crawlspace.xml'].include? hpxml_file
@@ -2052,10 +2007,6 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribut
     hot_water_distribution_values[:recirculation_piping_length] = 30
     hot_water_distribution_values[:recirculation_branch_piping_length] = 30
     hot_water_distribution_values[:recirculation_pump_power] = 50
-  elsif hpxml_file == 'valid-dhw-recirc-timer-reference.xml'
-    hot_water_distribution_values[:recirculation_piping_length] = nil
-  elsif hpxml_file == 'valid-dhw-standard-reference.xml'
-    hot_water_distribution_values[:standard_piping_length] = nil
   elsif ['valid-dhw-none.xml'].include? hpxml_file
     hot_water_distribution_values = {}
   end
@@ -2180,16 +2131,6 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
     clothes_washer_values[:integrated_modified_energy_factor] = 0.73
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
     clothes_washer_values[:location] = "basement - conditioned"
-  elsif ['valid-appliances-reference-elec.xml',
-         'valid-appliances-reference-gas.xml'].include? hpxml_file
-    clothes_washer_values[:modified_energy_factor] = nil
-    clothes_washer_values[:rated_annual_kwh] = nil
-    clothes_washer_values[:label_electric_rate] = nil
-    clothes_washer_values[:label_gas_rate] = nil
-    clothes_washer_values[:label_annual_gas_cost] = nil
-    clothes_washer_values[:capacity] = nil
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
-    clothes_washer_values[:location] = "basement - conditioned"
   end
   return clothes_washer_values
 end
@@ -2204,23 +2145,18 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
   elsif hpxml_file == 'valid-appliances-none.xml'
     clothes_dryer_values = {}
   elsif hpxml_file == 'valid-appliances-dryer-cef.xml'
-    clothes_dryer_values[:energy_factor] = nil
-    clothes_dryer_values[:combined_energy_factor] = 2.62
-    clothes_dryer_values[:control_type] = "moisture"
+    clothes_dryer_values = { :id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "electricity",
+                             :combined_energy_factor => 2.62,
+                             :control_type => "moisture" }
   elsif hpxml_file == 'valid-appliances-gas.xml'
-    clothes_dryer_values[:fuel_type] = "natural gas"
-    clothes_dryer_values[:energy_factor] = 2.67
-    clothes_dryer_values[:control_type] = "moisture"
+    clothes_dryer_values = { :id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "natural gas",
+                             :energy_factor => 2.67,
+                             :control_type => "moisture" }
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
-    clothes_dryer_values[:location] = "basement - conditioned"
-  elsif hpxml_file == 'valid-appliances-reference-elec.xml'
-    clothes_dryer_values[:energy_factor] = nil
-    clothes_dryer_values[:control_type] = nil
-  elsif hpxml_file == 'valid-appliances-reference-gas.xml'
-    clothes_dryer_values[:fuel_type] = "natural gas"
-    clothes_dryer_values[:energy_factor] = nil
-    clothes_dryer_values[:control_type] = nil
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
     clothes_dryer_values[:location] = "basement - conditioned"
   end
   return clothes_dryer_values
@@ -2234,13 +2170,9 @@ def get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
   elsif hpxml_file == 'valid-appliances-none.xml'
     dishwasher_values = {}
   elsif hpxml_file == 'valid-appliances-dishwasher-ef.xml'
-    dishwasher_values[:rated_annual_kwh] = nil
-    dishwasher_values[:energy_factor] = 0.5
-    dishwasher_values[:place_setting_capacity] = 8
-  elsif ['valid-appliances-reference-elec.xml',
-         'valid-appliances-reference-gas.xml'].include? hpxml_file
-    dishwasher_values[:rated_annual_kwh] = nil
-    dishwasher_values[:place_setting_capacity] = nil
+    dishwasher_values = { :id => "Dishwasher",
+                          :energy_factor => 0.5,
+                          :place_setting_capacity => 8 }
   end
   return dishwasher_values
 end
@@ -2253,11 +2185,6 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
   elsif hpxml_file == 'valid-appliances-none.xml'
     refrigerator_values = {}
   elsif hpxml_file == 'valid-appliances-in-basement.xml'
-    refrigerator_values[:location] = "basement - conditioned"
-  elsif ['valid-appliances-reference-elec.xml',
-         'valid-appliances-reference-gas.xml'].include? hpxml_file
-    refrigerator_values[:rated_annual_kwh] = nil
-  elsif hpxml_file == 'valid-misc-appliances-in-basement.xml'
     refrigerator_values[:location] = "basement - conditioned"
   end
   return refrigerator_values
@@ -2273,11 +2200,6 @@ def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
   elsif hpxml_file == 'valid-appliances-gas.xml'
     cooking_range_values[:fuel_type] = "natural gas"
     cooking_range_values[:is_induction] = false
-  elsif hpxml_file == 'valid-appliances-reference-elec.xml'
-    cooking_range_values[:is_induction] = nil
-  elsif hpxml_file == 'valid-appliances-reference-gas.xml'
-    cooking_range_values[:fuel_type] = "natural gas"
-    cooking_range_values[:is_induction] = nil
   end
   return cooking_range_values
 end
@@ -2288,9 +2210,6 @@ def get_hpxml_file_oven_values(hpxml_file, oven_values)
                     :is_convection => true }
   elsif hpxml_file == 'valid-appliances-none.xml'
     oven_values = {}
-  elsif ['valid-appliances-reference-elec.xml',
-         'valid-appliances-reference-gas.xml'].include? hpxml_file
-    oven_values[:is_convection] = nil
   end
   return oven_values
 end
@@ -2303,10 +2222,8 @@ def get_hpxml_file_lighting_values(hpxml_file, lighting_values)
                         :fraction_tier_ii_interior => 0.25,
                         :fraction_tier_ii_exterior => 0.25,
                         :fraction_tier_ii_garage => 0.25 }
-  elsif hpxml_file == 'valid-misc-lighting-default.xml'
-    lighting_values = {}
   elsif hpxml_file == 'valid-misc-lighting-none.xml'
-    lighting_values = nil
+    lighting_values = {}
   end
   return lighting_values
 end
@@ -2316,9 +2233,6 @@ def get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
     ceiling_fans_values << { :id => "CeilingFan",
                              :efficiency => 100,
                              :quantity => 2 }
-  elsif hpxml_file == 'valid-misc-ceiling-fans-reference.xml'
-    ceiling_fans_values[0][:efficiency] = nil
-    ceiling_fans_values[0][:quantity] = nil
   end
   return ceiling_fans_values
 end
