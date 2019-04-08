@@ -535,13 +535,13 @@ class EnergyPlusValidator
 
       ## [HWDistType=Standard]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Standard" => {
-        "PipingLength" => zero_or_one, # Uses ERI Reference Home if not provided
+        "PipingLength" => one,
       },
 
       ## [HWDistType=Recirculation]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation" => {
         "ControlType" => one,
-        "RecirculationPipingLoopLength" => zero_or_one, # Uses ERI Reference Home if not provided
+        "RecirculationPipingLoopLength" => one,
         "BranchPipingLoopLength" => one,
         "PumpPower" => one,
       },

@@ -1907,29 +1907,22 @@ class OSModel
     # Distribution
     if not wh.nil?
       dist = wh.elements["HotWaterDistribution"]
-      hot_water_distirbution_values = HPXML.get_hot_water_distribution_values(hot_water_distribution: wh.elements["HotWaterDistribution"])
-      dist_type = hot_water_distirbution_values[:system_type].downcase
+      hot_water_distribution_values = HPXML.get_hot_water_distribution_values(hot_water_distribution: wh.elements["HotWaterDistribution"])
+      dist_type = hot_water_distribution_values[:system_type].downcase
       if dist_type == "standard"
-        std_pipe_length = hot_water_distirbution_values[:standard_piping_length]
-        if hot_water_distirbution_values[:standard_piping_length].nil?
-          std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
-        end
+        std_pipe_length = hot_water_distribution_values[:standard_piping_length]
         recirc_loop_length = nil
         recirc_branch_length = nil
         recirc_control_type = nil
         recirc_pump_power = nil
       elsif dist_type == "recirculation"
-        recirc_loop_length = hot_water_distirbution_values[:recirculation_piping_length]
-        if recirc_loop_length.nil?
-          std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
-          recirc_loop_length = HotWaterAndAppliances.get_default_recirc_loop_length(std_pipe_length)
-        end
-        recirc_branch_length = hot_water_distirbution_values[:recirculation_branch_piping_length]
-        recirc_control_type = hot_water_distirbution_values[:recirculation_control_type]
-        recirc_pump_power = hot_water_distirbution_values[:recirculation_pump_power]
+        recirc_loop_length = hot_water_distribution_values[:recirculation_piping_length]
+        recirc_branch_length = hot_water_distribution_values[:recirculation_branch_piping_length]
+        recirc_control_type = hot_water_distribution_values[:recirculation_control_type]
+        recirc_pump_power = hot_water_distribution_values[:recirculation_pump_power]
         std_pipe_length = nil
       end
-      pipe_r = hot_water_distirbution_values[:pipe_r_value]
+      pipe_r = hot_water_distribution_values[:pipe_r_value]
     end
 
     # Drain Water Heat Recovery
@@ -1940,9 +1933,9 @@ class OSModel
     if not wh.nil?
       if XMLHelper.has_element(dist, "DrainWaterHeatRecovery")
         dwhr_present = true
-        dwhr_facilities_connected = hot_water_distirbution_values[:dwhr_facilities_connected]
-        dwhr_is_equal_flow = hot_water_distirbution_values[:dwhr_equal_flow]
-        dwhr_efficiency = hot_water_distirbution_values[:dwhr_efficiency]
+        dwhr_facilities_connected = hot_water_distribution_values[:dwhr_facilities_connected]
+        dwhr_is_equal_flow = hot_water_distribution_values[:dwhr_equal_flow]
+        dwhr_efficiency = hot_water_distribution_values[:dwhr_efficiency]
       end
     end
 

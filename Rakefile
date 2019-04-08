@@ -55,8 +55,6 @@ def create_hpxmls
     'valid-dhw-recirc-nocontrol.xml' => 'valid.xml',
     'valid-dhw-recirc-temperature.xml' => 'valid.xml',
     'valid-dhw-recirc-timer.xml' => 'valid.xml',
-    'valid-dhw-recirc-timer-reference.xml' => 'valid-dhw-recirc-timer.xml',
-    'valid-dhw-standard-reference.xml' => 'valid.xml',
     'valid-dhw-tank-gas.xml' => 'valid.xml',
     'valid-dhw-tank-heat-pump.xml' => 'valid.xml',
     'valid-dhw-tankless-electric.xml' => 'valid.xml',
@@ -2048,10 +2046,6 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribut
     hot_water_distribution_values[:recirculation_piping_length] = 30
     hot_water_distribution_values[:recirculation_branch_piping_length] = 30
     hot_water_distribution_values[:recirculation_pump_power] = 50
-  elsif hpxml_file == 'valid-dhw-recirc-timer-reference.xml'
-    hot_water_distribution_values[:recirculation_piping_length] = nil
-  elsif hpxml_file == 'valid-dhw-standard-reference.xml'
-    hot_water_distribution_values[:standard_piping_length] = nil
   elsif ['valid-dhw-none.xml'].include? hpxml_file
     hot_water_distribution_values = {}
   end
