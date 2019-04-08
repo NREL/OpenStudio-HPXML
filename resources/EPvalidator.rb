@@ -566,7 +566,7 @@ class EnergyPlusValidator
       # [ClothesWasher]
       "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => zero_or_one,
+        "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
         "[ModifiedEnergyFactor | IntegratedModifiedEnergyFactor]" => one,
         "RatedAnnualkWh" => one,
         "LabelElectricRate" => one,
@@ -578,7 +578,7 @@ class EnergyPlusValidator
       # [ClothesDryer]
       "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => zero_or_one,
+        "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one,
         "[EnergyFactor | CombinedEnergyFactor]" => one,
         "[ControlType='timer' or ControlType='moisture']" => one,
@@ -594,7 +594,7 @@ class EnergyPlusValidator
       # [Refrigerator]
       "/HPXML/Building/BuildingDetails/Appliances/Refrigerator" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => zero_or_one,
+        "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
         "RatedAnnualkWh" => one,
       },
 
