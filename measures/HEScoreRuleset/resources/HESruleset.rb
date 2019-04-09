@@ -1,7 +1,10 @@
 require 'csv'
 require_relative "../../HPXMLtoOpenStudio/resources/airflow"
+require_relative "../../HPXMLtoOpenStudio/resources/constructions"
 require_relative "../../HPXMLtoOpenStudio/resources/geometry"
+require_relative "../../HPXMLtoOpenStudio/resources/hotwater_appliances"
 require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
+require_relative "../../HPXMLtoOpenStudio/resources/lighting"
 
 class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
@@ -66,7 +69,7 @@ class HEScoreRuleset
     set_systems_hvac(orig_details, hpxml)
     set_systems_mechanical_ventilation(orig_details, hpxml)
     set_systems_water_heater(orig_details, hpxml)
-    set_systems_water_heating_use(hpxml)
+    set_systems_water_heating_use(orig_details, hpxml)
     set_systems_photovoltaics(orig_details, hpxml)
 
     # Appliances
@@ -132,6 +135,9 @@ class HEScoreRuleset
   def self.set_enclosure_attics_roofs(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
       attic_values = HPXML.get_attic_values(attic: orig_attic)
+      if attic_values[:attic_type] == "VentedAttic"
+        attic_values[:specific_leakage_area] = Airflow.get_default_vented_attic_sla()
+      end
       new_attic = HPXML.add_attic(hpxml: hpxml, **attic_values)
 
       # Roof: Two surfaces per HES zone_roof
@@ -188,15 +194,15 @@ class HEScoreRuleset
                              insulation_id: "#{roof_values[:insulation_id]}_gable_#{idx}",
                              insulation_assembly_r_value: 4.0) # FIXME: Hard-coded
       end
-
-      # Uses ERI Reference Home for vented attic specific leakage area
     end
   end
 
   def self.set_enclosure_foundations(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
       foundation_values = HPXML.get_foundation_values(foundation: orig_foundation)
-
+      if foundation_values[:foundation_type] == "VentedCrawlspace"
+        foundation_values[:specific_leakage_area] = Airflow.get_default_vented_crawl_sla()
+      end
       new_foundation = HPXML.add_foundation(hpxml: hpxml, **foundation_values)
 
       # FrameFloor
@@ -258,8 +264,6 @@ class HEScoreRuleset
                      perimeter_insulation_r_value: slab_values[:perimeter_insulation_r_value],
                      under_slab_insulation_id: "#{slab_values[:id]}_under_insulation",
                      under_slab_insulation_r_value: 0)
-
-      # Uses ERI Reference Home for vented crawlspace specific leakage area
     end
   end
 
@@ -385,13 +389,15 @@ class HEScoreRuleset
     end
     fail "Could not find front wall." if front_wall.nil?
 
+    ufactor, shgc = SubsurfaceConstructions.get_default_ufactor_shgc(@iecc_zone)
+
     front_wall_values = HPXML.get_wall_values(wall: front_wall)
     HPXML.add_door(hpxml: hpxml,
                    id: "Door",
                    wall_idref: front_wall_values[:id],
-                   azimuth: orientation_to_azimuth(@bldg_orient))
-    # Uses ERI Reference Home for Area
-    # Uses ERI Reference Home for RValue
+                   area: SubsurfaceConstructions.get_default_door_area(),
+                   azimuth: orientation_to_azimuth(@bldg_orient),
+                   r_value: 1.0 / ufactor)
   end
 
   def self.set_systems_hvac(orig_details, hpxml)
@@ -623,11 +629,20 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_systems_water_heating_use(hpxml)
+  def self.set_systems_water_heating_use(orig_details, hpxml)
+    # Hot water piping length
+    has_uncond_bsmnt = false
+    fnd_types, _ = get_foundation_details(orig_details)
+    if fnd_types.include? "UnconditionedBasement"
+      has_uncond_bsmnt = true
+    end
+    piping_length = HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, @cfa, @ncfl)
+
     HPXML.add_hot_water_distribution(hpxml: hpxml,
                                      id: "HotWaterDistribution",
                                      system_type: "Standard",
-                                     pipe_r_value: 0)
+                                     pipe_r_value: 0,
+                                     standard_piping_length: piping_length)
 
     HPXML.add_water_fixture(hpxml: hpxml,
                             id: "ShowerHead",
@@ -656,42 +671,59 @@ class HEScoreRuleset
 
   def self.set_appliances_clothes_washer(hpxml)
     HPXML.add_clothes_washer(hpxml: hpxml,
-                             id: "ClothesWasher")
-    # Uses ERI Reference Home for performance
+                             id: "ClothesWasher",
+                             location: "living space", # FIXME: Verify
+                             modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_mef(),
+                             rated_annual_kwh: HotWaterAndAppliances.get_clothes_washer_reference_ler(),
+                             label_electric_rate: HotWaterAndAppliances.get_clothes_washer_reference_elec_rate(),
+                             label_gas_rate: HotWaterAndAppliances.get_clothes_washer_reference_gas_rate(),
+                             label_annual_gas_cost: HotWaterAndAppliances.get_clothes_washer_reference_agc(),
+                             capacity: HotWaterAndAppliances.get_clothes_washer_reference_cap())
   end
 
   def self.set_appliances_clothes_dryer(hpxml)
     HPXML.add_clothes_dryer(hpxml: hpxml,
                             id: "ClothesDryer",
-                            fuel_type: "electricity")
-    # Uses ERI Reference Home for performance
+                            location: "living space", # FIXME: Verify
+                            fuel_type: "electricity",
+                            energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_ef(Constants.FuelTypeElectric),
+                            control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
   end
 
   def self.set_appliances_dishwasher(hpxml)
     HPXML.add_dishwasher(hpxml: hpxml,
-                         id: "Dishwasher")
-    # Uses ERI Reference Home for performance
+                         id: "Dishwasher",
+                         energy_factor: HotWaterAndAppliances.get_dishwasher_reference_ef(),
+                         place_setting_capacity: HotWaterAndAppliances.get_dishwasher_reference_cap())
   end
 
   def self.set_appliances_refrigerator(hpxml)
     HPXML.add_refrigerator(hpxml: hpxml,
-                           id: "Refrigerator")
-    # Uses ERI Reference Home for performance
+                           id: "Refrigerator",
+                           location: "living space", # FIXME: Verify
+                           rated_annual_kwh: HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds))
   end
 
   def self.set_appliances_cooking_range_oven(hpxml)
     HPXML.add_cooking_range(hpxml: hpxml,
                             id: "CookingRange",
-                            fuel_type: "electricity")
+                            fuel_type: "electricity",
+                            is_induction: HotWaterAndAppliances.get_range_oven_reference_is_induction())
 
     HPXML.add_oven(hpxml: hpxml,
-                   id: "Oven")
-    # Uses ERI Reference Home for performance
+                   id: "Oven",
+                   is_convection: HotWaterAndAppliances.get_range_oven_reference_is_convection())
   end
 
   def self.set_lighting(orig_details, hpxml)
-    HPXML.add_lighting(hpxml: hpxml)
-    # Uses ERI Reference Home
+    fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
+    HPXML.add_lighting(hpxml: hpxml,
+                       fraction_tier_i_interior: fFI_int,
+                       fraction_tier_i_exterior: fFI_ext,
+                       fraction_tier_i_garage: fFI_grg,
+                       fraction_tier_ii_interior: fFII_int,
+                       fraction_tier_ii_exterior: fFII_ext,
+                       fraction_tier_ii_garage: fFII_grg)
   end
 
   def self.set_ceiling_fans(orig_details, hpxml)

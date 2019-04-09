@@ -885,14 +885,6 @@ class OSModel
         fnd_slab_perim = fnd_slab.elements["PerimeterInsulation/Layer[InstallationType='continuous']"]
         slab_ext_r = slab_values[:perimeter_insulation_r_value]
         slab_ext_depth = slab_values[:perimeter_insulation_depth]
-        if slab_ext_r.nil? or slab_ext_depth.nil?
-          if foundation_type == "SlabOnGrade"
-            slab_ext_r, slab_ext_depth = FoundationConstructions.get_default_slab_perimeter_rvalue_depth(@iecc_zone_2006)
-          else
-            slab_ext_r = 0
-            slab_ext_depth = 0
-          end
-        end
         if slab_ext_r == 0 or slab_ext_depth == 0
           slab_ext_r = 0
           slab_ext_depth = 0
@@ -901,14 +893,6 @@ class OSModel
         fnd_slab_under = fnd_slab.elements["UnderSlabInsulation/Layer[InstallationType='continuous']"]
         slab_perim_r = slab_values[:under_slab_insulation_r_value]
         slab_perim_width = slab_values[:under_slab_insulation_width]
-        if slab_perim_r.nil? or slab_perim_width.nil?
-          if foundation_type == "SlabOnGrade"
-            slab_perim_r, slab_perim_width = FoundationConstructions.get_default_slab_under_rvalue_width()
-          else
-            slab_perim_r = 0
-            slab_perim_width = 0
-          end
-        end
         if slab_perim_r == 0 or slab_perim_width == 0
           slab_perim_r = 0
           slab_perim_width = 0
@@ -970,13 +954,6 @@ class OSModel
         walls_concrete_thick_in = foundation_wall_values[:thickness]
         wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
         wall_film_r = Material.AirFilmVertical.rvalue
-        if wall_assembly_r.nil?
-          if foundation_type == "ConditionedBasement"
-            wall_assembly_r = 1.0 / FoundationConstructions.get_default_basement_wall_ufactor(@iecc_zone_2006)
-          else
-            wall_assembly_r = Material.Concrete(walls_concrete_thick_in).rvalue + wall_film_r
-          end
-        end
         wall_cav_r = 0.0
         wall_cav_depth = 0.0
         wall_grade = 1
@@ -1035,11 +1012,7 @@ class OSModel
         ceiling_surfaces << surface
 
         floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
-
         floor_assembly_r = frame_floor_values[:insulation_assembly_r_value]
-        if floor_assembly_r.nil?
-          floor_assembly_r = 1.0 / FloorConstructions.get_default_floor_ufactor(@iecc_zone_2006)
-        end
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),  # 2x4, 16" o.c.
@@ -1385,10 +1358,7 @@ class OSModel
         end
         film_r = 2 * Material.AirFilmFloorAverage.rvalue
 
-        assembly_r = FloorConstructions.get_default_ceiling_ufactor(@iecc_zone_2006)
-        if not attic_floor_values[:insulation_assembly_r_value].nil?
-          assembly_r = attic_floor_values[:insulation_assembly_r_value]
-        end
+        assembly_r = attic_floor_values[:insulation_assembly_r_value]
         constr_sets = [
           WoodStudConstructionSet.new(Material.Stud2x6, 0.11, 0.0, 0.0, drywall_thick_in, nil), # 2x6, 24" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.24, 0.0, 0.0, drywall_thick_in, nil), # 2x4, 16" o.c.
@@ -1715,14 +1685,7 @@ class OSModel
       door_id = door_values[:id]
 
       door_area = door_values[:area]
-      if door_values[:area].nil?
-        door_area = SubsurfaceConstructions.get_default_door_area()
-      end
-
       door_azimuth = door_values[:azimuth]
-      if door_azimuth.nil?
-        door_azimuth = 0
-      end
 
       door_height = 6.67 # ft
       door_width = door_area / door_height
@@ -1757,12 +1720,7 @@ class OSModel
       sub_surface.setSubSurfaceType("Door")
 
       # Apply construction
-      rvalue = door_values[:r_value]
-      if not rvalue.nil?
-        ufactor = 1.0 / rvalue
-      else
-        ufactor, shgc = SubsurfaceConstructions.get_default_ufactor_shgc(@iecc_zone_2006)
-      end
+      ufactor = 1.0 / door_values[:r_value]
 
       success = SubsurfaceConstructions.apply_door(runner, model, [sub_surface], "Door", ufactor)
       return false if not success
@@ -1829,27 +1787,17 @@ class OSModel
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
       cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
+      cw_ler = clothes_washer_values[:rated_annual_kwh]
+      cw_elec_rate = clothes_washer_values[:label_electric_rate]
+      cw_gas_rate = clothes_washer_values[:label_gas_rate]
+      cw_agc = clothes_washer_values[:label_annual_gas_cost]
+      cw_cap = clothes_washer_values[:capacity]
       cw_mef = clothes_washer_values[:modified_energy_factor]
-      cw_imef = clothes_washer_values[:integrated_modified_energy_factor]
-      if cw_mef.nil? and cw_imef.nil?
-        cw_mef = HotWaterAndAppliances.get_clothes_washer_reference_mef()
-        cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
-        cw_elec_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
-        cw_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
-        cw_agc = HotWaterAndAppliances.get_clothes_washer_reference_agc()
-        cw_cap = HotWaterAndAppliances.get_clothes_washer_reference_cap()
-      else
-        if cw_mef.nil?
-          cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(cw_imef)
-        end
-        cw_ler = clothes_washer_values[:rated_annual_kwh]
-        cw_elec_rate = clothes_washer_values[:label_electric_rate]
-        cw_gas_rate = clothes_washer_values[:label_gas_rate]
-        cw_agc = clothes_washer_values[:label_annual_gas_cost]
-        cw_cap = clothes_washer_values[:capacity]
+      if cw_mef.nil?
+        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
       end
     else
-      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = nil
+      cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
     end
 
     # Clothes Dryer
@@ -1857,34 +1805,22 @@ class OSModel
     if not clothes_dryer_values.nil?
       cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
       cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
+      cd_control = clothes_dryer_values[:control_type]
       cd_ef = clothes_dryer_values[:energy_factor]
-      cd_cef = clothes_dryer_values[:combined_energy_factor]
-      if cd_ef.nil? and cd_cef.nil?
-        cd_ef = HotWaterAndAppliances.get_clothes_dryer_reference_ef(cd_fuel)
-        cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
-      else
-        if cd_ef.nil?
-          cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(cd_cef)
-        end
-        cd_control = clothes_dryer_values[:control_type]
+      if cd_ef.nil?
+        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
       end
     else
-      cd_ef = cd_control = cd_fuel = nil
+      cd_ef = cd_control = cd_fuel = cd_space = nil
     end
 
     # Dishwasher
     dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
     if not dishwasher_values.nil?
+      dw_cap = dishwasher_values[:place_setting_capacity]
       dw_ef = dishwasher_values[:energy_factor]
-      dw_annual_kwh = dishwasher_values[:rated_annual_kwh]
-      if dw_ef.nil? and dw_annual_kwh.nil?
-        dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
-        dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
-      else
-        if dw_ef.nil?
-          dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dw_annual_kwh)
-        end
-        dw_cap = dishwasher_values[:place_setting_capacity]
+      if dw_ef.nil?
+        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
       end
     else
       dw_ef = dw_cap = nil
@@ -1894,12 +1830,9 @@ class OSModel
     refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
     if not refrigerator_values.nil?
       fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
-      fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
-      if not refrigerator_values[:rated_annual_kwh].nil?
-        fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
-      end
+      fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
     else
-      fridge_annual_kwh = nil
+      fridge_annual_kwh = fridge_space = nil
     end
 
     # Cooking Range/Oven
@@ -1907,12 +1840,8 @@ class OSModel
     oven_values = HPXML.get_oven_values(oven: building.elements["BuildingDetails/Appliances/Oven"])
     if not cooking_range_values.nil? and not oven_values.nil?
       cook_fuel_type = to_beopt_fuel(cooking_range_values[:fuel_type])
-      cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
-      oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
-      if not cooking_range_values[:is_induction].nil?
-        cook_is_induction = cooking_range_values[:is_induction]
-        oven_is_convection = oven_values[:is_convection]
-      end
+      cook_is_induction = cooking_range_values[:is_induction]
+      oven_is_convection = oven_values[:is_convection]
     else
       cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end
@@ -1936,29 +1865,22 @@ class OSModel
     # Distribution
     if not wh.nil?
       dist = wh.elements["HotWaterDistribution"]
-      hot_water_distirbution_values = HPXML.get_hot_water_distribution_values(hot_water_distribution: wh.elements["HotWaterDistribution"])
-      dist_type = hot_water_distirbution_values[:system_type].downcase
+      hot_water_distribution_values = HPXML.get_hot_water_distribution_values(hot_water_distribution: wh.elements["HotWaterDistribution"])
+      dist_type = hot_water_distribution_values[:system_type].downcase
       if dist_type == "standard"
-        std_pipe_length = hot_water_distirbution_values[:standard_piping_length]
-        if hot_water_distirbution_values[:standard_piping_length].nil?
-          std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
-        end
+        std_pipe_length = hot_water_distribution_values[:standard_piping_length]
         recirc_loop_length = nil
         recirc_branch_length = nil
         recirc_control_type = nil
         recirc_pump_power = nil
       elsif dist_type == "recirculation"
-        recirc_loop_length = hot_water_distirbution_values[:recirculation_piping_length]
-        if recirc_loop_length.nil?
-          std_pipe_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
-          recirc_loop_length = HotWaterAndAppliances.get_default_recirc_loop_length(std_pipe_length)
-        end
-        recirc_branch_length = hot_water_distirbution_values[:recirculation_branch_piping_length]
-        recirc_control_type = hot_water_distirbution_values[:recirculation_control_type]
-        recirc_pump_power = hot_water_distirbution_values[:recirculation_pump_power]
+        recirc_loop_length = hot_water_distribution_values[:recirculation_piping_length]
+        recirc_branch_length = hot_water_distribution_values[:recirculation_branch_piping_length]
+        recirc_control_type = hot_water_distribution_values[:recirculation_control_type]
+        recirc_pump_power = hot_water_distribution_values[:recirculation_pump_power]
         std_pipe_length = nil
       end
-      pipe_r = hot_water_distirbution_values[:pipe_r_value]
+      pipe_r = hot_water_distribution_values[:pipe_r_value]
     end
 
     # Drain Water Heat Recovery
@@ -1969,9 +1891,9 @@ class OSModel
     if not wh.nil?
       if XMLHelper.has_element(dist, "DrainWaterHeatRecovery")
         dwhr_present = true
-        dwhr_facilities_connected = hot_water_distirbution_values[:dwhr_facilities_connected]
-        dwhr_is_equal_flow = hot_water_distirbution_values[:dwhr_equal_flow]
-        dwhr_efficiency = hot_water_distirbution_values[:dwhr_efficiency]
+        dwhr_facilities_connected = hot_water_distribution_values[:dwhr_facilities_connected]
+        dwhr_is_equal_flow = hot_water_distribution_values[:dwhr_equal_flow]
+        dwhr_efficiency = hot_water_distribution_values[:dwhr_efficiency]
       end
     end
 
@@ -2752,39 +2674,23 @@ class OSModel
 
     lighting_values = HPXML.get_lighting_values(lighting: lighting)
 
-    # Default
-    fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg = Lighting.get_reference_fractions()
-
-    unless lighting_values[:fraction_tier_i_interior].nil?
-      fFI_int = lighting_values[:fraction_tier_i_interior]
+    if lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior] > 1
+      fail "Fraction of qualifying interior lighting fixtures #{lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior]} is greater than 1."
     end
-    unless lighting_values[:fraction_tier_i_exterior].nil?
-      fFI_ext = lighting_values[:fraction_tier_i_exterior]
+    if lighting_values[:fraction_tier_i_exterior] + lighting_values[:fraction_tier_ii_exterior] > 1
+      fail "Fraction of qualifying exterior lighting fixtures #{lighting_values[:fraction_tier_i_exterior] + lighting_values[:fraction_tier_ii_exterior]} is greater than 1."
     end
-    unless lighting_values[:fraction_tier_i_garage].nil?
-      fFI_grg = lighting_values[:fraction_tier_i_garage]
-    end
-    unless lighting_values[:fraction_tier_ii_interior].nil?
-      fFII_int = lighting_values[:fraction_tier_ii_interior]
-    end
-    unless lighting_values[:fraction_tier_ii_exterior].nil?
-      fFII_ext = lighting_values[:fraction_tier_ii_exterior]
-    end
-    unless lighting_values[:fraction_tier_ii_garage].nil?
-      fFII_grg = lighting_values[:fraction_tier_ii_garage]
+    if lighting_values[:fraction_tier_i_garage] + lighting_values[:fraction_tier_ii_garage] > 1
+      fail "Fraction of qualifying garage lighting fixtures #{lighting_values[:fraction_tier_i_garage] + lighting_values[:fraction_tier_ii_garage]} is greater than 1."
     end
 
-    if fFI_int + fFII_int > 1
-      fail "Fraction of qualifying interior lighting fixtures #{fFI_int + fFII_int} is greater than 1."
-    end
-    if fFI_ext + fFII_ext > 1
-      fail "Fraction of qualifying exterior lighting fixtures #{fFI_ext + fFII_ext} is greater than 1."
-    end
-    if fFI_grg + fFII_grg > 1
-      fail "Fraction of qualifying garage lighting fixtures #{fFI_grg + fFII_grg} is greater than 1."
-    end
-
-    int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present, fFI_int, fFI_ext, fFI_grg, fFII_int, fFII_ext, fFII_grg)
+    int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present,
+                                                              lighting_values[:fraction_tier_i_interior],
+                                                              lighting_values[:fraction_tier_i_exterior],
+                                                              lighting_values[:fraction_tier_i_garage],
+                                                              lighting_values[:fraction_tier_ii_interior],
+                                                              lighting_values[:fraction_tier_ii_exterior],
+                                                              lighting_values[:fraction_tier_ii_garage])
 
     success, sch = Lighting.apply_interior(model, unit, runner, weather, nil, int_kwh)
     return false if not success
@@ -2824,11 +2730,7 @@ class OSModel
       foundation_values = HPXML.get_foundation_values(foundation: vented_crawl)
       frame_floor_values = HPXML.get_frame_floor_values(floor: vented_crawl.elements["FrameFloor"])
       area = frame_floor_values[:area]
-      vented_crawl_sla = foundation_values[:specific_leakage_area]
-      if vented_crawl_sla.nil?
-        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
-      end
-      vented_crawl_sla_area += (vented_crawl_sla * area)
+      vented_crawl_sla_area += (foundation_values[:specific_leakage_area] * area)
       vented_crawl_area += area
     end
     if vented_crawl_area > 0
@@ -2845,13 +2747,9 @@ class OSModel
       attic_values = HPXML.get_attic_values(attic: vented_attic)
       attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
       area = attic_floor_values[:area]
-      vented_attic_sla = attic_values[:specific_leakage_area]
       vented_attic_const_ach = attic_values[:constant_ach_natural]
-      if not vented_attic_sla.nil?
-        vented_attic_sla_area += (vented_attic_sla * area)
-      else
-        vented_attic_sla = Airflow.get_default_vented_attic_sla()
-        vented_attic_sla_area += (vented_attic_sla * area)
+      if not attic_values[:specific_leakage_area].nil?
+        vented_attic_sla_area += (attic_values[:specific_leakage_area] * area)
       end
       vented_attic_area += area
     end
@@ -3366,9 +3264,6 @@ class OSModel
   def self.apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
                                    drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
     if wall_type == "WoodStud"
-      if assembly_r.nil?
-        assembly_r = 1.0 / WallConstructions.get_default_frame_wall_ufactor(@iecc_zone_2006)
-      end
       install_grade = 1
       cavity_filled = true
 
