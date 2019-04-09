@@ -235,7 +235,7 @@ class OSModel
     @ncfl = building_construction_values[:number_of_conditioned_floors]
     @nbeds = building_construction_values[:number_of_bedrooms]
     @garage_present = building_construction_values[:garage_present]
-    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"])
+    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
     climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: building.elements["BuildingDetails/ClimateandRiskZones"])
     @iecc_zone_2006 = climate_and_risk_zones_values[:iecc2006]
