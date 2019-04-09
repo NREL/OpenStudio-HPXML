@@ -3749,21 +3749,32 @@ class OSModel
   end
 
   def self.get_space_from_location(location, object_name, model, spaces)
-    if location.nil? or location == 'living space'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
+    num_orig_spaces = spaces.size
+
+    space = nil
+    if location == 'living space'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - conditioned'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
     elsif location == 'basement - unconditioned'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
     elsif location == 'garage'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
     elsif location == 'attic - unvented' or location == 'attic - vented'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
     elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
     end
 
-    fail "Unhandled #{object_name} location: #{location}."
+    if space.nil?
+      fail "Unhandled #{object_name} location: #{location}."
+    end
+
+    if spaces.size != num_orig_spaces
+      fail "#{object_name} location is '#{location}' but building does not have this location specified."
+    end
+
+    return space
   end
 end
 
