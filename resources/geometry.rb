@@ -62,37 +62,6 @@ class Geometry
     return l, w, h
   end
 
-  def self.get_building_stories(spaces)
-    space_min_zs = []
-    spaces.each do |space|
-      next if not self.space_is_finished(space)
-
-      surfaces_min_zs = []
-      space.surfaces.each do |surface|
-        zvalues = self.getSurfaceZValues([surface])
-        surfaces_min_zs << zvalues.min + UnitConversions.convert(space.zOrigin, "m", "ft")
-      end
-      space_min_zs << surfaces_min_zs.min
-    end
-    return space_min_zs.uniq.length
-  end
-
-  def self.get_above_grade_building_stories(spaces)
-    space_min_zs = []
-    spaces.each do |space|
-      next if not self.space_is_finished(space)
-      next if not self.space_is_above_grade(space)
-
-      surfaces_min_zs = []
-      space.surfaces.each do |surface|
-        zvalues = self.getSurfaceZValues([surface])
-        surfaces_min_zs << zvalues.min + UnitConversions.convert(space.zOrigin, "m", "ft")
-      end
-      space_min_zs << surfaces_min_zs.min
-    end
-    return space_min_zs.uniq.length
-  end
-
   def self.make_polygon(*pts)
     p = OpenStudio::Point3dVector.new
     pts.each do |pt|
