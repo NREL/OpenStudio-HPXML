@@ -235,7 +235,7 @@ class OSModel
     @ncfl = building_construction_values[:number_of_conditioned_floors]
     @nbeds = building_construction_values[:number_of_bedrooms]
     @garage_present = building_construction_values[:garage_present]
-    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/FoundationType/Basement[Conditioned='false']"])
+    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
     climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: building.elements["BuildingDetails/ClimateandRiskZones"])
     @iecc_zone_2006 = climate_and_risk_zones_values[:iecc2006]
@@ -3787,21 +3787,32 @@ class OSModel
   end
 
   def self.get_space_from_location(location, object_name, model, spaces)
-    if location.nil? or location == 'living space'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
+    num_orig_spaces = spaces.size
+
+    space = nil
+    if location == 'living space'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - conditioned'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
     elsif location == 'basement - unconditioned'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
     elsif location == 'garage'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
     elsif location == 'attic - unvented' or location == 'attic - vented'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
     elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
-      return create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
     end
 
-    fail "Unhandled #{object_name} location: #{location}."
+    if space.nil?
+      fail "Unhandled #{object_name} location: #{location}."
+    end
+
+    if spaces.size != num_orig_spaces
+      fail "#{object_name} location is '#{location}' but building does not have this location specified."
+    end
+
+    return space
   end
 end
 

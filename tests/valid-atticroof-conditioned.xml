@@ -577,13 +577,13 @@
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctLocation>attic - conditioned</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctLocation>attic - conditioned</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
@@ -595,7 +595,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>living space</Location>
+            <Location>basement - conditioned</Location>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
@@ -627,7 +627,7 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <Location>living space</Location>
+          <Location>basement - conditioned</Location>
           <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
           <RatedAnnualkWh>387.0</RatedAnnualkWh>
           <LabelElectricRate>0.127</LabelElectricRate>
@@ -637,7 +637,7 @@
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
-          <Location>living space</Location>
+          <Location>basement - conditioned</Location>
           <FuelType>electricity</FuelType>
           <EnergyFactor>3.01</EnergyFactor>
           <ControlType>timer</ControlType>
@@ -649,7 +649,7 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
-          <Location>living space</Location>
+          <Location>basement - conditioned</Location>
           <RatedAnnualkWh>609.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
