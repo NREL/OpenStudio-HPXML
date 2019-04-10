@@ -270,6 +270,11 @@ class OSModel
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
 
+    # FIXME: Temporarily adding ideal air systems first to work around E+ bug
+    # https://github.com/NREL/EnergyPlus/issues/7264
+    success = add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
+    return false if not success
+
     success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
@@ -277,9 +282,6 @@ class OSModel
     return false if not success
 
     success = add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
-    return false if not success
-
-    success = add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather)
@@ -2403,16 +2405,19 @@ class OSModel
       return true
     end
 
-    residual_heat_load_served = @total_frac_remaining_heat_load_served
-    residual_cool_load_served = @total_frac_remaining_cool_load_served
-
     # Residual heating
+    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
+    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
+    residual_heat_load_served = 1.0 - htg_load_frac
     if residual_heat_load_served > 0.02 and residual_heat_load_served < 1
       success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_heat_load_served, 1)
       return false if not success
     end
 
     # Residual cooling
+    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
+    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
+    residual_cool_load_served = 1.0 - clg_load_frac
     if residual_cool_load_served > 0.02 and residual_cool_load_served < 1
       success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_cool_load_served, 1)
       return false if not success
