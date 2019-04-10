@@ -292,7 +292,7 @@ class OSModel
         fail "Unexpected load distribution scheme #{building_construction_values[:load_distribution_scheme]}."
       end
 
-      thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+      thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
       control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
       control_slave_zones_hash.each do |control_zone, slave_zones|
         ([control_zone] + slave_zones).each do |zone|
@@ -303,10 +303,10 @@ class OSModel
 
     # Plug Loads & Lighting
 
-    success = add_mels(runner, model, building, unit, spaces)
+    success = add_mels(runner, model, building, spaces)
     return false if not success
 
-    success = add_lighting(runner, model, building, unit, weather)
+    success = add_lighting(runner, model, building, weather)
     return false if not success
 
     # Other
@@ -2037,7 +2037,7 @@ class OSModel
           fan_power_rated = 0.365
           fan_power_installed = 0.5
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
-          success = HVAC.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_1speed(model, runner, seer, eers, shrs,
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
                                                  eer_capacity_derates, cool_capacity_btuh,
@@ -2053,7 +2053,7 @@ class OSModel
           fan_power_rated = 0.14
           fan_power_installed = 0.3
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
-          success = HVAC.apply_central_ac_2speed(model, unit, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_2speed(model, runner, seer, eers, shrs,
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
@@ -2070,7 +2070,7 @@ class OSModel
           fan_power_rated = 0.14
           fan_power_installed = 0.3
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
-          success = HVAC.apply_central_ac_4speed(model, unit, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_4speed(model, runner, seer, eers, shrs,
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
@@ -2090,7 +2090,7 @@ class OSModel
         shr = 0.65
         airflow_rate = 350.0
 
-        success = HVAC.apply_room_ac(model, unit, runner, eer, shr,
+        success = HVAC.apply_room_ac(model, runner, eer, shr,
                                      airflow_rate, cool_capacity_btuh, load_frac)
         return false if not success
 
@@ -2129,7 +2129,7 @@ class OSModel
         afue = heating_system_values[:heating_efficiency_afue]
         fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
         attached_to_multispeed_ac = get_attached_to_multispeed_ac(heating_system_values, building)
-        success = HVAC.apply_furnace(model, unit, runner, fuel, afue,
+        success = HVAC.apply_furnace(model, runner, fuel, afue,
                                      heat_capacity_btuh, fan_power, dse_heat,
                                      load_frac, attached_to_multispeed_ac)
         return false if not success
@@ -2140,7 +2140,7 @@ class OSModel
         fan_power = 0.0
         airflow_rate = 0.0
         # TODO: Allow DSE
-        success = HVAC.apply_unit_heater(model, unit, runner, fuel,
+        success = HVAC.apply_unit_heater(model, runner, fuel,
                                          afue, heat_capacity_btuh, fan_power,
                                          airflow_rate, load_frac)
         return false if not success
@@ -2155,7 +2155,7 @@ class OSModel
         oat_hwst_high = nil
         oat_hwst_low = nil
         design_temp = 180.0
-        success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
+        success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                     oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                                     heat_capacity_btuh, design_temp, dse_heat, load_frac)
         return false if not success
@@ -2164,7 +2164,7 @@ class OSModel
 
         efficiency = heating_system_values[:heating_efficiency_percent]
         # TODO: Allow DSE
-        success = HVAC.apply_electric_baseboard(model, unit, runner, efficiency,
+        success = HVAC.apply_electric_baseboard(model, runner, efficiency,
                                                 heat_capacity_btuh, load_frac)
         return false if not success
 
@@ -2174,7 +2174,7 @@ class OSModel
         airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
         fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
         # TODO: Allow DSE
-        success = HVAC.apply_unit_heater(model, unit, runner, fuel,
+        success = HVAC.apply_unit_heater(model, runner, fuel,
                                          efficiency, heat_capacity_btuh, fan_power,
                                          airflow_rate, load_frac)
         return false if not success
@@ -2244,7 +2244,7 @@ class OSModel
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_1speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+          success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    fan_power_rated, fan_power_installed, min_temp,
                                                    crankcase_kw, crankcase_temp,
                                                    eer_capacity_derates, cop_capacity_derates,
@@ -2267,7 +2267,7 @@ class OSModel
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_2speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+          success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling,
                                                    fan_speed_ratios_heating,
                                                    fan_power_rated, fan_power_installed, min_temp,
@@ -2292,7 +2292,7 @@ class OSModel
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_4speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+          success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling,
                                                    fan_speed_ratios_heating,
                                                    fan_power_rated, fan_power_installed, min_temp,
@@ -2330,7 +2330,7 @@ class OSModel
         fan_power = 0.07
         is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
         supplemental_efficiency = 1.0
-        success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
+        success = HVAC.apply_mshp(model, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
                                   min_cooling_airflow_rate, max_cooling_airflow_rate,
                                   min_heating_capacity, max_heating_capacity,
@@ -2367,7 +2367,7 @@ class OSModel
         heat_pump_capacity = cool_capacity_btuh
         supplemental_efficiency = 1
         supplemental_capacity = backup_heat_capacity_btuh
-        success = HVAC.apply_gshp(model, unit, runner, weather, cop, eer, shr,
+        success = HVAC.apply_gshp(model, runner, weather, cop, eer, shr,
                                   ground_conductivity, grout_conductivity,
                                   bore_config, bore_holes, bore_depth,
                                   bore_spacing, bore_diameter, pipe_size,
@@ -2389,10 +2389,10 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     if use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1)
+      success = HVAC.apply_ideal_air_loads_heating(model, runner, 1)
       return false if not success
 
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1)
+      success = HVAC.apply_ideal_air_loads_cooling(model, runner, 1)
       return false if not success
 
       return true
@@ -2403,7 +2403,7 @@ class OSModel
     htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
     residual_htg_load_frac = 1.0 - htg_load_frac
     if residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_htg_load_frac)
+      success = HVAC.apply_ideal_air_loads_heating(model, runner, residual_htg_load_frac)
       return false if not success
     end
 
@@ -2412,7 +2412,7 @@ class OSModel
     clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
     residual_clg_load_frac = 1.0 - clg_load_frac
     if residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_clg_load_frac)
+      success = HVAC.apply_ideal_air_loads_cooling(model, runner, residual_clg_load_frac)
       return false if not success
     end
 
@@ -2505,7 +2505,7 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    success = HVAC.apply_ceiling_fans(model, unit, runner, annual_kwh, weekday_sch, weekend_sch)
+    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch)
     return false if not success
 
     return true
@@ -2604,7 +2604,7 @@ class OSModel
     end
   end
 
-  def self.add_mels(runner, model, building, unit, spaces)
+  def self.add_mels(runner, model, building, spaces)
     living_space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
 
     # Misc
@@ -2641,7 +2641,7 @@ class OSModel
         misc_monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
       end
 
-      success, sch = MiscLoads.apply_plug(model, unit, runner, misc_annual_kwh,
+      success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh,
                                           misc_sens_frac, misc_lat_frac, misc_weekday_sch,
                                           misc_weekend_sch, misc_monthly_sch, nil)
       return false if not success
@@ -2655,14 +2655,14 @@ class OSModel
         tv_annual_kwh, tv_sens_frac, tv_lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
       end
 
-      success = MiscLoads.apply_tv(model, unit, runner, tv_annual_kwh, sch, living_space)
+      success = MiscLoads.apply_tv(model, runner, tv_annual_kwh, sch, living_space)
       return false if not success
     end
 
     return true
   end
 
-  def self.add_lighting(runner, model, building, unit, weather)
+  def self.add_lighting(runner, model, building, weather)
     lighting = building.elements["BuildingDetails/Lighting"]
     return true if lighting.nil?
 
@@ -2686,13 +2686,7 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    success, sch = Lighting.apply_interior(model, unit, runner, weather, nil, int_kwh)
-    return false if not success
-
-    success = Lighting.apply_garage(model, runner, sch, grg_kwh)
-    return false if not success
-
-    success = Lighting.apply_exterior(model, runner, sch, ext_kwh)
+    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh)
     return false if not success
 
     return true

@@ -6,7 +6,7 @@ require_relative "psychrometrics"
 require_relative "schedules"
 
 class HVAC
-  def self.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
+  def self.apply_central_ac_1speed(model, runner, seer, eers, shrs,
                                    fan_power_rated, fan_power_installed,
                                    crankcase_capacity, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
@@ -34,9 +34,9 @@ class HVAC
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)]
 
-    obj_name = Constants.ObjectNameCentralAirConditioner(unit.name.to_s)
+    obj_name = Constants.ObjectNameCentralAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -118,7 +118,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -128,7 +128,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -142,7 +142,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ac_2speed(model, unit, runner, seer, eers, shrs,
+  def self.apply_central_ac_2speed(model, runner, seer, eers, shrs,
                                    capacity_ratios, fan_speed_ratios,
                                    fan_power_rated, fan_power_installed,
                                    crankcase_capacity, crankcase_temp,
@@ -172,9 +172,9 @@ class HVAC
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
 
-    obj_name = Constants.ObjectNameCentralAirConditioner(unit.name.to_s)
+    obj_name = Constants.ObjectNameCentralAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -262,7 +262,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -272,7 +272,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -287,7 +287,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ac_4speed(model, unit, runner, seer, eers, shrs,
+  def self.apply_central_ac_4speed(model, runner, seer, eers, shrs,
                                    capacity_ratios, fan_speed_ratios,
                                    fan_power_rated, fan_power_installed,
                                    crankcase_capacity, crankcase_temp,
@@ -319,9 +319,9 @@ class HVAC
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
 
-    obj_name = Constants.ObjectNameCentralAirConditioner(unit.name.to_s)
+    obj_name = Constants.ObjectNameCentralAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -409,7 +409,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -419,7 +419,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -434,7 +434,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ashp_1speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+  def self.apply_central_ashp_1speed(model, runner, seer, hspf, eers, cops, shrs,
                                      fan_power_rated, fan_power_installed, min_temp,
                                      crankcase_capacity, crankcase_temp,
                                      eer_capacity_derates, cop_capacity_derates,
@@ -480,9 +480,9 @@ class HVAC
     # Heating defrost curve for reverse cycle
     defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], "DefrostEIR", -100, 100, -100, 100)
 
-    obj_name = Constants.ObjectNameAirSourceHeatPump(unit.name.to_s)
+    obj_name = Constants.ObjectNameAirSourceHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -578,7 +578,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -588,7 +588,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -671,7 +671,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -681,7 +681,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -699,7 +699,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ashp_2speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+  def self.apply_central_ashp_2speed(model, runner, seer, hspf, eers, cops, shrs,
                                      capacity_ratios, fan_speed_ratios_cooling,
                                      fan_speed_ratios_heating,
                                      fan_power_rated, fan_power_installed, min_temp,
@@ -747,9 +747,9 @@ class HVAC
     # Heating defrost curve for reverse cycle
     defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], "DefrostEIR", -100, 100, -100, 100)
 
-    obj_name = Constants.ObjectNameAirSourceHeatPump(unit.name.to_s)
+    obj_name = Constants.ObjectNameAirSourceHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -855,7 +855,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -865,7 +865,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -955,7 +955,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -965,7 +965,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -985,7 +985,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ashp_4speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+  def self.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
                                      capacity_ratios, fan_speed_ratios_cooling,
                                      fan_speed_ratios_heating,
                                      fan_power_rated, fan_power_installed, min_temp,
@@ -1037,9 +1037,9 @@ class HVAC
     # Heating defrost curve for reverse cycle
     defrost_eir_curve = create_curve_biquadratic(model, [0.1528, 0, 0, 0, 0, 0], "DefrostEIR", -100, 100, -100, 100)
 
-    obj_name = Constants.ObjectNameAirSourceHeatPump(unit.name.to_s)
+    obj_name = Constants.ObjectNameAirSourceHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -1146,7 +1146,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -1156,7 +1156,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -1246,7 +1246,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -1256,7 +1256,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -1276,7 +1276,7 @@ class HVAC
     return true
   end
 
-  def self.apply_mshp(model, unit, runner, seer, hspf, shr,
+  def self.apply_mshp(model, runner, seer, hspf, shr,
                       min_cooling_capacity, max_cooling_capacity,
                       min_cooling_airflow_rate, max_cooling_airflow_rate,
                       min_heating_capacity, max_heating_capacity,
@@ -1348,9 +1348,9 @@ class HVAC
 
     mshp_indices = [1, 3, 5, 9]
 
-    obj_name = Constants.ObjectNameMiniSplitHeatPump(unit.name.to_s)
+    obj_name = Constants.ObjectNameMiniSplitHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -1453,7 +1453,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -1463,7 +1463,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -1609,7 +1609,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -1619,7 +1619,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end # slave_zone
@@ -1653,7 +1653,7 @@ class HVAC
     return true
   end
 
-  def self.apply_gshp(model, unit, runner, weather, cop, eer, shr,
+  def self.apply_gshp(model, runner, weather, cop, eer, shr,
                       ground_conductivity, grout_conductivity,
                       bore_config, bore_holes, bore_depth,
                       bore_spacing, bore_diameter, pipe_size,
@@ -1697,7 +1697,7 @@ class HVAC
     heatingEIR = get_gshp_heating_eir(cop, fanKW_Adjust, pumpKW_Adjust)
     min_hp_temp = -30.0
 
-    obj_name = Constants.ObjectNameGroundSourceHeatPumpVerticalBore(unit.name.to_s)
+    obj_name = Constants.ObjectNameGroundSourceHeatPumpVerticalBore
 
     ground_heat_exch_vert = OpenStudio::Model::GroundHeatExchangerVertical.new(model)
     ground_heat_exch_vert.setName(obj_name + " exchanger")
@@ -1766,7 +1766,7 @@ class HVAC
     demand_outlet_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
     demand_outlet_pipe.addToNode(plant_loop.demandOutletNode)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -1848,7 +1848,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -1858,7 +1858,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end
@@ -1942,7 +1942,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -1952,7 +1952,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end
@@ -1973,7 +1973,7 @@ class HVAC
     return true
   end
 
-  def self.apply_room_ac(model, unit, runner, eer, shr,
+  def self.apply_room_ac(model, runner, eer, shr,
                          airflow_rate, capacity, frac_cool_load_served)
 
     return true if frac_cool_load_served <= 0
@@ -1994,9 +1994,9 @@ class HVAC
     roomcac_eir_fff_curve = create_curve_quadratic(model, cOOL_EIR_FFLOW_SPEC, "RoomAC-EIR-fFF", 0, 2, 0, 2)
     roomac_plf_fplr_curve = create_curve_quadratic(model, cOOL_PLF_FPLR, "RoomAC-PLF-fPLR", 0, 1, 0, 1)
 
-    obj_name = Constants.ObjectNameRoomAirConditioner(unit.name.to_s)
+    obj_name = Constants.ObjectNameRoomAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2030,7 +2030,7 @@ class HVAC
         ptac.setName(obj_name + " zone ptac")
         ptac.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
         ptac.addToThermalZone(zone)
-        runner.registerInfo("Added '#{ptac.name}' to '#{zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{ptac.name}' to '#{zone.name}'")
 
         prioritize_zone_hvac(model, runner, zone)
 
@@ -2044,7 +2044,7 @@ class HVAC
     return true
   end
 
-  def self.apply_furnace(model, unit, runner, fuel_type, afue,
+  def self.apply_furnace(model, runner, fuel_type, afue,
                          capacity, fan_power_installed, dse,
                          frac_heat_load_served, attached_to_multispeed_ac)
 
@@ -2059,9 +2059,9 @@ class HVAC
 
     # _processAirSystem
 
-    obj_name = Constants.ObjectNameFurnace(fuel_type, unit.name.to_s)
+    obj_name = Constants.ObjectNameFurnace(fuel_type)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2142,7 +2142,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone, diffuser_living)
 
       air_loop.multiAddBranchForZone(control_zone)
-      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
 
@@ -2152,7 +2152,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone, diffuser_fbsmt)
 
         air_loop.multiAddBranchForZone(slave_zone)
-        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         prioritize_zone_hvac(model, runner, slave_zone)
       end
@@ -2163,7 +2163,7 @@ class HVAC
     return true
   end
 
-  def self.apply_boiler(model, unit, runner, fuel_type, system_type, afue,
+  def self.apply_boiler(model, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                         capacity, design_temp, dse, frac_heat_load_served)
 
@@ -2194,7 +2194,7 @@ class HVAC
 
     boiler_eff_curve = get_boiler_curve(model, system_type == Constants.BoilerTypeCondensing)
 
-    obj_name = Constants.ObjectNameBoiler(fuel_type, unit.name.to_s)
+    obj_name = Constants.ObjectNameBoiler(fuel_type)
 
     # _processSystemHydronic
 
@@ -2288,7 +2288,7 @@ class HVAC
     pipe_demand_inlet.addToNode(plant_loop.demandInletNode)
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2303,7 +2303,7 @@ class HVAC
         baseboard_heater = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, baseboard_coil)
         baseboard_heater.setName(obj_name + " #{zone.name} convective water")
         baseboard_heater.addToThermalZone(zone)
-        runner.registerInfo("Added '#{baseboard_heater.name}' to '#{zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{baseboard_heater.name}' to '#{zone.name}'")
 
         prioritize_zone_hvac(model, runner, zone)
 
@@ -2317,12 +2317,12 @@ class HVAC
     return true
   end
 
-  def self.apply_electric_baseboard(model, unit, runner, efficiency, capacity, frac_heat_load_served)
+  def self.apply_electric_baseboard(model, runner, efficiency, capacity, frac_heat_load_served)
     return true if frac_heat_load_served <= 0
 
-    obj_name = Constants.ObjectNameElectricBaseboard(unit.name.to_s)
+    obj_name = Constants.ObjectNameElectricBaseboard
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2335,7 +2335,7 @@ class HVAC
         htg_coil.setEfficiency(efficiency)
 
         htg_coil.addToThermalZone(zone)
-        runner.registerInfo("Added '#{htg_coil.name}' to '#{zone.name}' of #{unit.name}")
+        runner.registerInfo("Added '#{htg_coil.name}' to '#{zone.name}'")
 
         prioritize_zone_hvac(model, runner, zone)
 
@@ -2347,7 +2347,7 @@ class HVAC
     return true
   end
 
-  def self.apply_unit_heater(model, unit, runner, fuel_type,
+  def self.apply_unit_heater(model, runner, fuel_type,
                              efficiency, capacity, fan_power,
                              airflow_rate, frac_heat_load_served)
 
@@ -2358,9 +2358,9 @@ class HVAC
       return false
     end
 
-    obj_name = Constants.ObjectNameUnitHeater(fuel_type, unit.name.to_s)
+    obj_name = Constants.ObjectNameUnitHeater(fuel_type)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2422,10 +2422,10 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads_cooling(model, unit, runner, frac_cool_load_served)
+  def self.apply_ideal_air_loads_cooling(model, runner, frac_cool_load_served)
     return true if frac_cool_load_served <= 0
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2452,10 +2452,10 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads_heating(model, unit, runner, frac_heat_load_served)
+  def self.apply_ideal_air_loads_heating(model, runner, frac_heat_load_served)
     return true if frac_heat_load_served <= 0
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2852,7 +2852,7 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.apply_dehumidifier(model, unit, runner, energy_factor,
+  def self.apply_dehumidifier(model, runner, energy_factor,
                               water_removal_rate, air_flow_rate, humidity_setpoint)
 
     # error checking
@@ -2873,11 +2873,11 @@ class HVAC
       return false
     end
 
-    obj_name = Constants.ObjectNameDehumidifier(unit.name.to_s)
+    obj_name = Constants.ObjectNameDehumidifier
 
     avg_rh_setpoint = humidity_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
     relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint(unit.name.to_s))
+    relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
     relative_humidity_setpoint_sch.setValue(avg_rh_setpoint)
 
     # Dehumidifier coefficients
@@ -2886,7 +2886,7 @@ class HVAC
     energy_factor_curve = create_curve_biquadratic(model, [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722], "DXDH-EnergyFactor-fT", -100, 100, -100, 100)
     part_load_frac_curve = create_curve_quadratic(model, [0.90, 0.10, 0.0], "DXDH-PLF-fPLR", 0, 1, 0.7, 1)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
@@ -2918,7 +2918,7 @@ class HVAC
       zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
 
       zone_hvac.addToThermalZone(control_zone)
-      runner.registerInfo("Added '#{zone_hvac.name}' to '#{control_zone.name}' of #{unit.name}")
+      runner.registerInfo("Added '#{zone_hvac.name}' to '#{control_zone.name}'")
 
       prioritize_zone_hvac(model, runner, control_zone)
     end
@@ -2926,22 +2926,22 @@ class HVAC
     return true
   end
 
-  def self.apply_ceiling_fans(model, unit, runner, annual_kWh, weekday_sch, weekend_sch)
-    obj_name = Constants.ObjectNameCeilingFan(unit.name.to_s)
+  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch)
+    obj_name = Constants.ObjectNameCeilingFan
 
     ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, runner, obj_name + " schedule", weekday_sch, weekend_sch, [1] * 12)
     if not ceiling_fan_sch.validated?
       return false
     end
 
-    finished_floor_area = Geometry.get_finished_floor_area_from_spaces(unit.spaces, runner)
+    ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces, runner)
 
-    unit.spaces.each do |space|
+    model.getSpaces.each do |space|
       next if Geometry.space_is_unfinished(space)
 
       space_obj_name = "#{obj_name}|#{space.name.to_s}"
 
-      space_mel_ann = annual_kWh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / finished_floor_area
+      space_mel_ann = annual_kWh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
       space_design_level = ceiling_fan_sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
 
       equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)

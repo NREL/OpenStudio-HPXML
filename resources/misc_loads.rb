@@ -3,7 +3,7 @@ require_relative "unit_conversions"
 require_relative "schedules"
 
 class MiscLoads
-  def self.apply_plug(model, unit, runner, annual_energy, sens_frac, lat_frac,
+  def self.apply_plug(model, runner, annual_energy, sens_frac, lat_frac,
                       weekday_sch, weekend_sch, monthly_sch, sch)
 
     # check for valid inputs
@@ -24,16 +24,16 @@ class MiscLoads
       return false
     end
 
-    # Get unit ffa
-    ffa = Geometry.get_finished_floor_area_from_spaces(unit.spaces, runner)
+    # Get FFA
+    ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces, runner)
     if ffa.nil?
       return false
     end
 
-    unit.spaces.each do |space|
+    model.getSpaces.each do |space|
       next if Geometry.space_is_unfinished(space)
 
-      obj_name = Constants.ObjectNameMiscPlugLoads(unit.name.to_s)
+      obj_name = Constants.ObjectNameMiscPlugLoads
       space_obj_name = "#{obj_name}|#{space.name.to_s}"
 
       if annual_energy > 0
@@ -68,8 +68,8 @@ class MiscLoads
     return true, sch
   end
 
-  def self.apply_tv(model, unit, runner, annual_energy, sch, space)
-    name = Constants.ObjectNameMiscTelevision(unit.name.to_s)
+  def self.apply_tv(model, runner, annual_energy, sch, space)
+    name = Constants.ObjectNameMiscTelevision
     design_level = sch.calcDesignLevelFromDailykWh(annual_energy / 365.0)
     sens_frac = 1.0
     lat_frac = 0.0

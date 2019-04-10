@@ -371,12 +371,8 @@ class Constants
     return "res af#{s_unit}"
   end
 
-  def self.ObjectNameAirSourceHeatPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res ashp#{s_unit}"
+  def self.ObjectNameAirSourceHeatPump
+    return "res ashp"
   end
 
   def self.ObjectNameBath(unit_name = self.ObjectNameBuildingUnit)
@@ -395,32 +391,20 @@ class Constants
     return "res bath dist#{s_unit}"
   end
 
-  def self.ObjectNameBoiler(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res boiler #{fueltype}#{s_unit}"
+  def self.ObjectNameBoiler(fueltype = "")
+    return "res boiler #{fueltype}"
   end
 
   def self.ObjectNameBuildingUnit(unit_num = 1)
     return "unit #{unit_num}"
   end
 
-  def self.ObjectNameCeilingFan(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res ceil fan#{s_unit}"
+  def self.ObjectNameCeilingFan
+    return "res ceil fan"
   end
 
-  def self.ObjectNameCentralAirConditioner(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res ac#{s_unit}"
+  def self.ObjectNameCentralAirConditioner
+    return "res ac"
   end
 
   def self.ObjectNameClothesWasher(unit_name = self.ObjectNameBuildingUnit)
@@ -463,12 +447,8 @@ class Constants
     return 'res cooling setpoint'
   end
 
-  def self.ObjectNameDehumidifier(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res dehumid#{s_unit}"
+  def self.ObjectNameDehumidifier
+    return "res dehumid"
   end
 
   def self.ObjectNameDishwasher(unit_name = self.ObjectNameBuildingUnit)
@@ -490,12 +470,8 @@ class Constants
     return "res eaves#{facade}"
   end
 
-  def self.ObjectNameElectricBaseboard(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res bb#{s_unit}"
+  def self.ObjectNameElectricBaseboard
+    return "res bb"
   end
 
   def self.ObjectNameExtraRefrigerator(unit_name = self.ObjectNameBuildingUnit)
@@ -514,12 +490,8 @@ class Constants
     return "res freezer#{s_unit}"
   end
 
-  def self.ObjectNameFurnace(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res fur #{fueltype}#{s_unit}"
+  def self.ObjectNameFurnace(fueltype = "")
+    return "res fur #{fueltype}"
   end
 
   def self.ObjectNameFurniture
@@ -550,12 +522,8 @@ class Constants
     return "res gas lighting#{s_unit}"
   end
 
-  def self.ObjectNameGroundSourceHeatPumpVerticalBore(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res gshp vert bore#{s_unit}"
+  def self.ObjectNameGroundSourceHeatPumpVerticalBore
+    return "res gshp vert bore"
   end
 
   def self.ObjectNameHeatingSeason
@@ -606,12 +574,8 @@ class Constants
     return "res infil#{s_unit}"
   end
 
-  def self.ObjectNameLighting(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res lighting#{s_unit}"
+  def self.ObjectNameLighting
+    return "res lighting"
   end
 
   def self.ObjectNameMechanicalVentilation(unit_name = self.ObjectNameBuildingUnit)
@@ -622,28 +586,16 @@ class Constants
     return "res mv#{s_unit}"
   end
 
-  def self.ObjectNameMiniSplitHeatPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res ms#{s_unit}"
+  def self.ObjectNameMiniSplitHeatPump
+    return "res ms"
   end
 
-  def self.ObjectNameMiscPlugLoads(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res misc plug loads#{s_unit}"
+  def self.ObjectNameMiscPlugLoads
+    return "res misc plug loads"
   end
 
-  def self.ObjectNameMiscTelevision(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res misc television#{s_unit}"
+  def self.ObjectNameMiscTelevision
+    return "res misc television"
   end
 
   def self.ObjectNameNaturalVentilation(unit_name = self.ObjectNameBuildingUnit)
@@ -704,20 +656,12 @@ class Constants
     return "res refrig#{s_unit}"
   end
 
-  def self.ObjectNameRelativeHumiditySetpoint(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res rh setpoint#{s_unit}"
+  def self.ObjectNameRelativeHumiditySetpoint
+    return "res rh setpoint"
   end
 
-  def self.ObjectNameRoomAirConditioner(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res room ac#{s_unit}"
+  def self.ObjectNameRoomAirConditioner
+    return "res room ac"
   end
 
   def self.ObjectNameShower(unit_name = self.ObjectNameBuildingUnit)
@@ -760,12 +704,8 @@ class Constants
     return "res solar hot water#{s_unit}"
   end
 
-  def self.ObjectNameUnitHeater(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res unit heater #{fueltype}#{s_unit}"
+  def self.ObjectNameUnitHeater(fueltype = "")
+    return "res unit heater #{fueltype}"
   end
 
   def self.ObjectNameWaterHeater(unit_name = self.ObjectNameBuildingUnit)
