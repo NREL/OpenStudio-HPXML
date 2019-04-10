@@ -267,6 +267,9 @@ class OSModel
 
     # HVAC
 
+    @total_frac_remaining_heat_load_served = 1.0
+    @total_frac_remaining_cool_load_served = 1.0
+
     success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
@@ -284,21 +287,6 @@ class OSModel
 
     success = add_ceiling_fans(runner, model, building, unit)
     return false if not success
-
-    # FIXME: remove the following logic eventually
-    if not building_construction_values[:load_distribution_scheme].nil?
-      if not ["UniformLoad", "SequentialLoad"].include? building_construction_values[:load_distribution_scheme]
-        fail "Unexpected load distribution scheme #{building_construction_values[:load_distribution_scheme]}."
-      end
-
-      thermal_zones = Geometry.get_thermal_zones_from_spaces(unit.spaces)
-      control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
-      control_slave_zones_hash.each do |control_zone, slave_zones|
-        ([control_zone] + slave_zones).each do |zone|
-          HVAC.prioritize_zone_hvac(model, runner, zone, building_construction_values[:load_distribution_scheme])
-        end
-      end
-    end
 
     # Plug Loads & Lighting
 
@@ -2021,6 +2009,8 @@ class OSModel
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
+      sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
+      @total_frac_remaining_cool_load_served -= load_frac
 
       dse_heat, dse_cool, has_dse = get_dse(building, clgsys)
 
@@ -2048,7 +2038,7 @@ class OSModel
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
-                                                 attached_heating_system)
+                                                 sequential_load_frac, attached_heating_system)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2064,7 +2054,7 @@ class OSModel
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
-                                                 attached_heating_system)
+                                                 sequential_load_frac, attached_heating_system)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2080,7 +2070,7 @@ class OSModel
                                                  fan_power_rated, fan_power_installed,
                                                  crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
-                                                 attached_heating_system)
+                                                 sequential_load_frac, attached_heating_system)
           return false if not success
 
         else
@@ -2096,7 +2086,8 @@ class OSModel
         airflow_rate = 350.0
 
         success = HVAC.apply_room_ac(model, unit, runner, eer, shr,
-                                     airflow_rate, cool_capacity_btuh, load_frac)
+                                     airflow_rate, cool_capacity_btuh, load_frac,
+                                     sequential_load_frac)
         return false if not success
 
       end
@@ -2122,6 +2113,8 @@ class OSModel
       htg_type = heating_system_values[:heating_system_type]
 
       load_frac = heating_system_values[:fraction_heat_load_served]
+      sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
+      @total_frac_remaining_heat_load_served -= load_frac
 
       dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
 
@@ -2137,7 +2130,8 @@ class OSModel
                                                       "CoolingSystem", loop_hvacs)
         success = HVAC.apply_furnace(model, unit, runner, fuel, afue,
                                      heat_capacity_btuh, fan_power, dse_heat,
-                                     load_frac, attached_cooling_system)
+                                     load_frac, sequential_load_frac,
+                                     attached_cooling_system)
         return false if not success
 
       elsif htg_type == "WallFurnace"
@@ -2148,7 +2142,8 @@ class OSModel
         # TODO: Allow DSE
         success = HVAC.apply_unit_heater(model, unit, runner, fuel,
                                          afue, heat_capacity_btuh, fan_power,
-                                         airflow_rate, load_frac)
+                                         airflow_rate, load_frac,
+                                         sequential_load_frac)
         return false if not success
 
       elsif htg_type == "Boiler"
@@ -2163,7 +2158,8 @@ class OSModel
         design_temp = 180.0
         success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
                                     oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                    heat_capacity_btuh, design_temp, dse_heat, load_frac)
+                                    heat_capacity_btuh, design_temp, dse_heat, load_frac,
+                                    sequential_load_frac)
         return false if not success
 
       elsif htg_type == "ElectricResistance"
@@ -2171,7 +2167,8 @@ class OSModel
         efficiency = heating_system_values[:heating_efficiency_percent]
         # TODO: Allow DSE
         success = HVAC.apply_electric_baseboard(model, unit, runner, efficiency,
-                                                heat_capacity_btuh, load_frac)
+                                                heat_capacity_btuh, load_frac,
+                                                sequential_load_frac)
         return false if not success
 
       elsif htg_type == "Stove"
@@ -2182,7 +2179,8 @@ class OSModel
         # TODO: Allow DSE
         success = HVAC.apply_unit_heater(model, unit, runner, fuel,
                                          efficiency, heat_capacity_btuh, fan_power,
-                                         airflow_rate, load_frac)
+                                         airflow_rate, load_frac,
+                                         sequential_load_frac)
         return false if not success
 
       end
@@ -2207,7 +2205,12 @@ class OSModel
       end
 
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
+      sequential_load_frac_heat = load_frac_heat / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
+      @total_frac_remaining_heat_load_served -= load_frac_heat
+
       load_frac_cool = heat_pump_values[:fraction_cool_load_served]
+      sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
+      @total_frac_remaining_cool_load_served -= load_frac_cool
 
       backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity] # TODO: Require in ERI Use Case?
       if backup_heat_capacity_btuh.nil?
@@ -2253,7 +2256,8 @@ class OSModel
                                                    crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
-                                                   load_frac_heat, load_frac_cool)
+                                                   load_frac_heat, load_frac_cool,
+                                                   sequential_load_frac_heat, sequential_load_frac_cool)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2275,7 +2279,8 @@ class OSModel
                                                    crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
-                                                   load_frac_heat, load_frac_cool)
+                                                   load_frac_heat, load_frac_cool,
+                                                   sequential_load_frac_heat, sequential_load_frac_cool)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2297,7 +2302,8 @@ class OSModel
                                                    crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
-                                                   load_frac_heat, load_frac_cool)
+                                                   load_frac_heat, load_frac_cool,
+                                                   sequential_load_frac_heat, sequential_load_frac_cool)
           return false if not success
 
         else
@@ -2336,7 +2342,8 @@ class OSModel
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
                                   supplemental_efficiency, backup_heat_capacity_btuh,
-                                  dse_heat, load_frac_heat, load_frac_cool)
+                                  dse_heat, load_frac_heat, load_frac_cool,
+                                  sequential_load_frac_heat, sequential_load_frac_cool)
         return false if not success
 
       elsif hp_type == "ground-to-air"
@@ -2373,7 +2380,8 @@ class OSModel
                                   u_tube_leg_spacing, u_tube_spacing_type,
                                   fan_power, heat_pump_capacity, supplemental_efficiency,
                                   supplemental_capacity, dse_heat,
-                                  load_frac_heat, load_frac_cool)
+                                  load_frac_heat, load_frac_cool,
+                                  sequential_load_frac_heat, sequential_load_frac_cool)
         return false if not success
 
       end
@@ -2386,30 +2394,27 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
     if use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1)
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1, 1)
       return false if not success
 
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1)
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1, 1)
       return false if not success
 
       return true
     end
 
+    residual_heat_load_served = @total_frac_remaining_heat_load_served
+    residual_cool_load_served = @total_frac_remaining_cool_load_served
+
     # Residual heating
-    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-    residual_htg_load_frac = 1.0 - htg_load_frac
-    if residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_htg_load_frac)
+    if residual_heat_load_served > 0.02 and residual_heat_load_served < 1
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_heat_load_served, 1)
       return false if not success
     end
 
     # Residual cooling
-    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-    residual_clg_load_frac = 1.0 - clg_load_frac
-    if residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_clg_load_frac)
+    if residual_cool_load_served > 0.02 and residual_cool_load_served < 1
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_cool_load_served, 1)
       return false if not success
     end
 

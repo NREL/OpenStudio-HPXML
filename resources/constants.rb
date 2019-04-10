@@ -1411,14 +1411,4 @@ class Constants
             self.SpaceTypeUnfinishedAttic,
             self.SpaceTypeUnfinishedBasement]
   end
-
-  def self.ZoneHVACPriorityList
-    return ["ZoneHVACEnergyRecoveryVentilator",
-            "AirLoopHVACUnitarySystem",
-            "ZoneHVACBaseboardConvectiveElectric",
-            "ZoneHVACBaseboardConvectiveWater",
-            "AirTerminalSingleDuctUncontrolled",
-            "ZoneHVACDehumidifierDX",
-            "ZoneHVACPackagedTerminalAirConditioner"]
-  end
 end

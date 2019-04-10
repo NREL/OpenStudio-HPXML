@@ -10,6 +10,7 @@ class HVAC
                                    fan_power_rated, fan_power_installed,
                                    crankcase_capacity, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
+                                   sequential_cool_load_frac,
                                    attached_heating_system)
 
     return true if frac_cool_load_served <= 0
@@ -120,7 +121,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-      prioritize_zone_hvac(model, runner, control_zone)
+      control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
 
       slave_zones.each do |slave_zone|
         diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -130,7 +131,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, slave_zone)
+        slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
       end # slave_zone
 
       # Store info for HVAC Sizing measure
@@ -151,6 +152,7 @@ class HVAC
                                    fan_power_rated, fan_power_installed,
                                    crankcase_capacity, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
+                                   sequential_cool_load_frac,
                                    attached_heating_system)
 
     return true if frac_cool_load_served <= 0
@@ -268,7 +270,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-      prioritize_zone_hvac(model, runner, control_zone)
+      control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
 
       slave_zones.each do |slave_zone|
         diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -278,7 +280,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, slave_zone)
+        slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
       end # slave_zone
 
       # Store info for HVAC Sizing measure
@@ -300,6 +302,7 @@ class HVAC
                                    fan_power_rated, fan_power_installed,
                                    crankcase_capacity, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
+                                   sequential_cool_load_frac,
                                    attached_heating_system)
 
     return true if frac_cool_load_served <= 0
@@ -419,7 +422,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-      prioritize_zone_hvac(model, runner, control_zone)
+      control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
 
       slave_zones.each do |slave_zone|
         diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -429,7 +432,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, slave_zone)
+        slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
       end # slave_zone
 
       # Store info for HVAC Sizing measure
@@ -451,7 +454,8 @@ class HVAC
                                      crankcase_capacity, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served)
+                                     frac_heat_load_served, frac_cool_load_served,
+                                     sequential_heat_load_frac, sequential_cool_load_frac)
 
     if heat_pump_capacity == Constants.SizingAutoMaxLoad
       runner.registerWarning("Using #{Constants.SizingAutoMaxLoad} is not recommended for single-speed heat pumps. When sized larger than the cooling load, this can lead to humidity concerns due to reduced dehumidification performance by the heat pump.")
@@ -625,7 +629,11 @@ class HVAC
         air_loop.multiAddBranchForZone(control_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, control_zone)
+        if mode == :htg
+          control_zone.setSequentialHeatingFraction(diffuser_living, sequential_heat_load_frac.round(5))
+        elsif mode == :clg
+          control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
+        end
 
         slave_zones.each do |slave_zone|
           diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -635,7 +643,11 @@ class HVAC
           air_loop.multiAddBranchForZone(slave_zone)
           runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-          prioritize_zone_hvac(model, runner, slave_zone)
+          if mode == :htg
+            slave_zone.setSequentialHeatingFraction(diffuser_fbsmt, sequential_heat_load_frac.round(5))
+          elsif mode == :clg
+            slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
+          end
         end # slave_zone
 
         # Store info for HVAC Sizing measure
@@ -667,7 +679,8 @@ class HVAC
                                      crankcase_capacity, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served)
+                                     frac_heat_load_served, frac_cool_load_served,
+                                     sequential_heat_load_frac, sequential_cool_load_frac)
 
     num_speeds = 2
 
@@ -852,7 +865,11 @@ class HVAC
         air_loop.multiAddBranchForZone(control_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, control_zone)
+        if mode == :htg
+          control_zone.setSequentialHeatingFraction(diffuser_living, sequential_heat_load_frac.round(5))
+        elsif mode == :clg
+          control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
+        end
 
         slave_zones.each do |slave_zone|
           diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -862,7 +879,11 @@ class HVAC
           air_loop.multiAddBranchForZone(slave_zone)
           runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-          prioritize_zone_hvac(model, runner, slave_zone)
+          if mode == :htg
+            slave_zone.setSequentialHeatingFraction(diffuser_fbsmt, sequential_heat_load_frac.round(5))
+          elsif mode == :clg
+            slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
+          end
         end # slave_zone
 
         # Store info for HVAC Sizing measure
@@ -896,7 +917,8 @@ class HVAC
                                      crankcase_capacity, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served)
+                                     frac_heat_load_served, frac_cool_load_served,
+                                     sequential_heat_load_frac, sequential_cool_load_frac)
 
     num_speeds = 4
 
@@ -1085,7 +1107,11 @@ class HVAC
         air_loop.multiAddBranchForZone(control_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, control_zone)
+        if mode == :htg
+          control_zone.setSequentialHeatingFraction(diffuser_living, sequential_heat_load_frac.round(5))
+        elsif mode == :clg
+          control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
+        end
 
         slave_zones.each do |slave_zone|
           diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -1095,7 +1121,11 @@ class HVAC
           air_loop.multiAddBranchForZone(slave_zone)
           runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-          prioritize_zone_hvac(model, runner, slave_zone)
+          if mode == :htg
+            slave_zone.setSequentialHeatingFraction(diffuser_fbsmt, sequential_heat_load_frac.round(5))
+          elsif mode == :clg
+            slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
+          end
         end # slave_zone
 
         # Store info for HVAC Sizing measure
@@ -1130,7 +1160,8 @@ class HVAC
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
                       heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
-                      dse, frac_heat_load_served, frac_cool_load_served)
+                      dse, frac_heat_load_served, frac_cool_load_served,
+                      sequential_heat_load_frac, sequential_cool_load_frac)
 
     num_speeds = 10
 
@@ -1337,7 +1368,11 @@ class HVAC
         air_loop.multiAddBranchForZone(control_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, control_zone)
+        if mode == :htg
+          control_zone.setSequentialHeatingFraction(diffuser_living, sequential_heat_load_frac.round(5))
+        elsif mode == :clg
+          control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
+        end
 
         slave_zones.each do |slave_zone|
           diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -1347,7 +1382,11 @@ class HVAC
           air_loop.multiAddBranchForZone(slave_zone)
           runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-          prioritize_zone_hvac(model, runner, slave_zone)
+          if mode == :htg
+            slave_zone.setSequentialHeatingFraction(diffuser_fbsmt, sequential_heat_load_frac.round(5))
+          elsif mode == :clg
+            slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
+          end
         end # slave_zone
 
         if mode == :htg and pan_heater_power > 0
@@ -1455,7 +1494,8 @@ class HVAC
                       u_tube_leg_spacing, u_tube_spacing_type,
                       fan_power, heat_pump_capacity, supplemental_efficiency,
                       supplemental_capacity, dse,
-                      frac_heat_load_served, frac_cool_load_served)
+                      frac_heat_load_served, frac_cool_load_served,
+                      sequential_heat_load_frac, sequential_cool_load_frac)
 
     if frac_glycol == 0
       fluid_type = Constants.FluidWater
@@ -1685,7 +1725,11 @@ class HVAC
         air_loop.multiAddBranchForZone(control_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, control_zone)
+        if mode == :htg
+          control_zone.setSequentialHeatingFraction(diffuser_living, sequential_heat_load_frac.round(5))
+        elsif mode == :clg
+          control_zone.setSequentialCoolingFraction(diffuser_living, sequential_cool_load_frac.round(5))
+        end
 
         slave_zones.each do |slave_zone|
           diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -1695,7 +1739,11 @@ class HVAC
           air_loop.multiAddBranchForZone(slave_zone)
           runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-          prioritize_zone_hvac(model, runner, slave_zone)
+          if mode == :htg
+            slave_zone.setSequentialHeatingFraction(diffuser_fbsmt, sequential_heat_load_frac.round(5))
+          elsif mode == :clg
+            slave_zone.setSequentialCoolingFraction(diffuser_fbsmt, sequential_cool_load_frac.round(5))
+          end
         end
 
         # Store info for HVAC Sizing measure
@@ -1726,7 +1774,8 @@ class HVAC
   end
 
   def self.apply_room_ac(model, unit, runner, eer, shr,
-                         airflow_rate, capacity, frac_cool_load_served)
+                         airflow_rate, capacity, frac_cool_load_served,
+                         sequential_cool_load_frac)
 
     return true if frac_cool_load_served <= 0
 
@@ -1785,7 +1834,7 @@ class HVAC
         ptac.addToThermalZone(zone)
         runner.registerInfo("Added '#{ptac.name}' to '#{zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, zone)
+        zone.setSequentialCoolingFraction(ptac, sequential_cool_load_frac.round(5))
 
         # Store info for HVAC Sizing measure
         ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, airflow_rate.to_s)
@@ -1806,6 +1855,7 @@ class HVAC
   def self.apply_furnace(model, unit, runner, fuel_type, afue,
                          capacity, fan_power_installed, dse,
                          frac_heat_load_served,
+                         sequential_heat_load_frac,
                          attached_cooling_system)
 
     return true if frac_heat_load_served <= 0
@@ -1904,7 +1954,7 @@ class HVAC
       air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}' of #{unit.name}")
 
-      prioritize_zone_hvac(model, runner, control_zone)
+      control_zone.setSequentialHeatingFraction(diffuser_living, sequential_heat_load_frac.round(5))
 
       slave_zones.each do |slave_zone|
         diffuser_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -1914,7 +1964,7 @@ class HVAC
         air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, slave_zone)
+        slave_zone.setSequentialHeatingFraction(diffuser_fbsmt, sequential_heat_load_frac.round(5))
       end
 
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -1930,7 +1980,8 @@ class HVAC
 
   def self.apply_boiler(model, unit, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                        capacity, design_temp, dse, frac_heat_load_served)
+                        capacity, design_temp, dse, frac_heat_load_served,
+                        sequential_heat_load_frac)
 
     return true if frac_heat_load_served <= 0
 
@@ -2071,9 +2122,9 @@ class HVAC
         baseboard_heater.addToThermalZone(zone)
         runner.registerInfo("Added '#{baseboard_heater.name}' to '#{zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, zone)
-
         plant_loop.addDemandBranchForComponent(baseboard_coil)
+
+        zone.setSequentialHeatingFraction(baseboard_heater, sequential_heat_load_frac.round(5))
 
         # Store info for HVAC Sizing measure
         baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -2089,7 +2140,8 @@ class HVAC
     return true
   end
 
-  def self.apply_electric_baseboard(model, unit, runner, efficiency, capacity, frac_heat_load_served)
+  def self.apply_electric_baseboard(model, unit, runner, efficiency, capacity,
+                                    frac_heat_load_served, sequential_heat_load_frac)
     return true if frac_heat_load_served <= 0
 
     obj_name = Constants.ObjectNameElectricBaseboard(unit.name.to_s)
@@ -2110,7 +2162,7 @@ class HVAC
         baseboard_heater.addToThermalZone(zone)
         runner.registerInfo("Added '#{baseboard_heater.name}' to '#{zone.name}' of #{unit.name}")
 
-        prioritize_zone_hvac(model, runner, zone)
+        zone.setSequentialHeatingFraction(baseboard_heater, sequential_heat_load_frac.round(5))
 
         # Store info for HVAC Sizing measure
         baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -2128,7 +2180,8 @@ class HVAC
 
   def self.apply_unit_heater(model, unit, runner, fuel_type,
                              efficiency, capacity, fan_power,
-                             airflow_rate, frac_heat_load_served)
+                             airflow_rate, frac_heat_load_served,
+                             sequential_heat_load_frac)
 
     return true if frac_heat_load_served <= 0
 
@@ -2147,15 +2200,20 @@ class HVAC
       ([control_zone] + slave_zones).each do |zone|
         # _processSystemHeatingCoil
 
-        htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
+        if fuel_type == Constants.FuelTypeElectric
+          htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
+          htg_coil.setEfficiency(efficiency)
+        else
+          htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
+          htg_coil.setGasBurnerEfficiency(efficiency)
+          htg_coil.setParasiticElectricLoad(0.0)
+          htg_coil.setParasiticGasLoad(0)
+          htg_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
+        end
         htg_coil.setName(obj_name + " htg coil")
-        htg_coil.setGasBurnerEfficiency(efficiency)
         if capacity != Constants.SizingAuto
           htg_coil.setNominalCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
         end
-        htg_coil.setParasiticElectricLoad(0.0)
-        htg_coil.setParasiticGasLoad(0)
-        htg_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
 
         fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
         fan.setName(obj_name + " htg supply fan")
@@ -2191,7 +2249,7 @@ class HVAC
         unitary_system.setControllingZoneorThermostatLocation(zone)
         unitary_system.addToThermalZone(zone)
 
-        prioritize_zone_hvac(model, runner, zone)
+        zone.setSequentialHeatingFraction(unitary_system, sequential_heat_load_frac.round(5))
 
         # Store info for HVAC Sizing measure
         unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, airflow_rate.to_s)
@@ -2208,7 +2266,8 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads_cooling(model, unit, runner, frac_cool_load_served)
+  def self.apply_ideal_air_loads_cooling(model, unit, runner, frac_cool_load_served,
+                                         sequential_cool_load_frac)
     return true if frac_cool_load_served <= 0
 
     obj_name = Constants.ObjectNameIdealAirSystemCooling(unit.name.to_s)
@@ -2232,6 +2291,8 @@ class HVAC
         ideal_air.setHumidificationControlType('None')
         ideal_air.addToThermalZone(zone)
 
+        zone.setSequentialCoolingFraction(ideal_air, sequential_cool_load_frac.round(5))
+
         # Store info for HVAC Sizing measure
         ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_cool_load_served)
         ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACType, Constants.ObjectNameIdealAirSystemCooling)
@@ -2241,7 +2302,8 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads_heating(model, unit, runner, frac_heat_load_served)
+  def self.apply_ideal_air_loads_heating(model, unit, runner, frac_heat_load_served,
+                                         sequential_heat_load_frac)
     return true if frac_heat_load_served <= 0
 
     obj_name = Constants.ObjectNameIdealAirSystemHeating(unit.name.to_s)
@@ -2264,6 +2326,8 @@ class HVAC
         ideal_air.setDehumidificationControlType('None')
         ideal_air.setHumidificationControlType('None')
         ideal_air.addToThermalZone(zone)
+
+        zone.setSequentialHeatingFraction(ideal_air, sequential_heat_load_frac.round(5))
 
         # Store info for HVAC Sizing measure
         ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -2869,8 +2933,6 @@ class HVAC
 
       zone_hvac.addToThermalZone(control_zone)
       runner.registerInfo("Added '#{zone_hvac.name}' to '#{control_zone.name}' of #{unit.name}")
-
-      prioritize_zone_hvac(model, runner, control_zone)
     end
 
     return true
@@ -4109,24 +4171,6 @@ class HVAC
         plant_loop.remove
       end
     end
-  end
-
-  def self.prioritize_zone_hvac(model, runner, zone, load_distribution_scheme = "SequentialLoad")
-    zone_hvac_list = []
-    Constants.ZoneHVACPriorityList.each do |zone_hvac_type|
-      zone.equipment.each do |object|
-        next if not object.respond_to?("to_#{zone_hvac_type}")
-        next if not object.public_send("to_#{zone_hvac_type}").is_initialized
-
-        new_object = object.public_send("to_#{zone_hvac_type}").get
-        zone_hvac_list << new_object
-      end
-    end
-    zone_hvac_list.reverse.each do |object|
-      zone.setCoolingPriority(object, 1)
-      zone.setHeatingPriority(object, 1)
-    end
-    zone.setLoadDistributionScheme(load_distribution_scheme)
   end
 
   def self.calc_heating_and_cooling_seasons(model, weather, runner = nil)

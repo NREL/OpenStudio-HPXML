@@ -1823,7 +1823,8 @@ class Airflow
       zone_hvac.setVentilationRateperOccupant(0)
       zone_hvac.addToThermalZone(unit_living.zone)
 
-      HVAC.prioritize_zone_hvac(model, runner, unit_living.zone)
+      zone.setCoolingPriority(zone_hvac, 1)
+      zone.setHeatingPriority(zone_hvac, 1)
 
     end
 

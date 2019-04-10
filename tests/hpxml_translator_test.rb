@@ -4,7 +4,6 @@ require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils'
-require 'json'
 require 'rexml/document'
 require 'rexml/xpath'
 require_relative '../resources/constants'
@@ -29,6 +28,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     @workflow_runtime_key = "Workflow Runtime"
 
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
+    hvac_base_dir = File.absolute_path(File.join(this_dir, "hvac_base"))
     hvac_dse_dir = File.absolute_path(File.join(this_dir, "hvac_dse"))
     hvac_multiple_dir = File.absolute_path(File.join(this_dir, "hvac_multiple"))
     hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
@@ -38,6 +38,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     test_dirs = [this_dir,
                  cfis_dir,
+                 hvac_base_dir,
                  hvac_dse_dir,
                  hvac_multiple_dir,
                  hvac_partial_dir,
@@ -62,11 +63,10 @@ class HPXMLTranslatorTest < MiniTest::Test
     _write_summary_results(results_dir, all_results)
 
     # Cross simulation tests
-    _test_dse(xmls, hvac_dse_dir, all_results)
-    _test_multiple_hvac(xmls, hvac_multiple_dir, all_results)
+    _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
+    _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
-    _test_partial_hvac(xmls, hvac_partial_dir, all_results)
-    _test_heat_pump_no_heating_or_cooling(xmls, hvac_load_fracs_dir, all_results)
+    _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
   end
 
   def test_invalid
@@ -561,7 +561,8 @@ class HPXMLTranslatorTest < MiniTest::Test
               query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Heating Coils' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Nominal Total Capacity' AND Units='W'"
               furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
             end
-            hpxml_value = HVAC.get_default_eae(htg_sys_type == 'Boiler', htg_sys_type == 'Furnace', htg_sys_fuel, 1.0, furnace_capacity_kbtuh) / (2.08 * htg_dse)
+            frac_load_served = Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
+            hpxml_value = HVAC.get_default_eae(htg_sys_type == 'Boiler', htg_sys_type == 'Furnace', htg_sys_fuel, frac_load_served, furnace_capacity_kbtuh) / (2.08 * htg_dse)
           end
 
           if htg_sys_type == 'Boiler'
@@ -569,7 +570,7 @@ class HPXMLTranslatorTest < MiniTest::Test
             sql_value = sqlFile.execAndReturnFirstDouble(query).get
           elsif htg_sys_type == 'Furnace'
             # Ratio fan power based on heating airflow rate divided by fan airflow rate since the
-            # fan be sized based on cooling.
+            # fan is sized based on cooling.
             query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
             query_fan_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='Fan:OnOff' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Maximum Flow Rate' AND Units='m3/s'"
             query_htg_airflow = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='AirLoopHVAC:UnitarySystem' AND RowName LIKE '%#{Constants.ObjectNameFurnace.upcase}%' AND ColumnName='User-Specified Heating Supply Air Flow Rate' AND Units='m3/s'"
@@ -901,14 +902,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _test_dse(xmls, hvac_dse_dir, all_results)
+  def _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
     # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
     xmls.sort.each do |xml|
       next if not xml.include? hvac_dse_dir
       next if not xml.include? "-dse-0.8"
 
       xml_dse80 = File.absolute_path(xml)
-      xml_dse100 = xml_dse80.gsub("-dse-0.8", "-dse-1.0")
+      xml_dse100 = xml_dse80.gsub(hvac_dse_dir, hvac_base_dir).gsub("-dse-0.8", "-base")
 
       results_dse80 = all_results[xml_dse80]
       results_dse100 = all_results[xml_dse100]
@@ -936,40 +937,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
-  def _test_multiple_hvac(xmls, multiple_hvac_dir, all_results)
-    # Compare end use results for three of an HVAC system to results for one HVAC system.
-    xmls.sort.each do |xml|
-      next if not xml.include? multiple_hvac_dir
-
-      xml_x3 = File.absolute_path(xml)
-      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
-
-      results_x3 = all_results[xml_x3]
-      results_x1 = all_results[xml_x1]
-
-      # Compare results
-      puts "\nResults for #{xml}:"
-      results_x3.keys.each do |k|
-        next if [@simulation_runtime_key, @workflow_runtime_key].include? k
-
-        result_x1 = results_x1[k].to_f
-        result_x3 = results_x3[k].to_f
-        next if result_x1 == 0.0 and result_x3 == 0.0
-
-        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
-        assert_in_delta(result_x1, result_x3, 0.1)
-      end
-      puts "\n"
-    end
-  end
-
-  def _test_multiple_hvac(xmls, hvac_multiple_dir, all_results)
+  def _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     # Compare end use results for three of an HVAC system to results for one HVAC system.
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
 
       xml_x3 = File.absolute_path(xml)
-      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
+      xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3", "-base"))
 
       results_x3 = all_results[xml_x3]
       results_x1 = all_results[xml_x1]
@@ -978,8 +952,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       # Compare results
       puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
-        next if [@simulation_runtime_key, @workflow_runtime_key].include? k
-        next if k[2] == "Crankcase"
+        next if not ["Heating", "Cooling"].include? k[1]
+        next if not ["General"].include? k[2] # Exclude crankcase/defrost
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
@@ -987,18 +961,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
 
-        # FIXME: Remove this code after the next E+ release
-        # Skip ZoneHVAC tests on the CI that only pass if using an E+ bugfix version
-        # See https://github.com/NREL/EnergyPlus/pull/7025
-        if ENV['CI']
-          skip_files_on_ci = ['valid-hvac-boiler-elec-only-x3.xml',
-                              'valid-hvac-boiler-gas-only-x3.xml',
-                              'valid-hvac-elec-resistance-only-x3.xml',
-                              'valid-hvac-room-ac-only-x3.xml']
-          next if skip_files_on_ci.include? File.basename(xml_x3)
-        end
-
-        assert_in_delta(result_x1, result_x3, 0.7) # TODO: Reduce tolerance
+        assert_in_epsilon(result_x1, result_x3, 0.1)
       end
       puts "\n"
     end
@@ -1033,13 +996,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
-  def _test_partial_hvac(xmls, hvac_partial_dir, all_results)
+  def _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     # Compare end use results for a partial HVAC system to a full HVAC system.
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
 
       xml_50 = File.absolute_path(xml)
-      xml_100 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-50percent", ""))))
+      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-50percent", "-base"))
 
       results_50 = all_results[xml_50]
       results_100 = all_results[xml_100]
@@ -1057,55 +1020,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         puts "50%, 100%: #{result_50.round(2)}, #{result_100.round(2)} #{k}"
 
-        # FIXME: Remove this code after the next E+ release
-        # Skip ZoneHVAC tests on the CI that only pass if using an E+ bugfix version
-        # See https://github.com/NREL/EnergyPlus/pull/7025
-        if ENV['CI']
-          skip_files_on_ci = ['valid-hvac-boiler-elec-only-50percent.xml',
-                              'valid-hvac-boiler-gas-only-50percent.xml',
-                              'valid-hvac-elec-resistance-only-50percent.xml',
-                              'valid-hvac-room-ac-only-50percent.xml',
-                              'valid-hvac-stove-oil-only-50percent.xml',
-                              'valid-hvac-wall-furnace-propane-only-50percent.xml']
-          next if skip_files_on_ci.include? File.basename(xml_50)
-        end
-
-        assert_in_delta(result_50, result_100 / 2.0, 0.1)
-      end
-      puts "\n"
-    end
-  end
-
-  def _test_heat_pump_no_heating_or_cooling(xmls, hvac_load_fracs_dir, all_results)
-    # Compares either:
-    #   1. Heat pumps without heating and differing heating efficiencies
-    #   2. Heat pumps without cooling and differing cooling efficiencies
-    # to ensure consistent heating/cooling energy consumption.
-    #
-    # This means that if we have, e.g., a heat pump used only for heating and where only
-    # the heating efficiency is provided, an arbitrary cooling efficiency can be used
-    # without heating end use results being affected.
-    xmls.sort.each do |xml|
-      next if not xml.include? hvac_load_fracs_dir
-
-      xml_1 = File.absolute_path(xml)
-      xml_2 = File.absolute_path(xml.gsub(".xml", "-diff-efficiency.xml"))
-
-      results_1 = all_results[xml_1]
-      results_2 = all_results[xml_2]
-      next if results_2.nil?
-
-      # Compare results
-      puts "\nResults for #{xml}:"
-      results_1.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-
-        result_1 = results_1[k].to_f
-        result_2 = results_2[k].to_f
-
-        puts "1, 2: #{result_1.round(2)}, #{result_2.round(2)} #{k}"
-
-        assert_in_delta(result_1, result_2, 0.3)
+        assert_in_epsilon(result_50, result_100 / 2.0, 0.1)
       end
       puts "\n"
     end

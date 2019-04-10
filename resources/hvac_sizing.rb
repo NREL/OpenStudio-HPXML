@@ -2175,6 +2175,9 @@ class HVACSizing
 
       hvac_final_values.Zone_Ratios[thermal_zone] = 0.9
     end
+    if hvac_final_values.Zone_Ratios.size == 1
+      hvac_final_values.Zone_Ratios[hvac_final_values.Zone_Ratios.keys[0]] = 1.0
+    end
     return hvac_final_values
 
     zone_heat_loads = {}

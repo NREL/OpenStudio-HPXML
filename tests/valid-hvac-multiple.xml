@@ -33,9 +33,6 @@
           <ConditionedFloorArea>7000.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>67575.0</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
-          <extension>
-            <LoadDistributionScheme>UniformLoad</LoadDistributionScheme>
-          </extension>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
