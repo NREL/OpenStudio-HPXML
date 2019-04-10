@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-04-09T18:28:47-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-04-10T07:11:28-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -259,12 +259,12 @@
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
               <HeatingSystemType>
-                <WallFurnace/>
+                <Stove/>
               </HeatingSystemType>
-              <HeatingSystemFuel>propane</HeatingSystemFuel>
+              <HeatingSystemFuel>fuel oil</HeatingSystemFuel>
               <HeatingCapacity>32000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
+                <Units>Percent</Units>
                 <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.5</FractionHeatLoadServed>

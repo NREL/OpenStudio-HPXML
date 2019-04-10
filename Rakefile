@@ -298,9 +298,9 @@ def create_hpxmls
     'hvac_partial/valid-hvac-mini-split-heat-pump-ducted-50percent.xml' => 'valid-hvac-mini-split-heat-pump-ducted.xml',
     'hvac_partial/valid-hvac-mini-split-heat-pump-ductless-50percent.xml' => 'valid-hvac-mini-split-heat-pump-ductless.xml',
     'hvac_partial/valid-hvac-room-ac-only-50percent.xml' => 'valid-hvac-room-ac-only.xml',
-    'hvac_partial/valid-hvac-stove-oil-only-50percent.xml' => 'valid-hvac-stove-oil-only.xml',
-    'hvac_partial/valid-hvac-wall-furnace-elec-only-50percent.xml' => 'valid-hvac-wall-furnace-elec-only.xml',
-    'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml' => 'valid-hvac-wall-furnace-propane-only.xml',
+    'hvac_partial/valid-hvac-stove-oil-only-50percent.xml.skip' => 'valid-hvac-stove-oil-only.xml',
+    'hvac_partial/valid-hvac-wall-furnace-elec-only-50percent.xml.skip' => 'valid-hvac-wall-furnace-elec-only.xml',
+    'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml.skip' => 'valid-hvac-wall-furnace-propane-only.xml',
 
     'water_heating_multiple/valid-dhw-tankless-electric-x3.xml' => 'valid-dhw-tankless-electric.xml',
     'water_heating_multiple/valid-dhw-tankless-gas-x3.xml' => 'valid-dhw-tankless-gas.xml',
