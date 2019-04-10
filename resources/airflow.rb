@@ -609,7 +609,7 @@ class Airflow
     # Search for clothes dryer
     has_dryer = false
     (model.getElectricEquipments + model.getOtherEquipments).each do |equip|
-      next unless equip.name.to_s == Constants.ObjectNameClothesDryer(Constants.FuelTypeElectric, unit.name.to_s) or equip.name.to_s == Constants.ObjectNameClothesDryer(Constants.FuelTypeGas, unit.name.to_s) or equip.name.to_s == Constants.ObjectNameClothesDryer(Constants.FuelTypePropane, unit.name.to_s)
+      next unless equip.name.to_s.start_with? Constants.ObjectNameClothesDryer(nil)
 
       has_dryer = true
       break

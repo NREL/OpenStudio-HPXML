@@ -263,7 +263,7 @@ class OSModel
 
     # Hot Water
 
-    success = add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
+    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
     return false if not success
 
     # HVAC
@@ -1775,7 +1775,9 @@ class OSModel
     return true
   end
 
-  def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
+  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
+    living_space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
+
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1930,7 +1932,7 @@ class OSModel
           capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_tank(model, unit, runner, nil, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tank(model, runner, nil, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj, @nbeds)
           return false if not success
@@ -1941,7 +1943,7 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           cycling_derate = 1.0 - ef_adj
-          success = Waterheater.apply_tankless(model, unit, runner, nil, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tankless(model, runner, nil, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
                                                @nbeds)
@@ -1964,11 +1966,11 @@ class OSModel
           temp_depress = 0.0 # FIXME
           ducting = "none"
           # FIXME: Use ef, ef_adj, ec_adj
-          success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather,
+          success = Waterheater.apply_heatpump(model, runner, nil, space, weather,
                                                e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
                                                cap, cop, shr, airflow_rate, fan_power,
                                                parasitics, tank_ua, int_factor, temp_depress,
-                                               @nbeds, ducting, 0)
+                                               @nbeds, ducting)
           return false if not success
 
         else
@@ -1984,7 +1986,7 @@ class OSModel
       end
     end
 
-    success = HotWaterAndAppliances.apply(model, unit, runner, weather,
+    success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
                                           @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
                                           cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                           cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,

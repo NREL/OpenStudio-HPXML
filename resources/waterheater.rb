@@ -8,7 +8,7 @@ require_relative "unit_conversions"
 require_relative "psychrometrics"
 
 class Waterheater
-  def self.apply_tank(model, unit, runner, loop, space, fuel_type, cap, vol, ef,
+  def self.apply_tank(model, runner, loop, space, fuel_type, cap, vol, ef,
                       re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds)
 
     # Validate inputs
@@ -50,7 +50,7 @@ class Waterheater
     if loop.nil?
       runner.registerInfo("A new plant loop for DHW will be added to the model")
       runner.registerInitialCondition("No water heater model currently exists")
-      loop = create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeTank)
+      loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
     end
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
@@ -63,9 +63,9 @@ class Waterheater
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater(unit.name.to_s), cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
 
-    storage_tank = get_shw_storage_tank(model, unit)
+    storage_tank = get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(new_heater)
@@ -78,7 +78,7 @@ class Waterheater
     return true
   end
 
-  def self.apply_tankless(model, unit, runner, loop, space, fuel_type, cap, ef,
+  def self.apply_tankless(model, runner, loop, space, fuel_type, cap, ef,
                           cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds)
 
     # Validate inputs
@@ -115,7 +115,7 @@ class Waterheater
     if loop.nil?
       runner.registerInfo("A new plant loop for DHW will be added to the model")
       runner.registerInitialCondition("No water heater model currently exists")
-      loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeTankless)
+      loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTankless)
     end
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
@@ -128,9 +128,9 @@ class Waterheater
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
-    new_heater = Waterheater.create_new_heater(Constants.ObjectNameWaterHeater(unit.name.to_s), cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    new_heater = Waterheater.create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
 
-    storage_tank = Waterheater.get_shw_storage_tank(model, unit)
+    storage_tank = Waterheater.get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(new_heater)
@@ -143,11 +143,11 @@ class Waterheater
     return true
   end
 
-  def self.apply_heatpump(model, unit, runner, loop, space, weather,
+  def self.apply_heatpump(model, runner, loop, space, weather,
                           e_cap, vol, t_set, min_temp, max_temp,
                           cap, cop, shr, airflow_rate, fan_power,
                           parasitics, tank_ua, int_factor, temp_depress,
-                          nbeds, ducting = "none", unit_index = 0)
+                          nbeds, ducting = "none")
 
     # Validate inputs
     if vol <= 0.0
@@ -207,14 +207,14 @@ class Waterheater
       return false
     end
 
-    obj_name_hpwh = Constants.ObjectNameWaterHeater(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
+    obj_name_hpwh = Constants.ObjectNameWaterHeater.gsub("|", "_")
 
     alt = weather.header.Altitude
     water_heater_tz = space.thermalZone.get
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
     runner.registerInitialCondition("There is no existing water heater")
-    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeHeatPump)
+    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
 
     new_pump = Waterheater.create_new_pump(model)
     new_pump.addToNode(loop.supplyInletNode)
@@ -573,73 +573,73 @@ class Waterheater
       runner.registerWarning("Confined space HPWH installations are typically used to represent installations in locations like a utility closet. Utility closets installations are typically only done in conditioned spaces.")
     end
     if temp_depress_c > 0 and ducting == "none"
-      hpwh_ducting_program.addLine("Set HPWH_last_#{unit_index} = (@TrendValue #{on_off_trend_var.name} 1)")
-      hpwh_ducting_program.addLine("Set HPWH_now_#{unit_index} = #{on_off_trend_var.name}")
+      hpwh_ducting_program.addLine("Set HPWH_last = (@TrendValue #{on_off_trend_var.name} 1)")
+      hpwh_ducting_program.addLine("Set HPWH_now = #{on_off_trend_var.name}")
       hpwh_ducting_program.addLine("Set num = (@Ln 2)")
-      hpwh_ducting_program.addLine("If (HPWH_last_#{unit_index} == 0) && (HPWH_now_#{unit_index}<>0)") # HPWH just turned on
-      hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = 0")
-      hpwh_ducting_program.addLine("Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
+      hpwh_ducting_program.addLine("If (HPWH_last == 0) && (HPWH_now<>0)") # HPWH just turned on
+      hpwh_ducting_program.addLine("Set HPWHOn = 0")
+      hpwh_ducting_program.addLine("Set exp = -(HPWHOn / 9.4) * num")
       hpwh_ducting_program.addLine("Set exponent = (@Exp exp)")
       hpwh_ducting_program.addLine("Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
-      hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} + #{timestep_minutes}")
-      hpwh_ducting_program.addLine("ElseIf (HPWH_last_#{unit_index} <> 0) && (HPWH_now_#{unit_index}<>0)") # HPWH has been running for more than 1 timestep
-      hpwh_ducting_program.addLine("Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
+      hpwh_ducting_program.addLine("Set HPWHOn = HPWHOn + #{timestep_minutes}")
+      hpwh_ducting_program.addLine("ElseIf (HPWH_last <> 0) && (HPWH_now<>0)") # HPWH has been running for more than 1 timestep
+      hpwh_ducting_program.addLine("Set exp = -(HPWHOn / 9.4) * num")
       hpwh_ducting_program.addLine("Set exponent = (@Exp exp)")
       hpwh_ducting_program.addLine("Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
-      hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} + #{timestep_minutes}")
+      hpwh_ducting_program.addLine("Set HPWHOn = HPWHOn + #{timestep_minutes}")
       hpwh_ducting_program.addLine("Else")
       hpwh_ducting_program.addLine("If (Hour == 0) && (DayOfYear == 1)")
-      hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = 0") # Assume HPWH starts off for initial conditions
+      hpwh_ducting_program.addLine("Set HPWHOn = 0") # Assume HPWH starts off for initial conditions
       hpwh_ducting_program.addLine("EndIF")
-      hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = HPWHOn_#{unit_index} - #{timestep_minutes}")
-      hpwh_ducting_program.addLine("If HPWHOn_#{unit_index} < 0")
-      hpwh_ducting_program.addLine("Set HPWHOn_#{unit_index} = 0")
+      hpwh_ducting_program.addLine("Set HPWHOn = HPWHOn - #{timestep_minutes}")
+      hpwh_ducting_program.addLine("If HPWHOn < 0")
+      hpwh_ducting_program.addLine("Set HPWHOn = 0")
       hpwh_ducting_program.addLine("EndIf")
-      hpwh_ducting_program.addLine("Set exp = -(HPWHOn_#{unit_index} / 9.4) * num")
+      hpwh_ducting_program.addLine("Set exp = -(HPWHOn / 9.4) * num")
       hpwh_ducting_program.addLine("Set exponent = (@Exp exp)")
       hpwh_ducting_program.addLine("Set T_dep = (#{temp_depress_c} * exponent) - #{temp_depress_c}")
       hpwh_ducting_program.addLine("EndIf")
-      hpwh_ducting_program.addLine("Set T_hpwh_inlet_#{unit_index} = #{amb_temp_sensor.name} + T_dep")
+      hpwh_ducting_program.addLine("Set T_hpwh_inlet = #{amb_temp_sensor.name} + T_dep")
     else
       if ducting == Constants.VentTypeBalanced or ducting == Constants.VentTypeSupply
-        hpwh_ducting_program.addLine("Set T_hpwh_inlet_#{unit_index} = HPWH_out_temp_#{unit_index}")
+        hpwh_ducting_program.addLine("Set T_hpwh_inlet = HPWH_out_temp")
       else
-        hpwh_ducting_program.addLine("Set T_hpwh_inlet_#{unit_index} = #{amb_temp_sensor.name}")
+        hpwh_ducting_program.addLine("Set T_hpwh_inlet = #{amb_temp_sensor.name}")
       end
     end
     if ducting == "none"
-      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet_#{unit_index}")
+      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet")
       hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}/100")
       hpwh_ducting_program.addLine("Set temp1=(#{tl_sensor.name}*#{int_factor})+#{fan_power_sensor.name}*#{int_factor}")
       hpwh_ducting_program.addLine("Set #{sens_act_actuator.name} = 0-(#{sens_cool_sensor.name}*#{int_factor})-temp1")
       hpwh_ducting_program.addLine("Set #{lat_act_actuator.name} = 0 - #{lat_cool_sensor.name} * #{int_factor}")
     elsif ducting == Constants.VentTypeBalanced
-      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet_#{unit_index}")
+      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet}")
       hpwh_ducting_program.addLine("Set #{tamb_act2_actuator.name} = #{amb_temp_sensor.name}")
-      hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = HPWH_out_rh_#{unit_index}/100")
+      hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = HPWH_out_rh/100")
       hpwh_ducting_program.addLine("Set #{sens_act_actuator.name} = 0 - #{tl_sensor.name}")
       hpwh_ducting_program.addLine("Set #{lat_act_actuator.name} = 0")
     elsif ducting == Constants.VentTypeSupply
-      hpwh_ducting_program.addLine("Set rho = (@RhoAirFnPbTdbW HPWH_amb_P_#{unit_index} HPWHTair_out_#{unit_index} HPWHWair_out_#{unit_index})")
-      hpwh_ducting_program.addLine("Set cp = (@CpAirFnWTdb HPWHWair_out_#{unit_index} HPWHTair_out_#{unit_index})")
-      hpwh_ducting_program.addLine("Set h = (@HFnTdbW HPWHTair_out_#{unit_index} HPWHWair_out_#{unit_index})")
-      hpwh_ducting_program.addLine("Set HPWH_sens_gain = rho*cp*(HPWHTair_out_#{unit_index}-#{amb_temp_sensor.name})*V_airHPWH_#{unit_index}")
-      hpwh_ducting_program.addLine("Set HPWH_lat_gain = h*rho*(HPWHWair_out_#{unit_index}-#{amb_w_sensor.name})*V_airHPWH_#{unit_index}")
-      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet_#{unit_index}")
+      hpwh_ducting_program.addLine("Set rho = (@RhoAirFnPbTdbW HPWH_amb_P HPWHTair_out HPWHWair_out)")
+      hpwh_ducting_program.addLine("Set cp = (@CpAirFnWTdb HPWHWair_out HPWHTair_out)")
+      hpwh_ducting_program.addLine("Set h = (@HFnTdbW HPWHTair_out HPWHWair_out)")
+      hpwh_ducting_program.addLine("Set HPWH_sens_gain = rho*cp*(HPWHTair_out}-#{amb_temp_sensor.name})*V_airHPWH}")
+      hpwh_ducting_program.addLine("Set HPWH_lat_gain = h*rho*(HPWHWair_out}-#{amb_w_sensor.name})*V_airHPWH}")
+      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet}")
       hpwh_ducting_program.addLine("Set #{tamb_act2_actuator.name} = #{amb_temp_sensor.name}")
-      hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = HPWH_out_rh_#{unit_index}/100")
-      hpwh_ducting_program.addLine("Set #{sens_act_actuator.name} = HPWH_sens_gain_#{unit_index} - #{tl_sensor.name}")
-      hpwh_ducting_program.addLine("Set #{lat_act_actuator.name} = HPWH_lat_gain_#{unit_index}")
+      hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = HPWH_out_rh}/100")
+      hpwh_ducting_program.addLine("Set #{sens_act_actuator.name} = HPWH_sens_gain} - #{tl_sensor.name}")
+      hpwh_ducting_program.addLine("Set #{lat_act_actuator.name} = HPWH_lat_gain}")
     elsif ducting == Constants.VentTypeExhaust
-      hpwh_ducting_program.addLine("Set rho = (@RhoAirFnPbTdbW HPWH_amb_P_#{unit_index} HPWHTair_out_#{unit_index} HPWHWair_out_#{unit_index})")
-      hpwh_ducting_program.addLine("Set cp = (@CpAirFnWTdb HPWHWair_out_#{unit_index} HPWHTair_out_#{unit_index})")
-      hpwh_ducting_program.addLine("Set h = (@HFnTdbW HPWHTair_out_#{unit_index} HPWHWair_out_#{unit_index})")
-      hpwh_ducting_program.addLine("Set HPWH_sens_gain = rho*cp*(#{tout_sensor.name}-#{amb_temp_sensor.name})*V_airHPWH_#{unit_index}")
-      hpwh_ducting_program.addLine("Set HPWH_lat_gain = h*rho*(Wout_#{unit_index}-#{amb_w_sensor.name})*V_airHPWH_#{unit_index}")
-      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet_#{unit_index}")
+      hpwh_ducting_program.addLine("Set rho = (@RhoAirFnPbTdbW HPWH_amb_P} HPWHTair_out} HPWHWair_out})")
+      hpwh_ducting_program.addLine("Set cp = (@CpAirFnWTdb HPWHWair_out} HPWHTair_out})")
+      hpwh_ducting_program.addLine("Set h = (@HFnTdbW HPWHTair_out} HPWHWair_out})")
+      hpwh_ducting_program.addLine("Set HPWH_sens_gain = rho*cp*(#{tout_sensor.name}-#{amb_temp_sensor.name})*V_airHPWH}")
+      hpwh_ducting_program.addLine("Set HPWH_lat_gain = h*rho*(Wout}-#{amb_w_sensor.name})*V_airHPWH}")
+      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet}")
       hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}/100")
-      hpwh_ducting_program.addLine("Set #{sens_act_actuator.name} = HPWH_sens_gain_#{unit_index} - #{tl_sensor.name}")
-      hpwh_ducting_program.addLine("Set #{lat_act_actuator.name} = HPWH_lat_gain_#{unit_index}")
+      hpwh_ducting_program.addLine("Set #{sens_act_actuator.name} = HPWH_sens_gain} - #{tl_sensor.name}")
+      hpwh_ducting_program.addLine("Set #{lat_act_actuator.name} = HPWH_lat_gain}")
     end
 
     leschedoverride_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_bottom_element_sp, "Schedule:Constant", "Schedule Value")
@@ -651,7 +651,7 @@ class Waterheater
       hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
       if ducting == Constants.VentTypeSupply or ducting == Constants.VentTypeBalanced
-        hpwh_ctrl_program.addLine("If (HPWH_out_temp_#{unit_index} < #{UnitConversions.convert(min_temp, "F", "C")}) || (HPWH_out_temp_#{unit_index} > #{UnitConversions.convert(max_temp, "F", "C")})")
+        hpwh_ctrl_program.addLine("If (HPWH_out_temp} < #{UnitConversions.convert(min_temp, "F", "C")}) || (HPWH_out_temp} > #{UnitConversions.convert(max_temp, "F", "C")})")
       else
         hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp, "F", "C").round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp, "F", "C").round(2)})")
       end
@@ -696,10 +696,10 @@ class Waterheater
       hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
       hpwh_ctrl_program.addLine("Set #{ueschedoverride_actuator.name} = #{ueschedoverridetemp}")
       hpwh_ctrl_program.addLine("Set #{hpschedoverride_actuator.name} = #{tset_C}")
-      hpwh_ctrl_program.addLine("Set UEMax_#{unit_index} = (@TrendMax #{uetrend_trend_var.name} 2)")
-      hpwh_ctrl_program.addLine("Set LEMax_#{unit_index} = (@TrendMax #{letrend_trend_var.name} 2)")
-      hpwh_ctrl_program.addLine("Set ElemOn_#{unit_index} = (@Max UEMax_#{unit_index} LEMax_#{unit_index})")
-      hpwh_ctrl_program.addLine("If (#{t_ctrl_sensor.name}<#{t_ems_control1}) || ((ElemOn_#{unit_index}>0) && (#{t_ctrl_sensor.name}<#{t_ems_control2}))") # Small offset in second value is to prevent the element overshooting the setpoint due to mixing
+      hpwh_ctrl_program.addLine("Set UEMax} = (@TrendMax #{uetrend_trend_var.name} 2)")
+      hpwh_ctrl_program.addLine("Set LEMax} = (@TrendMax #{letrend_trend_var.name} 2)")
+      hpwh_ctrl_program.addLine("Set ElemOn} = (@Max UEMax} LEMax})")
+      hpwh_ctrl_program.addLine("If (#{t_ctrl_sensor.name}<#{t_ems_control1}) || ((ElemOn}>0) && (#{t_ctrl_sensor.name}<#{t_ems_control2}))") # Small offset in second value is to prevent the element overshooting the setpoint due to mixing
       hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 70")
       hpwh_ctrl_program.addLine("Set #{hpschedoverride_actuator.name} = 0")
       hpwh_ctrl_program.addLine("Else")
@@ -716,7 +716,7 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_ducting_program)
 
-    storage_tank = Waterheater.get_shw_storage_tank(model, unit)
+    storage_tank = Waterheater.get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(tank)
@@ -881,9 +881,9 @@ class Waterheater
 
   private
 
-  def self.get_shw_storage_tank(model, unit)
+  def self.get_shw_storage_tank(model)
     model.getPlantLoops.each do |plant_loop|
-      next unless plant_loop.name.to_s == Constants.PlantLoopSolarHotWater(unit.name.to_s)
+      next unless plant_loop.name.to_s == Constants.PlantLoopSolarHotWater
 
       (plant_loop.supplyComponents + plant_loop.demandComponents).each do |component|
         if component.to_WaterHeaterStratified.is_initialized
