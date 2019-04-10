@@ -9,7 +9,7 @@ require_relative "psychrometrics"
 
 class Waterheater
   def self.apply_tank(model, unit, runner, loop, space, fuel_type, cap, vol, ef,
-                      re, t_set, oncycle_p, offcycle_p, ec_adj)
+                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds)
 
     # Validate inputs
     if vol <= 0
@@ -47,12 +47,6 @@ class Waterheater
       end
     end
 
-    # Get unit beds/baths
-    nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
-    if nbeds.nil? or nbaths.nil?
-      return false
-    end
-
     if loop.nil?
       runner.registerInfo("A new plant loop for DHW will be added to the model")
       runner.registerInitialCondition("No water heater model currently exists")
@@ -85,7 +79,7 @@ class Waterheater
   end
 
   def self.apply_tankless(model, unit, runner, loop, space, fuel_type, cap, ef,
-                          cd, t_set, oncycle_p, offcycle_p, ec_adj)
+                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds)
 
     # Validate inputs
     if ef > 1 or ef <= 0
@@ -116,12 +110,6 @@ class Waterheater
         runner.registerError("Parasitic electricity power must be greater than 0.")
         return false
       end
-    end
-
-    # Get unit beds/baths
-    nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
-    if nbeds.nil? or nbaths.nil?
-      return false
     end
 
     if loop.nil?
@@ -159,7 +147,7 @@ class Waterheater
                           e_cap, vol, t_set, min_temp, max_temp,
                           cap, cop, shr, airflow_rate, fan_power,
                           parasitics, tank_ua, int_factor, temp_depress,
-                          ducting = "none", unit_index = 0)
+                          nbeds, ducting = "none", unit_index = 0)
 
     # Validate inputs
     if vol <= 0.0
@@ -216,12 +204,6 @@ class Waterheater
     end
     if temp_depress < 0.0
       runner.registerError("Temperature depression must be greater than 0.")
-      return false
-    end
-
-    # Get unit beds/baths
-    nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
-    if nbeds.nil? or nbaths.nil?
       return false
     end
 

@@ -234,6 +234,7 @@ class OSModel
     @cvolume = building_construction_values[:conditioned_building_volume]
     @ncfl = building_construction_values[:number_of_conditioned_floors]
     @nbeds = building_construction_values[:number_of_bedrooms]
+    @nbaths = 3.0 # TODO: Arbitrary, but update
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
@@ -257,7 +258,7 @@ class OSModel
 
     # Bedrooms, Occupants
 
-    success = add_num_bedrooms_occupants(model, building, runner)
+    success = add_num_occupants(model, building, runner)
     return false if not success
 
     # Hot Water
@@ -757,18 +758,11 @@ class OSModel
     return gross_wall_area
   end
 
-  def self.add_num_bedrooms_occupants(model, building, runner)
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+  def self.add_num_occupants(model, building, runner)
     building_occupancy_values = HPXML.get_building_occupancy_values(building_occupancy: building.elements["BuildingDetails/BuildingSummary/BuildingOccupancy"])
 
-    # Bedrooms
-    num_bedrooms = building_construction_values[:number_of_bedrooms]
-    num_bathrooms = 3.0 # Arbitrary, no impact on results since water heater capacity is required
-    success = Geometry.process_beds_and_baths(model, runner, [num_bedrooms], [num_bathrooms])
-    return false if not success
-
     # Occupants
-    num_occ = Geometry.get_occupancy_default_num(num_bedrooms)
+    num_occ = Geometry.get_occupancy_default_num(@nbeds)
     unless building_occupancy_values.nil?
       unless building_occupancy_values[:number_of_residents].nil?
         num_occ = building_occupancy_values[:number_of_residents]
@@ -779,7 +773,7 @@ class OSModel
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      success = Geometry.process_occupants(model, runner, num_occ.to_s, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch)
+      success = Geometry.process_occupants(model, runner, num_occ.to_s, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @nbeds)
       return false if not success
     end
 
@@ -1939,7 +1933,7 @@ class OSModel
           offcycle_power = 0.0
           success = Waterheater.apply_tank(model, unit, runner, nil, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
-                                           oncycle_power, offcycle_power, ec_adj)
+                                           oncycle_power, offcycle_power, ec_adj, @nbeds)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1950,7 +1944,8 @@ class OSModel
           cycling_derate = 1.0 - ef_adj
           success = Waterheater.apply_tankless(model, unit, runner, nil, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
-                                               setpoint_temp, oncycle_power, offcycle_power, ec_adj)
+                                               setpoint_temp, oncycle_power, offcycle_power, ec_adj,
+                                               @nbeds)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -1974,7 +1969,7 @@ class OSModel
                                                e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
                                                cap, cop, shr, airflow_rate, fan_power,
                                                parasitics, tank_ua, int_factor, temp_depress,
-                                               ducting, 0)
+                                               @nbeds, ducting, 0)
           return false if not success
 
         else
@@ -2962,14 +2957,15 @@ class OSModel
 
     # FIXME: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)
+    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
+                            @nbeds, @nbaths)
     return false if not success
 
     return true
   end
 
   def self.add_hvac_sizing(runner, model, unit, weather)
-    success = HVACSizing.apply(model, unit, runner, weather, false)
+    success = HVACSizing.apply(model, unit, runner, weather, @nbeds, false)
     return false if not success
 
     return true

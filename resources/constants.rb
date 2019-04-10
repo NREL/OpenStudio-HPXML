@@ -175,14 +175,6 @@ class Constants
     return 'singlefamilydetached'
   end
 
-  def self.BuildingUnitFeatureNumBathrooms
-    return 'NumberOfBathrooms'
-  end
-
-  def self.BuildingUnitFeatureNumBedrooms
-    return 'NumberOfBedrooms'
-  end
-
   def self.BuildingUnitTypeResidential
     return 'Residential'
   end

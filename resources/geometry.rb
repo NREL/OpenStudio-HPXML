@@ -120,22 +120,6 @@ class Geometry
     return return_units
   end
 
-  def self.get_unit_beds_baths(model, unit, runner = nil)
-    # Returns a list with #beds, #baths, a list of spaces, and the unit name
-    nbeds = unit.additionalProperties.getFeatureAsInteger(Constants.BuildingUnitFeatureNumBedrooms)
-    nbaths = unit.additionalProperties.getFeatureAsDouble(Constants.BuildingUnitFeatureNumBathrooms)
-    if not (nbeds.is_initialized or nbaths.is_initialized)
-      if !runner.nil?
-        runner.registerError("Could not determine number of bedrooms or bathrooms.")
-      end
-      return [nil, nil]
-    else
-      nbeds = nbeds.get.to_f
-      nbaths = nbaths.get
-    end
-    return [nbeds, nbaths]
-  end
-
   def self.get_unit_adjacent_common_spaces(unit)
     # Returns a list of spaces adjacent to the unit that are not assigned
     # to a building unit.
@@ -768,81 +752,8 @@ class Geometry
     return below_grade_exterior_floors
   end
 
-  def self.process_beds_and_baths(model, runner, num_br, num_ba)
-    # Error checking
-    if not num_br.all? { |x| MathTools.valid_float?(x) }
-      runner.registerError("Number of bedrooms must be a numerical value.")
-      return false
-    else
-      num_br = num_br.map(&:to_f)
-    end
-    if not num_ba.all? { |x| MathTools.valid_float?(x) }
-      runner.registerError("Number of bathrooms must be a numerical value.")
-      return false
-    else
-      num_ba = num_ba.map(&:to_f)
-    end
-    if num_br.any? { |x| x <= 0 or x % 1 != 0 }
-      runner.registerError("Number of bedrooms must be a positive integer.")
-      return false
-    end
-    if num_ba.any? { |x| x <= 0 or x % 0.25 != 0 }
-      runner.registerError("Number of bathrooms must be a positive multiple of 0.25.")
-      return false
-    end
-    if num_br.length > 1 and num_ba.length > 1 and num_br.length != num_ba.length
-      runner.registerError("Number of bedroom elements specified inconsistent with number of bathroom elements specified.")
-      return false
-    end
-
-    # Get building units
-    units = self.get_building_units(model, runner)
-    if units.nil?
-      return false
-    end
-
-    # error checking
-    if num_br.length > 1 and num_br.length != units.size
-      runner.registerError("Number of bedroom elements specified inconsistent with number of multifamily units defined in the model.")
-      return false
-    end
-    if num_ba.length > 1 and num_ba.length != units.size
-      runner.registerError("Number of bathroom elements specified inconsistent with number of multifamily units defined in the model.")
-      return false
-    end
-
-    if units.size > 1 and num_br.length == 1
-      if num_br.length == 1
-        num_br = Array.new(units.size, num_br[0])
-      end
-      if num_ba.length == 1
-        num_ba = Array.new(units.size, num_ba[0])
-      end
-    end
-
-    # Update number of bedrooms/bathrooms
-    total_num_br = 0
-    total_num_ba = 0
-    units.each_with_index do |unit, unit_index|
-      num_br[unit_index] = num_br[unit_index].to_i
-      num_ba[unit_index] = num_ba[unit_index].to_f
-
-      unit.additionalProperties.setFeature(Constants.BuildingUnitFeatureNumBedrooms, num_br[unit_index])
-      unit.additionalProperties.setFeature(Constants.BuildingUnitFeatureNumBathrooms, num_ba[unit_index])
-
-      if units.size > 1
-        runner.registerInfo("Unit '#{unit_index}' has been assigned #{num_br[unit_index].to_s} bedroom(s) and #{num_ba[unit_index].round(2).to_s} bathroom(s).")
-      end
-
-      total_num_br += num_br[unit_index]
-      total_num_ba += num_ba[unit_index]
-    end
-
-    runner.registerInfo("The building has been assigned #{total_num_br.to_s} bedroom(s) and #{total_num_ba.round(2).to_s} bathroom(s) across #{units.size} unit(s).")
-    return true
-  end
-
-  def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch)
+  def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
+                             nbeds)
     num_occ = num_occ.split(",").map(&:strip)
 
     # Error checking
@@ -904,12 +815,6 @@ class Geometry
           runner.registerError("Number of Occupants must be either '#{Constants.Auto}' or a number greater than or equal to 0.")
           return false
         end
-      end
-
-      # Get number of beds
-      nbeds, nbaths = self.get_unit_beds_baths(model, unit, runner)
-      if nbeds.nil?
-        return false
       end
 
       # Calculate number of occupants for this unit

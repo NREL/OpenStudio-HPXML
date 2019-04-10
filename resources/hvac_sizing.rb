@@ -6,7 +6,7 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, unit, runner, weather, show_debug_info)
+  def self.apply(model, unit, runner, weather, nbeds, show_debug_info)
     # Get year of model
     @modelYear = model.yearDescription.get.assumedYear
 
@@ -36,12 +36,6 @@ class HVACSizing
 
     mj8 = process_site_calcs_and_design_temps(runner, mj8, weather, model)
     return false if mj8.nil?
-
-    # Get unit beds/baths
-    nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
-    if nbeds.nil? or nbaths.nil?
-      return false
-    end
 
     # Get finished floor area for unit
     unit_ffa = Geometry.get_finished_floor_area_from_spaces(unit.spaces)

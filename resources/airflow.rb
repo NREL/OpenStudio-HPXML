@@ -8,7 +8,8 @@ require_relative "unit_conversions"
 require_relative "hvac"
 
 class Airflow
-  def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems)
+  def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
+                 nbeds, nbaths)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
       return false
@@ -90,11 +91,6 @@ class Airflow
       obj_name_infil = Constants.ObjectNameInfiltration(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
       obj_name_natvent = Constants.ObjectNameNaturalVentilation(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
       obj_name_mech_vent = Constants.ObjectNameMechanicalVentilation(unit.name.to_s.gsub("unit ", "")).gsub("|", "_")
-
-      nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
-      if nbeds.nil? or nbaths.nil?
-        return false
-      end
 
       unit_ag_ext_wall_area = Geometry.calculate_above_grade_exterior_wall_area(unit.spaces)
       unit_ag_ffa = Geometry.get_above_grade_finished_floor_area_from_spaces(unit.spaces, runner)
