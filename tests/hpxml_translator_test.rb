@@ -224,7 +224,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Apply measure
     measures_dir = File.join(this_dir, "../../")
-    success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
+    success = apply_measures(measures_dir, measures, runner, model, true)
 
     # Report warnings/errors
     File.open(File.join(rundir, 'run.log'), 'w') do |f|

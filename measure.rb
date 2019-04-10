@@ -2511,7 +2511,7 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    success = HVAC.apply_eri_ceiling_fans(model, unit, runner, annual_kwh, weekday_sch, weekend_sch)
+    success = HVAC.apply_ceiling_fans(model, unit, runner, annual_kwh, weekday_sch, weekend_sch)
     return false if not success
 
     return true

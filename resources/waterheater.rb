@@ -755,91 +755,6 @@ class Waterheater
     return true
   end
 
-  def self.remove(model, runner) # TODO: Make unit specific
-    obj_name = Constants.ObjectNameWaterHeater
-    model.getPlantLoops.each do |pl|
-      next if not pl.name.to_s.start_with? Constants.PlantLoopDomesticWater
-
-      # Remove existing water heater
-      objects_to_remove = []
-      pl.supplyComponents.each do |wh|
-        next if !wh.to_WaterHeaterMixed.is_initialized and !wh.to_WaterHeaterStratified.is_initialized
-
-        if wh.to_WaterHeaterMixed.is_initialized
-          objects_to_remove << wh
-          if wh.to_WaterHeaterMixed.get.setpointTemperatureSchedule.is_initialized
-            objects_to_remove << wh.to_WaterHeaterMixed.get.setpointTemperatureSchedule.get
-          end
-        elsif wh.to_WaterHeaterStratified.is_initialized
-          if not wh.to_WaterHeaterStratified.get.secondaryPlantLoop.is_initialized
-            model.getWaterHeaterHeatPumpWrappedCondensers.each do |hpwh|
-              objects_to_remove << hpwh.tank
-              objects_to_remove << hpwh
-            end
-            objects_to_remove << wh.to_WaterHeaterStratified.get.heater1SetpointTemperatureSchedule
-            objects_to_remove << wh.to_WaterHeaterStratified.get.heater2SetpointTemperatureSchedule
-
-            # Remove existing HPWH objects
-            obj_name_underscore = obj_name.gsub(" ", "_")
-
-            model.getEnergyManagementSystemProgramCallingManagers.each do |program_calling_manager|
-              next unless program_calling_manager.name.to_s.include? obj_name
-
-              program_calling_manager.remove
-            end
-
-            model.getEnergyManagementSystemSensors.each do |sensor|
-              next unless sensor.name.to_s.include? obj_name_underscore
-
-              sensor.remove
-            end
-
-            model.getEnergyManagementSystemActuators.each do |actuator|
-              next unless actuator.name.to_s.include? obj_name_underscore
-
-              actuatedComponent = actuator.actuatedComponent
-              if actuatedComponent.is_a? OpenStudio::Model::OptionalModelObject # 2.4.0 or higher
-                actuatedComponent = actuatedComponent.get
-              end
-              if actuatedComponent.to_OtherEquipment.is_initialized
-                actuatedComponent.to_OtherEquipment.get.otherEquipmentDefinition.remove
-              end
-              actuator.remove
-            end
-
-            model.getScheduleConstants.each do |schedule|
-              next unless schedule.name.to_s.include? obj_name
-
-              schedule.remove
-            end
-
-            model.getEnergyManagementSystemPrograms.each do |program|
-              next unless program.name.to_s.include? obj_name_underscore
-
-              program.remove
-            end
-
-            model.getEnergyManagementSystemTrendVariables.each do |trend_var|
-              next unless trend_var.name.to_s.include? obj_name_underscore
-
-              trend_var.remove
-            end
-          end
-        end
-      end
-      if objects_to_remove.size > 0
-        runner.registerInfo("Removed existing water heater from plant loop '#{pl.name.to_s}'.")
-      end
-      objects_to_remove.uniq.each do |object|
-        begin
-          object.remove
-        rescue
-          # no op
-        end
-      end
-    end
-  end
-
   def self.get_location_hierarchy(ba_cz_name)
     if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
       return [Constants.SpaceTypeGarage,
@@ -864,6 +779,7 @@ class Waterheater
     end
   end
 
+  # FIXME: Merge this method and calc_water_heater_capacity
   def self.calc_capacity(cap, fuel, num_beds, num_baths)
     # Calculate the capacity of the water heater based on the fuel type and number of bedrooms and bathrooms in a home
     # returns the capacity in kBtu/hr
@@ -1002,65 +918,6 @@ class Waterheater
           return component.to_WaterHeaterStratified.get
         end
       end
-    end
-    return nil
-  end
-
-  def self.get_plant_loop_from_string(plant_loops, plantloop_s, unit, obj_name_hpwh, runner = nil)
-    if plantloop_s == Constants.Auto
-      return get_plant_loop_for_spaces(plant_loops, unit, obj_name_hpwh, runner)
-    end
-
-    plant_loop = nil
-    plant_loops.each do |pl|
-      if pl.name.to_s == plantloop_s
-        plant_loop = pl
-        break
-      end
-    end
-    if plant_loop.nil? and !runner
-      runner.registerError("Could not find plant loop with the name '#{plantloop_s}'.")
-    end
-    return plant_loop
-  end
-
-  def self.get_plant_loop_for_spaces(plant_loops, unit, obj_name_hpwh, runner = nil)
-    spaces = unit.spaces + Geometry.get_unit_adjacent_common_spaces(unit)
-    # We obtain the plant loop for a given set of space by comparing
-    # their associated thermal zones to the thermal zone that each plant
-    # loop water heater is located in.
-    spaces.each do |space|
-      next if !space.thermalZone.is_initialized
-
-      zone = space.thermalZone.get
-      plant_loops.each do |pl|
-        pl.supplyComponents.each do |wh|
-          if wh.to_WaterHeaterMixed.is_initialized
-            waterHeater = wh.to_WaterHeaterMixed.get
-            next if !waterHeater.ambientTemperatureThermalZone.is_initialized
-            next if waterHeater.ambientTemperatureThermalZone.get.name.to_s != zone.name.to_s
-
-            return pl
-          elsif wh.to_WaterHeaterStratified.is_initialized
-            if not wh.to_WaterHeaterStratified.get.secondaryPlantLoop.is_initialized
-              waterHeater = wh.to_WaterHeaterStratified.get
-              # Check if the water heater has a thermal zone attached to it, if not check if it has a schedule and the schedule name matches what we expect
-              if waterHeater.ambientTemperatureThermalZone.is_initialized
-                next if waterHeater.ambientTemperatureThermalZone.get.name.to_s != zone.name.to_s
-
-                return pl
-              elsif waterHeater.ambientTemperatureSchedule.is_initialized
-                if waterHeater.ambientTemperatureSchedule.get.name.to_s == "#{obj_name_hpwh} Tamb act" or waterHeater.ambientTemperatureSchedule.get.name.to_s == "#{obj_name_hpwh} Tamb act2"
-                  return pl
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-    if !runner.nil?
-      runner.registerError("Could not find plant loop.")
     end
     return nil
   end

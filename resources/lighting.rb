@@ -196,34 +196,6 @@ class Lighting
     return true
   end
 
-  def self.remove(model, runner)
-    objects_to_remove = []
-    model.getExteriorLightss.each do |exterior_light|
-      objects_to_remove << exterior_light
-      objects_to_remove << exterior_light.exteriorLightsDefinition
-      if exterior_light.schedule.is_initialized
-        objects_to_remove << exterior_light.schedule.get
-      end
-    end
-    model.getLightss.each do |light|
-      objects_to_remove << light
-      objects_to_remove << light.lightsDefinition
-      if light.schedule.is_initialized
-        objects_to_remove << light.schedule.get
-      end
-    end
-    if objects_to_remove.size > 0
-      runner.registerInfo("Removed existing interior/exterior lighting from the model.")
-    end
-    objects_to_remove.uniq.each do |object|
-      begin
-        object.remove
-      rescue
-        # no op
-      end
-    end
-  end
-
   def self.get_reference_fractions()
     fFI_int = 0.10
     fFI_ext = 0.0
