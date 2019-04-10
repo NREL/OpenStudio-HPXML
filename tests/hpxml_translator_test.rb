@@ -79,6 +79,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['skip_validation'] = false
 
     expected_error_msgs = { 'invalid-bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'invalid-clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
+                            'invalid-clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'invalid-duct-location.xml' => ["TODO"],
+                            'invalid-refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
+                            'invalid-water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
                             'invalid-missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                                "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
                             'invalid-hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to 1, but calculated sum is 1.2.",
