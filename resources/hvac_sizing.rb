@@ -6,7 +6,9 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, unit, runner, weather, nbeds, show_debug_info)
+  def self.apply(model, runner, weather, nbeds, show_debug_info)
+    unit = model.getBuildingUnits[0]
+
     # Get year of model
     @modelYear = model.yearDescription.get.assumedYear
 
@@ -34,7 +36,7 @@ class HVACSizing
     assumed_inside_temp = 73.5 # F
     @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (assumed_inside_temp + 460.0))
 
-    mj8 = process_site_calcs_and_design_temps(runner, mj8, weather, model)
+    mj8 = process_site_calcs_and_design_temps(runner, mj8, weather, model, unit)
     return false if mj8.nil?
 
     # Get finished floor area for unit
@@ -79,7 +81,7 @@ class HVACSizing
 
   private
 
-  def self.process_site_calcs_and_design_temps(runner, mj8, weather, model)
+  def self.process_site_calcs_and_design_temps(runner, mj8, weather, model, unit)
     '''
     Site Calculations and Design Temperatures
     '''
@@ -140,14 +142,6 @@ class HVACSizing
     mj8.cool_design_temps = {}
     mj8.heat_design_temps = {}
     mj8.dehum_design_temps = {}
-
-    # Arbitrary unit for retrieving unit features
-    unit = nil
-    model.getBuildingUnits.each do |u|
-      next if u.spaces.size == 0
-
-      unit = u
-    end
 
     # Initialize Manual J buffer space temperatures using current design temperatures
     model.getSpaces.each do |space|
@@ -1324,16 +1318,7 @@ class HVACSizing
       if sched.is_a? OpenStudio::Model::ScheduleRuleset or sched.is_a? OpenStudio::Model::ScheduleFixedInterval
         # Override any hot water schedules with smoothed schedules; TODO: Is there a better approach?
         max_mult = nil
-        if gain.name.to_s.start_with?(Constants.ObjectNameShower)
-          sched_values = [0.011, 0.005, 0.003, 0.005, 0.014, 0.052, 0.118, 0.117, 0.095, 0.074, 0.060, 0.047, 0.034, 0.029, 0.026, 0.025, 0.030, 0.039, 0.042, 0.042, 0.042, 0.041, 0.029, 0.021]
-          max_mult = 1.05 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameSink)
-          sched_values = [0.014, 0.007, 0.005, 0.005, 0.007, 0.018, 0.042, 0.062, 0.066, 0.062, 0.054, 0.050, 0.049, 0.045, 0.043, 0.041, 0.048, 0.065, 0.075, 0.069, 0.057, 0.048, 0.040, 0.027]
-          max_mult = 1.04 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameBath)
-          sched_values = [0.008, 0.004, 0.004, 0.004, 0.008, 0.019, 0.046, 0.058, 0.066, 0.058, 0.046, 0.035, 0.031, 0.023, 0.023, 0.023, 0.039, 0.046, 0.077, 0.100, 0.100, 0.077, 0.066, 0.039]
-          max_mult = 1.26 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
+        if gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
           sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
           max_mult = 1.05 * 1.04
         elsif gain.name.to_s.start_with?(Constants.ObjectNameClothesWasher)

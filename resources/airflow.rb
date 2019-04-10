@@ -9,7 +9,7 @@ require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                 nbeds, nbaths)
+                 nbeds, nbaths, ncfl, ncfl_ag)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
       return false
@@ -36,11 +36,6 @@ class Airflow
       spaces << space
     end
     building.building_height = Geometry.get_height_of_spaces(spaces)
-    unless model.getBuilding.standardsNumberOfAboveGroundStories.is_initialized
-      runner.registerError("Cannot determine the number of above grade stories.")
-      return false
-    end
-    building.stories = model.getBuilding.standardsNumberOfAboveGroundStories.get
     building.above_grade_volume = Geometry.get_above_grade_finished_volume(model)
     building.ag_ext_wall_area = Geometry.calculate_above_grade_exterior_wall_area(model_spaces)
     model.getThermalZones.each do |thermal_zone|
@@ -132,7 +127,7 @@ class Airflow
 
       # Update model
 
-      success, infil_output = process_infiltration_for_unit(model, runner, obj_name_infil, infil, wind_speed, building, weather, unit_ag_ffa, unit_ag_ext_wall_area, unit_living, unit_finished_basement)
+      success, infil_output = process_infiltration_for_unit(model, runner, obj_name_infil, infil, wind_speed, building, weather, unit_ag_ffa, unit_ag_ext_wall_area, unit_living, unit_finished_basement, ncfl_ag)
       return false if not success
 
       success, mv_output = process_mech_vent_for_unit(model, runner, obj_name_mech_vent, unit, infil.is_existing_home, infil_output.a_o, mech_vent, building, nbeds, nbaths, weather, unit_ffa, unit_living, units.size, has_forced_air_equipment)
@@ -156,7 +151,7 @@ class Airflow
       duct_programs = {}
       duct_lks = {}
       duct_systems.each do |ducts, air_loops|
-        success, ducts_output = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, has_forced_air_equipment)
+        success, ducts_output = process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, has_forced_air_equipment, ncfl)
         return false if not success
 
         air_loops.each do |air_loop|
@@ -341,7 +336,7 @@ class Airflow
     return true
   end
 
-  def self.process_infiltration_for_unit(model, runner, obj_name_infil, infil, wind_speed, building, weather, unit_ag_ffa, unit_ag_ext_wall_area, unit_living, unit_finished_basement)
+  def self.process_infiltration_for_unit(model, runner, obj_name_infil, infil, wind_speed, building, weather, unit_ag_ffa, unit_ag_ext_wall_area, unit_living, unit_finished_basement, ncfl_ag)
     spaces = []
     spaces << unit_living
     spaces << unit_finished_basement if not unit_finished_basement.nil?
@@ -465,7 +460,7 @@ class Airflow
 
       wind_coef = f_w * UnitConversions.convert(outside_air_density / 2.0, "lbm/ft^3", "inH2O/mph^2")**n_i # inH2O^n/mph^2n
 
-      unit_living.ACH = Airflow.get_infiltration_ACH_from_SLA(unit_living.SLA, building.stories, weather)
+      unit_living.ACH = Airflow.get_infiltration_ACH_from_SLA(unit_living.SLA, ncfl_ag, weather)
 
       # Convert living space ACH to cfm:
       unit_living.inf_flow = unit_living.ACH / UnitConversions.convert(1.0, "hr", "min") * unit_living.volume # cfm
@@ -844,7 +839,7 @@ class Airflow
     return true, cfis_output
   end
 
-  def self.process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, has_forced_air_equipment)
+  def self.process_ducts_for_unit(model, runner, ducts, building, unit, unit_index, unit_ffa, unit_has_mshp, unit_living, unit_finished_basement, has_forced_air_equipment, ncfl)
     # Validate Inputs
     if ducts.total_leakage < 0
       runner.registerError("Ducts: Total Leakage must be greater than or equal to 0.")
@@ -902,11 +897,6 @@ class Airflow
       location_name = unit_living.zone.name.to_s
     end
 
-    num_stories = building.stories
-    unless unit_finished_basement.nil?
-      num_stories +=  1
-    end
-
     if ducts.norm_leakage_25pa.nil?
       # Normalize values in case user inadvertently entered values that add up to the total duct leakage,
       # as opposed to adding up to 1
@@ -925,12 +915,12 @@ class Airflow
     end
 
     # Fraction of ducts in primary duct location (remaining ducts are in above-grade conditioned space).
-    location_frac_leakage = Airflow.get_location_frac_leakage(ducts.location_frac, num_stories)
+    location_frac_leakage = Airflow.get_location_frac_leakage(ducts.location_frac, ncfl)
 
     location_frac_conduction = location_frac_leakage
-    ducts.num_returns = Airflow.get_num_returns(ducts.num_returns, num_stories)
-    supply_surface_area = Airflow.get_duct_supply_surface_area(ducts.supply_area_mult, unit_ffa, num_stories)
-    return_surface_area = Airflow.get_return_surface_area(ducts.return_area_mult, unit_ffa, num_stories, ducts.num_returns)
+    ducts.num_returns = Airflow.get_num_returns(ducts.num_returns, ncfl)
+    supply_surface_area = Airflow.get_duct_supply_surface_area(ducts.supply_area_mult, unit_ffa, ncfl)
+    return_surface_area = Airflow.get_return_surface_area(ducts.return_area_mult, unit_ffa, ncfl, ducts.num_returns)
 
     # Calculate Duct UA value
     if location_name != unit_living.zone.name.to_s

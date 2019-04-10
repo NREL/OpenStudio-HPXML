@@ -163,7 +163,7 @@ class HotWaterAndAppliances
       # Fixtures (showers, sinks, baths)
       fx_gpd = get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures)
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
-      fx_obj_name = Constants.ObjectNameShower
+      fx_obj_name = Constants.ObjectNameFixtures
       fx_obj_name_sens = "#{fx_obj_name} Sensible"
       fx_obj_name_lat = "#{fx_obj_name} Latent"
       fx_peak_flow_gpm = fx_gpd / sum_fractions_hw / timestep_minutes * 365.0

@@ -233,6 +233,7 @@ class OSModel
     @cfa = building_construction_values[:conditioned_floor_area]
     @cvolume = building_construction_values[:conditioned_building_volume]
     @ncfl = building_construction_values[:number_of_conditioned_floors]
+    @ncfl_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = building_construction_values[:number_of_bedrooms]
     @nbaths = 3.0 # TODO: Arbitrary, but update
     @garage_present = building_construction_values[:garage_present]
@@ -253,7 +254,7 @@ class OSModel
     # Geometry/Envelope
 
     spaces = {}
-    success, unit = add_geometry_envelope(runner, model, building, weather, spaces)
+    success = add_geometry_envelope(runner, model, building, weather, spaces)
     return false if not success
 
     # Bedrooms, Occupants
@@ -268,22 +269,22 @@ class OSModel
 
     # HVAC
 
-    success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_cooling_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_heating_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_heat_pump(runner, model, building, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
+    success = add_residual_hvac(runner, model, building, use_only_ideal_air)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather)
     return false if not success
 
-    success = add_ceiling_fans(runner, model, building, unit)
+    success = add_ceiling_fans(runner, model, building)
     return false if not success
 
     # FIXME: remove the following logic eventually
@@ -311,10 +312,10 @@ class OSModel
 
     # Other
 
-    success = add_airflow(runner, model, building, unit, loop_hvacs)
+    success = add_airflow(runner, model, building, loop_hvacs)
     return false if not success
 
-    success = add_hvac_sizing(runner, model, unit, weather)
+    success = add_hvac_sizing(runner, model, weather)
     return false if not success
 
     success = add_fuel_heating_eae(runner, model, building, loop_hvacs, zone_hvacs)
@@ -363,7 +364,7 @@ class OSModel
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather, runner)
     return false if heating_season.nil? or cooling_season.nil?
 
-    success, unit = add_building_info(model, building)
+    success = add_building_info(model, building)
     return false if not success
 
     success = add_foundations(runner, model, building, spaces, subsurface_areas)
@@ -402,7 +403,7 @@ class OSModel
     success = explode_surfaces(runner, model)
     return false if not success
 
-    return true, unit
+    return true
   end
 
   def self.set_zone_volumes(runner, model, building)
@@ -627,22 +628,9 @@ class OSModel
   def self.add_building_info(model, building)
     # Store building unit information
     unit = OpenStudio::Model::BuildingUnit.new(model)
-    unit.setName(Constants.ObjectNameBuildingUnit)
+    unit.setName("res unit")
 
-    # Store number of units
-    model.getBuilding.setStandardsNumberOfLivingUnits(1)
-
-    # Store number of stories
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    model.getBuilding.setStandardsNumberOfStories(building_construction_values[:number_of_conditioned_floors])
-    model.getBuilding.setStandardsNumberOfAboveGroundStories(building_construction_values[:number_of_conditioned_floors_above_grade])
-
-    # Store info for HVAC Sizing measure
-    if @garage_present
-      unit.additionalProperties.setFeature(Constants.SizingInfoGarageFracUnderFinishedSpace, 0.5) # FIXME: assumption
-    end
-
-    return true, unit
+    return true
   end
 
   def self.get_surface_transformation(offset, x, y, z)
@@ -1125,8 +1113,6 @@ class OSModel
 
     # Calculate ffa already added to model
     model_ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces).round(1)
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    nstories_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
 
     if model_ffa > ffa
       runner.registerError("Sum of conditioned floor surface areas #{model_ffa.to_s} is greater than ConditionedFloorArea specified #{ffa.to_s}.")
@@ -1140,7 +1126,7 @@ class OSModel
 
     finishedfloor_width = Math::sqrt(addtl_ffa)
     finishedfloor_length = addtl_ffa / finishedfloor_width
-    z_origin = foundation_top + 8.0 * (nstories_ag - 1)
+    z_origin = foundation_top + 8.0 * (@ncfl_ag - 1)
 
     surface = OpenStudio::Model::Surface.new(add_floor_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
 
@@ -2003,7 +1989,7 @@ class OSModel
     return true
   end
 
-  def self.add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+  def self.add_cooling_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
@@ -2104,7 +2090,7 @@ class OSModel
     return true
   end
 
-  def self.add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+  def self.add_heating_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
@@ -2189,7 +2175,7 @@ class OSModel
     return true
   end
 
-  def self.add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
+  def self.add_heat_pump(runner, model, building, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
@@ -2389,7 +2375,7 @@ class OSModel
     return true
   end
 
-  def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
+  def self.add_residual_hvac(runner, model, building, use_only_ideal_air)
     if use_only_ideal_air
       success = HVAC.apply_ideal_air_loads_heating(model, runner, 1)
       return false if not success
@@ -2487,7 +2473,7 @@ class OSModel
     return true
   end
 
-  def self.add_ceiling_fans(runner, model, building, unit)
+  def self.add_ceiling_fans(runner, model, building)
     ceiling_fan_values = HPXML.get_ceiling_fan_values(ceiling_fan: building.elements["BuildingDetails/Lighting/CeilingFan"])
     return true if ceiling_fan_values.nil?
 
@@ -2694,7 +2680,7 @@ class OSModel
     return true
   end
 
-  def self.add_airflow(runner, model, building, unit, loop_hvacs)
+  def self.add_airflow(runner, model, building, loop_hvacs)
     # Infiltration
     infil_ach50 = nil
     infil_const_ach = nil
@@ -2953,14 +2939,14 @@ class OSModel
     # FIXME: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                            @nbeds, @nbaths)
+                            @nbeds, @nbaths, @ncfl, @ncfl_ag)
     return false if not success
 
     return true
   end
 
-  def self.add_hvac_sizing(runner, model, unit, weather)
-    success = HVACSizing.apply(model, unit, runner, weather, @nbeds, false)
+  def self.add_hvac_sizing(runner, model, weather)
+    success = HVACSizing.apply(model, runner, weather, @nbeds, false)
     return false if not success
 
     return true
