@@ -230,23 +230,15 @@ class Waterheater
     alt = weather.header.Altitude
     water_heater_tz = space.thermalZone.get
 
-    if loop.nil?
-      runner.registerInfo("A new plant loop for DHW will be added to the model")
-      runner.registerInitialCondition("There is no existing water heater")
-      loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeHeatPump)
-    else
-      runner.registerInitialCondition("An existing water heater was found in the model. This water heater will be removed and replace with a heat pump water heater")
-    end
+    runner.registerInfo("A new plant loop for DHW will be added to the model")
+    runner.registerInitialCondition("There is no existing water heater")
+    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater(unit.name.to_s), t_set, Constants.WaterHeaterTypeHeatPump)
 
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = Waterheater.create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
+    new_pump = Waterheater.create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     # Only ever going to make HPWHs in this measure, so don't split this code out to waterheater.rb
     # Calculate some geometry parameters for UA, the location of sensors and heat sources in the tank
@@ -760,7 +752,6 @@ class Waterheater
       return [Constants.SpaceTypeGarage,
               Constants.SpaceTypeLiving,
               Constants.SpaceTypeFinishedBasement,
-              Constants.SpaceTypeLaundryRoom,
               Constants.SpaceTypeCrawl,
               Constants.SpaceTypeUnfinishedAttic]
 
@@ -768,7 +759,6 @@ class Waterheater
       return [Constants.SpaceTypeFinishedBasement,
               Constants.SpaceTypeUnfinishedBasement,
               Constants.SpaceTypeLiving,
-              Constants.SpaceTypeLaundryRoom,
               Constants.SpaceTypeCrawl,
               Constants.SpaceTypeUnfinishedAttic]
     elsif ba_cz_name.nil?

@@ -1140,18 +1140,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SpaceTypeBathroom
-    return 'bathroom' # only used by multi-zone simulations
-  end
-
-  def self.SpaceTypeBedroom
-    return 'bedroom' # only used by multi-zone simulations
-  end
-
-  def self.SpaceTypeCorridor
-    return 'corridor'
-  end
-
   def self.SpaceTypeCrawl
     return 'crawlspace'
   end
@@ -1162,14 +1150,6 @@ class Constants
 
   def self.SpaceTypeGarage
     return 'garage'
-  end
-
-  def self.SpaceTypeKitchen
-    return 'kitchen' # only used by multi-zone simulations
-  end
-
-  def self.SpaceTypeLaundryRoom
-    return 'laundry room' # only used by multi-zone simulations
   end
 
   def self.SpaceTypeLiving
@@ -1349,14 +1329,9 @@ class Constants
   end
 
   def self.ExpectedSpaceTypes
-    return [self.SpaceTypeBathroom,
-            self.SpaceTypeBedroom,
-            self.SpaceTypeCorridor,
-            self.SpaceTypeCrawl,
+    return [self.SpaceTypeCrawl,
             self.SpaceTypeFinishedBasement,
             self.SpaceTypeGarage,
-            self.SpaceTypeKitchen,
-            self.SpaceTypeLaundryRoom,
             self.SpaceTypeLiving,
             self.SpaceTypePierBeam,
             self.SpaceTypeUnfinishedAttic,
