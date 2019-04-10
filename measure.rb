@@ -627,7 +627,6 @@ class OSModel
   def self.add_building_info(model, building)
     # Store building unit information
     unit = OpenStudio::Model::BuildingUnit.new(model)
-    unit.setBuildingUnitType(Constants.BuildingUnitTypeResidential)
     unit.setName(Constants.ObjectNameBuildingUnit)
 
     # Store number of units
@@ -773,7 +772,7 @@ class OSModel
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      success = Geometry.process_occupants(model, runner, num_occ.to_s, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @nbeds)
+      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @nbeds)
       return false if not success
     end
 

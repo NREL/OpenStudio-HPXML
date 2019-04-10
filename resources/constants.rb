@@ -33,10 +33,6 @@ class Constants
     return 32.174 # gravity (ft/s2)
   end
 
-  def self.MixedUseT
-    return 110 # F
-  end
-
   def self.MonthNumDays
     return [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   end
@@ -161,22 +157,6 @@ class Constants
 
   def self.BuildingAmericaClimateZone
     return 'Building America'
-  end
-
-  def self.BuildingTypeMultifamily
-    return 'multifamily'
-  end
-
-  def self.BuildingTypeSingleFamilyAttached
-    return 'singlefamilyattached'
-  end
-
-  def self.BuildingTypeSingleFamilyDetached
-    return 'singlefamilydetached'
-  end
-
-  def self.BuildingUnitTypeResidential
-    return 'Residential'
   end
 
   def self.CalcTypeERIRatedHome
@@ -681,12 +661,8 @@ class Constants
     return "res neighbors#{facade}"
   end
 
-  def self.ObjectNameOccupants(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res occupants#{s_unit}"
+  def self.ObjectNameOccupants
+    return "res occupants"
   end
 
   def self.ObjectNameOverhangs(facade = "")

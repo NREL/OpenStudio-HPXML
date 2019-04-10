@@ -81,7 +81,7 @@ class Geometry
     return_units = []
     model.getBuildingUnits.each do |unit|
       # Remove any units from list that have no associated spaces or are not residential
-      next if not (unit.spaces.size > 0 and unit.buildingUnitType == Constants.BuildingUnitTypeResidential)
+      next if not (unit.spaces.size > 0)
 
       return_units << unit
     end
@@ -723,14 +723,16 @@ class Geometry
 
   def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
                              nbeds)
-    num_occ = num_occ.split(",").map(&:strip)
 
     # Error checking
+    if num_occ < 0
+      runner.registerError("Number of occupants cannot be negative.")
+      return false
+    end
     if occ_gain < 0
       runner.registerError("Internal gains cannot be negative.")
       return false
     end
-
     if sens_frac < 0 or sens_frac > 1
       runner.registerError("Sensible fraction must be greater than or equal to 0 and less than or equal to 1.")
       return false
@@ -742,22 +744,6 @@ class Geometry
     if lat_frac + sens_frac > 1
       runner.registerError("Sum of sensible and latent fractions must be less than or equal to 1.")
       return false
-    end
-
-    # Get building units
-    units = self.get_building_units(model, runner)
-    if units.nil?
-      return false
-    end
-
-    # Error checking
-    if num_occ.length > 1 and num_occ.length != units.size
-      runner.registerError("Number of occupant elements specified inconsistent with number of multifamily units defined in the model.")
-      return false
-    end
-
-    if units.size > 1 and num_occ.length == 1
-      num_occ = Array.new(units.size, num_occ[0])
     end
 
     activity_per_person = UnitConversions.convert(occ_gain, "Btu/hr", "W")
@@ -773,87 +759,53 @@ class Geometry
     total_num_occ = 0
     people_sch = nil
     activity_sch = nil
-    units.each_with_index do |unit, unit_index|
-      unit_occ = num_occ[unit_index]
 
-      if unit_occ != Constants.Auto
-        if not MathTools.valid_float?(unit_occ)
-          runner.registerError("Number of Occupants must be either '#{Constants.Auto}' or a number greater than or equal to 0.")
+    # Get spaces
+    ffa_spaces = self.get_finished_spaces(model.getSpaces)
+
+    # Get FFA
+    ffa = self.get_finished_floor_area_from_spaces(ffa_spaces, runner)
+
+    ffa_spaces.each do |space|
+      space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
+
+      space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
+
+      if people_sch.nil?
+        # Create schedule
+        people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch)
+        if not people_sch.validated?
           return false
-        elsif unit_occ.to_f < 0
-          runner.registerError("Number of Occupants must be either '#{Constants.Auto}' or a number greater than or equal to 0.")
-          return false
         end
       end
 
-      # Calculate number of occupants for this unit
-      if unit_occ == Constants.Auto
-        if units.size > 1 # multifamily equation
-          unit_occ = 0.63 + 0.92 * nbeds
-        else # single-family equation
-          unit_occ = 0.87 + 0.59 * nbeds
-        end
-      else
-        unit_occ = unit_occ.to_f
+      if activity_sch.nil?
+        # Create schedule
+        activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
       end
 
-      # Get spaces
-      ffa_spaces = self.get_finished_spaces(unit.spaces)
+      # Add people definition for the occ
+      occ_def = OpenStudio::Model::PeopleDefinition.new(model)
+      occ = OpenStudio::Model::People.new(occ_def)
+      occ.setName(space_obj_name)
+      occ.setSpace(space)
+      occ_def.setName(space_obj_name)
+      occ_def.setNumberOfPeopleCalculationMethod("People", 1)
+      occ_def.setNumberofPeople(space_num_occ)
+      occ_def.setFractionRadiant(occ_rad)
+      occ_def.setSensibleHeatFraction(occ_sens)
+      occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
+      occ_def.setCarbonDioxideGenerationRate(0)
+      occ_def.setEnableASHRAE55ComfortWarnings(false)
+      occ.setActivityLevelSchedule(activity_sch)
+      occ.setNumberofPeopleSchedule(people_sch.schedule)
 
-      # Get FFA
-      ffa = self.get_finished_floor_area_from_spaces(ffa_spaces, runner)
+      total_num_occ += space_num_occ
 
-      schedules = {}
-      schedules[ffa_spaces] = [weekday_sch, weekend_sch, activity_per_person]
-
-      # Assign occupants to each space of the unit
-      schedules.each do |spaces, schedule|
-        spaces.each do |space|
-          space_obj_name = "#{Constants.ObjectNameOccupants(unit.name.to_s)}|#{space.name.to_s}"
-
-          space_num_occ = unit_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
-
-          if space_num_occ > 0
-
-            if people_sch.nil?
-              # Create schedule
-              people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", schedule[0], schedule[1], monthly_sch)
-              if not people_sch.validated?
-                return false
-              end
-            end
-
-            if activity_sch.nil?
-              # Create schedule
-              activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, schedule[2])
-            end
-
-            # Add people definition for the occ
-            occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-            occ = OpenStudio::Model::People.new(occ_def)
-            occ.setName(space_obj_name)
-            occ.setSpace(space)
-            occ_def.setName(space_obj_name)
-            occ_def.setNumberOfPeopleCalculationMethod("People", 1)
-            occ_def.setNumberofPeople(space_num_occ)
-            occ_def.setFractionRadiant(occ_rad)
-            occ_def.setSensibleHeatFraction(occ_sens)
-            occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
-            occ_def.setCarbonDioxideGenerationRate(0)
-            occ_def.setEnableASHRAE55ComfortWarnings(false)
-            occ.setActivityLevelSchedule(activity_sch)
-            occ.setNumberofPeopleSchedule(people_sch.schedule)
-
-            total_num_occ += space_num_occ
-
-            runner.registerInfo("#{unit.name.to_s} has been assigned #{space_num_occ.round(2)} occupant(s) for space '#{space.name}'.")
-
-          end
-        end
-      end
+      runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
     end
 
-    runner.registerInfo("The building has been assigned #{total_num_occ.round(2)} occupant(s) across #{units.size} unit(s).")
+    runner.registerInfo("The building has been assigned #{total_num_occ.round(2)} total occupant(s).")
     return true
   end
 

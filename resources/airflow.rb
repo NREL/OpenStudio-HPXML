@@ -20,7 +20,7 @@ class Airflow
     @infMethodSG = 'SHERMAN-GRIMSRUD'
 
     # Get building units
-    units = Geometry.get_building_units(model, runner)
+    units = model.getBuildingUnits
     if units.nil?
       return false
     end
