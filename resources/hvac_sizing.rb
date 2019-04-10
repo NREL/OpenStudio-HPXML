@@ -2040,7 +2040,7 @@ class HVACSizing
     elsif hvac.HasMiniSplitHeatPump
 
       if hvac.FixedCoolingCapacity.nil?
-        final_values = process_heat_pump_adjustment(runner, mj8, final_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+        final_values = process_heat_pump_adjustment(runner, model, mj8, final_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
         return nil if final_values.nil?
       end
 
