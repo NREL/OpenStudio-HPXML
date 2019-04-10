@@ -70,47 +70,6 @@ class Geometry
     return p
   end
 
-  def self.get_building_units(model, runner = nil)
-    if model.getSpaces.size == 0
-      if !runner.nil?
-        runner.registerError("No building geometry has been defined.")
-      end
-      return nil
-    end
-
-    return_units = []
-    model.getBuildingUnits.each do |unit|
-      # Remove any units from list that have no associated spaces or are not residential
-      next if not (unit.spaces.size > 0)
-
-      return_units << unit
-    end
-
-    return return_units
-  end
-
-  def self.get_unit_adjacent_common_spaces(unit)
-    # Returns a list of spaces adjacent to the unit that are not assigned
-    # to a building unit.
-    spaces = []
-
-    unit.spaces.each do |space|
-      space.surfaces.each do |surface|
-        next if not surface.adjacentSurface.is_initialized
-
-        adjacent_surface = surface.adjacentSurface.get
-        next if not adjacent_surface.space.is_initialized
-
-        adjacent_space = adjacent_surface.space.get
-        next if adjacent_space.buildingUnit.is_initialized
-
-        spaces << adjacent_space
-      end
-    end
-
-    return spaces.uniq
-  end
-
   def self.get_floor_area_from_spaces(spaces, runner = nil)
     floor_area = 0
     spaces.each do |space|
@@ -312,18 +271,17 @@ class Geometry
     return false
   end
 
-  def self.get_space_from_location(unit, location, location_hierarchy)
-    spaces = unit.spaces + self.get_unit_adjacent_common_spaces(unit)
+  def self.get_space_from_location(model, location, location_hierarchy)
     if location == Constants.Auto
       location_hierarchy.each do |space_type|
-        spaces.each do |space|
+        model.getSpaces.each do |space|
           next if not self.space_is_of_type(space, space_type)
 
           return space
         end
       end
     else
-      spaces.each do |space|
+      model.getSpaces.each do |space|
         next if not space.spaceType.is_initialized
         next if not space.spaceType.get.standardsSpaceType.is_initialized
         next if space.spaceType.get.standardsSpaceType.get != location

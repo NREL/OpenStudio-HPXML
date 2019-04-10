@@ -364,9 +364,6 @@ class OSModel
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather, runner)
     return false if heating_season.nil? or cooling_season.nil?
 
-    success = add_building_info(model, building)
-    return false if not success
-
     success = add_foundations(runner, model, building, spaces, subsurface_areas)
     return false if not success
 
@@ -612,10 +609,6 @@ class OSModel
       space = OpenStudio::Model::Space.new(model)
       space.setName(space_type)
 
-      model.getBuildingUnits.each do |unit|
-        space.setBuildingUnit(unit)
-      end
-
       st = OpenStudio::Model::SpaceType.new(model)
       st.setStandardsSpaceType(space_type)
       space.setSpaceType(st)
@@ -623,14 +616,6 @@ class OSModel
       space.setThermalZone(thermal_zone)
       spaces[space_type] = space
     end
-  end
-
-  def self.add_building_info(model, building)
-    # Store building unit information
-    unit = OpenStudio::Model::BuildingUnit.new(model)
-    unit.setName("res unit")
-
-    return true
   end
 
   def self.get_surface_transformation(offset, x, y, z)

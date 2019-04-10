@@ -483,11 +483,11 @@ class Waterheater
 
       tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Outdoor Air Drybulb Temperature")
       tout_sensor.setName("#{obj_name_hpwh} Tout")
-      tout_sensor.setKeyName(unit.living_zone.name.to_s)
+      tout_sensor.setKeyName(living_zone.name.to_s)
 
       sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Outdoor Air Relative Humidity")
       sensor.setName("#{obj_name_hpwh} RHout")
-      sensor.setKeyName(unit.living_zone.name.to_s)
+      sensor.setKeyName(living_zone.name.to_s)
 
       hpwh_tamb2 = OpenStudio::Model::ScheduleConstant.new(model)
       hpwh_tamb2.setName("#{obj_name_hpwh} Tamb act2")

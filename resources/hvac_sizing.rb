@@ -8,7 +8,7 @@ require_relative "constructions"
 class HVACSizing
   def self.apply(model, runner, weather, nbeds, show_debug_info)
     @model_spaces = model.getSpaces
-  
+
     # Get year of model
     @modelYear = model.yearDescription.get.assumedYear
 
@@ -1404,20 +1404,20 @@ class HVACSizing
       init_values.Heat_Load += [zone_loads.Heat_Windows + zone_loads.Heat_Skylights +
         zone_loads.Heat_Doors + zone_loads.Heat_Walls +
         zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0].max +
-                             zone_loads.Heat_Infil
+                               zone_loads.Heat_Infil
 
       # Cooling
       init_values.Cool_Load_Sens += zone_loads.Cool_Windows + zone_loads.Cool_Skylights +
-                                  zone_loads.Cool_Doors + zone_loads.Cool_Walls +
-                                  zone_loads.Cool_Floors + zone_loads.Cool_Roofs +
-                                  zone_loads.Cool_Infil_Sens + zone_loads.Cool_IntGains_Sens
+                                    zone_loads.Cool_Doors + zone_loads.Cool_Walls +
+                                    zone_loads.Cool_Floors + zone_loads.Cool_Roofs +
+                                    zone_loads.Cool_Infil_Sens + zone_loads.Cool_IntGains_Sens
       init_values.Cool_Load_Lat += zone_loads.Cool_Infil_Lat + zone_loads.Cool_IntGains_Lat
 
       # Dehumidification
       init_values.Dehumid_Load_Sens += zone_loads.Dehumid_Windows + zone_loads.Dehumid_Skylights +
-                                     zone_loads.Dehumid_Doors + zone_loads.Dehumid_Walls +
-                                     zone_loads.Dehumid_Floors + zone_loads.Dehumid_Roofs +
-                                     zone_loads.Dehumid_Infil_Sens + zone_loads.Dehumid_IntGains_Sens
+                                       zone_loads.Dehumid_Doors + zone_loads.Dehumid_Walls +
+                                       zone_loads.Dehumid_Floors + zone_loads.Dehumid_Roofs +
+                                       zone_loads.Dehumid_Infil_Sens + zone_loads.Dehumid_IntGains_Sens
       init_values.Dehumid_Load_Lat += zone_loads.Dehumid_Infil_Lat + zone_loads.Dehumid_IntGains_Lat
     end
 
@@ -1727,7 +1727,7 @@ class HVACSizing
 
       # Calculate the delivery effectiveness corrector for regain (Equation 6-40)
       dse_DEcorr_dehumid = dse_DE_dehumid + final_values.dse_Fregain * (1 - dse_DE_dehumid) + dse_Br_dehumid * \
-                                                                                            (dse_a_r_dehumid * final_values.dse_Fregain - final_values.dse_Fregain) * (dse_dT_dehumid / dse_dTe_dehumid)
+                                                                                              (dse_a_r_dehumid * final_values.dse_Fregain - final_values.dse_Fregain) * (dse_dT_dehumid / dse_dTe_dehumid)
 
       # Limit the DE to a reasonable value to prevent negative values and huge equipment
       dse_DEcorr_dehumid = [dse_DEcorr_dehumid, 0.25].max
@@ -2407,13 +2407,13 @@ class HVACSizing
     elsif tons <= 5
       index = (tons.floor - 1).to_i
       final_values.EER_Multiplier = MathTools.interp2(tons, tonnages[index - 1], tonnages[index],
-                                                    hvac.CapacityDerateFactorEER[index - 1],
-                                                    hvac.CapacityDerateFactorEER[index])
+                                                      hvac.CapacityDerateFactorEER[index - 1],
+                                                      hvac.CapacityDerateFactorEER[index])
     elsif tons <= 10
       index = ((tons / 2.0).floor - 1).to_i
       final_values.EER_Multiplier = MathTools.interp2(tons / 2.0, tonnages[index - 1], tonnages[index],
-                                                    hvac.CapacityDerateFactorEER[index - 1],
-                                                    hvac.CapacityDerateFactorEER[index])
+                                                      hvac.CapacityDerateFactorEER[index - 1],
+                                                      hvac.CapacityDerateFactorEER[index])
     else
       final_values.EER_Multiplier = hvac.CapacityDerateFactorEER[-1]
     end
@@ -2425,13 +2425,13 @@ class HVACSizing
       elsif tons <= 5
         index = (tons.floor - 1).to_i
         final_values.COP_Multiplier = MathTools.interp2(tons, tonnages[index - 1], tonnages[index],
-                                                      hvac.CapacityDerateFactorCOP[index - 1],
-                                                      hvac.CapacityDerateFactorCOP[index])
+                                                        hvac.CapacityDerateFactorCOP[index - 1],
+                                                        hvac.CapacityDerateFactorCOP[index])
       elsif tons <= 10
         index = ((tons / 2.0).floor - 1).to_i
         final_values.COP_Multiplier = MathTools.interp2(tons / 2.0, tonnages[index - 1], tonnages[index],
-                                                      hvac.CapacityDerateFactorCOP[index - 1],
-                                                      hvac.CapacityDerateFactorCOP[index])
+                                                        hvac.CapacityDerateFactorCOP[index - 1],
+                                                        hvac.CapacityDerateFactorCOP[index])
       else
         final_values.COP_Multiplier = hvac.CapacityDerateFactorCOP[-1]
       end

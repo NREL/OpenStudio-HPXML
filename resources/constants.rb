@@ -359,12 +359,8 @@ class Constants
     return 'Net Metering'
   end
 
-  def self.ObjectNameAirflow(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res airflow#{s_unit}"
+  def self.ObjectNameAirflow
+    return "res airflow"
   end
 
   def self.ObjectNameAirSourceHeatPump
@@ -373,10 +369,6 @@ class Constants
 
   def self.ObjectNameBoiler(fueltype = "")
     return "res boiler #{fueltype}"
-  end
-
-  def self.ObjectNameBuildingUnit(unit_num = 1)
-    return "unit #{unit_num}"
   end
 
   def self.ObjectNameCeilingFan
@@ -470,24 +462,16 @@ class Constants
     return "res dhw distribution"
   end
 
-  def self.ObjectNameInfiltration(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res infil#{s_unit}"
+  def self.ObjectNameInfiltration
+    return "res infil"
   end
 
   def self.ObjectNameLighting
     return "res lighting"
   end
 
-  def self.ObjectNameMechanicalVentilation(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res mech vent#{s_unit}"
+  def self.ObjectNameMechanicalVentilation
+    return "res mech vent"
   end
 
   def self.ObjectNameMiniSplitHeatPump
@@ -502,12 +486,8 @@ class Constants
     return "res misc television"
   end
 
-  def self.ObjectNameNaturalVentilation(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
-    if unit_name != self.ObjectNameBuildingUnit
-      s_unit = "|#{unit_name}"
-    end
-    return "res natural vent#{s_unit}"
+  def self.ObjectNameNaturalVentilation
+    return "res natural vent"
   end
 
   def self.ObjectNameNeighbors(facade = "")

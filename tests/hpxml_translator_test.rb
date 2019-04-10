@@ -271,7 +271,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Add output variable for CFIS fan power
-    output_var = OpenStudio::Model::OutputVariable.new("res_mv_1_cfis_fan_power", model)
+    output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(" ", "_"), model)
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('EMS')
 
@@ -740,7 +740,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       # CFIS fan power
       cfis_fan_w_per_airflow = nil
       if XMLHelper.get_value(bldg_details, "Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']/FanType") == "central fan integrated supply"
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_1_cfis_fan_power')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name LIKE '#{Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')}%')"
         cfis_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get
         # Ensure CFIS fan power equals heating/cooling fan power
         if not htg_fan_w_per_cfm.nil?
