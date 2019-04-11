@@ -1876,30 +1876,7 @@ class SubsurfaceConstructions
     end
 
     sc_msg = ""
-    if sc.nil?
-      # Remove any existing shading controls
-      objects_to_remove = []
-      subsurfaces.each do |subsurface|
-        next if not subsurface.shadingControl.is_initialized
-
-        shade_control = subsurface.shadingControl.get
-        if shade_control.shadingMaterial.is_initialized
-          objects_to_remove << shade_control.shadingMaterial.get
-        end
-        if shade_control.schedule.is_initialized
-          objects_to_remove << shade_control.schedule.get
-        end
-        objects_to_remove << shade_control
-        subsurface.resetShadingControl
-      end
-      objects_to_remove.uniq.each do |object|
-        begin
-          object.remove
-        rescue
-          # no op
-        end
-      end
-    else
+    if not sc.nil?
       # Add shading controls
       sc_msg = " and interior shades"
       subsurfaces.each do |subsurface|
@@ -1996,15 +1973,6 @@ class ThermalMassConstructions
       # Determine additional partition wall mass required
       addtl_surface_area = frac_of_ffa * space.floorArea - existing_surface_area * 2 / spaces.size.to_f
 
-      # Remove any existing internal mass
-      space.internalMass.each do |im|
-        runner.registerInfo("Removing internal mass object '#{im.name.to_s}' from space '#{space.name.to_s}'")
-        imdef = im.internalMassDefinition
-        im.remove
-        imdef.resetConstruction
-        imdef.remove
-      end
-
       if addtl_surface_area > 0
         # Add remaining partition walls within spaces (those without geometric representation)
         # as internal mass object.
@@ -2034,20 +2002,6 @@ class ThermalMassConstructions
 
   def self.apply_furniture(runner, model, frac_of_ffa, mass_lb_per_sqft = 8.0,
                            density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood)
-
-    # Remove any existing furniture mass.
-    furniture_removed = false
-    model.getInternalMasss.each do |im|
-      next if not im.name.get.include?(Constants.ObjectNameFurniture)
-
-      md = im.internalMassDefinition
-      im.remove
-      md.remove
-      furniture_removed = true
-    end
-    if furniture_removed
-      runner.registerInfo("Removed existing furniture mass.")
-    end
 
     model_spaces = model.getSpaces
 

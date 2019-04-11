@@ -23,6 +23,11 @@ def create_hpxmls
   hpxmls_files = {
     'valid.xml' => nil,
     'invalid_files/invalid-bad-wmo.xml' => 'valid.xml',
+    'invalid_files/invalid-clothes-washer-location.xml' => 'valid.xml',
+    'invalid_files/invalid-clothes-dryer-location.xml' => 'valid.xml',
+    'invalid_files/invalid-duct-location.xml.skip' => 'valid.xml',
+    'invalid_files/invalid-refrigerator-location.xml' => 'valid.xml',
+    'invalid_files/invalid-water-heater-location.xml' => 'valid.xml',
     'invalid_files/invalid-missing-elements.xml' => 'valid.xml',
     'invalid_files/invalid-missing-surfaces.xml' => 'valid.xml',
     'invalid_files/invalid-net-area-negative-roof.xml' => 'valid-enclosure-skylights.xml',
@@ -38,7 +43,6 @@ def create_hpxmls
     'valid-appliances-dishwasher-ef.xml' => 'valid.xml',
     'valid-appliances-dryer-cef.xml' => 'valid.xml',
     'valid-appliances-gas.xml' => 'valid.xml',
-    'valid-appliances-in-basement.xml' => 'valid.xml',
     'valid-appliances-none.xml' => 'valid.xml',
     'valid-appliances-washer-imef.xml' => 'valid.xml',
     'valid-atticroof-cathedral.xml' => 'valid.xml',
@@ -46,7 +50,6 @@ def create_hpxmls
     'valid-atticroof-flat.xml' => 'valid.xml',
     'valid-atticroof-vented.xml' => 'valid.xml',
     'valid-dhw-dwhr.xml' => 'valid.xml',
-    'valid-dhw-location-attic.xml' => 'valid.xml',
     'valid-dhw-low-flow-fixtures.xml' => 'valid.xml',
     'valid-dhw-multiple.xml' => 'valid.xml',
     'valid-dhw-none.xml' => 'valid.xml',
@@ -504,7 +507,7 @@ def create_hpxmls
 end
 
 def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     hpxml_values = { :xml_type => "HPXML",
                      :xml_generated_by => "Rakefile",
                      :transaction => "create",
@@ -513,36 +516,36 @@ def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
                      :eri_calculation_version => "2014AEG",
                      :building_id => "MyBuilding",
                      :event_type => "proposed workscope" }
-  elsif hpxml_file == 'valid-addenda-exclude-g.xml'
+  elsif ['valid-addenda-exclude-g.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = "2014AE"
-  elsif hpxml_file == 'valid-addenda-exclude-g-e.xml'
+  elsif ['valid-addenda-exclude-g-e.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = "2014A"
-  elsif hpxml_file == 'valid-addenda-exclude-g-e-a.xml'
+  elsif ['valid-addenda-exclude-g-e-a.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = "2014"
   end
   return hpxml_values
 end
 
 def get_hpxml_file_site_values(hpxml_file, site_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     site_values = { :fuels => ["electricity", "natural gas"] }
-  elsif hpxml_file == 'valid-hvac-none-no-fuel-access.xml'
+  elsif ['valid-hvac-none-no-fuel-access.xml'].include? hpxml_file
     site_values[:fuels] = ["electricity"]
-  elsif hpxml_file == 'valid-enclosure-no-natural-ventilation.xml'
+  elsif ['valid-enclosure-no-natural-ventilation.xml'].include? hpxml_file
     site_values[:disable_natural_ventilation] = true
   end
   return site_values
 end
 
 def get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
-  if hpxml_file == 'valid-misc-number-of-occupants.xml'
+  if ['valid-misc-number-of-occupants.xml'].include? hpxml_file
     building_occupancy_values = { :number_of_residents => 5 }
   end
   return building_occupancy_values
 end
 
 def get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     building_construction_values = { :number_of_conditioned_floors => 3,
                                      :number_of_conditioned_floors_above_grade => 2,
                                      :number_of_bedrooms => 4,
@@ -557,7 +560,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:number_of_conditioned_floors] = 2
     building_construction_values[:conditioned_floor_area] = 3500
     building_construction_values[:conditioned_building_volume] = 33787.5
-  elsif hpxml_file == 'invalid_files/invalid-missing-elements.xml'
+  elsif ['invalid_files/invalid-missing-elements.xml'].include? hpxml_file
     building_construction_values[:number_of_conditioned_floors] = nil
     building_construction_values[:conditioned_floor_area] = nil
   elsif ['valid-hvac-multiple.xml',
@@ -600,39 +603,39 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
          'hvac_partial/valid-hvac-stove-oil-only-50percent.xml',
          'hvac_partial/valid-hvac-wall-furnace-propane-only-50percent.xml'].include? hpxml_file
     building_construction_values[:load_distribution_scheme] = "UniformLoad" # TODO: Temporary
-  elsif hpxml_file == 'valid-hvac-ideal-air.xml'
+  elsif ['valid-hvac-ideal-air.xml'].include? hpxml_file
     building_construction_values[:use_only_ideal_air_system] = true
-  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     building_construction_values[:number_of_conditioned_floors] = 4
     building_construction_values[:number_of_conditioned_floors_above_grade] = 3
     building_construction_values[:conditioned_floor_area] = 9380
     building_construction_values[:conditioned_building_volume] = 85792.5
-  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+  elsif ['valid-atticroof-cathedral.xml'].include? hpxml_file
     building_construction_values[:conditioned_building_volume] = 89450
   end
   return building_construction_values
 end
 
 def get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     climate_and_risk_zones_values = { :iecc2006 => 7,
                                       :iecc2012 => 7,
                                       :weather_station_id => "WeatherStation",
                                       :weather_station_name => "Denver, CO",
                                       :weather_station_wmo => "725650" }
-  elsif hpxml_file == 'invalid_files/invalid-bad-wmo.xml'
+  elsif ['invalid_files/invalid-bad-wmo.xml'].include? hpxml_file
     climate_and_risk_zones_values[:weather_station_wmo] = "999999"
   end
   return climate_and_risk_zones_values
 end
 
 def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values, building_construction_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
                                             :house_pressure => 50,
                                             :unit_of_measure => "ACH",
                                             :air_leakage => 3.0 }
-  elsif hpxml_file == 'valid-infiltration-ach-natural.xml'
+  elsif ['valid-infiltration-ach-natural.xml'].include? hpxml_file
     air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
                                             :constant_ach_natural => 0.67 }
   end
@@ -641,15 +644,15 @@ def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltrat
 end
 
 def get_hpxml_file_attics_values(hpxml_file, attics_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     attics_values = [{ :id => "Attic",
                        :attic_type => "UnventedAttic" }]
-  elsif hpxml_file == 'valid-atticroof-vented.xml'
+  elsif ['valid-atticroof-vented.xml'].include? hpxml_file
     attics_values[0][:attic_type] = "VentedAttic"
     attics_values[0][:specific_leakage_area] = 0.003
-  elsif hpxml_file == 'valid-atticroof-flat.xml'
+  elsif ['valid-atticroof-flat.xml'].include? hpxml_file
     attics_values[0][:attic_type] = "FlatRoof"
-  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     attics_values[0][:attic_type] = "ConditionedAttic"
     attics_values << { :id => "AtticBehindKneewallNorth",
                        :attic_type => "UnventedAttic" }
@@ -657,14 +660,14 @@ def get_hpxml_file_attics_values(hpxml_file, attics_values)
                        :attic_type => "UnventedAttic" }
     attics_values << { :id => "AtticUnderRoofRidge",
                        :attic_type => "UnventedAttic" }
-  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+  elsif ['valid-atticroof-cathedral.xml'].include? hpxml_file
     attics_values[0][:attic_type] = "CathedralCeiling"
   end
   return attics_values
 end
 
 def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     attics_roofs_values = [[{ :id => "AtticRoofNorth",
                               :area => 1950,
                               :azimuth => 0,
@@ -683,7 +686,7 @@ def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
                               :radiant_barrier => false,
                               :insulation_id => "AtticRoofSouthIns",
                               :insulation_assembly_r_value => 2.3 }]]
-  elsif hpxml_file == 'valid-atticroof-flat.xml'
+  elsif ['valid-atticroof-flat.xml'].include? hpxml_file
     attics_roofs_values = [[{ :id => "AtticRoof",
                               :area => 3500,
                               :azimuth => 0,
@@ -693,7 +696,7 @@ def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
                               :radiant_barrier => false,
                               :insulation_id => "AtticRoofIns",
                               :insulation_assembly_r_value => 25.8 }]]
-  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     attics_roofs_values = [[{ :id => "AtticRoofA",
                               :area => 885,
                               :azimuth => 0,
@@ -748,7 +751,7 @@ def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
                               :radiant_barrier => false,
                               :insulation_id => "AtticRoofOIns",
                               :insulation_assembly_r_value => 2.3 }]
-  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+  elsif ['valid-atticroof-cathedral.xml'].include? hpxml_file
     attics_roofs_values[0][0][:insulation_assembly_r_value] = 25.8
     attics_roofs_values[0][1][:insulation_assembly_r_value] = 25.8
   end
@@ -756,15 +759,15 @@ def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
 end
 
 def get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     attics_floors_values = [[{ :id => "AtticFloor",
                                :adjacent_to => "living space",
                                :area => 3500,
                                :insulation_id => "AtticFloorIns",
                                :insulation_assembly_r_value => 39.3 }]]
-  elsif hpxml_file == 'valid-atticroof-flat.xml'
+  elsif ['valid-atticroof-flat.xml'].include? hpxml_file
     attics_floors_values[0].delete_at(0)
-  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     attics_floors_values = [[{ :id => "AtticFloorF",
                                :adjacent_to => "living space",
                                :area => 2380,
@@ -785,14 +788,14 @@ def get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
                                :area => 630,
                                :insulation_id => "AtticFloorMIns",
                                :insulation_assembly_r_value => 39.3 }]
-  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+  elsif ['valid-atticroof-cathedral.xml'].include? hpxml_file
     attics_floors_values[0].delete_at(0)
   end
   return attics_floors_values
 end
 
 def get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     attics_walls_values = [[{ :id => "AtticWallEast",
                               :adjacent_to => "outside",
                               :wall_type => "WoodStud",
@@ -811,7 +814,7 @@ def get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
                               :emittance => 0.9,
                               :insulation_id => "AtticWallWestIns",
                               :insulation_assembly_r_value => 4.0 }]]
-  elsif hpxml_file == 'valid-enclosure-multiple-walls.xml'
+  elsif ['valid-enclosure-multiple-walls.xml'].include? hpxml_file
     attics_walls_values[0][0][:area] = 2
     attics_walls_values[0] << { :id => "AtticWallEastMedium",
                                 :adjacent_to => "outside",
@@ -829,9 +832,9 @@ def get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
                                 :emittance => 0.9,
                                 :insulation_id => "AtticWallEastLargeIns",
                                 :insulation_assembly_r_value => 4.0 }
-  elsif hpxml_file == 'valid-atticroof-flat.xml'
+  elsif ['valid-atticroof-flat.xml'].include? hpxml_file
     attics_walls_values[0].delete_at(0)
-  elsif hpxml_file == 'valid-atticroof-conditioned.xml'
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     attics_walls_values = [[{ :id => "AtticWallC",
                               :adjacent_to => "outside",
                               :wall_type => "WoodStud",
@@ -922,7 +925,7 @@ def get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
                               :emittance => 0.9,
                               :insulation_id => "AtticWallPOppositeIns",
                               :insulation_assembly_r_value => 4.0 }]
-  elsif hpxml_file == 'valid-atticroof-cathedral.xml'
+  elsif ['valid-atticroof-cathedral.xml'].include? hpxml_file
     attics_walls_values[0][0][:insulation_assembly_r_value] = 23.0
     attics_walls_values[0][1][:insulation_assembly_r_value] = 23.0
   end
@@ -930,7 +933,7 @@ def get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
 end
 
 def get_hpxml_file_foundations_values(hpxml_file, foundations_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     foundations_values = [{ :id => "Foundation",
                             :foundation_type => "ConditionedBasement" }]
   elsif ['valid-foundation-pier-beam.xml'].include? hpxml_file
@@ -949,7 +952,7 @@ def get_hpxml_file_foundations_values(hpxml_file, foundations_values)
 end
 
 def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     foundations_walls_values = [[{ :id => "FoundationWall",
                                    :height => 9,
                                    :area => 2160,
@@ -971,7 +974,7 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
 end
 
 def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     foundations_slabs_values = [[{ :id => "FoundationSlab",
                                    :area => 3500,
                                    :thickness => 4,
@@ -985,7 +988,7 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
                                    :under_slab_insulation_r_value => 0,
                                    :carpet_fraction => 0,
                                    :carpet_r_value => 0 }]]
-  elsif hpxml_file == 'valid-foundation-slab.xml'
+  elsif ['valid-foundation-slab.xml'].include? hpxml_file
     foundations_slabs_values[0][0][:under_slab_insulation_width] = 2
     foundations_slabs_values[0][0][:depth_below_grade] = 0
     foundations_slabs_values[0][0][:under_slab_insulation_r_value] = 5
@@ -1003,7 +1006,7 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
 end
 
 def get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framefloors_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     foundations_framefloors_values = [[]]
   elsif ['valid-foundation-pier-beam.xml',
          'valid-foundation-unconditioned-basement.xml',
@@ -1019,7 +1022,7 @@ def get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framef
 end
 
 def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     rim_joists_values = [{ :id => "RimJoist",
                            :exterior_adjacent_to => "outside",
                            :interior_adjacent_to => "living space",
@@ -1050,7 +1053,7 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
 end
 
 def get_hpxml_file_walls_values(hpxml_file, walls_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     walls_values = [{ :id => "Wall",
                       :exterior_adjacent_to => "outside",
                       :interior_adjacent_to => "living space",
@@ -1060,7 +1063,7 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :emittance => 0.9,
                       :insulation_id => "WallIns",
                       :insulation_assembly_r_value => 23 }]
-  elsif hpxml_file == 'valid-enclosure-multiple-walls.xml'
+  elsif ['valid-enclosure-multiple-walls.xml'].include? hpxml_file
     walls_values[0][:id] = "agwall-small"
     walls_values[0][:area] = 10
     walls_values << { :id => "WallMedium",
@@ -1081,37 +1084,37 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :emittance => 0.9,
                       :insulation_id => "WallLargeIns",
                       :insulation_assembly_r_value => 23 }
-  elsif hpxml_file == 'valid-enclosure-walltype-cmu.xml'
+  elsif ['valid-enclosure-walltype-cmu.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "ConcreteMasonryUnit"
     walls_values[0][:insulation_assembly_r_value] = 12
-  elsif hpxml_file == 'valid-enclosure-walltype-doublestud.xml'
+  elsif ['valid-enclosure-walltype-doublestud.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "DoubleWoodStud"
     walls_values[0][:insulation_assembly_r_value] = 28.7
-  elsif hpxml_file == 'valid-enclosure-walltype-icf.xml'
+  elsif ['valid-enclosure-walltype-icf.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "InsulatedConcreteForms"
     walls_values[0][:insulation_assembly_r_value] = 21
-  elsif hpxml_file == 'valid-enclosure-walltype-log.xml'
+  elsif ['valid-enclosure-walltype-log.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "LogWall"
     walls_values[0][:insulation_assembly_r_value] = 7.1
-  elsif hpxml_file == 'valid-enclosure-walltype-sip.xml'
+  elsif ['valid-enclosure-walltype-sip.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "StructurallyInsulatedPanel"
     walls_values[0][:insulation_assembly_r_value] = 16.1
-  elsif hpxml_file == 'valid-enclosure-walltype-solidconcrete.xml'
+  elsif ['valid-enclosure-walltype-solidconcrete.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "SolidConcrete"
     walls_values[0][:insulation_assembly_r_value] = 1.35
-  elsif hpxml_file == 'valid-enclosure-walltype-steelstud.xml'
+  elsif ['valid-enclosure-walltype-steelstud.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "SteelFrame"
     walls_values[0][:insulation_assembly_r_value] = 8.1
-  elsif hpxml_file == 'valid-enclosure-walltype-stone.xml'
+  elsif ['valid-enclosure-walltype-stone.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "Stone"
     walls_values[0][:insulation_assembly_r_value] = 5.4
-  elsif hpxml_file == 'valid-enclosure-walltype-strawbale.xml'
+  elsif ['valid-enclosure-walltype-strawbale.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "StrawBale"
     walls_values[0][:insulation_assembly_r_value] = 58.8
-  elsif hpxml_file == 'valid-enclosure-walltype-structuralbrick.xml'
+  elsif ['valid-enclosure-walltype-structuralbrick.xml'].include? hpxml_file
     walls_values[0][:wall_type] = "StructuralBrick"
     walls_values[0][:insulation_assembly_r_value] = 7.9
-  elsif hpxml_file == 'invalid_files/invalid-missing-surfaces.xml'
+  elsif ['invalid_files/invalid-missing-surfaces.xml'].include? hpxml_file
     walls_values[0][:area] = 3696
     walls_values << { :id => "Wall2",
                       :exterior_adjacent_to => "living space",
@@ -1127,7 +1130,7 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
 end
 
 def get_hpxml_file_windows_values(hpxml_file, windows_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     windows_values = [{ :id => "WindowSouth",
                         :area => 240,
                         :azimuth => 180,
@@ -1152,17 +1155,17 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "Wall" }]
-  elsif hpxml_file == 'valid-enclosure-multiple-walls.xml'
+  elsif ['valid-enclosure-multiple-walls.xml'].include? hpxml_file
     windows_values[0][:wall_idref] = "WallMedium"
     windows_values[1][:wall_idref] = "WallLarge"
     windows_values[2][:wall_idref] = "WallLarge"
     windows_values[3][:wall_idref] = "WallLarge"
-  elsif hpxml_file == 'valid-enclosure-orientation-45.xml'
+  elsif ['valid-enclosure-orientation-45.xml'].include? hpxml_file
     windows_values[0][:azimuth] = 225
     windows_values[1][:azimuth] = 45
     windows_values[2][:azimuth] = 135
     windows_values[3][:azimuth] = 315
-  elsif hpxml_file == 'valid-enclosure-overhangs.xml'
+  elsif ['valid-enclosure-overhangs.xml'].include? hpxml_file
     windows_values[0][:overhangs_depth] = 2.5
     windows_values[0][:overhangs_distance_to_top_of_window] = 0
     windows_values[0][:overhangs_distance_to_bottom_of_window] = 4
@@ -1172,7 +1175,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values[3][:overhangs_depth] = 1.5
     windows_values[3][:overhangs_distance_to_top_of_window] = 2
     windows_values[3][:overhangs_distance_to_bottom_of_window] = 7
-  elsif hpxml_file == 'valid-enclosure-windows-interior-shading.xml'
+  elsif ['valid-enclosure-windows-interior-shading.xml'].include? hpxml_file
     windows_values[0][:interior_shading_factor_summer] = 0.7
     windows_values[0][:interior_shading_factor_winter] = 0.85
     windows_values[1][:interior_shading_factor_summer] = 0.01
@@ -1181,16 +1184,16 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values[2][:interior_shading_factor_winter] = 0.01
     windows_values[3][:interior_shading_factor_summer] = 0.85
     windows_values[3][:interior_shading_factor_winter] = 0.7
-  elsif hpxml_file == 'invalid_files/invalid-net-area-negative-wall.xml'
+  elsif ['invalid_files/invalid-net-area-negative-wall.xml'].include? hpxml_file
     windows_values[0][:area] = 3500
-  elsif hpxml_file == 'invalid_files/invalid-unattached-window.xml'
+  elsif ['invalid_files/invalid-unattached-window.xml'].include? hpxml_file
     windows_values[0][:wall_idref] = "foobar"
   end
   return windows_values
 end
 
 def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
-  if hpxml_file == 'valid-enclosure-skylights.xml'
+  if ['valid-enclosure-skylights.xml'].include? hpxml_file
     skylights_values << { :id => "SkylightNorth",
                           :area => 15,
                           :azimuth => 0,
@@ -1203,33 +1206,33 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
                           :ufactor => 0.35,
                           :shgc => 0.47,
                           :roof_idref => "AtticRoofSouth" }
-  elsif hpxml_file == 'invalid_files/invalid-net-area-negative-roof.xml'
+  elsif ['invalid_files/invalid-net-area-negative-roof.xml'].include? hpxml_file
     skylights_values[0][:area] = 4199
-  elsif hpxml_file == 'invalid_files/invalid-unattached-skylight.xml'
+  elsif ['invalid_files/invalid-unattached-skylight.xml'].include? hpxml_file
     skylights_values[0][:roof_idref] = "foobar"
   end
   return skylights_values
 end
 
 def get_hpxml_file_doors_values(hpxml_file, doors_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     doors_values = [{ :id => "Door",
                       :wall_idref => "Wall",
                       :area => 80,
                       :azimuth => 270,
                       :r_value => 4.4 }]
-  elsif hpxml_file == 'valid-enclosure-multiple-walls.xml'
+  elsif ['valid-enclosure-multiple-walls.xml'].include? hpxml_file
     doors_values[0][:wall_idref] = "WallLarge"
-  elsif hpxml_file == 'valid-enclosure-orientation-45.xml'
+  elsif ['valid-enclosure-orientation-45.xml'].include? hpxml_file
     doors_values[0][:azimuth] = 315
-  elsif hpxml_file == 'invalid_files/invalid-unattached-door.xml'
+  elsif ['invalid_files/invalid-unattached-door.xml'].include? hpxml_file
     doors_values[0][:wall_idref] = "foobar"
   end
   return doors_values
 end
 
 def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     heating_systems_values = [{ :id => "HeatingSystem",
                                 :distribution_system_idref => "HVACDistribution",
                                 :heating_system_type => "Furnace",
@@ -1250,7 +1253,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'valid-hvac-none.xml',
          'valid-hvac-room-ac-only.xml'].include? hpxml_file
     heating_systems_values = []
-  elsif hpxml_file == 'valid-hvac-boiler-elec-only.xml'
+  elsif ['valid-hvac-boiler-elec-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:heating_system_fuel] = "electricity"
     heating_systems_values[0][:heating_efficiency_afue] = 1
@@ -1258,13 +1261,13 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'valid-hvac-boiler-gas-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:electric_auxiliary_energy] = 200
-  elsif hpxml_file == 'valid-hvac-boiler-oil-only.xml'
+  elsif ['valid-hvac-boiler-oil-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:heating_system_fuel] = "fuel oil"
-  elsif hpxml_file == 'valid-hvac-boiler-propane-only.xml'
+  elsif ['valid-hvac-boiler-propane-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:heating_system_fuel] = "propane"
-  elsif hpxml_file == 'valid-hvac-elec-resistance-only.xml'
+  elsif ['valid-hvac-elec-resistance-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "ElectricResistance"
     heating_systems_values[0][:heating_system_fuel] = "electricity"
@@ -1281,11 +1284,11 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'valid-hvac-stove-oil-only-no-eae.xml',
          'valid-hvac-wall-furnace-propane-only-no-eae.xml'].include? hpxml_file
     heating_systems_values[0][:electric_auxiliary_energy] = nil
-  elsif hpxml_file == 'valid-hvac-furnace-oil-only.xml'
+  elsif ['valid-hvac-furnace-oil-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_fuel] = "fuel oil"
-  elsif hpxml_file == 'valid-hvac-furnace-propane-only.xml'
+  elsif ['valid-hvac-furnace-propane-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_fuel] = "propane"
-  elsif hpxml_file == 'valid-hvac-multiple.xml'
+  elsif ['valid-hvac-multiple.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:heating_system_fuel] = "electricity"
     heating_systems_values[0][:heating_efficiency_afue] = 1
@@ -1333,20 +1336,20 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
                                 :heating_efficiency_afue => 0.8,
                                 :fraction_heat_load_served => 0.1,
                                 :electric_auxiliary_energy => 200 }
-  elsif hpxml_file == 'valid-hvac-stove-oil-only.xml'
+  elsif ['valid-hvac-stove-oil-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "Stove"
     heating_systems_values[0][:heating_system_fuel] = "fuel oil"
     heating_systems_values[0][:heating_efficiency_afue] = nil
     heating_systems_values[0][:heating_efficiency_percent] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
-  elsif hpxml_file == 'valid-hvac-wall-furnace-propane-only.xml'
+  elsif ['valid-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "WallFurnace"
     heating_systems_values[0][:heating_system_fuel] = "propane"
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
-  elsif hpxml_file == 'invalid_files/invalid-unattached-hvac.xml.skip'
+  elsif ['invalid_files/invalid-unattached-hvac.xml.skip'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = "foobar"
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] = -1
@@ -1371,7 +1374,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
 end
 
 def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     cooling_systems_values = [{ :id => "CoolingSystem",
                                 :distribution_system_idref => "HVACDistribution",
                                 :cooling_system_type => "central air conditioning",
@@ -1414,7 +1417,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[0][:cooling_system_type] = "room air conditioner"
     cooling_systems_values[0][:cooling_efficiency_seer] = nil
     cooling_systems_values[0][:cooling_efficiency_eer] = 8.5
-  elsif hpxml_file == 'valid-hvac-multiple.xml'
+  elsif ['valid-hvac-multiple.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution4"
     cooling_systems_values[0][:fraction_cool_load_served] = 0.2
     cooling_systems_values << { :id => "CoolingSystem2",
@@ -1484,7 +1487,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_cop => 3.6,
                            :cooling_efficiency_eer => 16.6 }
-  elsif hpxml_file == 'valid-hvac-mini-split-heat-pump-ducted.xml'
+  elsif ['valid-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "mini-split",
@@ -1494,11 +1497,11 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
-  elsif hpxml_file == 'valid-hvac-mini-split-heat-pump-ductless.xml'
+  elsif ['valid-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     heat_pumps_values[0][:distribution_system_idref] = nil
-  elsif hpxml_file == 'valid-hvac-mini-split-heat-pump-ductless-no-backup.xml'
+  elsif ['valid-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
     heat_pumps_values[0][:backup_heating_capacity] = 0
-  elsif hpxml_file == 'valid-hvac-multiple.xml'
+  elsif ['valid-hvac-multiple.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution5",
                            :heat_pump_type => "air-to-air",
@@ -1553,14 +1556,14 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
 end
 
 def get_hpxml_file_hvac_control_values(hpxml_file, hvac_control_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     hvac_control_values = { :id => "HVACControl",
                             :control_type => "manual thermostat" }
   elsif ['valid-hvac-none.xml'].include? hpxml_file
     hvac_control_values = {}
-  elsif hpxml_file == 'valid-hvac-programmable-thermostat.xml'
+  elsif ['valid-hvac-programmable-thermostat.xml'].include? hpxml_file
     hvac_control_values[:control_type] = "programmable thermostat"
-  elsif hpxml_file == 'valid-hvac-setpoints.xml'
+  elsif ['valid-hvac-setpoints.xml'].include? hpxml_file
     hvac_control_values[:setpoint_temp_heating_season] = 60
     hvac_control_values[:setpoint_temp_cooling_season] = 80
   end
@@ -1568,7 +1571,7 @@ def get_hpxml_file_hvac_control_values(hpxml_file, hvac_control_values)
 end
 
 def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     hvac_distributions_values = [{ :id => "HVACDistribution",
                                    :distribution_system_type => "AirDistribution" }]
   elsif ['valid-hvac-boiler-elec-only.xml',
@@ -1588,7 +1591,7 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
          'valid-hvac-stove-oil-only.xml',
          'valid-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
     hvac_distributions_values = []
-  elsif hpxml_file == 'valid-hvac-multiple.xml'
+  elsif ['valid-hvac-multiple.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
     hvac_distributions_values << { :id => "HVACDistribution2",
                                    :distribution_system_type => "HydronicDistribution" }
@@ -1632,7 +1635,7 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
 end
 
 def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_measurements_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     duct_leakage_measurements_values = [[{ :duct_type => "supply",
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
@@ -1643,10 +1646,10 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
                                            :duct_leakage_value => 25 }]
-  elsif hpxml_file == 'valid-hvac-mini-split-heat-pump-ducted.xml'
+  elsif ['valid-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 15
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 5
-  elsif hpxml_file == 'valid-hvac-multiple.xml'
+  elsif ['valid-hvac-multiple.xml'].include? hpxml_file
     duct_leakage_measurements_values[0] = []
     duct_leakage_measurements_values[1] = []
     duct_leakage_measurements_values << [{ :duct_type => "supply",
@@ -1690,7 +1693,7 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
 end
 
 def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     ducts_values = [[{ :duct_type => "supply",
                        :duct_insulation_r_value => 4,
                        :duct_location => "attic - unvented",
@@ -1708,6 +1711,18 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['valid-foundation-vented-crawlspace.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "crawlspace - vented"
     ducts_values[0][1][:duct_location] = "crawlspace - vented"
+  elsif ['valid-atticroof-flat.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "basement - conditioned"
+    ducts_values[0][1][:duct_location] = "basement - conditioned"
+  elsif ['valid-atticroof-vented.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "attic - vented"
+    ducts_values[0][1][:duct_location] = "attic - vented"
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "attic - conditioned"
+    ducts_values[0][1][:duct_location] = "attic - conditioned"
+  elsif ['invalid_files/invalid-duct-location.xml.skip'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "garage"
+    ducts_values[0][1][:duct_location] = "garage"
   elsif ['valid-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     ducts_values[0] = []
     ducts_values << [{ :duct_type => "supply",
@@ -1718,11 +1733,11 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]
-  elsif hpxml_file == 'valid-hvac-mini-split-heat-pump-ducted.xml'
+  elsif ['valid-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     ducts_values[0][0][:duct_insulation_r_value] = 0
     ducts_values[0][0][:duct_surface_area] = 30
     ducts_values[0][1][:duct_surface_area] = 10
-  elsif hpxml_file == 'valid-hvac-multiple.xml'
+  elsif ['valid-hvac-multiple.xml'].include? hpxml_file
     ducts_values[0] = []
     ducts_values[1] = []
     ducts_values << [{ :duct_type => "supply",
@@ -1790,7 +1805,7 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
 end
 
 def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
-  if hpxml_file == 'valid-mechvent-balanced.xml'
+  if ['valid-mechvent-balanced.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "balanced",
                                  :rated_flow_rate => 247,
@@ -1818,7 +1833,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :hours_in_operation => 8,
                                  :fan_power => 360,
                                  :distribution_system_idref => "HVACDistribution" }
-  elsif hpxml_file == 'valid-mechvent-erv.xml'
+  elsif ['valid-mechvent-erv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
                                  :rated_flow_rate => 247,
@@ -1826,26 +1841,26 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :total_recovery_efficiency => 0.48,
                                  :sensible_recovery_efficiency => 0.72,
                                  :fan_power => 123.5 }
-  elsif hpxml_file == 'valid-mechvent-exhaust.xml'
+  elsif ['valid-mechvent-exhaust.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "exhaust only",
                                  :rated_flow_rate => 247,
                                  :hours_in_operation => 24,
                                  :fan_power => 60 }
-  elsif hpxml_file == 'valid-mechvent-hrv.xml'
+  elsif ['valid-mechvent-hrv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "heat recovery ventilator",
                                  :rated_flow_rate => 247,
                                  :hours_in_operation => 24,
                                  :sensible_recovery_efficiency => 0.72,
                                  :fan_power => 123.5 }
-  elsif hpxml_file == 'valid-mechvent-supply.xml'
+  elsif ['valid-mechvent-supply.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "supply only",
                                  :rated_flow_rate => 247,
                                  :hours_in_operation => 24,
                                  :fan_power => 60 }
-  elsif hpxml_file == 'cfis/valid-hvac-boiler-gas-central-ac-1-speed-cfis.xml'
+  elsif ['cfis/valid-hvac-boiler-gas-central-ac-1-speed-cfis.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "central fan integrated supply",
                                  :rated_flow_rate => 247,
@@ -1857,7 +1872,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
 end
 
 def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     water_heating_systems_values = [{ :id => "WaterHeater",
                                       :fuel_type => "electricity",
                                       :water_heater_type => "storage water heater",
@@ -1866,9 +1881,7 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :fraction_dhw_load_served => 1,
                                       :heating_capacity => 18767,
                                       :energy_factor => 0.95 }]
-  elsif hpxml_file == 'valid-dhw-location-attic.xml'
-    water_heating_systems_values[0][:location] = "attic - unvented"
-  elsif hpxml_file == 'valid-dhw-multiple.xml'
+  elsif ['valid-dhw-multiple.xml'].include? hpxml_file
     water_heating_systems_values[0][:fraction_dhw_load_served] = 0.2
     water_heating_systems_values << { :id => "WaterHeater2",
                                       :fuel_type => "natural gas",
@@ -1898,53 +1911,53 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :location => "living space",
                                       :fraction_dhw_load_served => 0.2,
                                       :energy_factor => 0.82 }
-  elsif hpxml_file == 'valid-dhw-tank-gas.xml'
+  elsif ['valid-dhw-tank-gas.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = 4500
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
-  elsif hpxml_file == 'valid-dhw-tank-heat-pump.xml'
+  elsif ['valid-dhw-tank-heat-pump.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "heat pump water heater"
     water_heating_systems_values[0][:tank_volume] = 80
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 2.3
-  elsif hpxml_file == 'valid-dhw-tankless-electric.xml'
+  elsif ['valid-dhw-tankless-electric.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
     water_heating_systems_values[0][:tank_volume] = nil
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 0.99
-  elsif hpxml_file == 'valid-dhw-tankless-gas.xml'
+  elsif ['valid-dhw-tankless-gas.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
     water_heating_systems_values[0][:tank_volume] = nil
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 0.82
-  elsif hpxml_file == 'valid-dhw-tankless-oil.xml'
+  elsif ['valid-dhw-tankless-oil.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "fuel oil"
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
     water_heating_systems_values[0][:tank_volume] = nil
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 0.82
-  elsif hpxml_file == 'valid-dhw-tankless-propane.xml'
+  elsif ['valid-dhw-tankless-propane.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "propane"
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
     water_heating_systems_values[0][:tank_volume] = nil
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 0.82
-  elsif hpxml_file == 'valid-dhw-tank-oil.xml'
+  elsif ['valid-dhw-tank-oil.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "fuel oil"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = 4500
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
-  elsif hpxml_file == 'valid-dhw-tank-propane.xml'
+  elsif ['valid-dhw-tank-propane.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "propane"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = 4500
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
-  elsif hpxml_file == 'valid-dhw-uef.xml'
+  elsif ['valid-dhw-uef.xml'].include? hpxml_file
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
   elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
@@ -1952,6 +1965,14 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['valid-foundation-unvented-crawlspace.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "crawlspace - unvented"
   elsif ['valid-foundation-vented-crawlspace.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "crawlspace - vented"
+  elsif ['valid-foundation-slab.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "living space"
+  elsif ['valid-atticroof-vented.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "attic - vented"
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "basement - conditioned"
+  elsif ['invalid_files/invalid-water-heater-location.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "crawlspace - vented"
   elsif ['valid-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
@@ -1966,42 +1987,42 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
 end
 
 def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribution_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     hot_water_distribution_values = { :id => "HotWaterDstribution",
                                       :system_type => "Standard",
                                       :standard_piping_length => 30,
                                       :pipe_r_value => 0.0 }
-  elsif hpxml_file == 'valid-dhw-dwhr.xml'
+  elsif ['valid-dhw-dwhr.xml'].include? hpxml_file
     hot_water_distribution_values[:dwhr_facilities_connected] = "all"
     hot_water_distribution_values[:dwhr_equal_flow] = true
     hot_water_distribution_values[:dwhr_efficiency] = 0.55
-  elsif hpxml_file == 'valid-dhw-recirc-demand.xml'
+  elsif ['valid-dhw-recirc-demand.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "presence sensor demand control"
     hot_water_distribution_values[:recirculation_piping_length] = 30
     hot_water_distribution_values[:recirculation_branch_piping_length] = 30
     hot_water_distribution_values[:recirculation_pump_power] = 50
     hot_water_distribution_values[:pipe_r_value] = 3
-  elsif hpxml_file == 'valid-dhw-recirc-manual.xml'
+  elsif ['valid-dhw-recirc-manual.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "manual demand control"
     hot_water_distribution_values[:recirculation_piping_length] = 30
     hot_water_distribution_values[:recirculation_branch_piping_length] = 30
     hot_water_distribution_values[:recirculation_pump_power] = 50
     hot_water_distribution_values[:pipe_r_value] = 3
-  elsif hpxml_file == 'valid-dhw-recirc-nocontrol.xml'
+  elsif ['valid-dhw-recirc-nocontrol.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "no control"
     hot_water_distribution_values[:recirculation_piping_length] = 30
     hot_water_distribution_values[:recirculation_branch_piping_length] = 30
     hot_water_distribution_values[:recirculation_pump_power] = 50
-  elsif hpxml_file == 'valid-dhw-recirc-temperature.xml'
+  elsif ['valid-dhw-recirc-temperature.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "temperature"
     hot_water_distribution_values[:recirculation_piping_length] = 30
     hot_water_distribution_values[:recirculation_branch_piping_length] = 30
     hot_water_distribution_values[:recirculation_pump_power] = 50
-  elsif hpxml_file == 'valid-dhw-recirc-timer.xml'
+  elsif ['valid-dhw-recirc-timer.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "timer"
     hot_water_distribution_values[:recirculation_piping_length] = 30
@@ -2014,14 +2035,14 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribut
 end
 
 def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     water_fixtures_values = [{ :id => "WaterFixture",
                                :water_fixture_type => "shower head",
                                :low_flow => true },
                              { :id => "WaterFixture2",
                                :water_fixture_type => "faucet",
                                :low_flow => false }]
-  elsif hpxml_file == 'valid-dhw-low-flow-fixtures.xml'
+  elsif ['valid-dhw-low-flow-fixtures.xml'].include? hpxml_file
     water_fixtures_values[1][:low_flow] = true
   elsif ['valid-dhw-none.xml'].include? hpxml_file
     water_fixtures_values = []
@@ -2030,7 +2051,7 @@ def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
 end
 
 def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
-  if hpxml_file == 'valid-pv-array-1axis.xml'
+  if ['valid-pv-array-1axis.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
                            :array_type => "1-axis",
@@ -2039,7 +2060,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif hpxml_file == 'valid-pv-array-1axis-backtracked.xml'
+  elsif ['valid-pv-array-1axis-backtracked.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
                            :array_type => "1-axis backtracked",
@@ -2048,7 +2069,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif hpxml_file == 'valid-pv-array-2axis.xml'
+  elsif ['valid-pv-array-2axis.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
                            :array_type => "2-axis",
@@ -2057,7 +2078,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif hpxml_file == 'valid-pv-array-fixed-open-rack.xml'
+  elsif ['valid-pv-array-fixed-open-rack.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
                            :array_type => "fixed open rack",
@@ -2066,7 +2087,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif hpxml_file == 'valid-pv-module-premium.xml'
+  elsif ['valid-pv-module-premium.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "premium",
                            :array_type => "fixed roof mount",
@@ -2075,7 +2096,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif hpxml_file == 'valid-pv-module-standard.xml'
+  elsif ['valid-pv-module-standard.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
                            :array_type => "fixed roof mount",
@@ -2084,7 +2105,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif hpxml_file == 'valid-pv-module-thinfilm.xml.skip'
+  elsif ['valid-pv-module-thinfilm.xml.skip'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "thin film",
                            :array_type => "fixed roof mount",
@@ -2093,7 +2114,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif hpxml_file == 'valid-pv-multiple.xml'
+  elsif ['valid-pv-multiple.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
                            :array_type => "fixed roof mount",
@@ -2115,7 +2136,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
 end
 
 def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     clothes_washer_values = { :id => "ClothesWasher",
                               :location => "living space",
                               :modified_energy_factor => 1.2,
@@ -2124,52 +2145,60 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
                               :label_gas_rate => 1.003,
                               :label_annual_gas_cost => 24.0,
                               :capacity => 3.5 }
-  elsif hpxml_file == 'valid-appliances-none.xml'
+  elsif ['valid-appliances-none.xml'].include? hpxml_file
     clothes_washer_values = {}
-  elsif hpxml_file == 'valid-appliances-washer-imef.xml'
+  elsif ['valid-appliances-washer-imef.xml'].include? hpxml_file
     clothes_washer_values[:modified_energy_factor] = nil
     clothes_washer_values[:integrated_modified_energy_factor] = 0.73
-  elsif hpxml_file == 'valid-appliances-in-basement.xml'
+  elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
+    clothes_washer_values[:location] = "basement - unconditioned"
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     clothes_washer_values[:location] = "basement - conditioned"
+  elsif ['invalid_files/invalid-clothes-washer-location.xml'].include? hpxml_file
+    clothes_washer_values[:location] = "garage"
   end
   return clothes_washer_values
 end
 
 def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     clothes_dryer_values = { :id => "ClothesDryer",
                              :location => "living space",
                              :fuel_type => "electricity",
                              :energy_factor => 3.01,
                              :control_type => "timer" }
-  elsif hpxml_file == 'valid-appliances-none.xml'
+  elsif ['valid-appliances-none.xml'].include? hpxml_file
     clothes_dryer_values = {}
-  elsif hpxml_file == 'valid-appliances-dryer-cef.xml'
+  elsif ['valid-appliances-dryer-cef.xml'].include? hpxml_file
     clothes_dryer_values = { :id => "ClothesDryer",
                              :location => "living space",
                              :fuel_type => "electricity",
                              :combined_energy_factor => 2.62,
                              :control_type => "moisture" }
-  elsif hpxml_file == 'valid-appliances-gas.xml'
+  elsif ['valid-appliances-gas.xml'].include? hpxml_file
     clothes_dryer_values = { :id => "ClothesDryer",
                              :location => "living space",
                              :fuel_type => "natural gas",
                              :energy_factor => 2.67,
                              :control_type => "moisture" }
-  elsif hpxml_file == 'valid-appliances-in-basement.xml'
+  elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
+    clothes_dryer_values[:location] = "basement - unconditioned"
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "basement - conditioned"
+  elsif ['invalid_files/invalid-clothes-dryer-location.xml'].include? hpxml_file
+    clothes_dryer_values[:location] = "garage"
   end
   return clothes_dryer_values
 end
 
 def get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     dishwasher_values = { :id => "Dishwasher",
                           :rated_annual_kwh => 100,
                           :place_setting_capacity => 12 }
-  elsif hpxml_file == 'valid-appliances-none.xml'
+  elsif ['valid-appliances-none.xml'].include? hpxml_file
     dishwasher_values = {}
-  elsif hpxml_file == 'valid-appliances-dishwasher-ef.xml'
+  elsif ['valid-appliances-dishwasher-ef.xml'].include? hpxml_file
     dishwasher_values = { :id => "Dishwasher",
                           :energy_factor => 0.5,
                           :place_setting_capacity => 8 }
@@ -2178,26 +2207,30 @@ def get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
 end
 
 def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     refrigerator_values = { :id => "Refrigerator",
                             :location => "living space",
                             :rated_annual_kwh => 609 }
-  elsif hpxml_file == 'valid-appliances-none.xml'
+  elsif ['valid-appliances-none.xml'].include? hpxml_file
     refrigerator_values = {}
-  elsif hpxml_file == 'valid-appliances-in-basement.xml'
+  elsif ['valid-foundation-unconditioned-basement.xml'].include? hpxml_file
+    refrigerator_values[:location] = "basement - unconditioned"
+  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
     refrigerator_values[:location] = "basement - conditioned"
+  elsif ['invalid_files/invalid-refrigerator-location.xml'].include? hpxml_file
+    refrigerator_values[:location] = "garage"
   end
   return refrigerator_values
 end
 
 def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     cooking_range_values = { :id => "Range",
                              :fuel_type => "electricity",
                              :is_induction => true }
-  elsif hpxml_file == 'valid-appliances-none.xml'
+  elsif ['valid-appliances-none.xml'].include? hpxml_file
     cooking_range_values = {}
-  elsif hpxml_file == 'valid-appliances-gas.xml'
+  elsif ['valid-appliances-gas.xml'].include? hpxml_file
     cooking_range_values[:fuel_type] = "natural gas"
     cooking_range_values[:is_induction] = false
   end
@@ -2205,31 +2238,31 @@ def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
 end
 
 def get_hpxml_file_oven_values(hpxml_file, oven_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     oven_values = { :id => "Oven",
                     :is_convection => true }
-  elsif hpxml_file == 'valid-appliances-none.xml'
+  elsif ['valid-appliances-none.xml'].include? hpxml_file
     oven_values = {}
   end
   return oven_values
 end
 
 def get_hpxml_file_lighting_values(hpxml_file, lighting_values)
-  if hpxml_file == 'valid.xml'
+  if ['valid.xml'].include? hpxml_file
     lighting_values = { :fraction_tier_i_interior => 0.5,
                         :fraction_tier_i_exterior => 0.5,
                         :fraction_tier_i_garage => 0.5,
                         :fraction_tier_ii_interior => 0.25,
                         :fraction_tier_ii_exterior => 0.25,
                         :fraction_tier_ii_garage => 0.25 }
-  elsif hpxml_file == 'valid-misc-lighting-none.xml'
+  elsif ['valid-misc-lighting-none.xml'].include? hpxml_file
     lighting_values = {}
   end
   return lighting_values
 end
 
 def get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
-  if hpxml_file == 'valid-misc-ceiling-fans.xml'
+  if ['valid-misc-ceiling-fans.xml'].include? hpxml_file
     ceiling_fans_values << { :id => "CeilingFan",
                              :efficiency => 100,
                              :quantity => 2 }
@@ -2238,7 +2271,7 @@ def get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
 end
 
 def get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
-  if hpxml_file == 'valid-misc-loads-detailed.xml'
+  if ['valid-misc-loads-detailed.xml'].include? hpxml_file
     plug_loads_values << { :id => "PlugLoadMisc",
                            :plug_load_type => "other",
                            :kWh_per_year => 7302,
@@ -2252,7 +2285,7 @@ def get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
 end
 
 def get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_values)
-  if hpxml_file == 'valid-misc-loads-detailed.xml'
+  if ['valid-misc-loads-detailed.xml'].include? hpxml_file
     misc_load_schedule_values = { :weekday_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
                                   :weekend_fractions => "0.020, 0.020, 0.020, 0.020, 0.020, 0.034, 0.043, 0.085, 0.050, 0.030, 0.030, 0.041, 0.030, 0.025, 0.026, 0.026, 0.039, 0.042, 0.045, 0.070, 0.070, 0.073, 0.073, 0.066",
                                   :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" }
