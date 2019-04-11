@@ -41,45 +41,12 @@ class Geometry
     return m
   end
 
-  def self.get_surface_dimensions(surface)
-    least_x = 9e99
-    greatest_x = -9e99
-    least_y = 9e99
-    greatest_y = -9e99
-    least_z = 9e99
-    greatest_z = -9e99
-    surface.vertices.each do |vertex|
-      least_x = [vertex.x, least_x].min
-      greatest_x = [vertex.x, greatest_x].max
-      least_y = [vertex.y, least_y].min
-      greatest_y = [vertex.y, greatest_y].max
-      least_z = [vertex.z, least_z].min
-      greatest_z = [vertex.z, greatest_z].max
-    end
-    l = greatest_x - least_x
-    w = greatest_y - least_y
-    h = greatest_z - least_z
-    return l, w, h
-  end
-
   def self.make_polygon(*pts)
     p = OpenStudio::Point3dVector.new
     pts.each do |pt|
       p << pt
     end
     return p
-  end
-
-  def self.get_floor_area_from_spaces(spaces, runner = nil)
-    floor_area = 0
-    spaces.each do |space|
-      floor_area += UnitConversions.convert(space.floorArea, "m^2", "ft^2")
-    end
-    if floor_area == 0 and not runner.nil?
-      runner.registerError("Could not find any floor area.")
-      return nil
-    end
-    return floor_area
   end
 
   def self.get_zone_volume(zone, runner = nil)
@@ -99,34 +66,6 @@ class Geometry
     return volume
   end
 
-  def self.get_finished_floor_area_from_spaces(spaces, runner = nil)
-    floor_area = 0
-    spaces.each do |space|
-      next if not self.space_is_finished(space)
-
-      floor_area += UnitConversions.convert(space.floorArea, "m^2", "ft^2")
-    end
-    if floor_area == 0 and not runner.nil?
-      runner.registerError("Could not find any finished floor area.")
-      return nil
-    end
-    return floor_area
-  end
-
-  def self.get_above_grade_finished_floor_area_from_spaces(spaces, runner = nil)
-    floor_area = 0
-    spaces.each do |space|
-      next if not (self.space_is_finished(space) and self.space_is_above_grade(space))
-
-      floor_area += UnitConversions.convert(space.floorArea, "m^2", "ft^2")
-    end
-    if floor_area == 0 and not runner.nil?
-      runner.registerError("Could not find any above-grade finished floor area.")
-      return nil
-    end
-    return floor_area
-  end
-
   def self.get_above_grade_finished_volume(model, runner = nil)
     volume = 0
     model.getThermalZones.each do |zone|
@@ -139,20 +78,6 @@ class Geometry
       return nil
     end
     return volume
-  end
-
-  def self.get_window_area_from_spaces(spaces)
-    window_area = 0
-    spaces.each do |space|
-      space.surfaces.each do |surface|
-        surface.subSurfaces.each do |subsurface|
-          next if subsurface.subSurfaceType.downcase != "fixedwindow"
-
-          window_area += UnitConversions.convert(subsurface.grossArea, "m^2", "ft^2")
-        end
-      end
-    end
-    return window_area
   end
 
   def self.space_height(space)
@@ -680,7 +605,7 @@ class Geometry
   end
 
   def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             nbeds)
+                             cfa, nbeds)
 
     # Error checking
     if num_occ < 0
@@ -721,13 +646,10 @@ class Geometry
     # Get spaces
     ffa_spaces = self.get_finished_spaces(model.getSpaces)
 
-    # Get FFA
-    ffa = self.get_finished_floor_area_from_spaces(ffa_spaces, runner)
-
     ffa_spaces.each do |space|
       space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
 
-      space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
+      space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
 
       if people_sch.nil?
         # Create schedule

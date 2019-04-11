@@ -9,7 +9,7 @@ require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                 nbeds, nbaths, ncfl, ncfl_ag)
+                 cfa, cfa_ag, nbeds, nbaths, ncfl, ncfl_ag, window_area)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
       return false
@@ -49,11 +49,8 @@ class Airflow
         building.unfinished_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.unfinished_attic_const_ach, infil.unfinished_attic_sla)
       end
     end
-    building.ffa = Geometry.get_finished_floor_area_from_spaces(model_spaces, runner)
-    return false if building.ffa.nil?
-
-    building.ag_ffa = Geometry.get_above_grade_finished_floor_area_from_spaces(model_spaces, runner)
-    return false if building.ag_ffa.nil?
+    building.cfa = cfa
+    building.ag_cfa = cfa_ag
 
     wind_speed = process_wind_speed_correction(infil.terrain, infil.shelter_coef, Geometry.get_closest_neighbor_distance(model), building.building_height)
     if not process_infiltration(model, infil, wind_speed, building, weather)
@@ -85,9 +82,6 @@ class Airflow
     obj_name_mech_vent = Constants.ObjectNameMechanicalVentilation.gsub("|", "_")
 
     ag_ext_wall_area = Geometry.calculate_above_grade_exterior_wall_area(model_spaces)
-    ag_ffa = Geometry.get_above_grade_finished_floor_area_from_spaces(model_spaces, runner)
-    ffa = Geometry.get_finished_floor_area_from_spaces(model_spaces, runner)
-    window_area = Geometry.get_window_area_from_spaces(model_spaces)
 
     # Search for mini-split heat pump
     has_mshp = HVAC.has_mshp(model, runner, building.living.zone)
@@ -113,10 +107,10 @@ class Airflow
 
     # Update model
 
-    success, infil_output = process_infiltration_for_conditioned_zones(model, runner, obj_name_infil, infil, wind_speed, building, weather, ag_ffa, ag_ext_wall_area, ncfl_ag)
+    success, infil_output = process_infiltration_for_conditioned_zones(model, runner, obj_name_infil, infil, wind_speed, building, weather, ag_ext_wall_area, ncfl_ag)
     return false if not success
 
-    success, mv_output = process_mech_vent(model, runner, obj_name_mech_vent, infil.is_existing_home, infil_output.a_o, mech_vent, building, nbeds, nbaths, weather, ffa, has_forced_air_equipment)
+    success, mv_output = process_mech_vent(model, runner, obj_name_mech_vent, infil.is_existing_home, infil_output.a_o, mech_vent, building, nbeds, nbaths, weather, has_forced_air_equipment)
     return false if not success
 
     cfis_programs = {}
@@ -137,7 +131,7 @@ class Airflow
     duct_programs = {}
     duct_lks = {}
     duct_systems.each do |ducts, air_loops|
-      success, ducts_output = process_ducts(model, runner, ducts, building, ffa, has_mshp, has_forced_air_equipment, ncfl)
+      success, ducts_output = process_ducts(model, runner, ducts, building, has_mshp, has_forced_air_equipment, ncfl)
       return false if not success
 
       air_loops.each do |air_loop|
@@ -321,7 +315,7 @@ class Airflow
     return true
   end
 
-  def self.process_infiltration_for_conditioned_zones(model, runner, obj_name_infil, infil, wind_speed, building, weather, ag_ffa, ag_ext_wall_area, ncfl_ag)
+  def self.process_infiltration_for_conditioned_zones(model, runner, obj_name_infil, infil, wind_speed, building, weather, ag_ext_wall_area, ncfl_ag)
     spaces = []
     spaces << building.living
     spaces << building.finished_basement if not building.finished_basement.nil?
@@ -341,13 +335,13 @@ class Airflow
       n_i = 0.65
 
       # Calculate SLA for above-grade portion of the building
-      building.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.living_ach50, n_i, building.ag_ffa, building.above_grade_volume)
+      building.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.living_ach50, n_i, building.ag_cfa, building.above_grade_volume)
 
       # Effective Leakage Area (ft^2)
-      a_o = building.SLA * building.ag_ffa * (ag_ext_wall_area / building.ag_ext_wall_area)
+      a_o = building.SLA * building.ag_cfa * (ag_ext_wall_area / building.ag_ext_wall_area)
 
       # Calculate SLA
-      building.living.SLA = a_o / ag_ffa
+      building.living.SLA = a_o / building.ag_cfa
 
       # Flow Coefficient (cfm/inH2O^n) (based on ASHRAE HoF)
       c_i = a_o * (2.0 / outside_air_density)**0.5 * delta_pref**(0.5 - n_i) * inf_conv_factor
@@ -513,7 +507,7 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent(model, runner, obj_name_mech_vent, is_existing_home, ela, mech_vent, building, nbeds, nbaths, weather, ffa, has_forced_air_equipment)
+  def self.process_mech_vent(model, runner, obj_name_mech_vent, is_existing_home, ela, mech_vent, building, nbeds, nbaths, weather, has_forced_air_equipment)
     if mech_vent.type == Constants.VentTypeCFIS
       if not has_forced_air_equipment
         runner.registerError("A CFIS ventilation system has been selected but the building does not have central, forced air equipment.")
@@ -523,7 +517,7 @@ class Airflow
 
     if not mech_vent.frac_62_2.nil?
       # Get ASHRAE 62.2 required ventilation rate (excluding infiltration credit)
-      ashrae_mv_without_infil_credit = Airflow.get_mech_vent_whole_house_cfm(1, nbeds, ffa, mech_vent.ashrae_std)
+      ashrae_mv_without_infil_credit = Airflow.get_mech_vent_whole_house_cfm(1, nbeds, building.cfa, mech_vent.ashrae_std)
 
       # Determine mechanical ventilation infiltration credit (per ASHRAE 62.2)
       rate_credit = 0 # default to no credit
@@ -532,7 +526,7 @@ class Airflow
           # ASHRAE Standard 62.2 2010
           # Only applies to existing buildings
           # 2 cfm per 100ft^2 of occupiable floor area
-          default_rate = 2.0 * ffa / 100.0 # cfm
+          default_rate = 2.0 * building.cfa / 100.0 # cfm
           # Half the excess infiltration rate above the default rate is credited toward mech vent:
           rate_credit = [(building.living.inf_flow - default_rate) / 2.0, 0].max
         elsif mech_vent.ashrae_std == '2013'
@@ -822,7 +816,7 @@ class Airflow
     return true, cfis_output
   end
 
-  def self.process_ducts(model, runner, ducts, building, ffa, has_mshp, has_forced_air_equipment, ncfl)
+  def self.process_ducts(model, runner, ducts, building, has_mshp, has_forced_air_equipment, ncfl)
     # Validate Inputs
     if ducts.total_leakage < 0
       runner.registerError("Ducts: Total Leakage must be greater than or equal to 0.")
@@ -902,8 +896,8 @@ class Airflow
 
     location_frac_conduction = location_frac_leakage
     ducts.num_returns = Airflow.get_num_returns(ducts.num_returns, ncfl)
-    supply_surface_area = Airflow.get_duct_supply_surface_area(ducts.supply_area_mult, ffa, ncfl)
-    return_surface_area = Airflow.get_return_surface_area(ducts.return_area_mult, ffa, ncfl, ducts.num_returns)
+    supply_surface_area = Airflow.get_duct_supply_surface_area(ducts.supply_area_mult, building.cfa, ncfl)
+    return_surface_area = Airflow.get_return_surface_area(ducts.return_area_mult, building.cfa, ncfl, ducts.num_returns)
 
     # Calculate Duct UA value
     if location_name != building.living.zone.name.to_s
@@ -928,7 +922,7 @@ class Airflow
 
     unless ducts.norm_leakage_25pa.nil?
       fan_AirFlowRate = 1000.0 # TODO: what should fan_AirFlowRate be?
-      ducts = calc_duct_leakage_from_test(ducts, ffa, fan_AirFlowRate)
+      ducts = calc_duct_leakage_from_test(ducts, building.cfa, fan_AirFlowRate)
     end
 
     total_unbalance = (supply_loss - return_loss).abs
@@ -1974,7 +1968,7 @@ class Airflow
     return location_zone, location_name
   end
 
-  def self.calc_duct_leakage_from_test(ducts, ffa, fan_AirFlowRate)
+  def self.calc_duct_leakage_from_test(ducts, fan_AirFlowRate)
     '''
     Calculates duct leakage inputs based on duct blaster type lkage measurements (cfm @ 25 Pa per 100 ft2 conditioned floor area).
     Requires assumptions about supply/return leakage split, air handler leakage, and duct plenum (de)pressurization.
@@ -1991,7 +1985,7 @@ class Airflow
     p_return = 25.0 # though it is likely lower (Reference: Pigg and Francisco 2008 "A Field Study of Exterior Duct Leakage in New Wisconsin Homes")
 
     # Conversion
-    cfm25 = ducts.norm_leakage_25pa * ffa / 100.0 #denormalize leakage
+    cfm25 = ducts.norm_leakage_25pa * cfa / 100.0 #denormalize leakage
     ah_cfm25 = ah_lkage * fan_AirFlowRate # air handler leakage flow rate at 25 Pa
     ah_supply_lk_cfm25 = [ah_cfm25 * ducts.ah_supply_frac, cfm25 * supply_duct_lkage_frac].min
     ah_return_lk_cfm25 = [ah_cfm25 * ducts.ah_return_frac, cfm25 * return_duct_lkage_frac].min
@@ -2086,21 +2080,21 @@ class Airflow
     end
   end
 
-  def self.get_duct_supply_surface_area(mult, ffa, num_stories)
+  def self.get_duct_supply_surface_area(mult, cfa, num_stories)
     # Duct Surface Areas per 2010 BA Benchmark
     if num_stories == 1
-      return 0.27 * ffa * mult # ft^2
+      return 0.27 * cfa * mult # ft^2
     else
-      return 0.2 * ffa * mult
+      return 0.2 * cfa * mult
     end
   end
 
-  def self.get_return_surface_area(mult, ffa, num_stories, num_returns)
+  def self.get_return_surface_area(mult, cfa, num_stories, num_returns)
     # Duct Surface Areas per 2010 BA Benchmark
     if num_stories == 1
-      return [0.05 * num_returns * ffa, 0.25 * ffa].min * mult
+      return [0.05 * num_returns * cfa, 0.25 * cfa].min * mult
     else
-      return [0.04 * num_returns * ffa, 0.19 * ffa].min * mult
+      return [0.04 * num_returns * cfa, 0.19 * cfa].min * mult
     end
   end
 
@@ -2115,13 +2109,13 @@ class Airflow
     return num_returns.to_i
   end
 
-  def self.get_mech_vent_whole_house_cfm(frac622, num_beds, ffa, std)
+  def self.get_mech_vent_whole_house_cfm(frac622, num_beds, cfa, std)
     # Returns the ASHRAE 62.2 whole house mechanical ventilation rate, excluding any infiltration credit.
     if std == '2013'
-      return frac622 * ((num_beds + 1.0) * 7.5 + 0.03 * ffa)
+      return frac622 * ((num_beds + 1.0) * 7.5 + 0.03 * cfa)
     end
 
-    return frac622 * ((num_beds + 1.0) * 7.5 + 0.01 * ffa)
+    return frac622 * ((num_beds + 1.0) * 7.5 + 0.01 * cfa)
   end
 end
 
@@ -2293,5 +2287,5 @@ end
 class Building
   def initialize
   end
-  attr_accessor(:ffa, :ag_ffa, :ag_ext_wall_area, :building_height, :stories, :above_grade_volume, :SLA, :living, :finished_basement, :garage, :unfinished_basement, :crawlspace, :pierbeam, :unfinished_attic)
+  attr_accessor(:cfa, :ag_cfa, :ag_ext_wall_area, :building_height, :stories, :above_grade_volume, :SLA, :living, :finished_basement, :garage, :unfinished_basement, :crawlspace, :pierbeam, :unfinished_attic)
 end

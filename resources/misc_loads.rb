@@ -3,12 +3,18 @@ require_relative "unit_conversions"
 require_relative "schedules"
 
 class MiscLoads
-  def self.apply_plug(model, runner, annual_energy, sens_frac, lat_frac,
-                      weekday_sch, weekend_sch, monthly_sch, sch)
+  def self.apply_plug(model, runner, misc_kwh, sens_frac, lat_frac,
+                      weekday_sch, weekend_sch, monthly_sch, tv_kwh, cfa)
+
+    return true if misc_kwh + tv_kwh == 0
 
     # check for valid inputs
-    if annual_energy < 0
-      runner.registerError("Annual energy use must be greater than or equal to 0.")
+    if misc_kwh < 0
+      runner.registerError("Misc annual energy use must be greater than or equal to 0.")
+      return false
+    end
+    if tv_kwh < 0
+      runner.registerError("TV annual energy use must be greater than or equal to 0.")
       return false
     end
     if sens_frac < 0 or sens_frac > 1
@@ -24,29 +30,21 @@ class MiscLoads
       return false
     end
 
-    # Get FFA
-    ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces, runner)
-    if ffa.nil?
+    # Create schedule
+    sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameMiscPlugLoads + " schedule", weekday_sch, weekend_sch, monthly_sch)
+    if not sch.validated?
       return false
     end
 
-    model.getSpaces.each do |space|
-      next if Geometry.space_is_unfinished(space)
+    # Misc plug loads
+    if misc_kwh > 0
+      model.getSpaces.each do |space|
+        next if Geometry.space_is_unfinished(space)
 
-      obj_name = Constants.ObjectNameMiscPlugLoads
-      space_obj_name = "#{obj_name}|#{space.name.to_s}"
+        obj_name = Constants.ObjectNameMiscPlugLoads
+        space_obj_name = "#{obj_name}|#{space.name.to_s}"
 
-      if annual_energy > 0
-
-        if sch.nil?
-          # Create schedule
-          sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameMiscPlugLoads + " schedule", weekday_sch, weekend_sch, monthly_sch)
-          if not sch.validated?
-            return false
-          end
-        end
-
-        space_mel_ann = annual_energy * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
+        space_mel_ann = misc_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
         space_design_level = sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
 
         # Add electric equipment for the mel
@@ -61,31 +59,37 @@ class MiscLoads
         mel_def.setFractionLatent(lat_frac)
         mel_def.setFractionLost(1 - sens_frac - lat_frac)
         mel.setSchedule(sch.schedule)
-
       end
     end
 
-    return true, sch
-  end
+    # Television
+    tv_sens_frac = 1.0
+    tv_lat_frac = 0.0
 
-  def self.apply_tv(model, runner, annual_energy, sch, space)
-    name = Constants.ObjectNameMiscTelevision
-    design_level = sch.calcDesignLevelFromDailykWh(annual_energy / 365.0)
-    sens_frac = 1.0
-    lat_frac = 0.0
+    if tv_kwh > 0
+      model.getSpaces.each do |space|
+        next if Geometry.space_is_unfinished(space)
 
-    # Add electric equipment for the mel
-    mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-    mel.setName(name)
-    mel.setEndUseSubcategory(name)
-    mel.setSpace(space)
-    mel_def.setName(name)
-    mel_def.setDesignLevel(design_level)
-    mel_def.setFractionRadiant(0.6 * sens_frac)
-    mel_def.setFractionLatent(lat_frac)
-    mel_def.setFractionLost(1 - sens_frac - lat_frac)
-    mel.setSchedule(sch.schedule)
+        obj_name = Constants.ObjectNameMiscTelevision
+        space_obj_name = "#{obj_name}|#{space.name.to_s}"
+
+        space_mel_ann = tv_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
+        space_design_level = sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
+
+        # Add electric equipment for the television
+        mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+        mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
+        mel.setName(space_obj_name)
+        mel.setEndUseSubcategory(obj_name)
+        mel.setSpace(space)
+        mel_def.setName(space_obj_name)
+        mel_def.setDesignLevel(space_design_level)
+        mel_def.setFractionRadiant(0.6 * tv_sens_frac)
+        mel_def.setFractionLatent(tv_lat_frac)
+        mel_def.setFractionLost(1 - tv_sens_frac - tv_lat_frac)
+        mel.setSchedule(sch.schedule)
+      end
+    end
 
     return true
   end

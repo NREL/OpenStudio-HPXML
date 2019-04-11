@@ -231,6 +231,13 @@ class OSModel
     # Global variables
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = building_construction_values[:conditioned_floor_area]
+    @cfa_ag = @cfa
+    building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |foundation|
+      foundation.elements.each("Slab") do |fnd_slab|
+        slab_values = HPXML.get_slab_values(slab: fnd_slab)
+        @cfa_ag -= slab_values[:area]
+      end
+    end
     @cvolume = building_construction_values[:conditioned_building_volume]
     @ncfl = building_construction_values[:number_of_conditioned_floors]
     @ncfl_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
@@ -404,6 +411,7 @@ class OSModel
   end
 
   def self.set_zone_volumes(runner, model, building)
+    # TODO: Use HPXML values not Model values
     thermal_zones = model.getThermalZones
 
     # Init
@@ -415,7 +423,16 @@ class OSModel
       if Geometry.is_finished_basement(thermal_zone) or Geometry.is_unfinished_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
         zones_updated += 1
 
-        zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * Geometry.get_floor_area_from_spaces(thermal_zone.spaces)
+        zone_floor_area = 0.0
+        thermal_zone.spaces.each do |space|
+          space.surfaces.each do |surface|
+            if surface.surfaceType.downcase == "floor"
+              zone_floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
+            end
+          end
+        end
+
+        zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * zone_floor_area
         if zone_volume <= 0
           fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
         end
@@ -448,17 +465,20 @@ class OSModel
         zones_updated += 1
 
         zone_surfaces = []
+        zone_floor_area = 0.0
         thermal_zone.spaces.each do |space|
           space.surfaces.each do |surface|
             zone_surfaces << surface
+            if surface.surfaceType.downcase == "floor"
+              zone_floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
+            end
           end
         end
 
         # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-        zone_area = Geometry.get_floor_area_from_spaces(thermal_zone.spaces)
-        zone_length = zone_area**0.5
+        zone_length = zone_floor_area**0.5
         zone_height = Math.tan(UnitConversions.convert(Geometry.get_roof_pitch(zone_surfaces), "deg", "rad")) * zone_length / 2.0
-        zone_volume = [zone_area * zone_height / 3.0, 0.01].max
+        zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
       end
     end
@@ -745,7 +765,7 @@ class OSModel
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @nbeds)
+      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
       return false if not success
     end
 
@@ -943,8 +963,6 @@ class OSModel
       plywood_thick_in, mat_floor_covering, mat_carpet = nil
       floor_assembly_r, floor_film_r = nil
       foundation.elements.each("FrameFloor") do |fnd_floor|
-        next if foundation_type == "ConditionedBasement"
-
         frame_floor_values = HPXML.get_frame_floor_values(floor: fnd_floor)
 
         floor_id = frame_floor_values[:id]
@@ -1053,8 +1071,9 @@ class OSModel
   end
 
   def self.add_finished_floor_area(runner, model, building, spaces)
+    # TODO: Use HPXML values not Model values
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    ffa = building_construction_values[:conditioned_floor_area].round(1)
+    cfa = building_construction_values[:conditioned_floor_area].round(1)
 
     # First check if we need to add a finished basement ceiling
     foundation_top = get_foundation_top(model)
@@ -1062,21 +1081,24 @@ class OSModel
     model.getThermalZones.each do |zone|
       next if not Geometry.is_finished_basement(zone)
 
-      floor_area = Geometry.get_finished_floor_area_from_spaces(zone.spaces).round(1)
+      floor_area = 0.0
       ceiling_area = 0.0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
-          next if surface.surfaceType.downcase.to_s != "roofceiling"
-
-          ceiling_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
+          if surface.surfaceType.downcase.to_s == "floor"
+            floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
+          elsif surface.surfaceType.downcase.to_s == "roofceiling"
+            ceiling_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
+          end
         end
       end
-      addtl_ffa = floor_area - ceiling_area
-      if addtl_ffa > 0
-        runner.registerWarning("Adding finished basement adiabatic ceiling with #{addtl_ffa.to_s} ft^2.")
 
-        finishedfloor_width = Math::sqrt(addtl_ffa)
-        finishedfloor_length = addtl_ffa / finishedfloor_width
+      addtl_cfa = floor_area - ceiling_area
+      if addtl_cfa > 0
+        runner.registerWarning("Adding finished basement adiabatic ceiling with #{addtl_cfa.to_s} ft^2.")
+
+        finishedfloor_width = Math::sqrt(addtl_cfa)
+        finishedfloor_length = addtl_cfa / finishedfloor_width
         z_origin = foundation_top
 
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
@@ -1096,21 +1118,30 @@ class OSModel
 
     # Next check if we need to add floors between finished spaces (e.g., 2-story buildings).
 
-    # Calculate ffa already added to model
-    model_ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces).round(1)
+    # Calculate cfa already added to model
+    model_cfa = 0.0
+    model.getSpaces.each do |space|
+      next unless Geometry.space_is_finished(space)
 
-    if model_ffa > ffa
-      runner.registerError("Sum of conditioned floor surface areas #{model_ffa.to_s} is greater than ConditionedFloorArea specified #{ffa.to_s}.")
+      space.surfaces.each do |surface|
+        next unless surface.surfaceType.downcase.to_s == "floor"
+
+        model_cfa += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
+      end
+    end
+
+    if model_cfa > cfa
+      runner.registerError("Sum of conditioned floor surface areas #{model_cfa.to_s} is greater than ConditionedFloorArea specified #{cfa.to_s}.")
       return false
     end
 
-    addtl_ffa = ffa - model_ffa
-    return true unless addtl_ffa > 0
+    addtl_cfa = cfa - model_cfa
+    return true unless addtl_cfa > 0
 
-    runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_ffa.to_s} ft^2 to preserve building total conditioned floor area.")
+    runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_cfa.to_s} ft^2 to preserve building total conditioned floor area.")
 
-    finishedfloor_width = Math::sqrt(addtl_ffa)
-    finishedfloor_length = addtl_ffa / finishedfloor_width
+    finishedfloor_width = Math::sqrt(addtl_cfa)
+    finishedfloor_length = addtl_cfa / finishedfloor_width
     z_origin = foundation_top + 8.0 * (@ncfl_ag - 1)
 
     surface = OpenStudio::Model::Surface.new(add_floor_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
@@ -1131,18 +1162,18 @@ class OSModel
 
   def self.add_thermal_mass(runner, model, building)
     drywall_thick_in = 0.5
-    partition_frac_of_ffa = 1.0
+    partition_frac_of_cfa = 1.0
     success = ThermalMassConstructions.apply_partition_walls(runner, model, [],
                                                              "PartitionWallConstruction",
-                                                             drywall_thick_in, partition_frac_of_ffa)
+                                                             drywall_thick_in, partition_frac_of_cfa)
     return false if not success
 
     # FIXME ?
-    furniture_frac_of_ffa = 1.0
+    furniture_frac_of_cfa = 1.0
     mass_lb_per_sqft = 8.0
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
-    success = ThermalMassConstructions.apply_furniture(runner, model, furniture_frac_of_ffa,
+    success = ThermalMassConstructions.apply_furniture(runner, model, furniture_frac_of_cfa,
                                                        mass_lb_per_sqft, density_lb_per_cuft, mat)
     return false if not success
 
@@ -2464,7 +2495,7 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch)
+    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, @cfa)
     return false if not success
 
     return true
@@ -2599,11 +2630,8 @@ class OSModel
       if misc_monthly_sch.nil?
         misc_monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
       end
-
-      success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh,
-                                          misc_sens_frac, misc_lat_frac, misc_weekday_sch,
-                                          misc_weekend_sch, misc_monthly_sch, nil)
-      return false if not success
+    else
+      misc_annual_kwh = 0
     end
 
     # Television
@@ -2613,10 +2641,13 @@ class OSModel
       if tv_annual_kwh.nil?
         tv_annual_kwh, tv_sens_frac, tv_lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
       end
-
-      success = MiscLoads.apply_tv(model, runner, tv_annual_kwh, sch, living_space)
-      return false if not success
+    else
+      tv_annual_kwh = 0
     end
+
+    success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
+                                        misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh, @cfa)
+    return false if not success
 
     return true
   end
@@ -2645,7 +2676,8 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh)
+    gfa = 0 # garage floor area FIXME
+    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, gfa)
     return false if not success
 
     return true
@@ -2909,15 +2941,21 @@ class OSModel
 
     # FIXME: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
+    window_area = 0.0
+    building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
+      window_values = HPXML.get_window_values(window: window)
+      window_area += window_values[:area]
+    end
+
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                            @nbeds, @nbaths, @ncfl, @ncfl_ag)
+                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area)
     return false if not success
 
     return true
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @nbeds, false)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, false)
     return false if not success
 
     return true

@@ -2924,7 +2924,7 @@ class HVAC
     return true
   end
 
-  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch)
+  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, cfa)
     obj_name = Constants.ObjectNameCeilingFan
 
     ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, runner, obj_name + " schedule", weekday_sch, weekend_sch, [1] * 12)
@@ -2932,14 +2932,12 @@ class HVAC
       return false
     end
 
-    ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces, runner)
-
     model.getSpaces.each do |space|
       next if Geometry.space_is_unfinished(space)
 
       space_obj_name = "#{obj_name}|#{space.name.to_s}"
 
-      space_mel_ann = annual_kWh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
+      space_mel_ann = annual_kWh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
       space_design_level = ceiling_fan_sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
 
       equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)

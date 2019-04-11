@@ -6,7 +6,7 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, nbeds, show_debug_info)
+  def self.apply(model, runner, weather, cfa, nbeds, show_debug_info)
     @model_spaces = model.getSpaces
 
     # Get year of model
@@ -39,9 +39,6 @@ class HVACSizing
     mj8 = process_site_calcs_and_design_temps(runner, mj8, weather)
     return false if mj8.nil?
 
-    # Get finished floor area
-    ffa = Geometry.get_finished_floor_area_from_spaces(@model_spaces)
-
     # Get shelter class
     shelter_class = get_shelter_class(model)
 
@@ -49,11 +46,11 @@ class HVACSizing
     hvac = get_hvac_info(runner, model)
     return false if hvac.nil?
 
-    ducts = get_ducts_info(runner, model, hvac, ffa)
+    ducts = get_ducts_info(runner, model, hvac, cfa)
     return false if ducts.nil?
 
     # Calculate loads for each conditioned thermal zone
-    zones_loads = process_zone_loads(runner, model, mj8, weather, mj8.htd, nbeds, ffa, shelter_class)
+    zones_loads = process_zone_loads(runner, model, mj8, weather, mj8.htd, nbeds, cfa, shelter_class)
     return false if zones_loads.nil?
 
     # Aggregate zone loads into initial loads
@@ -61,7 +58,7 @@ class HVACSizing
     return false if init_values.nil?
 
     # Process duct loads and equipment
-    init_values, final_values = process_loads_and_equipment(runner, model, mj8, zones_loads, init_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+    init_values, final_values = process_loads_and_equipment(runner, model, mj8, zones_loads, init_values, weather, hvac, ducts, nbeds, cfa, shelter_class)
     return false if final_values.nil? or init_values.nil?
 
     # Display debug info
@@ -440,7 +437,7 @@ class HVACSizing
     return dehum_temp
   end
 
-  def self.process_zone_loads(runner, model, mj8, weather, htd, nbeds, ffa, shelter_class)
+  def self.process_zone_loads(runner, model, mj8, weather, htd, nbeds, cfa, shelter_class)
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
 
     # Constant loads (no variation throughout day)
@@ -467,7 +464,7 @@ class HVACSizing
     thermal_zones.each do |thermal_zone|
       next if not Geometry.zone_is_finished(thermal_zone)
 
-      zones_sens[thermal_zone], zones_lat[thermal_zone] = process_internal_gains(runner, mj8, thermal_zone, weather, nbeds, ffa)
+      zones_sens[thermal_zone], zones_lat[thermal_zone] = process_internal_gains(runner, mj8, thermal_zone, weather, nbeds, cfa)
       return nil if zones_sens[thermal_zone].nil? or zones_lat[thermal_zone].nil?
     end
     # Find hour of the maximum total & latent loads
@@ -1233,7 +1230,7 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_internal_gains(runner, mj8, thermal_zone, weather, nbeds, ffa)
+  def self.process_internal_gains(runner, mj8, thermal_zone, weather, nbeds, cfa)
     '''
     Cooling and Dehumidification Loads: Internal Gains
     '''
@@ -1371,10 +1368,11 @@ class HVACSizing
     n_occupants = nbeds + 1 # Number of occupants based on Section 22-3
     occ_sched = [1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189,
                  0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000]
-    zone_ffa = Geometry.get_finished_floor_area_from_spaces(thermal_zone.spaces)
-    for hr in 0..23
-      int_Sens_Hr[hr] += occ_sched[hr] * 230 * n_occupants * zone_ffa / ffa
-      int_Lat_Hr[hr] += occ_sched[hr] * 200 * n_occupants * zone_ffa / ffa
+    thermal_zone.spaces.each do |space|
+      for hr in 0..23
+        int_Sens_Hr[hr] += occ_sched[hr] * 230 * n_occupants * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
+        int_Lat_Hr[hr] += occ_sched[hr] * 200 * n_occupants * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
+      end
     end
 
     return int_Sens_Hr, int_Lat_Hr
@@ -1455,7 +1453,7 @@ class HVACSizing
     return init_values
   end
 
-  def self.process_loads_and_equipment(runner, model, mj8, zones_loads, init_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+  def self.process_loads_and_equipment(runner, model, mj8, zones_loads, init_values, weather, hvac, ducts, nbeds, cfa, shelter_class)
     # TODO: Combine process_duct_loads_cool_dehum with process_duct_loads_heating? Some duplicate code
     final_values = FinalValues.new
     final_values = process_duct_regain_factors(runner, final_values, ducts)
@@ -1464,7 +1462,7 @@ class HVACSizing
     final_values = process_cooling_equipment_adjustments(runner, mj8, init_values, final_values, weather, hvac)
     final_values = process_slave_zone_flow_ratios(runner, zones_loads, ducts, final_values)
     final_values = process_fixed_equipment(runner, final_values, hvac)
-    final_values = process_finalize(runner, model, mj8, zones_loads, init_values, final_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+    final_values = process_finalize(runner, model, mj8, zones_loads, init_values, final_values, weather, hvac, ducts, nbeds, cfa, shelter_class)
     final_values = process_efficiency_capacity_derate(runner, hvac, final_values)
     final_values = process_dehumidifier_sizing(runner, mj8, init_values, final_values, weather, hvac)
     return init_values, final_values
@@ -1997,7 +1995,7 @@ class HVACSizing
     return final_values
   end
 
-  def self.process_finalize(runner, model, mj8, zones_loads, init_values, final_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+  def self.process_finalize(runner, model, mj8, zones_loads, init_values, final_values, weather, hvac, ducts, nbeds, cfa, shelter_class)
     '''
     Finalize Sizing Calculations
     '''
@@ -2024,7 +2022,7 @@ class HVACSizing
     elsif hvac.HasAirSourceHeatPump
 
       if hvac.FixedCoolingCapacity.nil?
-        final_values = process_heat_pump_adjustment(runner, model, mj8, final_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+        final_values = process_heat_pump_adjustment(runner, model, mj8, final_values, weather, hvac, ducts, nbeds, cfa, shelter_class)
         return nil if final_values.nil?
       end
 
@@ -2040,7 +2038,7 @@ class HVACSizing
     elsif hvac.HasMiniSplitHeatPump
 
       if hvac.FixedCoolingCapacity.nil?
-        final_values = process_heat_pump_adjustment(runner, model, mj8, final_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+        final_values = process_heat_pump_adjustment(runner, model, mj8, final_values, weather, hvac, ducts, nbeds, cfa, shelter_class)
         return nil if final_values.nil?
       end
 
@@ -2223,7 +2221,7 @@ class HVACSizing
     return final_values
   end
 
-  def self.process_heat_pump_adjustment(runner, model, mj8, final_values, weather, hvac, ducts, nbeds, ffa, shelter_class)
+  def self.process_heat_pump_adjustment(runner, model, mj8, final_values, weather, hvac, ducts, nbeds, cfa, shelter_class)
     '''
     Adjust heat pump sizing
     '''
@@ -2267,7 +2265,7 @@ class HVACSizing
       end
 
       # Calculate heating loads at the minimum compressor temperature
-      min_temp_zones_loads = process_zone_loads(runner, model, mj8, weather, htd, nbeds, ffa, shelter_class)
+      min_temp_zones_loads = process_zone_loads(runner, model, mj8, weather, htd, nbeds, cfa, shelter_class)
       return nil if min_temp_zones_loads.nil?
 
       min_temp_init_values = process_intermediate_total_loads(runner, mj8, min_temp_zones_loads, weather, hvac)
@@ -2821,7 +2819,7 @@ class HVACSizing
     return cool_Load_Lat, cool_Load_Sens
   end
 
-  def self.get_ducts_info(runner, model, hvac, ffa)
+  def self.get_ducts_info(runner, model, hvac, cfa)
     ducts = DuctsInfo.new
 
     ducts.Has = false

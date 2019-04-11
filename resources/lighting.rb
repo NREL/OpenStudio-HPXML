@@ -3,7 +3,7 @@ require_relative "geometry"
 require_relative "unit_conversions"
 
 class Lighting
-  def self.apply(model, runner, weather, interior_kwh, garage_kwh, exterior_kwh)
+  def self.apply(model, runner, weather, interior_kwh, garage_kwh, exterior_kwh, cfa, gfa)
     lat = weather.header.Latitude
     long = weather.header.Longitude
     tz = weather.header.Timezone
@@ -116,12 +116,8 @@ class Lighting
       end
     end
 
-    # Get FFA and finished spaces
+    # Get finished spaces
     finished_spaces = Geometry.get_finished_spaces(model.getSpaces)
-    ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces, runner)
-    if ffa.nil?
-      return false
-    end
 
     # Create schedule
     sch = HourlyByMonthSchedule.new(model, runner, Constants.ObjectNameLighting + " schedule", lighting_sch, lighting_sch)
@@ -134,7 +130,7 @@ class Lighting
       space_obj_name = "#{Constants.ObjectNameLighting} #{space.name.to_s}"
 
       if finished_spaces.include?(space)
-        space_ltg_ann = interior_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
+        space_ltg_ann = interior_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
       end
       space_design_level = sch.calcDesignLevel(sch.maxval * space_ltg_ann)
 
@@ -152,7 +148,6 @@ class Lighting
     end
 
     garage_spaces = Geometry.get_garage_spaces(model.getSpaces)
-    gfa = Geometry.get_floor_area_from_spaces(garage_spaces)
     garage_spaces.each do |garage_space|
       space_obj_name = "#{Constants.ObjectNameLighting} #{garage_space.name.to_s}"
 
