@@ -295,7 +295,7 @@ class OSModel
     success = add_setpoints(runner, model, building, weather, spaces)
     return false if not success
 
-    success = add_ceiling_fans(runner, model, building)
+    success = add_ceiling_fans(runner, model, building, spaces)
     return false if not success
 
     # FIXME: remove the following logic eventually
@@ -2493,7 +2493,7 @@ class OSModel
     return true
   end
 
-  def self.add_ceiling_fans(runner, model, building)
+  def self.add_ceiling_fans(runner, model, building, spaces)
     ceiling_fan_values = HPXML.get_ceiling_fan_values(ceiling_fan: building.elements["BuildingDetails/Lighting/CeilingFan"])
     return true if ceiling_fan_values.nil?
 
