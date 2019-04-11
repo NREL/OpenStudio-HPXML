@@ -6,7 +6,7 @@ require_relative "psychrometrics"
 require_relative "schedules"
 
 class HVAC
-  def self.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
+  def self.apply_central_ac_1speed(model, unit, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
                                    frac_cool_load_served)
@@ -24,12 +24,16 @@ class HVAC
     cOOL_CAP_FFLOW_SPEC = [[0.718605468, 0.410099989, -0.128705457]]
     cOOL_EIR_FFLOW_SPEC = [[1.32299905, -0.477711207, 0.154712157]]
 
+    eir_coeff_ac_clg = [-3.302695861, 0.137871531, -0.001056996, -0.012573945, 0.000214638, -0.000145054]
+
     capacity_ratios = [1.0]
     fan_speed_ratios = [1.0]
 
     # Cooling Coil
     rated_airflow_rate = 386.1 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
+    eers = [calc_EER_cooling_1spd(seer, fan_power_rated, eir_coeff_ac_clg)]
+    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)]
@@ -434,7 +438,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ashp_1speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+  def self.apply_central_ashp_1speed(model, unit, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      eer_capacity_derates, cop_capacity_derates,
                                      heat_pump_capacity, supplemental_efficiency,
@@ -460,6 +464,10 @@ class HVAC
     hEAT_CAP_FFLOW_SPEC = [[0.694045465, 0.474207981, -0.168253446]]
     hEAT_EIR_FFLOW_SPEC = [[2.185418751, -1.942827919, 0.757409168]]
 
+    eir_coeff_hp_clg = [-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]
+    eir_coeff_hp_htg = [0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]
+    cap_coeff_hp_htg = [0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]
+
     capacity_ratios = [1.0]
     fan_speed_ratios_cooling = [1.0]
     fan_speed_ratios_heating = [1.0]
@@ -467,6 +475,8 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate_cooling = 394.2 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
+    eers = [calc_EER_cooling_1spd(seer, fan_power_rated, eir_coeff_hp_clg)]
+    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)]
@@ -474,6 +484,8 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 384.1 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
+    cops = [calc_COP_heating_1spd(hspf, Constants.C_d_htg, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg)]
+    puts cops
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)]
 
@@ -3498,6 +3510,147 @@ class HVAC
 
   def self.calc_EIR_from_EER(eer, supplyFanPower_Rated)
     return UnitConversions.convert((1 - UnitConversions.convert(supplyFanPower_Rated * 0.03333, "Wh", "Btu")) / eer - supplyFanPower_Rated * 0.03333, "Wh", "Btu")
+  end
+
+  def self.calc_EER_from_EIR(eir, supplyFanPower_Rated)
+    cfm_per_ton = 400
+    cfm_per_btuh = cfm_per_ton / 12000.0
+    return ((1 - 3.412 * (supplyFanPower_Rated * cfm_per_btuh)) / (eir / 3.412 + (supplyFanPower_Rated * cfm_per_btuh)))
+  end
+
+  def self.calc_biquad(coeff, in_1, in_2)
+    result = coeff[0] + coeff[1]*in_1 + coeff[2]*in_1*in_1 + coeff[3]*in_2 + coeff[4]*in_2*in_2 + coeff[5]*in_1*in_2
+    return result
+  end
+
+  def self.calc_EER_cooling_1spd(seer, fan_power_rated, eir_coeff)
+    # Directly calculate cooling coil net EER at condition A (95/80/67) using SEER
+
+    if seer < 13
+      c_d = Constants.C_d_clg_low_seer
+    else
+      c_d = Constants.C_d_clg_high_seer
+    end
+
+    # 1. Calculate eer_b using SEER and c_d
+    eer_b = seer / (1 - 0.5 * c_d)
+
+    # 2. Calculate eir_b
+    eir_b = calc_EIR_from_EER(eer_b, fan_power_rated)
+
+    # 3. Calculate eir_a using performance curves
+    eir_a = eir_b / calc_biquad(eir_coeff, 67.0, 82.0)
+    eer_a = calc_EER_from_EIR(eir_a, fan_power_rated)
+
+    return eer_a
+  end
+
+  def self.calc_COP_heating_1spd(hspf, c_d, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg)
+    # Iterate to find rated net COP given HSPF using simple bisection method
+
+    # Initial large bracket to span possible hspf range
+    cop_a = 0.1
+    cop_b = 10.0
+    
+    # Iterate
+    iter_max = 100
+    tol = 0.0001
+
+    i = 0
+    err = 1
+    cop_c = (cop_a + cop_b) / 2.0
+    (1..iter_max + 1).each do |n|
+      f_a = calc_HSPF_SingleSpeed(cop_a, c_d, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg) - hspf
+      f_c = calc_HSPF_SingleSpeed(cop_c, c_d, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg) - hspf
+
+      if f_c == 0
+        return cop_c
+      elsif f_a * f_c < 0
+        cop_b = cop_c
+      else
+        cop_a = cop_c
+      end
+
+      cop_c = (cop_a + cop_b) / 2.0
+      err = (cop_b - cop_a) / 2.0
+
+      if err <= tol
+        break
+      end
+    end
+
+    if i > iter_max
+      cop_c = -99
+      runner.registerWarning('Single-speed heating COP iteration failed to converge.')
+    end
+
+    return cop_c
+  end
+
+  def self.calc_HSPF_SingleSpeed(cop_47, c_d, fan_power_rated, coeff_eir, coeff_q)
+    # Single speed HSPF calculation ported from BEopt v2.8 sim.py
+
+    eir_47 = calc_EIR_from_COP(cop_47, fan_power_rated)
+    eir_35 = eir_47 * calc_biquad(coeff_eir, 70, 35)
+    eir_17 = eir_47 * calc_biquad(coeff_eir, 70, 17)
+    
+    q_47 = 1
+    q_35 = 0.7519   # Hard code Q_35 from BEopt1 
+    q_17 = q_47 * calc_biquad(coeff_q, 70, 17)
+    
+    cfm_Btu_h = 400 / 12000.0
+    
+    q_47_net = q_47 + fan_power_rated * 3.412 * cfm_Btu_h
+    q_35_net = q_35 + fan_power_rated * 3.412 * cfm_Btu_h
+    q_17_net = q_17 + fan_power_rated * 3.412 * cfm_Btu_h
+    
+    p_47 = (q_47 * eir_47)/3.412 + fan_power_rated * cfm_Btu_h
+    p_35 = (q_35 * eir_35)/3.412 + fan_power_rated * cfm_Btu_h
+    p_17 = (q_17 * eir_17)/3.412 + fan_power_rated * cfm_Btu_h
+    
+    t_bins = [62,57,52,47,42,37,32,27,22,17,12,7,2,-3,-8]
+    frac_hours = [0.132,0.111,0.103,0.093,0.100,0.109,0.126,0.087,0.055,0.036,0.026,0.013,0.006,0.002,0.001]
+    
+    designtemp = 5
+    t_off = 10
+    t_on = 14
+    ptot = 0
+    rHtot = 0
+    bLtot = 0
+    dHRmin = q_47
+
+    (0..14).each do |i|
+      bL = ((65 - t_bins[i]) / (65-designtemp)) * 0.77 * dHRmin
+       
+      if t_bins[i] > 17 and t_bins[i] < 45
+        q_h = q_17_net + (((q_35_net - q_17_net) * (t_bins[i]-17)) / (35-17))
+        p_h = p_17 + (((p_35 - p_17) * (t_bins[i] - 17)) / (35 - 17))
+      else
+        q_h = q_17_net + (((q_47_net - q_17_net) * (t_bins[i] - 17)) / (47 - 17))
+        p_h = p_17 + (((p_47 - p_17) * (t_bins[i] - 17))/(47 - 17))
+      end
+     
+      x_t = [bL / q_h, 1].min
+     
+      pLF = 1 - (c_d * (1 - x_t))
+      if t_bins[i] <= t_off or q_h/(3.412 * p_h) < 1
+        sigma_t = 0
+      elsif t_off < t_bins[i] and t_bins[i] <= t_on and q_h /(p_h * 3.412) >= 1
+        sigma_t = 0.5
+      elsif t_bins[i] > t_on and q_h / (3.412 * p_h) >= 1
+        sigma_t = 1
+      end
+     
+      p_h_i = (x_t * p_h * sigma_t / pLF) * frac_hours[i]
+      rH_i = ((bL - (x_t * q_h * sigma_t)) / 3.412) * frac_hours[i]
+      bL_i = bL * frac_hours[i]
+      ptot = ptot + p_h_i
+      rHtot = rHtot + rH_i
+      bLtot = bLtot + bL_i
+    end
+
+    hspf = bLtot / (ptot + rHtot)
+    return hspf
   end
 
   def self.calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)

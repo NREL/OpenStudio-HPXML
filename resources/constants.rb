@@ -5,6 +5,18 @@ class Constants
     return 73.5 # deg-F
   end
 
+  def self.C_d_clg_low_seer
+    return 0.20
+  end
+
+  def self.C_d_clg_high_seer
+    return 0.07
+  end
+
+  def self.C_d_htg
+    return 0.11
+  end
+
   def self.DefaultCoolingSetpoint
     return 76.0
   end
