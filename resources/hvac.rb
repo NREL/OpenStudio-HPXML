@@ -7,8 +7,7 @@ require_relative "schedules"
 
 class HVAC
   def self.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
-                                   fan_power_rated, fan_power_installed,
-                                   crankcase_capacity, crankcase_temp,
+                                   fan_power_installed, crankcase_kw, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
                                    sequential_cool_load_frac,
                                    attached_heating_system)
@@ -16,6 +15,7 @@ class HVAC
     return true if frac_cool_load_served <= 0
 
     num_speeds = 1
+    fan_power_rated = get_fan_power_rated(seer)
 
     # Performance curves
     # NOTE: These coefficients are in IP UNITS
@@ -63,7 +63,7 @@ class HVAC
       clg_coil.setLatentCapacityTimeConstant(OpenStudio::OptionalDouble.new(45.0))
 
       clg_coil.setCondenserType("AirCooled")
-      clg_coil.setCrankcaseHeaterCapacity(OpenStudio::OptionalDouble.new(UnitConversions.convert(crankcase_capacity, "kW", "W")))
+      clg_coil.setCrankcaseHeaterCapacity(OpenStudio::OptionalDouble.new(UnitConversions.convert(crankcase_kw, "kW", "W")))
       clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(OpenStudio::OptionalDouble.new(UnitConversions.convert(crankcase_temp, "F", "C")))
 
       # _processSystemFan
@@ -149,8 +149,7 @@ class HVAC
 
   def self.apply_central_ac_2speed(model, unit, runner, seer, eers, shrs,
                                    capacity_ratios, fan_speed_ratios,
-                                   fan_power_rated, fan_power_installed,
-                                   crankcase_capacity, crankcase_temp,
+                                   fan_power_installed, crankcase_kw, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
                                    sequential_cool_load_frac,
                                    attached_heating_system)
@@ -158,6 +157,7 @@ class HVAC
     return true if frac_cool_load_served <= 0
 
     num_speeds = 2
+    fan_power_rated = get_fan_power_rated(seer)
 
     # Performance curves
     # NOTE: These coefficients are in IP UNITS
@@ -195,7 +195,7 @@ class HVAC
       clg_coil.setCondenserType("AirCooled")
       clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
       clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-      clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
       clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
 
       clg_coil.setFuelType("Electricity")
@@ -299,8 +299,7 @@ class HVAC
 
   def self.apply_central_ac_4speed(model, unit, runner, seer, eers, shrs,
                                    capacity_ratios, fan_speed_ratios,
-                                   fan_power_rated, fan_power_installed,
-                                   crankcase_capacity, crankcase_temp,
+                                   fan_power_installed, crankcase_kw, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
                                    sequential_cool_load_frac,
                                    attached_heating_system)
@@ -308,6 +307,7 @@ class HVAC
     return true if frac_cool_load_served <= 0
 
     num_speeds = 4
+    fan_power_rated = get_fan_power_rated(seer)
 
     # Performance curves
     # NOTE: These coefficients are in IP UNITS
@@ -347,7 +347,7 @@ class HVAC
       clg_coil.setCondenserType("AirCooled")
       clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
       clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-      clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+      clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
       clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
 
       clg_coil.setFuelType("Electricity")
@@ -450,8 +450,7 @@ class HVAC
   end
 
   def self.apply_central_ashp_1speed(model, unit, runner, seer, hspf, eers, cops, shrs,
-                                     fan_power_rated, fan_power_installed, min_temp,
-                                     crankcase_capacity, crankcase_temp,
+                                     fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
                                      frac_heat_load_served, frac_cool_load_served,
@@ -462,6 +461,7 @@ class HVAC
     end
 
     num_speeds = 1
+    fan_power_rated = get_fan_power_rated(seer)
 
     # Performance curves
     # NOTE: These coefficients are in IP UNITS
@@ -529,7 +529,7 @@ class HVAC
           if frac_heat_load_served <= 0
             coil.setCrankcaseHeaterCapacity(0.0)
           else
-            coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+            coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
           end
           coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
           coil.setDefrostStrategy("ReverseCycle")
@@ -673,16 +673,15 @@ class HVAC
   end
 
   def self.apply_central_ashp_2speed(model, unit, runner, seer, hspf, eers, cops, shrs,
-                                     capacity_ratios, fan_speed_ratios_cooling,
-                                     fan_speed_ratios_heating,
-                                     fan_power_rated, fan_power_installed, min_temp,
-                                     crankcase_capacity, crankcase_temp,
+                                     capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
+                                     fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac)
 
     num_speeds = 2
+    fan_power_rated = get_fan_power_rated(seer)
 
     # Performance curves
     # NOTE: These coefficients are in IP UNITS
@@ -746,7 +745,7 @@ class HVAC
           if frac_heat_load_served <= 0
             coil.setCrankcaseHeaterCapacity(0.0)
           else
-            coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+            coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
           end
           coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
           coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
@@ -913,14 +912,14 @@ class HVAC
   def self.apply_central_ashp_4speed(model, unit, runner, seer, hspf, eers, cops, shrs,
                                      capacity_ratios, fan_speed_ratios_cooling,
                                      fan_speed_ratios_heating,
-                                     fan_power_rated, fan_power_installed, min_temp,
-                                     crankcase_capacity, crankcase_temp,
+                                     fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac)
 
     num_speeds = 4
+    fan_power_rated = get_fan_power_rated(seer)
 
     # Performance curves
     # NOTE: These coefficients are in IP UNITS
@@ -988,7 +987,7 @@ class HVAC
           if frac_heat_load_served <= 0
             coil.setCrankcaseHeaterCapacity(0.0)
           else
-            coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_capacity, "kW", "W"))
+            coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
           end
           coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
           coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
@@ -3779,6 +3778,14 @@ class HVAC
       return 0.11
     elsif num_speeds == 4
       return 0.24
+    end
+  end
+
+  def self.get_fan_power_rated(seer)
+    if seer <= 15
+      return 0.365 # W/cfm
+    else
+      return 0.14 # W/cfm
     end
   end
 
