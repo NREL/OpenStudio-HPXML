@@ -1025,7 +1025,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         puts "50%, 100%: #{result_50.round(2)}, #{result_100.round(2)} #{k}"
 
-        assert_in_epsilon(result_50, result_100 / 2.0, 0.1)
+        assert_in_epsilon(result_50, result_100 / 2.0, 0.05)
       end
       puts "\n"
     end

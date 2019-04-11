@@ -2410,18 +2410,20 @@ class OSModel
     htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
     residual_heat_load_served = 1.0 - htg_load_frac
     if residual_heat_load_served > 0.02 and residual_heat_load_served < 1
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_heat_load_served, 1)
+      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_heat_load_served, residual_heat_load_served)
       return false if not success
     end
+    @total_frac_remaining_heat_load_served -= residual_heat_load_served
 
     # Residual cooling
     clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
     clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
     residual_cool_load_served = 1.0 - clg_load_frac
     if residual_cool_load_served > 0.02 and residual_cool_load_served < 1
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_cool_load_served, 1)
+      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_cool_load_served, residual_cool_load_served)
       return false if not success
     end
+    @total_frac_remaining_cool_load_served -= residual_cool_load_served
 
     return true
   end
