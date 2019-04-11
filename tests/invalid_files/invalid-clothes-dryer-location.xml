@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-03-27T16:56:27-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-04-09T14:31:14-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -27,11 +27,11 @@
           </FuelTypesAvailable>
         </Site>
         <BuildingConstruction>
-          <NumberofConditionedFloors>2</NumberofConditionedFloors>
+          <NumberofConditionedFloors>3</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>4</NumberofBedrooms>
-          <ConditionedFloorArea>3500.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>33787.5</ConditionedBuildingVolume>
+          <ConditionedFloorArea>7000.0</ConditionedFloorArea>
+          <ConditionedBuildingVolume>67575.0</ConditionedBuildingVolume>
           <GaragePresent>false</GaragePresent>
         </BuildingConstruction>
       </BuildingSummary>
@@ -59,7 +59,7 @@
               <UnitofMeasure>ACH</UnitofMeasure>
               <AirLeakage>3.0</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>33787.5</InfiltrationVolume>
+            <InfiltrationVolume>67575.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -148,18 +148,9 @@
             <SystemIdentifier id='Foundation'/>
             <FoundationType>
               <Basement>
-                <Conditioned>false</Conditioned>
+                <Conditioned>true</Conditioned>
               </Basement>
             </FoundationType>
-            <FrameFloor>
-              <SystemIdentifier id='FoundationFrameFloor'/>
-              <AdjacentTo>living space</AdjacentTo>
-              <Area>3500.0</Area>
-              <Insulation>
-                <SystemIdentifier id='FoundationFrameFloorIns'/>
-                <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
-              </Insulation>
-            </FrameFloor>
             <FoundationWall>
               <SystemIdentifier id='FoundationWall'/>
               <Height>9.0</Height>
@@ -217,7 +208,7 @@
           <RimJoist>
             <SystemIdentifier id='RimJoist2'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>180.0</Area>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
@@ -345,13 +336,13 @@
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>basement - unconditioned</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>basement - unconditioned</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
@@ -363,7 +354,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>basement - unconditioned</Location>
+            <Location>living space</Location>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
@@ -395,7 +386,7 @@
       <Appliances>
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
-          <Location>basement - unconditioned</Location>
+          <Location>living space</Location>
           <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
           <RatedAnnualkWh>387.0</RatedAnnualkWh>
           <LabelElectricRate>0.127</LabelElectricRate>
@@ -405,7 +396,7 @@
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
-          <Location>basement - unconditioned</Location>
+          <Location>garage</Location>
           <FuelType>electricity</FuelType>
           <EnergyFactor>3.01</EnergyFactor>
           <ControlType>timer</ControlType>
@@ -417,7 +408,7 @@
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
-          <Location>basement - unconditioned</Location>
+          <Location>living space</Location>
           <RatedAnnualkWh>609.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
