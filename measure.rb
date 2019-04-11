@@ -276,6 +276,10 @@ class OSModel
 
     # HVAC
 
+    control_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
+    slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
+    @control_slave_zones_hash = { control_zone => slave_zones }
+
     success = add_cooling_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
@@ -288,7 +292,7 @@ class OSModel
     success = add_residual_hvac(runner, model, building, use_only_ideal_air)
     return false if not success
 
-    success = add_setpoints(runner, model, building, weather)
+    success = add_setpoints(runner, model, building, weather, spaces)
     return false if not success
 
     success = add_ceiling_fans(runner, model, building)
@@ -314,7 +318,7 @@ class OSModel
     success = add_mels(runner, model, building, spaces)
     return false if not success
 
-    success = add_lighting(runner, model, building, weather)
+    success = add_lighting(runner, model, building, weather, spaces)
     return false if not success
 
     # Other
@@ -1778,8 +1782,6 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
-    living_space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1988,8 +1990,10 @@ class OSModel
       end
     end
 
+    wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
+    living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
     success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
-                                          @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
+                                          @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
                                           cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                           cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                                           cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
@@ -2043,7 +2047,7 @@ class OSModel
           success = HVAC.apply_central_ac_1speed(model, runner, seer, eers, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  eer_capacity_derates, cool_capacity_btuh,
-                                                 dse_cool, load_frac)
+                                                 dse_cool, load_frac, @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2058,7 +2062,7 @@ class OSModel
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  eer_capacity_derates, cool_capacity_btuh,
-                                                 dse_cool, load_frac)
+                                                 dse_cool, load_frac, @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2073,7 +2077,7 @@ class OSModel
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  eer_capacity_derates, cool_capacity_btuh,
-                                                 dse_cool, load_frac)
+                                                 dse_cool, load_frac, @control_slave_zones_hash)
           return false if not success
 
         else
@@ -2088,8 +2092,8 @@ class OSModel
         shr = 0.65
         airflow_rate = 350.0
 
-        success = HVAC.apply_room_ac(model, runner, eer, shr,
-                                     airflow_rate, cool_capacity_btuh, load_frac)
+        success = HVAC.apply_room_ac(model, runner, eer, shr, airflow_rate, cool_capacity_btuh,
+                                     load_frac, @control_slave_zones_hash)
         return false if not success
 
       end
@@ -2129,7 +2133,8 @@ class OSModel
         attached_to_multispeed_ac = get_attached_to_multispeed_ac(heating_system_values, building)
         success = HVAC.apply_furnace(model, runner, fuel, afue,
                                      heat_capacity_btuh, fan_power, dse_heat,
-                                     load_frac, attached_to_multispeed_ac)
+                                     load_frac, attached_to_multispeed_ac,
+                                     @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "WallFurnace"
@@ -2140,7 +2145,8 @@ class OSModel
         # TODO: Allow DSE
         success = HVAC.apply_unit_heater(model, runner, fuel,
                                          afue, heat_capacity_btuh, fan_power,
-                                         airflow_rate, load_frac)
+                                         airflow_rate, load_frac,
+                                         @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "Boiler"
@@ -2155,7 +2161,8 @@ class OSModel
         design_temp = 180.0
         success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                     oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                    heat_capacity_btuh, design_temp, dse_heat, load_frac)
+                                    heat_capacity_btuh, design_temp, dse_heat, load_frac,
+                                    @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "ElectricResistance"
@@ -2163,7 +2170,8 @@ class OSModel
         efficiency = heating_system_values[:heating_efficiency_percent]
         # TODO: Allow DSE
         success = HVAC.apply_electric_baseboard(model, runner, efficiency,
-                                                heat_capacity_btuh, load_frac)
+                                                heat_capacity_btuh, load_frac,
+                                                @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "Stove"
@@ -2174,7 +2182,8 @@ class OSModel
         # TODO: Allow DSE
         success = HVAC.apply_unit_heater(model, runner, fuel,
                                          efficiency, heat_capacity_btuh, fan_power,
-                                         airflow_rate, load_frac)
+                                         airflow_rate, load_frac,
+                                         @control_slave_zones_hash)
         return false if not success
 
       end
@@ -2246,7 +2255,8 @@ class OSModel
                                                    eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
-                                                   load_frac_heat, load_frac_cool)
+                                                   load_frac_heat, load_frac_cool,
+                                                   @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2268,7 +2278,8 @@ class OSModel
                                                    eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
-                                                   load_frac_heat, load_frac_cool)
+                                                   load_frac_heat, load_frac_cool,
+                                                   @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2290,7 +2301,8 @@ class OSModel
                                                    eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
-                                                   load_frac_heat, load_frac_cool)
+                                                   load_frac_heat, load_frac_cool,
+                                                   @control_slave_zones_hash)
           return false if not success
 
         else
@@ -2329,7 +2341,8 @@ class OSModel
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
                                   supplemental_efficiency, backup_heat_capacity_btuh,
-                                  dse_heat, load_frac_heat, load_frac_cool)
+                                  dse_heat, load_frac_heat, load_frac_cool,
+                                  @control_slave_zones_hash)
         return false if not success
 
       elsif hp_type == "ground-to-air"
@@ -2366,7 +2379,8 @@ class OSModel
                                   u_tube_leg_spacing, u_tube_spacing_type,
                                   fan_power, heat_pump_capacity, supplemental_efficiency,
                                   supplemental_capacity, dse_heat,
-                                  load_frac_heat, load_frac_cool)
+                                  load_frac_heat, load_frac_cool,
+                                  @control_slave_zones_hash)
         return false if not success
 
       end
@@ -2409,9 +2423,11 @@ class OSModel
     return true
   end
 
-  def self.add_setpoints(runner, model, building, weather)
+  def self.add_setpoints(runner, model, building, weather, spaces)
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
+
+    conditioned_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
 
     control_type = hvac_control_values[:control_type]
     heating_temp = hvac_control_values[:setpoint_temp_heating_season]
@@ -2435,7 +2451,8 @@ class OSModel
     htg_season_start_month = 1
     htg_season_end_month = 12
     success = HVAC.apply_heating_setpoints(model, runner, weather, htg_weekday_setpoints, htg_weekend_setpoints,
-                                           htg_use_auto_season, htg_season_start_month, htg_season_end_month)
+                                           htg_use_auto_season, htg_season_start_month, htg_season_end_month,
+                                           conditioned_zones)
     return false if not success
 
     cooling_temp = hvac_control_values[:setpoint_temp_cooling_season]
@@ -2469,7 +2486,8 @@ class OSModel
     clg_season_start_month = 1
     clg_season_end_month = 12
     success = HVAC.apply_cooling_setpoints(model, runner, weather, clg_weekday_setpoints, clg_weekend_setpoints,
-                                           clg_use_auto_season, clg_season_start_month, clg_season_end_month)
+                                           clg_use_auto_season, clg_season_start_month, clg_season_end_month,
+                                           conditioned_zones)
     return false if not success
 
     return true
@@ -2495,7 +2513,9 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, @cfa)
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
+                                      @cfa, conditioned_spaces)
     return false if not success
 
     return true
@@ -2595,8 +2615,6 @@ class OSModel
   end
 
   def self.add_mels(runner, model, building, spaces)
-    living_space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-
     # Misc
     plug_load_values = HPXML.get_plug_load_values(plug_load: building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']"])
     if not plug_load_values.nil?
@@ -2645,14 +2663,16 @@ class OSModel
       tv_annual_kwh = 0
     end
 
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
     success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
-                                        misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh, @cfa)
+                                        misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh,
+                                        @cfa, conditioned_spaces)
     return false if not success
 
     return true
   end
 
-  def self.add_lighting(runner, model, building, weather)
+  def self.add_lighting(runner, model, building, weather, spaces)
     lighting = building.elements["BuildingDetails/Lighting"]
     return true if lighting.nil?
 
@@ -2677,7 +2697,10 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_garage])
 
     gfa = 0 # garage floor area FIXME
-    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, gfa)
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    garage_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeGarage])
+    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, gfa,
+                                  conditioned_spaces, garage_spaces)
     return false if not success
 
     return true
@@ -3761,6 +3784,25 @@ class OSModel
     end
 
     return space
+  end
+
+  def self.get_spaces_of_type(spaces, space_types_list)
+    spaces_of_type = []
+    space_types_list.each do |space_type|
+      spaces_of_type << spaces[space_type] unless spaces[space_type].nil?
+    end
+    return spaces_of_type
+  end
+
+  def self.get_space_of_type(spaces, space_type)
+    spaces_of_type = self.get_spaces_of_type(spaces, [space_type])
+    if spaces_of_type.size > 1
+      fail "Unexpected number of spaces."
+    elsif spaces_of_type.size == 1
+      return spaces_of_type[0]
+    end
+
+    return nil
   end
 end
 

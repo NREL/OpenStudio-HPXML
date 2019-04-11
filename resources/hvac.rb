@@ -9,7 +9,7 @@ class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, eers, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
-                                   frac_cool_load_served)
+                                   frac_cool_load_served, control_slave_zones_hash)
 
     return true if frac_cool_load_served <= 0
 
@@ -36,9 +36,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameCentralAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
@@ -146,7 +143,7 @@ class HVAC
                                    capacity_ratios, fan_speed_ratios,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
-                                   frac_cool_load_served)
+                                   frac_cool_load_served, control_slave_zones_hash)
 
     return true if frac_cool_load_served <= 0
 
@@ -174,9 +171,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameCentralAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
@@ -291,7 +285,7 @@ class HVAC
                                    capacity_ratios, fan_speed_ratios,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
-                                   frac_cool_load_served)
+                                   frac_cool_load_served, control_slave_zones_hash)
 
     return true if frac_cool_load_served <= 0
 
@@ -321,9 +315,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameCentralAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
@@ -439,7 +430,8 @@ class HVAC
                                      eer_capacity_derates, cop_capacity_derates,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served)
+                                     frac_heat_load_served, frac_cool_load_served,
+                                     control_slave_zones_hash)
 
     if heat_pump_capacity == Constants.SizingAutoMaxLoad
       runner.registerWarning("Using #{Constants.SizingAutoMaxLoad} is not recommended for single-speed heat pumps. When sized larger than the cooling load, this can lead to humidity concerns due to reduced dehumidification performance by the heat pump.")
@@ -482,9 +474,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameAirSourceHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
@@ -705,7 +694,8 @@ class HVAC
                                      eer_capacity_derates, cop_capacity_derates,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served)
+                                     frac_heat_load_served, frac_cool_load_served,
+                                     control_slave_zones_hash)
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
@@ -748,9 +738,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameAirSourceHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
       htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, curves_in_ip, dse)
@@ -990,7 +977,8 @@ class HVAC
                                      eer_capacity_derates, cop_capacity_derates,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served)
+                                     frac_heat_load_served, frac_cool_load_served,
+                                     control_slave_zones_hash)
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
@@ -1037,9 +1025,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameAirSourceHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
@@ -1282,7 +1267,8 @@ class HVAC
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
                       heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
-                      dse, frac_heat_load_served, frac_cool_load_served)
+                      dse, frac_heat_load_served, frac_cool_load_served,
+                      control_slave_zones_hash)
 
     num_speeds = 10
 
@@ -1348,9 +1334,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameMiniSplitHeatPump
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
@@ -1660,7 +1643,8 @@ class HVAC
                       u_tube_leg_spacing, u_tube_spacing_type,
                       fan_power, heat_pump_capacity, supplemental_efficiency,
                       supplemental_capacity, dse,
-                      frac_heat_load_served, frac_cool_load_served)
+                      frac_heat_load_served, frac_cool_load_served,
+                      control_slave_zones_hash)
 
     if frac_glycol == 0
       fluid_type = Constants.FluidWater
@@ -1764,9 +1748,6 @@ class HVAC
     demand_outlet_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
     demand_outlet_pipe.addToNode(plant_loop.demandOutletNode)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       gshp_HEAT_CAP_fT_coeff = convert_curve_gshp(hEAT_CAP_FT_SEC, false)
       gshp_HEAT_POWER_fT_coeff = convert_curve_gshp(hEAT_POWER_FT_SPEC, false)
@@ -1972,7 +1953,8 @@ class HVAC
   end
 
   def self.apply_room_ac(model, runner, eer, shr,
-                         airflow_rate, capacity, frac_cool_load_served)
+                         airflow_rate, capacity, frac_cool_load_served,
+                         control_slave_zones_hash)
 
     return true if frac_cool_load_served <= 0
 
@@ -1994,9 +1976,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameRoomAirConditioner
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       ([control_zone] + slave_zones).each do |zone|
         # _processSystemRoomAC
@@ -2044,7 +2023,8 @@ class HVAC
 
   def self.apply_furnace(model, runner, fuel_type, afue,
                          capacity, fan_power_installed, dse,
-                         frac_heat_load_served, attached_to_multispeed_ac)
+                         frac_heat_load_served, attached_to_multispeed_ac,
+                         control_slave_zones_hash)
 
     return true if frac_heat_load_served <= 0
 
@@ -2059,9 +2039,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameFurnace(fuel_type)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processSystemHeatingCoil
 
@@ -2163,7 +2140,8 @@ class HVAC
 
   def self.apply_boiler(model, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                        capacity, design_temp, dse, frac_heat_load_served)
+                        capacity, design_temp, dse, frac_heat_load_served,
+                        control_slave_zones_hash)
 
     return true if frac_heat_load_served <= 0
 
@@ -2286,9 +2264,6 @@ class HVAC
     pipe_demand_inlet.addToNode(plant_loop.demandInletNode)
     pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       ([control_zone] + slave_zones).each do |zone|
         baseboard_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
@@ -2315,14 +2290,12 @@ class HVAC
     return true
   end
 
-  def self.apply_electric_baseboard(model, runner, efficiency, capacity, frac_heat_load_served)
+  def self.apply_electric_baseboard(model, runner, efficiency, capacity, frac_heat_load_served,
+                                    control_slave_zones_hash)
     return true if frac_heat_load_served <= 0
 
     obj_name = Constants.ObjectNameElectricBaseboard
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       ([control_zone] + slave_zones).each do |zone|
         htg_coil = OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric.new(model)
@@ -2347,7 +2320,8 @@ class HVAC
 
   def self.apply_unit_heater(model, runner, fuel_type,
                              efficiency, capacity, fan_power,
-                             airflow_rate, frac_heat_load_served)
+                             airflow_rate, frac_heat_load_served,
+                             control_slave_zones_hash)
 
     return true if frac_heat_load_served <= 0
 
@@ -2358,9 +2332,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameUnitHeater(fuel_type)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       ([control_zone] + slave_zones).each do |zone|
         # _processSystemHeatingCoil
@@ -2420,12 +2391,10 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads_cooling(model, runner, frac_cool_load_served)
+  def self.apply_ideal_air_loads_cooling(model, runner, frac_cool_load_served,
+                                         control_slave_zones_hash)
     return true if frac_cool_load_served <= 0
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       ([control_zone] + slave_zones).each do |zone|
         ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
@@ -2450,12 +2419,10 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads_heating(model, runner, frac_heat_load_served)
+  def self.apply_ideal_air_loads_heating(model, runner, frac_heat_load_served,
+                                         control_slave_zones_hash)
     return true if frac_heat_load_served <= 0
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       ([control_zone] + slave_zones).each do |zone|
         ideal_air = OpenStudio::Model::ZoneHVACIdealLoadsAirSystem.new(model)
@@ -2481,7 +2448,8 @@ class HVAC
   end
 
   def self.apply_heating_setpoints(model, runner, weather, htg_wkdy_monthly, htg_wked_monthly,
-                                   use_auto_season, season_start_month, season_end_month)
+                                   use_auto_season, season_start_month, season_end_month,
+                                   conditioned_zones)
 
     # Get heating season
     if use_auto_season
@@ -2507,17 +2475,10 @@ class HVAC
     htg_wkdy_monthly = htg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
     htg_wked_monthly = htg_wked_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
 
-    finished_zones = []
-    model.getThermalZones.each do |thermal_zone|
-      if Geometry.zone_is_finished(thermal_zone)
-        finished_zones << thermal_zone
-      end
-    end
-
     # Make the setpoint schedules
     clg_wkdy_monthly = nil
     clg_wked_monthly = nil
-    finished_zones.each do |finished_zone|
+    conditioned_zones.each do |finished_zone|
       thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
@@ -2585,7 +2546,7 @@ class HVAC
     end
 
     # Set the setpoint schedules
-    finished_zones.each do |finished_zone|
+    conditioned_zones.each do |finished_zone|
       thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
@@ -2618,7 +2579,8 @@ class HVAC
   end
 
   def self.apply_cooling_setpoints(model, runner, weather, clg_wkdy_monthly, clg_wked_monthly,
-                                   use_auto_season, season_start_month, season_end_month)
+                                   use_auto_season, season_start_month, season_end_month,
+                                   conditioned_zones)
 
     # Get cooling season
     if use_auto_season
@@ -2644,17 +2606,10 @@ class HVAC
     clg_wkdy_monthly = clg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
     clg_wked_monthly = clg_wked_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
 
-    finished_zones = []
-    model.getThermalZones.each do |thermal_zone|
-      if Geometry.zone_is_finished(thermal_zone)
-        finished_zones << thermal_zone
-      end
-    end
-
     # Make the setpoint schedules
     htg_wkdy_monthly = nil
     htg_wked_monthly = nil
-    finished_zones.each do |finished_zone|
+    conditioned_zones.each do |finished_zone|
       thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
@@ -2722,7 +2677,7 @@ class HVAC
     end
 
     # Set the setpoint schedules
-    finished_zones.each do |finished_zone|
+    conditioned_zones.each do |finished_zone|
       thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
@@ -2850,8 +2805,8 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.apply_dehumidifier(model, runner, energy_factor,
-                              water_removal_rate, air_flow_rate, humidity_setpoint)
+  def self.apply_dehumidifier(model, runner, energy_factor, water_removal_rate,
+                              air_flow_rate, humidity_setpoint, control_slave_zones_hash)
 
     # error checking
     if humidity_setpoint < 0 or humidity_setpoint > 1
@@ -2884,9 +2839,6 @@ class HVAC
     energy_factor_curve = create_curve_biquadratic(model, [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722], "DXDH-EnergyFactor-fT", -100, 100, -100, 100)
     part_load_frac_curve = create_curve_quadratic(model, [0.90, 0.10, 0.0], "DXDH-PLF-fPLR", 0, 1, 0.7, 1)
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-
-    control_slave_zones_hash = get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash.each do |control_zone, slave_zones|
       humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
       humidistat.setName(obj_name + " #{control_zone.name} humidistat")
@@ -2924,7 +2876,8 @@ class HVAC
     return true
   end
 
-  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, cfa)
+  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch,
+                              cfa, conditioned_spaces)
     obj_name = Constants.ObjectNameCeilingFan
 
     ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, runner, obj_name + " schedule", weekday_sch, weekend_sch, [1] * 12)
@@ -2932,9 +2885,7 @@ class HVAC
       return false
     end
 
-    model.getSpaces.each do |space|
-      next if Geometry.space_is_unfinished(space)
-
+    conditioned_spaces.each do |space|
       space_obj_name = "#{obj_name}|#{space.name.to_s}"
 
       space_mel_ann = annual_kWh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
@@ -3486,8 +3437,8 @@ class HVAC
     finished_above_grade_zones, finished_below_grade_zones = Geometry.get_finished_above_and_below_grade_zones(thermal_zones)
     control_zone = nil
     slave_zones = []
-    [finished_above_grade_zones, finished_below_grade_zones].each do |finished_zones| # Preference to above-grade zone as control zone
-      finished_zones.each do |finished_zone|
+    [finished_above_grade_zones, finished_below_grade_zones].each do |conditioned_zones| # Preference to above-grade zone as control zone
+      conditioned_zones.each do |finished_zone|
         if control_zone.nil?
           control_zone = finished_zone
         else

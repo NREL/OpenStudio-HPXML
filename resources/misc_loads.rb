@@ -4,7 +4,8 @@ require_relative "schedules"
 
 class MiscLoads
   def self.apply_plug(model, runner, misc_kwh, sens_frac, lat_frac,
-                      weekday_sch, weekend_sch, monthly_sch, tv_kwh, cfa)
+                      weekday_sch, weekend_sch, monthly_sch, tv_kwh, cfa,
+                      conditioned_spaces)
 
     return true if misc_kwh + tv_kwh == 0
 
@@ -38,11 +39,8 @@ class MiscLoads
 
     # Misc plug loads
     if misc_kwh > 0
-      model.getSpaces.each do |space|
-        next if Geometry.space_is_unfinished(space)
-
-        obj_name = Constants.ObjectNameMiscPlugLoads
-        space_obj_name = "#{obj_name}|#{space.name.to_s}"
+      conditioned_spaces.each do |space|
+        space_obj_name = "#{Constants.ObjectNameMiscPlugLoads}|#{space.name.to_s}"
 
         space_mel_ann = misc_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
         space_design_level = sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
@@ -51,7 +49,7 @@ class MiscLoads
         mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
         mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
         mel.setName(space_obj_name)
-        mel.setEndUseSubcategory(obj_name)
+        mel.setEndUseSubcategory(Constants.ObjectNameMiscPlugLoads)
         mel.setSpace(space)
         mel_def.setName(space_obj_name)
         mel_def.setDesignLevel(space_design_level)
@@ -67,11 +65,8 @@ class MiscLoads
     tv_lat_frac = 0.0
 
     if tv_kwh > 0
-      model.getSpaces.each do |space|
-        next if Geometry.space_is_unfinished(space)
-
-        obj_name = Constants.ObjectNameMiscTelevision
-        space_obj_name = "#{obj_name}|#{space.name.to_s}"
+      conditioned_spaces.each do |space|
+        space_obj_name = "#{Constants.ObjectNameMiscTelevision}|#{space.name.to_s}"
 
         space_mel_ann = tv_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
         space_design_level = sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
@@ -80,7 +75,7 @@ class MiscLoads
         mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
         mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
         mel.setName(space_obj_name)
-        mel.setEndUseSubcategory(obj_name)
+        mel.setEndUseSubcategory(Constants.ObjectNameMiscTelevision)
         mel.setSpace(space)
         mel_def.setName(space_obj_name)
         mel_def.setDesignLevel(space_design_level)

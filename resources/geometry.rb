@@ -3,36 +3,6 @@ require_relative "unit_conversions"
 require_relative "util"
 
 class Geometry
-  def self.get_abs_azimuth(azimuth_type, relative_azimuth, building_orientation, offset = 180.0)
-    azimuth = nil
-    if azimuth_type == Constants.CoordRelative
-      azimuth = relative_azimuth + building_orientation + offset
-    elsif azimuth_type == Constants.CoordAbsolute
-      azimuth = relative_azimuth + offset
-    end
-
-    # Ensure azimuth is >=0 and <=360
-    while azimuth < 0.0
-      azimuth += 360.0
-    end
-
-    while azimuth >= 360.0
-      azimuth -= 360.0
-    end
-
-    return azimuth
-  end
-
-  def self.get_abs_tilt(tilt_type, relative_tilt, roof_tilt, latitude)
-    if tilt_type == Constants.TiltPitch
-      return relative_tilt + roof_tilt
-    elsif tilt_type == Constants.TiltLatitude
-      return relative_tilt + latitude
-    elsif tilt_type == Constants.CoordAbsolute
-      return relative_tilt
-    end
-  end
-
   def self.initialize_transformation_matrix(m)
     m[0, 0] = 1
     m[1, 1] = 1
@@ -78,10 +48,6 @@ class Geometry
       return nil
     end
     return volume
-  end
-
-  def self.space_height(space)
-    return Geometry.get_height_of_spaces([space])
   end
 
   # Calculates space heights as the max z coordinate minus the min z coordinate

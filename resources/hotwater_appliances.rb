@@ -5,7 +5,7 @@ require_relative "constants"
 
 class HotWaterAndAppliances
   def self.apply(model, runner, weather, living_space,
-                 cfa, nbeds, ncfl, has_uncond_bsmnt,
+                 cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                  cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                  cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
@@ -37,7 +37,6 @@ class HotWaterAndAppliances
 
       water_use_connections = {}
       setpoint_scheds = {}
-      setpoint_temps = {}
 
       dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
         water_use_connections[dhw_loop] = OpenStudio::Model::WaterUseConnections.new(model)
@@ -48,18 +47,7 @@ class HotWaterAndAppliances
         if setpoint_scheds[dhw_loop].nil?
           return false
         end
-
-        setpoint_temps[dhw_loop] = Waterheater.get_water_heater_setpoint(model, dhw_loop, runner)
-        if setpoint_temps[dhw_loop].nil?
-          return false
-        end
       end
-
-      if setpoint_temps.values.max - setpoint_temps.values.min > 0.1
-        runner.registerError("Cannot handle different water heater setpoints.")
-        return false
-      end
-      setpoint_temp = setpoint_temps.values.reduce(:+) / setpoint_temps.size.to_f # average
 
       # Create hot water draw profile schedule
       fractions_hw = []
@@ -78,7 +66,7 @@ class HotWaterAndAppliances
       # Create mixed water draw profile schedule
       dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, dwhr_is_equal_flow, dwhr_facilities_connected, has_low_flow_fixtures)
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, dwhr_present, dwhr_iFrac, dwhr_efficiency, dwhr_eff_adj, dwhr_plc, dwhr_locF, dwhr_fixF)
-      daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, setpoint_temp)
+      daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, wh_setpoint)
       fractions_mw = []
       for day in 0..364
         for hr in 0..23
