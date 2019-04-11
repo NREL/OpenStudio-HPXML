@@ -93,6 +93,12 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       return false
     end
 
+    # Check for correct versions of OS
+    os_version = "2.8.0"
+    if OpenStudio.openStudioVersion != os_version
+      fail "OpenStudio version #{os_version} is required."
+    end
+
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue("hpxml_path", user_arguments)
     weather_dir = runner.getStringArgumentValue("weather_dir", user_arguments)
