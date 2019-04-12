@@ -123,7 +123,7 @@ def create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
   update_args_hash(measures, measure_subdir, args)
 
   # Apply measures
-  success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
+  success = apply_measures(measures_dir, measures, runner, model)
 
   # Report warnings/errors
   File.open(File.join(designdir, 'run.log'), 'w') do |f|
@@ -353,7 +353,7 @@ unless File.exists?(options[:hpxml]) and options[:hpxml].downcase.end_with? ".xm
 end
 
 # Check for correct versions of OS
-os_version = "2.7.1"
+os_version = "2.8.0"
 if OpenStudio.openStudioVersion != os_version
   fail "OpenStudio version #{os_version} is required."
 end
