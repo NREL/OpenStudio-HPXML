@@ -3,7 +3,8 @@ require_relative "geometry"
 require_relative "unit_conversions"
 
 class Lighting
-  def self.apply_interior(model, unit, runner, weather, sch, interior_ann)
+  def self.apply(model, runner, weather, interior_kwh, garage_kwh, exterior_kwh, cfa, gfa,
+                 conditioned_spaces, garage_spaces)
     lat = weather.header.Latitude
     long = weather.header.Longitude
     tz = weather.header.Timezone
@@ -116,112 +117,70 @@ class Lighting
       end
     end
 
-    # Get unit ffa and finished spaces
-    unit_finished_spaces = Geometry.get_finished_spaces(unit.spaces)
-    ffa = Geometry.get_finished_floor_area_from_spaces(unit.spaces, runner)
-    if ffa.nil?
+    # Create schedule
+    sch = HourlyByMonthSchedule.new(model, runner, Constants.ObjectNameLighting + " schedule", lighting_sch, lighting_sch)
+    if not sch.validated?
       return false
     end
 
-    # Finished spaces for the unit
-    unit_finished_spaces.each do |space|
-      space_obj_name = "#{Constants.ObjectNameLighting(unit.name.to_s)} #{space.name.to_s}"
+    # Add lighting to each conditioned space
+    if interior_kwh > 0
+      conditioned_spaces.each do |conditioned_space|
+        space_obj_name = "#{Constants.ObjectNameLighting} #{conditioned_space.name.to_s}"
 
-      if sch.nil?
-        # Create schedule
-        sch = HourlyByMonthSchedule.new(model, runner, Constants.ObjectNameLighting + " schedule", lighting_sch, lighting_sch)
-        if not sch.validated?
-          return false
-        end
+        space_ltg_ann = interior_kwh * UnitConversions.convert(conditioned_space.floorArea, "m^2", "ft^2") / cfa
+        space_design_level = sch.calcDesignLevel(sch.maxval * space_ltg_ann)
+
+        # Add lighting
+        ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+        ltg = OpenStudio::Model::Lights.new(ltg_def)
+        ltg.setName(space_obj_name)
+        ltg.setSpace(conditioned_space)
+        ltg_def.setName(space_obj_name)
+        ltg_def.setLightingLevel(space_design_level)
+        ltg_def.setFractionRadiant(0.6)
+        ltg_def.setFractionVisible(0.2)
+        ltg_def.setReturnAirFraction(0.0)
+        ltg.setSchedule(sch.schedule)
       end
-
-      if unit_finished_spaces.include?(space)
-        space_ltg_ann = interior_ann * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / ffa
-      end
-      space_design_level = sch.calcDesignLevel(sch.maxval * space_ltg_ann)
-
-      # Add lighting
-      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
-      ltg = OpenStudio::Model::Lights.new(ltg_def)
-      ltg.setName(space_obj_name)
-      ltg.setSpace(space)
-      ltg_def.setName(space_obj_name)
-      ltg_def.setLightingLevel(space_design_level)
-      ltg_def.setFractionRadiant(0.6)
-      ltg_def.setFractionVisible(0.2)
-      ltg_def.setReturnAirFraction(0.0)
-      ltg.setSchedule(sch.schedule)
     end
 
-    return true, sch
-  end
+    # Add lighting to each garage space
+    if garage_kwh > 0
+      garage_spaces.each do |garage_space|
+        space_obj_name = "#{Constants.ObjectNameLighting} #{garage_space.name.to_s}"
 
-  def self.apply_garage(model, runner, sch, garage_ann)
-    garage_spaces = Geometry.get_garage_spaces(model.getSpaces)
-    gfa = Geometry.get_floor_area_from_spaces(garage_spaces)
-    garage_spaces.each do |garage_space|
-      space_obj_name = "#{Constants.ObjectNameLighting} #{garage_space.name.to_s}"
+        space_ltg_ann = garage_kwh * UnitConversions.convert(garage_space.floorArea, "m^2", "ft^2") / gfa
+        space_design_level = sch.calcDesignLevel(sch.maxval * space_ltg_ann)
 
-      space_ltg_ann = garage_ann * UnitConversions.convert(garage_space.floorArea, "m^2", "ft^2") / gfa
-      space_design_level = sch.calcDesignLevel(sch.maxval * space_ltg_ann)
+        # Add lighting
+        ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+        ltg = OpenStudio::Model::Lights.new(ltg_def)
+        ltg.setName(space_obj_name)
+        ltg.setSpace(garage_space)
+        ltg_def.setName(space_obj_name)
+        ltg_def.setLightingLevel(space_design_level)
+        ltg_def.setFractionRadiant(0.6)
+        ltg_def.setFractionVisible(0.2)
+        ltg_def.setReturnAirFraction(0.0)
+        ltg.setSchedule(sch.schedule)
+      end
+    end
 
-      # Add lighting
-      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
-      ltg = OpenStudio::Model::Lights.new(ltg_def)
+    if exterior_kwh > 0
+      space_design_level = sch.calcDesignLevel(sch.maxval * exterior_kwh)
+      space_obj_name = "#{Constants.ObjectNameLighting} exterior"
+
+      # Add exterior lighting
+      ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
+      ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
       ltg.setName(space_obj_name)
-      ltg.setSpace(garage_space)
       ltg_def.setName(space_obj_name)
-      ltg_def.setLightingLevel(space_design_level)
-      ltg_def.setFractionRadiant(0.6)
-      ltg_def.setFractionVisible(0.2)
-      ltg_def.setReturnAirFraction(0.0)
+      ltg_def.setDesignLevel(space_design_level)
       ltg.setSchedule(sch.schedule)
     end
 
     return true
-  end
-
-  def self.apply_exterior(model, runner, sch, exterior_ann)
-    space_design_level = sch.calcDesignLevel(sch.maxval * exterior_ann)
-    space_obj_name = "#{Constants.ObjectNameLighting} exterior"
-
-    # Add exterior lighting
-    ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
-    ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
-    ltg.setName(space_obj_name)
-    ltg_def.setName(space_obj_name)
-    ltg_def.setDesignLevel(space_design_level)
-    ltg.setSchedule(sch.schedule)
-
-    return true
-  end
-
-  def self.remove(model, runner)
-    objects_to_remove = []
-    model.getExteriorLightss.each do |exterior_light|
-      objects_to_remove << exterior_light
-      objects_to_remove << exterior_light.exteriorLightsDefinition
-      if exterior_light.schedule.is_initialized
-        objects_to_remove << exterior_light.schedule.get
-      end
-    end
-    model.getLightss.each do |light|
-      objects_to_remove << light
-      objects_to_remove << light.lightsDefinition
-      if light.schedule.is_initialized
-        objects_to_remove << light.schedule.get
-      end
-    end
-    if objects_to_remove.size > 0
-      runner.registerInfo("Removed existing interior/exterior lighting from the model.")
-    end
-    objects_to_remove.uniq.each do |object|
-      begin
-        object.remove
-      rescue
-        # no op
-      end
-    end
   end
 
   def self.get_reference_fractions()
