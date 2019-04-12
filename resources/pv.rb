@@ -22,22 +22,4 @@ class PV
 
     return true
   end
-
-  def self.remove(model, runner, obj_name)
-    # Remove existing photovoltaics
-    curves_to_remove = []
-    model.getElectricLoadCenterDistributions.each do |electric_load_center_dist|
-      next unless electric_load_center_dist.name.to_s == "#{obj_name} elec load center dist"
-
-      electric_load_center_dist.generators.each do |generator|
-        generator = generator.to_GeneratorPVWatts.get
-        generator.remove
-      end
-      if electric_load_center_dist.inverter.is_initialized
-        inverter = electric_load_center_dist.inverter.get
-        inverter.remove
-      end
-      electric_load_center_dist.remove
-    end
-  end
 end
