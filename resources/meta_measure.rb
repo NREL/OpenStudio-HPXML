@@ -1,51 +1,11 @@
 # Helper methods related to having a meta-measure
 
-def apply_measures(measures_dir, measures, runner, model, workflow_json = nil, osw_out = nil, show_measure_calls = true)
+def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true)
   require 'openstudio'
 
   workflow_order = []
-  if workflow_json.nil?
-    measures.keys.each do |measure_subdir|
-      workflow_order << measure_subdir
-    end
-  else
-    # Run measures in the order dictated by the json instead
-    JSON.parse(File.read(workflow_json), :symbolize_names => true).each do |group|
-      group[:group_steps].each do |step|
-        step[:measures].each do |measure_subdir|
-          next unless measures.keys.include? measure_subdir
-
-          workflow_order << measure_subdir
-        end
-      end
-    end
-    # Tack additional measure not found in workflow_json on the end
-    measures.keys.each do |measure_subdir|
-      next if workflow_order.include? measure_subdir
-
-      workflow_order << measure_subdir
-    end
-  end
-
-  if not osw_out.nil?
-    # Create a workflow based on the measures we're going to call. Convenient for debugging.
-    workflowJSON = OpenStudio::WorkflowJSON.new
-    workflowJSON.setOswPath(File.expand_path("../#{osw_out}"))
-    workflowJSON.addMeasurePath("measures")
-    steps = OpenStudio::WorkflowStepVector.new
-    workflow_order.each do |measure_subdir|
-      measures[measure_subdir].each do |args|
-        step = OpenStudio::MeasureStep.new(measure_subdir)
-        args.each do |k, v|
-          next if v.nil?
-
-          step.setArgument(k, v)
-        end
-        steps.push(step)
-      end
-    end
-    workflowJSON.setWorkflowSteps(steps)
-    workflowJSON.save
+  measures.keys.each do |measure_subdir|
+    workflow_order << measure_subdir
   end
 
   # Call each measure in the specified order
