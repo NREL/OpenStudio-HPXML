@@ -237,9 +237,18 @@ class OSModel
     # Global variables
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = building_construction_values[:conditioned_floor_area]
+    @cfa_ag = @cfa
+    building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |foundation|
+      foundation.elements.each("Slab") do |fnd_slab|
+        slab_values = HPXML.get_slab_values(slab: fnd_slab)
+        @cfa_ag -= slab_values[:area]
+      end
+    end
     @cvolume = building_construction_values[:conditioned_building_volume]
     @ncfl = building_construction_values[:number_of_conditioned_floors]
+    @ncfl_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = building_construction_values[:number_of_bedrooms]
+    @nbaths = 3.0 # TODO: Arbitrary, but update
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
@@ -258,17 +267,17 @@ class OSModel
     # Geometry/Envelope
 
     spaces = {}
-    success, unit = add_geometry_envelope(runner, model, building, weather, spaces)
+    success = add_geometry_envelope(runner, model, building, weather, spaces)
     return false if not success
 
     # Bedrooms, Occupants
 
-    success = add_num_bedrooms_occupants(model, building, runner)
+    success = add_num_occupants(model, building, runner)
     return false if not success
 
     # Hot Water
 
-    success = add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
+    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
     return false if not success
 
     # HVAC
@@ -276,40 +285,44 @@ class OSModel
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
 
+    control_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
+    slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
+    @control_slave_zones_hash = { control_zone => slave_zones }
+
     # FIXME: Temporarily adding ideal air systems first to work around E+ bug
     # https://github.com/NREL/EnergyPlus/issues/7264
-    success = add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
+    success = add_residual_hvac(runner, model, building, use_only_ideal_air)
     return false if not success
 
-    success = add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_cooling_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_heating_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_heat_pump(runner, model, building, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return false if not success
 
-    success = add_setpoints(runner, model, building, weather)
+    success = add_setpoints(runner, model, building, weather, spaces)
     return false if not success
 
-    success = add_ceiling_fans(runner, model, building, unit)
+    success = add_ceiling_fans(runner, model, building, spaces)
     return false if not success
 
     # Plug Loads & Lighting
 
-    success = add_mels(runner, model, building, unit, spaces)
+    success = add_mels(runner, model, building, spaces)
     return false if not success
 
-    success = add_lighting(runner, model, building, unit, weather)
+    success = add_lighting(runner, model, building, weather, spaces)
     return false if not success
 
     # Other
 
-    success = add_airflow(runner, model, building, unit, loop_hvacs)
+    success = add_airflow(runner, model, building, loop_hvacs)
     return false if not success
 
-    success = add_hvac_sizing(runner, model, unit, weather)
+    success = add_hvac_sizing(runner, model, weather)
     return false if not success
 
     success = add_fuel_heating_eae(runner, model, building, loop_hvacs, zone_hvacs)
@@ -358,9 +371,6 @@ class OSModel
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather, runner)
     return false if heating_season.nil? or cooling_season.nil?
 
-    success, unit = add_building_info(model, building)
-    return false if not success
-
     success = add_foundations(runner, model, building, spaces, subsurface_areas)
     return false if not success
 
@@ -397,10 +407,11 @@ class OSModel
     success = explode_surfaces(runner, model)
     return false if not success
 
-    return true, unit
+    return true
   end
 
   def self.set_zone_volumes(runner, model, building)
+    # TODO: Use HPXML values not Model values
     thermal_zones = model.getThermalZones
 
     # Init
@@ -412,7 +423,16 @@ class OSModel
       if Geometry.is_finished_basement(thermal_zone) or Geometry.is_unfinished_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
         zones_updated += 1
 
-        zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * Geometry.get_floor_area_from_spaces(thermal_zone.spaces)
+        zone_floor_area = 0.0
+        thermal_zone.spaces.each do |space|
+          space.surfaces.each do |surface|
+            if surface.surfaceType.downcase == "floor"
+              zone_floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
+            end
+          end
+        end
+
+        zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * zone_floor_area
         if zone_volume <= 0
           fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
         end
@@ -445,17 +465,20 @@ class OSModel
         zones_updated += 1
 
         zone_surfaces = []
+        zone_floor_area = 0.0
         thermal_zone.spaces.each do |space|
           space.surfaces.each do |surface|
             zone_surfaces << surface
+            if surface.surfaceType.downcase == "floor"
+              zone_floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
+            end
           end
         end
 
         # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-        zone_area = Geometry.get_floor_area_from_spaces(thermal_zone.spaces)
-        zone_length = zone_area**0.5
+        zone_length = zone_floor_area**0.5
         zone_height = Math.tan(UnitConversions.convert(Geometry.get_roof_pitch(zone_surfaces), "deg", "rad")) * zone_length / 2.0
-        zone_volume = [zone_area * zone_height / 3.0, 0.01].max
+        zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
       end
     end
@@ -606,10 +629,6 @@ class OSModel
       space = OpenStudio::Model::Space.new(model)
       space.setName(space_type)
 
-      model.getBuildingUnits.each do |unit|
-        space.setBuildingUnit(unit)
-      end
-
       st = OpenStudio::Model::SpaceType.new(model)
       st.setStandardsSpaceType(space_type)
       space.setSpaceType(st)
@@ -617,28 +636,6 @@ class OSModel
       space.setThermalZone(thermal_zone)
       spaces[space_type] = space
     end
-  end
-
-  def self.add_building_info(model, building)
-    # Store building unit information
-    unit = OpenStudio::Model::BuildingUnit.new(model)
-    unit.setBuildingUnitType(Constants.BuildingUnitTypeResidential)
-    unit.setName(Constants.ObjectNameBuildingUnit)
-
-    # Store number of units
-    model.getBuilding.setStandardsNumberOfLivingUnits(1)
-
-    # Store number of stories
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    model.getBuilding.setStandardsNumberOfStories(building_construction_values[:number_of_conditioned_floors])
-    model.getBuilding.setStandardsNumberOfAboveGroundStories(building_construction_values[:number_of_conditioned_floors_above_grade])
-
-    # Store info for HVAC Sizing measure
-    if @garage_present
-      unit.additionalProperties.setFeature(Constants.SizingInfoGarageFracUnderFinishedSpace, 0.5) # FIXME: assumption
-    end
-
-    return true, unit
   end
 
   def self.get_surface_transformation(offset, x, y, z)
@@ -753,18 +750,11 @@ class OSModel
     return gross_wall_area
   end
 
-  def self.add_num_bedrooms_occupants(model, building, runner)
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+  def self.add_num_occupants(model, building, runner)
     building_occupancy_values = HPXML.get_building_occupancy_values(building_occupancy: building.elements["BuildingDetails/BuildingSummary/BuildingOccupancy"])
 
-    # Bedrooms
-    num_bedrooms = building_construction_values[:number_of_bedrooms]
-    num_bathrooms = 3.0 # Arbitrary, no impact on results since water heater capacity is required
-    success = Geometry.process_beds_and_baths(model, runner, [num_bedrooms], [num_bathrooms])
-    return false if not success
-
     # Occupants
-    num_occ = Geometry.get_occupancy_default_num(num_bedrooms)
+    num_occ = Geometry.get_occupancy_default_num(@nbeds)
     unless building_occupancy_values.nil?
       unless building_occupancy_values[:number_of_residents].nil?
         num_occ = building_occupancy_values[:number_of_residents]
@@ -775,7 +765,7 @@ class OSModel
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      success = Geometry.process_occupants(model, runner, num_occ.to_s, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch)
+      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
       return false if not success
     end
 
@@ -973,8 +963,6 @@ class OSModel
       plywood_thick_in, mat_floor_covering, mat_carpet = nil
       floor_assembly_r, floor_film_r = nil
       foundation.elements.each("FrameFloor") do |fnd_floor|
-        next if foundation_type == "ConditionedBasement"
-
         frame_floor_values = HPXML.get_frame_floor_values(floor: fnd_floor)
 
         floor_id = frame_floor_values[:id]
@@ -1083,8 +1071,9 @@ class OSModel
   end
 
   def self.add_finished_floor_area(runner, model, building, spaces)
+    # TODO: Use HPXML values not Model values
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    ffa = building_construction_values[:conditioned_floor_area].round(1)
+    cfa = building_construction_values[:conditioned_floor_area].round(1)
 
     # First check if we need to add a finished basement ceiling
     foundation_top = get_foundation_top(model)
@@ -1092,21 +1081,24 @@ class OSModel
     model.getThermalZones.each do |zone|
       next if not Geometry.is_finished_basement(zone)
 
-      floor_area = Geometry.get_finished_floor_area_from_spaces(zone.spaces).round(1)
+      floor_area = 0.0
       ceiling_area = 0.0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
-          next if surface.surfaceType.downcase.to_s != "roofceiling"
-
-          ceiling_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
+          if surface.surfaceType.downcase.to_s == "floor"
+            floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
+          elsif surface.surfaceType.downcase.to_s == "roofceiling"
+            ceiling_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
+          end
         end
       end
-      addtl_ffa = floor_area - ceiling_area
-      if addtl_ffa > 0
-        runner.registerWarning("Adding finished basement adiabatic ceiling with #{addtl_ffa.to_s} ft^2.")
 
-        finishedfloor_width = Math::sqrt(addtl_ffa)
-        finishedfloor_length = addtl_ffa / finishedfloor_width
+      addtl_cfa = floor_area - ceiling_area
+      if addtl_cfa > 0
+        runner.registerWarning("Adding finished basement adiabatic ceiling with #{addtl_cfa.to_s} ft^2.")
+
+        finishedfloor_width = Math::sqrt(addtl_cfa)
+        finishedfloor_length = addtl_cfa / finishedfloor_width
         z_origin = foundation_top
 
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
@@ -1126,24 +1118,31 @@ class OSModel
 
     # Next check if we need to add floors between finished spaces (e.g., 2-story buildings).
 
-    # Calculate ffa already added to model
-    model_ffa = Geometry.get_finished_floor_area_from_spaces(model.getSpaces).round(1)
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    nstories_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
+    # Calculate cfa already added to model
+    model_cfa = 0.0
+    model.getSpaces.each do |space|
+      next unless Geometry.space_is_finished(space)
 
-    if model_ffa > ffa
-      runner.registerError("Sum of conditioned floor surface areas #{model_ffa.to_s} is greater than ConditionedFloorArea specified #{ffa.to_s}.")
+      space.surfaces.each do |surface|
+        next unless surface.surfaceType.downcase.to_s == "floor"
+
+        model_cfa += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
+      end
+    end
+
+    if model_cfa > cfa
+      runner.registerError("Sum of conditioned floor surface areas #{model_cfa.to_s} is greater than ConditionedFloorArea specified #{cfa.to_s}.")
       return false
     end
 
-    addtl_ffa = ffa - model_ffa
-    return true unless addtl_ffa > 0
+    addtl_cfa = cfa - model_cfa
+    return true unless addtl_cfa > 0
 
-    runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_ffa.to_s} ft^2 to preserve building total conditioned floor area.")
+    runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_cfa.to_s} ft^2 to preserve building total conditioned floor area.")
 
-    finishedfloor_width = Math::sqrt(addtl_ffa)
-    finishedfloor_length = addtl_ffa / finishedfloor_width
-    z_origin = foundation_top + 8.0 * (nstories_ag - 1)
+    finishedfloor_width = Math::sqrt(addtl_cfa)
+    finishedfloor_length = addtl_cfa / finishedfloor_width
+    z_origin = foundation_top + 8.0 * (@ncfl_ag - 1)
 
     surface = OpenStudio::Model::Surface.new(add_floor_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
 
@@ -1163,18 +1162,18 @@ class OSModel
 
   def self.add_thermal_mass(runner, model, building)
     drywall_thick_in = 0.5
-    partition_frac_of_ffa = 1.0
+    partition_frac_of_cfa = 1.0
     success = ThermalMassConstructions.apply_partition_walls(runner, model, [],
                                                              "PartitionWallConstruction",
-                                                             drywall_thick_in, partition_frac_of_ffa)
+                                                             drywall_thick_in, partition_frac_of_cfa)
     return false if not success
 
     # FIXME ?
-    furniture_frac_of_ffa = 1.0
+    furniture_frac_of_cfa = 1.0
     mass_lb_per_sqft = 8.0
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
-    success = ThermalMassConstructions.apply_furniture(runner, model, furniture_frac_of_ffa,
+    success = ThermalMassConstructions.apply_furniture(runner, model, furniture_frac_of_cfa,
                                                        mass_lb_per_sqft, density_lb_per_cuft, mat)
     return false if not success
 
@@ -1778,7 +1777,7 @@ class OSModel
     return true
   end
 
-  def self.add_hot_water_and_appliances(runner, model, building, unit, weather, spaces, loop_dhws)
+  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1933,9 +1932,9 @@ class OSModel
           capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_tank(model, unit, runner, nil, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tank(model, runner, nil, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
-                                           oncycle_power, offcycle_power, ec_adj)
+                                           oncycle_power, offcycle_power, ec_adj, @nbeds)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1944,9 +1943,10 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           cycling_derate = 1.0 - ef_adj
-          success = Waterheater.apply_tankless(model, unit, runner, nil, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tankless(model, runner, nil, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
-                                               setpoint_temp, oncycle_power, offcycle_power, ec_adj)
+                                               setpoint_temp, oncycle_power, offcycle_power, ec_adj,
+                                               @nbeds)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -1966,11 +1966,11 @@ class OSModel
           temp_depress = 0.0 # FIXME
           ducting = "none"
           # FIXME: Use ef, ef_adj, ec_adj
-          success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather,
+          success = Waterheater.apply_heatpump(model, runner, nil, space, weather,
                                                e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
                                                cap, cop, shr, airflow_rate, fan_power,
                                                parasitics, tank_ua, int_factor, temp_depress,
-                                               ducting, 0)
+                                               @nbeds, ducting)
           return false if not success
 
         else
@@ -1986,8 +1986,10 @@ class OSModel
       end
     end
 
-    success = HotWaterAndAppliances.apply(model, unit, runner, weather,
-                                          @cfa, @nbeds, @ncfl, @has_uncond_bsmnt,
+    wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
+    living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+    success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
+                                          @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
                                           cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                           cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
                                           cd_space, dw_ef, dw_cap, fridge_annual_kwh, fridge_space,
@@ -2003,7 +2005,7 @@ class OSModel
     return true
   end
 
-  def self.add_cooling_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+  def self.add_cooling_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
@@ -2041,10 +2043,11 @@ class OSModel
           eers = [0.82 * seer + 0.64]
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
-          success = HVAC.apply_central_ac_1speed(model, unit, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_1speed(model, runner, seer, eers, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
-                                                 sequential_load_frac, attached_heating_system)
+                                                 sequential_load_frac, attached_heating_system,
+                                                 @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2054,11 +2057,12 @@ class OSModel
           capacity_ratios = [0.72, 1.0]
           fan_speed_ratios = [0.86, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
-          success = HVAC.apply_central_ac_2speed(model, unit, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_2speed(model, runner, seer, eers, shrs,
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
-                                                 sequential_load_frac, attached_heating_system)
+                                                 sequential_load_frac, attached_heating_system,
+                                                 @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2068,11 +2072,12 @@ class OSModel
           capacity_ratios = [0.36, 0.64, 1.0, 1.16]
           fan_speed_ratios = [0.51, 0.84, 1.0, 1.19]
           fan_power_installed = get_fan_power_installed(seer)
-          success = HVAC.apply_central_ac_4speed(model, unit, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_4speed(model, runner, seer, eers, shrs,
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
-                                                 sequential_load_frac, attached_heating_system)
+                                                 sequential_load_frac, attached_heating_system,
+                                                 @control_slave_zones_hash)
           return false if not success
 
         else
@@ -2087,9 +2092,9 @@ class OSModel
         shr = 0.65
         airflow_rate = 350.0
 
-        success = HVAC.apply_room_ac(model, unit, runner, eer, shr,
+        success = HVAC.apply_room_ac(model, runner, eer, shr,
                                      airflow_rate, cool_capacity_btuh, load_frac,
-                                     sequential_load_frac)
+                                     sequential_load_frac, @control_slave_zones_hash)
         return false if not success
 
       end
@@ -2100,7 +2105,7 @@ class OSModel
     return true
   end
 
-  def self.add_heating_system(runner, model, building, unit, loop_hvacs, zone_hvacs, use_only_ideal_air)
+  def self.add_heating_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
@@ -2130,10 +2135,10 @@ class OSModel
         fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
         attached_cooling_system = get_attached_system(heating_system_values, building,
                                                       "CoolingSystem", loop_hvacs)
-        success = HVAC.apply_furnace(model, unit, runner, fuel, afue,
+        success = HVAC.apply_furnace(model, runner, fuel, afue,
                                      heat_capacity_btuh, fan_power, dse_heat,
                                      load_frac, sequential_load_frac,
-                                     attached_cooling_system)
+                                     attached_cooling_system, @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "WallFurnace"
@@ -2142,10 +2147,10 @@ class OSModel
         fan_power = 0.0
         airflow_rate = 0.0
         # TODO: Allow DSE
-        success = HVAC.apply_unit_heater(model, unit, runner, fuel,
+        success = HVAC.apply_unit_heater(model, runner, fuel,
                                          afue, heat_capacity_btuh, fan_power,
                                          airflow_rate, load_frac,
-                                         sequential_load_frac)
+                                         sequential_load_frac, @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "Boiler"
@@ -2158,19 +2163,19 @@ class OSModel
         oat_hwst_high = nil
         oat_hwst_low = nil
         design_temp = 180.0
-        success = HVAC.apply_boiler(model, unit, runner, fuel, system_type, afue,
+        success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                     oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                                     heat_capacity_btuh, design_temp, dse_heat, load_frac,
-                                    sequential_load_frac)
+                                    sequential_load_frac, @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "ElectricResistance"
 
         efficiency = heating_system_values[:heating_efficiency_percent]
         # TODO: Allow DSE
-        success = HVAC.apply_electric_baseboard(model, unit, runner, efficiency,
+        success = HVAC.apply_electric_baseboard(model, runner, efficiency,
                                                 heat_capacity_btuh, load_frac,
-                                                sequential_load_frac)
+                                                sequential_load_frac, @control_slave_zones_hash)
         return false if not success
 
       elsif htg_type == "Stove"
@@ -2179,10 +2184,10 @@ class OSModel
         airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
         fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
         # TODO: Allow DSE
-        success = HVAC.apply_unit_heater(model, unit, runner, fuel,
+        success = HVAC.apply_unit_heater(model, runner, fuel,
                                          efficiency, heat_capacity_btuh, fan_power,
                                          airflow_rate, load_frac,
-                                         sequential_load_frac)
+                                         sequential_load_frac, @control_slave_zones_hash)
         return false if not success
 
       end
@@ -2193,7 +2198,7 @@ class OSModel
     return true
   end
 
-  def self.add_heat_pump(runner, model, building, unit, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
+  def self.add_heat_pump(runner, model, building, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
     return true if use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
@@ -2252,12 +2257,13 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
           supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_1speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+          success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
-                                                   sequential_load_frac_heat, sequential_load_frac_cool)
+                                                   sequential_load_frac_heat, sequential_load_frac_cool,
+                                                   @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2271,14 +2277,14 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
           supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_2speed(model, unit, runner, seer, hspf, eers, cops, shrs,
-                                                   capacity_ratios, fan_speed_ratios_cooling,
-                                                   fan_speed_ratios_heating,
+          success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, eers, cops, shrs,
+                                                   capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
-                                                   sequential_load_frac_heat, sequential_load_frac_cool)
+                                                   sequential_load_frac_heat, sequential_load_frac_cool,
+                                                   @control_slave_zones_hash)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2292,13 +2298,14 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
           supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_4speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+          success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
-                                                   sequential_load_frac_heat, sequential_load_frac_cool)
+                                                   sequential_load_frac_heat, sequential_load_frac_cool,
+                                                   @control_slave_zones_hash)
           return false if not success
 
         else
@@ -2328,7 +2335,7 @@ class OSModel
         fan_power = 0.07
         is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
         supplemental_efficiency = 1.0
-        success = HVAC.apply_mshp(model, unit, runner, seer, hspf, shr,
+        success = HVAC.apply_mshp(model, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
                                   min_cooling_airflow_rate, max_cooling_airflow_rate,
                                   min_heating_capacity, max_heating_capacity,
@@ -2338,7 +2345,8 @@ class OSModel
                                   is_ducted, cool_capacity_btuh,
                                   supplemental_efficiency, backup_heat_capacity_btuh,
                                   dse_heat, load_frac_heat, load_frac_cool,
-                                  sequential_load_frac_heat, sequential_load_frac_cool)
+                                  sequential_load_frac_heat, sequential_load_frac_cool,
+                                  @control_slave_zones_hash)
         return false if not success
 
       elsif hp_type == "ground-to-air"
@@ -2366,7 +2374,7 @@ class OSModel
         heat_pump_capacity = cool_capacity_btuh
         supplemental_efficiency = 1
         supplemental_capacity = backup_heat_capacity_btuh
-        success = HVAC.apply_gshp(model, unit, runner, weather, cop, eer, shr,
+        success = HVAC.apply_gshp(model, runner, weather, cop, eer, shr,
                                   ground_conductivity, grout_conductivity,
                                   bore_config, bore_holes, bore_depth,
                                   bore_spacing, bore_diameter, pipe_size,
@@ -2376,7 +2384,8 @@ class OSModel
                                   fan_power, heat_pump_capacity, supplemental_efficiency,
                                   supplemental_capacity, dse_heat,
                                   load_frac_heat, load_frac_cool,
-                                  sequential_load_frac_heat, sequential_load_frac_cool)
+                                  sequential_load_frac_heat, sequential_load_frac_cool,
+                                  @control_slave_zones_hash)
         return false if not success
 
       end
@@ -2387,12 +2396,12 @@ class OSModel
     return true
   end
 
-  def self.add_residual_hvac(runner, model, building, unit, use_only_ideal_air)
+  def self.add_residual_hvac(runner, model, building, use_only_ideal_air)
     if use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, 1, 1)
+      success = HVAC.apply_ideal_air_loads_heating(model, runner, 1, 1, @control_slave_zones_hash)
       return false if not success
 
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, 1, 1)
+      success = HVAC.apply_ideal_air_loads_cooling(model, runner, 1, 1, @control_slave_zones_hash)
       return false if not success
 
       return true
@@ -2403,7 +2412,8 @@ class OSModel
     htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
     residual_heat_load_served = 1.0 - htg_load_frac
     if residual_heat_load_served > 0.02 and residual_heat_load_served < 1
-      success = HVAC.apply_ideal_air_loads_heating(model, unit, runner, residual_heat_load_served, residual_heat_load_served)
+      success = HVAC.apply_ideal_air_loads_heating(model, runner, residual_heat_load_served,
+                                                   residual_heat_load_served, @control_slave_zones_hash)
       return false if not success
     end
     @total_frac_remaining_heat_load_served -= residual_heat_load_served
@@ -2413,7 +2423,8 @@ class OSModel
     clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
     residual_cool_load_served = 1.0 - clg_load_frac
     if residual_cool_load_served > 0.02 and residual_cool_load_served < 1
-      success = HVAC.apply_ideal_air_loads_cooling(model, unit, runner, residual_cool_load_served, residual_cool_load_served)
+      success = HVAC.apply_ideal_air_loads_cooling(model, runner, residual_cool_load_served,
+                                                   residual_cool_load_served, @control_slave_zones_hash)
       return false if not success
     end
     @total_frac_remaining_cool_load_served -= residual_cool_load_served
@@ -2421,9 +2432,11 @@ class OSModel
     return true
   end
 
-  def self.add_setpoints(runner, model, building, weather)
+  def self.add_setpoints(runner, model, building, weather, spaces)
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
+
+    conditioned_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
 
     control_type = hvac_control_values[:control_type]
     heating_temp = hvac_control_values[:setpoint_temp_heating_season]
@@ -2447,7 +2460,8 @@ class OSModel
     htg_season_start_month = 1
     htg_season_end_month = 12
     success = HVAC.apply_heating_setpoints(model, runner, weather, htg_weekday_setpoints, htg_weekend_setpoints,
-                                           htg_use_auto_season, htg_season_start_month, htg_season_end_month)
+                                           htg_use_auto_season, htg_season_start_month, htg_season_end_month,
+                                           conditioned_zones)
     return false if not success
 
     cooling_temp = hvac_control_values[:setpoint_temp_cooling_season]
@@ -2481,13 +2495,14 @@ class OSModel
     clg_season_start_month = 1
     clg_season_end_month = 12
     success = HVAC.apply_cooling_setpoints(model, runner, weather, clg_weekday_setpoints, clg_weekend_setpoints,
-                                           clg_use_auto_season, clg_season_start_month, clg_season_end_month)
+                                           clg_use_auto_season, clg_season_start_month, clg_season_end_month,
+                                           conditioned_zones)
     return false if not success
 
     return true
   end
 
-  def self.add_ceiling_fans(runner, model, building, unit)
+  def self.add_ceiling_fans(runner, model, building, spaces)
     ceiling_fan_values = HPXML.get_ceiling_fan_values(ceiling_fan: building.elements["BuildingDetails/Lighting/CeilingFan"])
     return true if ceiling_fan_values.nil?
 
@@ -2507,7 +2522,9 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    success = HVAC.apply_eri_ceiling_fans(model, unit, runner, annual_kwh, weekday_sch, weekend_sch)
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
+                                      @cfa, conditioned_spaces)
     return false if not success
 
     return true
@@ -2606,9 +2623,7 @@ class OSModel
     end
   end
 
-  def self.add_mels(runner, model, building, unit, spaces)
-    living_space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-
+  def self.add_mels(runner, model, building, spaces)
     # Misc
     plug_load_values = HPXML.get_plug_load_values(plug_load: building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']"])
     if not plug_load_values.nil?
@@ -2642,11 +2657,8 @@ class OSModel
       if misc_monthly_sch.nil?
         misc_monthly_sch = "1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248"
       end
-
-      success, sch = MiscLoads.apply_plug(model, unit, runner, misc_annual_kwh,
-                                          misc_sens_frac, misc_lat_frac, misc_weekday_sch,
-                                          misc_weekend_sch, misc_monthly_sch, nil)
-      return false if not success
+    else
+      misc_annual_kwh = 0
     end
 
     # Television
@@ -2656,15 +2668,20 @@ class OSModel
       if tv_annual_kwh.nil?
         tv_annual_kwh, tv_sens_frac, tv_lat_frac = MiscLoads.get_televisions_values(@cfa, @nbeds)
       end
-
-      success = MiscLoads.apply_tv(model, unit, runner, tv_annual_kwh, sch, living_space)
-      return false if not success
+    else
+      tv_annual_kwh = 0
     end
+
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
+                                        misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh,
+                                        @cfa, conditioned_spaces)
+    return false if not success
 
     return true
   end
 
-  def self.add_lighting(runner, model, building, unit, weather)
+  def self.add_lighting(runner, model, building, weather, spaces)
     lighting = building.elements["BuildingDetails/Lighting"]
     return true if lighting.nil?
 
@@ -2688,19 +2705,17 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    success, sch = Lighting.apply_interior(model, unit, runner, weather, nil, int_kwh)
-    return false if not success
-
-    success = Lighting.apply_garage(model, runner, sch, grg_kwh)
-    return false if not success
-
-    success = Lighting.apply_exterior(model, runner, sch, ext_kwh)
+    gfa = 0 # garage floor area FIXME
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    garage_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeGarage])
+    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, gfa,
+                                  conditioned_spaces, garage_spaces)
     return false if not success
 
     return true
   end
 
-  def self.add_airflow(runner, model, building, unit, loop_hvacs)
+  def self.add_airflow(runner, model, building, loop_hvacs)
     # Infiltration
     infil_ach50 = nil
     infil_const_ach = nil
@@ -2996,14 +3011,21 @@ class OSModel
 
     # TODO: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems)
+    window_area = 0.0
+    building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
+      window_values = HPXML.get_window_values(window: window)
+      window_area += window_values[:area]
+    end
+
+    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area)
     return false if not success
 
     return true
   end
 
-  def self.add_hvac_sizing(runner, model, unit, weather)
-    success = HVACSizing.apply(model, unit, runner, weather, false)
+  def self.add_hvac_sizing(runner, model, weather)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, false)
     return false if not success
 
     return true
@@ -3813,6 +3835,25 @@ class OSModel
     end
 
     return space
+  end
+
+  def self.get_spaces_of_type(spaces, space_types_list)
+    spaces_of_type = []
+    space_types_list.each do |space_type|
+      spaces_of_type << spaces[space_type] unless spaces[space_type].nil?
+    end
+    return spaces_of_type
+  end
+
+  def self.get_space_of_type(spaces, space_type)
+    spaces_of_type = self.get_spaces_of_type(spaces, [space_type])
+    if spaces_of_type.size > 1
+      fail "Unexpected number of spaces."
+    elsif spaces_of_type.size == 1
+      return spaces_of_type[0]
+    end
+
+    return nil
   end
 end
 

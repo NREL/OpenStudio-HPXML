@@ -222,7 +222,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Apply measure
     measures_dir = File.join(this_dir, "../../")
-    success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
+    success = apply_measures(measures_dir, measures, runner, model)
 
     # Report warnings/errors
     File.open(File.join(rundir, 'run.log'), 'w') do |f|
@@ -269,13 +269,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Add output variables for CFIS tests
-    output_var = OpenStudio::Model::OutputVariable.new("res_mv_cfis_fan_power", model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('EMS')
+    @cfis_fan_power_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(" ", "_"), model)
+    @cfis_fan_power_output_var.setReportingFrequency('runperiod')
+    @cfis_fan_power_output_var.setKeyValue('EMS')
 
-    output_var = OpenStudio::Model::OutputVariable.new("res_mv_cfis_flow_rate", model)
-    output_var.setReportingFrequency('runperiod')
-    output_var.setKeyValue('EMS')
+    @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(" ", "_"), model)
+    @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
+    @cfis_flow_rate_output_var.setKeyValue('EMS')
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
@@ -745,13 +745,13 @@ class HPXMLTranslatorTest < MiniTest::Test
       if not mv.nil? and XMLHelper.get_value(mv, "FanType") == "central fan integrated supply"
         # Fan power
         hpxml_value = Float(XMLHelper.get_value(mv, "FanPower"))
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_cfis_fan_power')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_fan_power_output_var.variableName}')"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_delta(hpxml_value, sql_value, 0.001)
 
         # Flow rate
         hpxml_value = Float(XMLHelper.get_value(mv, "RatedFlowRate"))
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_cfis_flow_rate')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_flow_rate_output_var.variableName}')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.001)
       end
@@ -809,14 +809,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     cd = bldg_details.elements["Appliances/ClothesDryer"]
     if not cd.nil? and not wh.nil?
       # Location
-      fuel = to_beopt_fuel(XMLHelper.get_value(cd, 'FuelType'))
       location = XMLHelper.get_value(cd, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
                       'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
-      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer(fuel).upcase}')"
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
       assert_equal(hpxml_value, sql_value)
     end
