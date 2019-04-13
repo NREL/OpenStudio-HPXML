@@ -14,43 +14,10 @@ class HEScoreRuleset
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml_doc.elements["/HPXML"])
     hpxml_values[:eri_calculation_version] = "2014AEG" # FIXME: Verify
     hpxml_doc = HPXML.create_hpxml(**hpxml_values)
-
     hpxml = hpxml_doc.elements["HPXML"]
 
-    fnd_types, @cfa_basement = get_foundation_details(orig_details)
-
-    # Global variables
-    orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_details.elements["BuildingSummary/BuildingConstruction"])
-    orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
-    @year_built = orig_building_construction_values[:year_built]
-    @nbeds = orig_building_construction_values[:number_of_bedrooms]
-    @cfa = orig_building_construction_values[:conditioned_floor_area] # ft^2
-    @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
-    @ncfl = @ncfl_ag # Number above-grade stories plus any conditioned basement
-    if fnd_types.include? "ConditionedBasement"
-      @ncfl += 1
-    end
-    @nfl = @ncfl_ag # Number above-grade stories plus any basement
-    if fnd_types.include? "ConditionedBasement" or fnd_types.include? "UnconditionedBasement"
-      @nfl += 1
-    end
-    @ceil_height = orig_building_construction_values[:average_ceiling_height] # ft
-    @bldg_orient = orig_site_values[:orientation_of_front_of_home]
-    @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
-
-    # Calculate geometry
-    # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
-    # FIXME: Verify. Does this change for shape=townhouse? Maybe ridge changes to front-back instead of left-right
-    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
-    @bldg_length_side = (3.0 * @bldg_footprint / 5.0)**0.5 # ft
-    @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
-    @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
-    @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
-    @height = @ceil_height * @ncfl_ag # ft FIXME: Verify. Used for infiltration.
-    @roof_angle = 30.0 # deg
-
     # BuildingSummary
-    set_summary(hpxml)
+    set_summary(orig_details, hpxml)
 
     # ClimateAndRiskZones
     set_climate(orig_details, hpxml)
@@ -90,13 +57,44 @@ class HEScoreRuleset
     return hpxml_doc
   end
 
-  def self.set_summary(hpxml)
+  def self.set_summary(orig_details, hpxml)
     # TODO: Neighboring buildings to left/right, 12ft offset, same height as building; what about townhouses?
+    
+    # Get HPXML values
+    orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
+    @bldg_orient = orig_site_values[:orientation_of_front_of_home]
+    @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
+    
+    orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_details.elements["BuildingSummary/BuildingConstruction"])
+    @year_built = orig_building_construction_values[:year_built]
+    @nbeds = orig_building_construction_values[:number_of_bedrooms]
+    @cfa = orig_building_construction_values[:conditioned_floor_area] # ft^2
+    fnd_types, @cfa_basement = get_foundation_details(orig_details)
+    @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
+    @ceil_height = orig_building_construction_values[:average_ceiling_height] # ft
+    
+    # Calculate geometry
+    # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
+    @has_cond_bsmnt = fnd_types.include?("ConditionedBasement")
+    @has_uncond_bsmnt = fnd_types.include?("UnconditionedBasement")
+    @ncfl = @ncfl_ag + (@has_cond_bsmnt ? 1 : 0)
+    @nfl = @ncfl + (@has_uncond_bsmnt ? 1 : 0)
+    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2 FIXME: Verify. Does this change for shape=townhouse? Maybe ridge changes to front-back instead of left-right
+    @bldg_length_side = (3.0 * @bldg_footprint / 5.0)**0.5 # ft
+    @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
+    @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
+    @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
+    @height = @ceil_height * @ncfl_ag # ft FIXME: Verify. Used for infiltration.
+    @roof_angle = 30.0 # deg
+    
     HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
+    
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
+                                 
+    
     HPXML.add_building_construction(hpxml: hpxml,
                                     number_of_conditioned_floors: @ncfl,
                                     number_of_conditioned_floors_above_grade: @ncfl_ag,
@@ -631,12 +629,7 @@ class HEScoreRuleset
 
   def self.set_systems_water_heating_use(orig_details, hpxml)
     # Hot water piping length
-    has_uncond_bsmnt = false
-    fnd_types, _ = get_foundation_details(orig_details)
-    if fnd_types.include? "UnconditionedBasement"
-      has_uncond_bsmnt = true
-    end
-    piping_length = HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, @cfa, @ncfl)
+    piping_length = HotWaterAndAppliances.get_default_std_pipe_length(@has_uncond_bsmnt, @cfa, @ncfl)
 
     HPXML.add_hot_water_distribution(hpxml: hpxml,
                                      id: "HotWaterDistribution",
