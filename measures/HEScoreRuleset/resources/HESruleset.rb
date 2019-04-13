@@ -59,12 +59,12 @@ class HEScoreRuleset
 
   def self.set_summary(orig_details, hpxml)
     # TODO: Neighboring buildings to left/right, 12ft offset, same height as building; what about townhouses?
-    
+
     # Get HPXML values
     orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
     @bldg_orient = orig_site_values[:orientation_of_front_of_home]
     @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
-    
+
     orig_building_construction_values = HPXML.get_building_construction_values(building_construction: orig_details.elements["BuildingSummary/BuildingConstruction"])
     @year_built = orig_building_construction_values[:year_built]
     @nbeds = orig_building_construction_values[:number_of_bedrooms]
@@ -72,7 +72,7 @@ class HEScoreRuleset
     fnd_types, @cfa_basement = get_foundation_details(orig_details)
     @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
     @ceil_height = orig_building_construction_values[:average_ceiling_height] # ft
-    
+
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
     @has_cond_bsmnt = fnd_types.include?("ConditionedBasement")
@@ -86,15 +86,14 @@ class HEScoreRuleset
     @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
     @height = @ceil_height * @ncfl_ag # ft FIXME: Verify. Used for infiltration.
     @roof_angle = 30.0 # deg
-    
+
     HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
-    
+
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
-                                 
-    
+
     HPXML.add_building_construction(hpxml: hpxml,
                                     number_of_conditioned_floors: @ncfl,
                                     number_of_conditioned_floors_above_grade: @ncfl_ag,
@@ -106,7 +105,6 @@ class HEScoreRuleset
 
   def self.set_climate(orig_details, hpxml)
     climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: orig_details.elements["ClimateandRiskZones"])
-    climate_and_risk_zones_values[:iecc2006] = climate_and_risk_zones_values[:iecc2012]
     HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
     @iecc_zone = climate_and_risk_zones_values[:iecc2012]
   end
