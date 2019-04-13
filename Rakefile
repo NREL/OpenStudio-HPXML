@@ -494,6 +494,11 @@ def create_hpxmls
       end
       HPXML.add_misc_loads_schedule(hpxml: hpxml, **misc_load_schedule_values) unless misc_load_schedule_values.empty?
 
+      if ['invalid_files/invalid-missing-elements.xml'].include? derivative
+        hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"].elements.delete("NumberofConditionedFloors")
+        hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"].elements.delete("ConditionedFloorArea")
+      end
+
       hpxml_path = File.join(tests_dir, derivative)
 
       # Validate file against HPXML schema
@@ -504,7 +509,8 @@ def create_hpxmls
       end
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
-    rescue
+    rescue Exception => e
+      puts "\n#{e}\n#{e.backtrace.join('\n')}"
       puts "\nError: Did not successfully generate #{derivative}."
       exit!
     end
@@ -584,9 +590,6 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:number_of_conditioned_floors] = 2
     building_construction_values[:conditioned_floor_area] = 3500
     building_construction_values[:conditioned_building_volume] = 33787.5
-  elsif ['invalid_files/invalid-missing-elements.xml'].include? hpxml_file
-    building_construction_values[:number_of_conditioned_floors] = nil
-    building_construction_values[:conditioned_floor_area] = nil
   elsif ['valid-hvac-multiple.xml',
          'hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
          'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
