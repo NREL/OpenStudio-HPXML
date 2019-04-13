@@ -1182,8 +1182,8 @@ class HPXML
       XMLHelper.add_element(distribution_system_type_e, distribution_system_type)
     elsif ["DSE"].include? distribution_system_type
       XMLHelper.add_element(distribution_system_type_e, "Other", distribution_system_type)
-      XMLHelper.add_element(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency", to_float(annual_heating_dse))
-      XMLHelper.add_element(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency", to_float(annual_cooling_dse))
+      XMLHelper.add_element(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency", to_float(annual_heating_dse)) unless annual_heating_dse.nil?
+      XMLHelper.add_element(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency", to_float(annual_cooling_dse)) unless annual_cooling_dse.nil?
     else
       fail "Unexpected distribution_system_type '#{distribution_system_type}'."
     end
