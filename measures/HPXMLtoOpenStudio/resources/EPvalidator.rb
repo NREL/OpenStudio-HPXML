@@ -48,7 +48,6 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent" => one,
 
-        "/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC[Year=2006]" => one, # See [ClimateZone]
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
 
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50 or constant nACH; see [AirInfiltration]
