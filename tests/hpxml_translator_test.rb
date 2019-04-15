@@ -50,6 +50,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
         # next if File.basename(xml) != "valid-hvac-central-ac-only-1-speed.xml" # FIXME: remove
         # next if File.basename(xml) != "valid-hvac-air-to-air-heat-pump-1-speed.xml" # FIXME: remove
+        # next if File.basename(xml) != "valid-hvac-central-ac-only-2-speed.xml" # FIXME: remove
+        # next if File.basename(xml) != "valid-hvac-air-to-air-heat-pump-2-speed.xml" # FIXME: remove
         next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
 
         xmls << File.absolute_path(xml)

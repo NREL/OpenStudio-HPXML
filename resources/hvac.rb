@@ -24,15 +24,13 @@ class HVAC
     cOOL_CAP_FFLOW_SPEC = [[0.718605468, 0.410099989, -0.128705457]]
     cOOL_EIR_FFLOW_SPEC = [[1.32299905, -0.477711207, 0.154712157]]
 
-    eir_coeff_ac_clg = [-3.302695861, 0.137871531, -0.001056996, -0.012573945, 0.000214638, -0.000145054]
-
     capacity_ratios = [1.0]
     fan_speed_ratios = [1.0]
 
     # Cooling Coil
     rated_airflow_rate = 386.1 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
-    eers = [calc_EER_cooling_1spd(seer, fan_power_rated, eir_coeff_ac_clg)]
+    eers = [calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)]
     puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
@@ -146,7 +144,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ac_2speed(model, unit, runner, seer, eers, shrs,
+  def self.apply_central_ac_2speed(model, unit, runner, seer, shrs,
                                    capacity_ratios, fan_speed_ratios,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
@@ -172,6 +170,8 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate = 355.2 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
+    eers = calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
+    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -464,10 +464,6 @@ class HVAC
     hEAT_CAP_FFLOW_SPEC = [[0.694045465, 0.474207981, -0.168253446]]
     hEAT_EIR_FFLOW_SPEC = [[2.185418751, -1.942827919, 0.757409168]]
 
-    eir_coeff_hp_clg = [-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]
-    eir_coeff_hp_htg = [0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]
-    cap_coeff_hp_htg = [0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]
-
     capacity_ratios = [1.0]
     fan_speed_ratios_cooling = [1.0]
     fan_speed_ratios_heating = [1.0]
@@ -475,7 +471,7 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate_cooling = 394.2 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
-    eers = [calc_EER_cooling_1spd(seer, fan_power_rated, eir_coeff_hp_clg)]
+    eers = [calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)]
     puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
@@ -484,7 +480,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 384.1 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
-    cops = [calc_COP_heating_1spd(hspf, Constants.C_d_htg, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg)]
+    cops = [calc_COP_heating_1spd(hspf, Constants.C_d, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)]
     puts cops
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)]
@@ -711,7 +707,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ashp_2speed(model, unit, runner, seer, hspf, eers, cops, shrs,
+  def self.apply_central_ashp_2speed(model, unit, runner, seer, hspf, shrs,
                                      capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      eer_capacity_derates, cop_capacity_derates,
@@ -745,6 +741,8 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate_cooling = 344.1 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
+    eers = calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios_cooling, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC, true)
+    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -752,6 +750,8 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 352.2 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
+    cops = calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
+    puts cops
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -3504,18 +3504,48 @@ class HVAC
     return gpm_btuh * UnitConversions.convert(1.0, "gal/min", "m^3/s") * 1000.0 * 6.0 * 2990.0 / 3000.0 # Adjustment per ISO 13256-1 Internal Pressure drop across heat pump coil assumed to be 11ft w.g.
   end
 
-  def self.calc_EIR_from_COP(cop, supplyFanPower_Rated)
-    return UnitConversions.convert((UnitConversions.convert(1, "Btu", "Wh") + supplyFanPower_Rated * 0.03333) / cop - supplyFanPower_Rated * 0.03333, "Wh", "Btu")
+  def self.calc_EIR_from_COP(cop, fan_power_rated)
+    return UnitConversions.convert((UnitConversions.convert(1, "Btu", "Wh") + fan_power_rated * 0.03333) / cop - fan_power_rated * 0.03333, "Wh", "Btu")
   end
 
-  def self.calc_EIR_from_EER(eer, supplyFanPower_Rated)
-    return UnitConversions.convert((1 - UnitConversions.convert(supplyFanPower_Rated * 0.03333, "Wh", "Btu")) / eer - supplyFanPower_Rated * 0.03333, "Wh", "Btu")
+  def self.calc_EIR_from_EER(eer, fan_power_rated)
+    return UnitConversions.convert((1 - UnitConversions.convert(fan_power_rated * 0.03333, "Wh", "Btu")) / eer - fan_power_rated * 0.03333, "Wh", "Btu")
   end
 
-  def self.calc_EER_from_EIR(eir, supplyFanPower_Rated)
-    cfm_per_ton = 400
+  def self.calc_EER_from_EIR(eir, fan_power_rated)
+    cfm_per_ton = 400.0
     cfm_per_btuh = cfm_per_ton / 12000.0
-    return ((1 - 3.412 * (supplyFanPower_Rated * cfm_per_btuh)) / (eir / 3.412 + (supplyFanPower_Rated * cfm_per_btuh)))
+    return ((1 - 3.412 * (fan_power_rated * cfm_per_btuh)) / (eir / 3.412 + (fan_power_rated * cfm_per_btuh)))
+  end
+
+  def self.calc_COP_from_EIR(eir, fan_power_rated)
+    cfm_per_ton = 400.0
+    cfm_per_btuh = cfm_per_ton / 12000.0
+    return (1.0 / 3.412 + fan_power_rated * cfm_per_btuh) / (eir / 3.412 + fan_power_rated * cfm_per_btuh)
+  end
+
+  def self.calc_EERs_from_EIR_2spd(eer_2, fan_power_rated, is_heat_pump)
+    # Returns low and high stage EER A given high stage EER A
+
+    eir_2_a = calc_EIR_from_EER(eer_2, fan_power_rated)
+
+    if not is_heat_pump
+      eir_1_a = 0.8691 * eir_2_a + 0.0127 # Relationship derived using Dylan's data for two stage air conditioners
+    else
+      eir_1_a = 0.8887 * eir_2_a + 0.0083 # Relationship derived using Dylan's data for two stage heat pumps
+    end
+
+    return [calc_EER_from_EIR(eir_1_a, fan_power_rated), eer_2]
+  end
+
+  def self.calc_COPs_from_EIR_2spd(cop_2, fan_power_rated)
+    # Returns low and high stage rated COP given high stage COP
+    
+    eir_2 = calc_EIR_from_COP(cop_2, fan_power_rated)
+
+    eir_1 = 0.6241 * eir_2 + 0.0681 # Relationship derived using Dylan's data for Carrier two stage heat pumps
+
+    return [calc_COP_from_EIR(eir_1, fan_power_rated), cop_2]
   end
 
   def self.calc_biquad(coeff, in_1, in_2)
@@ -3523,7 +3553,7 @@ class HVAC
     return result
   end
 
-  def self.calc_EER_cooling_1spd(seer, fan_power_rated, eir_coeff)
+  def self.calc_EER_cooling_1spd(seer, fan_power_rated, coeff_eir)
     # Directly calculate cooling coil net EER at condition A (95/80/67) using SEER
 
     if seer < 13
@@ -3539,13 +3569,117 @@ class HVAC
     eir_b = calc_EIR_from_EER(eer_b, fan_power_rated)
 
     # 3. Calculate eir_a using performance curves
-    eir_a = eir_b / calc_biquad(eir_coeff, 67.0, 82.0)
+    eir_a = eir_b / calc_biquad(coeff_eir[0], 67.0, 82.0)
     eer_a = calc_EER_from_EIR(eir_a, fan_power_rated)
 
     return eer_a
   end
 
-  def self.calc_COP_heating_1spd(hspf, c_d, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg)
+  def self.calc_EERs_cooling_2spd(seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, is_heat_pump = false)
+    # Iterate to find rated net EERs given SEER using simple bisection method for two stage air conditioners
+
+    # Initial large bracket of EER (A condition) to span possible seer range
+    eer_a = 5.0
+    eer_b = 20.0
+
+    # Iterate
+    iter_max = 100
+    tol = 0.0001
+
+    err = 1
+    eer_c = (eer_a + eer_b) / 2.0
+    (1..iter_max).each do |n|
+      eers = calc_EERs_from_EIR_2spd(eer_a, fan_power_rated, is_heat_pump)
+      f_a = calc_SEER_TwoSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
+
+      eers = calc_EERs_from_EIR_2spd(eer_c, fan_power_rated, is_heat_pump)
+      f_c = calc_SEER_TwoSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
+
+      if f_c == 0
+        return eer_c
+      elsif f_a * f_c < 0
+        eer_b = eer_c
+      else
+        eer_a = eer_c
+      end
+
+      eer_c = (eer_a + eer_b) / 2.0
+      err = (eer_b - eer_a) / 2.0
+
+      if err <= tol
+        break
+      end
+    end
+
+    if err > tol
+      eer_c = -99
+      runner.registerWarning('Two-speed cooling EERs iteration failed to converge.')
+    end
+
+    return calc_EERs_from_EIR_2spd(eer_c, fan_power_rated, is_heat_pump)
+  end
+
+  def self.calc_SEER_TwoSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
+    # Two speed SEER calculation ported from BEopt v2.8 sim.py
+
+    eir_A2 = calc_EIR_from_EER(eers[1], fan_power_rated)
+    eir_B2 = eir_A2 * calc_biquad(coeff_eir[1], 67.0, 82.0)
+    
+    eir_A1 = calc_EIR_from_EER(eers[0], fan_power_rated)
+    eir_B1 = eir_A1 * calc_biquad(coeff_eir[0], 67.0, 82.0)
+    eir_F1 = eir_A1 * calc_biquad(coeff_eir[0], 67.0, 67.0)
+    
+    q_A2 = 1.0
+    q_B2 = q_A2 * calc_biquad(coeff_q[1], 67.0, 82.0)
+        
+    q_B1 = q_A2 * capacity_ratios[0] * calc_biquad(coeff_q[0], 67.0, 82.0)
+    q_F1 = q_A2 * capacity_ratios[0] * calc_biquad(coeff_q[0], 67.0, 67.0)
+
+    cfm_Btu_h = 400.0 / 12000.0
+
+    q_A2_net = q_A2 - fan_power_rated * 3.412 * cfm_Btu_h    
+    q_B2_net = q_B2 - fan_power_rated * 3.412 * cfm_Btu_h       
+    q_B1_net = q_B1 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[0]
+    q_F1_net = q_F1 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[0]
+
+    p_A2 = (q_A2 * eir_A2) / 3.412 + fan_power_rated * cfm_Btu_h
+    p_B2 = (q_B2 * eir_B2) / 3.412 + fan_power_rated * cfm_Btu_h
+    p_B1 = (q_B1 * eir_B1) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[0]
+    p_F1 = (q_F1 * eir_F1) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[0]
+
+    t_bins = [67.0, 72.0, 77.0, 82.0, 87.0, 92.0, 97.0, 102.0]
+    frac_hours = [0.214, 0.231, 0.216, 0.161, 0.104, 0.052, 0.018, 0.004]
+    
+    e_tot = 0.0
+    q_tot = 0.0
+    (0..7).each do |i|
+      bL_i = ((t_bins[i] - 65.0) / (95.0 - 65.0)) * (q_A2_net / 1.1)
+      q_low_i = q_F1_net + ((q_B1_net - q_F1_net) / (82.0 - 67.0)) * (t_bins[i] - 67.0)
+      e_low_i = p_F1 + ((p_B1 - p_F1) / (82.0 - 67.0)) * (t_bins[i] - 67.0)
+      q_high_i = q_B2_net + ((q_A2_net - q_B2_net) / (95.0 - 82.0)) * (t_bins[i] - 82.0)
+      e_high_i = p_B2 + ((p_A2 - p_B2) / (95.0 - 82.0)) * (t_bins[i] - 82.0)
+      if q_low_i >= bL_i
+        pLF_i = 1.0 - c_d * (1.0 - (bL_i / q_low_i))
+        q_i = bL_i * frac_hours[i]
+        e_i = (((bL_i / q_low_i) * e_low_i) / pLF_i) * frac_hours[i]
+      elsif q_low_i < bL_i and bL_i < q_high_i
+        x_i = (q_high_i - bL_i) / (q_high_i - q_low_i)
+        q_i = (x_i * q_low_i + (1.0 - x_i) * q_high_i) * frac_hours[i]
+        e_i = (x_i * e_low_i + (1.0 - x_i) * e_high_i) * frac_hours[i]
+      elsif q_high_i <= bL_i
+        q_i = q_high_i * frac_hours[i]
+        e_i = e_high_i * frac_hours[i]
+      end
+        
+      e_tot += e_i
+      q_tot += q_i
+    end
+
+    seer = q_tot / e_tot
+    return seer
+  end
+
+  def self.calc_COP_heating_1spd(hspf, c_d, fan_power_rated, coeff_eir, coeff_q)
     # Iterate to find rated net COP given HSPF using simple bisection method
 
     # Initial large bracket to span possible hspf range
@@ -3556,12 +3690,11 @@ class HVAC
     iter_max = 100
     tol = 0.0001
 
-    i = 0
     err = 1
     cop_c = (cop_a + cop_b) / 2.0
-    (1..iter_max + 1).each do |n|
-      f_a = calc_HSPF_SingleSpeed(cop_a, c_d, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg) - hspf
-      f_c = calc_HSPF_SingleSpeed(cop_c, c_d, fan_power_rated, eir_coeff_hp_htg, cap_coeff_hp_htg) - hspf
+    (1..iter_max).each do |n|
+      f_a = calc_HSPF_SingleSpeed(cop_a, c_d, fan_power_rated, coeff_eir, coeff_q) - hspf
+      f_c = calc_HSPF_SingleSpeed(cop_c, c_d, fan_power_rated, coeff_eir, coeff_q) - hspf
 
       if f_c == 0
         return cop_c
@@ -3579,7 +3712,7 @@ class HVAC
       end
     end
 
-    if i > iter_max
+    if err > tol
       cop_c = -99
       runner.registerWarning('Single-speed heating COP iteration failed to converge.')
     end
@@ -3591,25 +3724,25 @@ class HVAC
     # Single speed HSPF calculation ported from BEopt v2.8 sim.py
 
     eir_47 = calc_EIR_from_COP(cop_47, fan_power_rated)
-    eir_35 = eir_47 * calc_biquad(coeff_eir, 70, 35)
-    eir_17 = eir_47 * calc_biquad(coeff_eir, 70, 17)
+    eir_35 = eir_47 * calc_biquad(coeff_eir[0], 70.0, 35.0)
+    eir_17 = eir_47 * calc_biquad(coeff_eir[0], 70.0, 17.0)
     
     q_47 = 1.0
-    q_35 = 0.7519   # Hard code Q_35 from BEopt1 
-    q_17 = q_47 * calc_biquad(coeff_q, 70, 17)
-    
+    q_35 = 0.7519 # Hard code Q_35 from BEopt1 
+    q_17 = q_47 * calc_biquad(coeff_q[0], 70.0, 17.0)
+
     cfm_Btu_h = 400.0 / 12000.0
-    
+
     q_47_net = q_47 + fan_power_rated * 3.412 * cfm_Btu_h
     q_35_net = q_35 + fan_power_rated * 3.412 * cfm_Btu_h
     q_17_net = q_17 + fan_power_rated * 3.412 * cfm_Btu_h
     
-    p_47 = (q_47 * eir_47)/3.412 + fan_power_rated * cfm_Btu_h
-    p_35 = (q_35 * eir_35)/3.412 + fan_power_rated * cfm_Btu_h
-    p_17 = (q_17 * eir_17)/3.412 + fan_power_rated * cfm_Btu_h
+    p_47 = (q_47 * eir_47) / 3.412 + fan_power_rated * cfm_Btu_h
+    p_35 = (q_35 * eir_35) / 3.412 + fan_power_rated * cfm_Btu_h
+    p_17 = (q_17 * eir_17) / 3.412 + fan_power_rated * cfm_Btu_h
     
-    t_bins = [62,57,52,47,42,37,32,27,22,17,12,7,2,-3,-8]
-    frac_hours = [0.132,0.111,0.103,0.093,0.100,0.109,0.126,0.087,0.055,0.036,0.026,0.013,0.006,0.002,0.001]
+    t_bins = [62.0, 57.0, 52.0, 47.0, 42.0, 37.0, 32.0, 27.0, 22.0, 17.0, 12.0, 7.0, 2.0, -3.0, -8.0]
+    frac_hours = [0.132, 0.111, 0.103, 0.093, 0.100, 0.109, 0.126, 0.087, 0.055, 0.036, 0.026, 0.013, 0.006, 0.002, 0.001]
     
     designtemp = 5.0
     t_off = 10.0
@@ -3618,38 +3751,192 @@ class HVAC
     rHtot = 0.0
     bLtot = 0.0
     dHRmin = q_47
-
     (0..14).each do |i|
-      bL = ((65 - t_bins[i]) / (65-designtemp)) * 0.77 * dHRmin
+      bL = ((65.0 - t_bins[i]) / (65.0 - designtemp)) * 0.77 * dHRmin
        
-      if t_bins[i] > 17 and t_bins[i] < 45
-        q_h = q_17_net + (((q_35_net - q_17_net) * (t_bins[i]-17)) / (35-17))
-        p_h = p_17 + (((p_35 - p_17) * (t_bins[i] - 17)) / (35 - 17))
+      if t_bins[i] > 17.0 and t_bins[i] < 45.0
+        q_h = q_17_net + (((q_35_net - q_17_net) * (t_bins[i] - 17.0)) / (35.0 - 17.0))
+        p_h = p_17 + (((p_35 - p_17) * (t_bins[i] - 17.0)) / (35.0 - 17.0))
       else
-        q_h = q_17_net + (((q_47_net - q_17_net) * (t_bins[i] - 17)) / (47 - 17))
-        p_h = p_17 + (((p_47 - p_17) * (t_bins[i] - 17))/(47 - 17))
+        q_h = q_17_net + (((q_47_net - q_17_net) * (t_bins[i] - 17.0)) / (47.0 - 17.0))
+        p_h = p_17 + (((p_47 - p_17) * (t_bins[i] - 17.0)) / (47.0 - 17.0))
       end
      
       x_t = [bL / q_h, 1].min
      
       pLF = 1 - (c_d * (1 - x_t))
-      if t_bins[i] <= t_off or q_h/(3.412 * p_h) < 1
-        sigma_t = 0
-      elsif t_off < t_bins[i] and t_bins[i] <= t_on and q_h /(p_h * 3.412) >= 1
+      if t_bins[i] <= t_off or q_h / (3.412 * p_h) < 1.0
+        sigma_t = 0.0
+      elsif t_off < t_bins[i] and t_bins[i] <= t_on and q_h / (p_h * 3.412) >= 1.0
         sigma_t = 0.5
-      elsif t_bins[i] > t_on and q_h / (3.412 * p_h) >= 1
-        sigma_t = 1
+      elsif t_bins[i] > t_on and q_h / (3.412 * p_h) >= 1.0
+        sigma_t = 1.0
       end
      
       p_h_i = (x_t * p_h * sigma_t / pLF) * frac_hours[i]
       rH_i = ((bL - (x_t * q_h * sigma_t)) / 3.412) * frac_hours[i]
       bL_i = bL * frac_hours[i]
-      ptot = ptot + p_h_i
-      rHtot = rHtot + rH_i
-      bLtot = bLtot + bL_i
+      ptot += p_h_i
+      rHtot += rH_i
+      bLtot += bL_i
     end
 
     hspf = bLtot / (ptot + rHtot)
+    return hspf
+  end
+
+  def self.calc_COPs_heating_2spd(hspf, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
+    # Iterate to find rated net EERs given SEER using simple bisection method for two stage air conditioners
+    
+    # Initial large bracket of COP to span possible hspf range
+    cop_a = 1.0
+    cop_b = 10.0
+    
+    # Iterate
+    iter_max = 100
+    tol = 0.0001    
+
+    err = 1
+    cop_c = (cop_a + cop_b) / 2.0
+    (1..iter_max).each do |n|
+      cops = calc_COPs_from_EIR_2spd(cop_a, fan_power_rated)
+      f_a = calc_HSPF_TwoSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
+
+      cops = calc_COPs_from_EIR_2spd(cop_c, fan_power_rated)
+      f_c = calc_HSPF_TwoSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
+              
+      if f_c == 0
+        return cop_c
+      elsif f_a * f_c < 0
+        cop_b = cop_c
+      else
+        cop_a = cop_c
+      end
+      
+      cop_c = (cop_a + cop_b) / 2.0
+      err = (cop_b - cop_a) / 2.0
+
+      if err <= tol
+        break
+      end
+    end
+
+    if err > tol
+      return -99
+      runner.registerWarning('Two-speed heating COP iteration failed to converge.')
+    end
+        
+    return calc_COPs_from_EIR_2spd(cop_c, fan_power_rated) 
+  end
+
+  def self.calc_HSPF_TwoSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
+    eir_47_H = calc_EIR_from_COP(cops[1], fan_power_rated)
+    eir_35_H = eir_47_H * calc_biquad(coeff_eir[1], 70.0, 35.0)
+    eir_17_H = eir_47_H * calc_biquad(coeff_eir[1], 70.0, 17.0)
+        
+    eir_47_L = calc_EIR_from_COP(cops[0], fan_power_rated)
+    eir_62_L = eir_47_L * calc_biquad(coeff_eir[0], 70.0, 62.0)
+    eir_35_L = eir_47_L * calc_biquad(coeff_eir[0], 70.0, 35.0)
+    eir_17_L = eir_47_L * calc_biquad(coeff_eir[0], 70.0, 17.0)
+    
+    q_H47 = 1.0
+    q_H35 = 0.7519 # Hard code Q_35 from BEopt1 #TODO: UPDATE!!
+    q_H17 = q_H47 * calc_biquad(coeff_q[1], 70.0, 17.0)
+    
+    q_L47 = q_H47 * capacity_ratios[0]
+    q_L62 = q_L47 * calc_biquad(coeff_q[0], 70.0, 62.0)
+    q_L35 = 0.7519 * capacity_ratios[0] # Hard code Q_35 from BEopt1  # TODO: UPDATE!!!
+    q_L17 = q_L47 * calc_biquad(coeff_q[0], 70.0, 17.0)
+
+    cfm_Btu_h = 400.0 / 12000.0
+        
+    q_H47_net = q_H47 + fan_power_rated * 3.412 * cfm_Btu_h
+    q_H35_net = q_H35 + fan_power_rated * 3.412 * cfm_Btu_h
+    q_H17_net = q_H17 + fan_power_rated * 3.412 * cfm_Btu_h
+    q_L62_net = q_L62 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[0]
+    q_L47_net = q_L47 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[0]
+    q_L35_net = q_L35 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[0]
+    q_L17_net = q_L17 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[0]      
+            
+    p_H47 = (q_H47 * eir_47_H) / 3.412 + fan_power_rated * cfm_Btu_h
+    p_H35 = (q_H35 * eir_35_H) / 3.412 + fan_power_rated * cfm_Btu_h
+    p_H17 = (q_H17 * eir_17_H) / 3.412 + fan_power_rated * cfm_Btu_h
+    p_L62 = (q_L62 * eir_62_L) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[0]
+    p_L47 = (q_L47 * eir_47_L) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[0]
+    p_L35 = (q_L35 * eir_35_L) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[0]
+    p_L17 = (q_L17 * eir_17_L) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[0]
+    
+    t_bins = [62.0, 57.0, 52.0, 47.0, 42.0, 37.0, 32.0, 27.0, 22.0, 17.0, 12.0, 7.0, 2.0, -3.0, -8.0]
+    frac_hours = [0.132, 0.111, 0.103, 0.093, 0.100, 0.109, 0.126, 0.087, 0.055, 0.036, 0.026, 0.013, 0.006, 0.002, 0.001]
+    
+    designtemp = 5.0
+    t_off = 10.0
+    t_on = 14.0
+    ptot = 0.0
+    rHtot = 0.0
+    bLtot = 0.0
+    dHRmin = q_H47    
+    (0..14).each do |i|        
+      bL = ((65.0 - t_bins[i]) / (65.0 - designtemp)) * 0.77 * dHRmin
+      
+      if 17.0 < t_bins[i] and t_bins[i] < 45.0
+        q_h = q_H17_net + (((q_H35_net - q_H17_net) * (t_bins[i] - 17.0)) / (35.0 - 17.0))
+        p_h = p_H17 + (((p_H35 - p_H17) * (t_bins[i] - 17.0)) / (35.0 - 17.0))
+      else
+        q_h = q_H17_net + (((q_H47_net - q_H17_net) * (t_bins[i] - 17.0)) / (47.0 - 17.0))
+        p_h = p_H17 + (((p_H47 - p_H17) * (t_bins[i] - 17.0)) / (47.0 - 17.0))
+      end
+      
+      if t_bins[i] >= 40.0
+        q_l = q_L47_net + (((q_L62_net - q_L47_net) * (t_bins[i] - 47.0)) / (62.0 - 47.0))
+        p_l = p_L47 + (((p_L62 - p_L47) * (t_bins[i] - 47.0)) / (62.0 - 47.0))
+      elsif 17 <= t_bins[i] and t_bins[i] < 40.0
+        q_l = q_L17_net + (((q_L35_net - q_L17_net) * (t_bins[i] - 17.0)) / (35.0 - 17.0))
+        p_l = p_L17 + (((p_L35 - p_L17) * (t_bins[i] - 17.0)) / (35.0 - 17.0))
+      else
+        q_l = q_L17_net + (((q_L47_net - q_L17_net) * (t_bins[i] - 17.0)) / (47.0 - 17.0))
+        p_l = p_L17 + (((p_L47 - p_L17) * (t_bins[i] - 17.0)) / (47.0 - 17.0))
+      end
+      
+      x_t_h = [bL / q_h, 1].min
+      x_t_l = [bL / q_l, 1].min
+      pLF = 1 - (c_d * (1 - x_t_l))
+      if t_bins[i] <= t_off or q_h / (p_h * 3.412) < 1.0
+        sigma_t_h = 0.0
+      elsif t_off < t_bins[i] and t_bins[i] <= t_on and q_h / (p_h * 3.412) >= 1.0
+        sigma_t_h = 0.5
+      elsif t_bins[i] > t_on and q_h / (p_h * 3.412) >= 1.0
+        sigma_t_h = 1.0
+      end
+      
+      if t_bins[i] <= t_off
+        sigma_t_l = 0.0
+      elsif t_off < t_bins[i] and t_bins[i] <= t_on
+        sigma_t_l = 0.5
+      elsif t_bins[i] > t_on
+        sigma_t_l = 1.0
+      end
+      
+      if q_l > bL
+        p_h_i = (x_t_l * p_l * sigma_t_l / pLF) * frac_hours[i]
+        rH_i = (bL * (1.0 - sigma_t_l)) / 3.412 * frac_hours[i]
+      elsif q_l < bL and q_h > bL
+        x_t_l = ((q_h - bL) / (q_h - q_l))
+        x_t_h = 1.0 - x_t_l
+        p_h_i = (x_t_l * p_l + x_t_h * p_h) * sigma_t_l * frac_hours[i]
+        rH_i = (bL * (1.0 - sigma_t_l)) / 3.412 * frac_hours[i]
+      elsif q_h <= bL
+        p_h_i = p_h * sigma_t_h * frac_hours[i]
+        rH_i = (bL - (q_h * sigma_t_l)) / 3.412 * frac_hours[i]
+      end
+      
+      bL_i = bL * frac_hours[i]
+      ptot += p_h_i
+      rHtot += rH_i
+      bLtot += bL_i
+    end
+      
+    hspf = bLtot / (ptot + rHtot)        
     return hspf
   end
 
@@ -3895,32 +4182,32 @@ class HVAC
     return htg_coil_stage_data
   end
 
-  def self.calc_cooling_eirs(num_speeds, coolingEER, supplyFanPower_Rated)
+  def self.calc_cooling_eirs(num_speeds, coolingEER, fan_power_rated)
     cooling_eirs = []
     (0...num_speeds).to_a.each do |speed|
-      eir = calc_EIR_from_EER(coolingEER[speed], supplyFanPower_Rated)
+      eir = calc_EIR_from_EER(coolingEER[speed], fan_power_rated)
       cooling_eirs << eir
     end
     return cooling_eirs
   end
 
-  def self.calc_heating_eirs(num_speeds, heatingCOP, supplyFanPower_Rated)
+  def self.calc_heating_eirs(num_speeds, heatingCOP, fan_power_rated)
     heating_eirs = []
     (0...num_speeds).to_a.each do |speed|
-      eir = calc_EIR_from_COP(heatingCOP[speed], supplyFanPower_Rated)
+      eir = calc_EIR_from_COP(heatingCOP[speed], fan_power_rated)
       heating_eirs << eir
     end
     return heating_eirs
   end
 
-  def self.calc_shrs_rated_gross(num_speeds, shr_Rated_Net, supplyFanPower_Rated, cfms_ton_rated)
+  def self.calc_shrs_rated_gross(num_speeds, shr_Rated_Net, fan_power_rated, cfms_ton_rated)
     # Convert SHRs from net to gross
     shrs_rated_gross = []
     (0...num_speeds).to_a.each do |speed|
       qtot_net_nominal = 12000.0
       qsens_net_nominal = qtot_net_nominal * shr_Rated_Net[speed]
-      qtot_gross_nominal = qtot_net_nominal + UnitConversions.convert(cfms_ton_rated[speed] * supplyFanPower_Rated, "Wh", "Btu")
-      qsens_gross_nominal = qsens_net_nominal + UnitConversions.convert(cfms_ton_rated[speed] * supplyFanPower_Rated, "Wh", "Btu")
+      qtot_gross_nominal = qtot_net_nominal + UnitConversions.convert(cfms_ton_rated[speed] * fan_power_rated, "Wh", "Btu")
+      qsens_gross_nominal = qsens_net_nominal + UnitConversions.convert(cfms_ton_rated[speed] * fan_power_rated, "Wh", "Btu")
       shrs_rated_gross << (qsens_gross_nominal / qtot_gross_nominal)
 
       # Make sure SHR's are in valid range based on E+ model limits.
@@ -4919,7 +5206,7 @@ class HVAC
     return cooling_eirs
   end
 
-  def self.calc_mshp_SEER_VariableSpeed(eer_A, c_d, capacityRatio, cfm_Tons, supplyFanPower_Rated, isHeatPump, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
+  def self.calc_mshp_SEER_VariableSpeed(eer_A, c_d, capacityRatio, cfm_Tons, fan_power_rated, isHeatPump, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
     n_max = (eer_A.length - 1.0) - 3.0 # Don't use max speed
     n_min = 0.0
     n_int = (n_min + (n_max - n_min) / 3.0).ceil.to_i
@@ -4929,13 +5216,13 @@ class HVAC
     tout_E = UnitConversions.convert(87.0, "F", "C")
     tout_F = UnitConversions.convert(67.0, "F", "C")
 
-    eir_A2 = calc_EIR_from_EER(eer_A[n_max], supplyFanPower_Rated[n_max])
+    eir_A2 = calc_EIR_from_EER(eer_A[n_max], fan_power_rated[n_max])
     eir_B2 = eir_A2 * MathTools.biquadratic(wBin, tout_B, cOOL_EIR_FT_SPEC[n_max])
 
-    eir_Av = calc_EIR_from_EER(eer_A[n_int], supplyFanPower_Rated[n_int])
+    eir_Av = calc_EIR_from_EER(eer_A[n_int], fan_power_rated[n_int])
     eir_Ev = eir_Av * MathTools.biquadratic(wBin, tout_E, cOOL_EIR_FT_SPEC[n_int])
 
-    eir_A1 = calc_EIR_from_EER(eer_A[n_min], supplyFanPower_Rated[n_min])
+    eir_A1 = calc_EIR_from_EER(eer_A[n_min], fan_power_rated[n_min])
     eir_B1 = eir_A1 * MathTools.biquadratic(wBin, tout_B, cOOL_EIR_FT_SPEC[n_min])
     eir_F1 = eir_A1 * MathTools.biquadratic(wBin, tout_F, cOOL_EIR_FT_SPEC[n_min])
 
@@ -4945,17 +5232,17 @@ class HVAC
     q_B1 = capacityRatio[n_min] * MathTools.biquadratic(wBin, tout_B, cOOL_CAP_FT_SPEC[n_min])
     q_F1 = capacityRatio[n_min] * MathTools.biquadratic(wBin, tout_F, cOOL_CAP_FT_SPEC[n_min])
 
-    q_A2_net = q_A2 - supplyFanPower_Rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_B2_net = q_B2 - supplyFanPower_Rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_Ev_net = q_Ev - supplyFanPower_Rated[n_int] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_B1_net = q_B1 - supplyFanPower_Rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_F1_net = q_F1 - supplyFanPower_Rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_A2_net = q_A2 - fan_power_rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_B2_net = q_B2 - fan_power_rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_Ev_net = q_Ev - fan_power_rated[n_int] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_B1_net = q_B1 - fan_power_rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_F1_net = q_F1 - fan_power_rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
 
-    p_A2 = UnitConversions.convert(q_A2 * eir_A2, "Btu", "Wh") + supplyFanPower_Rated[n_max] * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_B2 = UnitConversions.convert(q_B2 * eir_B2, "Btu", "Wh") + supplyFanPower_Rated[n_max] * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_Ev = UnitConversions.convert(q_Ev * eir_Ev, "Btu", "Wh") + supplyFanPower_Rated[n_int] * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_B1 = UnitConversions.convert(q_B1 * eir_B1, "Btu", "Wh") + supplyFanPower_Rated[n_min] * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_F1 = UnitConversions.convert(q_F1 * eir_F1, "Btu", "Wh") + supplyFanPower_Rated[n_min] * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_A2 = UnitConversions.convert(q_A2 * eir_A2, "Btu", "Wh") + fan_power_rated[n_max] * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_B2 = UnitConversions.convert(q_B2 * eir_B2, "Btu", "Wh") + fan_power_rated[n_max] * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_Ev = UnitConversions.convert(q_Ev * eir_Ev, "Btu", "Wh") + fan_power_rated[n_int] * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_B1 = UnitConversions.convert(q_B1 * eir_B1, "Btu", "Wh") + fan_power_rated[n_min] * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_F1 = UnitConversions.convert(q_F1 * eir_F1, "Btu", "Wh") + fan_power_rated[n_min] * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
 
     q_k1_87 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (87 - 67.0)
     q_k2_87 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (87.0 - 82.0)
@@ -5093,7 +5380,7 @@ class HVAC
     return heating_eirs
   end
 
-  def self.calc_mshp_HSPF_VariableSpeed(cop_47, c_d, capacityRatio, cfm_Tons, supplyFanPower_Rated, min_temp, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
+  def self.calc_mshp_HSPF_VariableSpeed(cop_47, c_d, capacityRatio, cfm_Tons, fan_power_rated, min_temp, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
     n_max = (cop_47.length - 1.0) #-3 # Don't use max speed
     n_min = 0
     n_int = (n_min + (n_max - n_min) / 3.0).ceil.to_i
@@ -5103,13 +5390,13 @@ class HVAC
     tout_2 = UnitConversions.convert(35.0, "F", "C")
     tout_0 = UnitConversions.convert(62.0, "F", "C")
 
-    eir_H1_2 = calc_EIR_from_COP(cop_47[n_max], supplyFanPower_Rated[n_max])
+    eir_H1_2 = calc_EIR_from_COP(cop_47[n_max], fan_power_rated[n_max])
     eir_H3_2 = eir_H1_2 * MathTools.biquadratic(tin, tout_3, hEAT_EIR_FT_SPEC[n_max])
 
-    eir_adjv = calc_EIR_from_COP(cop_47[n_int], supplyFanPower_Rated[n_int])
+    eir_adjv = calc_EIR_from_COP(cop_47[n_int], fan_power_rated[n_int])
     eir_H2_v = eir_adjv * MathTools.biquadratic(tin, tout_2, hEAT_EIR_FT_SPEC[n_int])
 
-    eir_H1_1 = calc_EIR_from_COP(cop_47[n_min], supplyFanPower_Rated[n_min])
+    eir_H1_1 = calc_EIR_from_COP(cop_47[n_min], fan_power_rated[n_min])
     eir_H0_1 = eir_H1_1 * MathTools.biquadratic(tin, tout_0, hEAT_EIR_FT_SPEC[n_min])
 
     q_H1_2 = capacityRatio[n_max]
@@ -5120,17 +5407,17 @@ class HVAC
     q_H1_1 = capacityRatio[n_min]
     q_H0_1 = q_H1_1 * MathTools.biquadratic(tin, tout_0, hEAT_CAP_FT_SPEC[n_min])
 
-    q_H1_2_net = q_H1_2 + supplyFanPower_Rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_H3_2_net = q_H3_2 + supplyFanPower_Rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_H2_v_net = q_H2_v + supplyFanPower_Rated[n_int] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_H1_1_net = q_H1_1 + supplyFanPower_Rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
-    q_H0_1_net = q_H0_1 + supplyFanPower_Rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_H1_2_net = q_H1_2 + fan_power_rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_H3_2_net = q_H3_2 + fan_power_rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_H2_v_net = q_H2_v + fan_power_rated[n_int] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_H1_1_net = q_H1_1 + fan_power_rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    q_H0_1_net = q_H0_1 + fan_power_rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
 
-    p_H1_2 = q_H1_2 * eir_H1_2 + supplyFanPower_Rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_H3_2 = q_H3_2 * eir_H3_2 + supplyFanPower_Rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_H2_v = q_H2_v * eir_H2_v + supplyFanPower_Rated[n_int] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_H1_1 = q_H1_1 * eir_H1_1 + supplyFanPower_Rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
-    p_H0_1 = q_H0_1 * eir_H0_1 + supplyFanPower_Rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_H1_2 = q_H1_2 * eir_H1_2 + fan_power_rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_H3_2 = q_H3_2 * eir_H3_2 + fan_power_rated[n_max] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_max] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_H2_v = q_H2_v * eir_H2_v + fan_power_rated[n_int] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_int] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_H1_1 = q_H1_1 * eir_H1_1 + fan_power_rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
+    p_H0_1 = q_H0_1 * eir_H0_1 + fan_power_rated[n_min] * UnitConversions.convert(1, "W", "Btu/hr") * cfm_Tons[n_min] / UnitConversions.convert(1, "ton", "Btu/hr")
 
     q_H35_2 = 0.9 * (q_H3_2_net + 0.6 * (q_H1_2_net - q_H3_2_net))
     p_H35_2 = 0.985 * (p_H3_2 + 0.6 * (p_H1_2 - p_H3_2))

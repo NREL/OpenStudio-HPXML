@@ -13,7 +13,7 @@ class Constants
     return 0.07
   end
 
-  def self.C_d_htg
+  def self.C_d
     return 0.11
   end
 
