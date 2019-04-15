@@ -3594,11 +3594,11 @@ class HVAC
     eir_35 = eir_47 * calc_biquad(coeff_eir, 70, 35)
     eir_17 = eir_47 * calc_biquad(coeff_eir, 70, 17)
     
-    q_47 = 1
+    q_47 = 1.0
     q_35 = 0.7519   # Hard code Q_35 from BEopt1 
     q_17 = q_47 * calc_biquad(coeff_q, 70, 17)
     
-    cfm_Btu_h = 400 / 12000.0
+    cfm_Btu_h = 400.0 / 12000.0
     
     q_47_net = q_47 + fan_power_rated * 3.412 * cfm_Btu_h
     q_35_net = q_35 + fan_power_rated * 3.412 * cfm_Btu_h
@@ -3611,12 +3611,12 @@ class HVAC
     t_bins = [62,57,52,47,42,37,32,27,22,17,12,7,2,-3,-8]
     frac_hours = [0.132,0.111,0.103,0.093,0.100,0.109,0.126,0.087,0.055,0.036,0.026,0.013,0.006,0.002,0.001]
     
-    designtemp = 5
-    t_off = 10
-    t_on = 14
-    ptot = 0
-    rHtot = 0
-    bLtot = 0
+    designtemp = 5.0
+    t_off = 10.0
+    t_on = 14.0
+    ptot = 0.0
+    rHtot = 0.0
+    bLtot = 0.0
     dHRmin = q_47
 
     (0..14).each do |i|
