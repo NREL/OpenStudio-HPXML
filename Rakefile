@@ -11,11 +11,11 @@ task :update_measures do
   system(command)
 
   create_hpxmls
+
+  puts "Done."
 end
 
 def create_hpxmls
-  puts "Generating HPXML files..."
-
   this_dir = File.dirname(__FILE__)
   tests_dir = File.join(this_dir, "tests")
 
@@ -287,223 +287,253 @@ def create_hpxmls
     'water_heating_multiple/valid-dhw-tankless-propane-x3.xml' => 'valid-dhw-tankless-propane.xml'
   }
 
+  puts "Generating #{hpxmls_files.size} HPXML files..."
+
   hpxmls_files.each do |derivative, parent|
-    puts "Generating #{derivative}..."
+    print "."
 
-    hpxml_files = [derivative]
-    unless parent.nil?
-      hpxml_files.unshift(parent)
-    end
-    while not parent.nil?
-      if hpxmls_files.keys.include? parent
-        unless hpxmls_files[parent].nil?
-          hpxml_files.unshift(hpxmls_files[parent])
+    begin
+      hpxml_files = [derivative]
+      unless parent.nil?
+        hpxml_files.unshift(parent)
+      end
+      while not parent.nil?
+        if hpxmls_files.keys.include? parent
+          unless hpxmls_files[parent].nil?
+            hpxml_files.unshift(hpxmls_files[parent])
+          end
+          parent = hpxmls_files[parent]
         end
-        parent = hpxmls_files[parent]
       end
-    end
 
-    hpxml_values = {}
-    site_values = {}
-    building_occupancy_values = {}
-    building_construction_values = {}
-    climate_and_risk_zones_values = {}
-    air_infiltration_measurement_values = {}
-    attics_values = []
-    attics_roofs_values = []
-    attics_floors_values = []
-    attics_walls_values = []
-    foundations_values = []
-    foundations_framefloors_values = []
-    foundations_walls_values = []
-    foundations_slabs_values = []
-    rim_joists_values = []
-    walls_values = []
-    windows_values = []
-    skylights_values = []
-    doors_values = []
-    heating_systems_values = []
-    cooling_systems_values = []
-    heat_pumps_values = []
-    hvac_control_values = {}
-    hvac_distributions_values = []
-    duct_leakage_measurements_values = []
-    ducts_values = []
-    ventilation_fans_values = []
-    water_heating_systems_values = []
-    hot_water_distribution_values = {}
-    water_fixtures_values = []
-    pv_systems_values = []
-    clothes_washer_values = {}
-    clothes_dryer_values = {}
-    dishwasher_values = {}
-    refrigerator_values = {}
-    cooking_range_values = {}
-    oven_values = {}
-    lighting_values = {}
-    ceiling_fans_values = []
-    plug_loads_values = []
-    misc_load_schedule_values = {}
-    hpxml_files.each do |hpxml_file|
-      hpxml_values = get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
-      site_values = get_hpxml_file_site_values(hpxml_file, site_values)
-      building_occupancy_values = get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
-      building_construction_values = get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
-      climate_and_risk_zones_values = get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
-      air_infiltration_measurement_values = get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values, building_construction_values)
-      attics_values = get_hpxml_file_attics_values(hpxml_file, attics_values)
-      attics_roofs_values = get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
-      attics_floors_values = get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
-      attics_walls_values = get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
-      foundations_values = get_hpxml_file_foundations_values(hpxml_file, foundations_values)
-      foundations_framefloors_values = get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framefloors_values)
-      foundations_walls_values = get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values)
-      foundations_slabs_values = get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values)
-      rim_joists_values = get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
-      walls_values = get_hpxml_file_walls_values(hpxml_file, walls_values)
-      windows_values = get_hpxml_file_windows_values(hpxml_file, windows_values)
-      skylights_values = get_hpxml_file_skylights_values(hpxml_file, skylights_values)
-      doors_values = get_hpxml_file_doors_values(hpxml_file, doors_values)
-      heating_systems_values = get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
-      cooling_systems_values = get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
-      heat_pumps_values = get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
-      hvac_control_values = get_hpxml_file_hvac_control_values(hpxml_file, hvac_control_values)
-      hvac_distributions_values = get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_values)
-      duct_leakage_measurements_values = get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_measurements_values)
-      ducts_values = get_hpxml_file_ducts_values(hpxml_file, ducts_values)
-      ventilation_fans_values = get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
-      water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems_values)
-      hot_water_distribution_values = get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribution_values)
-      water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
-      pv_systems_values = get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
-      clothes_washer_values = get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
-      clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
-      dishwasher_values = get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
-      refrigerator_values = get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
-      cooking_range_values = get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
-      oven_values = get_hpxml_file_oven_values(hpxml_file, oven_values)
-      lighting_values = get_hpxml_file_lighting_values(hpxml_file, lighting_values)
-      ceiling_fans_values = get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
-      plug_loads_values = get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
-      misc_load_schedule_values = get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_values)
-    end
+      hpxml_values = {}
+      site_values = {}
+      building_occupancy_values = {}
+      building_construction_values = {}
+      climate_and_risk_zones_values = {}
+      air_infiltration_measurement_values = {}
+      attics_values = []
+      attics_roofs_values = []
+      attics_floors_values = []
+      attics_walls_values = []
+      foundations_values = []
+      foundations_framefloors_values = []
+      foundations_walls_values = []
+      foundations_slabs_values = []
+      rim_joists_values = []
+      walls_values = []
+      windows_values = []
+      skylights_values = []
+      doors_values = []
+      heating_systems_values = []
+      cooling_systems_values = []
+      heat_pumps_values = []
+      hvac_control_values = {}
+      hvac_distributions_values = []
+      duct_leakage_measurements_values = []
+      ducts_values = []
+      ventilation_fans_values = []
+      water_heating_systems_values = []
+      hot_water_distribution_values = {}
+      water_fixtures_values = []
+      pv_systems_values = []
+      clothes_washer_values = {}
+      clothes_dryer_values = {}
+      dishwasher_values = {}
+      refrigerator_values = {}
+      cooking_range_values = {}
+      oven_values = {}
+      lighting_values = {}
+      ceiling_fans_values = []
+      plug_loads_values = []
+      misc_load_schedule_values = {}
+      hpxml_files.each do |hpxml_file|
+        hpxml_values = get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
+        site_values = get_hpxml_file_site_values(hpxml_file, site_values)
+        building_occupancy_values = get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
+        building_construction_values = get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
+        climate_and_risk_zones_values = get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
+        air_infiltration_measurement_values = get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values, building_construction_values)
+        attics_values = get_hpxml_file_attics_values(hpxml_file, attics_values)
+        attics_roofs_values = get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
+        attics_floors_values = get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
+        attics_walls_values = get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
+        foundations_values = get_hpxml_file_foundations_values(hpxml_file, foundations_values)
+        foundations_framefloors_values = get_hpxml_file_foundations_framefloors_values(hpxml_file, foundations_framefloors_values)
+        foundations_walls_values = get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values)
+        foundations_slabs_values = get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values)
+        rim_joists_values = get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
+        walls_values = get_hpxml_file_walls_values(hpxml_file, walls_values)
+        windows_values = get_hpxml_file_windows_values(hpxml_file, windows_values)
+        skylights_values = get_hpxml_file_skylights_values(hpxml_file, skylights_values)
+        doors_values = get_hpxml_file_doors_values(hpxml_file, doors_values)
+        heating_systems_values = get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
+        cooling_systems_values = get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
+        heat_pumps_values = get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
+        hvac_control_values = get_hpxml_file_hvac_control_values(hpxml_file, hvac_control_values)
+        hvac_distributions_values = get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_values)
+        duct_leakage_measurements_values = get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_measurements_values)
+        ducts_values = get_hpxml_file_ducts_values(hpxml_file, ducts_values)
+        ventilation_fans_values = get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
+        water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems_values)
+        hot_water_distribution_values = get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribution_values)
+        water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
+        pv_systems_values = get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
+        clothes_washer_values = get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
+        clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
+        dishwasher_values = get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
+        refrigerator_values = get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
+        cooking_range_values = get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
+        oven_values = get_hpxml_file_oven_values(hpxml_file, oven_values)
+        lighting_values = get_hpxml_file_lighting_values(hpxml_file, lighting_values)
+        ceiling_fans_values = get_hpxml_file_ceiling_fan_values(hpxml_file, ceiling_fans_values)
+        plug_loads_values = get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
+        misc_load_schedule_values = get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_values)
+      end
 
-    hpxml_doc = HPXML.create_hpxml(**hpxml_values)
-    hpxml = hpxml_doc.elements["HPXML"]
+      hpxml_doc = HPXML.create_hpxml(**hpxml_values)
+      hpxml = hpxml_doc.elements["HPXML"]
 
-    if File.exists? File.join(tests_dir, derivative)
-      old_hpxml_doc = XMLHelper.parse_file(File.join(tests_dir, derivative))
-      created_date_and_time = HPXML.get_hpxml_values(hpxml: old_hpxml_doc.elements["HPXML"])[:created_date_and_time]
-      hpxml.elements["XMLTransactionHeaderInformation/CreatedDateAndTime"].text = created_date_and_time
-    end
+      if File.exists? File.join(tests_dir, derivative)
+        old_hpxml_doc = XMLHelper.parse_file(File.join(tests_dir, derivative))
+        created_date_and_time = HPXML.get_hpxml_values(hpxml: old_hpxml_doc.elements["HPXML"])[:created_date_and_time]
+        hpxml.elements["XMLTransactionHeaderInformation/CreatedDateAndTime"].text = created_date_and_time
+      end
 
-    HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
-    HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values) unless building_occupancy_values.empty?
-    HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
-    HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
-    HPXML.add_air_infiltration_measurement(hpxml: hpxml, **air_infiltration_measurement_values)
-    attics_values.each_with_index do |attic_values, i|
-      attic = HPXML.add_attic(hpxml: hpxml, **attic_values)
-      attics_roofs_values[i].each do |attic_roof_values|
-        HPXML.add_attic_roof(attic: attic, **attic_roof_values)
+      HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
+      HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values) unless building_occupancy_values.empty?
+      HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
+      HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
+      HPXML.add_air_infiltration_measurement(hpxml: hpxml, **air_infiltration_measurement_values)
+      attics_values.each_with_index do |attic_values, i|
+        attic = HPXML.add_attic(hpxml: hpxml, **attic_values)
+        attics_roofs_values[i].each do |attic_roof_values|
+          HPXML.add_attic_roof(attic: attic, **attic_roof_values)
+        end
+        attics_floors_values[i].each do |attic_floor_values|
+          HPXML.add_attic_floor(attic: attic, **attic_floor_values)
+        end
+        attics_walls_values[i].each do |attic_wall_values|
+          HPXML.add_attic_wall(attic: attic, **attic_wall_values)
+        end
       end
-      attics_floors_values[i].each do |attic_floor_values|
-        HPXML.add_attic_floor(attic: attic, **attic_floor_values)
+      foundations_values.each_with_index do |foundation_values, i|
+        foundation = HPXML.add_foundation(hpxml: hpxml, **foundation_values)
+        foundations_framefloors_values[i].each do |foundation_framefloor_values|
+          HPXML.add_frame_floor(foundation: foundation, **foundation_framefloor_values)
+        end
+        foundations_walls_values[i].each do |foundation_wall_values|
+          HPXML.add_foundation_wall(foundation: foundation, **foundation_wall_values)
+        end
+        foundations_slabs_values[i].each do |foundation_slab_values|
+          HPXML.add_slab(foundation: foundation, **foundation_slab_values)
+        end
       end
-      attics_walls_values[i].each do |attic_wall_values|
-        HPXML.add_attic_wall(attic: attic, **attic_wall_values)
+      rim_joists_values.each do |rim_joist_values|
+        HPXML.add_rim_joist(hpxml: hpxml, **rim_joist_values)
       end
-    end
-    foundations_values.each_with_index do |foundation_values, i|
-      foundation = HPXML.add_foundation(hpxml: hpxml, **foundation_values)
-      foundations_framefloors_values[i].each do |foundation_framefloor_values|
-        HPXML.add_frame_floor(foundation: foundation, **foundation_framefloor_values)
+      walls_values.each do |wall_values|
+        HPXML.add_wall(hpxml: hpxml, **wall_values)
       end
-      foundations_walls_values[i].each do |foundation_wall_values|
-        HPXML.add_foundation_wall(foundation: foundation, **foundation_wall_values)
+      windows_values.each do |window_values|
+        HPXML.add_window(hpxml: hpxml, **window_values)
       end
-      foundations_slabs_values[i].each do |foundation_slab_values|
-        HPXML.add_slab(foundation: foundation, **foundation_slab_values)
+      skylights_values.each do |skylight_values|
+        HPXML.add_skylight(hpxml: hpxml, **skylight_values)
       end
-    end
-    rim_joists_values.each do |rim_joist_values|
-      HPXML.add_rim_joist(hpxml: hpxml, **rim_joist_values)
-    end
-    walls_values.each do |wall_values|
-      HPXML.add_wall(hpxml: hpxml, **wall_values)
-    end
-    windows_values.each do |window_values|
-      HPXML.add_window(hpxml: hpxml, **window_values)
-    end
-    skylights_values.each do |skylight_values|
-      HPXML.add_skylight(hpxml: hpxml, **skylight_values)
-    end
-    doors_values.each do |door_values|
-      HPXML.add_door(hpxml: hpxml, **door_values)
-    end
-    heating_systems_values.each do |heating_system_values|
-      HPXML.add_heating_system(hpxml: hpxml, **heating_system_values)
-    end
-    cooling_systems_values.each do |cooling_system_values|
-      HPXML.add_cooling_system(hpxml: hpxml, **cooling_system_values)
-    end
-    heat_pumps_values.each do |heat_pump_values|
-      HPXML.add_heat_pump(hpxml: hpxml, **heat_pump_values)
-    end
-    HPXML.add_hvac_control(hpxml: hpxml, **hvac_control_values) unless hvac_control_values.empty?
-    hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
-      hvac_distribution = HPXML.add_hvac_distribution(hpxml: hpxml, **hvac_distribution_values)
-      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
-      next if air_distribution.nil?
+      doors_values.each do |door_values|
+        HPXML.add_door(hpxml: hpxml, **door_values)
+      end
+      heating_systems_values.each do |heating_system_values|
+        HPXML.add_heating_system(hpxml: hpxml, **heating_system_values)
+      end
+      cooling_systems_values.each do |cooling_system_values|
+        HPXML.add_cooling_system(hpxml: hpxml, **cooling_system_values)
+      end
+      heat_pumps_values.each do |heat_pump_values|
+        HPXML.add_heat_pump(hpxml: hpxml, **heat_pump_values)
+      end
+      HPXML.add_hvac_control(hpxml: hpxml, **hvac_control_values) unless hvac_control_values.empty?
+      hvac_distributions_values.each_with_index do |hvac_distribution_values, i|
+        hvac_distribution = HPXML.add_hvac_distribution(hpxml: hpxml, **hvac_distribution_values)
+        air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
+        next if air_distribution.nil?
 
-      duct_leakage_measurements_values[i].each do |duct_leakage_measurement_values|
-        HPXML.add_duct_leakage_measurement(air_distribution: air_distribution, **duct_leakage_measurement_values)
+        duct_leakage_measurements_values[i].each do |duct_leakage_measurement_values|
+          HPXML.add_duct_leakage_measurement(air_distribution: air_distribution, **duct_leakage_measurement_values)
+        end
+        ducts_values[i].each do |duct_values|
+          HPXML.add_ducts(air_distribution: air_distribution, **duct_values)
+        end
       end
-      ducts_values[i].each do |duct_values|
-        HPXML.add_ducts(air_distribution: air_distribution, **duct_values)
+      ventilation_fans_values.each do |ventilation_fan_values|
+        HPXML.add_ventilation_fan(hpxml: hpxml, **ventilation_fan_values)
       end
-    end
-    ventilation_fans_values.each do |ventilation_fan_values|
-      HPXML.add_ventilation_fan(hpxml: hpxml, **ventilation_fan_values)
-    end
-    water_heating_systems_values.each do |water_heating_system_values|
-      HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
-    end
-    HPXML.add_hot_water_distribution(hpxml: hpxml, **hot_water_distribution_values) unless hot_water_distribution_values.empty?
-    water_fixtures_values.each do |water_fixture_values|
-      HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
-    end
-    pv_systems_values.each do |pv_system_values|
-      HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
-    end
-    HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values) unless clothes_washer_values.empty?
-    HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values) unless clothes_dryer_values.empty?
-    HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values) unless dishwasher_values.empty?
-    HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values) unless refrigerator_values.empty?
-    HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values) unless cooking_range_values.empty?
-    HPXML.add_oven(hpxml: hpxml, **oven_values) unless oven_values.empty?
-    HPXML.add_lighting(hpxml: hpxml, **lighting_values) unless lighting_values.empty?
-    ceiling_fans_values.each do |ceiling_fan_values|
-      HPXML.add_ceiling_fan(hpxml: hpxml, **ceiling_fan_values)
-    end
-    plug_loads_values.each do |plug_load_values|
-      HPXML.add_plug_load(hpxml: hpxml, **plug_load_values)
-    end
-    HPXML.add_misc_loads_schedule(hpxml: hpxml, **misc_load_schedule_values) unless misc_load_schedule_values.empty?
+      water_heating_systems_values.each do |water_heating_system_values|
+        HPXML.add_water_heating_system(hpxml: hpxml, **water_heating_system_values)
+      end
+      HPXML.add_hot_water_distribution(hpxml: hpxml, **hot_water_distribution_values) unless hot_water_distribution_values.empty?
+      water_fixtures_values.each do |water_fixture_values|
+        HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
+      end
+      pv_systems_values.each do |pv_system_values|
+        HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
+      end
+      HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values) unless clothes_washer_values.empty?
+      HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values) unless clothes_dryer_values.empty?
+      HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values) unless dishwasher_values.empty?
+      HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values) unless refrigerator_values.empty?
+      HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values) unless cooking_range_values.empty?
+      HPXML.add_oven(hpxml: hpxml, **oven_values) unless oven_values.empty?
+      HPXML.add_lighting(hpxml: hpxml, **lighting_values) unless lighting_values.empty?
+      ceiling_fans_values.each do |ceiling_fan_values|
+        HPXML.add_ceiling_fan(hpxml: hpxml, **ceiling_fan_values)
+      end
+      plug_loads_values.each do |plug_load_values|
+        HPXML.add_plug_load(hpxml: hpxml, **plug_load_values)
+      end
+      HPXML.add_misc_loads_schedule(hpxml: hpxml, **misc_load_schedule_values) unless misc_load_schedule_values.empty?
 
-    hpxml_path = File.join(tests_dir, derivative)
+      if ['invalid_files/invalid-missing-elements.xml'].include? derivative
+        hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"].elements.delete("NumberofConditionedFloors")
+        hpxml.elements["Building/BuildingDetails/BuildingSummary/BuildingConstruction"].elements.delete("ConditionedFloorArea")
+      end
 
-    # Validate file against HPXML schema
-    schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "hpxml_schemas"))
-    errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
-    if errors.size > 0
-      fail errors.to_s
+      hpxml_path = File.join(tests_dir, derivative)
+
+      # Validate file against HPXML schema
+      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "hpxml_schemas"))
+      errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
+      if errors.size > 0
+        fail errors.to_s
+      end
+
+      XMLHelper.write_file(hpxml_doc, hpxml_path)
+    rescue Exception => e
+      puts "\n#{e}\n#{e.backtrace.join('\n')}"
+      puts "\nError: Did not successfully generate #{derivative}."
+      exit!
     end
-
-    XMLHelper.write_file(hpxml_doc, hpxml_path)
   end
 
-  puts "Generated #{hpxmls_files.length} files."
+  puts "\n"
+
+  # Print warnings about extra files
+  abs_hpxml_files = []
+  dirs = [nil]
+  hpxmls_files.keys.each do |hpxml_file|
+    abs_hpxml_files << File.join(tests_dir, hpxml_file)
+    next unless hpxml_file.include? '/'
+
+    dirs << hpxml_file.split('/')[0] + '/'
+  end
+  dirs.uniq.each do |dir|
+    Dir["#{tests_dir}/#{dir}*.xml"].each do |xml|
+      next if abs_hpxml_files.include? File.absolute_path(xml)
+
+      puts "Warning: Extra HPXML file found at #{File.absolute_path(xml)}"
+    end
+  end
 end
 
 def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
@@ -560,9 +590,6 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:number_of_conditioned_floors] = 2
     building_construction_values[:conditioned_floor_area] = 3500
     building_construction_values[:conditioned_building_volume] = 33787.5
-  elsif ['invalid_files/invalid-missing-elements.xml'].include? hpxml_file
-    building_construction_values[:number_of_conditioned_floors] = nil
-    building_construction_values[:conditioned_floor_area] = nil
   elsif ['valid-hvac-multiple.xml',
          'hvac_multiple/valid-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
          'hvac_multiple/valid-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
