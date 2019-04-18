@@ -79,6 +79,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['skip_validation'] = false
 
     expected_error_msgs = { 'invalid-bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'invalid-clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
+                            'invalid-clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'invalid-duct-location.xml' => ["TODO"],
+                            'invalid-refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
+                            'invalid-water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
                             'invalid-missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                                "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
                             'invalid-hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to 1, but calculated sum is 1.2.",
@@ -86,16 +91,16 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'invalid-missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
                                                                "Thermal zone 'garage' must have at least one roof/ceiling surface.",
                                                                "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
-                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'agwall-1'."],
-                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'attic-roof-1'."],
-                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'Window_ID1'."],
-                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door_ID1'."],
-                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'Skylight_ID1'."],
+                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
+                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
+                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowSouth'."],
+                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door'."],
+                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'invalid-unattached-hvac.xml' => ["TODO"],
                             'invalid-unattached-cfis.xml' => ["TODO"] }
 
     # Test simulations
-    Dir["#{this_dir}/invalid*.xml"].sort.each do |xml|
+    Dir["#{this_dir}/invalid_files/invalid*.xml"].sort.each do |xml|
       _run_xml(xml, this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
     end
   end
@@ -219,7 +224,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Apply measure
     measures_dir = File.join(this_dir, "../../")
-    success = apply_measures(measures_dir, measures, runner, model, nil, nil, true)
+    success = apply_measures(measures_dir, measures, runner, model)
 
     # Report warnings/errors
     File.open(File.join(rundir, 'run.log'), 'w') do |f|
@@ -266,7 +271,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Add output variable for CFIS fan power
-    output_var = OpenStudio::Model::OutputVariable.new("res_mv_1_cfis_fan_power", model)
+    output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis fan power".gsub(" ", "_"), model)
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('EMS')
 
@@ -347,7 +352,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Azimuth
-      if XMLHelper.has_element(roof, 'Azimuth')
+      if XMLHelper.has_element(roof, 'Azimuth') and Float(XMLHelper.get_value(roof, "Pitch")) > 0
         hpxml_value = Float(XMLHelper.get_value(roof, 'Azimuth'))
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
@@ -735,7 +740,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       # CFIS fan power
       cfis_fan_w_per_airflow = nil
       if XMLHelper.get_value(bldg_details, "Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']/FanType") == "central fan integrated supply"
-        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='res_mv_1_cfis_fan_power')"
+        query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name LIKE '#{Constants.ObjectNameMechanicalVentilation.gsub(' ', '_')}%')"
         cfis_fan_w_per_cfm = sqlFile.execAndReturnFirstDouble(query).get
         # Ensure CFIS fan power equals heating/cooling fan power
         if not htg_fan_w_per_cfm.nil?
@@ -969,6 +974,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
         next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+        next if k[2] == "Crankcase"
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
