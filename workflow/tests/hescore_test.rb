@@ -85,17 +85,6 @@ class HEScoreTest < Minitest::Unit::TestCase
     data = JSON.parse(File.read(json_path))
 
     results = {}
-    data["end_use"].each do |result|
-      fuel = result["resource_type"]
-      category = result["end_use"]
-      units = result["units"]
-      key = [fuel, category, units]
-      if results[key].nil?
-        results[key] = 0.0
-      end
-      results[key] += Float(result["quantity"]) # Just store annual results
-    end
-    results["Runtime"] = runtime
 
     # Fill in missing results with zeroes
     get_output_meter_requests.each do |hes_key, ep_meters|
@@ -103,10 +92,28 @@ class HEScoreTest < Minitest::Unit::TestCase
       fuel = hes_key[1]
       units = get_fuel_site_units(fuel)
       key = [fuel.to_s, category.to_s, units]
-      if results[key].nil?
+
+      found_in_results = false
+      data["end_use"].each do |result|
+        fuel = result["resource_type"]
+        category = result["end_use"]
+        units = result["units"]
+        results_key = [fuel, category, units]
+        next if results_key != key
+
+        if results[key].nil?
+          results[key] = 0.0
+        end
+        results[key] += Float(result["quantity"]) # Just store annual results
+        found_in_results = true
+      end
+
+      if not found_in_results
         results[key] = 0.0
       end
     end
+
+    results["Runtime"] = runtime
 
     return results
   end
