@@ -6,15 +6,19 @@ Unit Test Status: [![CircleCI](https://circleci.com/gh/NREL/OpenStudio-HPXML/tre
 
 Code Coverage: [![codecov](https://codecov.io/gh/NREL/OpenStudio-HPXML/branch/master/graph/badge.svg)](https://codecov.io/gh/NREL/OpenStudio-HPXML)
 
-To serve documentation, run:
+To create documentation, run
+
+```ruby
+gem install yard
+```
+
+and then either
 
 ```ruby
 yard server
 ```
 
-and navigate to http://localhost:8808.
-
-Otherwise, run:
+and navigate to http://localhost:8808, or 
 
 ```ruby
 yardoc
