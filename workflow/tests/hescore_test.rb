@@ -5,6 +5,7 @@ require 'fileutils'
 require 'json'
 require_relative '../../measures/HPXMLtoOpenStudio/measure'
 require_relative '../../measures/HPXMLtoOpenStudio/resources/xmlhelper'
+require_relative '../hescore_lib'
 
 class HEScoreTest < Minitest::Unit::TestCase
   def before_setup
@@ -84,16 +85,34 @@ class HEScoreTest < Minitest::Unit::TestCase
     data = JSON.parse(File.read(json_path))
 
     results = {}
-    data["end_use"].each do |result|
-      fuel = result["resource_type"]
-      category = result["end_use"]
-      units = result["units"]
-      key = [fuel, category, units]
-      if results[key].nil?
+
+    # Fill in missing results with zeroes
+    get_output_meter_requests.each do |hes_key, ep_meters|
+      category = hes_key[0]
+      fuel = hes_key[1]
+      units = get_fuel_site_units(fuel)
+      key = [fuel.to_s, category.to_s, units]
+
+      found_in_results = false
+      data["end_use"].each do |result|
+        fuel = result["resource_type"]
+        category = result["end_use"]
+        units = result["units"]
+        results_key = [fuel, category, units]
+        next if results_key != key
+
+        if results[key].nil?
+          results[key] = 0.0
+        end
+        results[key] += Float(result["quantity"]) # Just store annual results
+        found_in_results = true
+      end
+
+      if not found_in_results
         results[key] = 0.0
       end
-      results[key] += Float(result["quantity"]) # Just store annual results
     end
+
     results["Runtime"] = runtime
 
     return results
@@ -211,7 +230,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     end
 
     # Check we actually tested the right number of categories
-    assert_equal(tested_categories.uniq.size, 7)
+    assert_equal(7, tested_categories.uniq.size)
   end
 
   def _write_summary_results(results)
