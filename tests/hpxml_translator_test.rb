@@ -48,10 +48,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
-        # next if File.basename(xml) != "valid-hvac-central-ac-only-1-speed.xml" # FIXME: remove
-        # next if File.basename(xml) != "valid-hvac-air-to-air-heat-pump-1-speed.xml" # FIXME: remove
-        # next if File.basename(xml) != "valid-hvac-central-ac-only-2-speed.xml" # FIXME: remove
-        # next if File.basename(xml) != "valid-hvac-air-to-air-heat-pump-2-speed.xml" # FIXME: remove
         next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
 
         xmls << File.absolute_path(xml)
@@ -106,6 +102,84 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Test simulations
     Dir["#{this_dir}/invalid_files/invalid*.xml"].sort.each do |xml|
       _run_xml(xml, this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
+    end
+  end
+
+  def test_generalized_hvac
+    # single-speed air conditioner
+    cOOL_EIR_FT_SPEC = [[-3.302695861, 0.137871531, -0.001056996, -0.012573945, 0.000214638, -0.000145054]]
+    seer_to_expected_eer = { 13 => 11.2, 14 => 12.1, 15 => 13.0, 16 => 13.9 }
+    seer_to_expected_eer.each do |seer, expected_eer|
+      # fan_power_rated = HVAC.get_fan_power_rated(seer)
+      fan_power_rated = 0.365
+      actual_eer = HVAC.calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)
+      assert_in_epsilon(expected_eer, actual_eer, 0.01)
+    end
+
+    # single-speed air source heat pump
+    cOOL_EIR_FT_SPEC = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+    seer_to_expected_eer = { 13 => 11.31, 14 => 12.21, 15 => 13.12 }
+    seer_to_expected_eer.each do |seer, expected_eer|
+      fan_power_rated = 0.365
+      # fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eer = HVAC.calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)
+      assert_in_epsilon(expected_eer, actual_eer, 0.01)
+    end
+    hEAT_EIR_FT_SPEC = [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
+    hEAT_CAP_FT_SPEC = [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
+    hspf_to_expected_cop = { 7.7 => 3.09, 8.2 => 3.35, 8.5 => 3.51 }
+    hspf_to_expected_cop.each do |hspf, expected_cop|
+      fan_power_rated = 0.365
+      actual_cop = HVAC.calc_COP_heating_1spd(hspf, Constants.C_d, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
+      assert_in_epsilon(expected_cop, actual_cop, 0.01)
+    end
+
+    # two-speed air conditioner
+    cOOL_EIR_FT_SPEC = [[-3.877526888, 0.164566276, -0.001272755, -0.019956043, 0.000256512, -0.000133539],
+                        [-1.990708931, 0.093969249, -0.00073335, -0.009062553, 0.000165099, -0.0000997]]
+    cOOL_CAP_FT_SPEC = [[3.940185508, -0.104723455, 0.001019298, 0.006471171, -0.00000953, -0.000161658],
+                        [3.109456535, -0.085520461, 0.000863238, 0.00863049, -0.0000210, -0.000140186]]
+    capacity_ratios = [0.72, 1.0]
+    fan_speed_ratios = [0.86, 1.0]
+    seer_to_expected_eers = { 16 => [13.8, 12.7], 17 => [14.7, 13.6], 18 => [15.5, 14.5], 21 => [18.2, 17.2] }
+    seer_to_expected_eers.each do |seer, expected_eers|
+      fan_power_rated = 0.14
+      actual_eers = HVAC.calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
+      expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
+        assert_in_epsilon(expected_eer, actual_eer, 0.01)
+      end
+    end
+
+    # two-speed air source heat pump
+    cOOL_EIR_FT_SPEC = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
+                        [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
+    cOOL_CAP_FT_SPEC = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
+                        [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
+    capacity_ratios = [0.72, 1.0]
+    fan_speed_ratios_cooling = [0.86, 1.0]
+    fan_speed_ratios_heating = [0.8, 1.0]
+    seer_to_expected_eers = { 16 => [13.2, 12.2], 17 => [14.1, 13.0], 18 => [14.9, 13.9], 19 => [15.7, 14.7] }
+    seer_to_expected_eers.each do |seer, expected_eers|
+      fan_power_rated = 0.14
+      actual_eers = HVAC.calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
+      expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
+        assert_in_epsilon(expected_eer, actual_eer, 0.01)
+      end
+    end
+    hEAT_EIR_FT_SPEC = [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
+                        [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
+    hEAT_CAP_FT_SPEC = [[0.335690634, 0.002405123, -0.0000464, 0.013498735, 0.0000499, -0.00000725],
+                        [0.306358843, 0.005376987, -0.0000579, 0.011645092, 0.0000591, -0.0000203]]
+    capacity_ratios = [0.72, 1.0]
+    fan_speed_ratios_cooling = [0.86, 1.0]
+    fan_speed_ratios_heating = [0.8, 1.0]
+    hspf_to_expected_cops = { 8.6 => [3.85, 3.34], 8.7 => [3.90, 3.41], 9.3 => [4.24, 3.83], 9.5 => [4.35, 3.98] }
+    hspf_to_expected_cops.each do |hspf, expected_cops|
+      fan_power_rated = 0.14
+      actual_cops = HVAC.calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
+      expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
+        assert_in_epsilon(expected_cop, actual_cop, 0.01)
+      end
     end
   end
 
