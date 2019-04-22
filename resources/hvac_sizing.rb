@@ -1255,7 +1255,6 @@ class HVACSizing
 
     gains.each do |gain|
       # TODO: The lines below are for equivalence with BEopt
-      next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterDistribution)
       next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterRecircPump)
 
       sched = nil

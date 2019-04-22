@@ -367,6 +367,10 @@ class Constants
     return "res ashp"
   end
 
+  def self.ObjectNameBaths
+    return "res baths"
+  end
+
   def self.ObjectNameBoiler(fueltype = "")
     return "res boiler #{fueltype}"
   end
@@ -430,10 +434,6 @@ class Constants
     return "res baseboard"
   end
 
-  def self.ObjectNameFixtures
-    return "res dhw fixtures"
-  end
-
   def self.ObjectNameFurnace(fueltype = "")
     return "res furnace #{fueltype}"
   end
@@ -456,10 +456,6 @@ class Constants
 
   def self.ObjectNameHotWaterRecircPump
     return "res dhw recirc pump"
-  end
-
-  def self.ObjectNameHotWaterDistribution
-    return "res dhw distribution"
   end
 
   def self.ObjectNameInfiltration
@@ -518,6 +514,14 @@ class Constants
 
   def self.ObjectNameRoomAirConditioner
     return "res room ac"
+  end
+
+  def self.ObjectNameShowers
+    return "res showers"
+  end
+
+  def self.ObjectNameSinks
+    return "res sinks"
   end
 
   def self.ObjectNameUnitHeater(fueltype = "")

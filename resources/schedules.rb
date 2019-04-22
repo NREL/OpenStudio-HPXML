@@ -515,6 +515,10 @@ class HotWaterSchedule
     return @ontime
   end
 
+  def totalFlow
+    return @totflow
+  end
+
   private
 
   def loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks)
