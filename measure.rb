@@ -2044,7 +2044,6 @@ class OSModel
 
         if num_speeds == "1-Speed"
 
-          puts seer
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
@@ -2056,7 +2055,6 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          puts seer
           shrs = [0.71, 0.73]
           capacity_ratios = [0.72, 1.0]
           fan_speed_ratios = [0.86, 1.0]
@@ -2246,7 +2244,6 @@ class OSModel
 
         if num_speeds == "1-Speed"
 
-          puts seer, hspf
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
@@ -2264,7 +2261,6 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          puts seer, hspf
           shrs = [0.71, 0.724]
           capacity_ratios = [0.72, 1.0]
           fan_speed_ratios_cooling = [0.86, 1.0]

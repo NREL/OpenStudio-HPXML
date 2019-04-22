@@ -31,7 +31,6 @@ class HVAC
     rated_airflow_rate = 386.1 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
     eers = [calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)]
-    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)]
@@ -168,7 +167,6 @@ class HVAC
     rated_airflow_rate = 355.2 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
     eers = calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
-    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -464,7 +462,6 @@ class HVAC
     rated_airflow_rate_cooling = 394.2 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
     eers = [calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)]
-    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)]
@@ -473,7 +470,6 @@ class HVAC
     rated_airflow_rate_heating = 384.1 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
     cops = [calc_COP_heating_1spd(hspf, Constants.C_d, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)]
-    puts cops
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)]
 
@@ -732,7 +728,6 @@ class HVAC
     rated_airflow_rate_cooling = 344.1 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
     eers = calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios_cooling, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC, true)
-    puts eers
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -741,7 +736,6 @@ class HVAC
     rated_airflow_rate_heating = 352.2 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
     cops = calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
-    puts cops
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
