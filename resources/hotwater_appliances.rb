@@ -17,15 +17,6 @@ class HotWaterAndAppliances
                  dwhr_facilities_connected, dwhr_is_equal_flow,
                  dwhr_efficiency, dhw_loop_fracs, eri_version)
 
-    # Table 4.6.1.1(1): Hourly Hot Water Draw Fraction for Hot Water Tests
-    daily_fraction = [0.0085, 0.0085, 0.0085, 0.0085, 0.0085, 0.0100, 0.0750, 0.0750,
-                      0.0650, 0.0650, 0.0650, 0.0460, 0.0460, 0.0370, 0.0370, 0.0370,
-                      0.0370, 0.0630, 0.0630, 0.0630, 0.0630, 0.0510, 0.0510, 0.0085]
-    norm_daily_fraction = []
-    daily_fraction.each do |frac|
-      norm_daily_fraction << (frac / daily_fraction.max)
-    end
-
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
     start_datetime = OpenStudio::DateTime.new(model.getYearDescription.makeDate(1, 1), OpenStudio::Time.new(0, 0))
