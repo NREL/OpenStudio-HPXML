@@ -798,14 +798,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     cd = bldg_details.elements["Appliances/ClothesDryer"]
     if not cd.nil? and not wh.nil?
       # Location
-      fuel = to_beopt_fuel(XMLHelper.get_value(cd, 'FuelType'))
       location = XMLHelper.get_value(cd, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
                       'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
-      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer(fuel).upcase}')"
+      query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
       assert_equal(hpxml_value, sql_value)
     end
