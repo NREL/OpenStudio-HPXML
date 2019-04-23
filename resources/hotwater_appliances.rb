@@ -17,8 +17,6 @@ class HotWaterAndAppliances
                  dwhr_facilities_connected, dwhr_is_equal_flow,
                  dwhr_efficiency, dhw_loop_fracs, eri_version)
 
-    mw_setpoint = 105.0 # F, Temperature of mixed water at fixtures
-
     # Table 4.6.1.1(1): Hourly Hot Water Draw Fraction for Hot Water Tests
     daily_fraction = [0.0085, 0.0085, 0.0085, 0.0085, 0.0085, 0.0100, 0.0750, 0.0750,
                       0.0650, 0.0650, 0.0650, 0.0460, 0.0460, 0.0370, 0.0370, 0.0370,
@@ -30,10 +28,8 @@ class HotWaterAndAppliances
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
-    start_date = model.getYearDescription.makeDate(1, 1)
-    timestep_interval = OpenStudio::Time.new(0, 0, timestep_minutes)
-    timestep_day = OpenStudio::Time.new(0, 0, 60 * 24)
-    temp_sch_limits = model.getScheduleTypeLimitsByName("Temperature")
+    start_datetime = OpenStudio::DateTime.new(model.getYearDescription.makeDate(1, 1), OpenStudio::Time.new(0, 0))
+    timestep_day = OpenStudio::Time.new(1, 0)
 
     if not dist_type.nil?
 
@@ -51,41 +47,40 @@ class HotWaterAndAppliances
         end
       end
 
-      # Replace mains water temperature schedule with water heater inlet temperature schedule.
-      # These are identical unless there is a DWHR.
+      # Calculate mixed water fractions
       dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, dwhr_is_equal_flow, dwhr_facilities_connected, has_low_flow_fixtures)
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, dwhr_present, dwhr_iFrac, dwhr_efficiency, dwhr_eff_adj, dwhr_plc, dwhr_locF, dwhr_fixF)
       daily_wh_inlet_temperatures_c = daily_wh_inlet_temperatures.map { |t| UnitConversions.convert(t, "F", "C") }
-      time_series_tmains = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(daily_wh_inlet_temperatures_c), "")
+      daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, wh_setpoint)
+
+      # Replace mains water temperature schedule with water heater inlet temperature schedule.
+      # These are identical unless there is a DWHR.
+      time_series_tmains = OpenStudio::TimeSeries.new(start_datetime, timestep_day, OpenStudio::createVector(daily_wh_inlet_temperatures_c), "C")
       schedule_tmains = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_tmains, model).get
+      schedule_tmains.setName("mains temperature schedule")
       model.getSiteWaterMainsTemperature.setTemperatureSchedule(schedule_tmains)
     end
-
-    file_prefixes = { Constants.ObjectNameClothesWasher => "ClothesWasher",
-                      Constants.ObjectNameClothesDryer(cd_fuel) => "ClothesDryer",
-                      Constants.ObjectNameDishwasher => "Dishwasher",
-                      Constants.ObjectNameShowers => "Shower",
-                      Constants.ObjectNameSinks => "Sink",
-                      Constants.ObjectNameBaths => "Bath" }
 
     # Clothes washer
     if not dist_type.nil? and not cw_mef.nil?
       cw_annual_kwh, cw_frac_sens, cw_frac_lat, cw_gpd = self.calc_clothes_washer_energy_gpd(eri_version, nbeds, cw_ler, cw_elec_rate, cw_gas_rate, cw_agc, cw_cap)
       cw_name = Constants.ObjectNameClothesWasher
-      cw_schedule = HotWaterSchedule.new(model, runner, "#{cw_name} schedule", "#{cw_name} temperature schedule", nbeds, 0, file_prefixes[cw_name], wh_setpoint)
+      cw_schedule = HotWaterSchedule.new(model, runner, cw_name, nbeds)
+      cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
       cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
-      cw_peak_flow_gpm = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
       dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
-        add_water_use_equipment(model, cw_name, cw_peak_flow_gpm * dhw_load_frac, cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+        add_water_use_equipment(model, cw_name, cw_peak_flow * dhw_load_frac, cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
 
     # Clothes dryer
     if not cw_mef.nil? and not cd_ef.nil?
       cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = self.calc_clothes_dryer_energy(nbeds, cd_fuel, cd_ef, cd_control, cw_ler, cw_cap, cw_mef)
-      cd_name = Constants.ObjectNameClothesDryer(cd_fuel)
-      cd_schedule = HotWaterSchedule.new(model, runner, "#{cd_name} schedule", "#{cd_name} temperature schedule", nbeds, 0, file_prefixes[cd_name], wh_setpoint)
+      cd_name = Constants.ObjectNameClothesDryer
+      cd_weekday_sch = "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024"
+      cd_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+      cd_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cd_name, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0)
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
       add_electric_equipment(model, cd_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
@@ -96,12 +91,12 @@ class HotWaterAndAppliances
     if not dist_type.nil? and not dw_ef.nil?
       dw_annual_kwh, dw_frac_sens, dw_frac_lat, dw_gpd = self.calc_dishwasher_energy_gpd(eri_version, nbeds, dw_ef, dw_cap)
       dw_name = Constants.ObjectNameDishwasher
-      dw_schedule = HotWaterSchedule.new(model, runner, "#{cd_name} schedule", "#{cd_name} temperature schedule", nbeds, 0, file_prefixes[dw_name], wh_setpoint)
+      dw_schedule = HotWaterSchedule.new(model, runner, dw_name, nbeds)
+      dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
       dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
-      dw_peak_flow_gpm = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
       add_electric_equipment(model, dw_name, living_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
       dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
-        add_water_use_equipment(model, dw_name, dw_peak_flow_gpm * dhw_load_frac, dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+        add_water_use_equipment(model, dw_name, dw_peak_flow * dhw_load_frac, dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
 
@@ -129,37 +124,42 @@ class HotWaterAndAppliances
     end
 
     if not dist_type.nil?
-      # Fixtures (showers, sinks, baths)
+      # Fixtures (showers, sinks, baths) + distribution losses
       fx_gpd = get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures)
+      fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
 
-      # Add distribution losses to fixtures
-      fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
+      fx_names = [Constants.ObjectNameShower,
+                  Constants.ObjectNameSink,
+                  Constants.ObjectNameBath]
 
-      # Create showers/sinks/baths schedules
       fx_schedules = {}
+      fx_names.each do |fx_name|
+        fx_schedules[fx_name] = HotWaterSchedule.new(model, runner, fx_name, nbeds, daily_mw_fractions)
+      end
+
+      # Calculate sum_total_flow
       sum_total_flow = 0.0
-      [Constants.ObjectNameShowers, Constants.ObjectNameSinks, Constants.ObjectNameBaths].each do |fx_name|
-        fx_schedules[fx_name] = HotWaterSchedule.new(model, runner, "#{fx_name} schedule", "#{fx_name} temperature schedule", nbeds, 0, file_prefixes[fx_name], mw_setpoint)
-        sum_total_flow += fx_schedules[fx_name].totalFlow
+      fx_schedules.each do |fx_name, fx_schedule|
+        sum_total_flow += fx_schedule.totalFlow
       end
 
       fx_schedules.each do |fx_name, fx_schedule|
         fx_name_sens = "#{fx_name} Sensible"
         fx_name_lat = "#{fx_name} Latent"
 
-        fx_peak_flow_gpm = fx_schedule.calcPeakFlowFromDailygpm(fx_gpd)
-        fx_design_level_sens = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_sens_btu, "Btu", "kWh") / 365.0)
-        fx_design_level_lat = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_lat_btu, "Btu", "kWh") / 365.0)
-
-        # Disaggregate total fixture flow into showers, sinks, baths
+        fx_schedule = fx_schedules[fx_name]
         fx_frac = fx_schedule.totalFlow / sum_total_flow
 
+        fx_peak_flow = fx_schedule.calcPeakFlowFromDailygpm(fx_gpd * fx_frac)
+        fx_design_level_sens = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_sens_btu * fx_frac, "Btu", "kWh") / 365.0)
+        fx_design_level_lat = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_lat_btu * fx_frac, "Btu", "kWh") / 365.0)
+
         dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
-          add_water_use_equipment(model, fx_name, fx_peak_flow_gpm * dhw_load_frac * fx_frac, fx_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+          add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac, fx_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
         end
-        add_other_equipment(model, fx_name_sens, living_space, fx_design_level_sens * fx_frac, 1.0, 0.0, fx_schedule.schedule, nil)
-        add_other_equipment(model, fx_name_lat, living_space, fx_design_level_lat * fx_frac, 0.0, 1.0, fx_schedule.schedule, nil)
+        add_other_equipment(model, fx_name_sens, living_space, fx_design_level_sens, 1.0, 0.0, fx_schedule.schedule, nil)
+        add_other_equipment(model, fx_name_lat, living_space, fx_design_level_lat, 0.0, 1.0, fx_schedule.schedule, nil)
       end
 
       # Recirculation pump
@@ -432,14 +432,14 @@ class HotWaterAndAppliances
     return oe
   end
 
-  def self.add_water_use_equipment(model, obj_name, peak_flow_gpm, schedule, temp_schedule, water_use_connection)
-    return if peak_flow_gpm == 0.0
+  def self.add_water_use_equipment(model, obj_name, peak_flow, schedule, temp_schedule, water_use_connection)
+    return if peak_flow == 0.0
 
     wu_def = OpenStudio::Model::WaterUseEquipmentDefinition.new(model)
     wu = OpenStudio::Model::WaterUseEquipment.new(wu_def)
     wu.setName(obj_name)
     wu_def.setName(obj_name)
-    wu_def.setPeakFlowRate(UnitConversions.convert(peak_flow_gpm, "gal/min", "m^3/s"))
+    wu_def.setPeakFlowRate(peak_flow)
     wu_def.setEndUseSubcategory(obj_name)
     wu.setFlowRateFractionSchedule(schedule)
     wu_def.setTargetTemperatureSchedule(temp_schedule)
@@ -507,6 +507,16 @@ class HotWaterAndAppliances
     end
 
     return wh_temps_daily
+  end
+
+  def self.calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, tHot)
+    tMix = 105.0 # F, Temperature of mixed water at fixtures
+    adjFmix = []
+    for day in 0..364
+      adjFmix << (1.0 - ((tHot - tMix) / (tHot - daily_wh_inlet_temperatures[day]))).round(4)
+    end
+
+    return adjFmix
   end
 
   def self.get_hwdist_recirc_pump_energy(dist_type, recirc_control_type, recirc_pump_power)

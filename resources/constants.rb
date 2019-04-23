@@ -367,7 +367,7 @@ class Constants
     return "res ashp"
   end
 
-  def self.ObjectNameBaths
+  def self.ObjectNameBath
     return "res baths"
   end
 
@@ -387,12 +387,8 @@ class Constants
     return "res clothes washer"
   end
 
-  def self.ObjectNameClothesDryer(fueltype)
-    s_fuel = ""
-    if not fueltype.nil?
-      s_fuel = " #{fueltype}"
-    end
-    return "res clothes dryer#{s_fuel}"
+  def self.ObjectNameClothesDryer
+    return "res clothes dryer"
   end
 
   def self.ObjectNameCookingRange(fueltype)
@@ -516,11 +512,11 @@ class Constants
     return "res room ac"
   end
 
-  def self.ObjectNameShowers
+  def self.ObjectNameShower
     return "res showers"
   end
 
-  def self.ObjectNameSinks
+  def self.ObjectNameSink
     return "res sinks"
   end
 
