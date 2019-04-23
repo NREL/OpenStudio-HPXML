@@ -628,7 +628,8 @@ class HotWaterSchedule
     last_day_of_year += 1 if year_description.isLeapYear
 
     if not @daily_mw_fractions.nil?
-      # Create ScheduleInterval with annual values; convert mixed water to hot water
+      # Create ScheduleInterval with repeating weeks
+      # This is an annual schedule due to (daily) conversion between mixed water and hot water
 
       annual_values = []
       data_idx = 0

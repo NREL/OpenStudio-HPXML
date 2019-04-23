@@ -125,7 +125,7 @@ class HotWaterAndAppliances
 
     if not dist_type.nil?
       # Fixtures (showers, sinks, baths) + distribution losses
-      fx_gpd = get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures)
+      fx_gpd = get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures, daily_mw_fractions)
       fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
 
@@ -164,14 +164,14 @@ class HotWaterAndAppliances
 
       # Recirculation pump
       dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(dist_type, recirc_control_type, recirc_pump_power)
-      dist_pump_name = Constants.ObjectNameHotWaterRecircPump
-      dist_pump_weekday_sch = "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024"
-      dist_pump_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, runner, dist_pump_name, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
-      dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
-      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
-        dist_pump = add_electric_equipment(model, dist_pump_name, living_space, dist_pump_design_level * dhw_load_frac, 0.0, 0.0, dist_pump_schedule.schedule)
-        if not dist_pump.nil?
+      if dist_pump_annual_kwh > 0
+        dist_pump_name = Constants.ObjectNameHotWaterRecircPump
+        dist_pump_weekday_sch = "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024"
+        dist_pump_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
+        dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, runner, dist_pump_name, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
+        dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
+        dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+          dist_pump = add_electric_equipment(model, dist_pump_name, living_space, dist_pump_design_level * dhw_load_frac, 0.0, 0.0, dist_pump_schedule.schedule)
           dhw_loop.additionalProperties.setFeature("PlantLoopRecircPump", dist_pump.name.to_s)
         end
       end
@@ -240,8 +240,7 @@ class HotWaterAndAppliances
     if eri_version.include? "A"
       gpd = dwcpy * (4.6415 * (1.0 / ef) - 1.9295) / 365.0 # Eq. 4.2-11 (DWgpd)
     else
-      gpd = 30.0 + 10.0 * nbeds # Table 4.2.2(1) Service water heating systems
-      gpd += ((88.4 + 34.9 * nbeds) * 8.16 - (88.4 + 34.9 * nbeds) * 12.0 / cap * (4.6415 * (1.0 / ef) - 1.9295)) / 365.0 # Eq 4.2-8b
+      gpd = ((88.4 + 34.9 * nbeds) * 8.16 - (88.4 + 34.9 * nbeds) * 12.0 / cap * (4.6415 * (1.0 / ef) - 1.9295)) / 365.0 # Eq 4.2-8b
     end
 
     return annual_kwh, frac_sens, frac_lat, gpd
@@ -544,16 +543,16 @@ class HotWaterAndAppliances
     return f_eff
   end
 
-  def self.get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures)
-    # ANSI/RESNET 301-2014 Addendum A-2015
-    # Amendment on Domestic Hot Water (DHW) Systems
-
+  def self.get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures, daily_mw_fractions)
     if not eri_version.include? "A"
-      # Hot (not mixed) water GPD defined, so added to dishwasher instead.
-      # Mixed water GPD here set to zero.
-      return 0.0
+      hw_gpd = 30.0 + 10.0 * nbeds # Table 4.2.2(1) Service water heating systems
+      # Convert to mixed water gpd
+      avg_mw_fraction = daily_mw_fractions.reduce(:+) / daily_mw_fractions.size.to_f
+      return hw_gpd / avg_mw_fraction
     end
 
+    # ANSI/RESNET 301-2014 Addendum A-2015
+    # Amendment on Domestic Hot Water (DHW) Systems
     ref_f_gpd = 14.6 + 10.0 * nbeds # Eq. 4.2-2 (refFgpd)
     f_eff = get_fixtures_effectiveness(has_low_flow_fixtures)
     return f_eff * ref_f_gpd
@@ -569,15 +568,13 @@ class HotWaterAndAppliances
   def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl,
                               dist_type, pipe_r, std_pipe_length,
                               recirc_branch_length, has_low_flow_fixtures)
+    if not eri_version.include? "A"
+      return 0.0
+    end
+
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     # 4.2.2.5.2.11 Service Hot Water Use
-
-    if not eri_version.include? "A"
-      # Hot (not mixed) water GPD defined, so added to dishwasher instead.
-      # Mixed water GPD here set to zero.
-      return 0.0
-    end
 
     # Table 4.2.2.5.2.11(2) Hot Water Distribution System Insulation Factors
     sys_factor = nil
