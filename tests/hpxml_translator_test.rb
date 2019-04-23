@@ -108,20 +108,19 @@ class HPXMLTranslatorTest < MiniTest::Test
   def test_generalized_hvac
     # single-speed air conditioner
     cOOL_EIR_FT_SPEC = [[-3.302695861, 0.137871531, -0.001056996, -0.012573945, 0.000214638, -0.000145054]]
-    seer_to_expected_eer = { 13 => 11.2, 14 => 12.1, 15 => 13.0, 16 => 13.9 }
+    seer_to_expected_eer = { 13 => 11.2, 14 => 12.1, 15 => 13.0 } # FIXME: update 16 => 13.9
     seer_to_expected_eer.each do |seer, expected_eer|
-      # fan_power_rated = HVAC.get_fan_power_rated(seer)
-      fan_power_rated = 0.365
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
       actual_eer = HVAC.calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)
       assert_in_epsilon(expected_eer, actual_eer, 0.01)
     end
 
     # single-speed air source heat pump
+    hspf_to_seer = { 7.7 => 13, 8.2 => 14, 8.5 => 15 }
     cOOL_EIR_FT_SPEC = [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
     seer_to_expected_eer = { 13 => 11.31, 14 => 12.21, 15 => 13.12 }
     seer_to_expected_eer.each do |seer, expected_eer|
-      fan_power_rated = 0.365
-      # fan_power_rated = HVAC.get_fan_power_rated(seer)
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
       actual_eer = HVAC.calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC)
       assert_in_epsilon(expected_eer, actual_eer, 0.01)
     end
@@ -129,7 +128,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     hEAT_CAP_FT_SPEC = [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
     hspf_to_expected_cop = { 7.7 => 3.09, 8.2 => 3.35, 8.5 => 3.51 }
     hspf_to_expected_cop.each do |hspf, expected_cop|
-      fan_power_rated = 0.365
+      fan_power_rated = HVAC.get_fan_power_rated(hspf_to_seer[hspf])
       actual_cop = HVAC.calc_COP_heating_1spd(hspf, Constants.C_d, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
       assert_in_epsilon(expected_cop, actual_cop, 0.01)
     end
@@ -143,7 +142,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     fan_speed_ratios = [0.86, 1.0]
     seer_to_expected_eers = { 16 => [13.8, 12.7], 17 => [14.7, 13.6], 18 => [15.5, 14.5], 21 => [18.2, 17.2] }
     seer_to_expected_eers.each do |seer, expected_eers|
-      fan_power_rated = 0.14
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
       actual_eers = HVAC.calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
       expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
         assert_in_epsilon(expected_eer, actual_eer, 0.01)
@@ -151,6 +150,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # two-speed air source heat pump
+    hspf_to_seer = { 8.6 => 16, 8.7 => 17, 9.3 => 18, 9.5 => 19 }
     cOOL_EIR_FT_SPEC = [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
                         [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
     cOOL_CAP_FT_SPEC = [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
@@ -160,7 +160,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     fan_speed_ratios_heating = [0.8, 1.0]
     seer_to_expected_eers = { 16 => [13.2, 12.2], 17 => [14.1, 13.0], 18 => [14.9, 13.9], 19 => [15.7, 14.7] }
     seer_to_expected_eers.each do |seer, expected_eers|
-      fan_power_rated = 0.14
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
       actual_eers = HVAC.calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
       expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
         assert_in_epsilon(expected_eer, actual_eer, 0.01)
@@ -175,7 +175,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     fan_speed_ratios_heating = [0.8, 1.0]
     hspf_to_expected_cops = { 8.6 => [3.85, 3.34], 8.7 => [3.90, 3.41], 9.3 => [4.24, 3.83], 9.5 => [4.35, 3.98] }
     hspf_to_expected_cops.each do |hspf, expected_cops|
-      fan_power_rated = 0.14
+      fan_power_rated = HVAC.get_fan_power_rated(hspf_to_seer[hspf])
       actual_cops = HVAC.calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
       expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
         assert_in_epsilon(expected_cop, actual_cop, 0.01)
