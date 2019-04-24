@@ -368,7 +368,7 @@ class Constants
   end
 
   def self.ObjectNameAirflow
-    return "res airflow"
+    return "airflow"
   end
 
   def self.ObjectNameAirSourceHeatPump(mode = nil)
@@ -378,74 +378,74 @@ class Constants
 
       s_mode = " #{mode}"
     end
-    return "res ashp#{s_mode}"
+    return "ashp#{s_mode}"
   end
 
   def self.ObjectNameBoiler
-    return "res boiler"
+    return "boiler"
   end
 
   def self.ObjectNameCeilingFan
-    return "res ceiling fan"
+    return "ceiling fan"
   end
 
   def self.ObjectNameCentralAirConditioner
-    return "res central ac"
+    return "central ac"
   end
 
   def self.ObjectNameClothesWasher
-    return "res clothes washer"
+    return "clothes washer"
   end
 
   def self.ObjectNameClothesDryer
-    return "res clothes dryer"
+    return "clothes dryer"
   end
 
   def self.ObjectNameCookingRange
-    return "res cooking range"
+    return "cooking range"
   end
 
   def self.ObjectNameCoolingSeason
-    return 'res cooling season'
+    return 'cooling season'
   end
 
   def self.ObjectNameCoolingSetpoint
-    return 'res cooling setpoint'
+    return 'cooling setpoint'
   end
 
   def self.ObjectNameDehumidifier
-    return "res dehumidifier"
+    return "dehumidifier"
   end
 
   def self.ObjectNameDishwasher
-    return "res dishwasher"
+    return "dishwasher"
   end
 
   def self.ObjectNameDucts(airloop_name)
-    return "res ducts #{airloop_name}"
+    return "#{airloop_name} ducts"
   end
 
   def self.ObjectNameEaves(facade = "")
     if facade != ""
       facade = " #{facade}"
     end
-    return "res eaves#{facade}"
+    return "eaves#{facade}"
   end
 
   def self.ObjectNameElectricBaseboard
-    return "res baseboard"
+    return "baseboard"
   end
 
   def self.ObjectNameFixtures
-    return "res dhw fixtures"
+    return "dhw fixtures"
   end
 
   def self.ObjectNameFurnace
-    return "res furnace"
+    return "furnace"
   end
 
   def self.ObjectNameFurniture
-    return "res furniture"
+    return "furniture"
   end
 
   def self.ObjectNameGroundSourceHeatPump(mode = nil)
@@ -455,43 +455,43 @@ class Constants
 
       s_mode = " #{mode}"
     end
-    return "res gshp#{s_mode}"
+    return "gshp#{s_mode}"
   end
 
   def self.ObjectNameHeatingSeason
-    return 'res heating season'
+    return 'heating season'
   end
 
   def self.ObjectNameHeatingSetpoint
-    return 'res heating setpoint'
+    return 'heating setpoint'
   end
 
   def self.ObjectNameHotWaterRecircPump
-    return "res dhw recirc pump"
+    return "dhw recirc pump"
   end
 
   def self.ObjectNameHotWaterDistribution
-    return "res dhw distribution"
+    return "dhw distribution"
   end
 
   def self.ObjectNameIdealAirSystemCooling
-    return "res ideal cool"
+    return "ideal cool"
   end
 
   def self.ObjectNameIdealAirSystemHeating
-    return "res ideal heat"
+    return "ideal heat"
   end
 
   def self.ObjectNameInfiltration
-    return "res infil"
+    return "infil"
   end
 
   def self.ObjectNameLighting
-    return "res lighting"
+    return "lighting"
   end
 
   def self.ObjectNameMechanicalVentilation
-    return "res mech vent"
+    return "mech vent"
   end
 
   def self.ObjectNameMiniSplitHeatPump(mode = nil)
@@ -500,65 +500,65 @@ class Constants
 
       s_mode = " #{mode}"
     end
-    return "res minisplit#{s_mode}"
+    return "mshp#{s_mode}"
   end
 
   def self.ObjectNameMiscPlugLoads
-    return "res misc plug loads"
+    return "misc plug loads"
   end
 
   def self.ObjectNameMiscTelevision
-    return "res misc television"
+    return "misc tv"
   end
 
   def self.ObjectNameNaturalVentilation
-    return "res natural vent"
+    return "natural vent"
   end
 
   def self.ObjectNameNeighbors(facade = "")
     if facade != ""
       facade = " #{facade}"
     end
-    return "res neighbors#{facade}"
+    return "neighbors#{facade}"
   end
 
   def self.ObjectNameOccupants
-    return "res occupants"
+    return "occupants"
   end
 
   def self.ObjectNameOverhangs(facade = "")
     if facade != ""
       facade = " #{facade}"
     end
-    return "res overhangs#{facade}"
+    return "overhangs#{facade}"
   end
 
   def self.ObjectNamePhotovoltaics
-    return "res photovoltaics"
+    return "photovoltaics"
   end
 
   def self.ObjectNameRefrigerator
-    return "res fridge"
+    return "fridge"
   end
 
   def self.ObjectNameRelativeHumiditySetpoint
-    return "res rh setpoint"
+    return "rh setpoint"
   end
 
   def self.ObjectNameRoomAirConditioner
-    return "res room ac"
+    return "room ac"
   end
 
   def self.ObjectNameSolarHotWater
-    return "res solar hot water"
+    return "solar hot water"
   end
 
   def self.ObjectNameUnitHeater
-    return "res unit heater"
+    return "unit heater"
   end
 
   def self.ObjectNameWaterHeater
-    return "res water heater"
+    return "water heater"
   end
 
   def self.OptionTypeLightingFractions
