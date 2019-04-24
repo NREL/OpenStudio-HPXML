@@ -252,8 +252,6 @@ class OSModel
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
-    climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: building.elements["BuildingDetails/ClimateandRiskZones"])
-    @iecc_zone_2006 = climate_and_risk_zones_values[:iecc2006]
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
