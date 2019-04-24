@@ -569,7 +569,7 @@ class Waterheater
     # EMS Program for ducting
     hpwh_ducting_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_ducting_program.setName("#{obj_name_hpwh} InletAir")
-    if not (Geometry.is_finished_basement(water_heater_tz) or Geometry.is_living(water_heater_tz)) and temp_depress_c > 0
+    if not (Geometry.is_conditioned_basement(water_heater_tz) or Geometry.is_living(water_heater_tz)) and temp_depress_c > 0
       runner.registerWarning("Confined space HPWH installations are typically used to represent installations in locations like a utility closet. Utility closets installations are typically only done in conditioned spaces.")
     end
     if temp_depress_c > 0 and ducting == "none"
@@ -733,19 +733,19 @@ class Waterheater
     if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
       return [Constants.SpaceTypeGarage,
               Constants.SpaceTypeLiving,
-              Constants.SpaceTypeFinishedBasement,
+              Constants.SpaceTypeConditionedBasement,
               Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnfinishedAttic]
+              Constants.SpaceTypeUnconditionedAttic]
 
     elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-      return [Constants.SpaceTypeFinishedBasement,
-              Constants.SpaceTypeUnfinishedBasement,
+      return [Constants.SpaceTypeConditionedBasement,
+              Constants.SpaceTypeUnconditionedBasement,
               Constants.SpaceTypeLiving,
               Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnfinishedAttic]
+              Constants.SpaceTypeUnconditionedAttic]
     elsif ba_cz_name.nil?
-      return [Constants.SpaceTypeFinishedBasement,
-              Constants.SpaceTypeUnfinishedBasement,
+      return [Constants.SpaceTypeConditionedBasement,
+              Constants.SpaceTypeUnconditionedBasement,
               Constants.SpaceTypeGarage,
               Constants.SpaceTypeLiving]
     end

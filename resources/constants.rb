@@ -889,8 +889,8 @@ class Constants
     return 'crawlspace'
   end
 
-  def self.SpaceTypeFinishedBasement
-    return 'finished basement'
+  def self.SpaceTypeConditionedBasement
+    return 'conditioned basement'
   end
 
   def self.SpaceTypeGarage
@@ -905,15 +905,15 @@ class Constants
     return 'pier and beam'
   end
 
-  def self.SpaceTypeUnfinishedAttic
-    return 'unfinished attic'
+  def self.SpaceTypeUnconditionedAttic
+    return 'unconditioned attic'
   end
 
-  def self.SpaceTypeUnfinishedBasement
-    return 'unfinished basement'
+  def self.SpaceTypeUnconditionedBasement
+    return 'unconditioned basement'
   end
 
-  def self.SurfaceTypeFloorFinInsUnfinAttic # unfinished attic floor
+  def self.SurfaceTypeFloorFinInsUnfinAttic # unconditioned attic floor
     return 'FloorFinInsUnfinAttic'
   end
 
@@ -929,15 +929,15 @@ class Constants
     return 'FloorUnfinUninsUnfin'
   end
 
-  def self.SurfaceTypeFloorFndGrndFinB # finished basement floor
+  def self.SurfaceTypeFloorFndGrndFinB # conditioned basement floor
     return 'FloorFndGrndFinB'
   end
 
-  def self.SurfaceTypeFloorFndGrndUnfinB # unfinished basement floor
+  def self.SurfaceTypeFloorFndGrndUnfinB # unconditioned basement floor
     return 'FloorFndGrndUnfinB'
   end
 
-  def self.SurfaceTypeFloorFndGrndFinSlab # finished slab
+  def self.SurfaceTypeFloorFndGrndFinSlab # conditioned slab
     return 'FloorFndGrndFinSlab'
   end
 
@@ -945,7 +945,7 @@ class Constants
     return 'FloorFndGrndUnfinSlab'
   end
 
-  def self.SurfaceTypeFloorUnfinBInsFin # unfinished basement ceiling
+  def self.SurfaceTypeFloorUnfinBInsFin # unconditioned basement ceiling
     return 'FloorUnfinBInsFin'
   end
 
@@ -965,11 +965,11 @@ class Constants
     return 'RoofUnfinUninsExt'
   end
 
-  def self.SurfaceTypeRoofUnfinInsExt # unfinished attic roof
+  def self.SurfaceTypeRoofUnfinInsExt # unconditioned attic roof
     return 'RoofUnfinInsExt'
   end
 
-  def self.SurfaceTypeRoofFinInsExt # finished attic roof
+  def self.SurfaceTypeRoofFinInsExt # conditioned attic roof
     return 'RoofFinInsExt'
   end
 
@@ -985,11 +985,11 @@ class Constants
     return 'WallExtUninsUnfin'
   end
 
-  def self.SurfaceTypeWallFndGrndFinB # finished basement wall
+  def self.SurfaceTypeWallFndGrndFinB # conditioned basement wall
     return 'WallFndGrndFinB'
   end
 
-  def self.SurfaceTypeWallFndGrndUnfinB # unfinished basement wall
+  def self.SurfaceTypeWallFndGrndUnfinB # unconditioned basement wall
     return 'WallFndGrndUnfinB'
   end
 
@@ -1001,11 +1001,11 @@ class Constants
     return 'WallIntFinInsUnfin'
   end
 
-  def self.SurfaceTypeWallIntFinUninsFin # wall between two finished spaces
+  def self.SurfaceTypeWallIntFinUninsFin # wall between two conditioned spaces
     return 'WallIntFinUninsFin'
   end
 
-  def self.SurfaceTypeWallIntUnfinUninsUnfin # wall between two unfinished spaces
+  def self.SurfaceTypeWallIntUnfinUninsUnfin # wall between two unconditioned spaces
     return 'WallIntUnfinUninsUnfin'
   end
 

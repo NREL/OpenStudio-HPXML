@@ -39,22 +39,22 @@ class Airflow
       spaces << space
     end
     building.height = Geometry.get_height_of_spaces(spaces)
-    building.above_grade_volume = Geometry.get_above_grade_finished_volume(model)
+    building.above_grade_volume = Geometry.get_above_grade_conditioned_volume(model)
     model.getThermalZones.each do |thermal_zone|
-      if Geometry.is_finished_basement(thermal_zone)
-        building.finished_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.finished_basement_ach, nil)
+      if Geometry.is_conditioned_basement(thermal_zone)
+        building.conditioned_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.conditioned_basement_ach, nil)
       elsif Geometry.is_living(thermal_zone)
         building.living = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, nil)
       elsif Geometry.is_garage(thermal_zone)
         building.garage = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, nil)
-      elsif Geometry.is_unfinished_basement(thermal_zone)
-        building.unfinished_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.unfinished_basement_ach, nil)
+      elsif Geometry.is_unconditioned_basement(thermal_zone)
+        building.unconditioned_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.unconditioned_basement_ach, nil)
       elsif Geometry.is_crawl(thermal_zone)
         building.crawlspace = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.crawl_ach, nil)
       elsif Geometry.is_pier_beam(thermal_zone)
         building.pierbeam = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.pier_beam_ach, nil)
-      elsif Geometry.is_unfinished_attic(thermal_zone)
-        building.unfinished_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.unfinished_attic_const_ach, infil.unfinished_attic_sla)
+      elsif Geometry.is_unconditioned_attic(thermal_zone)
+        building.unconditioned_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.unconditioned_attic_const_ach, infil.unconditioned_attic_sla)
       end
     end
     building.cfa = cfa
@@ -141,8 +141,8 @@ class Airflow
       building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationELA, 0.0)
       building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, 0.0)
     end
-    unless building.finished_basement.nil?
-      building.finished_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.finished_basement.inf_flow)
+    unless building.conditioned_basement.nil?
+      building.conditioned_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.conditioned_basement.inf_flow)
     end
 
     # Store info for HVAC Sizing measure
@@ -152,11 +152,11 @@ class Airflow
     unless building.pierbeam.nil?
       building.pierbeam.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.pierbeam.inf_flow.to_f)
     end
-    unless building.unfinished_basement.nil?
-      building.unfinished_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unfinished_basement.inf_flow.to_f)
+    unless building.unconditioned_basement.nil?
+      building.unconditioned_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unconditioned_basement.inf_flow.to_f)
     end
-    unless building.unfinished_attic.nil?
-      building.unfinished_attic.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unfinished_attic.inf_flow)
+    unless building.unconditioned_attic.nil?
+      building.unconditioned_attic.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unconditioned_attic.inf_flow)
     end
     model.getAirLoopHVACs.each do |air_loop|
       has_ducts = air_loop.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoDuctExist)
@@ -257,10 +257,10 @@ class Airflow
   def self.process_infiltration(model, infil, wind_speed, building, weather)
     spaces = []
     spaces << building.garage if not building.garage.nil?
-    spaces << building.unfinished_basement if not building.unfinished_basement.nil?
+    spaces << building.unconditioned_basement if not building.unconditioned_basement.nil?
     spaces << building.crawlspace if not building.crawlspace.nil?
     spaces << building.pierbeam if not building.pierbeam.nil?
-    spaces << building.unfinished_attic if not building.unfinished_attic.nil?
+    spaces << building.unconditioned_attic if not building.unconditioned_attic.nil?
 
     unless building.garage.nil?
       building.garage.inf_method = @infMethodSG
@@ -271,9 +271,9 @@ class Airflow
       building.garage.inf_flow = building.garage.ACH / UnitConversions.convert(1.0, "hr", "min") * building.garage.volume # cfm
     end
 
-    unless building.unfinished_basement.nil?
-      building.unfinished_basement.inf_method = @infMethodRes # Used for constant ACH
-      building.unfinished_basement.inf_flow = building.unfinished_basement.ACH / UnitConversions.convert(1.0, "hr", "min") * building.unfinished_basement.volume
+    unless building.unconditioned_basement.nil?
+      building.unconditioned_basement.inf_method = @infMethodRes # Used for constant ACH
+      building.unconditioned_basement.inf_flow = building.unconditioned_basement.ACH / UnitConversions.convert(1.0, "hr", "min") * building.unconditioned_basement.volume
     end
 
     unless building.crawlspace.nil?
@@ -286,16 +286,16 @@ class Airflow
       building.pierbeam.inf_flow = building.pierbeam.ACH / UnitConversions.convert(1.0, "hr", "min") * building.pierbeam.volume
     end
 
-    unless building.unfinished_attic.nil?
-      if not building.unfinished_attic.SLA.nil?
-        building.unfinished_attic.inf_method = @infMethodSG
-        building.unfinished_attic.hor_lk_frac = 0.75 # Same as Energy Gauge USA Attic Model
-        building.unfinished_attic.neutral_level = 0.5 # DOE-2 Default
-        building.unfinished_attic.ACH = Airflow.get_infiltration_ACH_from_SLA(building.unfinished_attic.SLA, 1.0, weather)
-      elsif not building.unfinished_attic.ACH.nil?
-        building.unfinished_attic.inf_method = @infMethodRes
+    unless building.unconditioned_attic.nil?
+      if not building.unconditioned_attic.SLA.nil?
+        building.unconditioned_attic.inf_method = @infMethodSG
+        building.unconditioned_attic.hor_lk_frac = 0.75 # Same as Energy Gauge USA Attic Model
+        building.unconditioned_attic.neutral_level = 0.5 # DOE-2 Default
+        building.unconditioned_attic.ACH = Airflow.get_infiltration_ACH_from_SLA(building.unconditioned_attic.SLA, 1.0, weather)
+      elsif not building.unconditioned_attic.ACH.nil?
+        building.unconditioned_attic.inf_method = @infMethodRes
       end
-      building.unfinished_attic.inf_flow = building.unfinished_attic.ACH / UnitConversions.convert(1.0, "hr", "min") * building.unfinished_attic.volume
+      building.unconditioned_attic.inf_flow = building.unconditioned_attic.ACH / UnitConversions.convert(1.0, "hr", "min") * building.unconditioned_attic.volume
     end
 
     process_infiltration_for_spaces(model, spaces, wind_speed)
@@ -351,7 +351,7 @@ class Airflow
   def self.process_infiltration_for_conditioned_zones(model, runner, infil, wind_speed, building, weather)
     spaces = []
     spaces << building.living
-    spaces << building.finished_basement if not building.finished_basement.nil?
+    spaces << building.conditioned_basement if not building.conditioned_basement.nil?
 
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     inf_conv_factor = 776.25 # [ft/min]/[inH2O^(1/2)*ft^(3/2)/lbm^(1/2)]
@@ -486,9 +486,9 @@ class Airflow
 
     end
 
-    unless building.finished_basement.nil?
-      building.finished_basement.inf_method = @infMethodRes # Used for constant ACH
-      building.finished_basement.inf_flow = building.finished_basement.ACH / UnitConversions.convert(1.0, "hr", "min") * building.finished_basement.volume
+    unless building.conditioned_basement.nil?
+      building.conditioned_basement.inf_method = @infMethodRes # Used for constant ACH
+      building.conditioned_basement.inf_flow = building.conditioned_basement.ACH / UnitConversions.convert(1.0, "hr", "min") * building.conditioned_basement.volume
     end
 
     process_infiltration_for_spaces(model, spaces, wind_speed)
@@ -1078,12 +1078,19 @@ class Airflow
   end
 
   def self.create_ducts_objects(model, runner, building, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, air_loop_objects)
-    return true if ducts.size == 0
+    return true if ducts.size == 0 # No ducts
 
     duct_zones = ducts.map { |duct| duct.location_zone }.uniq!
     living_space = building.living.zone.spaces[0]
 
-    return true if duct_zones.size == 1 and Geometry.is_living(duct_zones[0])
+    # All duct zones are in living space?
+    all_ducts_conditioned = true
+    duct_zones.each do |duct_zone|
+      next if Geometry.is_living(duct_zone)
+
+      all_ducts_conditioned = false
+    end
+    return true if all_ducts_conditioned
 
     def self.create_duct_actuator(model, name, space)
       var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
@@ -1117,8 +1124,8 @@ class Airflow
       # Set the return plenums
       if air_loop.to_AirLoopHVAC.is_initialized
         building.living.zone.setReturnPlenum(ra_duct_zone, air_loop)
-        unless building.finished_basement.nil?
-          building.finished_basement.zone.setReturnPlenum(ra_duct_zone, air_loop)
+        unless building.conditioned_basement.nil?
+          building.conditioned_basement.zone.setReturnPlenum(ra_duct_zone, air_loop)
         end
         air_loop.demandComponents.each do |demand_component|
           next unless demand_component.to_AirLoopHVACReturnPlenum.is_initialized
@@ -1289,15 +1296,15 @@ class Airflow
 
         # Calculate fraction of outside air specific to this duct location
         f_oa = 1.0
-        if not building.finished_basement.nil? and building.finished_basement.zone.name.to_s == duct_zone_name
+        if not building.conditioned_basement.nil? and building.conditioned_basement.zone.name.to_s == duct_zone_name
           f_oa = 0.0
-        elsif not building.unfinished_basement.nil? and building.unfinished_basement.zone.name.to_s == duct_zone_name
+        elsif not building.unconditioned_basement.nil? and building.unconditioned_basement.zone.name.to_s == duct_zone_name
           f_oa = 0.0
         elsif not building.crawlspace.nil? and building.crawlspace.zone.name.to_s == duct_zone_name and building.crawlspace.ACH == 0
           f_oa = 0.0
         elsif not building.pierbeam.nil? and building.pierbeam.zone.name.to_s == duct_zone_name and building.pierbeam.ACH == 0
           f_oa = 0.0
-        elsif not building.unfinished_attic.nil? and building.unfinished_attic.zone.name.to_s == duct_zone_name and building.unfinished_attic.ACH == 0
+        elsif not building.unconditioned_attic.nil? and building.unconditioned_attic.zone.name.to_s == duct_zone_name and building.unconditioned_attic.ACH == 0
           f_oa = 0.0
         end
 
@@ -1870,11 +1877,11 @@ class Airflow
   def self.get_duct_zone(location, building, model)
     location_zone = building.living.zone
 
-    location_hierarchy = [Constants.SpaceTypeFinishedBasement,
-                          Constants.SpaceTypeUnfinishedBasement,
+    location_hierarchy = [Constants.SpaceTypeConditionedBasement,
+                          Constants.SpaceTypeUnconditionedBasement,
                           Constants.SpaceTypeCrawl,
                           Constants.SpaceTypePierBeam,
-                          Constants.SpaceTypeUnfinishedAttic,
+                          Constants.SpaceTypeUnconditionedAttic,
                           Constants.SpaceTypeGarage,
                           Constants.SpaceTypeLiving]
 
@@ -1958,24 +1965,24 @@ class Duct
 end
 
 class Infiltration
-  def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, unfinished_attic_sla, unfinished_attic_const_ach,
-                 unfinished_basement_ach, finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
+  def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, unconditioned_attic_sla, unconditioned_attic_const_ach,
+                 unconditioned_basement_ach, conditioned_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
     @living_ach50 = living_ach50
     @living_constant_ach = living_constant_ach
     @shelter_coef = shelter_coef
     @garage_ach50 = garage_ach50
     @crawl_ach = crawl_ach
-    @unfinished_attic_sla = unfinished_attic_sla
-    @unfinished_attic_const_ach = unfinished_attic_const_ach
-    @unfinished_basement_ach = unfinished_basement_ach
-    @finished_basement_ach = finished_basement_ach
+    @unconditioned_attic_sla = unconditioned_attic_sla
+    @unconditioned_attic_const_ach = unconditioned_attic_const_ach
+    @unconditioned_basement_ach = unconditioned_basement_ach
+    @conditioned_basement_ach = conditioned_basement_ach
     @pier_beam_ach = pier_beam_ach
     @has_flue_chimney = has_flue_chimney
     @is_existing_home = is_existing_home
     @terrain = terrain
   end
-  attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :crawl_ach, :unfinished_attic_sla, :unfinished_attic_const_ach,
-                :unfinished_basement_ach, :finished_basement_ach, :pier_beam_ach, :has_flue_chimney, :is_existing_home, :terrain,
+  attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :crawl_ach, :unconditioned_attic_sla, :unconditioned_attic_const_ach,
+                :unconditioned_basement_ach, :conditioned_basement_ach, :pier_beam_ach, :has_flue_chimney, :is_existing_home, :terrain,
                 :a_o, :c_i, :n_i, :stack_coef, :wind_coef, :y_i, :s_wflue)
 end
 
@@ -2048,5 +2055,5 @@ end
 class Building
   def initialize
   end
-  attr_accessor(:cfa, :ag_cfa, :nbeds, :nbaths, :ncfl, :ncfl_ag, :window_area, :height, :stories, :above_grade_volume, :SLA, :living, :finished_basement, :garage, :unfinished_basement, :crawlspace, :pierbeam, :unfinished_attic)
+  attr_accessor(:cfa, :ag_cfa, :nbeds, :nbaths, :ncfl, :ncfl_ag, :window_area, :height, :stories, :above_grade_volume, :SLA, :living, :conditioned_basement, :garage, :unconditioned_basement, :crawlspace, :pierbeam, :unconditioned_attic)
 end

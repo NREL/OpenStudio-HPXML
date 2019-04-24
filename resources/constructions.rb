@@ -823,11 +823,11 @@ end
 class RoofConstructions
   # Container class for roof constructions
 
-  def self.apply_unfinished_attic(runner, model, surfaces, constr_name,
-                                  cavity_r, install_grade, cavity_ins_thick_in,
-                                  framing_factor, framing_thick_in,
-                                  osb_thick_in, rigid_r,
-                                  mat_roofing, has_radiant_barrier)
+  def self.apply_unconditioned_attic(runner, model, surfaces, constr_name,
+                                     cavity_r, install_grade, cavity_ins_thick_in,
+                                     framing_factor, framing_thick_in,
+                                     osb_thick_in, rigid_r,
+                                     mat_roofing, has_radiant_barrier)
 
     return true if surfaces.empty?
 
@@ -921,10 +921,10 @@ class RoofConstructions
     return true
   end
 
-  def self.apply_finished_roof(runner, model, surfaces, constr_name,
-                               cavity_r, install_grade, cavity_depth,
-                               filled_cavity, framing_factor, drywall_thick_in,
-                               osb_thick_in, rigid_r, mat_roofing)
+  def self.apply_conditioned_roof(runner, model, surfaces, constr_name,
+                                  cavity_r, install_grade, cavity_depth,
+                                  filled_cavity, framing_factor, drywall_thick_in,
+                                  osb_thick_in, rigid_r, mat_roofing)
 
     return true if surfaces.empty?
 
@@ -1147,11 +1147,11 @@ end
 class FloorConstructions
   # Container class for above-grade floor constructions
 
-  # Unfinished attic floor
-  def self.apply_unfinished_attic(runner, model, surfaces, constr_name,
-                                  cavity_r, install_grade, ins_thick_in,
-                                  framing_factor, joist_height_in,
-                                  drywall_thick_in)
+  # Unconditioned attic floor
+  def self.apply_unconditioned_attic(runner, model, surfaces, constr_name,
+                                     cavity_r, install_grade, ins_thick_in,
+                                     framing_factor, joist_height_in,
+                                     drywall_thick_in)
 
     return true if surfaces.empty?
 
@@ -1952,7 +1952,7 @@ class ThermalMassConstructions
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
                                  drywall_thick_in, frac_of_ffa)
 
-    spaces = Geometry.get_finished_spaces(model.getSpaces)
+    spaces = Geometry.get_conditioned_spaces(model.getSpaces)
 
     return true if spaces.empty?
 
@@ -2005,8 +2005,8 @@ class ThermalMassConstructions
 
     model_spaces = model.getSpaces
 
-    finished_spaces = Geometry.get_finished_spaces(model_spaces)
-    unfinished_basement_spaces = Geometry.get_unfinished_basement_spaces(model_spaces)
+    conditioned_spaces = Geometry.get_conditioned_spaces(model_spaces)
+    unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
     garage_spaces = Geometry.get_garage_spaces(model_spaces)
 
     # Add user-specified furniture mass
@@ -2016,7 +2016,7 @@ class ThermalMassConstructions
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if finished_spaces.include?(space) or unfinished_basement_spaces.include?(space)
+      if conditioned_spaces.include?(space) or unconditioned_basement_spaces.include?(space)
         furnAreaFraction = frac_of_ffa
         furnMass = mass_lb_per_sqft
       elsif garage_spaces.include?(space)
@@ -2444,7 +2444,7 @@ class SurfaceTypes
     }
 
     model.getSpaces.each do |space|
-      is_finished = Geometry.space_is_finished(space)
+      is_conditioned = Geometry.space_is_conditioned(space)
 
       space.surfaces.each do |surface|
         next if surface.surfaceType.downcase != "wall"
@@ -2459,48 +2459,48 @@ class SurfaceTypes
         end
         obc_is_adjacent = (not adjacent_space.nil?)
 
-        # Exterior insulated finished
-        if is_finished and obc_is_exterior
+        # Exterior insulated conditioned
+        if is_conditioned and obc_is_exterior
           surfaces[Constants.SurfaceTypeWallExtInsFin] << surface
 
-        # Exterior insulated unfinished
-        elsif not is_finished and obc_is_exterior and Geometry.is_unfinished_attic(space) and get_space_r_value(runner, space, "roofceiling").to_f > 5
+        # Exterior insulated unconditioned
+        elsif not is_conditioned and obc_is_exterior and Geometry.is_unconditioned_attic(space) and get_space_r_value(runner, space, "roofceiling").to_f > 5
           surfaces[Constants.SurfaceTypeWallExtInsUnfin] << surface
 
-        # Exterior uninsulated unfinished
-        elsif not is_finished and obc_is_exterior
+        # Exterior uninsulated unconditioned
+        elsif not is_conditioned and obc_is_exterior
           surfaces[Constants.SurfaceTypeWallExtUninsUnfin] << surface
 
-        # Interior finished uninsulated finished
-        elsif is_finished and obc_is_adjacent and Geometry.space_is_finished(adjacent_space)
+        # Interior conditioned uninsulated conditioned
+        elsif is_conditioned and obc_is_adjacent and Geometry.space_is_conditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeWallIntFinUninsFin] << surface
 
-        # Interior unfinished uninsulated unfinished
-        elsif not is_finished and obc_is_adjacent and Geometry.space_is_unfinished(adjacent_space)
+        # Interior unconditioned uninsulated unconditioned
+        elsif not is_conditioned and obc_is_adjacent and Geometry.space_is_unconditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeWallIntUnfinUninsUnfin] << surface
 
-        # Interior finished insulated unfinished
-        elsif is_finished and obc_is_adjacent and Geometry.space_is_unfinished(adjacent_space)
+        # Interior conditioned insulated unconditioned
+        elsif is_conditioned and obc_is_adjacent and Geometry.space_is_unconditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeWallIntFinInsUnfin] << surface
 
-        # Exterior finished basement
-        elsif Geometry.is_finished_basement(space) and obc_is_foundation
+        # Exterior conditioned basement
+        elsif Geometry.is_conditioned_basement(space) and obc_is_foundation
           surfaces[Constants.SurfaceTypeWallFndGrndFinB] << surface
 
-        # Exterior unfinished basement
-        elsif Geometry.is_unfinished_basement(space) and obc_is_foundation
+        # Exterior unconditioned basement
+        elsif Geometry.is_unconditioned_basement(space) and obc_is_foundation
           surfaces[Constants.SurfaceTypeWallFndGrndUnfinB] << surface
 
         # Exterior crawlspace
         elsif Geometry.is_crawl(space) and obc_is_foundation
           surfaces[Constants.SurfaceTypeWallFndGrndCS] << surface
 
-        # Adiabatic finished
-        elsif obc_is_adiabatic and is_finished
+        # Adiabatic conditioned
+        elsif obc_is_adiabatic and is_conditioned
           surfaces[Constants.SurfaceTypeWallIntFinUninsFin] << surface
 
-        # Adiabatic unfinished
-        elsif obc_is_adiabatic and not is_finished
+        # Adiabatic unconditioned
+        elsif obc_is_adiabatic and not is_conditioned
           surfaces[Constants.SurfaceTypeWallIntUnfinUninsUnfin] << surface
 
         end
@@ -2518,7 +2518,7 @@ class SurfaceTypes
     }
 
     model.getSpaces.each do |space|
-      is_finished = Geometry.space_is_finished(space)
+      is_conditioned = Geometry.space_is_conditioned(space)
       above_grade = Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
@@ -2533,15 +2533,15 @@ class SurfaceTypes
         end
         obc_is_adjacent = (not adjacent_space.nil?)
 
-        # Exterior insulated finished
-        if obc_is_exterior and is_finished and above_grade
+        # Exterior insulated conditioned
+        if obc_is_exterior and is_conditioned and above_grade
           surfaces[Constants.SurfaceTypeRoofFinInsExt] << surface
 
-        # Exterior insulated unfinished
-        elsif obc_is_exterior and Geometry.is_unfinished_attic(space)
+        # Exterior insulated unconditioned
+        elsif obc_is_exterior and Geometry.is_unconditioned_attic(space)
           surfaces[Constants.SurfaceTypeRoofUnfinInsExt] << surface
 
-        # Exterior uninsulated unfinished
+        # Exterior uninsulated unconditioned
         elsif obc_is_exterior
           surfaces[Constants.SurfaceTypeRoofUnfinUninsExt] << surface
 
@@ -2585,16 +2585,16 @@ class SurfaceTypes
         end
         obc_is_adjacent = (not adjacent_space.nil?)
 
-        # Unfinished basement ceiling
-        if Geometry.is_unfinished_basement(space) and not adjacent_space.nil? and Geometry.space_is_finished(adjacent_space)
+        # Unconditioned basement ceiling
+        if Geometry.is_unconditioned_basement(space) and not adjacent_space.nil? and Geometry.space_is_conditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeFloorUnfinBInsFin] << surface
 
         # Crawlspace ceiling
-        elsif Geometry.is_crawl(space) and not adjacent_space.nil? and Geometry.space_is_finished(adjacent_space)
+        elsif Geometry.is_crawl(space) and not adjacent_space.nil? and Geometry.space_is_conditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeFloorCSInsFin] << surface
 
         # Pier beam ceiling
-        elsif Geometry.is_pier_beam(space) and not adjacent_space.nil? and Geometry.space_is_finished(adjacent_space)
+        elsif Geometry.is_pier_beam(space) and not adjacent_space.nil? and Geometry.space_is_conditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeFloorPBInsFin] << surface
 
         end
@@ -2610,7 +2610,7 @@ class SurfaceTypes
 
     # Floors
     model.getSpaces.each do |space|
-      is_finished = Geometry.space_is_finished(space)
+      is_conditioned = Geometry.space_is_conditioned(space)
       above_grade = Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
@@ -2627,48 +2627,48 @@ class SurfaceTypes
         end
         obc_is_adjacent = (not adjacent_space.nil?)
 
-        # Unfinished attic floor
-        if obc_is_adjacent and Geometry.is_unfinished_attic(space) and Geometry.space_is_finished(adjacent_space)
+        # Unconditioned attic floor
+        if obc_is_adjacent and Geometry.is_unconditioned_attic(space) and Geometry.space_is_conditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeFloorFinInsUnfinAttic] << surface
 
-        # Floor between finished spaces
-        elsif is_finished and obc_is_adjacent and Geometry.space_is_finished(adjacent_space)
+        # Floor between conditioned spaces
+        elsif is_conditioned and obc_is_adjacent and Geometry.space_is_conditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeFloorFinUninsFin] << surface
 
-        # Floor between unfinished spaces
-        elsif not is_finished and obc_is_adjacent and not Geometry.space_is_finished(adjacent_space)
+        # Floor between unconditioned spaces
+        elsif not is_conditioned and obc_is_adjacent and not Geometry.space_is_conditioned(adjacent_space)
           surfaces[Constants.SurfaceTypeFloorUnfinUninsUnfin] << surface
 
-        # Finished basement floor
-        elsif Geometry.is_finished_basement(space) and obc_is_foundation
+        # Conditioned basement floor
+        elsif Geometry.is_conditioned_basement(space) and obc_is_foundation
           surfaces[Constants.SurfaceTypeFloorFndGrndFinB] << surface
 
-        # Unfinished basement floor
-        elsif Geometry.is_unfinished_basement(space) and obc_is_foundation
+        # Unconditioned basement floor
+        elsif Geometry.is_unconditioned_basement(space) and obc_is_foundation
           surfaces[Constants.SurfaceTypeFloorFndGrndUnfinB] << surface
 
         # Crawlspace floor
         elsif Geometry.is_crawl(space) and obc_is_foundation
           surfaces[Constants.SurfaceTypeFloorFndGrndCS] << surface
 
-        # Finished slab
-        elsif above_grade and is_finished and obc_is_foundation
+        # Conditioned slab
+        elsif above_grade and is_conditioned and obc_is_foundation
           surfaces[Constants.SurfaceTypeFloorFndGrndFinSlab] << surface
 
-        # Unfinished slab
-        elsif above_grade and not is_finished and obc_is_foundation
+        # Unconditioned slab
+        elsif above_grade and not is_conditioned and obc_is_foundation
           surfaces[Constants.SurfaceTypeFloorFndGrndUnfinSlab] << surface
 
         # Interzonal floor
-        elsif is_finished and (obc_is_exterior or (obc_is_adjacent and not Geometry.space_is_finished(adjacent_space)))
+        elsif is_conditioned and (obc_is_exterior or (obc_is_adjacent and not Geometry.space_is_conditioned(adjacent_space)))
           surfaces[Constants.SurfaceTypeFloorFinInsUnfin] << surface
 
-        # Adiabatic finished floor
-        elsif obc_is_adiabatic and is_finished
+        # Adiabatic conditioned floor
+        elsif obc_is_adiabatic and is_conditioned
           surfaces[Constants.SurfaceTypeFloorFinUninsFin] << surface
 
-        # Adiabatic unfinished floor
-        elsif obc_is_adiabatic and not is_finished
+        # Adiabatic unconditioned floor
+        elsif obc_is_adiabatic and not is_conditioned
           surfaces[Constants.SurfaceTypeFloorUnfinUninsUnfin] << surface
 
         end

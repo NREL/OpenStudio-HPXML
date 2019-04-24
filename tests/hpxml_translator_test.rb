@@ -797,8 +797,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cw, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
-                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
@@ -812,8 +812,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cd, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
-                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
@@ -827,8 +827,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(refr, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
-                      'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
@@ -913,7 +913,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if not xml.include? "-dse-0.8"
 
       xml_dse80 = File.absolute_path(xml)
-      xml_dse100 = xml_dse80.gsub(hvac_dse_dir, hvac_base_dir).gsub("-dse-0.8", "-base")
+      xml_dse100 = xml_dse80.gsub(hvac_dse_dir, hvac_base_dir).gsub("-dse-0.8.xml", "-base.xml")
 
       results_dse80 = all_results[xml_dse80]
       results_dse100 = all_results[xml_dse100]
@@ -947,7 +947,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if not xml.include? hvac_multiple_dir
 
       xml_x3 = File.absolute_path(xml)
-      xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3", "-base"))
+      xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3.xml", "-base.xml"))
 
       results_x3 = all_results[xml_x3]
       results_x1 = all_results[xml_x1]
@@ -977,7 +977,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if not xml.include? water_heating_multiple_dir
 
       xml_x3 = File.absolute_path(xml)
-      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3", ""))))
+      xml_x1 = File.absolute_path(File.join(File.dirname(xml), "..", File.basename(xml.gsub("-x3.xml", ".xml"))))
 
       results_x3 = all_results[xml_x3]
       results_x1 = all_results[xml_x1]
@@ -1006,7 +1006,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if not xml.include? hvac_partial_dir
 
       xml_50 = File.absolute_path(xml)
-      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-50percent", "-base"))
+      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-50percent.xml", "-base.xml"))
 
       results_50 = all_results[xml_50]
       results_100 = all_results[xml_100]

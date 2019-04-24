@@ -20,8 +20,8 @@ class HVACSizing
     # in the SHRRated. It is a function of ODB (MJ design temp) and CFM/Ton (from MJ)
     @shr_biquadratic = [1.08464364, 0.002096954, 0, -0.005766327, 0, -0.000011147]
 
-    @finished_heat_design_temp = 70 # Indoor heating design temperature according to acca MANUAL J
-    @finished_cool_design_temp = 75 # Indoor heating design temperature according to acca MANUAL J
+    @conditioned_heat_design_temp = 70 # Indoor heating design temperature according to acca MANUAL J
+    @conditioned_cool_design_temp = 75 # Indoor heating design temperature according to acca MANUAL J
 
     # Manual J: The default values for wind velocity are 15 mph for heating and 7.5 mph for cooling.
     # These velocities do not represent the most severe wind conditions that will be experienced when
@@ -46,18 +46,22 @@ class HVACSizing
     zones_loads = process_zone_loads(runner, model, weather)
     return false if zones_loads.nil?
 
-    # Aggregate zone loads into initial loads
-    init_loads = aggregate_zone_loads(zones_loads)
-    return false if init_loads.nil?
-
-    # Get HVAC system info
-    hvacs = get_hvacs(runner, model)
-    return false if hvacs.nil?
-
     # Display debug info
     if show_debug_info
       display_zone_loads(runner, zones_loads)
     end
+
+    # Aggregate zone loads into initial loads
+    init_loads = aggregate_zone_loads(zones_loads)
+    return false if init_loads.nil?
+
+    # For airloop systems serving multiple zones, calculate air flow ratio to slave zones
+    zone_ratios = process_slave_zone_flow_ratios(runner, zones_loads)
+    return false if zone_ratios.nil?
+
+    # Get HVAC system info
+    hvacs = get_hvacs(runner, model)
+    return false if hvacs.nil?
 
     hvacs.each do |hvac|
       hvac = calculate_hvac_temperatures(init_loads, hvac)
@@ -79,9 +83,6 @@ class HVACSizing
       hvac_final_values = process_cooling_equipment_adjustments(runner, hvac_final_values, weather, hvac)
       return false if hvac_final_values.nil?
 
-      hvac_final_values = process_slave_zone_flow_ratios(runner, hvac_final_values, zones_loads, hvac)
-      return false if hvac_final_values.nil?
-
       hvac_final_values = process_fixed_equipment(runner, hvac_final_values, hvac)
       return false if hvac_final_values.nil?
 
@@ -89,7 +90,7 @@ class HVACSizing
       return false if hvac_final_values.nil?
 
       # Set OpenStudio object values
-      if not set_object_values(runner, model, hvac, hvac_final_values)
+      if not set_object_values(runner, model, hvac, hvac_final_values, zone_ratios)
         return false
       end
 
@@ -168,15 +169,15 @@ class HVACSizing
   end
 
   def self.process_design_temp_heating(runner, weather, space, design_db)
-    if Geometry.space_is_finished(space)
-      # Living space, finished attic, finished basement
-      heat_temp = @finished_heat_design_temp
+    if Geometry.space_is_conditioned(space)
+      # Living space, conditioned attic, conditioned basement
+      heat_temp = @conditioned_heat_design_temp
 
     elsif Geometry.is_garage(space)
       # Garage
       heat_temp = design_db + 13
 
-    elsif Geometry.is_unfinished_attic(space)
+    elsif Geometry.is_unconditioned_attic(space)
 
       is_vented = space_is_vented(space, 0.001)
 
@@ -186,7 +187,7 @@ class HVACSizing
       attic_roof_r = get_space_r_value(runner, space, "roofceiling", true)
       return nil if attic_roof_r.nil?
 
-      # Unfinished attic
+      # Unconditioned attic
       if attic_floor_r < attic_roof_r
 
         # Attic is considered to be encapsulated. MJ8 says to use an attic
@@ -195,7 +196,7 @@ class HVACSizing
         if is_vented
           heat_temp = design_db
         else # not is_vented
-          heat_temp = calculate_space_design_temps(runner, space, weather, @finished_heat_design_temp, design_db, weather.data.GroundMonthlyTemps.min)
+          heat_temp = calculate_space_design_temps(runner, space, weather, @conditioned_heat_design_temp, design_db, weather.data.GroundMonthlyTemps.min)
         end
 
       else
@@ -209,8 +210,8 @@ class HVACSizing
       heat_temp = design_db
 
     else
-      # Unfinished basement, Crawlspace
-      heat_temp = calculate_space_design_temps(runner, space, weather, @finished_heat_design_temp, design_db, weather.data.GroundMonthlyTemps.min)
+      # Unconditioned basement, Crawlspace
+      heat_temp = calculate_space_design_temps(runner, space, weather, @conditioned_heat_design_temp, design_db, weather.data.GroundMonthlyTemps.min)
 
     end
 
@@ -218,46 +219,46 @@ class HVACSizing
   end
 
   def self.process_design_temp_cooling(runner, weather, space)
-    if Geometry.space_is_finished(space)
-      # Living space, finished attic, finished basement
-      cool_temp = @finished_cool_design_temp
+    if Geometry.space_is_conditioned(space)
+      # Living space, conditioned attic, conditioned basement
+      cool_temp = @conditioned_cool_design_temp
 
     elsif Geometry.is_garage(space)
       # Garage
       # Calculate the cooling design temperature for the garage
 
-      # Calculate fraction of garage under finished space
+      # Calculate fraction of garage under conditioned space
       area_total = 0.0
-      area_finished = 0.0
+      area_conditioned = 0.0
       space.surfaces.each do |surface|
         next if surface.surfaceType.downcase != "roofceiling"
 
         area_total += surface.netArea
         next if not surface.adjacentSurface.is_initialized
         next if not surface.adjacentSurface.get.space.is_initialized
-        next if not Geometry.space_is_finished(surface.adjacentSurface.get.space.get)
+        next if not Geometry.space_is_conditioned(surface.adjacentSurface.get.space.get)
 
-        area_finished += surface.netArea
+        area_conditioned += surface.netArea
       end
-      garage_frac_under_finished = area_finished / area_total
+      garage_frac_under_conditioned = area_conditioned / area_total
 
       # Calculate the garage cooling design temperature based on Table 4C
       # Linearly interpolate between having living space over the garage and not having living space above the garage
       if @daily_range_num == 0
         cool_temp = (weather.design.CoolingDrybulb +
-                     (11 * garage_frac_under_finished) +
-                     (22 * (1 - garage_frac_under_finished)))
+                     (11 * garage_frac_under_conditioned) +
+                     (22 * (1 - garage_frac_under_conditioned)))
       elsif @daily_range_num == 1
         cool_temp = (weather.design.CoolingDrybulb +
-                     (6 * garage_frac_under_finished) +
-                     (17 * (1 - garage_frac_under_finished)))
+                     (6 * garage_frac_under_conditioned) +
+                     (17 * (1 - garage_frac_under_conditioned)))
       elsif @daily_range_num == 2
         cool_temp = (weather.design.CoolingDrybulb +
-                     (1 * garage_frac_under_finished) +
-                     (12 * (1 - garage_frac_under_finished)))
+                     (1 * garage_frac_under_conditioned) +
+                     (12 * (1 - garage_frac_under_conditioned)))
       end
 
-    elsif Geometry.is_unfinished_attic(space)
+    elsif Geometry.is_unconditioned_attic(space)
 
       is_vented = space_is_vented(space, 0.001)
 
@@ -267,7 +268,7 @@ class HVACSizing
       attic_roof_r = get_space_r_value(runner, space, "roofceiling", true)
       return nil if attic_roof_r.nil?
 
-      # Unfinished attic
+      # Unconditioned attic
       if attic_floor_r < attic_roof_r
 
         # Attic is considered to be encapsulated. MJ8 says to use an attic
@@ -276,12 +277,12 @@ class HVACSizing
         if is_vented
           cool_temp = weather.design.CoolingDrybulb + 40 # This is the number from a California study with dark shingle roof and similar ventilation.
         else # not is_vented
-          cool_temp = calculate_space_design_temps(runner, space, weather, @finished_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
+          cool_temp = calculate_space_design_temps(runner, space, weather, @conditioned_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
         end
 
       else
 
-        # Calculate the cooling design temperature for the unfinished attic based on Figure A12-14
+        # Calculate the cooling design temperature for the unconditioned attic based on Figure A12-14
         # Use an area-weighted temperature in case roof surfaces are different
         tot_roof_area = 0
         cool_temp = 0
@@ -391,8 +392,8 @@ class HVACSizing
       cool_temp = weather.design.CoolingDrybulb
 
     else
-      # Unfinished basement, Crawlspace
-      cool_temp = calculate_space_design_temps(runner, space, weather, @finished_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
+      # Unconditioned basement, Crawlspace
+      cool_temp = calculate_space_design_temps(runner, space, weather, @conditioned_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max)
 
     end
 
@@ -405,7 +406,7 @@ class HVACSizing
     # Constant loads (no variation throughout day)
     zones_loads = {}
     thermal_zones.each do |thermal_zone|
-      next if not Geometry.zone_is_finished(thermal_zone)
+      next if not Geometry.zone_is_conditioned(thermal_zone)
 
       zone_loads = ZoneLoads.new
       zone_loads = process_load_windows_skylights(runner, thermal_zone, zone_loads, weather)
@@ -424,7 +425,7 @@ class HVACSizing
     zones_sens = {}
     zones_lat = {}
     thermal_zones.each do |thermal_zone|
-      next if not Geometry.zone_is_finished(thermal_zone)
+      next if not Geometry.zone_is_conditioned(thermal_zone)
 
       zones_sens[thermal_zone], zones_lat[thermal_zone] = process_internal_gains(runner, thermal_zone, weather)
       return nil if zones_sens[thermal_zone].nil? or zones_lat[thermal_zone].nil?
@@ -1000,7 +1001,7 @@ class HVACSizing
 
       total_r = cavity_r + rigid_r
 
-      # Base CLTD for finished roofs (Roof-Joist-Ceiling Sandwiches) taken from MJ8 Figure A12-16
+      # Base CLTD for conditioned roofs (Roof-Joist-Ceiling Sandwiches) taken from MJ8 Figure A12-16
       if total_r <= 6
         cltd = 50
       elsif total_r <= 13
@@ -1078,7 +1079,7 @@ class HVACSizing
 
     # Foundation Floors
     Geometry.get_spaces_below_grade_exterior_floors(thermal_zone.spaces).each do |floor|
-      # Finished basement floor combinations based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
+      # Conditioned basement floor combinations based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
       r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
       z_f = -1 * (Geometry.getSurfaceZValues([floor]).min + UnitConversions.convert(floor.space.get.zOrigin, "m", "ft"))
@@ -1121,8 +1122,8 @@ class HVACSizing
     # Stack Coefficient (Cs) for infiltration calculation taken from Table 5D
     # Wind Coefficient (Cw) for Shielding Classes 1-5 for infiltration calculation taken from Table 5D
     # Coefficients converted to regression equations to allow for more than 3 stories
-    zone_finished_top = Geometry.get_height_of_spaces(Geometry.get_finished_spaces(thermal_zone.spaces))
-    zone_top_story = (zone_finished_top / 8.0).round
+    zone_conditioned_top = Geometry.get_height_of_spaces(Geometry.get_conditioned_spaces(thermal_zone.spaces))
+    zone_top_story = (zone_conditioned_top / 8.0).round
     c_s = 0.015 * zone_top_story
     if @shelter_class == 1
       c_w = 0.0119 * zone_top_story**0.4
@@ -1396,7 +1397,7 @@ class HVACSizing
 
     dse_Fregain = nil
 
-    if Geometry.is_unfinished_basement(duct.LocationSpace) or Geometry.is_finished_basement(duct.LocationSpace)
+    if Geometry.is_unconditioned_basement(duct.LocationSpace) or Geometry.is_conditioned_basement(duct.LocationSpace)
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
@@ -1456,13 +1457,13 @@ class HVACSizing
         end
       end
 
-    elsif Geometry.is_unfinished_attic(duct.LocationSpace)
+    elsif Geometry.is_unconditioned_attic(duct.LocationSpace)
       dse_Fregain = 0.10 # This would likely be higher for unvented attics with roof insulation
 
     elsif Geometry.is_garage(duct.LocationSpace)
       dse_Fregain = 0.05
 
-    elsif Geometry.is_living(duct.LocationSpace) or Geometry.is_finished_attic(duct.LocationSpace)
+    elsif Geometry.is_living(duct.LocationSpace) or Geometry.is_conditioned_attic(duct.LocationSpace)
       dse_Fregain = 1.0
 
     else
@@ -1525,7 +1526,7 @@ class HVACSizing
       end
 
       hvac_final_values.Heat_Load_Ducts = heatingLoad_Next - init_heat_load
-      hvac_final_values.Heat_Load = init_heat_load + hvac_final_values.Heat_Load_Ducts # FIXME: Ducts in finished spaces shouldn't affect the total heating load
+      hvac_final_values.Heat_Load = init_heat_load + hvac_final_values.Heat_Load_Ducts
     end
 
     return hvac_final_values
@@ -2143,29 +2144,12 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_slave_zone_flow_ratios(runner, hvac_final_values, zones_loads, hvac)
+  def self.process_slave_zone_flow_ratios(runner, zones_loads)
     '''
     Flow Ratios for Slave Zones
     '''
 
-    return nil if hvac_final_values.nil?
-
-    # FIXME: TEMPORARY
-    hvac_final_values.Zone_Ratios = {}
-    zones_loads.each do |thermal_zone, zone_loads|
-      next if Geometry.is_living(thermal_zone)
-
-      hvac_final_values.Zone_Ratios[thermal_zone] = 0.1
-    end
-    zones_loads.each do |thermal_zone, zone_loads|
-      next if not Geometry.is_living(thermal_zone)
-
-      hvac_final_values.Zone_Ratios[thermal_zone] = 0.9
-    end
-    if hvac_final_values.Zone_Ratios.size == 1
-      hvac_final_values.Zone_Ratios[hvac_final_values.Zone_Ratios.keys[0]] = 1.0
-    end
-    return hvac_final_values
+    return nil if zones_loads.nil?
 
     zone_heat_loads = {}
     zones_loads.each do |thermal_zone, zone_loads|
@@ -2173,48 +2157,49 @@ class HVACSizing
         zone_loads.Heat_Doors + zone_loads.Heat_Walls +
         zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0].max +
                                       zone_loads.Heat_Infil
-      # FIXME
-      # if !hvac.Ducts.LocationSpace.nil? and thermal_zone.spaces.include?(hvac.Ducts.LocationSpace)
-      #  zone_heat_loads[thermal_zone] -= hvac_final_values.Heat_Load_Ducts
-      # end
+    end
+
+    sum_heat_loads = 0.0
+    zones_loads.each do |thermal_zone, zone_loads|
+      sum_heat_loads += zone_heat_loads[thermal_zone]
     end
 
     # Divide up flow rate to thermal zones based on MJ8 loads
-    hvac_final_values.Zone_Ratios = {}
+    zone_ratios = {}
     total = 0.0
     zones_loads.each do |thermal_zone, zone_loads|
       next if Geometry.is_living(thermal_zone)
 
-      hvac_final_values.Zone_Ratios[thermal_zone] = zone_heat_loads[thermal_zone] / hvac_final_values.Heat_Load
+      zone_ratios[thermal_zone] = zone_heat_loads[thermal_zone] / sum_heat_loads
       # Use a minimum flow ratio of 1%. (Low flow ratios can be calculated, e.g., for buildings
-      # with inefficient above grade construction or poor ductwork in the finished basement.)
-      hvac_final_values.Zone_Ratios[thermal_zone] = [hvac_final_values.Zone_Ratios[thermal_zone], 0.01].max
-      total += hvac_final_values.Zone_Ratios[thermal_zone]
+      # with inefficient above grade construction or poor ductwork in the conditioned basement.)
+      zone_ratios[thermal_zone] = [zone_ratios[thermal_zone], 0.01].max
+      total += zone_ratios[thermal_zone]
     end
 
     zones_loads.each do |thermal_zone, zone_loads|
       next if not Geometry.is_living(thermal_zone)
 
-      hvac_final_values.Zone_Ratios[thermal_zone] = 1.0 - total
-      total += hvac_final_values.Zone_Ratios[thermal_zone]
+      zone_ratios[thermal_zone] = 1.0 - total
+      total += zone_ratios[thermal_zone]
     end
 
     if (total - 1.0).abs > 0.001
       s = ""
-      hvac_final_values.Zone_Ratios.each do |zone, flow_ratio|
+      zone_ratios.each do |zone, flow_ratio|
         s += " #{zone.name.to_s}: #{flow_ratio.round(3).to_s},"
       end
       runner.registerError("Zone flow ratios do not add up to one:#{s.chomp(',')}")
       return nil
     end
 
-    return hvac_final_values
+    return zone_ratios
   end
 
   def self.get_shelter_class(model)
     neighbor_offset_ft = Geometry.get_closest_neighbor_distance(model)
 
-    building_height_ft = Geometry.get_height_of_spaces(Geometry.get_finished_spaces(@model_spaces))
+    building_height_ft = Geometry.get_height_of_spaces(Geometry.get_conditioned_spaces(@model_spaces))
     exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
                          Geometry.calculate_above_grade_wall_area(@model_spaces)
 
@@ -2920,7 +2905,7 @@ class HVACSizing
       end
     end
 
-    # Populate other zone objects (e.g., in a finished basement) related to a given HVAC object
+    # Populate other zone objects (e.g., in a conditioned basement) related to a given HVAC object
     hvacs.each do |hvac|
       hvac.Objects.each do |object|
         other_zone_object = get_feature(runner, object, Constants.SizingInfoHVACOtherZoneObject, 'string', false)
@@ -3013,7 +2998,7 @@ class HVACSizing
     attic_UAs.each do |ua_type, ua|
       if ua_type == "outdoors" or ua_type == "infil"
         sum_uat += ua * t_solair
-      elsif ua_type == "surface" # adjacent to finished
+      elsif ua_type == "surface" # adjacent to conditioned
         sum_uat += ua * cool_setpoint
       elsif ua_type == "total" or ua_type == "foundation"
       # skip
@@ -3060,8 +3045,8 @@ class HVACSizing
   end
 
   def self.get_space_ua_values(runner, space, weather)
-    if Geometry.space_is_finished(space)
-      runner.registerError("Method should not be called for a finished space: '#{space.name.to_s}'.")
+    if Geometry.space_is_conditioned(space)
+      runner.registerError("Method should not be called for a conditioned space: '#{space.name.to_s}'.")
       return nil
     end
 
@@ -3088,7 +3073,7 @@ class HVACSizing
         return nil if ufactor.nil?
       end
 
-      # Exclude surfaces adjacent to unfinished space
+      # Exclude surfaces adjacent to unconditioned space
       next if not ["foundation", "outdoors"].include?(obc) and not Geometry.is_interzonal_surface(surface)
 
       space_UAs[obc] += ufactor * UnitConversions.convert(surface.netArea, "m^2", "ft^2")
@@ -3109,7 +3094,7 @@ class HVACSizing
     return space_UAs
   end
 
-  def self.calculate_space_design_temps(runner, space, weather, finished_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
+  def self.calculate_space_design_temps(runner, space, weather, conditioned_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
     space_UAs = get_space_ua_values(runner, space, weather)
     return nil if space_UAs.nil?
 
@@ -3123,8 +3108,8 @@ class HVACSizing
           sum_uat += ua * ground_db
         elsif ua_type == "outdoors" or ua_type == "infil"
           sum_uat += ua * design_db
-        elsif ua_type == "surface" # adjacent to finished
-          sum_uat += ua * finished_design_temp
+        elsif ua_type == "surface" # adjacent to conditioned
+          sum_uat += ua * conditioned_design_temp
         elsif ua_type == "total"
         # skip
         else
@@ -3147,16 +3132,16 @@ class HVACSizing
       # when the roof is insulated
       min_temp_rise = 5
 
-      max_cooling_temp = @finished_cool_design_temp + max_temp_rise
-      min_cooling_temp = @finished_cool_design_temp + min_temp_rise
+      max_cooling_temp = @conditioned_cool_design_temp + max_temp_rise
+      min_cooling_temp = @conditioned_cool_design_temp + min_temp_rise
 
-      ua_finished = 0
+      ua_conditioned = 0
       ua_outside = 0
       space_UAs.each do |ua_type, ua|
         if ua_type == "outdoors" or ua_type == "infil"
           ua_outside += ua
-        elsif ua_type == "surface" # adjacent to finished
-          ua_finished += ua
+        elsif ua_type == "surface" # adjacent to conditioned
+          ua_conditioned += ua
         elsif ua_type == "total" or ua_type == "foundation"
         # skip
         else
@@ -3164,8 +3149,8 @@ class HVACSizing
           return nil
         end
       end
-      percent_ua_finished = ua_finished / (ua_finished + ua_outside)
-      design_temp = max_cooling_temp - percent_ua_finished * (max_cooling_temp - min_cooling_temp)
+      percent_ua_conditioned = ua_conditioned / (ua_conditioned + ua_outside)
+      design_temp = max_cooling_temp - percent_ua_conditioned * (max_cooling_temp - min_cooling_temp)
 
     end
 
@@ -3722,7 +3707,7 @@ class HVACSizing
     return val.get
   end
 
-  def self.set_object_values(runner, model, hvac, hvac_final_values)
+  def self.set_object_values(runner, model, hvac, hvac_final_values, zone_ratios)
     # Updates object properties in the model
 
     # Prevent E+ error if, say, an ASHP with CoolingLoadFraction == 0
@@ -3797,7 +3782,7 @@ class HVACSizing
 
             # Air Terminal
             aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
-            aterm.setMaximumAirFlowRate(UnitConversions.convert(fan_airflow, "cfm", "m^3/s") * hvac_final_values.Zone_Ratios[thermal_zone])
+            aterm.setMaximumAirFlowRate(UnitConversions.convert(fan_airflow, "cfm", "m^3/s") * zone_ratios[thermal_zone])
           end
         end
 
@@ -3844,23 +3829,23 @@ class HVACSizing
         # Unitary System
         object.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
         if object.coolingCoil.is_initialized
-          object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * hvac_final_values.Zone_Ratios[thermal_zone], "cfm", "m^3/s"))
+          object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
         else
           object.setSupplyAirFlowRateDuringCoolingOperation(0.0)
         end
         object.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
         if object.heatingCoil.is_initialized
-          object.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(hvac_final_values.Heat_Airflow * hvac_final_values.Zone_Ratios[thermal_zone], "cfm", "m^3/s"))
+          object.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(hvac_final_values.Heat_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
         else
           object.setSupplyAirFlowRateDuringHeatingOperation(0.0)
         end
 
         # Fan
         fanonoff = object.supplyFan.get.to_FanOnOff.get
-        fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, "cfm", "m^3/s") * hvac_final_values.Zone_Ratios[thermal_zone])
+        fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, "cfm", "m^3/s") * zone_ratios[thermal_zone])
 
         # Coils
-        setCoilsObjectValues(runner, hvac, object, hvac_final_values, hvac_final_values.Zone_Ratios[thermal_zone])
+        setCoilsObjectValues(runner, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
 
@@ -3898,7 +3883,7 @@ class HVACSizing
         thermal_zone = object.thermalZone.get
 
         # Baseboard
-        object.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity * hvac_final_values.Zone_Ratios[thermal_zone], "Btu/hr", "W"))
+        object.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity * zone_ratios[thermal_zone], "Btu/hr", "W"))
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
 
@@ -3907,7 +3892,7 @@ class HVACSizing
         thermal_zone = object.thermalZone.get
 
         # PTAC
-        object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * hvac_final_values.Zone_Ratios[thermal_zone], "cfm", "m^3/s"))
+        object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
         object.setSupplyAirFlowRateDuringHeatingOperation(0.00001)
         object.setSupplyAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
         object.setOutdoorAirFlowRateDuringCoolingOperation(0.0)
@@ -3916,10 +3901,10 @@ class HVACSizing
 
         # Fan
         fanonoff = object.supplyAirFan.to_FanOnOff.get
-        fanonoff.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow * hvac_final_values.Zone_Ratios[thermal_zone], "cfm", "m^3/s"))
+        fanonoff.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
 
         # Coils
-        setCoilsObjectValues(runner, hvac, object, hvac_final_values, hvac_final_values.Zone_Ratios[thermal_zone])
+        setCoilsObjectValues(runner, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
 
         # Heating Coil override
         ptac_htg_coil = object.heatingCoil.to_CoilHeatingElectric.get
@@ -3935,7 +3920,7 @@ class HVACSizing
   end
 
   def self.setCoilsObjectValues(runner, hvac, equip, hvac_final_values, zone_ratio)
-    # zone_ratio is 1.0 unless there are multiple coils for the system (e.g., living coil and finished basement coil)
+    # zone_ratio is 1.0 unless there are multiple coils for the system (e.g., living coil and conditioned basement coil)
 
     clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(equip)
 

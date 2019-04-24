@@ -2327,12 +2327,12 @@ class HVAC
     # Make the setpoint schedules
     clg_wkdy_monthly = nil
     clg_wked_monthly = nil
-    conditioned_zones.each do |finished_zone|
-      thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
+    conditioned_zones.each do |conditioned_zone|
+      thermostat_setpoint = conditioned_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
         thermostat_setpoint = thermostat_setpoint.get
-        runner.registerInfo("Found existing thermostat #{thermostat_setpoint.name} for #{finished_zone.name}.")
+        runner.registerInfo("Found existing thermostat #{thermostat_setpoint.name} for #{conditioned_zone.name}.")
 
         clg_wkdy_monthly = get_setpoint_schedule(thermostat_setpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
         clg_wked_monthly = get_setpoint_schedule(thermostat_setpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
@@ -2356,7 +2356,7 @@ class HVAC
         clg_wked_monthly = [[UnitConversions.convert(Constants.DefaultCoolingSetpoint, "F", "C")] * 24] * 12
 
       end
-      break # assume all finished zones have the same schedules
+      break # assume all conditioned zones have the same schedules
     end
 
     (0..11).to_a.each do |i|
@@ -2395,8 +2395,8 @@ class HVAC
     end
 
     # Set the setpoint schedules
-    conditioned_zones.each do |finished_zone|
-      thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
+    conditioned_zones.each do |conditioned_zone|
+      thermostat_setpoint = conditioned_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
         thermostat_setpoint = thermostat_setpoint.get
@@ -2406,11 +2406,11 @@ class HVAC
       else
 
         thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
-        thermostat_setpoint.setName("#{finished_zone.name} temperature setpoint")
-        runner.registerInfo("Created new thermostat #{thermostat_setpoint.name} for #{finished_zone.name}.")
+        thermostat_setpoint.setName("#{conditioned_zone.name} temperature setpoint")
+        runner.registerInfo("Created new thermostat #{thermostat_setpoint.name} for #{conditioned_zone.name}.")
         thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
         thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
-        finished_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
+        conditioned_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
         runner.registerInfo("Set a dummy cooling setpoint schedule for #{thermostat_setpoint.name}.")
 
       end
@@ -2458,12 +2458,12 @@ class HVAC
     # Make the setpoint schedules
     htg_wkdy_monthly = nil
     htg_wked_monthly = nil
-    conditioned_zones.each do |finished_zone|
-      thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
+    conditioned_zones.each do |conditioned_zone|
+      thermostat_setpoint = conditioned_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
         thermostat_setpoint = thermostat_setpoint.get
-        runner.registerInfo("Found existing thermostat #{thermostat_setpoint.name} for #{finished_zone.name}.")
+        runner.registerInfo("Found existing thermostat #{thermostat_setpoint.name} for #{conditioned_zone.name}.")
 
         htg_wkdy_monthly = get_setpoint_schedule(thermostat_setpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
         htg_wked_monthly = get_setpoint_schedule(thermostat_setpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
@@ -2487,7 +2487,7 @@ class HVAC
         htg_wked_monthly = [[UnitConversions.convert(Constants.DefaultHeatingSetpoint, "F", "C")] * 24] * 12
 
       end
-      break # assume all finished zones have the same schedules
+      break # assume all conditioned zones have the same schedules
     end
 
     (0..11).to_a.each do |i|
@@ -2526,8 +2526,8 @@ class HVAC
     end
 
     # Set the setpoint schedules
-    conditioned_zones.each do |finished_zone|
-      thermostat_setpoint = finished_zone.thermostatSetpointDualSetpoint
+    conditioned_zones.each do |conditioned_zone|
+      thermostat_setpoint = conditioned_zone.thermostatSetpointDualSetpoint
       if thermostat_setpoint.is_initialized
 
         thermostat_setpoint = thermostat_setpoint.get
@@ -2537,11 +2537,11 @@ class HVAC
       else
 
         thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
-        thermostat_setpoint.setName("#{finished_zone.name} temperature setpoint")
-        runner.registerInfo("Created new thermostat #{thermostat_setpoint.name} for #{finished_zone.name}.")
+        thermostat_setpoint.setName("#{conditioned_zone.name} temperature setpoint")
+        runner.registerInfo("Created new thermostat #{thermostat_setpoint.name} for #{conditioned_zone.name}.")
         thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
         thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
-        finished_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
+        conditioned_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
         runner.registerInfo("Set a dummy heating setpoint schedule for #{thermostat_setpoint.name}.")
 
       end
@@ -3273,15 +3273,15 @@ class HVAC
 
   def self.get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash = {}
-    finished_above_grade_zones, finished_below_grade_zones = Geometry.get_finished_above_and_below_grade_zones(thermal_zones)
+    conditioned_above_grade_zones, conditioned_below_grade_zones = Geometry.get_conditioned_above_and_below_grade_zones(thermal_zones)
     control_zone = nil
     slave_zones = []
-    [finished_above_grade_zones, finished_below_grade_zones].each do |conditioned_zones| # Preference to above-grade zone as control zone
-      conditioned_zones.each do |finished_zone|
+    [conditioned_above_grade_zones, conditioned_below_grade_zones].each do |conditioned_zones| # Preference to above-grade zone as control zone
+      conditioned_zones.each do |conditioned_zone|
         if control_zone.nil?
-          control_zone = finished_zone
+          control_zone = conditioned_zone
         else
-          slave_zones << finished_zone
+          slave_zones << conditioned_zone
         end
       end
     end

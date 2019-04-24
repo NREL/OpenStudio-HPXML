@@ -284,7 +284,7 @@ class OSModel
     @total_frac_remaining_cool_load_served = 1.0
 
     control_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
-    slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
+    slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
     @control_slave_zones_hash = { control_zone => slave_zones }
 
     # FIXME: Temporarily adding ideal air systems first to work around E+ bug
@@ -390,7 +390,7 @@ class OSModel
     success = add_attics(runner, model, building, spaces, subsurface_areas)
     return false if not success
 
-    success = add_finished_floor_area(runner, model, building, spaces)
+    success = add_conditioned_floor_area(runner, model, building, spaces)
     return false if not success
 
     success = add_thermal_mass(runner, model, building)
@@ -418,7 +418,7 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_finished_basement(thermal_zone) or Geometry.is_unfinished_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
+      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
         zones_updated += 1
 
         zone_floor_area = 0.0
@@ -437,7 +437,7 @@ class OSModel
 
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
 
-        if Geometry.is_finished_basement(thermal_zone)
+        if Geometry.is_conditioned_basement(thermal_zone)
           living_volume = @cvolume - zone_volume
         end
 
@@ -459,7 +459,7 @@ class OSModel
 
     # Attic
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_unfinished_attic(thermal_zone)
+      if Geometry.is_unconditioned_attic(thermal_zone)
         zones_updated += 1
 
         zone_surfaces = []
@@ -1068,16 +1068,16 @@ class OSModel
     return true
   end
 
-  def self.add_finished_floor_area(runner, model, building, spaces)
+  def self.add_conditioned_floor_area(runner, model, building, spaces)
     # TODO: Use HPXML values not Model values
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     cfa = building_construction_values[:conditioned_floor_area].round(1)
 
-    # First check if we need to add a finished basement ceiling
+    # First check if we need to add a conditioned basement ceiling
     foundation_top = get_foundation_top(model)
 
     model.getThermalZones.each do |zone|
-      next if not Geometry.is_finished_basement(zone)
+      next if not Geometry.is_conditioned_basement(zone)
 
       floor_area = 0.0
       ceiling_area = 0.0
@@ -1093,17 +1093,17 @@ class OSModel
 
       addtl_cfa = floor_area - ceiling_area
       if addtl_cfa > 0
-        runner.registerWarning("Adding finished basement adiabatic ceiling with #{addtl_cfa.to_s} ft^2.")
+        runner.registerWarning("Adding conditioned basement adiabatic ceiling with #{addtl_cfa.to_s} ft^2.")
 
-        finishedfloor_width = Math::sqrt(addtl_cfa)
-        finishedfloor_length = addtl_cfa / finishedfloor_width
+        conditioned_floor_width = Math::sqrt(addtl_cfa)
+        conditioned_floor_length = addtl_cfa / conditioned_floor_width
         z_origin = foundation_top
 
-        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
+        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
         surface.setSunExposure("NoSun")
         surface.setWindExposure("NoWind")
-        surface.setName("inferred finished basement ceiling")
+        surface.setName("inferred conditioned basement ceiling")
         surface.setSurfaceType("RoofCeiling")
         surface.setSpace(zone.spaces[0])
         surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
@@ -1114,12 +1114,12 @@ class OSModel
       end
     end
 
-    # Next check if we need to add floors between finished spaces (e.g., 2-story buildings).
+    # Next check if we need to add floors between conditioned spaces (e.g., 2-story buildings).
 
     # Calculate cfa already added to model
     model_cfa = 0.0
     model.getSpaces.each do |space|
-      next unless Geometry.space_is_finished(space)
+      next unless Geometry.space_is_conditioned(space)
 
       space.surfaces.each do |surface|
         next unless surface.surfaceType.downcase.to_s == "floor"
@@ -1138,15 +1138,15 @@ class OSModel
 
     runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_cfa.to_s} ft^2 to preserve building total conditioned floor area.")
 
-    finishedfloor_width = Math::sqrt(addtl_cfa)
-    finishedfloor_length = addtl_cfa / finishedfloor_width
+    conditioned_floor_width = Math::sqrt(addtl_cfa)
+    conditioned_floor_length = addtl_cfa / conditioned_floor_width
     z_origin = foundation_top + 8.0 * (@ncfl_ag - 1)
 
-    surface = OpenStudio::Model::Surface.new(add_floor_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
+    surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
     surface.setSunExposure("NoSun")
     surface.setWindExposure("NoWind")
-    surface.setName("inferred finished floor")
+    surface.setName("inferred conditioned floor")
     surface.setSurfaceType("Floor")
     surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     surface.setOutsideBoundaryCondition("Adiabatic")
@@ -1365,13 +1365,13 @@ class OSModel
         ceiling_drywall_thick_in = constr_set.drywall_thick_in
         ceiling_install_grade = 1
 
-        success = FloorConstructions.apply_unfinished_attic(runner, model, [surface],
-                                                            "FloorConstruction",
-                                                            ceiling_r, ceiling_install_grade,
-                                                            ceiling_ins_thick_in,
-                                                            ceiling_framing_factor,
-                                                            ceiling_joist_height_in,
-                                                            ceiling_drywall_thick_in)
+        success = FloorConstructions.apply_unconditioned_attic(runner, model, [surface],
+                                                               "FloorConstruction",
+                                                               ceiling_r, ceiling_install_grade,
+                                                               ceiling_ins_thick_in,
+                                                               ceiling_framing_factor,
+                                                               ceiling_joist_height_in,
+                                                               ceiling_drywall_thick_in)
         return false if not success
 
         check_surface_assembly_rvalue(surface, film_r, assembly_r)
@@ -1433,24 +1433,24 @@ class OSModel
         roof_install_grade = 1
 
         if drywall_thick_in > 0
-          success = RoofConstructions.apply_finished_roof(runner, model, [surface],
-                                                          "RoofConstruction",
-                                                          roof_cavity_r, roof_install_grade,
-                                                          constr_set.stud.thick_in,
-                                                          true, constr_set.framing_factor,
-                                                          constr_set.drywall_thick_in,
-                                                          constr_set.osb_thick_in, constr_set.rigid_r,
-                                                          constr_set.exterior_material)
-        else
-          has_radiant_barrier = false # TODO
-          success = RoofConstructions.apply_unfinished_attic(runner, model, [surface],
+          success = RoofConstructions.apply_conditioned_roof(runner, model, [surface],
                                                              "RoofConstruction",
                                                              roof_cavity_r, roof_install_grade,
                                                              constr_set.stud.thick_in,
-                                                             constr_set.framing_factor,
-                                                             constr_set.stud.thick_in,
+                                                             true, constr_set.framing_factor,
+                                                             constr_set.drywall_thick_in,
                                                              constr_set.osb_thick_in, constr_set.rigid_r,
-                                                             constr_set.exterior_material, has_radiant_barrier)
+                                                             constr_set.exterior_material)
+        else
+          has_radiant_barrier = false # TODO
+          success = RoofConstructions.apply_unconditioned_attic(runner, model, [surface],
+                                                                "RoofConstruction",
+                                                                roof_cavity_r, roof_install_grade,
+                                                                constr_set.stud.thick_in,
+                                                                constr_set.framing_factor,
+                                                                constr_set.stud.thick_in,
+                                                                constr_set.osb_thick_in, constr_set.rigid_r,
+                                                                constr_set.exterior_material, has_radiant_barrier)
           return false if not success
         end
 
@@ -2434,7 +2434,7 @@ class OSModel
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
 
-    conditioned_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
+    conditioned_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
 
     control_type = hvac_control_values[:control_type]
     heating_temp = hvac_control_values[:setpoint_temp_heating_season]
@@ -2520,7 +2520,7 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
                                       @cfa, conditioned_spaces)
     return false if not success
@@ -2670,7 +2670,7 @@ class OSModel
       tv_annual_kwh = 0
     end
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
                                         misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh,
                                         @cfa, conditioned_spaces)
@@ -2704,7 +2704,7 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_garage])
 
     gfa = 0 # garage floor area FIXME
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     garage_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeGarage])
     success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, gfa,
                                   conditioned_spaces, garage_spaces)
@@ -2776,8 +2776,8 @@ class OSModel
     living_ach50 = infil_ach50
     living_constant_ach = infil_const_ach
     garage_ach50 = infil_ach50
-    finished_basement_ach = 0 # TODO: Need to handle above-grade basement
-    unfinished_basement_ach = 0.1 # TODO: Need to handle above-grade basement
+    conditioned_basement_ach = 0 # TODO: Need to handle above-grade basement
+    unconditioned_basement_ach = 0.1 # TODO: Need to handle above-grade basement
     crawl_ach = crawl_sla # FIXME: sla vs ach
     pier_beam_ach = 100
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
@@ -2788,8 +2788,8 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unfinished_basement_ach,
-                             finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unconditioned_basement_ach,
+                             conditioned_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
@@ -2920,73 +2920,57 @@ class OSModel
     # Ducts
     duct_systems = {}
     location_map = { 'living space' => Constants.SpaceTypeLiving,
-                     'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
-                     'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
+                     'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                     'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                      'crawlspace - vented' => Constants.SpaceTypeCrawl,
                      'crawlspace - unvented' => Constants.SpaceTypeCrawl,
-                     'attic - vented' => Constants.SpaceTypeUnfinishedAttic,
-                     'attic - unvented' => Constants.SpaceTypeUnfinishedAttic,
+                     'attic - vented' => Constants.SpaceTypeUnconditionedAttic,
+                     'attic - unvented' => Constants.SpaceTypeUnconditionedAttic,
                      'attic - conditioned' => Constants.SpaceTypeLiving,
                      'garage' => Constants.SpaceTypeGarage }
+    side_map = { 'supply' => Constants.DuctSideSupply,
+                 'return' => Constants.DuctSideReturn }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      ducts = []
+      air_ducts = []
 
-      # Supply Ducts
-      supply_duct_total_leakage_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      supply_duct_total_area = Float(air_distribution.elements["sum(Ducts[DuctType='supply']/DuctSurfaceArea)"])
-      air_distribution.elements.each("Ducts[DuctType='supply']") do |supply_duct|
-        supply_duct_r = Float(XMLHelper.get_value(supply_duct, "DuctInsulationRValue"))
-        supply_duct_area = Float(XMLHelper.get_value(supply_duct, "DuctSurfaceArea"))
-        supply_duct_location = location_map[XMLHelper.get_value(supply_duct, "DuctLocation")]
-        supply_duct_leakage_cfm25 = supply_duct_total_leakage_cfm25 * supply_duct_area / supply_duct_total_area
+      # Duct leakage
+      leakage_to_outside_cfm25 = { Constants.DuctSideSupply => 0.0,
+                                   Constants.DuctSideReturn => 0.0 }
+      air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
+        duct_leakage_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
+        next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
 
-        ducts << Duct.new(Constants.DuctSideSupply, supply_duct_location, nil, supply_duct_leakage_cfm25, supply_duct_area, supply_duct_r)
+        duct_side = side_map[duct_leakage_values[:duct_type]]
+        leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
       end
 
-      # Return Ducts
-      return_duct_total_leakage_cfm25 = Float(XMLHelper.get_value(air_distribution, "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value"))
-      return_duct_total_area = Float(air_distribution.elements["sum(Ducts[DuctType='return']/DuctSurfaceArea)"])
-      air_distribution.elements.each("Ducts[DuctType='return']") do |return_duct|
-        return_duct_r = Float(XMLHelper.get_value(return_duct, "DuctInsulationRValue"))
-        return_duct_area = Float(XMLHelper.get_value(return_duct, "DuctSurfaceArea"))
-        return_duct_location = location_map[XMLHelper.get_value(return_duct, "DuctLocation")]
-        return_duct_leakage_cfm25 = return_duct_total_leakage_cfm25 * return_duct_area / return_duct_total_area
-
-        ducts << Duct.new(Constants.DuctSideReturn, return_duct_location, nil, return_duct_leakage_cfm25, return_duct_area, return_duct_r)
+      # Duct location, Rvalue, Area
+      total_duct_area = { Constants.DuctSideSupply => 0.0,
+                          Constants.DuctSideReturn => 0.0 }
+      air_distribution.elements.each("Ducts") do |ducts|
+        ducts_values = HPXML.get_ducts_values(ducts: ducts)
+        duct_side = side_map[ducts_values[:duct_type]]
+        duct_area = ducts_values[:duct_surface_area]
+        total_duct_area[duct_side] += duct_area
       end
 
-      # FIXME FIXME FIXME
-      # TEMPORARY FOR COMPARISON TO MASTER BRANCH
-      def self.get_duct_supply_surface_area(mult, ffa, num_stories)
-        # Duct Surface Areas per 2010 BA Benchmark
-        if num_stories == 1
-          return 0.27 * ffa * mult # ft^2
-        else
-          return 0.2 * ffa * mult
-        end
-      end
+      air_distribution.elements.each("Ducts") do |ducts|
+        ducts_values = HPXML.get_ducts_values(ducts: ducts)
+        duct_location = location_map[ducts_values[:duct_location]]
+        next if Geometry.is_conditioned_space_type(duct_location)
 
-      def self.get_return_surface_area(mult, ffa, num_stories, num_returns)
-        # Duct Surface Areas per 2010 BA Benchmark
-        if num_stories == 1
-          return [0.05 * num_returns * ffa, 0.25 * ffa].min * mult
-        else
-          return [0.04 * num_returns * ffa, 0.19 * ffa].min * mult
-        end
+        duct_side = side_map[ducts_values[:duct_type]]
+        duct_area = ducts_values[:duct_surface_area]
+        duct_r = ducts_values[:duct_insulation_r_value]
+        duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
+                            duct_area / total_duct_area[duct_side]) # Apportion leakage to individual ducts by surface area
+
+        air_ducts << Duct.new(duct_side, duct_location, nil, duct_leakage_cfm, duct_area, duct_r)
       end
-      supply_area_mult = supply_duct_total_area / 100.0
-      supply_area = get_duct_supply_surface_area(supply_area_mult, @cfa, Float(@ncfl))
-      supply_duct_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='supply']/DuctLocation")]
-      return_area_mult = return_duct_total_area / 100.0
-      return_area = get_return_surface_area(return_area_mult, @cfa, Float(@ncfl), 1.0)
-      return_duct_location = location_map[XMLHelper.get_value(air_distribution, "Ducts[DuctType='return']/DuctLocation")]
-      ducts = [Duct.new(Constants.DuctSideSupply, supply_duct_location, 0.2, nil, supply_area, 4.0),
-               Duct.new(Constants.DuctSideReturn, return_duct_location, 0.1, nil, return_area, 4.0)]
-      # FIXME FIXME FIXME
 
       # Connect AirLoopHVACs to ducts
       systems_for_this_duct = []
@@ -3004,7 +2988,7 @@ class OSModel
         end
       end
 
-      duct_systems[ducts] = systems_for_this_duct
+      duct_systems[air_ducts] = systems_for_this_duct
     end
 
     # TODO: Throw error if, e.g., multiple heating systems connected to same distribution system?
@@ -3707,13 +3691,13 @@ class OSModel
     elsif ["garage"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
     elsif ["basement - unconditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement))
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement))
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
     elsif ["crawlspace - vented", "crawlspace - unvented"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
     elsif ["attic - unvented", "attic - vented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic))
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
     elsif ["attic - conditioned", "flat roof", "cathedral ceiling"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     else
@@ -3731,13 +3715,13 @@ class OSModel
     elsif ["garage"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
     elsif ["basement - unconditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
     elsif ["crawlspace - vented", "crawlspace - unvented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
     elsif ["attic - unvented", "attic - vented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
     elsif ["attic - conditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     else
@@ -3813,13 +3797,13 @@ class OSModel
     if location == 'living space'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - conditioned'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement)
     elsif location == 'basement - unconditioned'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement)
     elsif location == 'garage'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
     elsif location == 'attic - unvented' or location == 'attic - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic)
     elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
     end
