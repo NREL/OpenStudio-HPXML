@@ -421,10 +421,6 @@ class Constants
     return "dishwasher"
   end
 
-  def self.ObjectNameDucts(airloop_name)
-    return "#{airloop_name} ducts"
-  end
-
   def self.ObjectNameEaves(facade = "")
     if facade != ""
       facade = " #{facade}"
