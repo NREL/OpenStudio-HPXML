@@ -489,7 +489,7 @@ class EnergyPlusValidator
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented']" => one,
         "FractionDHWLoadServed" => one,
         "[EnergyFactor | UniformEnergyFactor]" => one,
-        "extension/EnergyFactorMultiplier" => zero_or_one, # Uses ERI assumption if not provided
+        "extension/TanklessCyclingDerate" => zero_or_one, # Uses ERI assumption if not provided
       },
 
       ## [WHType=Tank]
