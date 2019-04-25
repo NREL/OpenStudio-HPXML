@@ -2953,21 +2953,23 @@ class OSModel
                           Constants.DuctSideReturn => 0.0 }
       air_distribution.elements.each("Ducts") do |ducts|
         ducts_values = HPXML.get_ducts_values(ducts: ducts)
+        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
+
+        # Calculate total duct area in unconditioned spaces
         duct_side = side_map[ducts_values[:duct_type]]
-        duct_area = ducts_values[:duct_surface_area]
-        total_duct_area[duct_side] += duct_area
+        total_duct_area[duct_side] += ducts_values[:duct_surface_area]
       end
 
       air_distribution.elements.each("Ducts") do |ducts|
         ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        duct_location = location_map[ducts_values[:duct_location]]
-        next if Geometry.is_conditioned_space_type(duct_location)
+        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
 
         duct_side = side_map[ducts_values[:duct_type]]
         duct_area = ducts_values[:duct_surface_area]
         duct_r = ducts_values[:duct_insulation_r_value]
+        # Apportion leakage to individual ducts by surface area
         duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
-                            duct_area / total_duct_area[duct_side]) # Apportion leakage to individual ducts by surface area
+                            duct_area / total_duct_area[duct_side])
 
         air_ducts << Duct.new(duct_side, duct_location, nil, duct_leakage_cfm, duct_area, duct_r)
       end
