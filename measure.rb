@@ -317,7 +317,7 @@ class OSModel
 
     # Other
 
-    success = add_airflow(runner, model, building, loop_hvacs)
+    success = add_airflow(runner, model, building, loop_hvacs, spaces)
     return false if not success
 
     success = add_hvac_sizing(runner, model, weather)
@@ -2020,7 +2020,7 @@ class OSModel
       sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac
 
-      dse_heat, dse_cool, has_dse = get_dse(building, clgsys)
+      dse_heat, dse_cool, has_dse = get_dse(building, cooling_system_values)
 
       orig_air_loops = model.getAirLoopHVACs
       orig_plant_loops = model.getPlantLoops
@@ -2089,7 +2089,6 @@ class OSModel
         eer = cooling_system_values[:cooling_efficiency_eer]
         shr = 0.65
         airflow_rate = 350.0
-
         success = HVAC.apply_room_ac(model, runner, eer, shr,
                                      airflow_rate, cool_capacity_btuh, load_frac,
                                      sequential_load_frac, @control_slave_zones_hash)
@@ -2121,7 +2120,7 @@ class OSModel
       sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_heat_load_served -= load_frac
 
-      dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
+      dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
 
       orig_air_loops = model.getAirLoopHVACs
       orig_plant_loops = model.getPlantLoops
@@ -2144,7 +2143,6 @@ class OSModel
         afue = heating_system_values[:heating_efficiency_afue]
         fan_power = 0.0
         airflow_rate = 0.0
-        # TODO: Allow DSE
         success = HVAC.apply_unit_heater(model, runner, fuel,
                                          afue, heat_capacity_btuh, fan_power,
                                          airflow_rate, load_frac,
@@ -2170,7 +2168,6 @@ class OSModel
       elsif htg_type == "ElectricResistance"
 
         efficiency = heating_system_values[:heating_efficiency_percent]
-        # TODO: Allow DSE
         success = HVAC.apply_electric_baseboard(model, runner, efficiency,
                                                 heat_capacity_btuh, load_frac,
                                                 sequential_load_frac, @control_slave_zones_hash)
@@ -2181,7 +2178,6 @@ class OSModel
         efficiency = heating_system_values[:heating_efficiency_percent]
         airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
         fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
-        # TODO: Allow DSE
         success = HVAC.apply_unit_heater(model, runner, fuel,
                                          efficiency, heat_capacity_btuh, fan_power,
                                          airflow_rate, load_frac,
@@ -2222,7 +2218,7 @@ class OSModel
         backup_heat_capacity_btuh = Constants.SizingAuto
       end
 
-      dse_heat, dse_cool, has_dse = get_dse(building, hp)
+      dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
         # TODO: Can we remove this since we use separate airloops for
         # heating and cooling?
@@ -2528,26 +2524,34 @@ class OSModel
     return true
   end
 
-  def self.get_dse(building, system)
-    if system.elements["DistributionSystem"].nil? # No distribution system
+  def self.get_dse(building, system_values)
+    dist_id = system_values[:distribution_system_idref]
+    if dist_id.nil? # No distribution system
       return 1.0, 1.0, false
     end
 
     # Get attached distribution system
-    ducts = nil
+    attached_dist = nil
+    found_attached_dist = nil
     annual_cooling_dse = nil
     annual_heating_dse = nil
-    duct_id = system.elements["DistributionSystem"].attributes["idref"]
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
-      next if duct_id != hvac_distribution_values[:id]
-      next if dist.elements["DistributionSystemType[Other='DSE']"].nil?
+      next if dist_id != hvac_distribution_values[:id]
 
-      ducts = dist
+      found_attached_dist = true
+      next if hvac_distribution_values[:distribution_system_type] != 'DSE'
+
+      attached_dist = dist
       annual_cooling_dse = hvac_distribution_values[:annual_cooling_dse]
       annual_heating_dse = hvac_distribution_values[:annual_heating_dse]
     end
-    if ducts.nil? # No attached DSEs for system
+
+    if not found_attached_dist
+      fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_values[:id]}'."
+    end
+
+    if attached_dist.nil? # No attached DSEs for system
       return 1.0, 1.0, false
     end
 
@@ -2713,7 +2717,7 @@ class OSModel
     return true
   end
 
-  def self.add_airflow(runner, model, building, loop_hvacs)
+  def self.add_airflow(runner, model, building, loop_hvacs, spaces)
     # Infiltration
     infil_ach50 = nil
     infil_const_ach = nil
@@ -2854,6 +2858,11 @@ class OSModel
         fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
       end
 
+      cfis_hvac_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: cfis_hvac_dist)
+      if cfis_hvac_dist_values[:distribution_system_type] == 'HydronicDistribution'
+        fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' cannot be hydronic for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
+      end
+
       # Get HVAC systems attached to this distribution system
       cfis_sys_ids = []
       hvac_plant = building.elements["BuildingDetails/Systems/HVAC/HVACPlant"]
@@ -2966,11 +2975,12 @@ class OSModel
 
         duct_side = side_map[ducts_values[:duct_type]]
         duct_area = ducts_values[:duct_surface_area]
+        duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
         # Apportion leakage to individual ducts by surface area
         duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
                             duct_area / total_duct_area[duct_side])
 
-        air_ducts << Duct.new(duct_side, ducts_values[:duct_location], nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+        air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
       end
 
       # Connect AirLoopHVACs to ducts
@@ -2991,8 +3001,6 @@ class OSModel
 
       duct_systems[air_ducts] = systems_for_this_duct
     end
-
-    # TODO: Throw error if, e.g., multiple heating systems connected to same distribution system?
 
     window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
@@ -3030,7 +3038,7 @@ class OSModel
 
       load_frac = heating_system_values[:fraction_heat_load_served]
 
-      dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
+      dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
 
       sys_id = heating_system_values[:id]
 

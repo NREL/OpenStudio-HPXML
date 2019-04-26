@@ -781,7 +781,7 @@ class Airflow
 
     ducts.each do |duct|
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
-      duct.location_zone = get_duct_zone(duct.location, building, model)
+      duct.zone = duct.space.thermalZone.get
     end
 
     if ducts.size > 0
@@ -791,7 +791,7 @@ class Airflow
 
         air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
         air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(","))
-        air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationZones, ducts.map { |duct| duct.location_zone.handle.to_s }.join(","))
+        air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationZones, ducts.map { |duct| duct.zone.handle.to_s }.join(","))
         air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(","))
         air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(","))
         air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(","))
@@ -1078,7 +1078,7 @@ class Airflow
   def self.create_ducts_objects(model, runner, building, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loops, duct_programs, duct_lks, air_loop_objects)
     return true if ducts.size == 0 # No ducts
 
-    duct_zones = ducts.map { |duct| duct.location_zone }.uniq!
+    duct_zones = ducts.map { |duct| duct.zone }.uniq!
     living_space = building.living.zone.spaces[0]
 
     # All duct zones are in living space?
@@ -1279,7 +1279,7 @@ class Airflow
         leakage_cfm25s = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
         ua_values = { Constants.DuctSideSupply => 0, Constants.DuctSideReturn => 0 }
         ducts.each do |duct|
-          next unless duct.location_zone.name.to_s == duct_zone_name
+          next unless duct.zone.name.to_s == duct_zone_name
 
           if not duct.leakage_frac.nil?
             leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
@@ -1889,25 +1889,6 @@ class Airflow
     end
   end
 
-  def self.get_duct_zone(location, building, model)
-    location_zone = building.living.zone
-
-    location_hierarchy = [Constants.SpaceTypeConditionedBasement,
-                          Constants.SpaceTypeUnconditionedBasement,
-                          Constants.SpaceTypeCrawl,
-                          Constants.SpaceTypePierBeam,
-                          Constants.SpaceTypeUnconditionedAttic,
-                          Constants.SpaceTypeGarage,
-                          Constants.SpaceTypeLiving]
-
-    # Get space
-    space = Geometry.get_space_from_location(model, location, location_hierarchy)
-    return location_zone if space.nil?
-
-    location_zone = space.thermalZone.get
-    return location_zone
-  end
-
   def self.get_infiltration_ACH_from_SLA(sla, numStories, weather)
     # Returns the infiltration annual average ACH given a SLA.
     # Equation from ASHRAE 119-1998 (using numStories for simplification)
@@ -1968,15 +1949,15 @@ class Airflow
 end
 
 class Duct
-  def initialize(side, location, leakage_frac, leakage_cfm25, area, rvalue)
+  def initialize(side, space, leakage_frac, leakage_cfm25, area, rvalue)
     @side = side
-    @location = location
+    @space = space
     @leakage_frac = leakage_frac
     @leakage_cfm25 = leakage_cfm25
     @area = area
     @rvalue = rvalue
   end
-  attr_accessor(:side, :location, :leakage_frac, :leakage_cfm25, :area, :rvalue, :location_zone)
+  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone)
 end
 
 class Infiltration

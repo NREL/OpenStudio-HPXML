@@ -77,9 +77,10 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['skip_validation'] = false
 
     expected_error_msgs = { 'invalid-bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'invalid-cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for mechanical ventilation 'MechanicalVentilation'."],
                             'invalid-clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'invalid-clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'invalid-duct-location.xml' => ["TODO"],
+                            'invalid-duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
                             'invalid-refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'invalid-water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
                             'invalid-missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
@@ -94,8 +95,8 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowSouth'."],
                             'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door'."],
                             'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
-                            'invalid-unattached-hvac.xml' => ["TODO"],
-                            'invalid-unattached-cfis.xml' => ["TODO"] }
+                            'invalid-unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' cannot be found for HVAC system 'HeatingSystem'."],
+                            'invalid-unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for mechanical ventilation 'MechanicalVentilation'."] }
 
     # Test simulations
     Dir["#{this_dir}/invalid_files/invalid*.xml"].sort.each do |xml|
@@ -755,8 +756,6 @@ class HPXMLTranslatorTest < MiniTest::Test
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.001)
       end
-
-      # CFIS flow rate
     end
 
     # Water Heater

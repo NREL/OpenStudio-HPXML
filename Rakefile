@@ -87,6 +87,7 @@ def create_hpxmls
     'valid-hvac-central-ac-only-2-speed.xml' => 'valid.xml',
     'valid-hvac-central-ac-only-var-speed.xml' => 'valid.xml',
     'valid-hvac-dse.xml' => 'valid.xml',
+    'valid-hvac-ducts-in-conditioned-space.xml' => 'valid.xml',
     'valid-hvac-elec-resistance-only.xml' => 'valid.xml',
     'valid-hvac-furnace-elec-only.xml' => 'valid.xml',
     'valid-hvac-furnace-gas-central-ac-2-speed.xml' => 'valid.xml',
@@ -135,20 +136,21 @@ def create_hpxmls
     'valid-pv-multiple.xml' => 'valid.xml',
 
     'invalid_files/invalid-bad-wmo.xml' => 'valid.xml',
+    'invalid_files/invalid-cfis-with-hydronic-distribution.xml' => 'valid-hvac-boiler-gas-only.xml',
     'invalid_files/invalid-clothes-washer-location.xml' => 'valid.xml',
     'invalid_files/invalid-clothes-dryer-location.xml' => 'valid.xml',
-    'invalid_files/invalid-duct-location.xml.skip' => 'valid.xml',
-    'invalid_files/invalid-refrigerator-location.xml' => 'valid.xml',
-    'invalid_files/invalid-water-heater-location.xml' => 'valid.xml',
+    'invalid_files/invalid-duct-location.xml' => 'valid.xml',
     'invalid_files/invalid-missing-elements.xml' => 'valid.xml',
     'invalid_files/invalid-missing-surfaces.xml' => 'valid.xml',
     'invalid_files/invalid-net-area-negative-roof.xml' => 'valid-enclosure-skylights.xml',
     'invalid_files/invalid-net-area-negative-wall.xml' => 'valid.xml',
-    'invalid_files/invalid-unattached-cfis.xml.skip' => 'valid.xml',
+    'invalid_files/invalid-refrigerator-location.xml' => 'valid.xml',
+    'invalid_files/invalid-unattached-cfis.xml' => 'valid.xml',
     'invalid_files/invalid-unattached-door.xml' => 'valid.xml',
-    'invalid_files/invalid-unattached-hvac.xml.skip' => 'valid.xml',
+    'invalid_files/invalid-unattached-hvac-distribution.xml' => 'valid.xml',
     'invalid_files/invalid-unattached-skylight.xml' => 'valid-enclosure-skylights.xml',
     'invalid_files/invalid-unattached-window.xml' => 'valid.xml',
+    'invalid_files/invalid-water-heater-location.xml' => 'valid.xml',
 
     'cfis/valid-cfis.xml' => 'valid.xml',
     'cfis/valid-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'valid-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -159,6 +161,7 @@ def create_hpxmls
     'cfis/valid-hvac-central-ac-only-2-speed-cfis.xml' => 'valid-hvac-central-ac-only-2-speed.xml',
     'cfis/valid-hvac-central-ac-only-var-speed-cfis.xml' => 'valid-hvac-central-ac-only-var-speed.xml',
     'cfis/valid-hvac-dse-cfis.xml' => 'valid-hvac-dse.xml',
+    'cfis/valid-hvac-ducts-in-conditioned-space-cfis.xml' => 'valid-hvac-ducts-in-conditioned-space.xml',
     'cfis/valid-hvac-furnace-elec-only-cfis.xml' => 'valid-hvac-furnace-elec-only.xml',
     'cfis/valid-hvac-furnace-gas-central-ac-2-speed-cfis.xml' => 'valid-hvac-furnace-gas-central-ac-2-speed.xml',
     'cfis/valid-hvac-furnace-gas-central-ac-var-speed-cfis.xml' => 'valid-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -1391,7 +1394,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_system_fuel] = "propane"
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
-  elsif ['invalid_files/invalid-unattached-hvac.xml.skip'].include? hpxml_file
+  elsif ['invalid_files/invalid-unattached-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = "foobar"
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] = -1
@@ -1735,12 +1738,14 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['valid-atticroof-vented.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "attic - vented"
     ducts_values[0][1][:duct_location] = "attic - vented"
-  elsif ['valid-atticroof-conditioned.xml'].include? hpxml_file
-    ducts_values[0][0][:duct_location] = "attic - conditioned"
-    ducts_values[0][1][:duct_location] = "attic - conditioned"
-  elsif ['invalid_files/invalid-duct-location.xml.skip'].include? hpxml_file
+  elsif ['invalid_files/invalid-duct-location.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "garage"
     ducts_values[0][1][:duct_location] = "garage"
+  elsif ['valid-hvac-ducts-in-conditioned-space.xml',
+         'valid-atticroof-cathedral.xml',
+         'valid-atticroof-conditioned.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "living space"
+    ducts_values[0][1][:duct_location] = "living space"
   elsif ['valid-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     ducts_values[0] = []
     ducts_values << [{ :duct_type => "supply",
@@ -1810,7 +1815,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :rated_flow_rate => 247,
                                  :hours_in_operation => 24,
                                  :fan_power => 123.5 }
-  elsif ['invalid_files/invalid-unattached-cfis.xml.skip',
+  elsif ['invalid_files/invalid-unattached-cfis.xml',
+         'invalid_files/invalid-cfis-with-hydronic-distribution.xml',
          'valid-mechvent-cfis.xml',
          'cfis/valid-cfis.xml',
          'cfis/valid-hvac-air-to-air-heat-pump-1-speed-cfis.xml',
@@ -1819,6 +1825,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
          'cfis/valid-hvac-central-ac-only-1-speed-cfis.xml',
          'cfis/valid-hvac-central-ac-only-2-speed-cfis.xml',
          'cfis/valid-hvac-central-ac-only-var-speed-cfis.xml',
+         'cfis/valid-hvac-dse-cfis.xml',
+         'cfis/valid-hvac-ducts-in-conditioned-space-cfis.xml',
          'cfis/valid-hvac-furnace-elec-only-cfis.xml',
          'cfis/valid-hvac-furnace-gas-central-ac-2-speed-cfis.xml',
          'cfis/valid-hvac-furnace-gas-central-ac-var-speed-cfis.xml',
@@ -1832,6 +1840,9 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :hours_in_operation => 8,
                                  :fan_power => 360,
                                  :distribution_system_idref => "HVACDistribution" }
+    if ['invalid_files/invalid-unattached-cfis.xml'].include? hpxml_file
+      ventilation_fans_values[0][:distribution_system_idref] = "foobar"
+    end
   elsif ['valid-mechvent-erv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
