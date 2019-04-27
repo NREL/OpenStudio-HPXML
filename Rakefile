@@ -138,19 +138,26 @@ def create_hpxmls
     'invalid_files/invalid-bad-wmo.xml' => 'valid.xml',
     'invalid_files/invalid-cfis-with-hydronic-distribution.xml' => 'valid-hvac-boiler-gas-only.xml',
     'invalid_files/invalid-clothes-washer-location.xml' => 'valid.xml',
+    'invalid_files/invalid-clothes-washer-location-other.xml' => 'valid.xml',
     'invalid_files/invalid-clothes-dryer-location.xml' => 'valid.xml',
+    'invalid_files/invalid-clothes-dryer-location-other.xml' => 'valid.xml',
+    'invalid_files/invalid-dhw-frac-load-served.xml' => 'valid-dhw-multiple.xml',
     'invalid_files/invalid-duct-location.xml' => 'valid.xml',
+    'invalid_files/invalid-duct-location-other.xml' => 'valid.xml',
+    'invalid_files/invalid-hvac-frac-load-served.xml' => 'valid-hvac-multiple.xml',
     'invalid_files/invalid-missing-elements.xml' => 'valid.xml',
     'invalid_files/invalid-missing-surfaces.xml' => 'valid.xml',
     'invalid_files/invalid-net-area-negative-roof.xml' => 'valid-enclosure-skylights.xml',
     'invalid_files/invalid-net-area-negative-wall.xml' => 'valid.xml',
     'invalid_files/invalid-refrigerator-location.xml' => 'valid.xml',
+    'invalid_files/invalid-refrigerator-location-other.xml' => 'valid.xml',
     'invalid_files/invalid-unattached-cfis.xml' => 'valid.xml',
     'invalid_files/invalid-unattached-door.xml' => 'valid.xml',
     'invalid_files/invalid-unattached-hvac-distribution.xml' => 'valid.xml',
     'invalid_files/invalid-unattached-skylight.xml' => 'valid-enclosure-skylights.xml',
     'invalid_files/invalid-unattached-window.xml' => 'valid.xml',
     'invalid_files/invalid-water-heater-location.xml' => 'valid.xml',
+    'invalid_files/invalid-water-heater-location-other.xml' => 'valid.xml',
 
     'cfis/valid-cfis.xml' => 'valid.xml',
     'cfis/valid-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'valid-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -1375,6 +1382,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
                                 :heating_efficiency_afue => 0.8,
                                 :fraction_heat_load_served => 0.1,
                                 :electric_auxiliary_energy => 200 }
+  elsif ['invalid_files/invalid-hvac-frac-load-served.xml'].include? hpxml_file
+    heating_systems_values[0][:fraction_heat_load_served] += 0.1
   elsif ['valid-hvac-stove-oil-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "Stove"
@@ -1472,6 +1481,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
                                 :cooling_capacity => 48000,
                                 :fraction_cool_load_served => 0.2,
                                 :cooling_efficiency_eer => 8.5 }
+  elsif ['invalid_files/invalid-hvac-frac-load-served.xml'].include? hpxml_file
+    cooling_systems_values[0][:fraction_cool_load_served] += 0.2
   elsif hpxml_file.include? 'hvac_autosizing' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] = -1
   elsif hpxml_file.include? '-zero-cool.xml' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
@@ -1741,6 +1752,9 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['invalid_files/invalid-duct-location.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "garage"
     ducts_values[0][1][:duct_location] = "garage"
+  elsif ['invalid_files/invalid-duct-location-other.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "unconditioned space"
+    ducts_values[0][1][:duct_location] = "unconditioned space"
   elsif ['valid-hvac-ducts-in-conditioned-space.xml',
          'valid-atticroof-cathedral.xml',
          'valid-atticroof-conditioned.xml'].include? hpxml_file
@@ -1921,6 +1935,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :location => "living space",
                                       :fraction_dhw_load_served => 0.2,
                                       :energy_factor => 0.82 }
+  elsif ['invalid_files/invalid-dhw-frac-load-served.xml'].include? hpxml_file
+    water_heating_systems_values[0][:fraction_dhw_load_served] += 0.15
   elsif ['valid-dhw-tank-gas.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
@@ -1984,6 +2000,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "basement - conditioned"
   elsif ['invalid_files/invalid-water-heater-location.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "crawlspace - vented"
+  elsif ['invalid_files/invalid-water-heater-location-other.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "unconditioned space"
   elsif ['valid-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
   elsif hpxml_file.include? 'water_heating_multiple' and not water_heating_systems_values.nil? and water_heating_systems_values.size > 0
@@ -2166,6 +2184,8 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
     clothes_washer_values[:location] = "basement - conditioned"
   elsif ['invalid_files/invalid-clothes-washer-location.xml'].include? hpxml_file
     clothes_washer_values[:location] = "garage"
+  elsif ['invalid_files/invalid-clothes-washer-location-other.xml'].include? hpxml_file
+    clothes_washer_values[:location] = "other"
   end
   return clothes_washer_values
 end
@@ -2197,6 +2217,8 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
     clothes_dryer_values[:location] = "basement - conditioned"
   elsif ['invalid_files/invalid-clothes-dryer-location.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "garage"
+  elsif ['invalid_files/invalid-clothes-dryer-location-other.xml'].include? hpxml_file
+    clothes_dryer_values[:location] = "other"
   end
   return clothes_dryer_values
 end
@@ -2229,6 +2251,8 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
     refrigerator_values[:location] = "basement - conditioned"
   elsif ['invalid_files/invalid-refrigerator-location.xml'].include? hpxml_file
     refrigerator_values[:location] = "garage"
+  elsif ['invalid_files/invalid-refrigerator-location-other.xml'].include? hpxml_file
+    refrigerator_values[:location] = "other"
   end
   return refrigerator_values
 end
