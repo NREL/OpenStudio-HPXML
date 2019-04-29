@@ -1325,7 +1325,7 @@ class HPXML
                                     energy_factor: nil,
                                     uniform_energy_factor: nil,
                                     recovery_efficiency: nil,
-                                    energy_factor_multiplier: nil,
+                                    tankless_cycling_derate: nil,
                                     **remainder)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
@@ -1341,7 +1341,7 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "UniformEnergyFactor", to_float(uniform_energy_factor)) unless uniform_energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", to_float(recovery_efficiency)) unless recovery_efficiency.nil?
     HPXML.add_extension(parent: water_heating_system,
-                        extensions: { "EnergyFactorMultiplier": to_float(energy_factor_multiplier) })
+                        extensions: { "TanklessCyclingDerate": to_float(tankless_cycling_derate) })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -1364,7 +1364,7 @@ class HPXML
              :energy_factor => to_float(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
              :recovery_efficiency => to_float(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
-             :energy_factor_multiplier => to_float(XMLHelper.get_value(water_heating_system, "extension/EnergyFactorMultiplier")) }
+             :tankless_cycling_derate => to_float(XMLHelper.get_value(water_heating_system, "extension/TanklessCyclingDerate")) }
   end
 
   def self.add_hot_water_distribution(hpxml:,
