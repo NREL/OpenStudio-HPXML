@@ -346,7 +346,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC(4), cOOL_EIR_FT_SPEC_AC(4), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(4), cOOL_EIR_FFLOW_SPEC_AC(4), curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC(4), cOOL_EIR_FT_SPEC_AC(4), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, curves_in_ip, dse)
 
       # _processSystemCoolingCoil
 
@@ -1112,7 +1112,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(4), hEAT_EIR_FFLOW_SPEC_ASHP(4), curves_in_ip, dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, curves_in_ip, dse)
 
       # _processSystemHeatingCoil
 
@@ -1230,7 +1230,7 @@ class HVAC
 
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP(4), cOOL_EIR_FT_SPEC_ASHP(4), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(4), cOOL_EIR_FFLOW_SPEC_ASHP(4), curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP(4), cOOL_EIR_FT_SPEC_ASHP(4), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, curves_in_ip, dse)
 
       # _processSystemCoolingCoil
 
