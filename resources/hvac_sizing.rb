@@ -2486,7 +2486,11 @@ class HVACSizing
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)
 
-      value[duct.Side] += values[duct.Side][duct.LocationSpace] * duct.Area / uncond_area[duct.Side]
+      if uncond_area[duct.Side] > 0
+        value[duct.Side] += values[duct.Side][duct.LocationSpace] * duct.Area / uncond_area[duct.Side]
+      else
+        value[duct.Side] += values[duct.Side][duct.LocationSpace]
+      end
     end
 
     return value[Constants.DuctSideSupply], value[Constants.DuctSideReturn]
