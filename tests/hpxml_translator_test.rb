@@ -206,10 +206,10 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Obtain HVAC capacities
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%Capacity' AND Units='W'"
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%User-Specified%Capacity' AND Description NOT LIKE '%Supplemental%' AND Units='W'"
     results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
 
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%Capacity' AND Units='W'"
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
     results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
 
     sqlFile.close
@@ -548,7 +548,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # Check for zero heating energy
         found_htg_energy = false
         results.keys.each do |k|
-          next unless k[1] == 'Heating'
+          next unless k[1] == 'Heating' and k[0] != 'Capacity'
 
           found_htg_energy = true
         end
@@ -560,14 +560,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # FIXME: For now, skip if multiple equipment
         if htg_sys_cap > 0 and num_htg_sys == 1
           hpxml_value = htg_sys_cap
-          if htg_sys_type == 'Boiler'
-            query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='Boiler:HotWater' AND ColumnName='User-Specified Nominal Capacity' AND Units='W'"
-          elsif htg_sys_type == 'ElectricResistance'
-            query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName='ZONEHVAC:BASEBOARD:CONVECTIVE:ELECTRIC' AND ColumnName='User-Specified Heating Design Capacity' AND Units='W'"
-          else
-            query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Heating:%' AND ColumnName='User-Specified Nominal Capacity' AND Units='W'"
-          end
-          sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
+          sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
           assert_in_epsilon(hpxml_value, sql_value, 0.01)
         end
 
@@ -646,7 +639,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # Check for zero cooling energy
         found_clg_energy = false
         results.keys.each do |k|
-          next unless k[1] == 'Cooling'
+          next unless k[1] == 'Cooling' and k[0] != 'Capacity'
 
           found_clg_energy = true
         end
@@ -658,8 +651,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # FIXME: For now, skip if multiple equipment
         if clg_sys_cap > 0 and num_clg_sys == 1
           hpxml_value = clg_sys_cap
-          query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Cooling:%' AND ColumnName LIKE '%User-Specified%Total Cooling Capacity' AND Units='W'"
-          sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
+          sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
           if clg_sys_type == "central air conditioning" and get_ac_num_speeds(clg_sys_seer) == "Variable-Speed"
             cap_adj = 1.16 # TODO: Generalize this
           else
@@ -687,7 +679,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # Check for zero heating energy
         found_htg_energy = false
         results.keys.each do |k|
-          next unless k[1] == 'Heating'
+          next unless k[1] == 'Heating' and k[0] != 'Capacity'
 
           found_htg_energy = true
         end
@@ -701,7 +693,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # Check for zero cooling energy
         found_clg_energy = false
         results.keys.each do |k|
-          next unless k[1] == 'Cooling'
+          next unless k[1] == 'Cooling' and k[0] != 'Capacity'
 
           found_clg_energy = true
         end
@@ -713,8 +705,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # FIXME: For now, skip if multiple equipment
         if hp_cap > 0 and num_hp == 1
           hpxml_value = hp_cap
-          query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Cooling:%' AND ColumnName LIKE '%User-Specified%Total Cooling Capacity' AND Units='W'"
-          sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
+          sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
           if hp_type == "mini-split" or (hp_type == "air-to-air" and get_ashp_num_speeds_by_seer(hp_seer) == "Variable-Speed")
             cap_adj = 1.20 # TODO: Generalize this
           else
