@@ -929,6 +929,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       results_dse80.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
         next if not ["General"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == 'Capacity'
 
         result_dse80 = results_dse80[k].to_f
         result_dse100 = results_dse100[k].to_f
