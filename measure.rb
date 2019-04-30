@@ -2995,7 +2995,7 @@ class OSModel
           sys_id = sys.elements["SystemIdentifier"].attributes["id"]
           heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys
           cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys
-          
+
           next if loop_hvacs[sys_id].nil?
 
           loop_hvacs[sys_id].each do |loop|

@@ -205,6 +205,13 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
+    # Obtain HVAC capacities
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%Capacity' AND Units='W'"
+    results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%Capacity' AND Units='W'"
+    results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+
     sqlFile.close
 
     results[@simulation_runtime_key] = sim_time
