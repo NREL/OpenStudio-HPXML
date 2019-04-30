@@ -2985,21 +2985,29 @@ class OSModel
 
       # Connect AirLoopHVACs to ducts
       systems_for_this_duct = []
-      duct_id = hvac_distribution_values[:id]
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0] |
-                              BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0] |
-                              BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[FractionHeatLoadServed > 0 && FractionCoolLoadServed > 0]") do |sys|
-        next if sys.elements["DistributionSystem"].nil? or duct_id != sys.elements["DistributionSystem"].attributes["idref"]
+      dist_id = hvac_distribution_values[:id]
+      heating_systems_attached = []
+      cooling_systems_attached = []
+      ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
+        building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
+          next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
 
-        sys_id = sys.elements["SystemIdentifier"].attributes["id"]
-        loop_hvacs[sys_id].each do |loop|
-          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+          sys_id = sys.elements["SystemIdentifier"].attributes["id"]
+          heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys
+          cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys
 
-          systems_for_this_duct << loop
+          loop_hvacs[sys_id].each do |loop|
+            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+
+            systems_for_this_duct << loop
+          end
         end
+
+        duct_systems[air_ducts] = systems_for_this_duct
       end
 
-      duct_systems[air_ducts] = systems_for_this_duct
+      fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if cooling_systems_attached.size > 1
+      fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
     end
 
     window_area = 0.0

@@ -144,6 +144,8 @@ def create_hpxmls
     'invalid_files/invalid-dhw-frac-load-served.xml' => 'valid-dhw-multiple.xml',
     'invalid_files/invalid-duct-location.xml' => 'valid.xml',
     'invalid_files/invalid-duct-location-other.xml' => 'valid.xml',
+    'invalid_files/invalid-hvac-distribution-multiple-attached-cooling.xml' => 'valid-hvac-multiple.xml',
+    'invalid_files/invalid-hvac-distribution-multiple-attached-heating.xml' => 'valid-hvac-multiple.xml',
     'invalid_files/invalid-hvac-frac-load-served.xml' => 'valid-hvac-multiple.xml',
     'invalid_files/invalid-missing-elements.xml' => 'valid.xml',
     'invalid_files/invalid-missing-surfaces.xml' => 'valid.xml',
@@ -1585,6 +1587,10 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 0.2,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
+  elsif ['invalid_files/invalid-hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
+    heat_pumps_values[0][:distribution_system_idref] = "HVACDistribution3"
+  elsif ['invalid_files/invalid-hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
+    heat_pumps_values[0][:distribution_system_idref] = "HVACDistribution4"
   elsif hpxml_file.include? 'hvac_autosizing' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] = -1
   elsif hpxml_file.include? '-zero-heat-cool.xml' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
