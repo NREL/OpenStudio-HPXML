@@ -457,7 +457,13 @@ class HotWaterSchedule
     @sch_name = "#{obj_name} schedule"
     @schedule = nil
     @days_shift = days_shift
-    @nbeds = ([nbeds, 5].min).to_i
+    if nbeds < 1
+      @nbeds = 1
+    elsif nbeds > 5
+      @nbeds = 5
+    else
+      @nbeds = nbeds
+    end
     @daily_mw_fractions = daily_mw_fractions
 
     file_prefixes = { Constants.ObjectNameClothesWasher => "ClothesWasher",
@@ -465,7 +471,8 @@ class HotWaterSchedule
                       Constants.ObjectNameDishwasher => "Dishwasher",
                       Constants.ObjectNameShower => "Shower",
                       Constants.ObjectNameSink => "Sink",
-                      Constants.ObjectNameBath => "Bath" }
+                      Constants.ObjectNameBath => "Bath",
+                      Constants.ObjectNameFixtures => "SSB" }
     @file_prefix = file_prefixes[obj_name]
 
     timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i

@@ -120,9 +120,14 @@ class HotWaterAndAppliances
       fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
 
-      fx_names = [Constants.ObjectNameShower,
-                  Constants.ObjectNameSink,
-                  Constants.ObjectNameBath]
+      disaggregate_sinks_showers_baths = true
+      if disaggregate_sinks_showers_baths
+        fx_names = [Constants.ObjectNameShower,
+                    Constants.ObjectNameSink,
+                    Constants.ObjectNameBath]
+      else
+        fx_names = [Constants.ObjectNameFixtures]
+      end
 
       fx_schedules = {}
       fx_names.each do |fx_name|
