@@ -1816,14 +1816,14 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]
   elsif ['valid-hvac-multiple-ducts.xml'].include? hpxml_file
-    ducts_values << [{ :duct_type => "supply",
-                       :duct_insulation_r_value => 8,
-                       :duct_location => "crawlspace - vented",
-                       :duct_surface_area => 300 },
-                     { :duct_type => "return",
-                       :duct_insulation_r_value => 4,
-                       :duct_location => "crawlspace - vented",
-                       :duct_surface_area => 100 }]
+    ducts_values[0] << { :duct_type => "supply",
+                         :duct_insulation_r_value => 8,
+                         :duct_location => "attic - unvented",
+                         :duct_surface_area => 300 }
+    ducts_values[0] << { :duct_type => "return",
+                         :duct_insulation_r_value => 4,
+                         :duct_location => "attic - unvented",
+                         :duct_surface_area => 100 }
   end
   return ducts_values
 end
