@@ -429,6 +429,10 @@ class Constants
   def self.ObjectNameElectricBaseboard
     return "res baseboard"
   end
+  
+  def self.ObjectNameFixtures
+    return "res dhw fixtures"
+  end
 
   def self.ObjectNameFurnace(fueltype = "")
     return "res furnace #{fueltype}"
