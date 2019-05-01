@@ -1105,7 +1105,7 @@ class Airflow
     end
 
     # Create one duct system per airloop
-    air_loop_with_cfis = nil # Used to ensure CFIS is only added to one air loop
+    cfis_added = false # Used to ensure CFIS is only added to one air loop
     air_loops.each do |air_loop|
       next unless building.living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this
 
@@ -1434,9 +1434,9 @@ class Airflow
         duct_program.addLine("Set #{dz_w_var.name} = #{dz_w_sensor.name}")
         duct_program.addLine("Run #{duct_subroutine.name}")
 
-        if mech_vent.cfis_air_loops.include?(air_loop) and air_loop_with_cfis.nil? # Has CFIS (only run once even though there can be separate heating/cooling air loops)
+        if mech_vent.cfis_air_loops.include?(air_loop) and not cfis_added # Has CFIS (only run once even though there can be separate heating/cooling air loops)
 
-          air_loop_with_cfis = air_loop
+          cfis_added = true
 
           # Calculate CFIS duct losses
 
