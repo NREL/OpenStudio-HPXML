@@ -651,8 +651,9 @@ class HEScoreRuleset
 
     HPXML.add_pv_system(hpxml: hpxml,
                         id: "PVSystem",
+                        location: "roof", # FIXME: Verify. HEScore was using "fixed open rack"??
                         module_type: "standard", # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                        array_type: "fixed roof mount", # FIXME: Verify. HEScore was using "fixed open rack"??
+                        tracking: "fixed",
                         array_azimuth: orientation_to_azimuth(pv_system_values[:array_orientation]),
                         array_tilt: @roof_angle,
                         max_power_output: pv_system_values[:max_power_output],
