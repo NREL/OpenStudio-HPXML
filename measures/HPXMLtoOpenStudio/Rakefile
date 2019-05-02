@@ -2081,7 +2081,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   if ['valid-pv-array-1axis.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
-                           :array_type => "1-axis",
+                           :location => "ground",
+                           :tracking => "1-axis",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2090,7 +2091,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   elsif ['valid-pv-array-1axis-backtracked.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
-                           :array_type => "1-axis backtracked",
+                           :location => "ground",
+                           :tracking => "1-axis backtracked",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2099,7 +2101,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   elsif ['valid-pv-array-2axis.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
-                           :array_type => "2-axis",
+                           :location => "ground",
+                           :tracking => "2-axis",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2108,7 +2111,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   elsif ['valid-pv-array-fixed-open-rack.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
-                           :array_type => "fixed open rack",
+                           :location => "ground",
+                           :tracking => "fixed",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2117,7 +2121,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   elsif ['valid-pv-module-premium.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "premium",
-                           :array_type => "fixed roof mount",
+                           :location => "roof",
+                           :tracking => "fixed",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2126,7 +2131,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   elsif ['valid-pv-module-standard.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
-                           :array_type => "fixed roof mount",
+                           :location => "roof",
+                           :tracking => "fixed",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2135,7 +2141,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   elsif ['valid-pv-module-thinfilm.xml.skip'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "thin film",
-                           :array_type => "fixed roof mount",
+                           :location => "roof",
+                           :tracking => "fixed",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2144,7 +2151,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
   elsif ['valid-pv-multiple.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
-                           :array_type => "fixed roof mount",
+                           :location => "roof",
+                           :tracking => "fixed",
                            :array_azimuth => 180,
                            :array_tilt => 20,
                            :max_power_output => 4000,
@@ -2152,7 +2160,8 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :system_losses_fraction => 0.14 }
     pv_systems_values << { :id => "PVSystem2",
                            :module_type => "standard",
-                           :array_type => "fixed roof mount",
+                           :location => "roof",
+                           :tracking => "fixed",
                            :array_azimuth => 90,
                            :array_tilt => 20,
                            :max_power_output => 1500,
