@@ -315,6 +315,7 @@ end
 if options[:output_dir].nil?
   options[:output_dir] = basedir # default
 end
+options[:output_dir] = File.expand_path(options[:output_dir])
 
 unless Dir.exists?(options[:output_dir])
   FileUtils.mkdir_p(options[:output_dir])
