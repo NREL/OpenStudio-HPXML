@@ -871,12 +871,8 @@ class Waterheater
     return 120.0
   end
 
-  def self.get_ef_multiplier(type)
-    if type == Constants.WaterHeaterTypeTankless
-      return 0.92
-    end
-
-    return 1.0
+  def self.get_tankless_cycling_derate()
+    return 0.08
   end
 
   private

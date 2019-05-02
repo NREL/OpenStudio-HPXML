@@ -1909,10 +1909,6 @@ class OSModel
           ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
         end
 
-        ef_adj = water_heating_system_values[:energy_factor_multiplier]
-        if ef_adj.nil?
-          ef_adj = Waterheater.get_ef_multiplier(to_beopt_wh_type(wh_type))
-        end
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
@@ -1931,16 +1927,20 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_tank(model, runner, nil, space, to_beopt_fuel(fuel),
-                                           capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
+                                           capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj, @nbeds)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
 
+          cycling_derate = water_heating_system_values[:tankless_cycling_derate]
+          if cycling_derate.nil?
+            cycling_derate = Waterheater.get_tankless_cycling_derate()
+          end
+
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          cycling_derate = 1.0 - ef_adj
           success = Waterheater.apply_tankless(model, runner, nil, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
@@ -1963,7 +1963,7 @@ class OSModel
           int_factor = 1.0 # FIXME
           temp_depress = 0.0 # FIXME
           ducting = "none"
-          # FIXME: Use ef, ef_adj, ec_adj
+          # FIXME: Use ef, ec_adj
           success = Waterheater.apply_heatpump(model, runner, nil, space, weather,
                                                e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
                                                cap, cop, shr, airflow_rate, fan_power,
@@ -3092,17 +3092,21 @@ class OSModel
                     "premium" => Constants.PVModuleTypePremium,
                     "thin film" => Constants.PVModuleTypeThinFilm }
 
-    arrays_map = { "fixed open rack" => Constants.PVArrayTypeFixedOpenRack,
-                   "fixed roof mount" => Constants.PVArrayTypeFixedRoofMount,
-                   "1-axis" => Constants.PVArrayTypeFixed1Axis,
-                   "1-axis backtracked" => Constants.PVArrayTypeFixed1AxisBacktracked,
-                   "2-axis" => Constants.PVArrayTypeFixed2Axis }
-
     building.elements.each("BuildingDetails/Systems/Photovoltaics/PVSystem") do |pvsys|
       pv_system_values = HPXML.get_pv_system_values(pv_system: pvsys)
       pv_id = pv_system_values[:id]
       module_type = modules_map[pv_system_values[:module_type]]
-      array_type = arrays_map[pv_system_values[:array_type]]
+      if pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'roof'
+        array_type = Constants.PVArrayTypeFixedRoofMount
+      elsif pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'ground'
+        array_type = Constants.PVArrayTypeFixedOpenRack
+      elsif pv_system_values[:tracking] == '1-axis'
+        array_type = Constants.PVArrayTypeFixed1Axis
+      elsif pv_system_values[:tracking] == '1-axis backtracked'
+        array_type = Constants.PVArrayTypeFixed1AxisBacktracked
+      elsif pv_system_values[:tracking] == '2-axis'
+        array_type = Constants.PVArrayTypeFixed2Axis
+      end
       az = pv_system_values[:array_azimuth]
       tilt = pv_system_values[:array_tilt]
       power_w = pv_system_values[:max_power_output]

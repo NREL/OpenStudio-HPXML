@@ -489,7 +489,7 @@ class EnergyPlusValidator
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented']" => one,
         "FractionDHWLoadServed" => one,
         "[EnergyFactor | UniformEnergyFactor]" => one,
-        "extension/EnergyFactorMultiplier" => zero_or_one, # Uses ERI assumption if not provided
+        "extension/TanklessCyclingDerate" => zero_or_one, # Uses ERI assumption if not provided
       },
 
       ## [WHType=Tank]
@@ -553,8 +553,9 @@ class EnergyPlusValidator
       # [PVSystem]
       "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
+        "[Location='ground' or Location='roof']" => one,
         "[ModuleType='standard' or ModuleType='premium' or ModuleType='thin film']" => one,
-        "[ArrayType='fixed roof mount' or ArrayType='fixed open rack' or ArrayType='1-axis' or ArrayType='1-axis backtracked' or ArrayType='2-axis']" => one,
+        "[Tracking='fixed' or Tracking='1-axis' or Tracking='1-axis backtracked' or Tracking='2-axis']" => one,
         "ArrayAzimuth" => one,
         "ArrayTilt" => one,
         "MaxPowerOutput" => one,
