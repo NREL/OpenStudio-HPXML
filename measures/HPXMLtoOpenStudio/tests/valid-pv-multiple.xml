@@ -385,8 +385,9 @@
         <Photovoltaics>
           <PVSystem>
             <SystemIdentifier id='PVSystem'/>
+            <Location>roof</Location>
             <ModuleType>standard</ModuleType>
-            <ArrayType>fixed roof mount</ArrayType>
+            <Tracking>fixed</Tracking>
             <ArrayAzimuth>180</ArrayAzimuth>
             <ArrayTilt>20.0</ArrayTilt>
             <MaxPowerOutput>4000.0</MaxPowerOutput>
@@ -395,8 +396,9 @@
           </PVSystem>
           <PVSystem>
             <SystemIdentifier id='PVSystem2'/>
+            <Location>roof</Location>
             <ModuleType>standard</ModuleType>
-            <ArrayType>fixed roof mount</ArrayType>
+            <Tracking>fixed</Tracking>
             <ArrayAzimuth>90</ArrayAzimuth>
             <ArrayTilt>20.0</ArrayTilt>
             <MaxPowerOutput>1500.0</MaxPowerOutput>
