@@ -20,23 +20,23 @@ def rm_path(path)
   end
 end
 
-def get_designdir(basedir, design)
-  return File.join(basedir, design.gsub(' ', ''))
+def get_designdir(output_dir, design)
+  return File.join(output_dir, design.gsub(' ', ''))
 end
 
 def get_output_hpxml_path(resultsdir, designdir)
   return File.join(resultsdir, File.basename(designdir) + ".xml")
 end
 
-def run_design(designdir, design, resultsdir, hpxml, debug, skip_validation)
+def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_validation)
   puts "Creating input..."
-  create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
+  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_validation)
 
   puts "Running simulation..."
   run_energyplus(design, designdir)
 end
 
-def create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
+def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_validation)
   Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -45,7 +45,7 @@ def create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
 
   model = OpenStudio::Model::Model.new
   runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-  measures_dir = File.join(File.dirname(__FILE__), "../measures")
+  measures_dir = File.join(basedir, "..", "measures")
 
   measures = {}
 
@@ -61,7 +61,7 @@ def create_idf(design, designdir, resultsdir, hpxml, debug, skip_validation)
   measure_subdir = "HPXMLtoOpenStudio"
   args = {}
   args['hpxml_path'] = output_hpxml_path
-  args['weather_dir'] = File.absolute_path(File.join(designdir, "..", "..", "weather"))
+  args['weather_dir'] = File.absolute_path(File.join(basedir, "..", "weather"))
   args['epw_output_path'] = File.join(designdir, "in.epw")
   if debug
     args['osm_output_path'] = File.join(designdir, "in.osm")
@@ -267,6 +267,10 @@ OptionParser.new do |opts|
     options[:hpxml] = t
   end
 
+  opts.on('-o', '--output-dir <DIR>', 'Output directory') do |t|
+    options[:output_dir] = t
+  end
+
   opts.on('-w', '--download-weather', 'Downloads all weather files') do |t|
     options[:epws] = t
   end
@@ -308,17 +312,25 @@ if OpenStudio.openStudioVersion != os_version
   fail "OpenStudio version #{os_version} is required."
 end
 
+if options[:output_dir].nil?
+  options[:output_dir] = basedir # default
+end
+
+unless Dir.exists?(options[:output_dir])
+  FileUtils.mkdir_p(options[:output_dir])
+end
+
 # Create results dir
-resultsdir = File.join(basedir, "results")
+resultsdir = File.join(options[:output_dir], "results")
 rm_path(resultsdir)
 Dir.mkdir(resultsdir)
 
 # Run design
 puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
-designdir = get_designdir(basedir, design)
+designdir = get_designdir(options[:output_dir], design)
 rm_path(designdir)
-rundir = run_design(designdir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_validation])
+rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_validation])
 
 # Create output
 create_output(designdir, resultsdir)
