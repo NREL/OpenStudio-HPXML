@@ -3047,17 +3047,21 @@ class OSModel
                     "premium" => Constants.PVModuleTypePremium,
                     "thin film" => Constants.PVModuleTypeThinFilm }
 
-    arrays_map = { "fixed open rack" => Constants.PVArrayTypeFixedOpenRack,
-                   "fixed roof mount" => Constants.PVArrayTypeFixedRoofMount,
-                   "1-axis" => Constants.PVArrayTypeFixed1Axis,
-                   "1-axis backtracked" => Constants.PVArrayTypeFixed1AxisBacktracked,
-                   "2-axis" => Constants.PVArrayTypeFixed2Axis }
-
     building.elements.each("BuildingDetails/Systems/Photovoltaics/PVSystem") do |pvsys|
       pv_system_values = HPXML.get_pv_system_values(pv_system: pvsys)
       pv_id = pv_system_values[:id]
       module_type = modules_map[pv_system_values[:module_type]]
-      array_type = arrays_map[pv_system_values[:array_type]]
+      if pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'roof'
+        array_type = Constants.PVArrayTypeFixedRoofMount
+      elsif pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'ground'
+        array_type = Constants.PVArrayTypeFixedOpenRack
+      elsif pv_system_values[:tracking] == '1-axis'
+        array_type = Constants.PVArrayTypeFixed1Axis
+      elsif pv_system_values[:tracking] == '1-axis backtracked'
+        array_type = Constants.PVArrayTypeFixed1AxisBacktracked
+      elsif pv_system_values[:tracking] == '2-axis'
+        array_type = Constants.PVArrayTypeFixed2Axis
+      end
       az = pv_system_values[:array_azimuth]
       tilt = pv_system_values[:array_tilt]
       power_w = pv_system_values[:max_power_output]

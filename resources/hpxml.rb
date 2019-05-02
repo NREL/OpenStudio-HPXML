@@ -1458,8 +1458,9 @@ class HPXML
 
   def self.add_pv_system(hpxml:,
                          id:,
+                         location:,
                          module_type:,
-                         array_type:,
+                         tracking:,
                          array_azimuth:,
                          array_tilt:,
                          max_power_output:,
@@ -1470,8 +1471,9 @@ class HPXML
     pv_system = XMLHelper.add_element(photovoltaics, "PVSystem")
     sys_id = XMLHelper.add_element(pv_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(pv_system, "Location", location)
     XMLHelper.add_element(pv_system, "ModuleType", module_type)
-    XMLHelper.add_element(pv_system, "ArrayType", array_type)
+    XMLHelper.add_element(pv_system, "Tracking", tracking)
     XMLHelper.add_element(pv_system, "ArrayAzimuth", to_integer(array_azimuth))
     XMLHelper.add_element(pv_system, "ArrayTilt", to_float(array_tilt))
     XMLHelper.add_element(pv_system, "MaxPowerOutput", to_float(max_power_output))
@@ -1489,8 +1491,9 @@ class HPXML
     return nil if pv_system.nil?
 
     return { :id => HPXML.get_id(pv_system),
+             :location => XMLHelper.get_value(pv_system, "Location"),
              :module_type => XMLHelper.get_value(pv_system, "ModuleType"),
-             :array_type => XMLHelper.get_value(pv_system, "ArrayType"),
+             :tracking => XMLHelper.get_value(pv_system, "Tracking"),
              :array_orientation => XMLHelper.get_value(pv_system, "ArrayOrientation"),
              :array_azimuth => to_integer(XMLHelper.get_value(pv_system, "ArrayAzimuth")),
              :array_tilt => to_float(XMLHelper.get_value(pv_system, "ArrayTilt")),

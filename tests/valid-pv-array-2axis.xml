@@ -385,8 +385,9 @@
         <Photovoltaics>
           <PVSystem>
             <SystemIdentifier id='PVSystem'/>
+            <Location>ground</Location>
             <ModuleType>standard</ModuleType>
-            <ArrayType>2-axis</ArrayType>
+            <Tracking>2-axis</Tracking>
             <ArrayAzimuth>180</ArrayAzimuth>
             <ArrayTilt>20.0</ArrayTilt>
             <MaxPowerOutput>4000.0</MaxPowerOutput>
