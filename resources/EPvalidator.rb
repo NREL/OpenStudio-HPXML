@@ -553,8 +553,9 @@ class EnergyPlusValidator
       # [PVSystem]
       "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
+        "[Location='ground' or Location='roof']" => one,
         "[ModuleType='standard' or ModuleType='premium' or ModuleType='thin film']" => one,
-        "[ArrayType='fixed roof mount' or ArrayType='fixed open rack' or ArrayType='1-axis' or ArrayType='1-axis backtracked' or ArrayType='2-axis']" => one,
+        "[Tracking='fixed' or Tracking='1-axis' or Tracking='1-axis backtracked' or Tracking='2-axis']" => one,
         "ArrayAzimuth" => one,
         "ArrayTilt" => one,
         "MaxPowerOutput" => one,
