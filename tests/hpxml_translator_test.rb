@@ -48,7 +48,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -76,38 +76,38 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args['skip_validation'] = false
 
-    expected_error_msgs = { 'invalid-bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
-                            'invalid-cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for mechanical ventilation 'MechanicalVentilation'."],
-                            'invalid-clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
-                            'invalid-clothes-dryer-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[Location="],
-                            'invalid-clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'invalid-clothes-washer-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[Location="],
-                            'invalid-dhw-frac-load-served.xml' => ["Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15."],
-                            'invalid-duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
-                            'invalid-duct-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return'][DuctLocation="],
-                            'invalid-hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
-                            'invalid-hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
-                            'invalid-hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
-                                                                    "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
-                            'invalid-missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
-                                                               "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
-                            'invalid-missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
-                                                               "Thermal zone 'garage' must have at least one roof/ceiling surface.",
-                                                               "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
-                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
-                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
-                            'invalid-refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
-                            'invalid-refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
-                            'invalid-unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for mechanical ventilation 'MechanicalVentilation'."],
-                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door'."],
-                            'invalid-unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' cannot be found for HVAC system 'HeatingSystem'."],
-                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
-                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowSouth'."],
-                            'invalid-water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'invalid-water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="] }
+    expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for mechanical ventilation 'MechanicalVentilation'."],
+                            'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
+                            'clothes-dryer-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[Location="],
+                            'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'clothes-washer-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesWasher[Location="],
+                            'dhw-frac-load-served.xml' => ["Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15."],
+                            'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
+                            'duct-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return'][DuctLocation="],
+                            'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
+                            'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
+                            'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
+                                                            "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
+                            'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
+                                                       "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
+                            'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
+                                                       "Thermal zone 'garage' must have at least one roof/ceiling surface.",
+                                                       "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
+                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
+                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'WallNorth'."],
+                            'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
+                            'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
+                            'unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for mechanical ventilation 'MechanicalVentilation'."],
+                            'unattached-door.xml' => ["Attached wall 'foobar' not found for door 'DoorNorth'."],
+                            'unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' cannot be found for HVAC system 'HeatingSystem'."],
+                            'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
+                            'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
+                            'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
+                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="] }
 
     # Test simulations
-    Dir["#{this_dir}/invalid_files/invalid*.xml"].sort.each do |xml|
+    Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
       _run_xml(File.absolute_path(xml), this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
     end
   end
@@ -937,7 +937,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         dse_actual = result_dse100 / result_dse80
         dse_expect = 0.8
-        if File.basename(xml) == "valid-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
+        if File.basename(xml) == "base-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
           dse_expect = 1.0 # TODO: Generalize this
         end
         puts "dse: #{dse_actual.round(2)} #{k}"
