@@ -1943,7 +1943,7 @@ class OSModel
 
         elsif wh_type == "instantaneous water heater"
 
-          cycling_derate = water_heating_system_values[:tankless_cycling_derate]
+          cycling_derate = water_heating_system_values[:performance_adjustment]
           if cycling_derate.nil?
             cycling_derate = Waterheater.get_tankless_cycling_derate()
           end
