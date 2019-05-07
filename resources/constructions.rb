@@ -1354,15 +1354,12 @@ class FoundationConstructions
   # Container class for below-grade wall/floor constructions
   # Note: Each slab surface (w/ connected walls) must have its own foundation object.
 
-  # Basement/crawlspace
-  def self.apply_walls_and_slab(runner, model, wall_surfaces, walls_constr_name,
-                                walls_ins_height, walls_cavity_r, walls_install_grade,
-                                walls_cavity_depth_in, walls_filled_cavity, walls_framing_factor,
-                                walls_rigid_r, walls_drywall_thick_in, walls_concrete_thick_in,
-                                space_height, slab_surface, slab_constr_name,
-                                slab_whole_r, slab_concrete_thick_in, exposed_perimeter = nil)
-
-    return true if slab_surface.nil?
+  # Foundation walls
+  def self.apply_wall(runner, model, wall_surfaces, wall_constr_name,
+                      wall_ins_height, wall_cavity_r, wall_install_grade,
+                      wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
+                      wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
+                      wall_height, foundation = nil)
 
     if wall_surfaces.empty?
       runner.registerError("No wall surfaces found adjacent to floor surface.")
@@ -1370,48 +1367,50 @@ class FoundationConstructions
     end
 
     # Validate inputs
-    if walls_ins_height < 0.0
+    if wall_ins_height < 0.0
       runner.registerError("Wall Insulation Height must be greater than or equal to 0.")
       return false
     end
-    if walls_cavity_r < 0.0
+    if wall_cavity_r < 0.0
       runner.registerError("Wall Cavity Insulation Installed R-value must be greater than or equal to 0.")
       return false
     end
-    if walls_cavity_depth_in < 0.0
+    if wall_cavity_depth_in < 0.0
       runner.registerError("Wall Cavity Depth must be greater than or equal to 0.")
       return false
     end
-    if walls_framing_factor < 0.0 or walls_framing_factor >= 1.0
+    if wall_framing_factor < 0.0 or wall_framing_factor >= 1.0
       runner.registerError("Wall Framing Factor must be greater than or equal to 0 and less than 1.")
       return false
     end
-    if walls_rigid_r < 0.0
+    if wall_rigid_r < 0.0
       runner.registerError("Wall Continuous Insulation Nominal R-value must be greater than or equal to 0.")
       return false
     end
 
     # Calculate interior wall R-value
-    int_wall_Rvalue = calc_interior_wall_r_value(runner, walls_cavity_depth_in, walls_cavity_r,
-                                                 walls_filled_cavity, walls_framing_factor,
-                                                 walls_install_grade, walls_rigid_r,
-                                                 walls_drywall_thick_in)
+    int_wall_Rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
+                                                 wall_filled_cavity, wall_framing_factor,
+                                                 wall_install_grade, wall_rigid_r,
+                                                 wall_drywall_thick_in)
     if int_wall_Rvalue.nil?
       return false
     end
 
-    # Create Kiva foundation
-    foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_Rvalue, space_height,
-                                                          walls_rigid_r, walls_ins_height)
+    if foundation.nil?
+      # Create Kiva foundation
+      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_Rvalue, wall_height,
+                                                            wall_rigid_r, wall_ins_height)
+    end
 
     # Define materials
-    mat_concrete = Material.Concrete(walls_concrete_thick_in)
+    mat_concrete = Material.Concrete(wall_concrete_thick_in)
 
     # Define construction
-    constr = Construction.new(walls_constr_name, [1])
+    constr = Construction.new(wall_constr_name, [1])
     constr.add_layer(mat_concrete)
-    if walls_drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(walls_drywall_thick_in))
+    if wall_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(wall_drywall_thick_in))
     end
 
     # Create and assign construction to surfaces
@@ -1424,22 +1423,15 @@ class FoundationConstructions
       wall_surface.setAdjacentFoundation(foundation)
     end
 
-    if not apply_slab(runner, model, slab_surface, slab_constr_name,
-                      0, 0, 0, 0, 0, slab_whole_r, slab_concrete_thick_in,
-                      nil, true, exposed_perimeter, foundation)
-      return false
-    end
-
     return true
   end
 
-  # Slabs
+  # Foundation slabs
   def self.apply_slab(runner, model, surface, constr_name,
                       perimeter_r, perimeter_width,
                       gap_r, exterior_r, exterior_depth,
-                      whole_r, concrete_thick_in, mat_carpet = nil,
-                      has_fnd_walls = false, exposed_perimeter = nil,
-                      foundation = nil)
+                      whole_r, concrete_thick_in, exposed_perimeter,
+                      mat_carpet = nil, foundation = nil)
 
     return true if surface.nil?
 
@@ -1508,15 +1500,6 @@ class FoundationConstructions
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions([surface], runner, model)
-      return false
-    end
-
-    # Exposed perimeter
-    if exposed_perimeter.nil?
-      exposed_perimeter = Geometry.calculate_exposed_perimeter(model, [surface], has_fnd_walls)
-    end
-    if exposed_perimeter <= 0
-      runner.registerError("Calculated an exposed perimeter <= 0 for slab '#{surface.name.to_s}'.")
       return false
     end
 
