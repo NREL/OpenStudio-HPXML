@@ -1039,7 +1039,7 @@ class FoundationConstructions
                       wall_ins_height, wall_cavity_r, wall_install_grade,
                       wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                       wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                      wall_height, foundation = nil)
+                      wall_height, wall_height_above_grade, foundation = nil)
 
     if wall_surfaces.empty?
       runner.registerError("No wall surfaces found adjacent to floor surface.")
@@ -1058,7 +1058,8 @@ class FoundationConstructions
     if foundation.nil?
       # Create Kiva foundation
       foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_Rvalue, wall_height,
-                                                            wall_rigid_r, wall_ins_height)
+                                                            wall_rigid_r, wall_ins_height,
+                                                            wall_height_above_grade)
     end
 
     # Define materials
@@ -1097,7 +1098,8 @@ class FoundationConstructions
       # Create Kiva foundation
       thick = UnitConversions.convert(concrete_thick_in, "in", "ft")
       foundation = create_kiva_slab_foundation(model, perimeter_r, perimeter_width,
-                                               gap_r, thick, exterior_r, exterior_depth)
+                                               gap_r, thick, exterior_r, exterior_depth,
+                                               concrete_thick_in)
     end
 
     # Define materials
@@ -1230,7 +1232,8 @@ class FoundationConstructions
   end
 
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
-                                       int_vert_depth, ext_vert_r, ext_vert_depth)
+                                       int_vert_depth, ext_vert_r, ext_vert_depth,
+                                       concrete_thick_in)
 
     # Create the Foundation:Kiva object for slab foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1257,14 +1260,8 @@ class FoundationConstructions
       foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
     end
 
-    foundation.setWallHeightAboveGrade(UnitConversions.convert(8.0, "in", "m"))
+    foundation.setWallHeightAboveGrade(UnitConversions.convert(concrete_thick_in, "in", "m"))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, "in", "m"))
-
-    # Footing wall construction
-    footing_mat = create_footing_material(model, "FootingMaterial")
-    footing_constr = OpenStudio::Model::Construction.new([footing_mat])
-    footing_constr.setName("FootingConstruction")
-    foundation.setFootingWallConstruction(footing_constr)
 
     apply_kiva_settings(model)
 
@@ -1272,7 +1269,8 @@ class FoundationConstructions
   end
 
   def self.create_kiva_crawl_or_basement_foundation(model, int_vert_r, int_vert_depth,
-                                                    ext_vert_r, ext_vert_depth)
+                                                    ext_vert_r, ext_vert_depth,
+                                                    wall_height_above_grade)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1291,7 +1289,7 @@ class FoundationConstructions
       foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
     end
 
-    foundation.setWallHeightAboveGrade(UnitConversions.convert(8.0, "in", "m"))
+    foundation.setWallHeightAboveGrade(UnitConversions.convert(wall_height_above_grade, "ft", "m"))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, "in", "m"))
 
     apply_kiva_settings(model)

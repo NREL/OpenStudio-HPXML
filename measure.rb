@@ -865,6 +865,7 @@ class OSModel
 
       # Foundation wall surfaces
       foundation_object = nil # FIXME: How to assign walls to multiple slabs for a given foundation? Each slab must reference a different Kiva object.
+      foundation_wall_heights = []
       foundation.elements.each("FoundationWall") do |fnd_wall|
         foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
 
@@ -878,6 +879,10 @@ class OSModel
         if wall_net_area <= 0
           fail "Calculated a negative net surface area for Wall '#{wall_id}'."
         end
+
+        foundation_wall_heights << wall_height
+
+        wall_height_above_grade = wall_height - foundation_wall_values[:depth_below_grade]
 
         z_origin = -1 * foundation_wall_values[:depth_below_grade]
 
@@ -927,7 +932,7 @@ class OSModel
                                                      wall_cont_height, wall_cavity_r, wall_install_grade,
                                                      wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                                                      wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                                     wall_height, foundation_object)
+                                                     wall_height, wall_height_above_grade, foundation_object)
         return false if not success
 
         if not wall_assembly_r.nil?
@@ -938,6 +943,7 @@ class OSModel
       end
 
       # Foundation slab surfaces
+      slab_depth_below_grade = nil
       foundation.elements.each("Slab") do |fnd_slab|
         slab_values = HPXML.get_foundation_slab_values(slab: fnd_slab)
 
@@ -956,7 +962,8 @@ class OSModel
         slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
         slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
 
-        z_origin = -1 * slab_values[:depth_below_grade]
+        slab_depth_below_grade = slab_values[:depth_below_grade]
+        z_origin = -1 * slab_depth_below_grade
 
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
 
@@ -1017,10 +1024,11 @@ class OSModel
         if foundation_type == "Ambient"
           z_origin = 2.0
         elsif foundation_type.include? "Basement" or foundation_type.include? "Crawlspace"
-          z_origin = -1 * foundation_wall_values[:depth_below_grade] + wall_height
+          avg_foundation_wall_height = foundation_wall_heights.reduce(:+) / foundation_wall_heights.size.to_f
+          z_origin = -1 * slab_depth_below_grade + avg_foundation_wall_height
         end
 
-        surface = OpenStudio::Model::Surface.new(add_floor_polygon(framefloor_length, framefloor_width, z_origin), model)
+        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(framefloor_length, framefloor_width, z_origin), model)
 
         surface.setName(floor_id)
         if interior_adjacent_to == "outside" # pier & beam foundation

@@ -91,6 +91,7 @@ def create_hpxmls
     'base-foundation-pier-beam.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
+    'base-foundation-unconditioned-basement-above-grade.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
@@ -963,6 +964,10 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :depth_below_grade => 7,
                                    :adjacent_to => "ground",
                                    :insulation_assembly_r_value => 10.69 }]]
+  elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
+    for i in 0..foundations_walls_values[0].size - 1
+      foundations_walls_values[0][i][:depth_below_grade] = 4
+    end
   elsif ['base-foundation-unvented-crawlspace.xml',
          'base-foundation-vented-crawlspace.xml'].include? hpxml_file
     for i in 0..foundations_walls_values[0].size - 1
@@ -990,6 +995,8 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
                                    :under_slab_insulation_r_value => 0,
                                    :carpet_fraction => 0,
                                    :carpet_r_value => 0 }]]
+  elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
+    foundations_slabs_values[0][0][:depth_below_grade] = 4
   elsif ['base-foundation-slab.xml'].include? hpxml_file
     foundations_slabs_values[0][0][:under_slab_insulation_width] = 2
     foundations_slabs_values[0][0][:depth_below_grade] = 0
