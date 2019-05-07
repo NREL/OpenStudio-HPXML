@@ -244,6 +244,11 @@ class OSModel
         @cfa_ag -= slab_values[:area]
       end
     end
+    @gfa = 0
+    building.elements.each("BuildingDetails/Enclosure/Garages/Garage/Slabs/Slab") do |garage_slab|
+      slab_values = HPXML.get_garage_slab_values(slab: garage_slab)
+      @gfa += slab_values[:area]
+    end
     @cvolume = building_construction_values[:conditioned_building_volume]
     @ncfl = building_construction_values[:number_of_conditioned_floors]
     @ncfl_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
@@ -859,7 +864,7 @@ class OSModel
       end
 
       # Foundation wall surfaces
-      foundation_object = nil # FIXME: How to assign walls to multiple slabs for a given foundation?
+      foundation_object = nil # FIXME: How to assign walls to multiple slabs for a given foundation? Each slab must reference a different Kiva object.
       foundation.elements.each("FoundationWall") do |fnd_wall|
         foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
 
@@ -883,16 +888,15 @@ class OSModel
           wall_azimuth = foundation_wall_values[:azimuth]
         end
 
-        # Split wall into exposed & adiabatic (non-exposed) sections
-        # based on slab's total exposed perimeter.
-        wall_length_exposed = wall_length * sum_perimeter_exposed / sum_wall_length
-        wall_length_adiabatic = wall_length - wall_length_exposed
+        # Calculate exposed section based on slab's total exposed perimeter.
+        # Apportioned to each foundation wall.
+        wall_length = wall_length * sum_perimeter_exposed / sum_wall_length
 
         # Exposed surface
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length_exposed, wall_height, z_origin,
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
                                                                   wall_azimuth), model)
 
-        surface.additionalProperties.setFeature("Length", wall_length_exposed)
+        surface.additionalProperties.setFeature("Length", wall_length)
         surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
@@ -931,26 +935,6 @@ class OSModel
         end
 
         foundation_object = surface.adjacentFoundation.get
-
-        if wall_length_adiabatic > 0
-          # Adiabatic (non-exposed) component of surface
-          adiabatic_surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length_adiabatic, wall_height, z_origin,
-                                                                              wall_azimuth), model)
-
-          adiabatic_surface.additionalProperties.setFeature("Length", wall_length_adiabatic)
-          adiabatic_surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
-          adiabatic_wall_id = "#{wall_id}_adiabatic"
-          adiabatic_surface.setSunExposure("NoSun")
-          adiabatic_surface.setWindExposure("NoWind")
-          adiabatic_surface.setName(adiabatic_wall_id)
-          adiabatic_surface.setSurfaceType("Wall")
-          set_surface_interior(model, spaces, adiabatic_surface, adiabatic_wall_id, interior_adjacent_to)
-          adiabatic_surface.setOutsideBoundaryCondition("Adiabatic")
-
-          # Apply Construction
-          success = apply_adiabatic_construction(runner, model, [adiabatic_surface], "wall")
-          return false if not success
-        end
       end
 
       # Foundation slab surfaces
@@ -1054,22 +1038,22 @@ class OSModel
         floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
         floor_assembly_r = frame_floor_values[:insulation_assembly_r_value]
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),  # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                    # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
         ]
         floor_constr_set, floor_cav_r = pick_wood_stud_construction_set(floor_assembly_r, constr_sets, floor_film_r, "foundation framefloor #{floor_id}")
 
         mat_floor_covering = nil
-        floor_cont_r = floor_constr_set.rigid_r # FIXME: Unused
         floor_grade = 1
 
         # Foundation ceiling
-        success = FloorConstructions.apply_foundation_ceiling(runner, model, [surface], "FndCeilingConstruction",
-                                                              floor_cav_r, floor_grade,
-                                                              floor_constr_set.framing_factor, floor_constr_set.stud.thick_in,
-                                                              floor_constr_set.osb_thick_in, mat_floor_covering,
-                                                              floor_constr_set.exterior_material)
+        success = Constructions.apply_floor(runner, model, [surface], "FndCeilingConstruction",
+                                            floor_cav_r, floor_grade,
+                                            floor_constr_set.framing_factor, floor_constr_set.stud.thick_in,
+                                            floor_constr_set.osb_thick_in, floor_constr_set.rigid_r,
+                                            mat_floor_covering, floor_constr_set.exterior_material)
         return false if not success
 
         if not floor_assembly_r.nil?
@@ -1115,23 +1099,26 @@ class OSModel
         ceiling_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
         ceiling_assembly_r = ceiling_values[:insulation_assembly_r_value]
         constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),  # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                    # Fallback
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
+          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
+          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
         ]
         ceiling_constr_set, ceiling_cav_r = pick_wood_stud_construction_set(ceiling_assembly_r, constr_sets, ceiling_film_r, "garage ceiling #{ceiling_id}")
 
-        # FIXME
-        # success = FloorConstructions.apply_foundation_ceiling(runner, model, [surface], "FndCeilingConstruction",
-        #                                                      floor_cav_r, floor_grade,
-        #                                                      floor_ff, floor_cav_depth,
-        #                                                      plywood_thick_in, mat_floor_covering,
-        #                                                      mat_carpet)
-        # return false if not success
-        #
-        # if not ceiling_assembly_r.nil?
-        #  check_surface_assembly_rvalue(surface, ceiling_film_r, ceiling_assembly_r)
-        # end
+        mat_ceiling_covering = nil
+        ceiling_grade = 1
+
+        success = Constructions.apply_floor(runner, model, [surface], "FndCeilingConstruction",
+                                            ceiling_cav_r, ceiling_grade,
+                                            ceiling_constr_set.framing_factor, ceiling_constr_set.stud.thick_in,
+                                            ceiling_constr_set.osb_thick_in, ceiling_constr_set.rigid_r,
+                                            mat_ceiling_covering, ceiling_constr_set.exterior_material)
+        return false if not success
+
+        if not ceiling_assembly_r.nil?
+          check_surface_assembly_rvalue(surface, ceiling_film_r, ceiling_assembly_r)
+        end
       end
 
       # Garage wall surfaces
@@ -1480,11 +1467,10 @@ class OSModel
       constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "rim joist #{rim_joist_id}")
       install_grade = 1
 
-      success = WallConstructions.apply_rim_joist(runner, model, [surface],
-                                                  "RimJoistConstruction",
-                                                  cavity_r, install_grade, constr_set.framing_factor,
-                                                  constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                  constr_set.rigid_r, constr_set.exterior_material)
+      success = Constructions.apply_rim_joist(runner, model, [surface], "RimJoistConstruction",
+                                              cavity_r, install_grade, constr_set.framing_factor,
+                                              constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                              constr_set.rigid_r, constr_set.exterior_material)
       return false if not success
 
       check_surface_assembly_rvalue(surface, film_r, assembly_r)
@@ -1547,13 +1533,10 @@ class OSModel
         ceiling_drywall_thick_in = constr_set.drywall_thick_in
         ceiling_install_grade = 1
 
-        success = FloorConstructions.apply_unfinished_attic(runner, model, [surface],
-                                                            "FloorConstruction",
-                                                            ceiling_r, ceiling_install_grade,
-                                                            ceiling_ins_thick_in,
-                                                            ceiling_framing_factor,
-                                                            ceiling_joist_height_in,
-                                                            ceiling_drywall_thick_in)
+        success = Constructions.apply_ceiling(runner, model, [surface], "FloorConstruction",
+                                              ceiling_r, ceiling_install_grade,
+                                              ceiling_ins_thick_in, ceiling_framing_factor,
+                                              ceiling_joist_height_in, ceiling_drywall_thick_in)
         return false if not success
 
         check_surface_assembly_rvalue(surface, film_r, assembly_r)
@@ -1600,6 +1583,7 @@ class OSModel
         mat_roofing = Material.RoofingAsphaltShinglesDark
         solar_abs = attic_roof_values[:solar_absorptance]
         emitt = attic_roof_values[:emittance]
+        has_radiant_barrier = attic_roof_values[:radiant_barrier]
 
         assembly_r = attic_roof_values[:insulation_assembly_r_value]
         constr_sets = [
@@ -1615,24 +1599,21 @@ class OSModel
         roof_install_grade = 1
 
         if drywall_thick_in > 0
-          success = RoofConstructions.apply_finished_roof(runner, model, [surface],
-                                                          "RoofConstruction",
-                                                          roof_cavity_r, roof_install_grade,
-                                                          constr_set.stud.thick_in,
-                                                          true, constr_set.framing_factor,
-                                                          constr_set.drywall_thick_in,
-                                                          constr_set.osb_thick_in, constr_set.rigid_r,
-                                                          constr_set.exterior_material)
+          success = Constructions.apply_closed_cavity_roof(runner, model, [surface], "RoofConstruction",
+                                                           roof_cavity_r, roof_install_grade,
+                                                           constr_set.stud.thick_in,
+                                                           true, constr_set.framing_factor,
+                                                           constr_set.drywall_thick_in,
+                                                           constr_set.osb_thick_in, constr_set.rigid_r,
+                                                           constr_set.exterior_material)
         else
-          has_radiant_barrier = false # TODO
-          success = RoofConstructions.apply_unfinished_attic(runner, model, [surface],
-                                                             "RoofConstruction",
-                                                             roof_cavity_r, roof_install_grade,
-                                                             constr_set.stud.thick_in,
-                                                             constr_set.framing_factor,
-                                                             constr_set.stud.thick_in,
-                                                             constr_set.osb_thick_in, constr_set.rigid_r,
-                                                             constr_set.exterior_material, has_radiant_barrier)
+          success = Constructions.apply_open_cavity_roof(runner, model, [surface], "RoofConstruction",
+                                                         roof_cavity_r, roof_install_grade,
+                                                         constr_set.stud.thick_in,
+                                                         constr_set.framing_factor,
+                                                         constr_set.stud.thick_in,
+                                                         constr_set.osb_thick_in, constr_set.rigid_r,
+                                                         constr_set.exterior_material, has_radiant_barrier)
           return false if not success
         end
 
@@ -1908,48 +1889,29 @@ class OSModel
   end
 
   def self.apply_adiabatic_construction(runner, model, surfaces, type)
-    # Arbitrary constructions, only heat capacitance matters
-    # Used for surfaces that solely contain subsurfaces (windows, doors, skylights)
+    # Arbitrary construction for heat capacitance.
+    # Only applies to surfaces where outside boundary conditioned is
+    # adiabatic or surface net area is near zero.
 
     if type == "wall"
 
-      framing_factor = Constants.DefaultFramingFactorInterior
-      cavity_r = 0.0
-      install_grade = 1
-      cavity_depth_in = 3.5
-      cavity_filled = false
-      rigid_r = 0.0
-      drywall_thick_in = 0.5
-      mat_ext_finish = Material.ExtFinishStuccoMedDark
-      success = WallConstructions.apply_wood_stud(runner, model, surfaces,
-                                                  "AdiabaticWallConstruction",
-                                                  cavity_r, install_grade, cavity_depth_in,
-                                                  cavity_filled, framing_factor,
-                                                  drywall_thick_in, 0, rigid_r, mat_ext_finish)
+      success = Constructions.apply_wood_stud_wall(runner, model, surfaces, "AdiabaticWallConstruction",
+                                                   0, 1, 3.5, true, 0.1, 0.5, 0, 999,
+                                                   Material.ExtFinishStuccoMedDark)
       return false if not success
 
     elsif type == "floor"
 
-      plywood_thick_in = 0.75
-      drywall_thick_in = 0.0
-      mat_floor_covering = Material.FloorWood
-      mat_carpet = Material.CoveringBare
-      success = FloorConstructions.apply_uninsulated(runner, model, surfaces,
-                                                     "AdiabaticFloorConstruction",
-                                                     plywood_thick_in, drywall_thick_in,
-                                                     mat_floor_covering, mat_carpet)
+      success = Constructions.apply_floor(runner, model, surfaces, "AdiabaticFloorConstruction",
+                                          0, 1, 0.07, 5.5, 0.75, 999,
+                                          Material.FloorWood, Material.CoveringBare)
       return false if not success
 
     elsif type == "roof"
 
-      framing_thick_in = 7.25
-      framing_factor = 0.07
-      osb_thick_in = 0.75
-      mat_roofing = Material.RoofingAsphaltShinglesMed
-      success = RoofConstructions.apply_uninsulated_roofs(runner, model, surfaces,
-                                                          "AdiabaticRoofConstruction",
-                                                          framing_thick_in, framing_factor,
-                                                          osb_thick_in, mat_roofing)
+      success = Constructions.apply_open_cavity_roof(runner, model, surfaces, "AdiabaticRoofConstruction",
+                                                     0, 1, 7.25, 0.07, 7.25, 0.75, 999,
+                                                     Material.RoofingAsphaltShinglesMed, false)
       return false if not success
 
     end
@@ -2872,10 +2834,9 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    gfa = 0 # garage floor area FIXME
     conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
     garage_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeGarage])
-    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, gfa,
+    success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
                                   conditioned_spaces, garage_spaces)
     return false if not success
 
@@ -3465,11 +3426,11 @@ class OSModel
       ]
       constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = WallConstructions.apply_wood_stud(runner, model, [surface], "WallConstruction",
-                                                  cavity_r, install_grade, constr_set.stud.thick_in,
-                                                  cavity_filled, constr_set.framing_factor,
-                                                  constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                  constr_set.rigid_r, constr_set.exterior_material)
+      success = Constructions.apply_wood_stud_wall(runner, model, [surface], "WallConstruction",
+                                                   cavity_r, install_grade, constr_set.stud.thick_in,
+                                                   cavity_filled, constr_set.framing_factor,
+                                                   constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                                   constr_set.rigid_r, constr_set.exterior_material)
       return false if not success
 
     elsif wall_type == "SteelFrame"
@@ -3486,12 +3447,12 @@ class OSModel
       ]
       constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = WallConstructions.apply_steel_stud(runner, model, [surface], "WallConstruction",
-                                                   cavity_r, install_grade, constr_set.cavity_thick_in,
-                                                   cavity_filled, constr_set.framing_factor,
-                                                   constr_set.corr_factor, constr_set.drywall_thick_in,
-                                                   constr_set.osb_thick_in, constr_set.rigid_r,
-                                                   constr_set.exterior_material)
+      success = Constructions.apply_steel_stud_wall(runner, model, [surface], "WallConstruction",
+                                                    cavity_r, install_grade, constr_set.cavity_thick_in,
+                                                    cavity_filled, constr_set.framing_factor,
+                                                    constr_set.corr_factor, constr_set.drywall_thick_in,
+                                                    constr_set.osb_thick_in, constr_set.rigid_r,
+                                                    constr_set.exterior_material)
       return false if not success
 
     elsif wall_type == "DoubleWoodStud"
@@ -3504,12 +3465,12 @@ class OSModel
       ]
       constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = WallConstructions.apply_double_stud(runner, model, [surface], "WallConstruction",
-                                                    cavity_r, install_grade, constr_set.stud.thick_in,
-                                                    constr_set.stud.thick_in, constr_set.framing_factor,
-                                                    constr_set.framing_spacing, is_staggered,
-                                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                    constr_set.rigid_r, constr_set.exterior_material)
+      success = Constructions.apply_double_stud_wall(runner, model, [surface], "WallConstruction",
+                                                     cavity_r, install_grade, constr_set.stud.thick_in,
+                                                     constr_set.stud.thick_in, constr_set.framing_factor,
+                                                     constr_set.framing_spacing, is_staggered,
+                                                     constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                                     constr_set.rigid_r, constr_set.exterior_material)
       return false if not success
 
     elsif wall_type == "ConcreteMasonryUnit"
@@ -3524,12 +3485,12 @@ class OSModel
       ]
       constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = WallConstructions.apply_cmu(runner, model, [surface], "WallConstruction",
-                                            constr_set.thick_in, constr_set.cond_in, density,
-                                            constr_set.framing_factor, furring_r,
-                                            furring_cavity_depth_in, furring_spacing,
-                                            constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                            rigid_r, constr_set.exterior_material)
+      success = Constructions.apply_cmu_wall(runner, model, [surface], "WallConstruction",
+                                             constr_set.thick_in, constr_set.cond_in, density,
+                                             constr_set.framing_factor, furring_r,
+                                             furring_cavity_depth_in, furring_spacing,
+                                             constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                             rigid_r, constr_set.exterior_material)
       return false if not success
 
     elsif wall_type == "StructurallyInsulatedPanel"
@@ -3543,11 +3504,11 @@ class OSModel
       ]
       constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = WallConstructions.apply_sip(runner, model, [surface], "WallConstruction",
-                                            cavity_r, constr_set.thick_in, constr_set.framing_factor,
-                                            sheathing_type, constr_set.sheath_thick_in,
-                                            constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                            constr_set.rigid_r, constr_set.exterior_material)
+      success = Constructions.apply_sip_wall(runner, model, [surface], "WallConstruction",
+                                             cavity_r, constr_set.thick_in, constr_set.framing_factor,
+                                             sheathing_type, constr_set.sheath_thick_in,
+                                             constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                             constr_set.rigid_r, constr_set.exterior_material)
       return false if not success
 
     elsif wall_type == "InsulatedConcreteForms"
@@ -3557,11 +3518,11 @@ class OSModel
       ]
       constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = WallConstructions.apply_icf(runner, model, [surface], "WallConstruction",
-                                            icf_r, constr_set.ins_thick_in,
-                                            constr_set.concrete_thick_in, constr_set.framing_factor,
-                                            constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                            constr_set.rigid_r, constr_set.exterior_material)
+      success = Constructions.apply_icf_wall(runner, model, [surface], "WallConstruction",
+                                             icf_r, constr_set.ins_thick_in,
+                                             constr_set.concrete_thick_in, constr_set.framing_factor,
+                                             constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                             constr_set.rigid_r, constr_set.exterior_material)
       return false if not success
 
     elsif ["SolidConcrete", "StructuralBrick", "StrawBale", "Stone", "LogWall"].include? wall_type
@@ -3593,10 +3554,10 @@ class OSModel
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      success = WallConstructions.apply_generic(runner, model, [surface], "WallConstruction",
-                                                thick_ins, conds, denss, specheats,
-                                                constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                constr_set.rigid_r, constr_set.exterior_material)
+      success = Constructions.apply_generic_layered_wall(runner, model, [surface], "WallConstruction",
+                                                         thick_ins, conds, denss, specheats,
+                                                         constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                                         constr_set.rigid_r, constr_set.exterior_material)
       return false if not success
 
     else
