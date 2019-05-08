@@ -160,20 +160,6 @@
             </FrameFloor>
           </Foundation>
         </Foundations>
-        <RimJoists>
-          <RimJoist>
-            <SystemIdentifier id='RimJoist'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>150.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-        </RimJoists>
         <Walls>
           <Wall>
             <SystemIdentifier id='WallNorth'/>

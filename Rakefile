@@ -1115,22 +1115,86 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
   if ['base.xml'].include? hpxml_file
     # TODO: Other geometry values (e.g., building volume) assume
     # no rim joists.
-    rim_joists_values = [{ :id => "RimJoist",
+    rim_joists_values = [{ :id => "RimJoistNorthFoundation",
                            :exterior_adjacent_to => "outside",
                            :interior_adjacent_to => "living space",
-                           :area => 150,
+                           :area => 35,
+                           :azimuth => 0,
+                           :solar_absorptance => 0.75,
+                           :emittance => 0.9,
+                           :insulation_assembly_r_value => 23.0 },
+                         { :id => "RimJoistSouthFoundation",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 35,
+                           :azimuth => 180,
+                           :solar_absorptance => 0.75,
+                           :emittance => 0.9,
+                           :insulation_assembly_r_value => 23.0 },
+                         { :id => "RimJoistEastFoundation",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 23,
+                           :azimuth => 90,
+                           :solar_absorptance => 0.75,
+                           :emittance => 0.9,
+                           :insulation_assembly_r_value => 23.0 },
+                         { :id => "RimJoistWestFoundation",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 23,
+                           :azimuth => 270,
                            :solar_absorptance => 0.75,
                            :emittance => 0.9,
                            :insulation_assembly_r_value => 23.0 }]
   elsif ['base-foundation-pier-beam.xml',
          'base-foundation-slab.xml'].include? hpxml_file
-    rim_joists_values.delete_at(1)
+    rim_joists_values = []
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
-    rim_joists_values[0][:interior_adjacent_to] = "basement - unconditioned"
+    for i in 0..rim_joists_values.size - 1
+      rim_joists_values[i][:interior_adjacent_to] = "basement - unconditioned"
+    end
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
-    rim_joists_values[0][:interior_adjacent_to] = "crawlspace - unvented"
+    for i in 0..rim_joists_values.size - 1
+      rim_joists_values[i][:interior_adjacent_to] = "crawlspace - unvented"
+    end
   elsif ['base-foundation-vented-crawlspace.xml'].include? hpxml_file
-    rim_joists_values[0][:interior_adjacent_to] = "crawlspace - vented"
+    for i in 0..rim_joists_values.size - 1
+      rim_joists_values[i][:interior_adjacent_to] = "crawlspace - vented"
+    end
+  elsif ['base-enclosure-2stories.xml'].include? hpxml_file
+    rim_joists_values << { :id => "RimJoistNorth2ndStory",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 35,
+                           :azimuth => 0,
+                           :solar_absorptance => 0.75,
+                           :emittance => 0.9,
+                           :insulation_assembly_r_value => 23.0 }
+    rim_joists_values << { :id => "RimJoistSouth2ndStory",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 35,
+                           :azimuth => 180,
+                           :solar_absorptance => 0.75,
+                           :emittance => 0.9,
+                           :insulation_assembly_r_value => 23.0 }
+    rim_joists_values << { :id => "RimJoistEast2ndStory",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 23,
+                           :azimuth => 90,
+                           :solar_absorptance => 0.75,
+                           :emittance => 0.9,
+                           :insulation_assembly_r_value => 23.0 }
+    rim_joists_values << { :id => "RimJoistWest2ndStory",
+                           :exterior_adjacent_to => "outside",
+                           :interior_adjacent_to => "living space",
+                           :area => 23,
+                           :azimuth => 270,
+                           :solar_absorptance => 0.75,
+                           :emittance => 0.9,
+                           :insulation_assembly_r_value => 23.0 }
   end
   return rim_joists_values
 end

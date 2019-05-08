@@ -181,14 +181,54 @@
         </Foundations>
         <RimJoists>
           <RimJoist>
-            <SystemIdentifier id='RimJoist'/>
+            <SystemIdentifier id='RimJoistNorthFoundation'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>150.0</Area>
+            <Area>35.0</Area>
+            <Azimuth>0</Azimuth>
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <Insulation>
-              <SystemIdentifier id='RimJoistInsulation'/>
+              <SystemIdentifier id='RimJoistNorthFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistSouthFoundation'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>35.0</Area>
+            <Azimuth>180</Azimuth>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistSouthFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistEastFoundation'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>23.0</Area>
+            <Azimuth>90</Azimuth>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistEastFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistWestFoundation'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <Area>23.0</Area>
+            <Azimuth>270</Azimuth>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistWestFoundationInsulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </RimJoist>
