@@ -976,7 +976,8 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     foundations_slabs_values[0][0][:depth_below_grade] = 4
   elsif ['base-foundation-slab.xml'].include? hpxml_file
-    foundations_slabs_values[0][0][:under_slab_insulation_width] = 2
+    foundations_slabs_values[0][0][:under_slab_insulation_width] = nil
+    foundations_slabs_values[0][0][:under_slab_insulation_spans_entire_slab] = true
     foundations_slabs_values[0][0][:depth_below_grade] = 0
     foundations_slabs_values[0][0][:under_slab_insulation_r_value] = 5
     foundations_slabs_values[0][0][:carpet_fraction] = 1

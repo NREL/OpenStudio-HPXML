@@ -155,7 +155,7 @@
               <Thickness>4.0</Thickness>
               <ExposedPerimeter>150.0</ExposedPerimeter>
               <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-              <UnderSlabInsulationWidth>2.0</UnderSlabInsulationWidth>
+              <UnderSlabInsulationSpansEntireSlab>true</UnderSlabInsulationSpansEntireSlab>
               <DepthBelowGrade>0.0</DepthBelowGrade>
               <PerimeterInsulation>
                 <SystemIdentifier id='FoundationSlabPerimeterInsulation'/>

@@ -969,10 +969,7 @@ class OSModel
         set_surface_interior(model, spaces, surface, slab_id, interior_adjacent_to)
         surface.setSunExposure("NoSun")
         surface.setWindExposure("NoWind")
-        slab_surface = surface
 
-        slab_gap_r = 0.0 # FIXME
-        slab_whole_r = 0.0 # FIXME
         slab_concrete_thick_in = slab_values[:thickness]
 
         slab_ext_r = slab_values[:perimeter_insulation_r_value]
@@ -982,12 +979,20 @@ class OSModel
           slab_ext_depth = 0
         end
 
-        slab_perim_r = slab_values[:under_slab_insulation_r_value]
-        slab_perim_width = slab_values[:under_slab_insulation_width]
-        if slab_perim_r == 0 or slab_perim_width == 0
+        if slab_values[:under_slab_insulation_spans_entire_slab]
+          slab_whole_r = slab_values[:under_slab_insulation_r_value]
           slab_perim_r = 0
           slab_perim_width = 0
+        else
+          slab_perim_r = slab_values[:under_slab_insulation_r_value]
+          slab_perim_width = slab_values[:under_slab_insulation_width]
+          if slab_perim_r == 0 or slab_perim_width == 0
+            slab_perim_r = 0
+            slab_perim_width = 0
+          end
+          slab_whole_r = 0
         end
+        slab_gap_r = slab_perim_r
 
         mat_carpet = nil
         if slab_values[:carpet_fraction] > 0 and slab_values[:carpet_r_value] > 0
@@ -995,14 +1000,14 @@ class OSModel
                                              slab_values[:carpet_r_value])
         end
 
-        success = FoundationConstructions.apply_slab(runner, model, slab_surface, "SlabConstruction",
+        success = FoundationConstructions.apply_slab(runner, model, surface, "SlabConstruction",
                                                      slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
                                                      slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
                                                      slab_exp_perim, mat_carpet, foundation_object)
         return false if not success
 
         # FIXME: Temporary code for sizing
-        slab_surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
+        surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
       end
 
       # Foundation ceiling surfaces
@@ -1205,10 +1210,7 @@ class OSModel
         set_surface_interior(model, spaces, surface, slab_id, "garage")
         surface.setSunExposure("NoSun")
         surface.setWindExposure("NoWind")
-        slab_surface = surface
 
-        slab_gap_r = 0.0 # FIXME
-        slab_whole_r = 0.0 # FIXME
         slab_concrete_thick_in = slab_values[:thickness]
 
         slab_ext_r = slab_values[:perimeter_insulation_r_value]
@@ -1218,14 +1220,22 @@ class OSModel
           slab_ext_depth = 0
         end
 
-        slab_perim_r = slab_values[:under_slab_insulation_r_value]
-        slab_perim_width = slab_values[:under_slab_insulation_width]
-        if slab_perim_r == 0 or slab_perim_width == 0
+        if slab_values[:under_slab_insulation_spans_entire_slab]
+          slab_whole_r = slab_values[:under_slab_insulation_r_value]
           slab_perim_r = 0
           slab_perim_width = 0
+        else
+          slab_perim_r = slab_values[:under_slab_insulation_r_value]
+          slab_perim_width = slab_values[:under_slab_insulation_width]
+          if slab_perim_r == 0 or slab_perim_width == 0
+            slab_perim_r = 0
+            slab_perim_width = 0
+          end
+          slab_whole_r = 0
         end
+        slab_gap_r = slab_perim_r
 
-        success = FoundationConstructions.apply_slab(runner, model, slab_surface, "GarageSlabConstruction",
+        success = FoundationConstructions.apply_slab(runner, model, surface, "GarageSlabConstruction",
                                                      slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
                                                      slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
                                                      slab_values[:exposed_perimeter], nil, nil)

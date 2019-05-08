@@ -614,7 +614,8 @@ class HPXML
                                thickness:,
                                exposed_perimeter:,
                                perimeter_insulation_depth:,
-                               under_slab_insulation_width:,
+                               under_slab_insulation_width: nil,
+                               under_slab_insulation_spans_entire_slab: nil,
                                depth_below_grade:,
                                carpet_fraction:,
                                carpet_r_value:,
@@ -630,7 +631,8 @@ class HPXML
     XMLHelper.add_element(slab, "Thickness", to_float(thickness))
     XMLHelper.add_element(slab, "ExposedPerimeter", to_float(exposed_perimeter))
     XMLHelper.add_element(slab, "PerimeterInsulationDepth", to_float(perimeter_insulation_depth))
-    XMLHelper.add_element(slab, "UnderSlabInsulationWidth", to_float(under_slab_insulation_width))
+    XMLHelper.add_element(slab, "UnderSlabInsulationWidth", to_float(under_slab_insulation_width)) unless under_slab_insulation_width.nil?
+    XMLHelper.add_element(slab, "UnderSlabInsulationSpansEntireSlab", to_bool(under_slab_insulation_spans_entire_slab)) unless under_slab_insulation_spans_entire_slab.nil?
     XMLHelper.add_element(slab, "DepthBelowGrade", to_float(depth_below_grade))
     add_layer_insulation(parent: slab,
                          element_name: "PerimeterInsulation",
@@ -663,6 +665,7 @@ class HPXML
              :exposed_perimeter => to_float(XMLHelper.get_value(slab, "ExposedPerimeter")),
              :perimeter_insulation_depth => to_float(XMLHelper.get_value(slab, "PerimeterInsulationDepth")),
              :under_slab_insulation_width => to_float(XMLHelper.get_value(slab, "UnderSlabInsulationWidth")),
+             :under_slab_insulation_spans_entire_slab => to_bool(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab")),
              :depth_below_grade => to_float(XMLHelper.get_value(slab, "DepthBelowGrade")),
              :carpet_fraction => to_float(XMLHelper.get_value(slab, "extension/CarpetFraction")),
              :carpet_r_value => to_float(XMLHelper.get_value(slab, "extension/CarpetRValue")),
@@ -789,7 +792,8 @@ class HPXML
                            thickness:,
                            exposed_perimeter:,
                            perimeter_insulation_depth:,
-                           under_slab_insulation_width:,
+                           under_slab_insulation_width: nil,
+                           under_slab_insulation_spans_entire_slab: nil,
                            perimeter_insulation_id: nil,
                            perimeter_insulation_r_value:,
                            under_slab_insulation_id: nil,
@@ -803,7 +807,8 @@ class HPXML
     XMLHelper.add_element(slab, "Thickness", to_float(thickness))
     XMLHelper.add_element(slab, "ExposedPerimeter", to_float(exposed_perimeter))
     XMLHelper.add_element(slab, "PerimeterInsulationDepth", to_float(perimeter_insulation_depth))
-    XMLHelper.add_element(slab, "UnderSlabInsulationWidth", to_float(under_slab_insulation_width))
+    XMLHelper.add_element(slab, "UnderSlabInsulationWidth", to_float(under_slab_insulation_width)) unless under_slab_insulation_width.nil?
+    XMLHelper.add_element(slab, "UnderSlabInsulationSpansEntireSlab", to_bool(under_slab_insulation_spans_entire_slab)) unless under_slab_insulation_spans_entire_slab.nil?
     add_layer_insulation(parent: slab,
                          element_name: "PerimeterInsulation",
                          id: perimeter_insulation_id,
@@ -832,6 +837,7 @@ class HPXML
              :exposed_perimeter => to_float(XMLHelper.get_value(slab, "ExposedPerimeter")),
              :perimeter_insulation_depth => to_float(XMLHelper.get_value(slab, "PerimeterInsulationDepth")),
              :under_slab_insulation_width => to_float(XMLHelper.get_value(slab, "UnderSlabInsulationWidth")),
+             :under_slab_insulation_spans_entire_slab => to_bool(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab")),
              :perimeter_insulation_id => perimeter_insulation_values[:id],
              :perimeter_insulation_r_value => to_float(perimeter_insulation_values[:continuous_nominal_r_value]),
              :under_slab_insulation_id => under_slab_insulation_values[:id],

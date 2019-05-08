@@ -231,7 +231,7 @@ class EnergyPlusValidator
         "Thickness" => one, # Use zero for dirt floor
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
-        "UnderSlabInsulationWidth" => one,
+        "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
         "DepthBelowGrade" => one,
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
@@ -278,7 +278,7 @@ class EnergyPlusValidator
         "Thickness" => one, # Use zero for dirt floor
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
-        "UnderSlabInsulationWidth" => one,
+        "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
