@@ -228,7 +228,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "CMU")
-      surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, furring_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, Float(furring_r))
     end
 
     return true
@@ -363,7 +363,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SIP")
-      surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, sip_thick_in)
+      surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
     end
 
     return true
@@ -683,8 +683,9 @@ class Constructions
     surfaces.each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, rigid_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, !mat_rb.nil?)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
     return true
@@ -753,9 +754,9 @@ class Constructions
     surfaces.each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, rigid_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, false)
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, cavity_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
     return true

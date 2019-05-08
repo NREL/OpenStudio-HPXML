@@ -935,31 +935,9 @@ end
 
 def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values)
   if ['base.xml'].include? hpxml_file
-    foundations_walls_values = [[{ :id => "FoundationWallNorth",
+    foundations_walls_values = [[{ :id => "FoundationWall",
                                    :height => 8,
-                                   :area => 360,
-                                   :azimuth => 0,
-                                   :thickness => 8,
-                                   :depth_below_grade => 7,
-                                   :adjacent_to => "ground",
-                                   :insulation_assembly_r_value => 10.69 },
-                                 { :id => "FoundationWallSouth",
-                                   :height => 8,
-                                   :area => 360,
-                                   :thickness => 8,
-                                   :depth_below_grade => 7,
-                                   :adjacent_to => "ground",
-                                   :insulation_assembly_r_value => 10.69 },
-                                 { :id => "FoundationWallEast",
-                                   :height => 8,
-                                   :area => 240,
-                                   :thickness => 8,
-                                   :depth_below_grade => 7,
-                                   :adjacent_to => "ground",
-                                   :insulation_assembly_r_value => 10.69 },
-                                 { :id => "FoundationWallWest",
-                                   :height => 8,
-                                   :area => 240,
+                                   :area => 1200,
                                    :thickness => 8,
                                    :depth_below_grade => 7,
                                    :adjacent_to => "ground",
@@ -1366,14 +1344,48 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values[3][:interior_shading_factor_winter] = 0.7
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     windows_values[0][:area] = 1000
-  elsif ['base-atticroof-conditioned.xml',
-         'base-atticroof-cathedral.xml'].include? hpxml_file
+  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     windows_values[0][:area] = 54
     windows_values[1][:area] = 54
     windows_values[2][:area] = 54
     windows_values[3][:area] = 54
+    windows_values << { :id => "AtticGableWindowEast",
+                        :area => 12,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "AtticGableEastCond" }
+    windows_values << { :id => "AtticGableWindowWest",
+                        :area => 12,
+                        :azimuth => 180,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "AtticGableWestCond" }
+  elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
+    windows_values[0][:area] = 54
+    windows_values[1][:area] = 54
+    windows_values[2][:area] = 54
+    windows_values[3][:area] = 54
+    windows_values << { :id => "AtticGableWindowEast",
+                        :area => 12,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "AtticGableEast" }
+    windows_values << { :id => "AtticGableWindowWest",
+                        :area => 12,
+                        :azimuth => 180,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "AtticGableWest" }
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     windows_values.delete_at(2)
+    windows_values << { :id => "GarageWindowEast",
+                        :area => 12,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "GarageWallEast" }
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     windows_values[0][:area] = 108
     windows_values[1][:area] = 108
@@ -1384,6 +1396,39 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values[1][:area] = 108
     windows_values[2][:area] = 72
     windows_values[3][:area] = 48
+  elsif ['base-foundation-unvented-crawlspace.xml',
+         'base-foundation-vented-crawlspace.xml',
+         'base-foundation-pier-beam.xml',
+         'base-foundation-slab.xml'].include? hpxml_file
+    windows_values.delete_at(7)
+    windows_values.delete_at(6)
+    windows_values.delete_at(5)
+    windows_values.delete_at(4)
+  elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
+    windows_values << { :id => "FoundationWindowNorth",
+                        :area => 20,
+                        :azimuth => 0,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" }
+    windows_values << { :id => "FoundationWindowSouth",
+                        :area => 20,
+                        :azimuth => 180,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" }
+    windows_values << { :id => "FoundationWindowEast",
+                        :area => 10,
+                        :azimuth => 90,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" }
+    windows_values << { :id => "FoundationWindowWest",
+                        :area => 10,
+                        :azimuth => 270,
+                        :ufactor => 0.33,
+                        :shgc => 0.45,
+                        :wall_idref => "FoundationWall" }
   elsif ['invalid_files/unattached-window.xml'].include? hpxml_file
     windows_values[0][:wall_idref] = "foobar"
   end
@@ -1424,6 +1469,13 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
                       :area => 40,
                       :azimuth => 270,
                       :r_value => 4.4 }]
+  elsif ['base-enclosure-garage.xml',
+         'base-enclosure-2stories-garage.xml'].include? hpxml_file
+    doors_values << { :id => "GarageDoorSouth",
+                      :wall_idref => "GarageWallSouth",
+                      :area => 70,
+                      :azimuth => 180,
+                      :r_value => 4.4 }
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     doors_values[0][:wall_idref] = "foobar"
   end

@@ -161,51 +161,14 @@
               </Insulation>
             </FrameFloor>
             <FoundationWall>
-              <SystemIdentifier id='FoundationWallNorth'/>
+              <SystemIdentifier id='FoundationWall'/>
               <Height>8.0</Height>
-              <Area>360.0</Area>
-              <Azimuth>0</Azimuth>
+              <Area>1200.0</Area>
               <Thickness>8.0</Thickness>
               <DepthBelowGrade>4.0</DepthBelowGrade>
               <AdjacentTo>ground</AdjacentTo>
               <Insulation>
-                <SystemIdentifier id='FoundationWallNorthInsulation'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
-              </Insulation>
-            </FoundationWall>
-            <FoundationWall>
-              <SystemIdentifier id='FoundationWallSouth'/>
-              <Height>8.0</Height>
-              <Area>360.0</Area>
-              <Thickness>8.0</Thickness>
-              <DepthBelowGrade>4.0</DepthBelowGrade>
-              <AdjacentTo>ground</AdjacentTo>
-              <Insulation>
-                <SystemIdentifier id='FoundationWallSouthInsulation'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
-              </Insulation>
-            </FoundationWall>
-            <FoundationWall>
-              <SystemIdentifier id='FoundationWallEast'/>
-              <Height>8.0</Height>
-              <Area>240.0</Area>
-              <Thickness>8.0</Thickness>
-              <DepthBelowGrade>4.0</DepthBelowGrade>
-              <AdjacentTo>ground</AdjacentTo>
-              <Insulation>
-                <SystemIdentifier id='FoundationWallEastInsulation'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
-              </Insulation>
-            </FoundationWall>
-            <FoundationWall>
-              <SystemIdentifier id='FoundationWallWest'/>
-              <Height>8.0</Height>
-              <Area>240.0</Area>
-              <Thickness>8.0</Thickness>
-              <DepthBelowGrade>4.0</DepthBelowGrade>
-              <AdjacentTo>ground</AdjacentTo>
-              <Insulation>
-                <SystemIdentifier id='FoundationWallWestInsulation'/>
+                <SystemIdentifier id='FoundationWallInsulation'/>
                 <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
               </Insulation>
             </FoundationWall>
@@ -350,6 +313,38 @@
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <AttachedToWall idref='WallWest'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='FoundationWindowNorth'/>
+            <Area>20.0</Area>
+            <Azimuth>0</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <AttachedToWall idref='FoundationWall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='FoundationWindowSouth'/>
+            <Area>20.0</Area>
+            <Azimuth>180</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <AttachedToWall idref='FoundationWall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='FoundationWindowEast'/>
+            <Area>10.0</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <AttachedToWall idref='FoundationWall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='FoundationWindowWest'/>
+            <Area>10.0</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <AttachedToWall idref='FoundationWall'/>
           </Window>
         </Windows>
         <Doors>

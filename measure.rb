@@ -758,12 +758,17 @@ class OSModel
     return OpenStudio::reverse(add_floor_polygon(x, y, z))
   end
 
-  def self.net_wall_area(gross_wall_area, wall_subsurface_areas, wall_id)
-    if wall_subsurface_areas.keys.include? wall_id
-      return gross_wall_area - wall_subsurface_areas[wall_id]
+  def self.net_surface_area(gross_area, subsurface_areas, surface_id, surface_type)
+    net_area = gross_area
+    if subsurface_areas.keys.include? surface_id
+      net_area -= subsurface_areas[surface_id]
     end
 
-    return gross_wall_area
+    if net_area <= 0
+      fail "Calculated a negative net surface area for #{surface_type} '#{surface_id}'."
+    end
+
+    return net_area
   end
 
   def self.add_num_occupants(model, building, runner)
@@ -849,9 +854,9 @@ class OSModel
       sum_wall_length = 0.0
       foundation.elements.each("FoundationWall") do |fnd_wall|
         foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-        # FIXME: Need to review this for foundation windows
+        wall_id = foundation_wall_values[:id]
         wall_height = foundation_wall_values[:height]
-        wall_net_area = net_wall_area(foundation_wall_values[:area], subsurface_areas, fnd_id)
+        wall_net_area = net_surface_area(foundation_wall_values[:area], subsurface_areas, wall_id, "Wall")
         wall_length = wall_net_area / wall_height
         sum_wall_length += wall_length
       end
@@ -873,19 +878,11 @@ class OSModel
 
         exterior_adjacent_to = foundation_wall_values[:adjacent_to]
 
-        # FIXME: Need to review this for foundation windows
         wall_height = foundation_wall_values[:height]
-        wall_net_area = net_wall_area(foundation_wall_values[:area], subsurface_areas, fnd_id)
-        if wall_net_area <= 0
-          fail "Calculated a negative net surface area for Wall '#{wall_id}'."
-        end
-
+        wall_net_area = net_surface_area(foundation_wall_values[:area], subsurface_areas, wall_id, "Wall")
         foundation_wall_heights << wall_height
-
         wall_height_above_grade = wall_height - foundation_wall_values[:depth_below_grade]
-
         z_origin = -1 * foundation_wall_values[:depth_below_grade]
-
         wall_length = wall_net_area / wall_height
 
         wall_azimuth = 0 # TODO
@@ -897,7 +894,6 @@ class OSModel
         # Apportioned to each foundation wall.
         wall_length = wall_length * sum_perimeter_exposed / sum_wall_length
 
-        # Exposed surface
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
                                                                   wall_azimuth), model)
 
@@ -1136,12 +1132,7 @@ class OSModel
         interior_adjacent_to = "garage"
         exterior_adjacent_to = wall_values[:adjacent_to]
         wall_id = wall_values[:id]
-
-        wall_net_area = net_wall_area(wall_values[:area], subsurface_areas, wall_id)
-        if wall_net_area <= 0
-          fail "Calculated a negative net surface area for Wall '#{wall_id}'."
-        end
-
+        wall_net_area = net_surface_area(wall_values[:area], subsurface_areas, wall_id, "Wall")
         wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
         wall_length = wall_net_area / wall_height
         z_origin = 0
@@ -1364,12 +1355,7 @@ class OSModel
       interior_adjacent_to = wall_values[:interior_adjacent_to]
       exterior_adjacent_to = wall_values[:exterior_adjacent_to]
       wall_id = wall_values[:id]
-
-      wall_net_area = net_wall_area(wall_values[:area], subsurface_areas, wall_id)
-      if wall_net_area <= 0
-        fail "Calculated a negative net surface area for Wall '#{wall_id}'."
-      end
-
+      wall_net_area = net_surface_area(wall_values[:area], subsurface_areas, wall_id, "Wall")
       wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
       wall_length = wall_net_area / wall_height
       z_origin = foundation_top
@@ -1555,11 +1541,7 @@ class OSModel
         attic_roof_values = HPXML.get_attic_roof_values(roof: roof)
 
         roof_id = attic_roof_values[:id]
-        roof_net_area = net_wall_area(attic_roof_values[:area], subsurface_areas, roof_id)
-        if roof_net_area <= 0
-          fail "Calculated a negative net surface area for Roof '#{roof_id}'."
-        end
-
+        roof_net_area = net_surface_area(attic_roof_values[:area], subsurface_areas, roof_id, "Roof")
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         roof_tilt = attic_roof_values[:pitch] / 12.0
@@ -1636,12 +1618,7 @@ class OSModel
 
         exterior_adjacent_to = attic_wall_values[:adjacent_to]
         wall_id = attic_wall_values[:id]
-
-        wall_net_area = net_wall_area(attic_wall_values[:area], subsurface_areas, wall_id)
-        if wall_net_area <= 0
-          fail "Calculated a negative net surface area for Wall '#{wall_id}'."
-        end
-
+        wall_net_area = net_surface_area(attic_wall_values[:area], subsurface_areas, wall_id, "Wall")
         wall_height = 8.0
         wall_length = wall_net_area / wall_height
         z_origin = walls_top
@@ -1710,31 +1687,20 @@ class OSModel
       z_origin = foundation_top
       window_azimuth = window_values[:azimuth]
 
+      # Create parent surface slightly bigger than window
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window_azimuth, [0, 0.001, 0.001 * 2, 0.001]), model) # offsets B, L, T, R
+                                                                window_azimuth, [0, 0.001, 0.001, 0.001]), model)
 
       surface.additionalProperties.setFeature("Length", window_width)
       surface.additionalProperties.setFeature("Azimuth", window_azimuth)
       surface.setName("surface #{window_id}")
       surface.setSurfaceType("Wall")
-      surface_space = nil
-      building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-        wall_values = HPXML.get_wall_values(wall: wall)
-
-        next unless wall_values[:id] == window_values[:wall_idref]
-
-        interior_adjacent_to = wall_values[:interior_adjacent_to]
-        set_surface_interior(model, spaces, surface, window_id, interior_adjacent_to)
-      end
-      if not surface.space.is_initialized
-        fail "Attached wall '#{window.elements['AttachedToWall'].attributes['idref']}' not found for window '#{window_id}'."
-      end
-
-      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic or OS won't create subsurface
+      assign_space_to_subsurface(surface, window_id, window_values[:wall_idref], building, spaces, model, "window")
+      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window_azimuth, [-0.001, 0, 0.001, 0]), model) # offsets B, L, T, R
+                                                                       window_azimuth, [-0.001, 0, 0.001, 0]), model)
       sub_surface.setName(window_id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType("FixedWindow")
@@ -1803,8 +1769,9 @@ class OSModel
       z_origin = walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
       skylight_azimuth = skylight_values[:azimuth]
 
+      # Create parent surface slightly bigger than skylight
       surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.001, skylight_height + 0.001, z_origin,
-                                                                skylight_azimuth, skylight_tilt), model) # base surface must be at least slightly larger than subsurface
+                                                                skylight_azimuth, skylight_tilt), model)
 
       surface.additionalProperties.setFeature("Length", skylight_width)
       surface.additionalProperties.setFeature("Width", skylight_height)
@@ -1813,7 +1780,7 @@ class OSModel
       surface.setName("surface #{skylight_id}")
       surface.setSurfaceType("RoofCeiling")
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving)) # Ensures it is included in Manual J sizing
-      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic or OS won't create subsurface
+      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_roof_polygon(skylight_width, skylight_height, z_origin,
@@ -1855,30 +1822,20 @@ class OSModel
       door_width = door_area / door_height
       z_origin = foundation_top
 
+      # Create parent surface slightly bigger than door
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                door_azimuth, [0, 0.001, 0.001, 0.001]), model) # offsets B, L, T, R
+                                                                door_azimuth, [0, 0.001, 0.001, 0.001]), model)
 
       surface.additionalProperties.setFeature("Length", door_width)
       surface.additionalProperties.setFeature("Azimuth", door_azimuth)
       surface.setName("surface #{door_id}")
       surface.setSurfaceType("Wall")
-      surface_space = nil
-      building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-        wall_values = HPXML.get_wall_values(wall: wall)
-        next unless wall_values[:id] == door_values[:wall_idref]
-
-        interior_adjacent_to = wall_values[:interior_adjacent_to]
-        set_surface_interior(model, spaces, surface, door_id, interior_adjacent_to)
-      end
-      if not surface.space.is_initialized
-        fail "Attached wall '#{door.elements['AttachedToWall'].attributes['idref']}' not found for door '#{door_id}'."
-      end
-
-      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic or OS won't create subsurface
+      assign_space_to_subsurface(surface, door_id, door_values[:wall_idref], building, spaces, model, "door")
+      surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                       door_azimuth, [0, 0, 0, 0]), model) # offsets B, L, T, R
+                                                                       door_azimuth, [0, 0, 0, 0]), model)
       sub_surface.setName(door_id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType("Door")
@@ -3952,6 +3909,69 @@ class OSModel
     end
 
     return nil
+  end
+
+  def self.assign_space_to_subsurface(surface, subsurface_id, wall_idref, building, spaces, model, subsurface_type)
+    # First check walls
+    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
+      wall_values = HPXML.get_wall_values(wall: wall)
+      next unless wall_values[:id] == wall_idref
+
+      interior_adjacent_to = wall_values[:interior_adjacent_to]
+      set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
+      return
+    end
+
+    # Next check foundation walls
+    if not surface.space.is_initialized
+      building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
+        foundation_values = HPXML.get_foundation_values(foundation: foundation)
+        interior_adjacent_to = get_foundation_adjacent_to(foundation_values[:foundation_type])
+
+        foundation.elements.each("FoundationWall") do |foundation_wall|
+          foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
+          next unless foundation_wall_values[:id] == wall_idref
+
+          set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
+          return
+        end
+      end
+    end
+
+    # Next check attic walls
+    if not surface.space.is_initialized
+      building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
+        attic_values = HPXML.get_attic_values(attic: attic)
+        interior_adjacent_to = get_attic_adjacent_to(attic_values[:attic_type])
+
+        attic.elements.each("Walls/Wall") do |attic_wall|
+          attic_wall_values = HPXML.get_attic_wall_values(wall: attic_wall)
+          next unless attic_wall_values[:id] == wall_idref
+
+          set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
+          return
+        end
+      end
+    end
+
+    # Next check garage walls
+    if not surface.space.is_initialized
+      building.elements.each("BuildingDetails/Enclosure/Garages/Garage") do |garage|
+        interior_adjacent_to = "garage"
+
+        garage.elements.each("Walls/Wall") do |garage_wall|
+          garage_wall_values = HPXML.get_garage_wall_values(wall: garage_wall)
+          next unless garage_wall_values[:id] == wall_idref
+
+          set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
+          return
+        end
+      end
+    end
+
+    if not surface.space.is_initialized
+      fail "Attached wall '#{wall_idref}' not found for #{subsurface_type} '#{subsurface_id}'."
+    end
   end
 end
 
