@@ -412,7 +412,7 @@ class OSModel
     success = set_zone_volumes(runner, model, building)
     return false if not success
 
-    success = explode_surfaces(runner, model)
+    success = explode_surfaces(runner, model, building)
     return false if not success
 
     return true
@@ -498,7 +498,7 @@ class OSModel
     return true
   end
 
-  def self.explode_surfaces(runner, model)
+  def self.explode_surfaces(runner, model, building)
     # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
     # FUTURE: Might be able to use the new self-shading options in E+ 8.9 ShadowCalculation object?
 
@@ -521,10 +521,35 @@ class OSModel
     end
     max_azimuth_length = azimuth_lengths.values.max
 
+    success = add_neighbors(runner, model, building, max_azimuth_length)
+    return false if not success
+
     # Initial distance of shifts at 90-degrees to horizontal outward
     azimuth_side_shifts = {}
     azimuth_lengths.each do |key, value|
       azimuth_side_shifts[key] = max_azimuth_length / 2.0
+    end
+
+    # Explode neighbors
+    model.getShadingSurfaceGroups.each do |shading_surface_group|
+      next if shading_surface_group.name.to_s != Constants.ObjectNameNeighbors
+
+      shading_surface_group.shadingSurfaces.each do |shading_surface|
+        azimuth = shading_surface.additionalProperties.getFeatureAsInteger("Azimuth").get
+        azimuth_rad = UnitConversions.convert(azimuth, "deg", "rad")
+        distance = shading_surface.additionalProperties.getFeatureAsDouble("Distance").get
+
+        unless azimuth_lengths.keys.include? azimuth
+          runner.registerError("A neighbor building surface has an azimuth '#{azimuth}' not equal to the amizuth of any wall (#{azimuth_lengths.keys * ", "}).")
+          return false
+        end
+
+        # Push out horizontally
+        distance += max_azimuth_length
+        transformation = get_surface_transformation(distance, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0)
+
+        shading_surface.setVertices(transformation * shading_surface.vertices)
+      end
     end
 
     # Explode walls, windows, doors, roofs, and skylights
@@ -1244,6 +1269,38 @@ class OSModel
 
       apply_wall_construction(runner, model, surface, wall_id, wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
                               drywall_thick_in, film_r, mat_ext_finish, wall_values[:solar_absorptance], wall_values[:emittance])
+    end
+
+    return true
+  end
+
+  def self.add_neighbors(runner, model, building, wall_length)
+    foundation_top = get_foundation_top(model)
+    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+
+    shading_surfaces = []
+    building.elements.each("BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
+      neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
+      azimuth = neighbor_building_values[:azimuth]
+      distance = neighbor_building_values[:distance]
+
+      wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
+      z_origin = foundation_top
+      shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(wall_length, wall_height, z_origin, azimuth), model)
+
+      shading_surface.additionalProperties.setFeature("Azimuth", azimuth)
+      shading_surface.additionalProperties.setFeature("Distance", distance)
+      shading_surface.setName("Neighbor azimuth #{azimuth} distance #{distance}")
+
+      shading_surfaces << shading_surface
+    end
+
+    unless shading_surfaces.empty?
+      shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
+      shading_surface_group.setName(Constants.ObjectNameNeighbors)
+      shading_surfaces.each do |shading_surface|
+        shading_surface.setShadingSurfaceGroup(shading_surface_group)
+      end
     end
 
     return true

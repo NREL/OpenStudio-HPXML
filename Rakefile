@@ -27,6 +27,7 @@ def create_hpxmls
   hpxmls_files = {
     'base.xml' => nil,
     'invalid_files/bad-wmo.xml' => 'base.xml',
+    'invalid_files/bad-site-neighbor-azimuth.xml' => 'base-site-neighbors.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml.skip' => 'base.xml',
@@ -577,10 +578,12 @@ end
 
 def get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
   if ['base-site-neighbors.xml'].include? hpxml_file
-    site_neighbors_values << { :azimuth => 45,
+    site_neighbors_values << { :azimuth => 0,
                                :distance => 10 }
-    site_neighbors_values << { :azimuth => 225,
+    site_neighbors_values << { :azimuth => 180,
                                :distance => 15 }
+  elsif ['invalid_files/bad-site-neighbor-azimuth.xml'].include? hpxml_file
+    site_neighbors_values[0][:azimuth] = 145
   end
   return site_neighbors_values
 end
