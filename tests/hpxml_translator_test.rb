@@ -47,8 +47,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
-        next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
+      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+        next if File.basename(xml) == "base-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
 
         xmls << File.absolute_path(xml)
       end
@@ -78,29 +78,29 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
     args['skip_validation'] = false
 
-    expected_error_msgs = { 'invalid-bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
-                            'invalid-clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
-                            'invalid-clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
-                            'invalid-duct-location.xml' => ["TODO"],
-                            'invalid-refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
-                            'invalid-water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'invalid-missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
-                                                               "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
-                            'invalid-hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to 1, but calculated sum is 1.2.",
-                                                                    "Expected FractionHeatLoadServed to sum to 1, but calculated sum is 1.1."],
-                            'invalid-missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
-                                                               "Thermal zone 'garage' must have at least one roof/ceiling surface.",
-                                                               "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
-                            'invalid-net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
-                            'invalid-net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
-                            'invalid-unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowSouth'."],
-                            'invalid-unattached-door.xml' => ["Attached wall 'foobar' not found for door 'Door'."],
-                            'invalid-unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
-                            'invalid-unattached-hvac.xml' => ["TODO"],
-                            'invalid-unattached-cfis.xml' => ["TODO"] }
+    expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
+                            'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
+                            'duct-location.xml' => ["TODO"],
+                            'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
+                            'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
+                            'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
+                                                       "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
+                            'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to 1, but calculated sum is 1.2.",
+                                                            "Expected FractionHeatLoadServed to sum to 1, but calculated sum is 1.1."],
+                            'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
+                                                       "Thermal zone 'garage' must have at least one roof/ceiling surface.",
+                                                       "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
+                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'WallNorth'."],
+                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
+                            'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
+                            'unattached-door.xml' => ["Attached wall 'foobar' not found for door 'DoorNorth'."],
+                            'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
+                            'unattached-hvac.xml' => ["TODO"],
+                            'unattached-cfis.xml' => ["TODO"] }
 
     # Test simulations
-    Dir["#{this_dir}/invalid_files/invalid*.xml"].sort.each do |xml|
+    Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
       _run_xml(xml, this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
     end
   end
@@ -921,7 +921,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         dse_actual = result_dse100 / result_dse80
         dse_expect = 0.8
-        if File.basename(xml) == "valid-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
+        if File.basename(xml) == "base-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
           dse_expect = 1.0 # TODO: Generalize this
         end
         puts "dse: #{dse_actual.round(2)} #{k}"
@@ -986,10 +986,10 @@ class HPXMLTranslatorTest < MiniTest::Test
         # Skip ZoneHVAC tests on the CI that only pass if using an E+ bugfix version
         # See https://github.com/NREL/EnergyPlus/pull/7025
         if ENV['CI']
-          skip_files_on_ci = ['valid-hvac-boiler-elec-only-x3.xml',
-                              'valid-hvac-boiler-gas-only-x3.xml',
-                              'valid-hvac-elec-resistance-only-x3.xml',
-                              'valid-hvac-room-ac-only-x3.xml']
+          skip_files_on_ci = ['base-hvac-boiler-elec-only-x3.xml',
+                              'base-hvac-boiler-gas-only-x3.xml',
+                              'base-hvac-elec-resistance-only-x3.xml',
+                              'base-hvac-room-ac-only-x3.xml']
           next if skip_files_on_ci.include? File.basename(xml_x3)
         end
 
@@ -1056,12 +1056,12 @@ class HPXMLTranslatorTest < MiniTest::Test
         # Skip ZoneHVAC tests on the CI that only pass if using an E+ bugfix version
         # See https://github.com/NREL/EnergyPlus/pull/7025
         if ENV['CI']
-          skip_files_on_ci = ['valid-hvac-boiler-elec-only-50percent.xml',
-                              'valid-hvac-boiler-gas-only-50percent.xml',
-                              'valid-hvac-elec-resistance-only-50percent.xml',
-                              'valid-hvac-room-ac-only-50percent.xml',
-                              'valid-hvac-stove-oil-only-50percent.xml',
-                              'valid-hvac-wall-furnace-propane-only-50percent.xml']
+          skip_files_on_ci = ['base-hvac-boiler-elec-only-50percent.xml',
+                              'base-hvac-boiler-gas-only-50percent.xml',
+                              'base-hvac-elec-resistance-only-50percent.xml',
+                              'base-hvac-room-ac-only-50percent.xml',
+                              'base-hvac-stove-oil-only-50percent.xml',
+                              'base-hvac-wall-furnace-propane-only-50percent.xml']
           next if skip_files_on_ci.include? File.basename(xml_50)
         end
 
