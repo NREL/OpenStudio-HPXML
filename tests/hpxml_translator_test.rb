@@ -79,6 +79,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['skip_validation'] = false
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'bad-site-neighbor-azimuth.xml' => ["A neighbor building surface has an azimuth '145' not equal to the amizuth of any wall (90, 270, 0, 180)"],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
                             'duct-location.xml' => ["TODO"],

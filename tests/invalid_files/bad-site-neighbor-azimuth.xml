@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-09T12:56:15-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-05-09T14:40:34-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -28,7 +28,7 @@
           <extension>
             <Neighbors>
               <NeighborBuilding>
-                <Azimuth>0</Azimuth>
+                <Azimuth>145</Azimuth>
                 <Distance>10.0</Distance>
               </NeighborBuilding>
               <NeighborBuilding>
