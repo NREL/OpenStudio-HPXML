@@ -1000,7 +1000,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
 
-        assert_in_delta(result_x1, result_x3, 0.2)
+        assert_in_delta(result_x1, result_x3, 0.25)
       end
       puts "\n"
     end
