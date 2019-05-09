@@ -146,6 +146,7 @@ def create_hpxmls
     'base-pv-module-standard.xml' => 'base.xml',
     'base-pv-module-thinfilm.xml.skip' => 'base.xml',
     'base-pv-multiple.xml' => 'base.xml',
+    'base-site-neighbors.xml' => 'base.xml',
     'cfis/base-cfis.xml' => 'base.xml',
     'cfis/base-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'cfis/base-hvac-air-to-air-heat-pump-2-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -310,6 +311,7 @@ def create_hpxmls
 
       hpxml_values = {}
       site_values = {}
+      site_neighbors_values = []
       building_occupancy_values = {}
       building_construction_values = {}
       climate_and_risk_zones_values = {}
@@ -352,6 +354,7 @@ def create_hpxmls
       hpxml_files.each do |hpxml_file|
         hpxml_values = get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
         site_values = get_hpxml_file_site_values(hpxml_file, site_values)
+        site_neighbors_values = get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
         building_occupancy_values = get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
         building_construction_values = get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
         climate_and_risk_zones_values = get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
@@ -403,6 +406,9 @@ def create_hpxmls
       end
 
       HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
+      site_neighbors_values.each do |site_neighbor_values|
+        HPXML.add_site_neighbor(hpxml: hpxml, **site_neighbor_values)
+      end
       HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values) unless building_occupancy_values.empty?
       HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
       HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
@@ -567,6 +573,16 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values[:disable_natural_ventilation] = true
   end
   return site_values
+end
+
+def get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
+  if ['base-site-neighbors.xml'].include? hpxml_file
+    site_neighbors_values << { :azimuth => 45,
+                               :distance => 10 }
+    site_neighbors_values << { :azimuth => 225,
+                               :distance => 15 }
+  end
+  return site_neighbors_values
 end
 
 def get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
