@@ -506,7 +506,7 @@ class EnergyPlusValidator
       ## [WHType=Tankless]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='instantaneous water heater']" => {
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one,
-        "extension/TanklessCyclingDerate" => zero_or_one, # Uses ERI assumption if not provided
+        "PerformanceAdjustment" => zero_or_one, # Uses ERI assumption for tankless cycling derate if not provided
       },
 
       ## [WHType=HeatPump]
