@@ -843,6 +843,8 @@ class OSModel
   end
 
   def self.add_foundations(runner, model, building, spaces, subsurface_areas)
+    # TODO: Refactor by creating methods for add_foundation_walls(), add_foundation_slabs(), etc.
+  
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
       foundation_values = HPXML.get_foundation_values(foundation: foundation)
 
@@ -917,13 +919,15 @@ class OSModel
         wall_cavity_depth_in = 0.0
         wall_install_grade = 1
         wall_framing_factor = 0.0
-        wall_cont_height = foundation_wall_values[:height]
+        wall_cont_height = foundation_wall_values[:insulation_height]
         wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
         if wall_rigid_r < 0 # Try without drywall
           wall_drywall_thick_in = 0.0
           wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
         end
 
+        # TODO: Currently assumes all walls have the same height, insulation height, etc.
+        # Refactor so that we create the single Kiva foundation object based on average values.
         success = FoundationConstructions.apply_wall(runner, model, [surface], "FndWallConstruction",
                                                      wall_cont_height, wall_cavity_r, wall_install_grade,
                                                      wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
@@ -1075,6 +1079,8 @@ class OSModel
   end
 
   def self.add_garages(runner, model, building, spaces, subsurface_areas)
+    # TODO: Refactor by creating methods for add_garage_ceilings(), add_garage_walls(), etc.
+    
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
 
     building.elements.each("BuildingDetails/Enclosure/Garages/Garage") do |garage|
@@ -1486,6 +1492,8 @@ class OSModel
   end
 
   def self.add_attics(runner, model, building, spaces, subsurface_areas)
+    # TODO: Refactor by creating methods for add_attic_floors(), add_attic_walls(), etc.
+  
     walls_top = get_walls_top(model)
 
     building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|

@@ -145,6 +145,7 @@
               <Thickness>8.0</Thickness>
               <DepthBelowGrade>7.0</DepthBelowGrade>
               <AdjacentTo>ground</AdjacentTo>
+              <InsulationHeight>8.0</InsulationHeight>
               <Insulation>
                 <SystemIdentifier id='FoundationWallInsulation'/>
                 <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>

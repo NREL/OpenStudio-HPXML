@@ -567,6 +567,7 @@ class HPXML
                                thickness:,
                                depth_below_grade:,
                                adjacent_to:,
+                               insulation_height:,
                                insulation_id: nil,
                                insulation_assembly_r_value:,
                                **remainder)
@@ -579,6 +580,7 @@ class HPXML
     XMLHelper.add_element(foundation_wall, "Thickness", to_float(thickness))
     XMLHelper.add_element(foundation_wall, "DepthBelowGrade", to_float(depth_below_grade))
     XMLHelper.add_element(foundation_wall, "AdjacentTo", adjacent_to)
+    XMLHelper.add_element(foundation_wall, "InsulationHeight", to_float(insulation_height))
     add_assembly_insulation(parent: foundation_wall,
                             id: insulation_id,
                             assembly_r_value: to_float(insulation_assembly_r_value))
@@ -603,6 +605,7 @@ class HPXML
              :thickness => to_float(XMLHelper.get_value(foundation_wall, "Thickness")),
              :depth_below_grade => to_float(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
              :adjacent_to => XMLHelper.get_value(foundation_wall, "AdjacentTo"),
+             :insulation_height => to_float(XMLHelper.get_value(foundation_wall, "InsulationHeight")),
              :insulation_id => insulation_values[:id],
              :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]),
              :insulation_continuous_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }

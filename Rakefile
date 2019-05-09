@@ -941,7 +941,12 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :thickness => 8,
                                    :depth_below_grade => 7,
                                    :adjacent_to => "ground",
+                                   :insulation_height => 8,
                                    :insulation_assembly_r_value => 10.69 }]]
+  elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    for i in 0..foundations_walls_values[0].size - 1
+      foundations_walls_values[0][i][:insulation_height] = 4
+    end
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     for i in 0..foundations_walls_values[0].size - 1
       foundations_walls_values[0][i][:depth_below_grade] = 4
@@ -952,6 +957,7 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
       foundations_walls_values[0][i][:height] /= 2.0
       foundations_walls_values[0][i][:area] /= 2.0
       foundations_walls_values[0][i][:depth_below_grade] = 3
+      foundations_walls_values[0][i][:insulation_height] /= 2.0
     end
   elsif ['base-foundation-pier-beam.xml',
          'base-foundation-slab.xml'].include? hpxml_file
