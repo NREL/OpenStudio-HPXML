@@ -20,8 +20,9 @@ end
 
 desc 'update all measures'
 task :update_measures do
-  require 'openstudio'
-  measures_dir = File.expand_path("../measures/", __FILE__)
+  # Prevent NREL error regarding U: drive when not VPNed in
+  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? and ENV['HOME'].start_with? 'U:'
+  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? and ENV['HOMEDRIVE'].start_with? 'U:'
 
   # Apply rubocop
   command = "rubocop --auto-correct --format simple --only Layout"

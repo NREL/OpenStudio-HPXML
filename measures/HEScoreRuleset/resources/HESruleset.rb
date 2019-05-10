@@ -58,8 +58,6 @@ class HEScoreRuleset
   end
 
   def self.set_summary(orig_details, hpxml)
-    # TODO: Neighboring buildings to left/right, 12ft offset, same height as building; what about townhouses?
-
     # Get HPXML values
     orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
     @bldg_orient = orig_site_values[:orientation_of_front_of_home]
@@ -90,6 +88,15 @@ class HEScoreRuleset
     HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
                    shelter_coefficient: Airflow.get_default_shelter_coefficient())
+
+    # Neighboring buildings to left/right, 12ft offset, same height as building.
+    # FIXME: Verify. What about townhouses?
+    HPXML.add_site_neighbor(hpxml: hpxml,
+                            azimuth: sanitize_azimuth(@bldg_azimuth + 90.0),
+                            distance: 12.0)
+    HPXML.add_site_neighbor(hpxml: hpxml,
+                            azimuth: sanitize_azimuth(@bldg_azimuth - 90.0),
+                            distance: 12.0)
 
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
