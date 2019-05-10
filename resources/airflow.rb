@@ -1088,10 +1088,10 @@ class Airflow
     ra_duct_zone.setName(obj_name_ducts + " ret air zone")
     ra_duct_zone.setVolume(0.25)
 
-    sw_point = OpenStudio::Point3d.new(0, 74, 0)
-    nw_point = OpenStudio::Point3d.new(0, 74.1, 0)
-    ne_point = OpenStudio::Point3d.new(0.1, 74.1, 0)
-    se_point = OpenStudio::Point3d.new(0.1, 74, 0)
+    sw_point = OpenStudio::Point3d.new(0, 0, 0)
+    nw_point = OpenStudio::Point3d.new(0, 0.1, 0)
+    ne_point = OpenStudio::Point3d.new(0.1, 0.1, 0)
+    se_point = OpenStudio::Point3d.new(0.1, 0, 0)
     ra_duct_polygon = Geometry.make_polygon(sw_point, nw_point, ne_point, se_point)
 
     ra_space = OpenStudio::Model::Space::fromFloorPrint(ra_duct_polygon, 1, model)

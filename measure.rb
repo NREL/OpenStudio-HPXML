@@ -511,6 +511,7 @@ class OSModel
     model.getSurfaces.sort.each do |surface|
       next unless ["wall", "roofceiling"].include? surface.surfaceType.downcase
       next unless ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
+      next if surface.additionalProperties.getFeatureAsDouble("Tilt").get <= 0 # skip flat roofs
 
       surfaces << surface
       azimuth = surface.additionalProperties.getFeatureAsInteger("Azimuth").get
@@ -521,13 +522,32 @@ class OSModel
     end
     max_azimuth_length = azimuth_lengths.values.max
 
+    # Using the max length for a given azimuth, calculate the apothem (radius of the incircle) of a regular
+    # n-sided polygon to create the smallest polygon possible without self-shading. The number of polygon
+    # sides is defined by the minimum difference between two azimuths.
+    min_azimuth_diff = 360
+    azimuths_sorted = azimuth_lengths.keys.sort
+    azimuths_sorted.each_with_index do |az, idx|
+      diff1 = (az - azimuths_sorted[(idx + 1) % azimuths_sorted.size]).abs
+      diff2 = 360.0 - diff1 # opposite direction
+      if diff1 < min_azimuth_diff
+        min_azimuth_diff = diff1
+      end
+      if diff2 < min_azimuth_diff
+        min_azimuth_diff = diff2
+      end
+    end
+    nsides = (360.0 / min_azimuth_diff).ceil
+    nsides = 4 if nsides < 4 # assume rectangle at the minimum
+    explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, "deg", "rad")))
+
     success = add_neighbors(runner, model, building, max_azimuth_length)
     return false if not success
 
     # Initial distance of shifts at 90-degrees to horizontal outward
     azimuth_side_shifts = {}
-    azimuth_lengths.each do |key, value|
-      azimuth_side_shifts[key] = max_azimuth_length / 2.0
+    azimuth_lengths.keys.each do |azimuth|
+      azimuth_side_shifts[azimuth] = max_azimuth_length / 2.0
     end
 
     # Explode neighbors
@@ -545,7 +565,7 @@ class OSModel
         end
 
         # Push out horizontally
-        distance += max_azimuth_length
+        distance += explode_distance
         transformation = get_surface_transformation(distance, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0)
 
         shading_surface.setVertices(transformation * shading_surface.vertices)
@@ -556,6 +576,8 @@ class OSModel
     surfaces_moved = []
 
     surfaces.sort.each do |surface|
+      next if surface.additionalProperties.getFeatureAsDouble("Tilt").get <= 0 # skip flat roofs
+
       if surface.adjacentSurface.is_initialized
         next if surfaces_moved.include? surface.adjacentSurface.get
       end
@@ -564,7 +586,8 @@ class OSModel
       azimuth_rad = UnitConversions.convert(azimuth, "deg", "rad")
 
       # Push out horizontally
-      distance = max_azimuth_length
+      distance = explode_distance
+
       if surface.surfaceType.downcase == "roofceiling"
         # Ensure pitched surfaces are positioned outward justified with walls, etc.
         roof_tilt = surface.additionalProperties.getFeatureAsDouble("Tilt").get
@@ -958,6 +981,7 @@ class OSModel
 
         surface.additionalProperties.setFeature("Length", wall_length)
         surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+        surface.additionalProperties.setFeature("Tilt", 90.0)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
@@ -1241,6 +1265,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", wall_length)
       surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName(wall_id)
       surface.setSurfaceType("Wall")
       set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
@@ -1338,6 +1363,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", rim_joist_length)
       surface.additionalProperties.setFeature("Azimuth", rim_joist_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName(rim_joist_id)
       surface.setSurfaceType("Wall")
       set_surface_interior(model, spaces, surface, rim_joist_id, interior_adjacent_to)
@@ -1466,7 +1492,11 @@ class OSModel
 
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
-        roof_tilt = attic_roof_values[:pitch] / 12.0
+        if attic_values[:attic_type] != "FlatRoof"
+          roof_tilt = attic_roof_values[:pitch] / 12.0
+        else
+          roof_tilt = 0.0
+        end
         z_origin = walls_top + 0.5 * Math.sin(Math.atan(roof_tilt)) * roof_width
         roof_azimuth = 0 # TODO
         if not attic_roof_values[:azimuth].nil?
@@ -1561,6 +1591,7 @@ class OSModel
 
         surface.additionalProperties.setFeature("Length", wall_length)
         surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+        surface.additionalProperties.setFeature("Tilt", 90.0)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
@@ -1621,6 +1652,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", window_width)
       surface.additionalProperties.setFeature("Azimuth", window_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName("surface #{window_id}")
       surface.setSurfaceType("Wall")
       surface_space = nil
@@ -1766,6 +1798,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", door_width)
       surface.additionalProperties.setFeature("Azimuth", door_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName("surface #{door_id}")
       surface.setSurfaceType("Wall")
       surface_space = nil
