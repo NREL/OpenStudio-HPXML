@@ -1198,6 +1198,7 @@ class OSModel
 
         surface.additionalProperties.setFeature("Length", wall_length)
         surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+        surface.additionalProperties.setFeature("Tilt", 90.0)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
@@ -1663,8 +1664,8 @@ class OSModel
 
         surface.additionalProperties.setFeature("Length", roof_length)
         surface.additionalProperties.setFeature("Width", roof_width)
-        surface.additionalProperties.setFeature("Tilt", roof_tilt)
         surface.additionalProperties.setFeature("Azimuth", roof_azimuth)
+        surface.additionalProperties.setFeature("Tilt", roof_tilt)
         surface.setName(roof_id)
         surface.setSurfaceType("RoofCeiling")
         surface.setOutsideBoundaryCondition("Outdoors")
@@ -1884,8 +1885,8 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", skylight_width)
       surface.additionalProperties.setFeature("Width", skylight_height)
-      surface.additionalProperties.setFeature("Tilt", skylight_tilt)
       surface.additionalProperties.setFeature("Azimuth", skylight_azimuth)
+      surface.additionalProperties.setFeature("Tilt", skylight_tilt)
       surface.setName("surface #{skylight_id}")
       surface.setSurfaceType("RoofCeiling")
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving)) # Ensures it is included in Manual J sizing
