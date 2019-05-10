@@ -96,8 +96,8 @@ class HPXML
                              **remainder)
     neighbors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
     neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
-    XMLHelper.add_element(neighbor_building, "Azimuth", to_integer(azimuth)) unless azimuth.nil?
-    XMLHelper.add_element(neighbor_building, "Distance", to_float(distance)) unless distance.nil?
+    XMLHelper.add_element(neighbor_building, "Azimuth", to_integer(azimuth))
+    XMLHelper.add_element(neighbor_building, "Distance", to_float(distance))
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,

@@ -540,7 +540,7 @@ class OSModel
         distance = shading_surface.additionalProperties.getFeatureAsDouble("Distance").get
 
         unless azimuth_lengths.keys.include? azimuth
-          runner.registerError("A neighbor building surface has an azimuth '#{azimuth}' not equal to the amizuth of any wall (#{azimuth_lengths.keys * ", "}).")
+          runner.registerError("A neighbor building has an azimuth '#{azimuth}' not equal to the amizuth of any wall (#{azimuth_lengths.keys * ", "}).")
           return false
         end
 
@@ -1275,8 +1275,20 @@ class OSModel
   end
 
   def self.add_neighbors(runner, model, building, wall_length)
-    foundation_top = get_foundation_top(model)
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    # Get the max z-value of any model surface
+    wall_height = -9e99
+    model.getSpaces.each do |space|
+      z_origin = space.zOrigin
+      space.surfaces.each do |surface|
+        surface.vertices.each do |vertex|
+          next if vertex.z < wall_height
+
+          wall_height = vertex.z
+        end
+      end
+    end
+    wall_height = UnitConversions.convert(wall_height, "m", "ft")
+    z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
     building.elements.each("BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
@@ -1284,10 +1296,7 @@ class OSModel
       azimuth = neighbor_building_values[:azimuth]
       distance = neighbor_building_values[:distance]
 
-      wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
-      z_origin = foundation_top
       shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(wall_length, wall_height, z_origin, azimuth), model)
-
       shading_surface.additionalProperties.setFeature("Azimuth", azimuth)
       shading_surface.additionalProperties.setFeature("Distance", distance)
       shading_surface.setName("Neighbor azimuth #{azimuth} distance #{distance}")
