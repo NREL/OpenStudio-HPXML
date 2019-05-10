@@ -1281,9 +1281,10 @@ class OSModel
       z_origin = space.zOrigin
       space.surfaces.each do |surface|
         surface.vertices.each do |vertex|
-          next if vertex.z < wall_height
+          surface_z = vertex.z + z_origin
+          next if surface_z < wall_height
 
-          wall_height = vertex.z
+          wall_height = surface_z
         end
       end
     end
