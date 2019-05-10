@@ -95,6 +95,7 @@ def create_hpxmls
     'base-foundation-unconditioned-basement-above-grade.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
+    'base-foundation-multiple-slab.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
@@ -1030,6 +1031,21 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
     foundations_slabs_values[0][0][:exposed_perimeter] -= 40
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     foundations_slabs_values[0][0][:exposed_perimeter] -= 30
+  elsif ['base-foundation-multiple-slab.xml'].include? hpxml_file
+    # Multiple slabs for the same (basement) foundation
+    foundations_slabs_values[0][0][:area] = 450
+    foundations_slabs_values[0][0][:exposed_perimeter] = 50
+    foundations_slabs_values[0] << { :id => "FoundationSlab2",
+                                     :area => 900,
+                                     :thickness => 4,
+                                     :exposed_perimeter => 100,
+                                     :perimeter_insulation_depth => 0,
+                                     :under_slab_insulation_width => 0,
+                                     :depth_below_grade => 7,
+                                     :perimeter_insulation_r_value => 0,
+                                     :under_slab_insulation_r_value => 0,
+                                     :carpet_fraction => 0,
+                                     :carpet_r_value => 0 }
   end
   return foundations_slabs_values
 end

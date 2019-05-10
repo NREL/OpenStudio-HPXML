@@ -858,21 +858,19 @@ class OSModel
         foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next if foundation_wall_values[:adjacent_to] != "ground"
 
-        wall_id = foundation_wall_values[:id]
-        wall_net_area = net_surface_area(foundation_wall_values[:area], subsurface_areas, wall_id, "Wall")
-        wall_length = wall_net_area / foundation_wall_values[:height]
-        sum_wall_length += wall_length
+        wall_net_area = net_surface_area(foundation_wall_values[:area], subsurface_areas, foundation_wall_values[:id], "Wall")
+        sum_wall_length += wall_net_area / foundation_wall_values[:height]
       end
 
-      # Calculate sum of exposed perimeter
-      sum_perimeter_exposed = 0.0
+      # Obtain the exposed perimeter for each slab
+      slabs_perimeter_exposed = {}
       foundation.elements.each("Slab") do |fnd_slab|
         slab_values = HPXML.get_foundation_slab_values(slab: fnd_slab)
-        sum_perimeter_exposed += slab_values[:exposed_perimeter]
+        slabs_perimeter_exposed[slab_values[:id]] = slab_values[:exposed_perimeter]
       end
 
       # Foundation wall surfaces
-      foundation_object = nil # FIXME: How to assign walls to multiple slabs for a given foundation? Each slab must reference a different Kiva object.
+      foundation_object = {}
       foundation_wall_heights = []
       foundation.elements.each("FoundationWall") do |fnd_wall|
         foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
@@ -893,54 +891,58 @@ class OSModel
           wall_azimuth = foundation_wall_values[:azimuth]
         end
 
-        # Calculate exposed section based on slab's total exposed perimeter.
-        # Apportioned to each foundation wall.
-        wall_length = wall_length * sum_perimeter_exposed / sum_wall_length
+        # Attach a portion of the foundation wall to each slab. This is
+        # needed if there are multiple Slab elements defined for the foundation.
+        slabs_perimeter_exposed.each do |slab_id, slab_perimeter_exposed|
+          # Calculate exposed section of wall based on slab's total exposed perimeter.
+          # Apportioned to each foundation wall.
+          wall_length = wall_length * slab_perimeter_exposed / sum_wall_length
 
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
-                                                                  wall_azimuth), model)
+          surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
+                                                                    wall_azimuth), model)
 
-        surface.additionalProperties.setFeature("Length", wall_length)
-        surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
-        surface.setName(wall_id)
-        surface.setSurfaceType("Wall")
-        set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, wall_id, exterior_adjacent_to)
+          surface.additionalProperties.setFeature("Length", wall_length)
+          surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+          surface.setName(wall_id)
+          surface.setSurfaceType("Wall")
+          set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
+          set_surface_exterior(model, spaces, surface, wall_id, exterior_adjacent_to)
 
-        if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-          wall_drywall_thick_in = 0.5
-        else
-          wall_drywall_thick_in = 0.0
-        end
-        wall_filled_cavity = true
-        wall_concrete_thick_in = foundation_wall_values[:thickness]
-        wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
-        wall_film_r = Material.AirFilmVertical.rvalue
-        wall_cavity_r = 0.0
-        wall_cavity_depth_in = 0.0
-        wall_install_grade = 1
-        wall_framing_factor = 0.0
-        wall_cont_height = foundation_wall_values[:insulation_height]
-        wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
-        if wall_rigid_r < 0 # Try without drywall
-          wall_drywall_thick_in = 0.0
+          if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
+            wall_drywall_thick_in = 0.5
+          else
+            wall_drywall_thick_in = 0.0
+          end
+          wall_filled_cavity = true
+          wall_concrete_thick_in = foundation_wall_values[:thickness]
+          wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
+          wall_film_r = Material.AirFilmVertical.rvalue
+          wall_cavity_r = 0.0
+          wall_cavity_depth_in = 0.0
+          wall_install_grade = 1
+          wall_framing_factor = 0.0
+          wall_cont_height = foundation_wall_values[:insulation_height]
           wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
+          if wall_rigid_r < 0 # Try without drywall
+            wall_drywall_thick_in = 0.0
+            wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
+          end
+
+          # TODO: Currently assumes all walls have the same height, insulation height, etc.
+          # Refactor so that we create the single Kiva foundation object based on average values.
+          success = FoundationConstructions.apply_wall(runner, model, [surface], "FndWallConstruction",
+                                                       wall_cont_height, wall_cavity_r, wall_install_grade,
+                                                       wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
+                                                       wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
+                                                       wall_height, wall_height_above_grade, foundation_object[slab_id])
+          return false if not success
+
+          if not wall_assembly_r.nil?
+            check_surface_assembly_rvalue(surface, wall_film_r, wall_assembly_r)
+          end
+
+          foundation_object[slab_id] = surface.adjacentFoundation.get
         end
-
-        # TODO: Currently assumes all walls have the same height, insulation height, etc.
-        # Refactor so that we create the single Kiva foundation object based on average values.
-        success = FoundationConstructions.apply_wall(runner, model, [surface], "FndWallConstruction",
-                                                     wall_cont_height, wall_cavity_r, wall_install_grade,
-                                                     wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
-                                                     wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                                     wall_height, wall_height_above_grade, foundation_object)
-        return false if not success
-
-        if not wall_assembly_r.nil?
-          check_surface_assembly_rvalue(surface, wall_film_r, wall_assembly_r)
-        end
-
-        foundation_object = surface.adjacentFoundation.get
       end
 
       # Foundation slab surfaces
@@ -1008,7 +1010,7 @@ class OSModel
         success = FoundationConstructions.apply_slab(runner, model, surface, "SlabConstruction",
                                                      slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
                                                      slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
-                                                     slab_exp_perim, mat_carpet, foundation_object)
+                                                     slab_exp_perim, mat_carpet, foundation_object[slab_id])
         return false if not success
 
         # FIXME: Temporary code for sizing
