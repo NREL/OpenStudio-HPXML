@@ -46,7 +46,6 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume" => one,
-        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent" => one,
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
 
@@ -55,6 +54,7 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic" => one_or_more, # See [Attic]
         "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation" => one_or_more, # See [Foundation]
+        "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage" => zero_or_more, # See [Garage]
         "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist" => zero_or_more, # See [RimJoist]
         "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall" => one_or_more, # See [Wall]
         "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window" => zero_or_more, # See [Window]
@@ -219,6 +219,7 @@ class EnergyPlusValidator
         "Thickness" => one,
         "DepthBelowGrade" => one,
         "[AdjacentTo='ground' or AdjacentTo='basement - unconditioned' or AdjacentTo='basement - conditioned' or AdjacentTo='crawlspace - vented' or AdjacentTo='crawlspace - unvented']" => one,
+        "InsulationHeight" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
         "Insulation/AssemblyEffectiveRValue" => one,
       },
@@ -230,7 +231,7 @@ class EnergyPlusValidator
         "Thickness" => one, # Use zero for dirt floor
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
-        "UnderSlabInsulationWidth" => one,
+        "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
         "DepthBelowGrade" => one,
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
@@ -238,6 +239,50 @@ class EnergyPlusValidator
         "UnderSlabInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "extension/CarpetFraction" => one,
         "extension/CarpetRValue" => one,
+      },
+
+      # [Garage]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "Ceilings/Ceiling" => zero_or_more, # See [GarageCeiling]
+        "Walls/Wall" => one_or_more, # See [GarageWall]
+        "Slabs/Slab" => one_or_more, # See [GarageSlab]
+      },
+
+      ## [GarageCeiling]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage/Ceilings/Ceiling" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[AdjacentTo='living space' or AdjacentTo='attic - vented' or AdjacentTo='attic - unvented' or AdjacentTo='attic - conditioned']" => one,
+        "Area" => one,
+        "Insulation/SystemIdentifier" => one, # Required by HPXML schema
+        "Insulation/AssemblyEffectiveRValue" => one,
+      },
+
+      ## [GarageWall]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage/Walls/Wall" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[AdjacentTo='outside' or AdjacentTo='living space']" => one,
+        "WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]" => one,
+        "Area" => one,
+        "Azimuth" => zero_or_one,
+        "SolarAbsorptance" => one,
+        "Emittance" => one,
+        "Insulation/SystemIdentifier" => one, # Required by HPXML schema
+        "Insulation/AssemblyEffectiveRValue" => one,
+      },
+
+      ## [GarageSlab]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage/Slabs/Slab" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "Area" => one,
+        "Thickness" => one, # Use zero for dirt floor
+        "ExposedPerimeter" => one,
+        "PerimeterInsulationDepth" => one,
+        "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
+        "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
+        "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
+        "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
+        "UnderSlabInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
       },
 
       # [RimJoist]

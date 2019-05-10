@@ -3,29 +3,15 @@ require_relative "unit_conversions"
 require_relative "materials"
 require_relative "geometry"
 
-class WallConstructions
-  # Container class for above-grade wall constructions
+class Constructions
+  # Container class for walls, floors/ceilings, roofs, etc.
 
-  def self.apply_wood_stud(runner, model, surfaces, constr_name,
-                           cavity_r, install_grade, cavity_depth_in, cavity_filled,
-                           framing_factor, drywall_thick_in, osb_thick_in,
-                           rigid_r, mat_ext_finish)
+  def self.apply_wood_stud_wall(runner, model, surfaces, constr_name,
+                                cavity_r, install_grade, cavity_depth_in, cavity_filled,
+                                framing_factor, drywall_thick_in, osb_thick_in,
+                                rigid_r, mat_ext_finish)
 
     return true if surfaces.empty?
-
-    # Validate inputs
-    if cavity_r < 0.0
-      runner.registerError("Cavity Insulation Installed R-value must be greater than or equal to 0.")
-      return false
-    end
-    if cavity_depth_in <= 0.0
-      runner.registerError("Cavity Depth must be greater than 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
 
     # Define materials
     if cavity_r > 0
@@ -84,41 +70,19 @@ class WallConstructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, cavity_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
     end
 
     return true
   end
 
-  def self.apply_double_stud(runner, model, surfaces, constr_name,
-                             cavity_r, install_grade, stud_depth_in, gap_depth_in,
-                             framing_factor, framing_spacing, is_staggered,
-                             drywall_thick_in, osb_thick_in, rigid_r,
-                             mat_ext_finish)
+  def self.apply_double_stud_wall(runner, model, surfaces, constr_name,
+                                  cavity_r, install_grade, stud_depth_in, gap_depth_in,
+                                  framing_factor, framing_spacing, is_staggered,
+                                  drywall_thick_in, osb_thick_in, rigid_r,
+                                  mat_ext_finish)
 
     return true if surfaces.empty?
-
-    # Validate inputs
-    if cavity_r <= 0.0
-      runner.registerError("Cavity Insulation Nominal R-value must be greater than 0.")
-      return false
-    end
-    if stud_depth_in <= 0.0
-      runner.registerError("Stud Depth must be greater than 0.")
-      return false
-    end
-    if gap_depth_in < 0.0
-      runner.registerError("Gap Depth must be greater than or equal to 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if framing_spacing <= 0.0
-      runner.registerError("Framing Spacing must be greater than 0.")
-      return false
-    end
 
     # Define materials
     cavity_depth_in = 2.0 * stud_depth_in + gap_depth_in
@@ -191,43 +155,13 @@ class WallConstructions
     return true
   end
 
-  def self.apply_cmu(runner, model, surfaces, constr_name,
-                     thick_in, conductivity, density, framing_factor,
-                     furring_r, furring_cavity_depth, furring_spacing,
-                     drywall_thick_in, osb_thick_in, rigid_r,
-                     mat_ext_finish)
+  def self.apply_cmu_wall(runner, model, surfaces, constr_name,
+                          thick_in, conductivity, density, framing_factor,
+                          furring_r, furring_cavity_depth, furring_spacing,
+                          drywall_thick_in, osb_thick_in, rigid_r,
+                          mat_ext_finish)
 
     return true if surfaces.empty?
-
-    # Validate inputs
-    if thick_in <= 0.0
-      runner.registerError("CMU Block Thickness must be greater than 0.")
-      return false
-    end
-    if conductivity <= 0.0
-      runner.registerError("CMU Conductivity must be greater than 0.")
-      return false
-    end
-    if density <= 0.0
-      runner.registerError("CMU Density must be greater than 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if furring_r < 0.0
-      runner.registerError("Furring Insulation R-value must be greater than or equal to 0.")
-      return false
-    end
-    if furring_cavity_depth < 0.0
-      runner.registerError("Furring Cavity Depth must be greater than or equal to 0.")
-      return false
-    end
-    if furring_spacing < 0.0
-      runner.registerError("Furring Stud Spacing must be greater than or equal to 0.")
-      return false
-    end
 
     # Define materials
     mat_cmu = Material.new(name = nil, thick_in = thick_in, mat_base = BaseMaterial.Concrete, k_in = conductivity, rho = density)
@@ -294,36 +228,18 @@ class WallConstructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "CMU")
-      surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, furring_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, Float(furring_r))
     end
 
     return true
   end
 
-  def self.apply_icf(runner, model, surfaces, constr_name,
-                     icf_r, ins_thick_in, concrete_thick_in, framing_factor,
-                     drywall_thick_in, osb_thick_in, rigid_r,
-                     mat_ext_finish)
+  def self.apply_icf_wall(runner, model, surfaces, constr_name,
+                          icf_r, ins_thick_in, concrete_thick_in, framing_factor,
+                          drywall_thick_in, osb_thick_in, rigid_r,
+                          mat_ext_finish)
 
     return true if surfaces.empty?
-
-    # Validate inputs
-    if icf_r <= 0.0
-      runner.registerError("Nominal Insulation R-value must be greater than 0.")
-      return false
-    end
-    if ins_thick_in <= 0.0
-      runner.registerError("Insulation Thickness must be greater than 0.")
-      return false
-    end
-    if concrete_thick_in <= 0.0
-      runner.registerError("Concrete Thickness must be greater than 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
 
     # Define materials
     mat_ins = Material.new(name = nil, thick_in = ins_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = ins_thick_in / icf_r)
@@ -378,31 +294,13 @@ class WallConstructions
     return true
   end
 
-  def self.apply_sip(runner, model, surfaces, constr_name,
-                     sip_r, sip_thick_in, framing_factor,
-                     sheathing_type, sheathing_thick_in,
-                     drywall_thick_in, osb_thick_in, rigid_r,
-                     mat_ext_finish)
+  def self.apply_sip_wall(runner, model, surfaces, constr_name,
+                          sip_r, sip_thick_in, framing_factor,
+                          sheathing_type, sheathing_thick_in,
+                          drywall_thick_in, osb_thick_in, rigid_r,
+                          mat_ext_finish)
 
     return true if surfaces.empty?
-
-    # Validate inputs
-    if sip_r <= 0.0
-      runner.registerError("Nominal Insulation R-value must be greater than 0.")
-      return false
-    end
-    if sip_thick_in <= 0.0
-      runner.registerError("Insulation Thickness must be greater than 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if sheathing_thick_in <= 0.0
-      runner.registerError("Interior Sheathing Thickness must be greater than 0.")
-      return false
-    end
 
     # Define materials
     spline_thick_in = 0.5
@@ -465,37 +363,19 @@ class WallConstructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SIP")
-      surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, sip_thick_in)
+      surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
     end
 
     return true
   end
 
-  def self.apply_steel_stud(runner, model, surfaces, constr_name,
-                            cavity_r, install_grade, cavity_depth,
-                            cavity_filled, framing_factor, correction_factor,
-                            drywall_thick_in, osb_thick_in, rigid_r,
-                            mat_ext_finish)
+  def self.apply_steel_stud_wall(runner, model, surfaces, constr_name,
+                                 cavity_r, install_grade, cavity_depth,
+                                 cavity_filled, framing_factor, correction_factor,
+                                 drywall_thick_in, osb_thick_in, rigid_r,
+                                 mat_ext_finish)
 
     return true if surfaces.empty?
-
-    # Validate inputs
-    if cavity_r < 0.0
-      runner.registerError("Cavity Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-    if cavity_depth <= 0.0
-      runner.registerError("Cavity Depth must be greater than 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if correction_factor < 0.0 or correction_factor > 1.0
-      runner.registerError("Correction Factor must be greater than or equal to 0 and less than or equal to 1.")
-      return false
-    end
 
     # Define materials
     eR = cavity_r * correction_factor # The effective R-value of the cavity insulation with steel stud framing
@@ -554,16 +434,16 @@ class WallConstructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SteelStud")
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, cavity_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
     end
 
     return true
   end
 
-  def self.apply_generic(runner, model, surfaces, constr_name,
-                         thick_ins, conds, denss, specheats,
-                         drywall_thick_in, osb_thick_in, rigid_r,
-                         mat_ext_finish)
+  def self.apply_generic_layered_wall(runner, model, surfaces, constr_name,
+                                      thick_ins, conds, denss, specheats,
+                                      drywall_thick_in, osb_thick_in, rigid_r,
+                                      mat_ext_finish)
 
     return true if surfaces.empty?
 
@@ -662,62 +542,12 @@ class WallConstructions
     return true
   end
 
-  def self.apply_uninsulated(runner, model, walls_by_type,
-                             osb_thick_in, drywall_thick_in, mat_ext_finish)
-
-    framing_factor = Constants.DefaultFramingFactorInterior
-    cavity_r = 0
-    install_grade = 1
-    cavity_depth_in = 3.5
-    cavity_filled = false
-    rigid_r = 0
-
-    if not apply_wood_stud(runner, model,
-                           walls_by_type[Constants.SurfaceTypeWallExtUninsUnfin],
-                           Constants.SurfaceTypeWallExtUninsUnfin,
-                           cavity_r, install_grade, cavity_depth_in,
-                           cavity_filled, framing_factor,
-                           0, osb_thick_in, rigid_r, mat_ext_finish)
-      return false
-    end
-
-    if not apply_wood_stud(runner, model,
-                           walls_by_type[Constants.SurfaceTypeWallIntFinUninsFin],
-                           Constants.SurfaceTypeWallIntFinUninsFin,
-                           cavity_r, install_grade, cavity_depth_in,
-                           cavity_filled, framing_factor,
-                           drywall_thick_in, 0, rigid_r, mat_ext_finish)
-      return false
-    end
-
-    if not apply_wood_stud(runner, model,
-                           walls_by_type[Constants.SurfaceTypeWallIntUnfinUninsUnfin],
-                           Constants.SurfaceTypeWallIntUnfinUninsUnfin,
-                           cavity_r, install_grade, cavity_depth_in,
-                           cavity_filled, framing_factor,
-                           0, 0, rigid_r, mat_ext_finish)
-      return false
-    end
-
-    return true
-  end
-
   def self.apply_rim_joist(runner, model, surfaces, constr_name,
                            cavity_r, install_grade, framing_factor,
                            drywall_thick_in, osb_thick_in,
                            rigid_r, mat_ext_finish)
 
     return true if surfaces.empty?
-
-    # Validate inputs
-    if cavity_r < 0.0
-      runner.registerError("Cavity Insulation Installed R-value must be greater than or equal to 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
 
     # Define materials
     rim_joist_thick_in = 1.5
@@ -774,80 +604,19 @@ class WallConstructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, cavity_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
     end
 
     return true
   end
 
-  def self.get_exterior_finish_materials
-    mats = []
-    mats << Material.ExtFinishStuccoMedDark
-    mats << Material.ExtFinishBrickLight
-    mats << Material.ExtFinishBrickMedDark
-    mats << Material.ExtFinishWoodLight
-    mats << Material.ExtFinishWoodMedDark
-    mats << Material.ExtFinishAluminumLight
-    mats << Material.ExtFinishAluminumMedDark
-    mats << Material.ExtFinishVinylLight
-    mats << Material.ExtFinishVinylMedDark
-    mats << Material.ExtFinishFiberCementLight
-    mats << Material.ExtFinishFiberCementMedDark
-    return mats
-  end
-
-  def self.get_exterior_finish_material(name)
-    get_exterior_finish_materials.each do |mat|
-      next if mat.name != name
-
-      return mat
-    end
-    return nil
-  end
-
-  def self.get_default_frame_wall_ufactor(iecc_zone_2006)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Frame Wall U-Factor
-    if ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B"].include? iecc_zone_2006
-      return 0.082
-    elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C"].include? iecc_zone_2006
-      return 0.060
-    elsif ["7", "8"].include? iecc_zone_2006
-      return 0.057
-    else
-      return nil
-    end
-  end
-end
-
-class RoofConstructions
-  # Container class for roof constructions
-
-  def self.apply_unfinished_attic(runner, model, surfaces, constr_name,
+  def self.apply_open_cavity_roof(runner, model, surfaces, constr_name,
                                   cavity_r, install_grade, cavity_ins_thick_in,
                                   framing_factor, framing_thick_in,
                                   osb_thick_in, rigid_r,
                                   mat_roofing, has_radiant_barrier)
 
     return true if surfaces.empty?
-
-    # Validate Inputs
-    if cavity_r < 0.0
-      runner.registerError("Roof Cavity Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-    if cavity_ins_thick_in < 0.0
-      runner.registerError("Roof Cavity Insulation Thickness must be greater than or equal to 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Roof Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if framing_thick_in < 0.0
-      runner.registerError("Roof Framing Thickness must be greater than 0.")
-      return false
-    end
 
     # Define materials
     roof_ins_thickness_in = [cavity_ins_thick_in, framing_thick_in].max
@@ -914,33 +683,20 @@ class RoofConstructions
     surfaces.each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, rigid_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, !mat_rb.nil?)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
     return true
   end
 
-  def self.apply_finished_roof(runner, model, surfaces, constr_name,
-                               cavity_r, install_grade, cavity_depth,
-                               filled_cavity, framing_factor, drywall_thick_in,
-                               osb_thick_in, rigid_r, mat_roofing)
+  def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
+                                    cavity_r, install_grade, cavity_depth,
+                                    filled_cavity, framing_factor, drywall_thick_in,
+                                    osb_thick_in, rigid_r, mat_roofing)
 
     return true if surfaces.empty?
-
-    # Validate Inputs
-    if cavity_r < 0.0
-      runner.registerError("Cavity Insulation Installed R-value must be greater than or equal to 0.")
-      return false
-    end
-    if cavity_depth <= 0.0
-      runner.registerError("Cavity Depth must be greater than 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
 
     # Define materials
     if cavity_r > 0
@@ -998,56 +754,161 @@ class RoofConstructions
     surfaces.each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, rigid_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, false)
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, cavity_r)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
     return true
   end
 
-  def self.apply_uninsulated_roofs(runner, model, surfaces, constr_name,
-                                   framing_thick_in, framing_factor,
-                                   osb_thick_in, mat_roofing)
+  def self.apply_ceiling(runner, model, surfaces, constr_name,
+                         cavity_r, install_grade, ins_thick_in,
+                         framing_factor, joist_height_in,
+                         drywall_thick_in)
+
+    # Drywall below, open cavity above (e.g., attic floor)
 
     return true if surfaces.empty?
 
     # Define materials
-    mat_cavity = Material.AirCavityOpen(framing_thick_in)
-    mat_framing = Material.new(name = nil, thick_in = framing_thick_in, mat_base = BaseMaterial.Wood)
-    mat_osb = nil
-    if osb_thick_in > 0
-      mat_osb = Material.new(name = "RoofSheathing", thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
+    mat_addtl_ins = nil
+    if ins_thick_in >= joist_height_in
+      # If the ceiling insulation thickness is greater than the joist thickness
+      cavity_k = ins_thick_in / cavity_r
+      if ins_thick_in > joist_height_in
+        # If there is additional insulation beyond the rafter height,
+        # these inputs are used for defining an additional layer
+        mat_addtl_ins = Material.new(name = "FloorUAAdditionalCeilingIns", thick_in = (ins_thick_in - joist_height_in), mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
+      end
+      mat_cavity = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
+    else
+      # Else the joist thickness is greater than the ceiling insulation thickness
+      if cavity_r == 0
+        mat_cavity = Material.AirCavityOpen(joist_height_in)
+      else
+        mat_cavity = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = joist_height_in / cavity_r)
+      end
     end
+    mat_framing = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.Wood)
+    mat_gap = Material.AirCavityOpen(joist_height_in)
 
     # Set paths
-    path_fracs = [framing_factor, 1 - framing_factor]
+    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmOutside)
-    if not mat_roofing.nil?
-      constr.add_layer(mat_roofing)
+    constr.add_layer(Material.AirFilmFloorAverage)
+    if not mat_addtl_ins.nil?
+      constr.add_layer(mat_addtl_ins)
     end
-    constr.add_layer(mat_osb)
-    constr.add_layer([mat_framing, mat_cavity], "RoofStudAndAirRoof")
-    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], "FloorUATrussandIns")
+    if drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(drywall_thick_in))
+    end
+    constr.add_layer(Material.AirFilmFloorAverage)
+
+    # Create and assign construction to ceiling surfaces
+    if not constr.create_and_assign_constructions(surfaces, runner, model)
+      return false
+    end
+
+    return true
+  end
+
+  def self.apply_floor(runner, model, surfaces, constr_name,
+                       cavity_r, install_grade,
+                       framing_factor, joist_height_in,
+                       plywood_thick_in, rigid_r, mat_floor_covering,
+                       mat_carpet)
+
+    # Open cavity below, floor covering above (e.g., crawlspace ceiling)
+
+    return true if surfaces.empty?
+
+    # Define materials
+    mat_2x = Material.Stud2x(joist_height_in)
+    if cavity_r == 0
+      mat_cavity = Material.AirCavityOpen(mat_2x.thick_in)
+    else
+      mat_cavity = Material.new(name = nil, thick_in = mat_2x.thick_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = mat_2x.thick_in / cavity_r)
+    end
+    mat_framing = Material.new(name = nil, thick_in = mat_2x.thick_in, mat_base = BaseMaterial.Wood)
+    mat_gap = Material.AirCavityOpen(joist_height_in)
+    mat_rigid = nil
+    if rigid_r > 0
+      rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
+      mat_rigid = Material.new(name = "WallRigidIns", thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
+    end
+
+    # Set paths
+    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
+
+    # Define construction
+    constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(Material.AirFilmFloorReduced)
+    constr.add_layer([mat_framing, mat_cavity, mat_gap], "FloorIns")
+    if not mat_rigid.nil?
+      constr.add_layer(mat_rigid)
+    end
+    if plywood_thick_in > 0
+      constr.add_layer(Material.Plywood(plywood_thick_in))
+    end
+    if not mat_floor_covering.nil?
+      constr.add_layer(mat_floor_covering)
+    end
+    if not mat_carpet.nil?
+      constr.add_layer(mat_carpet)
+    end
+    constr.add_layer(Material.AirFilmFloorReduced)
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
       return false
     end
 
-    # Store info for HVAC Sizing measure
-    surfaces.each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, 0.0)
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, false)
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, 0.0)
-    end
-
     return true
+  end
+
+  def self.get_exterior_finish_materials
+    mats = []
+    mats << Material.ExtFinishStuccoMedDark
+    mats << Material.ExtFinishBrickLight
+    mats << Material.ExtFinishBrickMedDark
+    mats << Material.ExtFinishWoodLight
+    mats << Material.ExtFinishWoodMedDark
+    mats << Material.ExtFinishAluminumLight
+    mats << Material.ExtFinishAluminumMedDark
+    mats << Material.ExtFinishVinylLight
+    mats << Material.ExtFinishVinylMedDark
+    mats << Material.ExtFinishFiberCementLight
+    mats << Material.ExtFinishFiberCementMedDark
+    return mats
+  end
+
+  def self.get_exterior_finish_material(name)
+    get_exterior_finish_materials.each do |mat|
+      next if mat.name != name
+
+      return mat
+    end
+    return nil
+  end
+
+  def self.get_default_frame_wall_ufactor(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Frame Wall U-Factor
+    if ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B"].include? iecc_zone_2006
+      return 0.082
+    elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C"].include? iecc_zone_2006
+      return 0.060
+    elsif ["7", "8"].include? iecc_zone_2006
+      return 0.057
+    else
+      return nil
+    end
   end
 
   def self.get_roofing_materials
@@ -1076,8 +937,6 @@ class RoofConstructions
     end
     return nil
   end
-
-  private
 
   def self.get_roofing_material_manual_j_color(name)
     if name == Material.RoofingAsphaltShinglesDark.name
@@ -1142,184 +1001,6 @@ class RoofConstructions
 
     return nil
   end
-end
-
-class FloorConstructions
-  # Container class for above-grade floor constructions
-
-  # Unfinished attic floor
-  def self.apply_unfinished_attic(runner, model, surfaces, constr_name,
-                                  cavity_r, install_grade, ins_thick_in,
-                                  framing_factor, joist_height_in,
-                                  drywall_thick_in)
-
-    return true if surfaces.empty?
-
-    # Validate Inputs
-    if cavity_r < 0.0
-      runner.registerError("Ceiling Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-    if ins_thick_in < 0.0
-      runner.registerError("Ceiling Insulation Thickness must be greater than or equal to 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Ceiling Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if joist_height_in <= 0.0
-      runner.registerError("Ceiling Joist Height must be greater than 0.")
-      return false
-    end
-
-    # TODO: Attic perimeter derate is currently disabled
-    # <- implementation goes here ->
-
-    # Define materials
-    mat_addtl_ins = nil
-    if ins_thick_in >= joist_height_in
-      # If the ceiling insulation thickness is greater than the joist thickness
-      cavity_k = ins_thick_in / cavity_r
-      if ins_thick_in > joist_height_in
-        # If there is additional insulation beyond the rafter height,
-        # these inputs are used for defining an additional layer
-        mat_addtl_ins = Material.new(name = "FloorUAAdditionalCeilingIns", thick_in = (ins_thick_in - joist_height_in), mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
-      end
-      mat_cavity = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = cavity_k)
-    else
-      # Else the joist thickness is greater than the ceiling insulation thickness
-      if cavity_r == 0
-        mat_cavity = Material.AirCavityOpen(joist_height_in)
-      else
-        mat_cavity = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.InsulationGenericLoosefill, k_in = joist_height_in / cavity_r)
-      end
-    end
-    mat_framing = Material.new(name = nil, thick_in = joist_height_in, mat_base = BaseMaterial.Wood)
-    mat_gap = Material.AirCavityOpen(joist_height_in)
-
-    # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
-    path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
-
-    # Define construction
-    constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmFloorAverage)
-    if not mat_addtl_ins.nil?
-      constr.add_layer(mat_addtl_ins)
-    end
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], "FloorUATrussandIns")
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
-    end
-    constr.add_layer(Material.AirFilmFloorAverage)
-
-    # Create and assign construction to ceiling surfaces
-    if not constr.create_and_assign_constructions(surfaces, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  # Basement/crawlspace ceiling
-  def self.apply_foundation_ceiling(runner, model, surfaces, constr_name,
-                                    cavity_r, install_grade,
-                                    framing_factor, joist_height_in,
-                                    plywood_thick_in, mat_floor_covering,
-                                    mat_carpet)
-
-    return true if surfaces.empty?
-
-    # Validate Inputs
-    if cavity_r < 0.0
-      runner.registerError("Ceiling Cavity Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-    if framing_factor < 0.0 or framing_factor >= 1.0
-      runner.registerError("Ceiling Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if joist_height_in <= 0.0
-      runner.registerError("Ceiling Joist Height must be greater than 0.")
-      return false
-    end
-
-    # Define materials
-    mat_2x = Material.Stud2x(joist_height_in)
-    if cavity_r == 0
-      mat_cavity = Material.AirCavityOpen(mat_2x.thick_in)
-    else
-      mat_cavity = Material.new(name = nil, thick_in = mat_2x.thick_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = mat_2x.thick_in / cavity_r)
-    end
-    mat_framing = Material.new(name = nil, thick_in = mat_2x.thick_in, mat_base = BaseMaterial.Wood)
-    mat_gap = Material.AirCavityOpen(joist_height_in)
-
-    # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
-    path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
-
-    # Define construction
-    constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmFloorReduced)
-    constr.add_layer([mat_framing, mat_cavity, mat_gap], "FloorIns")
-    if plywood_thick_in > 0
-      constr.add_layer(Material.Plywood(plywood_thick_in))
-    end
-    if not mat_floor_covering.nil?
-      constr.add_layer(mat_floor_covering)
-    end
-    if not mat_carpet.nil?
-      constr.add_layer(mat_carpet)
-    end
-    constr.add_layer(Material.AirFilmFloorReduced)
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions(surfaces, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  def self.apply_uninsulated(runner, model, surfaces, constr_name,
-                             plywood_thick_in, drywall_thick_in,
-                             mat_floor_covering, mat_carpet)
-
-    return true if surfaces.empty?
-
-    # Define materials
-    mat_cavity = Material.AirCavityClosed(Material.Stud2x6.thick_in)
-    mat_framing = Material.new(name = nil, thick_in = Material.Stud2x6.thick_in, mat_base = BaseMaterial.Wood)
-
-    # Set paths
-    path_fracs = [Constants.DefaultFramingFactorFloor, 1 - Constants.DefaultFramingFactorFloor]
-
-    # Define construction
-    constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(Material.AirFilmFloorAverage)
-    if drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(drywall_thick_in))
-    end
-    constr.add_layer([mat_framing, mat_cavity], "FloorFinStudAndAirFloor")
-    if plywood_thick_in > 0
-      constr.add_layer(Material.Plywood(plywood_thick_in))
-    end
-    if not mat_floor_covering.nil?
-      constr.add_layer(mat_floor_covering)
-    end
-    if not mat_carpet.nil?
-      constr.add_layer(mat_carpet)
-    end
-    constr.add_layer(Material.AirFilmFloorAverage)
-
-    # Create and apply construction to surfaces
-    if not constr.create_and_assign_constructions(surfaces, runner, model)
-      return false
-    end
-
-    return true
-  end
 
   def self.get_default_floor_ufactor(iecc_zone_2006)
     # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
@@ -1351,67 +1032,45 @@ class FloorConstructions
 end
 
 class FoundationConstructions
-  # Container class for below-grade wall/floor constructions
+  # Separate container class for below-grade constructions due to rigidness of Kiva.
   # Note: Each slab surface (w/ connected walls) must have its own foundation object.
 
-  # Basement/crawlspace
-  def self.apply_walls_and_slab(runner, model, wall_surfaces, walls_constr_name,
-                                walls_ins_height, walls_cavity_r, walls_install_grade,
-                                walls_cavity_depth_in, walls_filled_cavity, walls_framing_factor,
-                                walls_rigid_r, walls_drywall_thick_in, walls_concrete_thick_in,
-                                space_height, slab_surface, slab_constr_name,
-                                slab_whole_r, slab_concrete_thick_in, exposed_perimeter = nil)
-
-    return true if slab_surface.nil?
+  # Foundation walls
+  def self.apply_wall(runner, model, wall_surfaces, wall_constr_name,
+                      wall_ins_height, wall_cavity_r, wall_install_grade,
+                      wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
+                      wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
+                      wall_height, wall_height_above_grade, foundation = nil)
 
     if wall_surfaces.empty?
       runner.registerError("No wall surfaces found adjacent to floor surface.")
       return false
     end
 
-    # Validate inputs
-    if walls_ins_height < 0.0
-      runner.registerError("Wall Insulation Height must be greater than or equal to 0.")
-      return false
-    end
-    if walls_cavity_r < 0.0
-      runner.registerError("Wall Cavity Insulation Installed R-value must be greater than or equal to 0.")
-      return false
-    end
-    if walls_cavity_depth_in < 0.0
-      runner.registerError("Wall Cavity Depth must be greater than or equal to 0.")
-      return false
-    end
-    if walls_framing_factor < 0.0 or walls_framing_factor >= 1.0
-      runner.registerError("Wall Framing Factor must be greater than or equal to 0 and less than 1.")
-      return false
-    end
-    if walls_rigid_r < 0.0
-      runner.registerError("Wall Continuous Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-
     # Calculate interior wall R-value
-    int_wall_Rvalue = calc_interior_wall_r_value(runner, walls_cavity_depth_in, walls_cavity_r,
-                                                 walls_filled_cavity, walls_framing_factor,
-                                                 walls_install_grade, walls_rigid_r,
-                                                 walls_drywall_thick_in)
+    int_wall_Rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
+                                                 wall_filled_cavity, wall_framing_factor,
+                                                 wall_install_grade, wall_rigid_r,
+                                                 wall_drywall_thick_in)
     if int_wall_Rvalue.nil?
       return false
     end
 
-    # Create Kiva foundation
-    foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_Rvalue, space_height,
-                                                          walls_rigid_r, walls_ins_height)
+    if foundation.nil?
+      # Create Kiva foundation
+      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_Rvalue, wall_height,
+                                                            wall_rigid_r, wall_ins_height,
+                                                            wall_height_above_grade)
+    end
 
     # Define materials
-    mat_concrete = Material.Concrete(walls_concrete_thick_in)
+    mat_concrete = Material.Concrete(wall_concrete_thick_in)
 
     # Define construction
-    constr = Construction.new(walls_constr_name, [1])
+    constr = Construction.new(wall_constr_name, [1])
     constr.add_layer(mat_concrete)
-    if walls_drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(walls_drywall_thick_in))
+    if wall_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(wall_drywall_thick_in))
     end
 
     # Create and assign construction to surfaces
@@ -1424,56 +1083,24 @@ class FoundationConstructions
       wall_surface.setAdjacentFoundation(foundation)
     end
 
-    if not apply_slab(runner, model, slab_surface, slab_constr_name,
-                      0, 0, 0, 0, 0, slab_whole_r, slab_concrete_thick_in,
-                      nil, true, exposed_perimeter, foundation)
-      return false
-    end
-
     return true
   end
 
-  # Slabs
+  # Foundation slabs
   def self.apply_slab(runner, model, surface, constr_name,
                       perimeter_r, perimeter_width,
                       gap_r, exterior_r, exterior_depth,
-                      whole_r, concrete_thick_in, mat_carpet = nil,
-                      has_fnd_walls = false, exposed_perimeter = nil,
-                      foundation = nil)
+                      whole_r, concrete_thick_in, exposed_perimeter,
+                      mat_carpet = nil, foundation = nil)
 
     return true if surface.nil?
-
-    # Validate inputs
-    if perimeter_r < 0.0
-      runner.registerError("Perimeter Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-    if perimeter_width < 0.0
-      runner.registerError("Perimeter Insulation Width must be greater than or equal to 0.")
-      return false
-    end
-    if gap_r < 0.0
-      runner.registerError("Gap Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-    if exterior_r < 0.0
-      runner.registerError("Exterior Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
-    if exterior_depth < 0.0
-      runner.registerError("Exterior Insulation Depth must be greater than or equal to 0.")
-      return false
-    end
-    if whole_r < 0.0
-      runner.registerError("Whole Slab Insulation Nominal R-value must be greater than or equal to 0.")
-      return false
-    end
 
     if foundation.nil?
       # Create Kiva foundation
       thick = UnitConversions.convert(concrete_thick_in, "in", "ft")
       foundation = create_kiva_slab_foundation(model, perimeter_r, perimeter_width,
-                                               gap_r, thick, exterior_r, exterior_depth)
+                                               gap_r, thick, exterior_r, exterior_depth,
+                                               concrete_thick_in)
     end
 
     # Define materials
@@ -1508,15 +1135,6 @@ class FoundationConstructions
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions([surface], runner, model)
-      return false
-    end
-
-    # Exposed perimeter
-    if exposed_perimeter.nil?
-      exposed_perimeter = Geometry.calculate_exposed_perimeter(model, [surface], has_fnd_walls)
-    end
-    if exposed_perimeter <= 0
-      runner.registerError("Calculated an exposed perimeter <= 0 for slab '#{surface.name.to_s}'.")
       return false
     end
 
@@ -1615,7 +1233,8 @@ class FoundationConstructions
   end
 
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
-                                       int_vert_depth, ext_vert_r, ext_vert_depth)
+                                       int_vert_depth, ext_vert_r, ext_vert_depth,
+                                       concrete_thick_in)
 
     # Create the Foundation:Kiva object for slab foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1642,14 +1261,8 @@ class FoundationConstructions
       foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
     end
 
-    foundation.setWallHeightAboveGrade(UnitConversions.convert(8.0, "in", "m"))
+    foundation.setWallHeightAboveGrade(UnitConversions.convert(concrete_thick_in, "in", "m"))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, "in", "m"))
-
-    # Footing wall construction
-    footing_mat = create_footing_material(model, "FootingMaterial")
-    footing_constr = OpenStudio::Model::Construction.new([footing_mat])
-    footing_constr.setName("FootingConstruction")
-    foundation.setFootingWallConstruction(footing_constr)
 
     apply_kiva_settings(model)
 
@@ -1657,7 +1270,8 @@ class FoundationConstructions
   end
 
   def self.create_kiva_crawl_or_basement_foundation(model, int_vert_r, int_vert_depth,
-                                                    ext_vert_r, ext_vert_depth)
+                                                    ext_vert_r, ext_vert_depth,
+                                                    wall_height_above_grade)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1676,7 +1290,7 @@ class FoundationConstructions
       foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
     end
 
-    foundation.setWallHeightAboveGrade(UnitConversions.convert(8.0, "in", "m"))
+    foundation.setWallHeightAboveGrade(UnitConversions.convert(wall_height_above_grade, "ft", "m"))
     foundation.setWallDepthBelowSlab(UnitConversions.convert(8.0, "in", "m"))
 
     apply_kiva_settings(model)
@@ -1729,16 +1343,8 @@ class FoundationConstructions
 end
 
 class SubsurfaceConstructions
-  # Container class for door/window constructions
-
   def self.apply_door(runner, model, subsurfaces, constr_name, ufactor)
     return true if subsurfaces.empty?
-
-    # Validate Inputs
-    if ufactor <= 0.0
-      runner.registerError("Door U-Factor must be greater than 0.")
-      return false
-    end
 
     # Define materials
     door_Rvalue = 1.0 / ufactor - Material.AirFilmOutside.rvalue - Material.AirFilmVertical.rvalue
@@ -1784,24 +1390,6 @@ class SubsurfaceConstructions
                                  cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     return true if subsurfaces.empty?
-
-    # Validate Inputs
-    if ufactor <= 0
-      runner.registerError("#{type} U-factor must be greater than zero.")
-      return false
-    end
-    if shgc <= 0
-      runner.registerError("#{type} SHGC must be greater than zero.")
-      return false
-    end
-    if heat_shade_mult < 0 or heat_shade_mult > 1
-      runner.registerError("Heating Shade Multiplier must be greater than or equal to zero and less than or equal to one.")
-      return false
-    end
-    if cool_shade_mult < 0 or cool_shade_mult > 1
-      runner.registerError("Cooling Shade Multiplier must be greater than or equal to zero and less than or equal to one.")
-      return false
-    end
 
     # Define shade and schedule
     sc = nil
@@ -1928,39 +1516,13 @@ end
 class ThermalMassConstructions
   # Container class for additional thermal mass (partition/furniture) constructions
 
-  def self.apply(runner, model, walls_by_type, drywall_thick_in,
-                 partition_wall_frac_of_ffa = 1.0, furniture_frac_of_ffa = 0.4)
-
-    if not apply_partition_walls(runner, model,
-                                 walls_by_type[Constants.SurfaceTypeWallIntFinUninsFin],
-                                 Constants.SurfaceTypeWallIntFinUninsFin,
-                                 drywall_thick_in, partition_wall_frac_of_ffa)
-      return false
-    end
-
-    if not apply_furniture(runner, model, furniture_frac_of_ffa)
-      return false
-    end
-
-    return true
-  end
-
-  private
-
-  # Potentially adds more thermal mass if not enough
-  # partition walls already exist.
+  # Potentially adds more thermal mass if not enough partition walls already exist.
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
                                  drywall_thick_in, frac_of_ffa)
 
     spaces = Geometry.get_finished_spaces(model.getSpaces)
 
     return true if spaces.empty?
-
-    # Validate Inputs
-    if frac_of_ffa < 0
-      runner.registerError("Fraction of Floor Area must be greater than or equal to 0.")
-      return false
-    end
 
     imdefs = []
     spaces.each do |space|
@@ -1988,12 +1550,10 @@ class ThermalMassConstructions
       end
     end
 
-    if not WallConstructions.apply_wood_stud(runner, model,
-                                             imdefs,
-                                             constr_name,
-                                             0, 1, 3.5, false,
-                                             Constants.DefaultFramingFactorInterior,
-                                             drywall_thick_in, 0, 0, nil)
+    if not Constructions.apply_wood_stud_wall(runner, model, imdefs, constr_name,
+                                              0, 1, 3.5, false,
+                                              Constants.DefaultFramingFactorInterior,
+                                              drywall_thick_in, 0, 0, nil)
       return false
     end
 
@@ -2424,258 +1984,6 @@ class Construction
       type_s = "Surface"
     end
     runner.registerInfo("#{type_s.to_s} '#{surface.name.to_s}' has been assigned construction '#{surface.construction.get.name.to_s}'.")
-  end
-end
-
-class SurfaceTypes
-  # Container class for identifying types of surfaces
-
-  def self.get_walls(model, runner)
-    surfaces = {
-      Constants.SurfaceTypeWallExtInsFin => [],
-      Constants.SurfaceTypeWallExtInsUnfin => [],
-      Constants.SurfaceTypeWallExtUninsUnfin => [],
-      Constants.SurfaceTypeWallIntFinUninsFin => [],
-      Constants.SurfaceTypeWallIntUnfinUninsUnfin => [],
-      Constants.SurfaceTypeWallIntFinInsUnfin => [],
-      Constants.SurfaceTypeWallFndGrndFinB => [],
-      Constants.SurfaceTypeWallFndGrndUnfinB => [],
-      Constants.SurfaceTypeWallFndGrndCS => [],
-    }
-
-    model.getSpaces.each do |space|
-      is_finished = Geometry.space_is_finished(space)
-
-      space.surfaces.each do |surface|
-        next if surface.surfaceType.downcase != "wall"
-
-        obc_is_exterior = (surface.outsideBoundaryCondition.downcase == "outdoors")
-        obc_is_foundation = (surface.outsideBoundaryCondition.downcase == "foundation")
-        obc_is_adiabatic = (surface.outsideBoundaryCondition.downcase == "adiabatic")
-
-        adjacent_space = nil
-        if surface.adjacentSurface.is_initialized and surface.adjacentSurface.get.space.is_initialized
-          adjacent_space = surface.adjacentSurface.get.space.get
-        end
-        obc_is_adjacent = (not adjacent_space.nil?)
-
-        # Exterior insulated finished
-        if is_finished and obc_is_exterior
-          surfaces[Constants.SurfaceTypeWallExtInsFin] << surface
-
-        # Exterior insulated unfinished
-        elsif not is_finished and obc_is_exterior and Geometry.is_unfinished_attic(space) and get_space_r_value(runner, space, "roofceiling").to_f > 5
-          surfaces[Constants.SurfaceTypeWallExtInsUnfin] << surface
-
-        # Exterior uninsulated unfinished
-        elsif not is_finished and obc_is_exterior
-          surfaces[Constants.SurfaceTypeWallExtUninsUnfin] << surface
-
-        # Interior finished uninsulated finished
-        elsif is_finished and obc_is_adjacent and Geometry.space_is_finished(adjacent_space)
-          surfaces[Constants.SurfaceTypeWallIntFinUninsFin] << surface
-
-        # Interior unfinished uninsulated unfinished
-        elsif not is_finished and obc_is_adjacent and Geometry.space_is_unfinished(adjacent_space)
-          surfaces[Constants.SurfaceTypeWallIntUnfinUninsUnfin] << surface
-
-        # Interior finished insulated unfinished
-        elsif is_finished and obc_is_adjacent and Geometry.space_is_unfinished(adjacent_space)
-          surfaces[Constants.SurfaceTypeWallIntFinInsUnfin] << surface
-
-        # Exterior finished basement
-        elsif Geometry.is_finished_basement(space) and obc_is_foundation
-          surfaces[Constants.SurfaceTypeWallFndGrndFinB] << surface
-
-        # Exterior unfinished basement
-        elsif Geometry.is_unfinished_basement(space) and obc_is_foundation
-          surfaces[Constants.SurfaceTypeWallFndGrndUnfinB] << surface
-
-        # Exterior crawlspace
-        elsif Geometry.is_crawl(space) and obc_is_foundation
-          surfaces[Constants.SurfaceTypeWallFndGrndCS] << surface
-
-        # Adiabatic finished
-        elsif obc_is_adiabatic and is_finished
-          surfaces[Constants.SurfaceTypeWallIntFinUninsFin] << surface
-
-        # Adiabatic unfinished
-        elsif obc_is_adiabatic and not is_finished
-          surfaces[Constants.SurfaceTypeWallIntUnfinUninsUnfin] << surface
-
-        end
-      end
-    end
-
-    return surfaces
-  end
-
-  def self.get_roofs(model, runner)
-    surfaces = {
-      Constants.SurfaceTypeRoofFinInsExt => [],
-      Constants.SurfaceTypeRoofUnfinInsExt => [],
-      Constants.SurfaceTypeRoofUnfinUninsExt => [],
-    }
-
-    model.getSpaces.each do |space|
-      is_finished = Geometry.space_is_finished(space)
-      above_grade = Geometry.space_is_above_grade(space)
-
-      space.surfaces.each do |surface|
-        next if surface.surfaceType.downcase != "roofceiling"
-
-        obc_is_exterior = (surface.outsideBoundaryCondition.downcase == "outdoors")
-        obc_is_adiabatic = (surface.outsideBoundaryCondition.downcase == "adiabatic")
-
-        adjacent_space = nil
-        if surface.adjacentSurface.is_initialized and surface.adjacentSurface.get.space.is_initialized
-          adjacent_space = surface.adjacentSurface.get.space.get
-        end
-        obc_is_adjacent = (not adjacent_space.nil?)
-
-        # Exterior insulated finished
-        if obc_is_exterior and is_finished and above_grade
-          surfaces[Constants.SurfaceTypeRoofFinInsExt] << surface
-
-        # Exterior insulated unfinished
-        elsif obc_is_exterior and Geometry.is_unfinished_attic(space)
-          surfaces[Constants.SurfaceTypeRoofUnfinInsExt] << surface
-
-        # Exterior uninsulated unfinished
-        elsif obc_is_exterior
-          surfaces[Constants.SurfaceTypeRoofUnfinUninsExt] << surface
-
-        # Adiabatic
-        elsif obc_is_adiabatic
-          surfaces[Constants.SurfaceTypeRoofUnfinUninsExt] << surface
-
-        end
-      end
-    end
-
-    return surfaces
-  end
-
-  def self.get_floors(model, runner)
-    surfaces = {
-      Constants.SurfaceTypeFloorFinInsUnfinAttic => [],
-      Constants.SurfaceTypeFloorFinInsUnfin => [],
-      Constants.SurfaceTypeFloorFinUninsFin => [],
-      Constants.SurfaceTypeFloorUnfinUninsUnfin => [],
-      Constants.SurfaceTypeFloorFndGrndFinB => [],
-      Constants.SurfaceTypeFloorFndGrndUnfinB => [],
-      Constants.SurfaceTypeFloorFndGrndCS => [],
-      Constants.SurfaceTypeFloorFndGrndFinSlab => [],
-      Constants.SurfaceTypeFloorFndGrndUnfinSlab => [],
-      Constants.SurfaceTypeFloorUnfinBInsFin => [],
-      Constants.SurfaceTypeFloorCSInsFin => [],
-      Constants.SurfaceTypeFloorPBInsFin => [],
-    }
-
-    # Ceilings
-    model.getSpaces.each do |space|
-      space.surfaces.each do |surface|
-        next if surface.surfaceType.downcase != "roofceiling"
-
-        obc_is_adiabatic = (surface.outsideBoundaryCondition.downcase == "adiabatic")
-
-        adjacent_space = nil
-        if surface.adjacentSurface.is_initialized and surface.adjacentSurface.get.space.is_initialized
-          adjacent_space = surface.adjacentSurface.get.space.get
-        end
-        obc_is_adjacent = (not adjacent_space.nil?)
-
-        # Unfinished basement ceiling
-        if Geometry.is_unfinished_basement(space) and not adjacent_space.nil? and Geometry.space_is_finished(adjacent_space)
-          surfaces[Constants.SurfaceTypeFloorUnfinBInsFin] << surface
-
-        # Crawlspace ceiling
-        elsif Geometry.is_crawl(space) and not adjacent_space.nil? and Geometry.space_is_finished(adjacent_space)
-          surfaces[Constants.SurfaceTypeFloorCSInsFin] << surface
-
-        # Pier beam ceiling
-        elsif Geometry.is_pier_beam(space) and not adjacent_space.nil? and Geometry.space_is_finished(adjacent_space)
-          surfaces[Constants.SurfaceTypeFloorPBInsFin] << surface
-
-        end
-      end
-    end
-
-    ceiling_surface_names = []
-    surfaces.each do |surface_type, surfaces|
-      surfaces.each do |surface|
-        ceiling_surface_names << surface.name.to_s
-      end
-    end
-
-    # Floors
-    model.getSpaces.each do |space|
-      is_finished = Geometry.space_is_finished(space)
-      above_grade = Geometry.space_is_above_grade(space)
-
-      space.surfaces.each do |surface|
-        next if surface.surfaceType.downcase != "floor"
-
-        obc_is_exterior = (surface.outsideBoundaryCondition.downcase == "outdoors")
-        obc_is_foundation = (surface.outsideBoundaryCondition.downcase == "foundation")
-        obc_is_adiabatic = (surface.outsideBoundaryCondition.downcase == "adiabatic")
-
-        adjacent_space = nil
-        if surface.adjacentSurface.is_initialized and surface.adjacentSurface.get.space.is_initialized
-          adjacent_space = surface.adjacentSurface.get.space.get
-          next if ceiling_surface_names.include? surface.adjacentSurface.get.name.to_s
-        end
-        obc_is_adjacent = (not adjacent_space.nil?)
-
-        # Unfinished attic floor
-        if obc_is_adjacent and Geometry.is_unfinished_attic(space) and Geometry.space_is_finished(adjacent_space)
-          surfaces[Constants.SurfaceTypeFloorFinInsUnfinAttic] << surface
-
-        # Floor between finished spaces
-        elsif is_finished and obc_is_adjacent and Geometry.space_is_finished(adjacent_space)
-          surfaces[Constants.SurfaceTypeFloorFinUninsFin] << surface
-
-        # Floor between unfinished spaces
-        elsif not is_finished and obc_is_adjacent and not Geometry.space_is_finished(adjacent_space)
-          surfaces[Constants.SurfaceTypeFloorUnfinUninsUnfin] << surface
-
-        # Finished basement floor
-        elsif Geometry.is_finished_basement(space) and obc_is_foundation
-          surfaces[Constants.SurfaceTypeFloorFndGrndFinB] << surface
-
-        # Unfinished basement floor
-        elsif Geometry.is_unfinished_basement(space) and obc_is_foundation
-          surfaces[Constants.SurfaceTypeFloorFndGrndUnfinB] << surface
-
-        # Crawlspace floor
-        elsif Geometry.is_crawl(space) and obc_is_foundation
-          surfaces[Constants.SurfaceTypeFloorFndGrndCS] << surface
-
-        # Finished slab
-        elsif above_grade and is_finished and obc_is_foundation
-          surfaces[Constants.SurfaceTypeFloorFndGrndFinSlab] << surface
-
-        # Unfinished slab
-        elsif above_grade and not is_finished and obc_is_foundation
-          surfaces[Constants.SurfaceTypeFloorFndGrndUnfinSlab] << surface
-
-        # Interzonal floor
-        elsif is_finished and (obc_is_exterior or (obc_is_adjacent and not Geometry.space_is_finished(adjacent_space)))
-          surfaces[Constants.SurfaceTypeFloorFinInsUnfin] << surface
-
-        # Adiabatic finished floor
-        elsif obc_is_adiabatic and is_finished
-          surfaces[Constants.SurfaceTypeFloorFinUninsFin] << surface
-
-        # Adiabatic unfinished floor
-        elsif obc_is_adiabatic and not is_finished
-          surfaces[Constants.SurfaceTypeFloorUnfinUninsUnfin] << surface
-
-        end
-      end
-    end
-
-    return surfaces
   end
 end
 
