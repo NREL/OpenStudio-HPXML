@@ -912,31 +912,21 @@ class OSModel
           end
           wall_filled_cavity = true
           wall_concrete_thick_in = foundation_wall_values[:thickness]
-          wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
-          wall_film_r = Material.AirFilmVertical.rvalue
           wall_cavity_r = 0.0
           wall_cavity_depth_in = 0.0
           wall_install_grade = 1
           wall_framing_factor = 0.0
-          wall_cont_height = foundation_wall_values[:insulation_height]
-          wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
-          if wall_rigid_r < 0 # Try without drywall
-            wall_drywall_thick_in = 0.0
-            wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
-          end
+          wall_rigid_height = foundation_wall_values[:insulation_height]
+          wall_rigid_r = foundation_wall_values[:insulation_r_value]
 
           # TODO: Currently assumes all walls have the same height, insulation height, etc.
           # Refactor so that we create the single Kiva foundation object based on average values.
           success = FoundationConstructions.apply_wall(runner, model, [surface], "FndWallConstruction",
-                                                       wall_cont_height, wall_cavity_r, wall_install_grade,
+                                                       wall_rigid_height, wall_cavity_r, wall_install_grade,
                                                        wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                                                        wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                                                        wall_height, wall_height_above_grade, foundation_object[slab_id])
           return false if not success
-
-          if not wall_assembly_r.nil?
-            check_surface_assembly_rvalue(surface, wall_film_r, wall_assembly_r)
-          end
 
           foundation_object[slab_id] = surface.adjacentFoundation.get
         end

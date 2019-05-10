@@ -1037,7 +1037,7 @@ class FoundationConstructions
 
   # Foundation walls
   def self.apply_wall(runner, model, wall_surfaces, wall_constr_name,
-                      wall_ins_height, wall_cavity_r, wall_install_grade,
+                      wall_rigid_ins_height, wall_cavity_r, wall_install_grade,
                       wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                       wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                       wall_height, wall_height_above_grade, foundation = nil)
@@ -1048,18 +1048,18 @@ class FoundationConstructions
     end
 
     # Calculate interior wall R-value
-    int_wall_Rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
+    int_wall_rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
                                                  wall_filled_cavity, wall_framing_factor,
                                                  wall_install_grade, wall_rigid_r,
                                                  wall_drywall_thick_in)
-    if int_wall_Rvalue.nil?
+    if int_wall_rvalue.nil?
       return false
     end
 
     if foundation.nil?
       # Create Kiva foundation
-      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_Rvalue, wall_height,
-                                                            wall_rigid_r, wall_ins_height,
+      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_rvalue, wall_height,
+                                                            wall_rigid_r, wall_rigid_ins_height,
                                                             wall_height_above_grade)
     end
 

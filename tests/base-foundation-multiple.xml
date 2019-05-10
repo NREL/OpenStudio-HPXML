@@ -169,7 +169,10 @@
               <InsulationHeight>4.0</InsulationHeight>
               <Insulation>
                 <SystemIdentifier id='FoundationWallInsulation'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
+                <Layer>
+                  <InstallationType>continuous</InstallationType>
+                  <NominalRValue>8.9</NominalRValue>
+                </Layer>
               </Insulation>
             </FoundationWall>
             <FoundationWall>
@@ -179,10 +182,13 @@
               <Thickness>8.0</Thickness>
               <DepthBelowGrade>7.0</DepthBelowGrade>
               <AdjacentTo>crawlspace - unvented</AdjacentTo>
-              <InsulationHeight>8.0</InsulationHeight>
+              <InsulationHeight>0.0</InsulationHeight>
               <Insulation>
                 <SystemIdentifier id='FoundationWallInterzoneInsulation'/>
-                <AssemblyEffectiveRValue>1.5</AssemblyEffectiveRValue>
+                <Layer>
+                  <InstallationType>continuous</InstallationType>
+                  <NominalRValue>0.0</NominalRValue>
+                </Layer>
               </Insulation>
             </FoundationWall>
             <Slab>
@@ -239,7 +245,10 @@
               <InsulationHeight>4.0</InsulationHeight>
               <Insulation>
                 <SystemIdentifier id='FoundationWallCrawlspaceInsulation'/>
-                <AssemblyEffectiveRValue>10.69</AssemblyEffectiveRValue>
+                <Layer>
+                  <InstallationType>continuous</InstallationType>
+                  <NominalRValue>8.9</NominalRValue>
+                </Layer>
               </Insulation>
             </FoundationWall>
             <Slab>

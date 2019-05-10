@@ -943,7 +943,7 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :depth_below_grade => 7,
                                    :adjacent_to => "ground",
                                    :insulation_height => 8,
-                                   :insulation_assembly_r_value => 10.69 }]]
+                                   :insulation_r_value => 8.9 }]]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundations_walls_values[0][0][:insulation_height] = 4
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
@@ -962,8 +962,8 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                      :thickness => 8,
                                      :depth_below_grade => 7,
                                      :adjacent_to => "crawlspace - unvented",
-                                     :insulation_height => 8,
-                                     :insulation_assembly_r_value => 1.5 }
+                                     :insulation_height => 0,
+                                     :insulation_r_value => 0 }
     foundations_walls_values << [{ :id => "FoundationWallCrawlspace",
                                    :height => 4,
                                    :area => 600,
@@ -971,7 +971,7 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :depth_below_grade => 3,
                                    :adjacent_to => "ground",
                                    :insulation_height => 4,
-                                   :insulation_assembly_r_value => 10.69 }]
+                                   :insulation_r_value => 8.9 }]
   elsif ['base-foundation-pier-beam.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     foundations_walls_values = [[]]
