@@ -2108,7 +2108,8 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "attic - conditioned"
     ducts_values[0][1][:duct_location] = "attic - conditioned"
-  elsif ['invalid_files/duct-location.xml.skip'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/duct-location.xml.skip'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "garage"
     ducts_values[0][1][:duct_location] = "garage"
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
@@ -2362,6 +2363,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "basement - conditioned"
   elsif ['invalid_files/water-heater-location.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "crawlspace - vented"
+  elsif ['base-enclosure-garage.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "garage"
   elsif ['base-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
   elsif hpxml_file.include? 'water_heating_multiple' and not water_heating_systems_values.nil? and water_heating_systems_values.size > 0
@@ -2551,7 +2554,8 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
     clothes_washer_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     clothes_washer_values[:location] = "basement - conditioned"
-  elsif ['invalid_files/clothes-washer-location.xml'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/clothes-washer-location.xml'].include? hpxml_file
     clothes_washer_values[:location] = "garage"
   end
   return clothes_washer_values
@@ -2582,7 +2586,8 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
     clothes_dryer_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "basement - conditioned"
-  elsif ['invalid_files/clothes-dryer-location.xml'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/clothes-dryer-location.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "garage"
   end
   return clothes_dryer_values
@@ -2614,7 +2619,8 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
     refrigerator_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     refrigerator_values[:location] = "basement - conditioned"
-  elsif ['invalid_files/refrigerator-location.xml'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/refrigerator-location.xml'].include? hpxml_file
     refrigerator_values[:location] = "garage"
   end
   return refrigerator_values
