@@ -252,6 +252,7 @@ class OSModel
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
+    @min_neighbor_distance = get_min_neighbor_distance(building)
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
@@ -3075,14 +3076,14 @@ class OSModel
     end
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area)
+                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area, @min_neighbor_distance)
     return false if not success
 
     return true
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, false)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, @min_neighbor_distance, false)
     return false if not success
 
     return true
@@ -3911,6 +3912,20 @@ class OSModel
     end
 
     return nil
+  end
+
+  def self.get_min_neighbor_distance(building)
+    min_neighbor_distance = nil
+    building.elements.each("BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
+      neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
+      if min_neighbor_distance.nil?
+        min_neighbor_distance = 9e99
+      end
+      if neighbor_building_values[:distance] < min_neighbor_distance
+        min_neighbor_distance = neighbor_building_values[:distance]
+      end
+    end
+    return min_neighbor_distance
   end
 end
 
