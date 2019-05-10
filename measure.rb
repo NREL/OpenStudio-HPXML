@@ -560,7 +560,7 @@ class OSModel
         distance = shading_surface.additionalProperties.getFeatureAsDouble("Distance").get
 
         unless azimuth_lengths.keys.include? azimuth
-          runner.registerError("A neighbor building has an azimuth '#{azimuth}' not equal to the amizuth of any wall (#{azimuth_lengths.keys * ", "}).")
+          runner.registerError("A neighbor building has an azimuth '#{azimuth}' not equal to the azimuth of any wall (#{azimuth_lengths.keys * ", "}).")
           return false
         end
 
