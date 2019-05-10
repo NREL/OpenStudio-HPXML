@@ -257,6 +257,8 @@ class OSModel
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
+    @subsurface_areas_by_surface = calc_subsurface_areas_by_surface(building)
+    @default_azimuth = get_default_azimuth(building)
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
@@ -379,33 +381,31 @@ class OSModel
   end
 
   def self.add_geometry_envelope(runner, model, building, weather, spaces)
-    subsurface_areas = get_subsurface_areas(building)
-
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather, runner)
     return false if heating_season.nil? or cooling_season.nil?
 
-    success = add_foundations(runner, model, building, spaces, subsurface_areas)
+    success = add_foundations(runner, model, building, spaces)
     return false if not success
 
-    success = add_garages(runner, model, building, spaces, subsurface_areas)
+    success = add_garages(runner, model, building, spaces)
     return false if not success
 
-    success = add_walls(runner, model, building, spaces, subsurface_areas)
+    success = add_walls(runner, model, building, spaces)
     return false if not success
 
     success = add_rim_joists(runner, model, building, spaces)
     return false if not success
 
-    success = add_windows(runner, model, building, spaces, subsurface_areas, weather, cooling_season)
+    success = add_windows(runner, model, building, spaces, weather, cooling_season)
     return false if not success
 
-    success = add_doors(runner, model, building, spaces, subsurface_areas)
+    success = add_doors(runner, model, building, spaces)
     return false if not success
 
-    success = add_skylights(runner, model, building, spaces, subsurface_areas, weather, cooling_season)
+    success = add_skylights(runner, model, building, spaces, weather, cooling_season)
     return false if not success
 
-    success = add_attics(runner, model, building, spaces, subsurface_areas)
+    success = add_attics(runner, model, building, spaces)
     return false if not success
 
     success = add_finished_floor_area(runner, model, building, spaces)
@@ -758,10 +758,10 @@ class OSModel
     return OpenStudio::reverse(add_floor_polygon(x, y, z))
   end
 
-  def self.net_surface_area(gross_area, subsurface_areas, surface_id, surface_type)
+  def self.net_surface_area(gross_area, surface_id, surface_type)
     net_area = gross_area
-    if subsurface_areas.keys.include? surface_id
-      net_area -= subsurface_areas[surface_id]
+    if @subsurface_areas_by_surface.keys.include? surface_id
+      net_area -= @subsurface_areas_by_surface[surface_id]
     end
 
     if net_area <= 0
@@ -793,46 +793,44 @@ class OSModel
     return true
   end
 
-  def self.get_subsurface_areas(building)
+  def self.calc_subsurface_areas_by_surface(building)
+    # Returns a hash with the amount of subsurface (window/skylight/door)
+    # area for each surface. Used to convert gross surface area to net surface
+    # area for a given surface.
     subsurface_areas = {}
 
     # Windows
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
       wall_id = window_values[:wall_idref]
-      if not subsurface_areas.keys.include? wall_id
-        subsurface_areas[wall_id] = 0
-      end
-      window_area = window_values[:area]
-      subsurface_areas[wall_id] += window_area
+      subsurface_areas[wall_id] = 0.0 if subsurface_areas[wall_id].nil?
+      subsurface_areas[wall_id] += window_values[:area]
     end
 
     # Skylights
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_values = HPXML.get_skylight_values(skylight: skylight)
       roof_id = skylight_values[:roof_idref]
-      if not subsurface_areas.keys.include? roof_id
-        subsurface_areas[roof_id] = 0
-      end
-      skylight_area = skylight_values[:area]
-      subsurface_areas[roof_id] += skylight_area
+      subsurface_areas[roof_id] = 0.0 if subsurface_areas[roof_id].nil?
+      subsurface_areas[roof_id] += skylight_values[:area]
     end
 
     # Doors
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
       door_values = HPXML.get_door_values(door: door)
       wall_id = door_values[:wall_idref]
-      if not subsurface_areas.keys.include? wall_id
-        subsurface_areas[wall_id] = 0
-      end
-      door_area = SubsurfaceConstructions.get_default_door_area()
-      if not door_values[:area].nil?
-        door_area = door_values[:area]
-      end
-      subsurface_areas[wall_id] += door_area
+      subsurface_areas[wall_id] = 0.0 if subsurface_areas[wall_id].nil?
+      subsurface_areas[wall_id] += door_values[:area]
     end
 
     return subsurface_areas
+  end
+
+  def self.get_default_azimuth(building)
+    building.elements.each(".//Azimuth") do |azimuth|
+      return Integer(azimuth.text)
+    end
+    return 0
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
@@ -842,7 +840,7 @@ class OSModel
     return spaces[spacetype]
   end
 
-  def self.add_foundations(runner, model, building, spaces, subsurface_areas)
+  def self.add_foundations(runner, model, building, spaces)
     # TODO: Refactor by creating methods for add_foundation_walls(), add_foundation_slabs(), etc.
 
     building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
@@ -858,7 +856,7 @@ class OSModel
         foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next if foundation_wall_values[:adjacent_to] != "ground"
 
-        wall_net_area = net_surface_area(foundation_wall_values[:area], subsurface_areas, foundation_wall_values[:id], "Wall")
+        wall_net_area = net_surface_area(foundation_wall_values[:area], foundation_wall_values[:id], "Wall")
         sum_wall_length += wall_net_area / foundation_wall_values[:height]
       end
 
@@ -880,13 +878,13 @@ class OSModel
         exterior_adjacent_to = foundation_wall_values[:adjacent_to]
 
         wall_height = foundation_wall_values[:height]
-        wall_net_area = net_surface_area(foundation_wall_values[:area], subsurface_areas, wall_id, "Wall")
+        wall_net_area = net_surface_area(foundation_wall_values[:area], wall_id, "Wall")
         foundation_wall_heights << wall_height
         wall_height_above_grade = wall_height - foundation_wall_values[:depth_below_grade]
         z_origin = -1 * foundation_wall_values[:depth_below_grade]
         wall_length = wall_net_area / wall_height
 
-        wall_azimuth = 0 # TODO
+        wall_azimuth = @default_azimuth # don't split up surface due to the Kiva runtime impact
         if not foundation_wall_values[:azimuth].nil?
           wall_azimuth = foundation_wall_values[:azimuth]
         end
@@ -1081,7 +1079,7 @@ class OSModel
     return true
   end
 
-  def self.add_garages(runner, model, building, spaces, subsurface_areas)
+  def self.add_garages(runner, model, building, spaces)
     # TODO: Refactor by creating methods for add_garage_ceilings(), add_garage_walls(), etc.
 
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
@@ -1146,11 +1144,12 @@ class OSModel
         interior_adjacent_to = "garage"
         exterior_adjacent_to = wall_values[:adjacent_to]
         wall_id = wall_values[:id]
-        wall_net_area = net_surface_area(wall_values[:area], subsurface_areas, wall_id, "Wall")
+        wall_net_area = net_surface_area(wall_values[:area], wall_id, "Wall")
         wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
         wall_length = wall_net_area / wall_height
         z_origin = 0
-        wall_azimuth = 0 # TODO
+
+        wall_azimuth = @default_azimuth
         if not wall_values[:azimuth].nil?
           wall_azimuth = wall_values[:azimuth]
         end
@@ -1365,7 +1364,7 @@ class OSModel
     return true
   end
 
-  def self.add_walls(runner, model, building, spaces, subsurface_areas)
+  def self.add_walls(runner, model, building, spaces)
     foundation_top = get_foundation_top(model)
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
 
@@ -1374,11 +1373,11 @@ class OSModel
       interior_adjacent_to = wall_values[:interior_adjacent_to]
       exterior_adjacent_to = wall_values[:exterior_adjacent_to]
       wall_id = wall_values[:id]
-      wall_net_area = net_surface_area(wall_values[:area], subsurface_areas, wall_id, "Wall")
+      wall_net_area = net_surface_area(wall_values[:area], wall_id, "Wall")
       wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
       wall_length = wall_net_area / wall_height
       z_origin = foundation_top
-      wall_azimuth = 0 # TODO
+      wall_azimuth = @default_azimuth
       if not wall_values[:azimuth].nil?
         wall_azimuth = wall_values[:azimuth]
       end
@@ -1433,7 +1432,7 @@ class OSModel
       rim_joist_height = 1.0
       rim_joist_length = rim_joist_values[:area] / rim_joist_height
       z_origin = foundation_top
-      rim_joist_azimuth = 0 # TODO
+      rim_joist_azimuth = @default_azimuth
       if not rim_joist_values[:azimuth].nil?
         rim_joist_azimuth = rim_joist_values[:azimuth]
       end
@@ -1494,7 +1493,7 @@ class OSModel
     return true
   end
 
-  def self.add_attics(runner, model, building, spaces, subsurface_areas)
+  def self.add_attics(runner, model, building, spaces)
     # TODO: Refactor by creating methods for add_attic_floors(), add_attic_walls(), etc.
 
     walls_top = get_walls_top(model)
@@ -1562,12 +1561,12 @@ class OSModel
         attic_roof_values = HPXML.get_attic_roof_values(roof: roof)
 
         roof_id = attic_roof_values[:id]
-        roof_net_area = net_surface_area(attic_roof_values[:area], subsurface_areas, roof_id, "Roof")
+        roof_net_area = net_surface_area(attic_roof_values[:area], roof_id, "Roof")
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
         roof_tilt = attic_roof_values[:pitch] / 12.0
         z_origin = walls_top + 0.5 * Math.sin(Math.atan(roof_tilt)) * roof_width
-        roof_azimuth = 0 # TODO
+        roof_azimuth = @default_azimuth
         if not attic_roof_values[:azimuth].nil?
           roof_azimuth = attic_roof_values[:azimuth]
         end
@@ -1639,11 +1638,11 @@ class OSModel
 
         exterior_adjacent_to = attic_wall_values[:adjacent_to]
         wall_id = attic_wall_values[:id]
-        wall_net_area = net_surface_area(attic_wall_values[:area], subsurface_areas, wall_id, "Wall")
+        wall_net_area = net_surface_area(attic_wall_values[:area], wall_id, "Wall")
         wall_height = 8.0
         wall_length = wall_net_area / wall_height
         z_origin = walls_top
-        wall_azimuth = 0 # TODO
+        wall_azimuth = @default_azimuth
         if not attic_wall_values[:azimuth].nil?
           wall_azimuth = attic_wall_values[:azimuth]
         end
@@ -1685,7 +1684,7 @@ class OSModel
     return true
   end
 
-  def self.add_windows(runner, model, building, spaces, subsurface_areas, weather, cooling_season)
+  def self.add_windows(runner, model, building, spaces, weather, cooling_season)
     foundation_top = get_foundation_top(model)
 
     surfaces = []
@@ -1759,7 +1758,7 @@ class OSModel
     return true
   end
 
-  def self.add_skylights(runner, model, building, spaces, subsurface_areas, weather, cooling_season)
+  def self.add_skylights(runner, model, building, spaces, weather, cooling_season)
     walls_top = get_walls_top(model)
 
     surfaces = []
@@ -1828,7 +1827,7 @@ class OSModel
     return true
   end
 
-  def self.add_doors(runner, model, building, spaces, subsurface_areas)
+  def self.add_doors(runner, model, building, spaces)
     foundation_top = get_foundation_top(model)
 
     surfaces = []
