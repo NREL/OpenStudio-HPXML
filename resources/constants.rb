@@ -13,8 +13,12 @@ class Constants
     return 0.07
   end
 
-  def self.C_d
-    return 0.11
+  def self.C_d(var_speed = false)
+    if var_speed
+      return 0.25
+    else
+      return 0.11
+    end
   end
 
   def self.DefaultCoolingSetpoint

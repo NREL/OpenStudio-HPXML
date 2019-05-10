@@ -12,11 +12,13 @@ class HVAC
     elsif num_speeds == 2
       return [[3.940185508, -0.104723455, 0.001019298, 0.006471171, -0.00000953, -0.000161658],
               [3.109456535, -0.085520461, 0.000863238, 0.00863049, -0.0000210, -0.000140186]]
-    elsif num_speeds == 4
-      return [[3.845135427537, -0.095933272242, 0.000924533273, 0.008939030321, -0.000021025870, -0.000191684744],
-              [1.902445285801, -0.042809294549, 0.000555959865, 0.009928999493, -0.000013373437, -0.000211453245],
-              [-3.176259152730, 0.107498394091, -0.000574951600, 0.005484032413, -0.000011584801, -0.000135528854],
-              [1.216308942608, -0.021962441981, 0.000410292252, 0.007362335339, -0.000000025748, -0.000202117724]]
+    else
+      cOOL_CAP_coeff_perf_map = [[1.203, 7.866E-2, -1.797E-3, -9.527E-2, 1.340E-3, 9.421E-4],
+                                 [-1.070, 2.633E-1, -6.290E-3, -3.907E-2, 5.085E-4, 1.078E-4],
+                                 [-6.195E-1, 1.621E-1, -3.028E-3, -2.812E-3, -2.590E-5, -3.764E-4],
+                                 [-3.549E-1, 1.281E-1, -2.132E-3, 1.923E-3, -9.240E-5, -4.161E-4],
+                                 [1.037, -2.036E-2, 2.231E-3, -2.538E-4, 4.604E-5, -7.790E-4]]
+      return cOOL_CAP_coeff_perf_map.select { |i| num_speeds.include? cOOL_CAP_coeff_perf_map.index(i) }
     end
   end
 
@@ -26,11 +28,13 @@ class HVAC
     elsif num_speeds == 2
       return [[-3.877526888, 0.164566276, -0.001272755, -0.019956043, 0.000256512, -0.000133539],
               [-1.990708931, 0.093969249, -0.00073335, -0.009062553, 0.000165099, -0.0000997]]
-    elsif num_speeds == 4
-      return [[-1.400822352, 0.075567798, -0.000589362, -0.024655521, 0.00032690848, -0.00010222178],
-              [3.278112067, -0.07106453, 0.000468081, -0.014070845, 0.00022267912, -0.00004950051],
-              [1.183747649, -0.041423179, 0.000390378, 0.021207528, 0.00011181091, -0.00034107189],
-              [-3.97662986, 0.115338094, -0.000841943, 0.015962287, 0.00007757092, -0.00018579409]]
+    else
+      cOOL_EIR_coeff_perf_map = [[1.021, -1.214E-1, 3.936E-3, 5.435E-2, 2.830E-4, -2.057E-3],
+                                 [1.999, -1.977E-1, 6.001E-3, 3.196E-2, 6.380E-4, -1.948E-3],
+                                 [1.745, -1.546E-1, 4.585E-3, 2.595E-2, 6.609E-4, -1.752E-3],
+                                 [8.258E-1, -3.497E-2, 1.241E-3, 1.269E-2, 8.047E-4, -1.538E-3],
+                                 [2.555E-1, 3.711E-2, -1.427E-3, 8.907E-3, 5.665E-4, -6.538E-4]]
+      return cOOL_EIR_coeff_perf_map.select { |i| num_speeds.include? cOOL_EIR_coeff_perf_map.index(i) }
     end
   end
 
@@ -40,6 +44,8 @@ class HVAC
     elsif num_speeds == 2
       return [[0.65673024, 0.516470835, -0.172887149],
               [0.690334551, 0.464383753, -0.154507638]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
     end
   end
 
@@ -49,6 +55,8 @@ class HVAC
     elsif num_speeds == 2
       return [[1.562945114, -0.791859997, 0.230030877],
               [1.31565404, -0.482467162, 0.166239001]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
     end
   end
 
@@ -61,9 +69,6 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-
-    # Performance curves
-    # NOTE: These coefficients are in IP UNITS
     curves_in_ip = true
 
     capacity_ratios = [1.0]
@@ -192,15 +197,12 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
-
-    # Performance curves
-    # NOTE: These coefficients are in IP UNITS
     curves_in_ip = true
 
     # Cooling Coil
     rated_airflow_rate = 355.2 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
-    eers = calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC_AC(2), cOOL_CAP_FT_SPEC_AC(2))
+    eers = calc_EERs_cooling_2spd(runner, seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC_AC(2), cOOL_CAP_FT_SPEC_AC(2))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -317,7 +319,7 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ac_4speed(model, runner, seer, eers, shrs,
+  def self.apply_central_ac_4speed(model, runner, seer, shrs,
                                    capacity_ratios, fan_speed_ratios,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    eer_capacity_derates, capacity, dse,
@@ -327,16 +329,15 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
+    curves_in_ip = false
 
-    # Performance curves
-    # NOTE: These coefficients are in IP UNITS
-    curves_in_ip = true
-    cOOL_CAP_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
-    cOOL_EIR_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
+    cap_ratio_seer = [0.36, 0.51, 1.0]
+    fan_speed_seer = [0.42, 0.54, 1.0]
 
     # Cooling Coil
     rated_airflow_rate = 315.8 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
+    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_AC([0, 1, 4]), cOOL_CAP_FT_SPEC_AC([0, 1, 4]), curves_in_ip)
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -346,7 +347,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC(4), cOOL_EIR_FT_SPEC_AC(4), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_AC([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(4), cOOL_EIR_FFLOW_SPEC_AC(4), curves_in_ip, dse)
 
       # _processSystemCoolingCoil
 
@@ -559,9 +560,6 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-
-    # Performance curves
-    # NOTE: These coefficients are in IP UNITS
     curves_in_ip = true
 
     capacity_ratios = [1.0]
@@ -813,15 +811,12 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
-
-    # Performance curves
-    # NOTE: These coefficients are in IP UNITS
     curves_in_ip = true
 
     # Cooling Coil
     rated_airflow_rate_cooling = 344.1 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
-    eers = calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios_cooling, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CAP_FT_SPEC_ASHP(2), true)
+    eers = calc_EERs_cooling_2spd(runner, seer, Constants.C_d, capacity_ratios, fan_speed_ratios_cooling, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CAP_FT_SPEC_ASHP(2), true)
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -1082,10 +1077,7 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
-
-    # Performance curves
-    # NOTE: These coefficients are in IP UNITS
-    curves_in_ip = true
+    curves_in_ip = false
     cOOL_CAP_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
     cOOL_EIR_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
     hEAT_CAP_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
@@ -3187,6 +3179,35 @@ class HVAC
     return [calc_EER_from_EIR(eir_1_a, fan_power_rated), eer_2]
   end
 
+  def self.calc_EERs_from_EIR_4spd(eer_nom, fan_power_rated, calc_type = 'seer')
+    # Returns EER A at minimum, intermediate, and nominal speed given EER A (and a fourth speed if calc_type != 'seer')
+
+    eir_nom = calc_EIR_from_EER(eer_nom, fan_power_rated)
+
+    if calc_type.include? 'seer'
+      indices = [0, 1, 4]
+    else
+      indices = [0, 1, 2, 4]
+    end
+
+    cop_ratios = [1.07, 1.11, 1.08, 1.05, 1.0] # Gross COP
+
+    # SEER calculation is based on performance at three speeds
+    cops = [ cop_ratios[indices[0]], cop_ratios[indices[1]], cop_ratios[indices[2]] ]
+
+    unless calc_type.include? 'seer'
+      cops << cop_ratios[indices[3]]
+    end
+
+    eers = []
+    cops.each do |mult|
+      eir = eir_nom / mult
+      eers << calc_EER_from_EIR(eir, fan_power_rated)
+    end
+
+    return eers
+  end
+
   def self.calc_COPs_from_EIR_2spd(cop_2, fan_power_rated)
     # Returns low and high stage rated COP given high stage COP
 
@@ -3224,7 +3245,7 @@ class HVAC
     return eer_a
   end
 
-  def self.calc_EERs_cooling_2spd(seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, is_heat_pump = false)
+  def self.calc_EERs_cooling_2spd(runner, seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, is_heat_pump = false)
     # Iterate to find rated net EERs given SEER using simple bisection method for two stage air conditioners
 
     # Initial large bracket of EER (A condition) to span possible seer range
@@ -3266,6 +3287,50 @@ class HVAC
     end
 
     return calc_EERs_from_EIR_2spd(eer_c, fan_power_rated, is_heat_pump)
+  end
+
+  def self.calc_EERs_cooling_4spd(runner, seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip)
+    # Iterate to find rated net EERs given SEER using simple bisection method for two stage and variable speed air conditioners    
+
+    # Initial large bracket of EER (A condition) to span possible seer range
+    eer_a = 5.0
+    eer_b = 30.0
+    
+    # Iterate
+    iter_max = 100
+    tol = 0.0001    
+    
+    err = 1
+    eer_c = (eer_a + eer_b) / 2.0
+    (1..iter_max).each do |n|            
+      eers = calc_EERs_from_EIR_4spd(eer_a, fan_power_rated, calc_type = 'seer')
+      f_a = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip) - seer
+
+      eers = calc_EERs_from_EIR_4spd(eer_c, fan_power_rated, calc_type = 'seer')
+      f_c = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip) - seer
+      
+      if f_c == 0
+        return eer_c
+      elsif f_a * f_c < 0
+        eer_b = eer_c
+      else
+        eer_a = eer_c
+      end
+      
+      eer_c = (eer_a + eer_b) / 2.0
+      err = (eer_b - eer_a) / 2.0
+
+      if err <= tol
+        break
+      end
+    end
+
+    if err > tol
+      eer_c = -99
+      runner.registerWarning('Variable-speed cooling EERs iteration failed to converge.')
+    end
+        
+    return calc_EERs_from_EIR_4spd(eer_c, fan_power_rated, calc_type = 'model')
   end
 
   def self.calc_SEER_TwoSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
@@ -3323,6 +3388,120 @@ class HVAC
       e_tot += e_i
       q_tot += q_i
     end
+
+    seer = q_tot / e_tot
+    return seer
+  end
+
+  def self.calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip)
+    n_max = 2
+    n_int = 1
+    n_min = 0
+    
+    wBin = 67.0
+    tout_B = 82.0
+    tout_E = 87.0
+    tout_F = 67.0
+    unless curves_in_ip
+      wBin = UnitConversions.convert(wBin, "F", "C")
+      tout_B = UnitConversions.convert(tout_B, "F", "C")
+      tout_E = UnitConversions.convert(tout_E, "F", "C")
+      tout_F = UnitConversions.convert(tout_F, "F", "C")
+    end
+    
+    eir_A2 = calc_EIR_from_EER(eers[n_max], fan_power_rated)    
+    eir_B2 = eir_A2 * calc_biquad(coeff_eir[n_max], wBin, tout_B)
+    
+    eir_Av = calc_EIR_from_EER(eers[n_int], fan_power_rated)
+    eir_Ev = eir_Av * calc_biquad(coeff_eir[n_int], wBin, tout_E)
+    
+    eir_A1 = calc_EIR_from_EER(eers[n_min], fan_power_rated)
+    eir_B1 = eir_A1 * calc_biquad(coeff_eir[n_min], wBin, tout_B) 
+    eir_F1 = eir_A1 * calc_biquad(coeff_eir[n_min], wBin, tout_F)
+    
+    q_A2 = capacity_ratios[n_max]
+    q_B2 = q_A2 * calc_biquad(coeff_q[n_max], wBin, tout_B)    
+    q_Ev = capacity_ratios[n_int] * calc_biquad(coeff_q[n_int], wBin, tout_E)            
+    q_B1 = capacity_ratios[n_min] * calc_biquad(coeff_q[n_min], wBin, tout_B)
+    q_F1 = capacity_ratios[n_min] * calc_biquad(coeff_q[n_min], wBin, tout_F)
+
+    cfm_Btu_h = 400.0 / 12000.0
+        
+    q_A2_net = q_A2 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
+    q_B2_net = q_B2 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
+    q_Ev_net = q_Ev - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_int]
+    q_B1_net = q_B1 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
+    q_F1_net = q_F1 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
+    
+    p_A2 = (q_A2 * eir_A2) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_max]
+    p_B2 = (q_B2 * eir_B2) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_max]
+    p_Ev = (q_Ev * eir_Ev) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_int]
+    p_B1 = (q_B1 * eir_B1) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_min]
+    p_F1 = (q_F1 * eir_F1) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_min]
+    
+    q_k1_87 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (87.0 - 67.0)
+    q_k2_87 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (87.0 - 82.0)
+    n_Q = (q_Ev_net - q_k1_87) / (q_k2_87 - q_k1_87)
+    m_Q = (q_B1_net - q_F1_net) / (82.0 - 67.0) * (1.0 - n_Q) + (q_A2_net - q_B2_net) / (95.0 - 82.0) * n_Q    
+    p_k1_87 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (87.0 - 67.0)
+    p_k2_87 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (87.0 - 82.0)
+    n_E = (p_Ev - p_k1_87) / (p_k2_87 - p_k1_87)
+    m_E = (p_B1 - p_F1) / (82.0 - 67.0) * (1.0 - n_E) + (p_A2 - p_B2) / (95.0 - 82.0) * n_E
+    
+    c_T_1_1 = q_A2_net / (1.1 * (95.0 - 65.0))
+    c_T_1_2 = q_F1_net
+    c_T_1_3 = (q_B1_net - q_F1_net) / (82.0 - 67.0)
+    t_1 = (c_T_1_2 - 67.0 * c_T_1_3 + 65.0 * c_T_1_1) / (c_T_1_1 - c_T_1_3)
+    q_T_1 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (t_1 - 67.0)
+    p_T_1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_1 - 67.0)
+    eer_T_1 = q_T_1 / p_T_1 
+     
+    t_v = (q_Ev_net - 87.0 * m_Q + 65.0 * c_T_1_1) / (c_T_1_1 - m_Q)
+    q_T_v = q_Ev_net + m_Q * (t_v - 87.0)
+    p_T_v = p_Ev + m_E * (t_v - 87.0)
+    eer_T_v = q_T_v / p_T_v
+    
+    c_T_2_1 = c_T_1_1
+    c_T_2_2 = q_B2_net
+    c_T_2_3 = (q_A2_net - q_B2_net) / (95.0 - 82.0)
+    t_2 = (c_T_2_2 - 82.0 * c_T_2_3 + 65.0 * c_T_2_1) / (c_T_2_1 - c_T_2_3)
+    q_T_2 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (t_2 - 82.0)
+    p_T_2 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (t_2 - 82.0)
+    eer_T_2 = q_T_2 / p_T_2
+    
+    d = (t_2 ** 2.0 - t_1 ** 2.0) / (t_v ** 2.0 - t_1 ** 2.0)
+    b = (eer_T_1 - eer_T_2 - d * (eer_T_1 - eer_T_v)) / (t_1 - t_2 - d * (t_1 - t_v))
+    c = (eer_T_1 - eer_T_2 - b * (t_1 - t_2)) / (t_1 ** 2.0 - t_2 ** 2.0)
+    a = eer_T_2 - b * t_2 - c * t_2 ** 2.0
+
+    t_bins = [67.0, 72.0, 77.0, 82.0, 87.0, 92.0, 97.0, 102.0]
+    frac_hours = [0.214, 0.231, 0.216, 0.161, 0.104, 0.052, 0.018, 0.004]    
+    
+    e_tot = 0.0
+    q_tot = 0.0
+    (0..7).each do |i|
+      bL = ((t_bins[i] - 65.0) / (95.0 - 65.0)) * (q_A2_net / 1.1)
+      q_k1 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (t_bins[i] - 67.0)
+      p_k1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_bins[i] - 67)
+      q_k2 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (t_bins[i] - 82.0)
+      p_k2 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (t_bins[i] - 82.0)
+              
+      if bL <= q_k1
+        x_k1 = bL / q_k1        
+        q_Tj_N = x_k1 * q_k1 * frac_hours[i]
+        e_Tj_N = x_k1 * p_k1 * frac_hours[i] / (1.0 - c_d * (1.0 - x_k1))
+      elsif q_k1 < bL and bL <= q_k2
+        q_Tj_N = bL * frac_hours[i]
+        eer_T_j = a + b * t_bins[i] + c * t_bins[i] ** 2.0
+        e_Tj_N = q_Tj_N / eer_T_j
+      else
+        q_Tj_N = frac_hours[i] * q_k2
+        e_Tj_N = frac_hours[i] * p_k2
+      end
+        
+      q_tot += q_Tj_N
+      e_tot += e_Tj_N 
+      end  
 
     seer = q_tot / e_tot
     return seer

@@ -2069,13 +2069,12 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          eers = [0.80 * seer, 0.75 * seer, 0.65 * seer, 0.60 * seer]
           shrs = [0.98, 0.82, 0.745, 0.77]
-          capacity_ratios = [0.36, 0.64, 1.0, 1.16]
-          fan_speed_ratios = [0.51, 0.84, 1.0, 1.19]
+          capacity_ratios = [0.36, 0.51, 0.67, 1.0]
+          fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
-          success = HVAC.apply_central_ac_4speed(model, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  eer_capacity_derates, cool_capacity_btuh,
