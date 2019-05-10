@@ -135,7 +135,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     seer_to_expected_eers = { 16 => [13.8, 12.7], 17 => [14.7, 13.6], 18 => [15.5, 14.5], 21 => [18.2, 17.2] }
     seer_to_expected_eers.each do |seer, expected_eers|
       fan_power_rated = HVAC.get_fan_power_rated(seer)
-      actual_eers = HVAC.calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC(2), HVAC.cOOL_CAP_FT_SPEC_AC(2))
+      actual_eers = HVAC.calc_EERs_cooling_2spd(nil, seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC(2), HVAC.cOOL_CAP_FT_SPEC_AC(2))
       expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
         assert_in_epsilon(expected_eer, actual_eer, 0.01)
       end
@@ -149,7 +149,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     seer_to_expected_eers = { 16 => [13.2, 12.2], 17 => [14.1, 13.0], 18 => [14.9, 13.9], 19 => [15.7, 14.7] }
     seer_to_expected_eers.each do |seer, expected_eers|
       fan_power_rated = HVAC.get_fan_power_rated(seer)
-      actual_eers = HVAC.calc_EERs_cooling_2spd(seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_ASHP(2), HVAC.cOOL_CAP_FT_SPEC_ASHP(2))
+      actual_eers = HVAC.calc_EERs_cooling_2spd(nil, seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_ASHP(2), HVAC.cOOL_CAP_FT_SPEC_ASHP(2))
       expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
         assert_in_epsilon(expected_eer, actual_eer, 0.01)
       end
@@ -163,6 +163,18 @@ class HPXMLTranslatorTest < MiniTest::Test
       actual_cops = HVAC.calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(2), HVAC.hEAT_CAP_FT_SPEC_ASHP(2))
       expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
         assert_in_epsilon(expected_cop, actual_cop, 0.01)
+      end
+    end
+
+    # variable-speed air conditioner
+    cap_ratio_seer = [0.36, 0.51, 1.0]
+    fan_speed_seer = [0.42, 0.54, 1.0]
+    seer_to_expected_eers = { 24.5 => [19.5, 20.2, 19.7, 18.3] }
+    seer_to_expected_eers.each do |seer, expected_eers|
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eers = HVAC.calc_EERs_cooling_4spd(nil, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC([0, 1, 4]), HVAC.cOOL_CAP_FT_SPEC_AC([0, 1, 4]), curves_in_ip = false)
+      expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
+        assert_in_epsilon(expected_eer, actual_eer, 0.01)
       end
     end
   end
@@ -703,12 +715,7 @@ class HPXMLTranslatorTest < MiniTest::Test
           hpxml_value = clg_sys_cap
           query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Cooling:%' AND ColumnName LIKE '%User-Specified%Total Cooling Capacity' AND Units='W'"
           sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
-          if clg_sys_type == "central air conditioning" and get_ac_num_speeds(clg_sys_seer) == "Variable-Speed"
-            cap_adj = 1.16 # TODO: Generalize this
-          else
-            cap_adj = 1.0
-          end
-          assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
+          assert_in_epsilon(hpxml_value, sql_value, 0.01)
         end
 
       end
