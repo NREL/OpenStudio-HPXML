@@ -368,14 +368,14 @@
             <SystemIdentifier id='DoorNorth'/>
             <AttachedToWall idref='WallNorth'/>
             <Area>40.0</Area>
-            <Azimuth>270</Azimuth>
+            <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth'/>
             <AttachedToWall idref='WallSouth'/>
             <Area>40.0</Area>
-            <Azimuth>270</Azimuth>
+            <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
         </Doors>

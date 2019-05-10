@@ -1587,12 +1587,12 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
     doors_values = [{ :id => "DoorNorth",
                       :wall_idref => "WallNorth",
                       :area => 40,
-                      :azimuth => 270,
+                      :azimuth => 0,
                       :r_value => 4.4 },
                     { :id => "DoorSouth",
                       :wall_idref => "WallSouth",
                       :area => 40,
-                      :azimuth => 270,
+                      :azimuth => 180,
                       :r_value => 4.4 }]
   elsif ['base-enclosure-garage.xml',
          'base-enclosure-2stories-garage.xml'].include? hpxml_file
