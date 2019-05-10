@@ -32,7 +32,6 @@
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>1350.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>10800.0</ConditionedBuildingVolume>
-          <GaragePresent>false</GaragePresent>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>

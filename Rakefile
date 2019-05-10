@@ -608,8 +608,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
                                      :number_of_conditioned_floors_above_grade => 1,
                                      :number_of_bedrooms => 3,
                                      :conditioned_floor_area => 2700,
-                                     :conditioned_building_volume => 2700 * 8,
-                                     :garage_present => false }
+                                     :conditioned_building_volume => 2700 * 8 }
   elsif ['base-foundation-pier-beam.xml',
          'base-foundation-slab.xml',
          'base-foundation-unconditioned-basement.xml',
@@ -672,9 +671,6 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
     building_construction_values[:number_of_conditioned_floors_above_grade] += 1
     building_construction_values[:conditioned_floor_area] += 1350
     building_construction_values[:conditioned_building_volume] += 1350 * 8
-  elsif ['base-enclosure-2stories-garage.xml',
-         'base-enclosure-garage.xml'].include? hpxml_file
-    building_construction_values[:garage_present] = true
   end
   return building_construction_values
 end

@@ -244,7 +244,7 @@ class OSModel
         @cfa_ag -= slab_values[:area]
       end
     end
-    @gfa = 0
+    @gfa = 0 # garage floor area
     building.elements.each("BuildingDetails/Enclosure/Garages/Garage/Slabs/Slab") do |garage_slab|
       slab_values = HPXML.get_garage_slab_values(slab: garage_slab)
       @gfa += slab_values[:area]
@@ -254,7 +254,6 @@ class OSModel
     @ncfl_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = building_construction_values[:number_of_bedrooms]
     @nbaths = 3.0 # TODO: Arbitrary, but update
-    @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
     @subsurface_areas_by_surface = calc_subsurface_areas_by_surface(building)
@@ -2811,7 +2810,7 @@ class OSModel
       fail "Fraction of qualifying garage lighting fixtures #{lighting_values[:fraction_tier_i_garage] + lighting_values[:fraction_tier_ii_garage]} is greater than 1."
     end
 
-    int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @garage_present,
+    int_kwh, ext_kwh, grg_kwh = Lighting.calc_lighting_energy(@eri_version, @cfa, @gfa,
                                                               lighting_values[:fraction_tier_i_interior],
                                                               lighting_values[:fraction_tier_i_exterior],
                                                               lighting_values[:fraction_tier_i_garage],
