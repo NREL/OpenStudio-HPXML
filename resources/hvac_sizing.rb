@@ -6,7 +6,7 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, cfa, nbeds, show_debug_info)
+  def self.apply(model, runner, weather, cfa, nbeds, min_neighbor_distance, show_debug_info)
     @model_spaces = model.getSpaces
 
     # Get year of model
@@ -40,7 +40,7 @@ class HVACSizing
     return false if mj8.nil?
 
     # Get shelter class
-    shelter_class = get_shelter_class(model)
+    shelter_class = get_shelter_class(model, min_neighbor_distance)
 
     # Get HVAC system info
     hvac = get_hvac_info(runner, model)
@@ -2578,29 +2578,27 @@ class HVACSizing
     return final_values
   end
 
-  def self.get_shelter_class(model)
-    neighbor_offset_ft = Geometry.get_closest_neighbor_distance(model)
-
+  def self.get_shelter_class(model, min_neighbor_distance)
     height_ft = Geometry.get_height_of_spaces(Geometry.get_finished_spaces(@model_spaces))
     exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
                          Geometry.calculate_above_grade_wall_area(@model_spaces)
 
     if exposed_wall_ratio > 0.5 # 3 or 4 exposures; Table 5D
-      if neighbor_offset_ft == 0
+      if min_neighbor_distance.nil?
         shelter_class = 2 # Typical shelter for isolated rural house
-      elsif neighbor_offset_ft > height_ft
+      elsif min_neighbor_distance > height_ft
         shelter_class = 3 # Typical shelter caused by other buildings across the street
       else
         shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
       end
     else # 0, 1, or 2 exposures; Table 5E
-      if neighbor_offset_ft == 0
+      if min_neighbor_distance.nil?
         if exposed_wall_ratio > 0.25 # 2 exposures; Table 5E
           shelter_class = 2 # Typical shelter for isolated rural house
         else # 1 exposure; Table 5E
           shelter_class = 3 # Typical shelter caused by other buildings across the street
         end
-      elsif neighbor_offset_ft > height_ft
+      elsif min_neighbor_distance > height_ft
         shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
       else
         shelter_class = 5 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
