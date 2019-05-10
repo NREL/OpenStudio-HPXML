@@ -79,6 +79,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['skip_validation'] = false
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'bad-site-neighbor-azimuth.xml' => ["A neighbor building has an azimuth '145' not equal to the azimuth of any wall (90, 270, 0, 180)"],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
                             'duct-location.xml' => ["TODO"],
@@ -326,7 +327,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       hpxml_value = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.07) # TODO: Higher due to outside air film?
+      assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
 
       # Net area
       hpxml_value = Float(XMLHelper.get_value(roof, 'Area'))
