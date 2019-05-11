@@ -971,11 +971,11 @@ class OSModel
 
           # TODO: Currently assumes all walls have the same height, insulation height, etc.
           # Refactor so that we create the single Kiva foundation object based on average values.
-          success = FoundationConstructions.apply_wall(runner, model, [surface], "FndWallConstruction",
-                                                       wall_rigid_height, wall_cavity_r, wall_install_grade,
-                                                       wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
-                                                       wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                                       wall_height, wall_height_above_grade, foundation_object[slab_id])
+          success = Constructions.apply_foundation_wall(runner, model, [surface], "FndWallConstruction",
+                                                        wall_rigid_height, wall_cavity_r, wall_install_grade,
+                                                        wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
+                                                        wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
+                                                        wall_height, wall_height_above_grade, foundation_object[slab_id])
           return false if not success
 
           foundation_object[slab_id] = surface.adjacentFoundation.get
@@ -1044,10 +1044,10 @@ class OSModel
                                              slab_values[:carpet_r_value])
         end
 
-        success = FoundationConstructions.apply_slab(runner, model, surface, "SlabConstruction",
-                                                     slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
-                                                     slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
-                                                     slab_exp_perim, mat_carpet, foundation_object[slab_id])
+        success = Constructions.apply_foundation_slab(runner, model, surface, "SlabConstruction",
+                                                      slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
+                                                      slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
+                                                      slab_exp_perim, mat_carpet, foundation_object[slab_id])
         return false if not success
 
         # FIXME: Temporary code for sizing
@@ -1283,10 +1283,10 @@ class OSModel
         end
         slab_gap_r = slab_perim_r
 
-        success = FoundationConstructions.apply_slab(runner, model, surface, "GarageSlabConstruction",
-                                                     slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
-                                                     slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
-                                                     slab_values[:exposed_perimeter], nil, nil)
+        success = Constructions.apply_foundation_slab(runner, model, surface, "GarageSlabConstruction",
+                                                      slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
+                                                      slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
+                                                      slab_values[:exposed_perimeter], nil, nil)
         return false if not success
       end
     end
@@ -1387,9 +1387,9 @@ class OSModel
   def self.add_thermal_mass(runner, model, building)
     drywall_thick_in = 0.5
     partition_frac_of_cfa = 1.0
-    success = ThermalMassConstructions.apply_partition_walls(runner, model, [],
-                                                             "PartitionWallConstruction",
-                                                             drywall_thick_in, partition_frac_of_cfa)
+    success = Constructions.apply_partition_walls(runner, model, [],
+                                                  "PartitionWallConstruction",
+                                                  drywall_thick_in, partition_frac_of_cfa)
     return false if not success
 
     # FIXME ?
@@ -1397,8 +1397,8 @@ class OSModel
     mass_lb_per_sqft = 8.0
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
-    success = ThermalMassConstructions.apply_furniture(runner, model, furniture_frac_of_cfa,
-                                                       mass_lb_per_sqft, density_lb_per_cuft, mat)
+    success = Constructions.apply_furniture(runner, model, furniture_frac_of_cfa,
+                                            mass_lb_per_sqft, density_lb_per_cuft, mat)
     return false if not success
 
     return true
@@ -1826,7 +1826,7 @@ class OSModel
       # Apply construction
       ufactor = window_values[:ufactor]
       shgc = window_values[:shgc]
-      default_shade_summer, default_shade_winter = SubsurfaceConstructions.get_default_interior_shading_factors()
+      default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors()
       cool_shade_mult = default_shade_summer
       if not window_values[:interior_shading_factor_summer].nil?
         cool_shade_mult = window_values[:interior_shading_factor_summer]
@@ -1835,10 +1835,10 @@ class OSModel
       if not window_values[:interior_shading_factor_winter].nil?
         heat_shade_mult = window_values[:interior_shading_factor_winter]
       end
-      success = SubsurfaceConstructions.apply_window(runner, model, [sub_surface],
-                                                     "WindowConstruction",
-                                                     weather, cooling_season, ufactor, shgc,
-                                                     heat_shade_mult, cool_shade_mult)
+      success = Constructions.apply_window(runner, model, [sub_surface],
+                                           "WindowConstruction",
+                                           weather, cooling_season, ufactor, shgc,
+                                           heat_shade_mult, cool_shade_mult)
       return false if not success
     end
 
@@ -1904,10 +1904,10 @@ class OSModel
       shgc = skylight_values[:shgc]
       cool_shade_mult = 1.0
       heat_shade_mult = 1.0
-      success = SubsurfaceConstructions.apply_skylight(runner, model, [sub_surface],
-                                                       "SkylightConstruction",
-                                                       weather, cooling_season, ufactor, shgc,
-                                                       heat_shade_mult, cool_shade_mult)
+      success = Constructions.apply_skylight(runner, model, [sub_surface],
+                                             "SkylightConstruction",
+                                             weather, cooling_season, ufactor, shgc,
+                                             heat_shade_mult, cool_shade_mult)
       return false if not success
     end
 
@@ -1954,7 +1954,7 @@ class OSModel
       # Apply construction
       ufactor = 1.0 / door_values[:r_value]
 
-      success = SubsurfaceConstructions.apply_door(runner, model, [sub_surface], "Door", ufactor)
+      success = Constructions.apply_door(runner, model, [sub_surface], "Door", ufactor)
       return false if not success
     end
 
