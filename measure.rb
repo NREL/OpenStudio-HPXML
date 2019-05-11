@@ -875,7 +875,7 @@ class OSModel
   end
 
   def self.get_default_azimuth(building)
-    building.elements.each(".//Azimuth") do |azimuth|
+    building.elements.each("BuildingDetails/Enclosure//Azimuth") do |azimuth|
       return Integer(azimuth.text)
     end
     return 0
