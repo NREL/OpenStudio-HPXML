@@ -1287,13 +1287,14 @@ class Constructions
     end
   end
 
-  def self.get_default_basement_wall_ufactor(iecc_zone_2006)
+  def self.get_default_basement_wall_rvalue(iecc_zone_2006)
     # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
     # Basement Wall U-Factor
+    # Updated to insulation Rvalues (see IECC 2006)
     if ["1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B", "3C"].include? iecc_zone_2006
-      return 0.360
+      return 0.0 # U-factor: 0.360
     elsif ["4A", "4B", "4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
-      return 0.059
+      return 10.0 # U-factor: 0.059
     else
       return nil
     end
