@@ -39,7 +39,7 @@ class Constructions
     end
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction
@@ -111,7 +111,7 @@ class Constructions
       runner.registerError("Framing Factor (#{framing_factor.to_s}) is less than the framing solely provided by the studs (#{stud_frac.to_s}).")
       return false
     end
-    dsGapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    dsGapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [misc_framing_factor, stud_frac, stud_frac, dsGapFactor, (1.0 - (2 * stud_frac + misc_framing_factor + dsGapFactor))]
 
     # Define construction
@@ -403,7 +403,7 @@ class Constructions
     end
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [1 - gapFactor, gapFactor]
 
     # Define construction
@@ -573,7 +573,7 @@ class Constructions
     end
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction
@@ -651,7 +651,7 @@ class Constructions
     end
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction
@@ -724,7 +724,7 @@ class Constructions
     end
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction
@@ -794,7 +794,7 @@ class Constructions
     mat_gap = Material.AirCavityOpen(joist_height_in)
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction
@@ -843,7 +843,7 @@ class Constructions
     end
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction
@@ -867,6 +867,263 @@ class Constructions
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
       return false
+    end
+
+    return true
+  end
+
+  def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
+                                 wall_rigid_ins_height, wall_cavity_r, wall_install_grade,
+                                 wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
+                                 wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
+                                 wall_height, wall_height_above_grade, foundation = nil)
+
+    if wall_surfaces.empty?
+      runner.registerError("No wall surfaces found adjacent to floor surface.")
+      return false
+    end
+
+    # Calculate interior wall R-value
+    int_wall_rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
+                                                 wall_filled_cavity, wall_framing_factor,
+                                                 wall_install_grade, wall_rigid_r,
+                                                 wall_drywall_thick_in)
+    if int_wall_rvalue.nil?
+      return false
+    end
+
+    if foundation.nil?
+      # Create Kiva foundation
+      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_rvalue, wall_height,
+                                                            wall_rigid_r, wall_rigid_ins_height,
+                                                            wall_height_above_grade)
+    end
+
+    # Define materials
+    mat_concrete = Material.Concrete(wall_concrete_thick_in)
+
+    # Define construction
+    constr = Construction.new(wall_constr_name, [1])
+    constr.add_layer(mat_concrete)
+    if wall_drywall_thick_in > 0
+      constr.add_layer(Material.GypsumWall(wall_drywall_thick_in))
+    end
+
+    # Create and assign construction to surfaces
+    if not constr.create_and_assign_constructions(wall_surfaces, runner, model)
+      return false
+    end
+
+    # Assign surfaces to Kiva foundation
+    wall_surfaces.each do |wall_surface|
+      wall_surface.setAdjacentFoundation(foundation)
+    end
+
+    return true
+  end
+
+  def self.apply_foundation_slab(runner, model, surface, constr_name,
+                                 under_r, under_width, gap_r,
+                                 perimeter_r, perimeter_depth,
+                                 whole_r, concrete_thick_in, exposed_perimeter,
+                                 mat_carpet = nil, foundation = nil)
+
+    return true if surface.nil?
+
+    if foundation.nil?
+      # Create Kiva foundation
+      thick = UnitConversions.convert(concrete_thick_in, "in", "ft")
+      foundation = create_kiva_slab_foundation(model, under_r, under_width,
+                                               gap_r, thick, perimeter_r, perimeter_depth,
+                                               concrete_thick_in)
+    end
+
+    # Define materials
+    mat_concrete = nil
+    mat_soil = nil
+    if concrete_thick_in > 0
+      mat_concrete = Material.Concrete(concrete_thick_in)
+    else
+      # Use 0.5 - 1.0 inches of soil, per Neal Kruis recommendation
+      mat_soil = Material.Soil(0.5)
+    end
+    mat_rigid = nil
+    if whole_r > 0
+      rigid_thick_in = whole_r * BaseMaterial.InsulationRigid.k_in
+      mat_rigid = Material.new(name = "SlabRigidIns", thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / whole_r)
+    end
+
+    # Define construction
+    constr = Construction.new(constr_name, [1.0])
+    if not mat_rigid.nil?
+      constr.add_layer(mat_rigid)
+    end
+    if not mat_concrete.nil?
+      constr.add_layer(mat_concrete)
+    end
+    if not mat_soil.nil?
+      constr.add_layer(mat_soil)
+    end
+    if not mat_carpet.nil?
+      constr.add_layer(mat_carpet)
+    end
+
+    # Create and assign construction to surfaces
+    if not constr.create_and_assign_constructions([surface], runner, model)
+      return false
+    end
+
+    # Assign surface to Kiva foundation
+    surface.setAdjacentFoundation(foundation)
+    surface.createSurfacePropertyExposedFoundationPerimeter("TotalExposedPerimeter", UnitConversions.convert(exposed_perimeter, "ft", "m"))
+
+    return true
+  end
+
+  def self.apply_door(runner, model, subsurfaces, constr_name, ufactor)
+    return true if subsurfaces.empty?
+
+    # Define materials
+    door_Rvalue = 1.0 / ufactor - Material.AirFilmOutside.rvalue - Material.AirFilmVertical.rvalue
+    door_thickness = 1.75 # in
+    fin_door_mat = Material.new(name = "DoorMaterial", thick_in = door_thickness, mat_base = BaseMaterial.Wood, k_in = 1.0 / door_Rvalue * door_thickness)
+
+    # Set paths
+    path_fracs = [1]
+
+    # Define construction
+    constr = Construction.new(constr_name, path_fracs)
+    constr.add_layer(fin_door_mat)
+
+    # Create and assign construction to subsurfaces
+    if not constr.create_and_assign_constructions(subsurfaces, runner, model)
+      return false
+    end
+
+    return true
+  end
+
+  def self.apply_window(runner, model, subsurfaces, constr_name, weather,
+                        cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+
+    success = apply_window_skylight(runner, model, "Window", subsurfaces, constr_name, weather,
+                                    cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+    return false if not success
+
+    return true
+  end
+
+  def self.apply_skylight(runner, model, subsurfaces, constr_name, weather,
+                          cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+
+    success = apply_window_skylight(runner, model, "Skylight", subsurfaces, constr_name, weather,
+                                    cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+    return false if not success
+
+    return true
+  end
+
+  def self.apply_partition_walls(runner, model, surfaces, constr_name,
+                                 drywall_thick_in, frac_of_ffa)
+
+    spaces = Geometry.get_finished_spaces(model.getSpaces)
+
+    return true if spaces.empty?
+
+    imdefs = []
+    spaces.each do |space|
+      # Determine existing partition wall mass in space
+      existing_surface_area = 0
+      surfaces.each do |surface|
+        existing_surface_area += surface.grossArea
+      end
+
+      # Determine additional partition wall mass required
+      addtl_surface_area = frac_of_ffa * space.floorArea - existing_surface_area * 2 / spaces.size.to_f
+
+      if addtl_surface_area > 0
+        # Add remaining partition walls within spaces (those without geometric representation)
+        # as internal mass object.
+        imdef = OpenStudio::Model::InternalMassDefinition.new(model)
+        imdef.setName("#{space.name.to_s} Partition")
+        imdef.setSurfaceArea(addtl_surface_area)
+        imdefs << imdef
+
+        im = OpenStudio::Model::InternalMass.new(imdef)
+        im.setName("#{space.name.to_s} Partition")
+        im.setSpace(space)
+        runner.registerInfo("Added internal mass object '#{im.name.to_s}' to space '#{space.name.to_s}'")
+      end
+    end
+
+    if not Constructions.apply_wood_stud_wall(runner, model, imdefs, constr_name,
+                                              0, 1, 3.5, false,
+                                              Constants.DefaultFramingFactorInterior,
+                                              drywall_thick_in, 0, 0, nil)
+      return false
+    end
+
+    return true
+  end
+
+  def self.apply_furniture(runner, model, frac_of_ffa, mass_lb_per_sqft = 8.0,
+                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood)
+
+    model_spaces = model.getSpaces
+
+    finished_spaces = Geometry.get_finished_spaces(model_spaces)
+    unfinished_basement_spaces = Geometry.get_unfinished_basement_spaces(model_spaces)
+    garage_spaces = Geometry.get_garage_spaces(model_spaces)
+
+    # Add user-specified furniture mass
+    model_spaces.each do |space|
+      furnAreaFraction = nil
+      furnConductivity = mat.k_in
+      furnSolarAbsorptance = 0.6
+      furnSpecHeat = mat.cp
+      furnDensity = density_lb_per_cuft
+      if finished_spaces.include?(space) or unfinished_basement_spaces.include?(space)
+        furnAreaFraction = frac_of_ffa
+        furnMass = mass_lb_per_sqft
+      elsif garage_spaces.include?(space)
+        furnAreaFraction = 0.1
+        furnMass = 2.0
+      end
+
+      next if furnAreaFraction.nil?
+      next if furnAreaFraction <= 0
+      next if space.floorArea <= 0
+
+      mat_obj_name_space = "#{Constants.ObjectNameFurniture} material #{space.name.to_s}"
+      constr_obj_name_space = "#{Constants.ObjectNameFurniture} construction #{space.name.to_s}"
+      mass_obj_name_space = "#{Constants.ObjectNameFurniture} mass #{space.name.to_s}"
+
+      furnThickness = UnitConversions.convert(furnMass / (furnDensity * furnAreaFraction), 'ft', 'in')
+
+      # Define materials
+      mat_fm = Material.new(name = mat_obj_name_space, thick_in = furnThickness, mat_base = nil, k_in = furnConductivity, rho = furnDensity, cp = furnSpecHeat, tAbs = 0.9, sAbs = furnSolarAbsorptance, vAbs = 0.1)
+
+      # Set paths
+      path_fracs = [1]
+
+      # Define construction
+      constr = Construction.new(constr_obj_name_space, path_fracs)
+      constr.add_layer(mat_fm)
+
+      imdef = OpenStudio::Model::InternalMassDefinition.new(model)
+      imdef.setName(mass_obj_name_space)
+      imdef.setSurfaceArea(furnAreaFraction * space.floorArea)
+
+      im = OpenStudio::Model::InternalMass.new(imdef)
+      im.setName(mass_obj_name_space)
+      im.setSpace(space)
+
+      # Create and assign construction to surfaces
+      if not constr.create_and_assign_constructions([imdef], runner, model)
+        return false
+      end
+
+      runner.registerInfo("Assigned internal mass object '#{mass_obj_name_space}' to space '#{space.name}'.")
     end
 
     return true
@@ -1029,121 +1286,6 @@ class Constructions
       return nil
     end
   end
-end
-
-class FoundationConstructions
-  # Separate container class for below-grade constructions due to rigidness of Kiva.
-  # Note: Each slab surface (w/ connected walls) must have its own foundation object.
-
-  # Foundation walls
-  def self.apply_wall(runner, model, wall_surfaces, wall_constr_name,
-                      wall_ins_height, wall_cavity_r, wall_install_grade,
-                      wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
-                      wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                      wall_height, wall_height_above_grade, foundation = nil)
-
-    if wall_surfaces.empty?
-      runner.registerError("No wall surfaces found adjacent to floor surface.")
-      return false
-    end
-
-    # Calculate interior wall R-value
-    int_wall_Rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
-                                                 wall_filled_cavity, wall_framing_factor,
-                                                 wall_install_grade, wall_rigid_r,
-                                                 wall_drywall_thick_in)
-    if int_wall_Rvalue.nil?
-      return false
-    end
-
-    if foundation.nil?
-      # Create Kiva foundation
-      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_Rvalue, wall_height,
-                                                            wall_rigid_r, wall_ins_height,
-                                                            wall_height_above_grade)
-    end
-
-    # Define materials
-    mat_concrete = Material.Concrete(wall_concrete_thick_in)
-
-    # Define construction
-    constr = Construction.new(wall_constr_name, [1])
-    constr.add_layer(mat_concrete)
-    if wall_drywall_thick_in > 0
-      constr.add_layer(Material.GypsumWall(wall_drywall_thick_in))
-    end
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions(wall_surfaces, runner, model)
-      return false
-    end
-
-    # Assign surfaces to Kiva foundation
-    wall_surfaces.each do |wall_surface|
-      wall_surface.setAdjacentFoundation(foundation)
-    end
-
-    return true
-  end
-
-  # Foundation slabs
-  def self.apply_slab(runner, model, surface, constr_name,
-                      perimeter_r, perimeter_width,
-                      gap_r, exterior_r, exterior_depth,
-                      whole_r, concrete_thick_in, exposed_perimeter,
-                      mat_carpet = nil, foundation = nil)
-
-    return true if surface.nil?
-
-    if foundation.nil?
-      # Create Kiva foundation
-      thick = UnitConversions.convert(concrete_thick_in, "in", "ft")
-      foundation = create_kiva_slab_foundation(model, perimeter_r, perimeter_width,
-                                               gap_r, thick, exterior_r, exterior_depth,
-                                               concrete_thick_in)
-    end
-
-    # Define materials
-    mat_concrete = nil
-    mat_soil = nil
-    if concrete_thick_in > 0
-      mat_concrete = Material.Concrete(concrete_thick_in)
-    else
-      # Use 0.5 - 1.0 inches of soil, per Neal Kruis recommendation
-      mat_soil = Material.Soil(0.5)
-    end
-    mat_rigid = nil
-    if whole_r > 0
-      rigid_thick_in = whole_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name = "SlabRigidIns", thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / whole_r)
-    end
-
-    # Define construction
-    constr = Construction.new(constr_name, [1.0])
-    if not mat_rigid.nil?
-      constr.add_layer(mat_rigid)
-    end
-    if not mat_concrete.nil?
-      constr.add_layer(mat_concrete)
-    end
-    if not mat_soil.nil?
-      constr.add_layer(mat_soil)
-    end
-    if not mat_carpet.nil?
-      constr.add_layer(mat_carpet)
-    end
-
-    # Create and assign construction to surfaces
-    if not constr.create_and_assign_constructions([surface], runner, model)
-      return false
-    end
-
-    # Assign surface to Kiva foundation
-    surface.setAdjacentFoundation(foundation)
-    surface.createSurfacePropertyExposedFoundationPerimeter("TotalExposedPerimeter", UnitConversions.convert(exposed_perimeter, "ft", "m"))
-
-    return true
-  end
 
   def self.get_default_basement_wall_ufactor(iecc_zone_2006)
     # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
@@ -1175,7 +1317,56 @@ class FoundationConstructions
     return 0.0, 0.0
   end
 
+  def self.get_default_interior_shading_factors()
+    summer = 0.70
+    winter = 0.85
+    return summer, winter
+  end
+
+  def self.get_default_ufactor_shgc(iecc_zone_2006)
+    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
+    # Fenestration and Opaque Door U-Factor
+    # Glazed Fenestration Assembly SHGC
+    if ["1A", "1B", "1C"].include? iecc_zone_2006
+      return 1.2, 0.40
+    elsif ["2A", "2B", "2C"].include? iecc_zone_2006
+      return 0.75, 0.40
+    elsif ["3A", "3B", "3C"].include? iecc_zone_2006
+      return 0.65, 0.40
+    elsif ["4A", "4B"].include? iecc_zone_2006
+      return 0.40, 0.40
+    elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
+      return 0.35, 0.40
+    else
+      return nil
+    end
+  end
+
+  def self.get_default_door_area()
+    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
+    return 40.0
+  end
+
+  def self.get_default_door_azimuth()
+    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
+    return 0 # North
+  end
+
   private
+
+  def self.get_gap_factor(install_grade, framing_factor, cavity_r)
+    if cavity_r <= 0
+      return 0 # Gap factor only applies when there is cavity insulation
+    elsif install_grade == 1
+      return 0
+    elsif install_grade == 2
+      return 0.02 * (1 - framing_factor)
+    elsif install_grade == 3
+      return 0.05 * (1 - framing_factor)
+    end
+
+    return 0
+  end
 
   def self.calc_interior_wall_r_value(runner, cavity_depth_in, cavity_r, filled_cavity,
                                       framing_factor, install_grade, rigid_r, drywall_thick_in)
@@ -1213,7 +1404,7 @@ class FoundationConstructions
     end
 
     # Set paths
-    gapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
+    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
     path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
 
     # Define construction (only used to calculate assembly R-value)
@@ -1340,51 +1531,6 @@ class FoundationConstructions
     mat.setThermalAbsorptance(footing_mat.tAbs)
     return mat
   end
-end
-
-class SubsurfaceConstructions
-  def self.apply_door(runner, model, subsurfaces, constr_name, ufactor)
-    return true if subsurfaces.empty?
-
-    # Define materials
-    door_Rvalue = 1.0 / ufactor - Material.AirFilmOutside.rvalue - Material.AirFilmVertical.rvalue
-    door_thickness = 1.75 # in
-    fin_door_mat = Material.new(name = "DoorMaterial", thick_in = door_thickness, mat_base = BaseMaterial.Wood, k_in = 1.0 / door_Rvalue * door_thickness)
-
-    # Set paths
-    path_fracs = [1]
-
-    # Define construction
-    constr = Construction.new(constr_name, path_fracs)
-    constr.add_layer(fin_door_mat)
-
-    # Create and assign construction to subsurfaces
-    if not constr.create_and_assign_constructions(subsurfaces, runner, model)
-      return false
-    end
-
-    return true
-  end
-
-  def self.apply_window(runner, model, subsurfaces, constr_name, weather,
-                        cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
-
-    success = apply_window_skylight(runner, model, "Window", subsurfaces, constr_name, weather,
-                                    cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
-    return false if not success
-
-    return true
-  end
-
-  def self.apply_skylight(runner, model, subsurfaces, constr_name, weather,
-                          cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
-
-    success = apply_window_skylight(runner, model, "Skylight", subsurfaces, constr_name, weather,
-                                    cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
-    return false if not success
-
-    return true
-  end
 
   def self.apply_window_skylight(runner, model, type, subsurfaces, constr_name, weather,
                                  cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
@@ -1473,152 +1619,6 @@ class SubsurfaceConstructions
     end
 
     runner.registerInfo("Construction#{sc_msg} added to #{subsurfaces.size.to_s} #{constr_name.gsub("Construction", "").downcase}(s).")
-
-    return true
-  end
-
-  def self.get_default_interior_shading_factors()
-    summer = 0.70
-    winter = 0.85
-    return summer, winter
-  end
-
-  def self.get_default_ufactor_shgc(iecc_zone_2006)
-    # Table 4.2.2(2) - Component Heat Transfer Characteristics for Reference Home
-    # Fenestration and Opaque Door U-Factor
-    # Glazed Fenestration Assembly SHGC
-    if ["1A", "1B", "1C"].include? iecc_zone_2006
-      return 1.2, 0.40
-    elsif ["2A", "2B", "2C"].include? iecc_zone_2006
-      return 0.75, 0.40
-    elsif ["3A", "3B", "3C"].include? iecc_zone_2006
-      return 0.65, 0.40
-    elsif ["4A", "4B"].include? iecc_zone_2006
-      return 0.40, 0.40
-    elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
-      return 0.35, 0.40
-    else
-      return nil
-    end
-  end
-
-  def self.get_default_door_area()
-    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
-    return 40.0
-  end
-
-  def self.get_default_door_azimuth()
-    # Table 4.2.2(1) Specifications for the Reference and Rated Homes - Doors
-    return 0 # North
-  end
-end
-
-class ThermalMassConstructions
-  # Container class for additional thermal mass (partition/furniture) constructions
-
-  # Potentially adds more thermal mass if not enough partition walls already exist.
-  def self.apply_partition_walls(runner, model, surfaces, constr_name,
-                                 drywall_thick_in, frac_of_ffa)
-
-    spaces = Geometry.get_finished_spaces(model.getSpaces)
-
-    return true if spaces.empty?
-
-    imdefs = []
-    spaces.each do |space|
-      # Determine existing partition wall mass in space
-      existing_surface_area = 0
-      surfaces.each do |surface|
-        existing_surface_area += surface.grossArea
-      end
-
-      # Determine additional partition wall mass required
-      addtl_surface_area = frac_of_ffa * space.floorArea - existing_surface_area * 2 / spaces.size.to_f
-
-      if addtl_surface_area > 0
-        # Add remaining partition walls within spaces (those without geometric representation)
-        # as internal mass object.
-        imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-        imdef.setName("#{space.name.to_s} Partition")
-        imdef.setSurfaceArea(addtl_surface_area)
-        imdefs << imdef
-
-        im = OpenStudio::Model::InternalMass.new(imdef)
-        im.setName("#{space.name.to_s} Partition")
-        im.setSpace(space)
-        runner.registerInfo("Added internal mass object '#{im.name.to_s}' to space '#{space.name.to_s}'")
-      end
-    end
-
-    if not Constructions.apply_wood_stud_wall(runner, model, imdefs, constr_name,
-                                              0, 1, 3.5, false,
-                                              Constants.DefaultFramingFactorInterior,
-                                              drywall_thick_in, 0, 0, nil)
-      return false
-    end
-
-    return true
-  end
-
-  def self.apply_furniture(runner, model, frac_of_ffa, mass_lb_per_sqft = 8.0,
-                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood)
-
-    model_spaces = model.getSpaces
-
-    finished_spaces = Geometry.get_finished_spaces(model_spaces)
-    unfinished_basement_spaces = Geometry.get_unfinished_basement_spaces(model_spaces)
-    garage_spaces = Geometry.get_garage_spaces(model_spaces)
-
-    # Add user-specified furniture mass
-    model_spaces.each do |space|
-      furnAreaFraction = nil
-      furnConductivity = mat.k_in
-      furnSolarAbsorptance = 0.6
-      furnSpecHeat = mat.cp
-      furnDensity = density_lb_per_cuft
-      if finished_spaces.include?(space) or unfinished_basement_spaces.include?(space)
-        furnAreaFraction = frac_of_ffa
-        furnMass = mass_lb_per_sqft
-      elsif garage_spaces.include?(space)
-        furnAreaFraction = 0.1
-        furnMass = 2.0
-      end
-
-      next if furnAreaFraction.nil?
-      next if furnAreaFraction <= 0
-      next if space.floorArea <= 0
-
-      mat_obj_name_space = "#{Constants.ObjectNameFurniture} material #{space.name.to_s}"
-      constr_obj_name_space = "#{Constants.ObjectNameFurniture} construction #{space.name.to_s}"
-      mass_obj_name_space = "#{Constants.ObjectNameFurniture} mass #{space.name.to_s}"
-
-      furnThickness = UnitConversions.convert(furnMass / (furnDensity * furnAreaFraction), 'ft', 'in')
-
-      # Define materials
-      mat_fm = Material.new(name = mat_obj_name_space, thick_in = furnThickness, mat_base = nil, k_in = furnConductivity, rho = furnDensity, cp = furnSpecHeat, tAbs = 0.9, sAbs = furnSolarAbsorptance, vAbs = 0.1)
-
-      # Set paths
-      path_fracs = [1]
-
-      # Define construction
-      constr = Construction.new(constr_obj_name_space, path_fracs)
-      constr.add_layer(mat_fm)
-
-      imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-      imdef.setName(mass_obj_name_space)
-      imdef.setSurfaceArea(furnAreaFraction * space.floorArea)
-
-      im = OpenStudio::Model::InternalMass.new(imdef)
-      im.setName(mass_obj_name_space)
-      im.setSpace(space)
-
-      # Create and assign construction to surfaces
-      if not constr.create_and_assign_constructions([imdef], runner, model)
-        return false
-      end
-
-      runner.registerInfo("Assigned internal mass object '#{mass_obj_name_space}' to space '#{space.name}'.")
-    end
 
     return true
   end
@@ -1985,90 +1985,4 @@ class Construction
     end
     runner.registerInfo("#{type_s.to_s} '#{surface.name.to_s}' has been assigned construction '#{surface.construction.get.name.to_s}'.")
   end
-end
-
-private
-
-def get_gap_factor(install_grade, framing_factor, cavity_r)
-  if cavity_r <= 0
-    return 0 # Gap factor only applies when there is cavity insulation
-  elsif install_grade == 1
-    return 0
-  elsif install_grade == 2
-    return 0.02 * (1 - framing_factor)
-  elsif install_grade == 3
-    return 0.05 * (1 - framing_factor)
-  end
-
-  return 0
-end
-
-def get_space_r_value(runner, space, surface_type, register_error = false)
-  # Get area-weighted space r-value
-  sum_surface_ua = 0.0
-  total_area = 0.0
-  space.surfaces.each do |surface|
-    next if surface.surfaceType.downcase != surface_type
-
-    surf_area = UnitConversions.convert(surface.netArea, "m^2", "ft^2")
-    ufactor = get_surface_ufactor(runner, surface, surface_type, register_error)
-    next if ufactor.nil?
-
-    sum_surface_ua += surf_area * ufactor
-    total_area += surf_area
-  end
-  return nil if sum_surface_ua == 0
-
-  return total_area / sum_surface_ua
-end
-
-def get_surface_ufactor(runner, surface, surface_type, register_error = false)
-  if surface_type.downcase.include?("window")
-    simple_glazing = get_window_simple_glazing(runner, surface, register_error)
-    return nil if simple_glazing.nil?
-
-    return UnitConversions.convert(simple_glazing.uFactor, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
-  else
-    if not surface.construction.is_initialized
-      if register_error
-        runner.registerError("Construction not assigned to '#{surface.name.to_s}'.")
-      end
-      return nil
-    end
-    ufactor = UnitConversions.convert(surface.uFactor.get, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
-    if surface.class.method_defined?('adjacentSurface') and surface.adjacentSurface.is_initialized
-      # Use average u-factor of adjacent surface, as OpenStudio returns
-      # two different values for, e.g., floor vs adjacent roofceiling
-      if not surface.adjacentSurface.get.construction.is_initialized
-        if register_error
-          runner.registerError("Construction not assigned to '#{surface.adjacentSurface.get.name.to_s}'.")
-        end
-        return nil
-      end
-      adjacent_ufactor = UnitConversions.convert(surface.adjacentSurface.get.uFactor.get, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
-      return (ufactor + adjacent_ufactor) / 2.0
-    end
-    return ufactor
-  end
-end
-
-def get_window_simple_glazing(runner, surface, register_error = false)
-  if not surface.construction.is_initialized
-    if register_error
-      runner.registerError("Construction not assigned to '#{surface.name.to_s}'.")
-    end
-    return nil
-  end
-  construction = surface.construction.get
-  if not construction.to_LayeredConstruction.is_initialized
-    runner.registerError("Expected LayeredConstruction for '#{surface.name.to_s}'.")
-    return nil
-  end
-  window_layered_construction = construction.to_LayeredConstruction.get
-  if not window_layered_construction.getLayer(0).to_SimpleGlazing.is_initialized
-    runner.registerError("Expected SimpleGlazing for '#{surface.name.to_s}'.")
-    return nil
-  end
-  simple_glazing = window_layered_construction.getLayer(0).to_SimpleGlazing.get
-  return simple_glazing
 end

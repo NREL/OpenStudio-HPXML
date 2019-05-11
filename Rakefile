@@ -27,6 +27,7 @@ def create_hpxmls
   hpxmls_files = {
     'base.xml' => nil,
     'invalid_files/bad-wmo.xml' => 'base.xml',
+    'invalid_files/bad-site-neighbor-azimuth.xml' => 'base-site-neighbors.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml.skip' => 'base.xml',
@@ -152,6 +153,7 @@ def create_hpxmls
     'base-pv-module-standard.xml' => 'base.xml',
     'base-pv-module-thinfilm.xml.skip' => 'base.xml',
     'base-pv-multiple.xml' => 'base.xml',
+    'base-site-neighbors.xml' => 'base.xml',
     'cfis/base-cfis.xml' => 'base.xml',
     'cfis/base-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'cfis/base-hvac-air-to-air-heat-pump-2-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -316,6 +318,7 @@ def create_hpxmls
 
       hpxml_values = {}
       site_values = {}
+      site_neighbors_values = []
       building_occupancy_values = {}
       building_construction_values = {}
       climate_and_risk_zones_values = {}
@@ -362,6 +365,7 @@ def create_hpxmls
       hpxml_files.each do |hpxml_file|
         hpxml_values = get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
         site_values = get_hpxml_file_site_values(hpxml_file, site_values)
+        site_neighbors_values = get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
         building_occupancy_values = get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
         building_construction_values = get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
         climate_and_risk_zones_values = get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
@@ -417,6 +421,9 @@ def create_hpxmls
       end
 
       HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
+      site_neighbors_values.each do |site_neighbor_values|
+        HPXML.add_site_neighbor(hpxml: hpxml, **site_neighbor_values)
+      end
       HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values) unless building_occupancy_values.empty?
       HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
       HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
@@ -593,6 +600,18 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values[:disable_natural_ventilation] = true
   end
   return site_values
+end
+
+def get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
+  if ['base-site-neighbors.xml'].include? hpxml_file
+    site_neighbors_values << { :azimuth => 0,
+                               :distance => 10 }
+    site_neighbors_values << { :azimuth => 180,
+                               :distance => 15 }
+  elsif ['invalid_files/bad-site-neighbor-azimuth.xml'].include? hpxml_file
+    site_neighbors_values[0][:azimuth] = 145
+  end
+  return site_neighbors_values
 end
 
 def get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
@@ -943,7 +962,7 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :depth_below_grade => 7,
                                    :adjacent_to => "ground",
                                    :insulation_height => 8,
-                                   :insulation_assembly_r_value => 10.69 }]]
+                                   :insulation_r_value => 8.9 }]]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundations_walls_values[0][0][:insulation_height] = 4
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
@@ -962,8 +981,8 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                      :thickness => 8,
                                      :depth_below_grade => 7,
                                      :adjacent_to => "crawlspace - unvented",
-                                     :insulation_height => 8,
-                                     :insulation_assembly_r_value => 1.5 }
+                                     :insulation_height => 0,
+                                     :insulation_r_value => 0 }
     foundations_walls_values << [{ :id => "FoundationWallCrawlspace",
                                    :height => 4,
                                    :area => 600,
@@ -971,7 +990,7 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :depth_below_grade => 3,
                                    :adjacent_to => "ground",
                                    :insulation_height => 4,
-                                   :insulation_assembly_r_value => 10.69 }]
+                                   :insulation_r_value => 8.9 }]
   elsif ['base-foundation-pier-beam.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     foundations_walls_values = [[]]
@@ -2108,7 +2127,8 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "attic - conditioned"
     ducts_values[0][1][:duct_location] = "attic - conditioned"
-  elsif ['invalid_files/duct-location.xml.skip'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/duct-location.xml.skip'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "garage"
     ducts_values[0][1][:duct_location] = "garage"
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
@@ -2362,6 +2382,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "basement - conditioned"
   elsif ['invalid_files/water-heater-location.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "crawlspace - vented"
+  elsif ['base-enclosure-garage.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "garage"
   elsif ['base-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
   elsif hpxml_file.include? 'water_heating_multiple' and not water_heating_systems_values.nil? and water_heating_systems_values.size > 0
@@ -2551,7 +2573,8 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
     clothes_washer_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     clothes_washer_values[:location] = "basement - conditioned"
-  elsif ['invalid_files/clothes-washer-location.xml'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/clothes-washer-location.xml'].include? hpxml_file
     clothes_washer_values[:location] = "garage"
   end
   return clothes_washer_values
@@ -2582,7 +2605,8 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
     clothes_dryer_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "basement - conditioned"
-  elsif ['invalid_files/clothes-dryer-location.xml'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/clothes-dryer-location.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "garage"
   end
   return clothes_dryer_values
@@ -2614,7 +2638,8 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
     refrigerator_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
     refrigerator_values[:location] = "basement - conditioned"
-  elsif ['invalid_files/refrigerator-location.xml'].include? hpxml_file
+  elsif ['base-enclosure-garage.xml',
+         'invalid_files/refrigerator-location.xml'].include? hpxml_file
     refrigerator_values[:location] = "garage"
   end
   return refrigerator_values

@@ -90,6 +90,29 @@ class HPXML
              :disable_natural_ventilation => to_bool(XMLHelper.get_value(site, "extension/DisableNaturalVentilation")) }
   end
 
+  def self.add_site_neighbor(hpxml:,
+                             azimuth:,
+                             distance:,
+                             **remainder)
+    neighbors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
+    neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
+    XMLHelper.add_element(neighbor_building, "Azimuth", to_integer(azimuth))
+    XMLHelper.add_element(neighbor_building, "Distance", to_float(distance))
+
+    check_remainder(remainder,
+                    calling_method: __method__.to_s,
+                    expected_kwargs: [])
+
+    return neighbor_building
+  end
+
+  def self.get_neighbor_building_values(neighbor_building:)
+    return nil if neighbor_building.nil?
+
+    return { :azimuth => to_integer(XMLHelper.get_value(neighbor_building, "Azimuth")),
+             :distance => to_float(XMLHelper.get_value(neighbor_building, "Distance")) }
+  end
+
   def self.add_building_occupancy(hpxml:,
                                   number_of_residents: nil,
                                   **remainder)
@@ -566,7 +589,7 @@ class HPXML
                                adjacent_to:,
                                insulation_height:,
                                insulation_id: nil,
-                               insulation_assembly_r_value:,
+                               insulation_r_value:,
                                **remainder)
     foundation_wall = XMLHelper.add_element(foundation, "FoundationWall")
     sys_id = XMLHelper.add_element(foundation_wall, "SystemIdentifier")
@@ -578,13 +601,14 @@ class HPXML
     XMLHelper.add_element(foundation_wall, "DepthBelowGrade", to_float(depth_below_grade))
     XMLHelper.add_element(foundation_wall, "AdjacentTo", adjacent_to)
     XMLHelper.add_element(foundation_wall, "InsulationHeight", to_float(insulation_height))
-    add_assembly_insulation(parent: foundation_wall,
-                            id: insulation_id,
-                            assembly_r_value: to_float(insulation_assembly_r_value))
+    add_layer_insulation(parent: foundation_wall,
+                         element_name: "Insulation",
+                         id: insulation_id,
+                         continuous_nominal_r_value: to_float(insulation_r_value))
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
-                    expected_kwargs: [:insulation_continuous_r_value])
+                    expected_kwargs: [])
 
     return foundation_wall
   end
@@ -592,7 +616,6 @@ class HPXML
   def self.get_foundation_wall_values(foundation_wall:)
     return nil if foundation_wall.nil?
 
-    insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
     insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
 
     return { :id => HPXML.get_id(foundation_wall),
@@ -603,9 +626,8 @@ class HPXML
              :depth_below_grade => to_float(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
              :adjacent_to => XMLHelper.get_value(foundation_wall, "AdjacentTo"),
              :insulation_height => to_float(XMLHelper.get_value(foundation_wall, "InsulationHeight")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float(insulation_values[:assembly_r_value]),
-             :insulation_continuous_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }
+             :insulation_id => insulation_layer_values[:id],
+             :insulation_r_value => to_float(insulation_layer_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_foundation_slab(foundation:,
