@@ -923,8 +923,8 @@ class Constructions
   end
 
   def self.apply_foundation_slab(runner, model, surface, constr_name,
-                                 perimeter_r, perimeter_width,
-                                 gap_r, exterior_r, exterior_depth,
+                                 under_r, under_width, gap_r,
+                                 perimeter_r, perimeter_depth,
                                  whole_r, concrete_thick_in, exposed_perimeter,
                                  mat_carpet = nil, foundation = nil)
 
@@ -933,8 +933,8 @@ class Constructions
     if foundation.nil?
       # Create Kiva foundation
       thick = UnitConversions.convert(concrete_thick_in, "in", "ft")
-      foundation = create_kiva_slab_foundation(model, perimeter_r, perimeter_width,
-                                               gap_r, thick, exterior_r, exterior_depth,
+      foundation = create_kiva_slab_foundation(model, under_r, under_width,
+                                               gap_r, thick, perimeter_r, perimeter_depth,
                                                concrete_thick_in)
     end
 

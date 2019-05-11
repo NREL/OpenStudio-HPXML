@@ -1016,27 +1016,27 @@ class OSModel
 
         slab_concrete_thick_in = slab_values[:thickness]
 
-        slab_ext_r = slab_values[:perimeter_insulation_r_value]
-        slab_ext_depth = slab_values[:perimeter_insulation_depth]
-        if slab_ext_r == 0 or slab_ext_depth == 0
-          slab_ext_r = 0
-          slab_ext_depth = 0
+        slab_perim_r = slab_values[:perimeter_insulation_r_value]
+        slab_perim_depth = slab_values[:perimeter_insulation_depth]
+        if slab_perim_r == 0 or slab_perim_depth == 0
+          slab_perim_r = 0
+          slab_perim_depth = 0
         end
 
         if slab_values[:under_slab_insulation_spans_entire_slab]
           slab_whole_r = slab_values[:under_slab_insulation_r_value]
-          slab_perim_r = 0
-          slab_perim_width = 0
+          slab_under_r = 0
+          slab_under_width = 0
         else
-          slab_perim_r = slab_values[:under_slab_insulation_r_value]
-          slab_perim_width = slab_values[:under_slab_insulation_width]
-          if slab_perim_r == 0 or slab_perim_width == 0
-            slab_perim_r = 0
-            slab_perim_width = 0
+          slab_under_r = slab_values[:under_slab_insulation_r_value]
+          slab_under_width = slab_values[:under_slab_insulation_width]
+          if slab_under_r == 0 or slab_under_width == 0
+            slab_under_r = 0
+            slab_under_width = 0
           end
           slab_whole_r = 0
         end
-        slab_gap_r = slab_perim_r
+        slab_gap_r = slab_under_r
 
         mat_carpet = nil
         if slab_values[:carpet_fraction] > 0 and slab_values[:carpet_r_value] > 0
@@ -1045,8 +1045,8 @@ class OSModel
         end
 
         success = Constructions.apply_foundation_slab(runner, model, surface, "SlabConstruction",
-                                                      slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
-                                                      slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
+                                                      slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
+                                                      slab_perim_depth, slab_whole_r, slab_concrete_thick_in,
                                                       slab_exp_perim, mat_carpet, foundation_object[slab_id])
         return false if not success
 
@@ -1261,31 +1261,31 @@ class OSModel
 
         slab_concrete_thick_in = slab_values[:thickness]
 
-        slab_ext_r = slab_values[:perimeter_insulation_r_value]
-        slab_ext_depth = slab_values[:perimeter_insulation_depth]
-        if slab_ext_r == 0 or slab_ext_depth == 0
-          slab_ext_r = 0
-          slab_ext_depth = 0
+        slab_perim_r = slab_values[:perimeter_insulation_r_value]
+        slab_perim_depth = slab_values[:perimeter_insulation_depth]
+        if slab_perim_r == 0 or slab_perim_depth == 0
+          slab_perim_r = 0
+          slab_perim_depth = 0
         end
 
         if slab_values[:under_slab_insulation_spans_entire_slab]
           slab_whole_r = slab_values[:under_slab_insulation_r_value]
-          slab_perim_r = 0
-          slab_perim_width = 0
+          slab_under_r = 0
+          slab_under_width = 0
         else
-          slab_perim_r = slab_values[:under_slab_insulation_r_value]
-          slab_perim_width = slab_values[:under_slab_insulation_width]
-          if slab_perim_r == 0 or slab_perim_width == 0
-            slab_perim_r = 0
-            slab_perim_width = 0
+          slab_under_r = slab_values[:under_slab_insulation_r_value]
+          slab_under_width = slab_values[:under_slab_insulation_width]
+          if slab_under_r == 0 or slab_under_width == 0
+            slab_under_r = 0
+            slab_under_width = 0
           end
           slab_whole_r = 0
         end
-        slab_gap_r = slab_perim_r
+        slab_gap_r = slab_under_r
 
         success = Constructions.apply_foundation_slab(runner, model, surface, "GarageSlabConstruction",
-                                                      slab_perim_r, slab_perim_width, slab_gap_r, slab_ext_r,
-                                                      slab_ext_depth, slab_whole_r, slab_concrete_thick_in,
+                                                      slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
+                                                      slab_perim_depth, slab_whole_r, slab_concrete_thick_in,
                                                       slab_values[:exposed_perimeter], nil, nil)
         return false if not success
       end
