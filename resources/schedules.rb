@@ -6,7 +6,8 @@ class HourlyByMonthSchedule
   # weekday_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   def initialize(model, runner, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
-                 normalize_values = true, create_sch_object = true)
+                 normalize_values = true, create_sch_object = true,
+                 lower_limit_value = nil, upper_limit_value = nil, numeric_type = nil, unit_type = nil)
     @validated = true
     @model = model
     @runner = runner
@@ -14,6 +15,10 @@ class HourlyByMonthSchedule
     @schedule = nil
     @weekday_month_by_hour_values = validateValues(weekday_month_by_hour_values, 12, 24)
     @weekend_month_by_hour_values = validateValues(weekend_month_by_hour_values, 12, 24)
+    @lower_limit_value = lower_limit_value
+    @upper_limit_value = upper_limit_value
+    @numeric_type = numeric_type
+    @unit_type = unit_type
     if not @validated
       return
     end
@@ -107,6 +112,16 @@ class HourlyByMonthSchedule
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
 
+    if not @lower_limit_value.nil? or not @upper_limit_value.nil? or not @numeric_type.nil? or not @unit_type.nil?
+      schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(@model)
+      schedule_type_limits.setName(schedule.name.to_s)
+      schedule_type_limits.setLowerLimitValue(@lower_limit_value) unless @lower_limit_value.nil?
+      schedule_type_limits.setUpperLimitValue(@upper_limit_value) unless @upper_limit_value.nil?
+      schedule_type_limits.setNumericType(@numeric_type) unless @numeric_type.nil?
+      schedule_type_limits.setUnitType(@unit_type) unless @unit_type.nil?
+      schedule.setScheduleTypeLimits(schedule_type_limits)
+    end
+
     assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 
     for m in 1..12
@@ -199,7 +214,8 @@ class MonthWeekdayWeekendSchedule
   # weekend_hourly_values can either be a comma-separated string of 24 numbers or a 24-element array of numbers.
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   def initialize(model, runner, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
-                 mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true)
+                 mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true,
+                 lower_limit_value = nil, upper_limit_value = nil, numeric_type = nil, unit_type = nil)
     @validated = true
     @model = model
     @runner = runner
@@ -210,6 +226,10 @@ class MonthWeekdayWeekendSchedule
     @weekday_hourly_values = validateValues(weekday_hourly_values, 24, "weekday")
     @weekend_hourly_values = validateValues(weekend_hourly_values, 24, "weekend")
     @monthly_values = validateValues(monthly_values, 12, "monthly")
+    @lower_limit_value = lower_limit_value
+    @upper_limit_value = upper_limit_value
+    @numeric_type = numeric_type
+    @unit_type = unit_type
     if not @validated
       return
     end
@@ -362,6 +382,16 @@ class MonthWeekdayWeekendSchedule
 
     schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
     schedule.setName(@sch_name)
+
+    if not @lower_limit_value.nil? or not @upper_limit_value.nil? or not @numeric_type.nil? or not @unit_type.nil?
+      schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(@model)
+      schedule_type_limits.setName(@sch_name)
+      schedule_type_limits.setLowerLimitValue(@lower_limit_value) unless @lower_limit_value.nil?
+      schedule_type_limits.setUpperLimitValue(@upper_limit_value) unless @upper_limit_value.nil?
+      schedule_type_limits.setNumericType(@numeric_type) unless @numeric_type.nil?
+      schedule_type_limits.setUnitType(@unit_type) unless @unit_type.nil?
+      schedule.setScheduleTypeLimits(schedule_type_limits)
+    end
 
     assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 

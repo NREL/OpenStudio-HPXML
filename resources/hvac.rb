@@ -2467,7 +2467,7 @@ class HVAC
 
     cooling_season = get_season(model, weather, runner, Constants.ObjectNameCoolingSeason)
 
-    heating_season_schedule = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameHeatingSeason, Array.new(24, 1), Array.new(24, 1), heating_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false)
+    heating_season_schedule = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameHeatingSeason, Array.new(24, 1), Array.new(24, 1), heating_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false, true, 0, 1, "Discrete")
     unless heating_season_schedule.validated?
       return false
     end
@@ -2598,7 +2598,7 @@ class HVAC
 
     heating_season = get_season(model, weather, runner, Constants.ObjectNameHeatingSeason)
 
-    cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false)
+    cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false, true, 0, 1, "Discrete")
     unless cooling_season_sch.validated?
       return false
     end
