@@ -27,6 +27,7 @@ def create_hpxmls
   hpxmls_files = {
     'base.xml' => nil,
     'invalid_files/bad-wmo.xml' => 'base.xml',
+    'invalid_files/bad-site-neighbor-azimuth.xml' => 'base-site-neighbors.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
     'invalid_files/duct-location.xml.skip' => 'base.xml',
@@ -102,6 +103,7 @@ def create_hpxmls
     'base-hvac-central-ac-only-1-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
+    'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -146,6 +148,7 @@ def create_hpxmls
     'base-pv-module-standard.xml' => 'base.xml',
     'base-pv-module-thinfilm.xml.skip' => 'base.xml',
     'base-pv-multiple.xml' => 'base.xml',
+    'base-site-neighbors.xml' => 'base.xml',
     'cfis/base-cfis.xml' => 'base.xml',
     'cfis/base-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'cfis/base-hvac-air-to-air-heat-pump-2-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -310,6 +313,7 @@ def create_hpxmls
 
       hpxml_values = {}
       site_values = {}
+      site_neighbors_values = []
       building_occupancy_values = {}
       building_construction_values = {}
       climate_and_risk_zones_values = {}
@@ -352,6 +356,7 @@ def create_hpxmls
       hpxml_files.each do |hpxml_file|
         hpxml_values = get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
         site_values = get_hpxml_file_site_values(hpxml_file, site_values)
+        site_neighbors_values = get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
         building_occupancy_values = get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
         building_construction_values = get_hpxml_file_building_construction_values(hpxml_file, building_construction_values)
         climate_and_risk_zones_values = get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zones_values)
@@ -403,6 +408,9 @@ def create_hpxmls
       end
 
       HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
+      site_neighbors_values.each do |site_neighbor_values|
+        HPXML.add_site_neighbor(hpxml: hpxml, **site_neighbor_values)
+      end
       HPXML.add_building_occupancy(hpxml: hpxml, **building_occupancy_values) unless building_occupancy_values.empty?
       HPXML.add_building_construction(hpxml: hpxml, **building_construction_values)
       HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
@@ -567,6 +575,18 @@ def get_hpxml_file_site_values(hpxml_file, site_values)
     site_values[:disable_natural_ventilation] = true
   end
   return site_values
+end
+
+def get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
+  if ['base-site-neighbors.xml'].include? hpxml_file
+    site_neighbors_values << { :azimuth => 0,
+                               :distance => 10 }
+    site_neighbors_values << { :azimuth => 180,
+                               :distance => 15 }
+  elsif ['invalid_files/bad-site-neighbor-azimuth.xml'].include? hpxml_file
+    site_neighbors_values[0][:azimuth] = 145
+  end
+  return site_neighbors_values
 end
 
 def get_hpxml_file_building_occupancy_values(hpxml_file, building_occupancy_values)
@@ -1565,6 +1585,10 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
     hvac_distributions_values << { :id => "HVACDistribution6",
                                    :distribution_system_type => "AirDistribution" }
+  elsif ['base-hvac-dse.xml'].include? hpxml_file
+    hvac_distributions_values[0][:distribution_system_type] = "DSE"
+    hvac_distributions_values[0][:annual_heating_dse] = 0.75
+    hvac_distributions_values[0][:annual_cooling_dse] = 0.75
   elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-0.8.xml'
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
     hvac_distributions_values[0][:annual_heating_dse] = 0.8

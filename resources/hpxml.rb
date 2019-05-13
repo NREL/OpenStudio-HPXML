@@ -90,6 +90,29 @@ class HPXML
              :disable_natural_ventilation => to_bool(XMLHelper.get_value(site, "extension/DisableNaturalVentilation")) }
   end
 
+  def self.add_site_neighbor(hpxml:,
+                             azimuth:,
+                             distance:,
+                             **remainder)
+    neighbors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
+    neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
+    XMLHelper.add_element(neighbor_building, "Azimuth", to_integer(azimuth))
+    XMLHelper.add_element(neighbor_building, "Distance", to_float(distance))
+
+    check_remainder(remainder,
+                    calling_method: __method__.to_s,
+                    expected_kwargs: [])
+
+    return neighbor_building
+  end
+
+  def self.get_neighbor_building_values(neighbor_building:)
+    return nil if neighbor_building.nil?
+
+    return { :azimuth => to_integer(XMLHelper.get_value(neighbor_building, "Azimuth")),
+             :distance => to_float(XMLHelper.get_value(neighbor_building, "Distance")) }
+  end
+
   def self.add_building_occupancy(hpxml:,
                                   number_of_residents: nil,
                                   **remainder)
