@@ -460,11 +460,13 @@ class HVAC
     elsif num_speeds == 2
       return [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
               [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
-    elsif num_speeds == 4
-      return [[3.63396857, -0.093606786, 0.000918114, 0.011852512, -0.0000318307, -0.000206446],
-              [1.808745668, -0.041963484, 0.000545263, 0.011346539, -0.000023838, -0.000205162],
-              [0.112814745, 0.005638646, 0.000203427, 0.011981545, -0.0000207957, -0.000212379],
-              [1.141506147, -0.023973142, 0.000420763, 0.01038334, -0.0000174633, -0.000197092]]
+    else
+      cOOL_CAP_coeff_perf_map = [[1.203, 7.866E-2, -1.797E-3, -9.527E-2, 1.340E-3, 9.421E-4],
+                                 [-1.070, 2.633E-1, -6.290E-3, -3.907E-2, 5.085E-4, 1.078E-4],
+                                 [-6.195E-1, 1.621E-1, -3.028E-3, -2.812E-3, -2.590E-5, -3.764E-4],
+                                 [-3.549E-1, 1.281E-1, -2.132E-3, 1.923E-3, -9.240E-5, -4.161E-4],
+                                 [1.037, -2.036E-2, 2.231E-3, -2.538E-4, 4.604E-5, -7.790E-4]]
+      return cOOL_CAP_coeff_perf_map.select { |i| num_speeds.include? cOOL_CAP_coeff_perf_map.index(i) }
     end
   end
 
@@ -474,11 +476,13 @@ class HVAC
     elsif num_speeds == 2
       return [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
               [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
-    elsif num_speeds == 4
-      return [[-1.380674217, 0.083176919, -0.000676029, -0.028120348, 0.000320593, -0.0000616147],
-              [4.817787321, -0.100122768, 0.000673499, -0.026889359, 0.00029445, -0.0000390331],
-              [-1.502227232, 0.05896401, -0.000439349, 0.002198465, 0.000148486, -0.000159553],
-              [-3.443078025, 0.115186164, -0.000852001, 0.004678056, 0.000134319, -0.000171976]]
+    else
+      cOOL_EIR_coeff_perf_map = [[1.021, -1.214E-1, 3.936E-3, 5.435E-2, 2.830E-4, -2.057E-3],
+                                 [1.999, -1.977E-1, 6.001E-3, 3.196E-2, 6.380E-4, -1.948E-3],
+                                 [1.745, -1.546E-1, 4.585E-3, 2.595E-2, 6.609E-4, -1.752E-3],
+                                 [8.258E-1, -3.497E-2, 1.241E-3, 1.269E-2, 8.047E-4, -1.538E-3],
+                                 [2.555E-1, 3.711E-2, -1.427E-3, 8.907E-3, 5.665E-4, -6.538E-4]]
+      return cOOL_EIR_coeff_perf_map.select { |i| num_speeds.include? cOOL_EIR_coeff_perf_map.index(i) }
     end
   end
 
@@ -488,6 +492,8 @@ class HVAC
     elsif num_speeds == 2
       return [[0.655239515, 0.511655216, -0.166894731],
               [0.618281092, 0.569060264, -0.187341356]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
     end
   end
 
@@ -497,6 +503,8 @@ class HVAC
     elsif num_speeds == 2
       return [[1.639108268, -0.998953996, 0.359845728],
               [1.570774717, -0.914152018, 0.343377302]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
     end
   end
 
@@ -534,6 +542,8 @@ class HVAC
     elsif num_speeds == 2
       return [[0.741466907, 0.378645444, -0.119754733],
               [0.76634609, 0.32840943, -0.094701495]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
     end
   end
 
@@ -543,6 +553,8 @@ class HVAC
     elsif num_speeds == 2
       return [[2.153618211, -1.737190609, 0.584269478],
               [2.001041353, -1.58869128, 0.587593517]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
     end
   end
 
@@ -563,12 +575,11 @@ class HVAC
     curves_in_ip = true
 
     capacity_ratios = [1.0]
-    fan_speed_ratios_cooling = [1.0]
-    fan_speed_ratios_heating = [1.0]
+    fan_speed_ratios = [1.0]
 
     # Cooling Coil
     rated_airflow_rate_cooling = 394.2 # cfm
-    cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
+    cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios, capacity_ratios)
     eers = [calc_EER_cooling_1spd(seer, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP)]
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
@@ -576,7 +587,7 @@ class HVAC
 
     # Heating Coil
     rated_airflow_rate_heating = 384.1 # cfm
-    cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
+    cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios, capacity_ratios)
     cops = [calc_COP_heating_1spd(hspf, Constants.C_d, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP, hEAT_CAP_FT_SPEC_ASHP)]
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)]
@@ -801,7 +812,7 @@ class HVAC
   end
 
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                     capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
+                                     capacity_ratios, fan_speed_ratios,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      eer_capacity_derates, cop_capacity_derates,
                                      heat_pump_capacity, supplemental_efficiency,
@@ -815,16 +826,16 @@ class HVAC
 
     # Cooling Coil
     rated_airflow_rate_cooling = 344.1 # cfm
-    cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
-    eers = calc_EERs_cooling_2spd(runner, seer, Constants.C_d, capacity_ratios, fan_speed_ratios_cooling, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CAP_FT_SPEC_ASHP(2), true)
+    cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios, capacity_ratios)
+    eers = calc_EERs_cooling_2spd(runner, seer, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CAP_FT_SPEC_ASHP(2), true)
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
 
     # Heating Coil
     rated_airflow_rate_heating = 352.2 # cfm
-    cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
-    cops = calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CAP_FT_SPEC_ASHP(2))
+    cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios, capacity_ratios)
+    cops = calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CAP_FT_SPEC_ASHP(2))
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -883,7 +894,7 @@ class HVAC
       perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
       perf.setSingleModeOperation(false)
       for speed in 1..num_speeds
-        f = OpenStudio::Model::SupplyAirflowRatioField.new(fan_speed_ratios_heating[speed - 1], Constants.small)
+        f = OpenStudio::Model::SupplyAirflowRatioField.new(fan_speed_ratios[speed - 1], Constants.small)
         perf.addSupplyAirflowRatioField(f)
       end
 
@@ -985,7 +996,7 @@ class HVAC
       perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
       perf.setSingleModeOperation(false)
       for speed in 1..num_speeds
-        f = OpenStudio::Model::SupplyAirflowRatioField.new(Constants.small, fan_speed_ratios_cooling[speed - 1])
+        f = OpenStudio::Model::SupplyAirflowRatioField.new(Constants.small, fan_speed_ratios[speed - 1])
         perf.addSupplyAirflowRatioField(f)
       end
 
@@ -1066,8 +1077,8 @@ class HVAC
     return true
   end
 
-  def self.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
-                                     capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
+  def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
+                                     capacity_ratios, fan_speed_ratios,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      eer_capacity_derates, cop_capacity_derates,
                                      heat_pump_capacity, supplemental_efficiency,
@@ -1078,21 +1089,22 @@ class HVAC
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
     curves_in_ip = false
-    cOOL_CAP_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
-    cOOL_EIR_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
-    hEAT_CAP_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
-    hEAT_EIR_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
+
+    cap_ratio_seer = [0.36, 0.51, 1.0]
+    fan_speed_seer = [0.42, 0.54, 1.0]
 
     # Cooling Coil
     rated_airflow_rate_cooling = 315.8 # cfm
-    cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
+    cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios, capacity_ratios)
+    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP([0, 1, 4]), cOOL_CAP_FT_SPEC_ASHP([0, 1, 4]), curves_in_ip)
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
 
     # Heating Coil
     rated_airflow_rate_heating = 296.9 # cfm
-    cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
+    cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios, capacity_ratios)
+    cops = calc_COPs_heating_4spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CAP_FT_SPEC_ASHP(4))
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -1104,7 +1116,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, curves_in_ip, dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(4), hEAT_EIR_FFLOW_SPEC_ASHP(4), curves_in_ip, dse)
 
       # _processSystemHeatingCoil
 
@@ -1222,7 +1234,7 @@ class HVAC
 
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP(4), cOOL_EIR_FT_SPEC_ASHP(4), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC(4), cOOL_EIR_FFLOW_SPEC(4), curves_in_ip, dse)
 
       # _processSystemCoolingCoil
 
@@ -3655,6 +3667,10 @@ class HVAC
     end
 
     return calc_COPs_from_EIR_2spd(cop_c, fan_power_rated)
+  end
+
+  def self.calc_COPs_heating_4spd(hspf, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
+    # TODO
   end
 
   def self.calc_HSPF_TwoSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
