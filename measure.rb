@@ -568,7 +568,7 @@ class OSModel
         distance = shading_surface.additionalProperties.getFeatureAsDouble("Distance").get
 
         unless azimuth_lengths.keys.include? azimuth
-          runner.registerError("A neighbor building has an azimuth '#{azimuth}' not equal to the azimuth of any wall (#{azimuth_lengths.keys * ", "}).")
+          runner.registerError("A neighbor building has an azimuth (#{azimuth}) not equal to the azimuth of any wall.")
           return false
         end
 
@@ -878,7 +878,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure//Azimuth") do |azimuth|
       return Integer(azimuth.text)
     end
-    return 0
+    return 90
   end
 
   def self.create_or_get_space(model, spaces, spacetype)

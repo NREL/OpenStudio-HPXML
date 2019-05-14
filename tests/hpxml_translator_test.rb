@@ -78,7 +78,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['skip_validation'] = false
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
-                            'bad-site-neighbor-azimuth.xml' => ["A neighbor building has an azimuth '145' not equal to the azimuth of any wall (90, 270, 0, 180)"],
+                            'bad-site-neighbor-azimuth.xml' => ["A neighbor building has an azimuth (145) not equal to the azimuth of any wall."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-washer-location.xml' => ["ClothesWasher location is 'garage' but building does not have this location specified."],
                             'duct-location.xml' => ["TODO"],
@@ -91,8 +91,8 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
                                                        "Thermal zone 'garage' must have at least one roof/ceiling surface.",
                                                        "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
-                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'WallNorth'."],
-                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
+                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
+                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoof'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'unattached-door.xml' => ["Attached wall 'foobar' not found for door 'DoorNorth'."],
                             'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],

@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:27:28-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-05-13T12:11:09-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -256,14 +256,26 @@
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <HeatingCapacity>64000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>1.0</Value>
+                <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
+            <CoolingSystem>
+              <SystemIdentifier id='CoolingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
+              </AnnualCoolingEfficiency>
+            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -274,8 +286,8 @@
             <DistributionSystemType>
               <Other>DSE</Other>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>0.8</AnnualCoolingDistributionSystemEfficiency>
+            <AnnualHeatingDistributionSystemEfficiency>0.75</AnnualHeatingDistributionSystemEfficiency>
+            <AnnualCoolingDistributionSystemEfficiency>0.75</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
