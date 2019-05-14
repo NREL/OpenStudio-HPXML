@@ -219,9 +219,10 @@ class EnergyPlusValidator
         "Thickness" => one,
         "DepthBelowGrade" => one,
         "[AdjacentTo='ground' or AdjacentTo='basement - unconditioned' or AdjacentTo='basement - conditioned' or AdjacentTo='crawlspace - vented' or AdjacentTo='crawlspace - unvented']" => one,
-        "InsulationHeight" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        "Insulation/Layer[InstallationType='continuous']/NominalRValue" => one,
+        # Either specify insulation layer R-value & height OR assembly R-value:
+        "InsulationHeight | Insulation/AssemblyEffectiveRValue" => one,
+        "Insulation/Layer[InstallationType='continuous']/NominalRValue | Insulation/AssemblyEffectiveRValue" => one,
       },
 
       ## [FoundationSlab]

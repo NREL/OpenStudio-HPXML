@@ -966,8 +966,19 @@ class OSModel
           wall_cavity_depth_in = 0.0
           wall_install_grade = 1
           wall_framing_factor = 0.0
-          wall_rigid_height = foundation_wall_values[:insulation_height]
-          wall_rigid_r = foundation_wall_values[:insulation_r_value]
+          wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
+          if not wall_assembly_r.nil?
+            wall_rigid_height = wall_height
+            wall_film_r = Material.AirFilmVertical.rvalue
+            wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
+            if wall_rigid_r < 0 # Try without drywall
+              wall_drywall_thick_in = 0.0
+              wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
+            end
+          else
+            wall_rigid_height = foundation_wall_values[:insulation_height]
+            wall_rigid_r = foundation_wall_values[:insulation_r_value]
+          end
 
           # TODO: Currently assumes all walls have the same height, insulation height, etc.
           # Refactor so that we create the single Kiva foundation object based on average values.
@@ -977,6 +988,10 @@ class OSModel
                                                         wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                                                         wall_height, wall_height_above_grade, foundation_object[slab_id])
           return false if not success
+
+          if not wall_assembly_r.nil?
+            check_surface_assembly_rvalue(surface, wall_film_r, wall_assembly_r)
+          end
 
           foundation_object[slab_id] = surface.adjacentFoundation.get
         end
