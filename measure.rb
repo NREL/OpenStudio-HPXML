@@ -878,7 +878,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure//Azimuth") do |azimuth|
       return Integer(azimuth.text)
     end
-    return 0
+    return 90
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
