@@ -9,7 +9,7 @@ require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                 cfa, cfa_ag, nbeds, nbaths, ncfl, ncfl_ag, window_area)
+                 cfa, cfa_ag, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
       return false
@@ -52,7 +52,7 @@ class Airflow
     building.cfa = cfa
     building.ag_cfa = cfa_ag
 
-    wind_speed = process_wind_speed_correction(infil.terrain, infil.shelter_coef, Geometry.get_closest_neighbor_distance(model), building.building_height)
+    wind_speed = process_wind_speed_correction(infil.terrain, infil.shelter_coef, min_neighbor_distance, building.building_height)
     if not process_infiltration(model, infil, wind_speed, building, weather)
       return false
     end
@@ -205,7 +205,7 @@ class Airflow
 
   private
 
-  def self.process_wind_speed_correction(terrain, shelter_coef, neighbors_min_nonzero_offset, building_height)
+  def self.process_wind_speed_correction(terrain, shelter_coef, min_neighbor_distance, building_height)
     wind_speed = WindSpeed.new
     wind_speed.height = 32.8 # ft (Standard weather station height)
 
@@ -244,10 +244,10 @@ class Airflow
 
     # Local Shielding
     if shelter_coef == Constants.Auto
-      if neighbors_min_nonzero_offset == 0
+      if min_neighbor_distance.nil?
         # Typical shelter for isolated rural house
         wind_speed.S_wo = 0.90
-      elsif neighbors_min_nonzero_offset > building_height
+      elsif min_neighbor_distance > building_height
         # Typical shelter caused by other building across the street
         wind_speed.S_wo = 0.70
       else
@@ -1088,10 +1088,10 @@ class Airflow
     ra_duct_zone.setName(obj_name_ducts + " ret air zone")
     ra_duct_zone.setVolume(0.25)
 
-    sw_point = OpenStudio::Point3d.new(0, 74, 0)
-    nw_point = OpenStudio::Point3d.new(0, 74.1, 0)
-    ne_point = OpenStudio::Point3d.new(0.1, 74.1, 0)
-    se_point = OpenStudio::Point3d.new(0.1, 74, 0)
+    sw_point = OpenStudio::Point3d.new(0, 0, 0)
+    nw_point = OpenStudio::Point3d.new(0, 0.1, 0)
+    ne_point = OpenStudio::Point3d.new(0.1, 0.1, 0)
+    se_point = OpenStudio::Point3d.new(0.1, 0, 0)
     ra_duct_polygon = Geometry.make_polygon(sw_point, nw_point, ne_point, se_point)
 
     ra_space = OpenStudio::Model::Space::fromFloorPrint(ra_duct_polygon, 1, model)

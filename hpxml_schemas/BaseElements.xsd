@@ -168,7 +168,6 @@
 					<xs:documentation>Describe</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="None"/>
 			<xs:element name="Unknown"/>
 		</xs:choice>
 	</xs:complexType>
@@ -1725,11 +1724,10 @@
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:element>
-									<xs:element maxOccurs="1" minOccurs="0" name="ArrayType">
+									<xs:element maxOccurs="1" minOccurs="0" name="Tracking">
 										<xs:simpleType>
 											<xs:restriction base="xs:string">
-												<xs:enumeration value="fixed open rack"/>
-												<xs:enumeration value="fixed roof mount"/>
+												<xs:enumeration value="fixed"/>
 												<xs:enumeration value="1-axis"/>
 												<xs:enumeration value="1-axis backtracked"/>
 												<xs:enumeration value="2-axis"/>

@@ -252,6 +252,7 @@ class OSModel
     @garage_present = building_construction_values[:garage_present]
     foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
     @has_uncond_bsmnt = (not foundation_values.nil?)
+    @min_neighbor_distance = get_min_neighbor_distance(building)
 
     loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
@@ -412,7 +413,7 @@ class OSModel
     success = set_zone_volumes(runner, model, building)
     return false if not success
 
-    success = explode_surfaces(runner, model)
+    success = explode_surfaces(runner, model, building)
     return false if not success
 
     return true
@@ -498,7 +499,7 @@ class OSModel
     return true
   end
 
-  def self.explode_surfaces(runner, model)
+  def self.explode_surfaces(runner, model, building)
     # Re-position surfaces so as to not shade each other and to make it easier to visualize the building.
     # FUTURE: Might be able to use the new self-shading options in E+ 8.9 ShadowCalculation object?
 
@@ -511,6 +512,7 @@ class OSModel
     model.getSurfaces.sort.each do |surface|
       next unless ["wall", "roofceiling"].include? surface.surfaceType.downcase
       next unless ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
+      next if surface.additionalProperties.getFeatureAsDouble("Tilt").get <= 0 # skip flat roofs
 
       surfaces << surface
       azimuth = surface.additionalProperties.getFeatureAsInteger("Azimuth").get
@@ -521,16 +523,62 @@ class OSModel
     end
     max_azimuth_length = azimuth_lengths.values.max
 
+    # Using the max length for a given azimuth, calculate the apothem (radius of the incircle) of a regular
+    # n-sided polygon to create the smallest polygon possible without self-shading. The number of polygon
+    # sides is defined by the minimum difference between two azimuths.
+    min_azimuth_diff = 360
+    azimuths_sorted = azimuth_lengths.keys.sort
+    azimuths_sorted.each_with_index do |az, idx|
+      diff1 = (az - azimuths_sorted[(idx + 1) % azimuths_sorted.size]).abs
+      diff2 = 360.0 - diff1 # opposite direction
+      if diff1 < min_azimuth_diff
+        min_azimuth_diff = diff1
+      end
+      if diff2 < min_azimuth_diff
+        min_azimuth_diff = diff2
+      end
+    end
+    nsides = (360.0 / min_azimuth_diff).ceil
+    nsides = 4 if nsides < 4 # assume rectangle at the minimum
+    explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, "deg", "rad")))
+
+    success = add_neighbors(runner, model, building, max_azimuth_length)
+    return false if not success
+
     # Initial distance of shifts at 90-degrees to horizontal outward
     azimuth_side_shifts = {}
-    azimuth_lengths.each do |key, value|
-      azimuth_side_shifts[key] = max_azimuth_length / 2.0
+    azimuth_lengths.keys.each do |azimuth|
+      azimuth_side_shifts[azimuth] = max_azimuth_length / 2.0
+    end
+
+    # Explode neighbors
+    model.getShadingSurfaceGroups.each do |shading_surface_group|
+      next if shading_surface_group.name.to_s != Constants.ObjectNameNeighbors
+
+      shading_surface_group.shadingSurfaces.each do |shading_surface|
+        azimuth = shading_surface.additionalProperties.getFeatureAsInteger("Azimuth").get
+        azimuth_rad = UnitConversions.convert(azimuth, "deg", "rad")
+        distance = shading_surface.additionalProperties.getFeatureAsDouble("Distance").get
+
+        unless azimuth_lengths.keys.include? azimuth
+          runner.registerError("A neighbor building has an azimuth (#{azimuth}) not equal to the azimuth of any wall.")
+          return false
+        end
+
+        # Push out horizontally
+        distance += explode_distance
+        transformation = get_surface_transformation(distance, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0)
+
+        shading_surface.setVertices(transformation * shading_surface.vertices)
+      end
     end
 
     # Explode walls, windows, doors, roofs, and skylights
     surfaces_moved = []
 
     surfaces.sort.each do |surface|
+      next if surface.additionalProperties.getFeatureAsDouble("Tilt").get <= 0 # skip flat roofs
+
       if surface.adjacentSurface.is_initialized
         next if surfaces_moved.include? surface.adjacentSurface.get
       end
@@ -539,7 +587,8 @@ class OSModel
       azimuth_rad = UnitConversions.convert(azimuth, "deg", "rad")
 
       # Push out horizontally
-      distance = max_azimuth_length
+      distance = explode_distance
+
       if surface.surfaceType.downcase == "roofceiling"
         # Ensure pitched surfaces are positioned outward justified with walls, etc.
         roof_tilt = surface.additionalProperties.getFeatureAsDouble("Tilt").get
@@ -933,6 +982,7 @@ class OSModel
 
         surface.additionalProperties.setFeature("Length", wall_length)
         surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+        surface.additionalProperties.setFeature("Tilt", 90.0)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
@@ -1216,6 +1266,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", wall_length)
       surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName(wall_id)
       surface.setSurfaceType("Wall")
       set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
@@ -1249,6 +1300,48 @@ class OSModel
     return true
   end
 
+  def self.add_neighbors(runner, model, building, wall_length)
+    # Get the max z-value of any model surface
+    wall_height = -9e99
+    model.getSpaces.each do |space|
+      z_origin = space.zOrigin
+      space.surfaces.each do |surface|
+        surface.vertices.each do |vertex|
+          surface_z = vertex.z + z_origin
+          next if surface_z < wall_height
+
+          wall_height = surface_z
+        end
+      end
+    end
+    wall_height = UnitConversions.convert(wall_height, "m", "ft")
+    z_origin = 0 # shading surface always starts at grade
+
+    shading_surfaces = []
+    building.elements.each("BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
+      neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
+      azimuth = neighbor_building_values[:azimuth]
+      distance = neighbor_building_values[:distance]
+
+      shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(wall_length, wall_height, z_origin, azimuth), model)
+      shading_surface.additionalProperties.setFeature("Azimuth", azimuth)
+      shading_surface.additionalProperties.setFeature("Distance", distance)
+      shading_surface.setName("Neighbor azimuth #{azimuth} distance #{distance}")
+
+      shading_surfaces << shading_surface
+    end
+
+    unless shading_surfaces.empty?
+      shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
+      shading_surface_group.setName(Constants.ObjectNameNeighbors)
+      shading_surfaces.each do |shading_surface|
+        shading_surface.setShadingSurfaceGroup(shading_surface_group)
+      end
+    end
+
+    return true
+  end
+
   def self.add_rim_joists(runner, model, building, spaces)
     foundation_top = get_foundation_top(model)
 
@@ -1271,6 +1364,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", rim_joist_length)
       surface.additionalProperties.setFeature("Azimuth", rim_joist_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName(rim_joist_id)
       surface.setSurfaceType("Wall")
       set_surface_interior(model, spaces, surface, rim_joist_id, interior_adjacent_to)
@@ -1399,7 +1493,11 @@ class OSModel
 
         roof_width = Math::sqrt(roof_net_area)
         roof_length = roof_net_area / roof_width
-        roof_tilt = attic_roof_values[:pitch] / 12.0
+        if attic_values[:attic_type] != "FlatRoof"
+          roof_tilt = attic_roof_values[:pitch] / 12.0
+        else
+          roof_tilt = 0.0
+        end
         z_origin = walls_top + 0.5 * Math.sin(Math.atan(roof_tilt)) * roof_width
         roof_azimuth = 0 # TODO
         if not attic_roof_values[:azimuth].nil?
@@ -1494,6 +1592,7 @@ class OSModel
 
         surface.additionalProperties.setFeature("Length", wall_length)
         surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+        surface.additionalProperties.setFeature("Tilt", 90.0)
         surface.setName(wall_id)
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
@@ -1554,6 +1653,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", window_width)
       surface.additionalProperties.setFeature("Azimuth", window_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName("surface #{window_id}")
       surface.setSurfaceType("Wall")
       surface_space = nil
@@ -1699,6 +1799,7 @@ class OSModel
 
       surface.additionalProperties.setFeature("Length", door_width)
       surface.additionalProperties.setFeature("Azimuth", door_azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
       surface.setName("surface #{door_id}")
       surface.setSurfaceType("Wall")
       surface_space = nil
@@ -1919,10 +2020,6 @@ class OSModel
           ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
         end
 
-        ef_adj = water_heating_system_values[:energy_factor_multiplier]
-        if ef_adj.nil?
-          ef_adj = Waterheater.get_ef_multiplier(to_beopt_wh_type(wh_type))
-        end
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
@@ -1941,16 +2038,20 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_tank(model, runner, nil, space, to_beopt_fuel(fuel),
-                                           capacity_kbtuh, tank_vol, ef * ef_adj, re, setpoint_temp,
+                                           capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj, @nbeds)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
 
+          cycling_derate = water_heating_system_values[:performance_adjustment]
+          if cycling_derate.nil?
+            cycling_derate = Waterheater.get_tankless_cycling_derate()
+          end
+
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          cycling_derate = 1.0 - ef_adj
           success = Waterheater.apply_tankless(model, runner, nil, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
@@ -1973,7 +2074,7 @@ class OSModel
           int_factor = 1.0 # FIXME
           temp_depress = 0.0 # FIXME
           ducting = "none"
-          # FIXME: Use ef, ef_adj, ec_adj
+          # FIXME: Use ef, ec_adj
           success = Waterheater.apply_heatpump(model, runner, nil, space, weather,
                                                e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
                                                cap, cop, shr, airflow_rate, fan_power,
@@ -2975,14 +3076,14 @@ class OSModel
     end
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area)
+                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area, @min_neighbor_distance)
     return false if not success
 
     return true
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, false)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, @min_neighbor_distance, false)
     return false if not success
 
     return true
@@ -3047,17 +3148,21 @@ class OSModel
                     "premium" => Constants.PVModuleTypePremium,
                     "thin film" => Constants.PVModuleTypeThinFilm }
 
-    arrays_map = { "fixed open rack" => Constants.PVArrayTypeFixedOpenRack,
-                   "fixed roof mount" => Constants.PVArrayTypeFixedRoofMount,
-                   "1-axis" => Constants.PVArrayTypeFixed1Axis,
-                   "1-axis backtracked" => Constants.PVArrayTypeFixed1AxisBacktracked,
-                   "2-axis" => Constants.PVArrayTypeFixed2Axis }
-
     building.elements.each("BuildingDetails/Systems/Photovoltaics/PVSystem") do |pvsys|
       pv_system_values = HPXML.get_pv_system_values(pv_system: pvsys)
       pv_id = pv_system_values[:id]
       module_type = modules_map[pv_system_values[:module_type]]
-      array_type = arrays_map[pv_system_values[:array_type]]
+      if pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'roof'
+        array_type = Constants.PVArrayTypeFixedRoofMount
+      elsif pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'ground'
+        array_type = Constants.PVArrayTypeFixedOpenRack
+      elsif pv_system_values[:tracking] == '1-axis'
+        array_type = Constants.PVArrayTypeFixed1Axis
+      elsif pv_system_values[:tracking] == '1-axis backtracked'
+        array_type = Constants.PVArrayTypeFixed1AxisBacktracked
+      elsif pv_system_values[:tracking] == '2-axis'
+        array_type = Constants.PVArrayTypeFixed2Axis
+      end
       az = pv_system_values[:array_azimuth]
       tilt = pv_system_values[:array_tilt]
       power_w = pv_system_values[:max_power_output]
@@ -3807,6 +3912,20 @@ class OSModel
     end
 
     return nil
+  end
+
+  def self.get_min_neighbor_distance(building)
+    min_neighbor_distance = nil
+    building.elements.each("BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
+      neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
+      if min_neighbor_distance.nil?
+        min_neighbor_distance = 9e99
+      end
+      if neighbor_building_values[:distance] < min_neighbor_distance
+        min_neighbor_distance = neighbor_building_values[:distance]
+      end
+    end
+    return min_neighbor_distance
   end
 end
 

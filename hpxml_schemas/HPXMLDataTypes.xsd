@@ -371,6 +371,7 @@
 			<xs:enumeration value="owner-occupied"/>
 			<xs:enumeration value="renter-occupied"/>
 			<xs:enumeration value="owner-and-renter-occupied"/>
+			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="OccupantIncomeRangeUnits">
