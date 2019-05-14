@@ -1305,7 +1305,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :wall_idref => "AtticGableCond" }
     windows_values << { :id => "AtticGableWindowWest",
                         :area => 12,
-                        :azimuth => 180,
+                        :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "AtticGableCond" }
@@ -1322,7 +1322,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :wall_idref => "AtticGable" }
     windows_values << { :id => "AtticGableWindowWest",
                         :area => 12,
-                        :azimuth => 180,
+                        :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
                         :wall_idref => "AtticGable" }
