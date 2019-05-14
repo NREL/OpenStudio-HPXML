@@ -303,7 +303,7 @@
           <Window>
             <SystemIdentifier id='AtticGableWindowWest'/>
             <Area>12.0</Area>
-            <Azimuth>180</Azimuth>
+            <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <AttachedToWall idref='AtticGableCond'/>
