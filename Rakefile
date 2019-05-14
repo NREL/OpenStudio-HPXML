@@ -109,6 +109,7 @@ def create_hpxmls
     'base-hvac-central-ac-only-1-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
+    'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -742,17 +743,8 @@ end
 
 def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
   if ['base.xml'].include? hpxml_file
-    attics_roofs_values = [[{ :id => "AtticRoofNorth",
-                              :area => 755,
-                              :azimuth => 0,
-                              :solar_absorptance => 0.75,
-                              :emittance => 0.9,
-                              :pitch => 6,
-                              :radiant_barrier => false,
-                              :insulation_assembly_r_value => 2.3 },
-                            { :id => "AtticRoofSouth",
-                              :area => 755,
-                              :azimuth => 180,
+    attics_roofs_values = [[{ :id => "AtticRoof",
+                              :area => 1510,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :pitch => 6,
@@ -761,40 +753,21 @@ def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     attics_roofs_values = [[{ :id => "AtticRoof",
                               :area => 1350,
-                              :azimuth => 0,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :pitch => 0,
                               :radiant_barrier => false,
                               :insulation_assembly_r_value => 25.8 }]]
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    attics_roofs_values = [[{ :id => "AtticRoofNorthCond",
-                              :area => 503,
-                              :azimuth => 0,
-                              :solar_absorptance => 0.75,
-                              :emittance => 0.9,
-                              :pitch => 6,
-                              :radiant_barrier => false,
-                              :insulation_assembly_r_value => 25.8 },
-                            { :id => "AtticRoofSouthCond",
-                              :area => 503,
-                              :azimuth => 180,
+    attics_roofs_values = [[{ :id => "AtticRoofCond",
+                              :area => 1006,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :pitch => 6,
                               :radiant_barrier => false,
                               :insulation_assembly_r_value => 25.8 }]]
-    attics_roofs_values << [{ :id => "AtticRoofNorthUncond",
-                              :area => 252,
-                              :azimuth => 0,
-                              :solar_absorptance => 0.75,
-                              :emittance => 0.9,
-                              :pitch => 6,
-                              :radiant_barrier => false,
-                              :insulation_assembly_r_value => 2.3 },
-                            { :id => "AtticRoofSouthUncond",
-                              :area => 252,
-                              :azimuth => 180,
+    attics_roofs_values << [{ :id => "AtticRoofUncond",
+                              :area => 504,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :pitch => 6,
@@ -802,24 +775,16 @@ def get_hpxml_file_attics_roofs_values(hpxml_file, attics_roofs_values)
                               :insulation_assembly_r_value => 2.3 }]
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     attics_roofs_values[0][0][:insulation_assembly_r_value] = 25.8
-    attics_roofs_values[0][1][:insulation_assembly_r_value] = 25.8
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    attics_roofs_values[0] << { :id => "AtticRoofNorthGarage",
-                                :area => 335,
-                                :azimuth => 0,
+    attics_roofs_values[0] << { :id => "AtticRoofGarage",
+                                :area => 670,
                                 :solar_absorptance => 0.75,
                                 :emittance => 0.9,
                                 :pitch => 6,
                                 :radiant_barrier => false,
                                 :insulation_assembly_r_value => 2.3 }
-    attics_roofs_values[0] << { :id => "AtticRoofSouthGarage",
-                                :area => 335,
-                                :azimuth => 180,
-                                :solar_absorptance => 0.75,
-                                :emittance => 0.9,
-                                :pitch => 6,
-                                :radiant_barrier => false,
-                                :insulation_assembly_r_value => 2.3 }
+  elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
+    attics_roofs_values[0][0][:insulation_assembly_r_value] = 25.8
   end
   return attics_roofs_values
 end
@@ -838,13 +803,9 @@ def get_hpxml_file_attics_floors_values(hpxml_file, attics_floors_values)
                                :adjacent_to => "living space",
                                :area => 900,
                                :insulation_assembly_r_value => 2.1 }]]
-    attics_floors_values << [{ :id => "AtticFloorNorthUncond",
+    attics_floors_values << [{ :id => "AtticFloorUncond",
                                :adjacent_to => "living space",
-                               :area => 225,
-                               :insulation_assembly_r_value => 39.3 },
-                             { :id => "AtticFloorSouthUncond",
-                               :adjacent_to => "living space",
-                               :area => 225,
+                               :area => 450,
                                :insulation_assembly_r_value => 39.3 }]
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     attics_floors_values[0] << { :id => "AtticFloorGarage",
@@ -857,76 +818,39 @@ end
 
 def get_hpxml_file_attics_walls_values(hpxml_file, attics_walls_values)
   if ['base.xml'].include? hpxml_file
-    attics_walls_values = [[{ :id => "AtticGableEast",
+    attics_walls_values = [[{ :id => "AtticGable",
                               :adjacent_to => "outside",
                               :wall_type => "WoodStud",
-                              :area => 145,
-                              :azimuth => 90,
-                              :solar_absorptance => 0.75,
-                              :emittance => 0.9,
-                              :insulation_assembly_r_value => 4.0 },
-                            { :id => "AtticGableWest",
-                              :adjacent_to => "outside",
-                              :wall_type => "WoodStud",
-                              :area => 145,
-                              :azimuth => 270,
+                              :area => 290,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :insulation_assembly_r_value => 4.0 }]]
   elsif ['base-atticroof-flat.xml'].include? hpxml_file
     attics_walls_values[0].delete_at(0)
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    attics_walls_values = [[{ :id => "AtticGableEastCond",
+    attics_walls_values = [[{ :id => "AtticGableCond",
                               :adjacent_to => "outside",
                               :wall_type => "WoodStud",
-                              :area => 120,
-                              :azimuth => 90,
+                              :area => 240,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :insulation_assembly_r_value => 23.0 },
-                            { :id => "AtticGableWestCond",
-                              :adjacent_to => "outside",
-                              :wall_type => "WoodStud",
-                              :area => 120,
-                              :azimuth => 270,
-                              :solar_absorptance => 0.75,
-                              :emittance => 0.9,
-                              :insulation_assembly_r_value => 23.0 },
-                            { :id => "AtticKneeWallNorth",
+                            { :id => "AtticKneeWall",
                               :adjacent_to => "attic - unvented",
                               :wall_type => "WoodStud",
-                              :area => 158,
-                              :azimuth => 0,
-                              :solar_absorptance => 0.75,
-                              :emittance => 0.9,
-                              :insulation_assembly_r_value => 23.0 },
-                            { :id => "AtticKneeWallSouth",
-                              :adjacent_to => "attic - unvented",
-                              :wall_type => "WoodStud",
-                              :area => 158,
-                              :azimuth => 180,
+                              :area => 316,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :insulation_assembly_r_value => 23.0 }]]
-    attics_walls_values << [{ :id => "AtticGableEastUncond",
+    attics_walls_values << [{ :id => "AtticGableUncond",
                               :adjacent_to => "attic - unvented",
                               :wall_type => "WoodStud",
-                              :area => 25,
-                              :azimuth => 90,
-                              :solar_absorptance => 0.75,
-                              :emittance => 0.9,
-                              :insulation_assembly_r_value => 4.0 },
-                            { :id => "AtticGableWestUncond",
-                              :adjacent_to => "attic - unvented",
-                              :wall_type => "WoodStud",
-                              :area => 25,
-                              :azimuth => 270,
+                              :area => 50,
                               :solar_absorptance => 0.75,
                               :emittance => 0.9,
                               :insulation_assembly_r_value => 4.0 }]
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     attics_walls_values[0][0][:insulation_assembly_r_value] = 23.0
-    attics_walls_values[0][1][:insulation_assembly_r_value] = 23.0
   end
   return attics_walls_values
 end
@@ -1115,45 +1039,19 @@ def get_hpxml_file_garages_walls_values(hpxml_file, garages_walls_values)
     garages_walls_values = [[]]
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     # exterior surfaces below; interzonal surfaces specified in Walls element
-    garages_walls_values = [[{ :id => "GarageWallSouth",
+    garages_walls_values = [[{ :id => "GarageWall",
                                :adjacent_to => "outside",
                                :wall_type => "WoodStud",
-                               :area => 400,
-                               :azimuth => 180,
-                               :solar_absorptance => 0.75,
-                               :emittance => 0.9,
-                               :insulation_assembly_r_value => 4 },
-                             { :id => "GarageWallEast",
-                               :adjacent_to => "outside",
-                               :wall_type => "WoodStud",
-                               :area => 400,
-                               :azimuth => 90,
+                               :area => 800,
                                :solar_absorptance => 0.75,
                                :emittance => 0.9,
                                :insulation_assembly_r_value => 4 }]]
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     # exterior surfaces below; interzonal surface specified in Walls element
-    garages_walls_values = [[{ :id => "GarageWallNorth",
+    garages_walls_values = [[{ :id => "GarageWall",
                                :adjacent_to => "outside",
                                :wall_type => "WoodStud",
-                               :area => 160,
-                               :azimuth => 0,
-                               :solar_absorptance => 0.75,
-                               :emittance => 0.9,
-                               :insulation_assembly_r_value => 4 },
-                             { :id => "GarageWallSouth",
-                               :adjacent_to => "outside",
-                               :wall_type => "WoodStud",
-                               :area => 160,
-                               :azimuth => 180,
-                               :solar_absorptance => 0.75,
-                               :emittance => 0.9,
-                               :insulation_assembly_r_value => 4 },
-                             { :id => "GarageWallEast",
-                               :adjacent_to => "outside",
-                               :wall_type => "WoodStud",
-                               :area => 240,
-                               :azimuth => 90,
+                               :area => 560,
                                :solar_absorptance => 0.75,
                                :emittance => 0.9,
                                :insulation_assembly_r_value => 4 }]]
@@ -1188,35 +1086,10 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
   if ['base.xml'].include? hpxml_file
     # TODO: Other geometry values (e.g., building volume) assume
     # no rim joists.
-    rim_joists_values = [{ :id => "RimJoistNorthFoundation",
+    rim_joists_values = [{ :id => "RimJoistFoundation",
                            :exterior_adjacent_to => "outside",
                            :interior_adjacent_to => "living space",
-                           :area => 35,
-                           :azimuth => 0,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 },
-                         { :id => "RimJoistSouthFoundation",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "living space",
-                           :area => 35,
-                           :azimuth => 180,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 },
-                         { :id => "RimJoistEastFoundation",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "living space",
-                           :area => 23,
-                           :azimuth => 90,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 },
-                         { :id => "RimJoistWestFoundation",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "living space",
-                           :area => 23,
-                           :azimuth => 270,
+                           :area => 116,
                            :solar_absorptance => 0.75,
                            :emittance => 0.9,
                            :insulation_assembly_r_value => 23.0 }]
@@ -1237,60 +1110,18 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
     end
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     rim_joists_values[0][:exterior_adjacent_to] = "crawlspace - unvented"
-    rim_joists_values << { :id => "RimJoistNorthCrawlspace",
+    rim_joists_values << { :id => "RimJoistCrawlspace",
                            :exterior_adjacent_to => "outside",
                            :interior_adjacent_to => "crawlspace - unvented",
-                           :area => 35,
-                           :azimuth => 0,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 }
-    rim_joists_values << { :id => "RimJoistEastCrawlspace",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "crawlspace - unvented",
-                           :area => 23,
-                           :azimuth => 90,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 }
-    rim_joists_values << { :id => "RimJoistWestCrawlspace",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "crawlspace - unvented",
-                           :area => 23,
-                           :azimuth => 270,
+                           :area => 81,
                            :solar_absorptance => 0.75,
                            :emittance => 0.9,
                            :insulation_assembly_r_value => 23.0 }
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
-    rim_joists_values << { :id => "RimJoistNorth2ndStory",
+    rim_joists_values << { :id => "RimJoist2ndStory",
                            :exterior_adjacent_to => "outside",
                            :interior_adjacent_to => "living space",
-                           :area => 35,
-                           :azimuth => 0,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 }
-    rim_joists_values << { :id => "RimJoistSouth2ndStory",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "living space",
-                           :area => 35,
-                           :azimuth => 180,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 }
-    rim_joists_values << { :id => "RimJoistEast2ndStory",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "living space",
-                           :area => 23,
-                           :azimuth => 90,
-                           :solar_absorptance => 0.75,
-                           :emittance => 0.9,
-                           :insulation_assembly_r_value => 23.0 }
-    rim_joists_values << { :id => "RimJoistWest2ndStory",
-                           :exterior_adjacent_to => "outside",
-                           :interior_adjacent_to => "living space",
-                           :area => 23,
-                           :azimuth => 270,
+                           :area => 116,
                            :solar_absorptance => 0.75,
                            :emittance => 0.9,
                            :insulation_assembly_r_value => 23.0 }
@@ -1300,39 +1131,11 @@ end
 
 def get_hpxml_file_walls_values(hpxml_file, walls_values)
   if ['base.xml'].include? hpxml_file
-    walls_values = [{ :id => "WallNorth",
+    walls_values = [{ :id => "Wall",
                       :exterior_adjacent_to => "outside",
                       :interior_adjacent_to => "living space",
                       :wall_type => "WoodStud",
-                      :area => 360,
-                      :azimuth => 0,
-                      :solar_absorptance => 0.75,
-                      :emittance => 0.9,
-                      :insulation_assembly_r_value => 23 },
-                    { :id => "WallSouth",
-                      :exterior_adjacent_to => "outside",
-                      :interior_adjacent_to => "living space",
-                      :wall_type => "WoodStud",
-                      :area => 360,
-                      :azimuth => 180,
-                      :solar_absorptance => 0.75,
-                      :emittance => 0.9,
-                      :insulation_assembly_r_value => 23 },
-                    { :id => "WallEast",
-                      :exterior_adjacent_to => "outside",
-                      :interior_adjacent_to => "living space",
-                      :wall_type => "WoodStud",
-                      :area => 240,
-                      :azimuth => 90,
-                      :solar_absorptance => 0.75,
-                      :emittance => 0.9,
-                      :insulation_assembly_r_value => 23 },
-                    { :id => "WallWest",
-                      :exterior_adjacent_to => "outside",
-                      :interior_adjacent_to => "living space",
-                      :wall_type => "WoodStud",
-                      :area => 240,
-                      :azimuth => 270,
+                      :area => 1200,
                       :solar_absorptance => 0.75,
                       :emittance => 0.9,
                       :insulation_assembly_r_value => 23 }]
@@ -1392,7 +1195,6 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :interior_adjacent_to => "garage",
                       :wall_type => "WoodStud",
                       :area => 100,
-                      :azimuth => 0,
                       :solar_absorptance => 0.75,
                       :emittance => 0.9,
                       :insulation_assembly_r_value => 4 }
@@ -1401,62 +1203,39 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
       walls_values[i][:area] *= 2.0
     end
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
-    walls_values = [{ :id => "WallNorth",
+    walls_values = [{ :id => "Wall",
                       :exterior_adjacent_to => "outside",
                       :interior_adjacent_to => "living space",
                       :wall_type => "WoodStud",
-                      :area => 360,
-                      :azimuth => 0,
+                      :area => 880,
                       :solar_absorptance => 0.75,
                       :emittance => 0.9,
                       :insulation_assembly_r_value => 23 },
-                    { :id => "WallSouth",
-                      :exterior_adjacent_to => "outside",
-                      :interior_adjacent_to => "living space",
-                      :wall_type => "WoodStud",
-                      :area => 200,
-                      :azimuth => 180,
-                      :solar_absorptance => 0.75,
-                      :emittance => 0.9,
-                      :insulation_assembly_r_value => 23 },
-                    { :id => "WallSouthGarage",
+                    { :id => "WallGarage",
                       :exterior_adjacent_to => "garage",
                       :interior_adjacent_to => "living space",
                       :wall_type => "WoodStud",
-                      :area => 160,
-                      :azimuth => 180,
-                      :solar_absorptance => 0.75,
-                      :emittance => 0.9,
-                      :insulation_assembly_r_value => 23 },
-                    { :id => "WallEast",
-                      :exterior_adjacent_to => "outside",
-                      :interior_adjacent_to => "living space",
-                      :wall_type => "WoodStud",
-                      :area => 80,
-                      :azimuth => 90,
-                      :solar_absorptance => 0.75,
-                      :emittance => 0.9,
-                      :insulation_assembly_r_value => 23 },
-                    { :id => "WallEastGarage",
-                      :exterior_adjacent_to => "garage",
-                      :interior_adjacent_to => "living space",
-                      :wall_type => "WoodStud",
-                      :area => 160,
-                      :azimuth => 90,
-                      :solar_absorptance => 0.75,
-                      :emittance => 0.9,
-                      :insulation_assembly_r_value => 23 },
-                    { :id => "WallWest",
-                      :exterior_adjacent_to => "outside",
-                      :interior_adjacent_to => "living space",
-                      :wall_type => "WoodStud",
-                      :area => 240,
-                      :azimuth => 270,
+                      :area => 320,
                       :solar_absorptance => 0.75,
                       :emittance => 0.9,
                       :insulation_assembly_r_value => 23 }]
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
-    walls_values[2][:exterior_adjacent_to] = "garage"
+    walls_values = [{ :id => "Wall",
+                      :exterior_adjacent_to => "outside",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 960,
+                      :solar_absorptance => 0.75,
+                      :emittance => 0.9,
+                      :insulation_assembly_r_value => 23 },
+                    { :id => "WallGarage",
+                      :exterior_adjacent_to => "garage",
+                      :interior_adjacent_to => "living space",
+                      :wall_type => "WoodStud",
+                      :area => 240,
+                      :solar_absorptance => 0.75,
+                      :emittance => 0.9,
+                      :insulation_assembly_r_value => 23 }]
   end
   return walls_values
 end
@@ -1468,25 +1247,25 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :azimuth => 0,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "WallNorth" },
+                        :wall_idref => "Wall" },
                       { :id => "WindowSouth",
                         :area => 54,
                         :azimuth => 180,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "WallSouth" },
+                        :wall_idref => "Wall" },
                       { :id => "WindowEast",
                         :area => 36,
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "WallEast" },
+                        :wall_idref => "Wall" },
                       { :id => "WindowWest",
                         :area => 36,
                         :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "WallWest" }]
+                        :wall_idref => "Wall" }]
   elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
     windows_values[0][:overhangs_depth] = 2.5
     windows_values[0][:overhangs_distance_to_top_of_window] = 0
@@ -1518,13 +1297,13 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGableEastCond" }
+                        :wall_idref => "AtticGableCond" }
     windows_values << { :id => "AtticGableWindowWest",
                         :area => 12,
                         :azimuth => 180,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGableWestCond" }
+                        :wall_idref => "AtticGableCond" }
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     windows_values[0][:area] = 54
     windows_values[1][:area] = 54
@@ -1535,13 +1314,13 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGableEast" }
+                        :wall_idref => "AtticGable" }
     windows_values << { :id => "AtticGableWindowWest",
                         :area => 12,
                         :azimuth => 180,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGableWest" }
+                        :wall_idref => "AtticGable" }
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     windows_values.delete_at(2)
     windows_values << { :id => "GarageWindowEast",
@@ -1549,7 +1328,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "GarageWallEast" }
+                        :wall_idref => "GarageWall" }
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     windows_values[0][:area] = 108
     windows_values[1][:area] = 108
@@ -1598,13 +1377,13 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
                           :azimuth => 0,
                           :ufactor => 0.33,
                           :shgc => 0.45,
-                          :roof_idref => "AtticRoofNorth" }
+                          :roof_idref => "AtticRoof" }
     skylights_values << { :id => "SkylightSouth",
                           :area => 15,
                           :azimuth => 180,
                           :ufactor => 0.35,
                           :shgc => 0.47,
-                          :roof_idref => "AtticRoofSouth" }
+                          :roof_idref => "AtticRoof" }
   elsif ['invalid_files/net-area-negative-roof.xml'].include? hpxml_file
     skylights_values[0][:area] = 4000
   elsif ['invalid_files/unattached-skylight.xml'].include? hpxml_file
@@ -1616,19 +1395,19 @@ end
 def get_hpxml_file_doors_values(hpxml_file, doors_values)
   if ['base.xml'].include? hpxml_file
     doors_values = [{ :id => "DoorNorth",
-                      :wall_idref => "WallNorth",
+                      :wall_idref => "Wall",
                       :area => 40,
                       :azimuth => 0,
                       :r_value => 4.4 },
                     { :id => "DoorSouth",
-                      :wall_idref => "WallSouth",
+                      :wall_idref => "Wall",
                       :area => 40,
                       :azimuth => 180,
                       :r_value => 4.4 }]
   elsif ['base-enclosure-garage.xml',
          'base-enclosure-2stories-garage.xml'].include? hpxml_file
     doors_values << { :id => "GarageDoorSouth",
-                      :wall_idref => "GarageWallSouth",
+                      :wall_idref => "GarageWall",
                       :area => 70,
                       :azimuth => 180,
                       :r_value => 4.4 }
@@ -2010,6 +1789,10 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
     hvac_distributions_values << { :id => "HVACDistribution6",
                                    :distribution_system_type => "AirDistribution" }
+  elsif ['base-hvac-dse.xml'].include? hpxml_file
+    hvac_distributions_values[0][:distribution_system_type] = "DSE"
+    hvac_distributions_values[0][:annual_heating_dse] = 0.75
+    hvac_distributions_values[0][:annual_cooling_dse] = 0.75
   elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-0.8.xml'
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
     hvac_distributions_values[0][:annual_heating_dse] = 0.8
