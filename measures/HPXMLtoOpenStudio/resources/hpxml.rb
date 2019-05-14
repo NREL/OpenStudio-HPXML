@@ -90,6 +90,29 @@ class HPXML
              :disable_natural_ventilation => to_bool(XMLHelper.get_value(site, "extension/DisableNaturalVentilation")) }
   end
 
+  def self.add_site_neighbor(hpxml:,
+                             azimuth:,
+                             distance:,
+                             **remainder)
+    neighbors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
+    neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
+    XMLHelper.add_element(neighbor_building, "Azimuth", to_integer(azimuth))
+    XMLHelper.add_element(neighbor_building, "Distance", to_float(distance))
+
+    check_remainder(remainder,
+                    calling_method: __method__.to_s,
+                    expected_kwargs: [])
+
+    return neighbor_building
+  end
+
+  def self.get_neighbor_building_values(neighbor_building:)
+    return nil if neighbor_building.nil?
+
+    return { :azimuth => to_integer(XMLHelper.get_value(neighbor_building, "Azimuth")),
+             :distance => to_float(XMLHelper.get_value(neighbor_building, "Distance")) }
+  end
+
   def self.add_building_occupancy(hpxml:,
                                   number_of_residents: nil,
                                   **remainder)
@@ -1319,13 +1342,13 @@ class HPXML
                                     fuel_type:,
                                     water_heater_type:,
                                     location:,
+                                    performance_adjustment: nil,
                                     tank_volume: nil,
                                     fraction_dhw_load_served:,
                                     heating_capacity: nil,
                                     energy_factor: nil,
                                     uniform_energy_factor: nil,
                                     recovery_efficiency: nil,
-                                    tankless_cycling_derate: nil,
                                     **remainder)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
@@ -1334,14 +1357,13 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "FuelType", fuel_type)
     XMLHelper.add_element(water_heating_system, "WaterHeaterType", water_heater_type)
     XMLHelper.add_element(water_heating_system, "Location", location)
+    XMLHelper.add_element(water_heating_system, "PerformanceAdjustment", to_float(performance_adjustment)) unless performance_adjustment.nil?
     XMLHelper.add_element(water_heating_system, "TankVolume", to_float(tank_volume)) unless tank_volume.nil?
     XMLHelper.add_element(water_heating_system, "FractionDHWLoadServed", to_float(fraction_dhw_load_served))
     XMLHelper.add_element(water_heating_system, "HeatingCapacity", to_float(heating_capacity)) unless heating_capacity.nil?
     XMLHelper.add_element(water_heating_system, "EnergyFactor", to_float(energy_factor)) unless energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "UniformEnergyFactor", to_float(uniform_energy_factor)) unless uniform_energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", to_float(recovery_efficiency)) unless recovery_efficiency.nil?
-    HPXML.add_extension(parent: water_heating_system,
-                        extensions: { "TanklessCyclingDerate": to_float(tankless_cycling_derate) })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -1358,13 +1380,13 @@ class HPXML
              :fuel_type => XMLHelper.get_value(water_heating_system, "FuelType"),
              :water_heater_type => XMLHelper.get_value(water_heating_system, "WaterHeaterType"),
              :location => XMLHelper.get_value(water_heating_system, "Location"),
+             :performance_adjustment => to_float(XMLHelper.get_value(water_heating_system, "PerformanceAdjustment")),
              :tank_volume => to_float(XMLHelper.get_value(water_heating_system, "TankVolume")),
              :fraction_dhw_load_served => to_float(XMLHelper.get_value(water_heating_system, "FractionDHWLoadServed")),
              :heating_capacity => to_float(XMLHelper.get_value(water_heating_system, "HeatingCapacity")),
              :energy_factor => to_float(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
-             :recovery_efficiency => to_float(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
-             :tankless_cycling_derate => to_float(XMLHelper.get_value(water_heating_system, "extension/TanklessCyclingDerate")) }
+             :recovery_efficiency => to_float(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")) }
   end
 
   def self.add_hot_water_distribution(hpxml:,
