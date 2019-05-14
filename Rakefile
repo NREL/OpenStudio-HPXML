@@ -93,6 +93,7 @@ def create_hpxmls
     'base-foundation-pier-beam.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
+    'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unconditioned-basement-above-grade.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
@@ -889,6 +890,10 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :insulation_r_value => 8.9 }]]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundations_walls_values[0][0][:insulation_height] = 4
+  elsif ['base-foundation-unconditioned-basement-assembly-r.xml'].include? hpxml_file
+    foundations_walls_values[0][0][:insulation_height] = nil
+    foundations_walls_values[0][0][:insulation_r_value] = nil
+    foundations_walls_values[0][0][:insulation_assembly_r_value] = 10.69
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     foundations_walls_values[0][0][:depth_below_grade] = 4
   elsif ['base-foundation-unvented-crawlspace.xml',
