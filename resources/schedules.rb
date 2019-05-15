@@ -481,6 +481,7 @@ class HotWaterSchedule
     temperature_sch = OpenStudio::Model::ScheduleConstant.new(@model)
     temperature_sch.setValue(@target_water_temperature)
     temperature_sch.setName(@temperature_sch_name)
+    Schedule.createScheduleTypeLimits(@model, temperature_sch, nil, nil, "Continuous")
     return temperature_sch
   end
 
