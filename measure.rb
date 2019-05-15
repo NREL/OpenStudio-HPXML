@@ -3152,15 +3152,6 @@ class OSModel
 
     # Ducts
     duct_systems = {}
-    location_map = { 'living space' => Constants.SpaceTypeLiving,
-                     'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
-                     'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
-                     'crawlspace - vented' => Constants.SpaceTypeCrawl,
-                     'crawlspace - unvented' => Constants.SpaceTypeCrawl,
-                     'attic - vented' => Constants.SpaceTypeUnconditionedAttic,
-                     'attic - unvented' => Constants.SpaceTypeUnconditionedAttic,
-                     'attic - conditioned' => Constants.SpaceTypeLiving,
-                     'garage' => Constants.SpaceTypeGarage }
     side_map = { 'supply' => Constants.DuctSideSupply,
                  'return' => Constants.DuctSideReturn }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
@@ -3186,7 +3177,7 @@ class OSModel
                           Constants.DuctSideReturn => 0.0 }
       air_distribution.elements.each("Ducts") do |ducts|
         ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
+        next if ['living space', 'basement - conditioned', 'attic - conditioned'].include? ducts_values[:duct_location]
 
         # Calculate total duct area in unconditioned spaces
         duct_side = side_map[ducts_values[:duct_type]]
@@ -3195,7 +3186,7 @@ class OSModel
 
       air_distribution.elements.each("Ducts") do |ducts|
         ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
+        next if ['living space', 'basement - conditioned', 'attic - conditioned'].include? ducts_values[:duct_location]
 
         duct_side = side_map[ducts_values[:duct_type]]
         duct_area = ducts_values[:duct_surface_area]
