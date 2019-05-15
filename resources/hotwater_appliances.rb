@@ -62,6 +62,7 @@ class HotWaterAndAppliances
       time_series_hw = OpenStudio::TimeSeries.new(start_date, timestep_interval, OpenStudio::createVector(fractions_hw), "")
       schedule_hw = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_hw, model).get
       schedule_hw.setName("Hot Water Draw Profile")
+      Schedule.createScheduleTypeLimits(model, schedule_hw, 0, 1, "Continuous")
 
       # Create mixed water draw profile schedule
       dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, dwhr_is_equal_flow, dwhr_facilities_connected, has_low_flow_fixtures)
@@ -78,6 +79,7 @@ class HotWaterAndAppliances
       time_series_mw = OpenStudio::TimeSeries.new(start_date, timestep_interval, OpenStudio::createVector(fractions_mw), "")
       schedule_mw = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_mw, model).get
       schedule_mw.setName("Mixed Water Draw Profile")
+      Schedule.createScheduleTypeLimits(model, schedule_mw, 0, 1, "Continuous")
 
       # Replace mains water temperature schedule with water heater inlet temperature schedule.
       # These are identical unless there is a DWHR.
