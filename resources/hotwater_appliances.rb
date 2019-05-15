@@ -28,7 +28,7 @@ class HotWaterAndAppliances
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
-    start_date = model.getYearDescription.makeDate(1, 1)
+    start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
     timestep_interval = OpenStudio::Time.new(0, 0, timestep_minutes)
     timestep_day = OpenStudio::Time.new(0, 0, 60 * 24)
     temp_sch_limits = model.getScheduleTypeLimitsByName("Temperature")
@@ -58,12 +58,13 @@ class HotWaterAndAppliances
           end
         end
       end
+      
       sum_fractions_hw = fractions_hw.reduce(:+).to_f
       time_series_hw = OpenStudio::TimeSeries.new(start_date, timestep_interval, OpenStudio::createVector(fractions_hw), "")
       schedule_hw = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_hw, model).get
       schedule_hw.setName("Hot Water Draw Profile")
       Schedule.createScheduleTypeLimits(model, schedule_hw, 0, 1, "Continuous")
-
+      
       # Create mixed water draw profile schedule
       dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, dwhr_is_equal_flow, dwhr_facilities_connected, has_low_flow_fixtures)
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, dwhr_present, dwhr_iFrac, dwhr_efficiency, dwhr_eff_adj, dwhr_plc, dwhr_locF, dwhr_fixF)
