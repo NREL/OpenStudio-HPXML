@@ -168,10 +168,10 @@ class HVACSizing
 
       is_vented = space_is_vented(space, 0.001)
 
-      attic_floor_r = get_space_r_value(runner, space, "floor", true)
+      attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = get_space_r_value(runner, space, "roofceiling", true)
+      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
       return nil if attic_roof_r.nil?
 
       # Unfinished attic
@@ -249,10 +249,10 @@ class HVACSizing
 
       is_vented = space_is_vented(space, 0.001)
 
-      attic_floor_r = get_space_r_value(runner, space, "floor", true)
+      attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = get_space_r_value(runner, space, "roofceiling", true)
+      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
       return nil if attic_roof_r.nil?
 
       # Unfinished attic
@@ -400,10 +400,10 @@ class HVACSizing
 
       is_vented = space_is_vented(space, 0.001)
 
-      attic_floor_r = get_space_r_value(runner, space, "floor", true)
+      attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = get_space_r_value(runner, space, "roofceiling", true)
+      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
       return nil if attic_roof_r.nil?
 
       # Unfinished attic
@@ -642,7 +642,7 @@ class HVACSizing
         next if not window.subSurfaceType.downcase.include?("window")
 
         # U-factor
-        u_window = get_surface_ufactor(runner, window, window.subSurfaceType, true)
+        u_window = self.get_surface_ufactor(runner, window, window.subSurfaceType, true)
         return nil if u_window.nil?
 
         zone_loads.Heat_Windows += u_window * UnitConversions.convert(window.grossArea, "m^2", "ft^2") * htd
@@ -802,7 +802,7 @@ class HVACSizing
         next if not skylight.subSurfaceType.downcase.include?("skylight")
 
         # U-factor
-        u_skylight = get_surface_ufactor(runner, skylight, skylight.subSurfaceType, true)
+        u_skylight = self.get_surface_ufactor(runner, skylight, skylight.subSurfaceType, true)
         return nil if u_skylight.nil?
 
         zone_loads.Heat_Skylights += u_skylight * UnitConversions.convert(skylight.grossArea, "m^2", "ft^2") * htd
@@ -904,7 +904,7 @@ class HVACSizing
       wall.subSurfaces.each do |door|
         next if not door.subSurfaceType.downcase.include?("door")
 
-        door_ufactor = get_surface_ufactor(runner, door, door.subSurfaceType, true)
+        door_ufactor = self.get_surface_ufactor(runner, door, door.subSurfaceType, true)
         return nil if door_ufactor.nil?
 
         zone_loads.Heat_Doors += door_ufactor * UnitConversions.convert(door.grossArea, "m^2", "ft^2") * htd
@@ -970,7 +970,7 @@ class HVACSizing
         cltd_Wall = [cltd_Wall + cltd_corr, 0].max # Assume zero cooling load for negative CLTD's
       end
 
-      wall_ufactor = get_surface_ufactor(runner, wall, wall.surfaceType, true)
+      wall_ufactor = self.get_surface_ufactor(runner, wall, wall.surfaceType, true)
       return nil if wall_ufactor.nil?
 
       zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * cltd_Wall
@@ -980,7 +980,7 @@ class HVACSizing
 
     # Interzonal Walls
     Geometry.get_spaces_interzonal_walls(thermal_zone.spaces).each do |wall|
-      wall_ufactor = get_surface_ufactor(runner, wall, wall.surfaceType, true)
+      wall_ufactor = self.get_surface_ufactor(runner, wall, wall.surfaceType, true)
       return nil if wall_ufactor.nil?
 
       adjacent_space = wall.adjacentSurface.get.space.get
@@ -1089,7 +1089,7 @@ class HVACSizing
       # Adjust base CLTD for different CTD or DR
       cltd_FinishedRoof = cltd_FinishedRoof + (weather.design.CoolingDrybulb - 95) + mj8.daily_range_temp_adjust[mj8.daily_range_num]
 
-      roof_ufactor = get_surface_ufactor(runner, roof, roof.surfaceType, true)
+      roof_ufactor = self.get_surface_ufactor(runner, roof, roof.surfaceType, true)
       return nil if roof_ufactor.nil?
 
       zone_loads.Cool_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * cltd_FinishedRoof
@@ -1113,7 +1113,7 @@ class HVACSizing
 
     # Exterior Floors
     Geometry.get_spaces_above_grade_exterior_floors(thermal_zone.spaces).each do |floor|
-      floor_ufactor = get_surface_ufactor(runner, floor, floor.surfaceType, true)
+      floor_ufactor = self.get_surface_ufactor(runner, floor, floor.surfaceType, true)
       return nil if floor_ufactor.nil?
 
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (mj8.ctd - 5 + mj8.daily_range_temp_adjust[mj8.daily_range_num])
@@ -1123,7 +1123,7 @@ class HVACSizing
 
     # Interzonal Floors
     Geometry.get_spaces_interzonal_floors_and_ceilings(thermal_zone.spaces).each do |floor|
-      floor_ufactor = get_surface_ufactor(runner, floor, floor.surfaceType, true)
+      floor_ufactor = self.get_surface_ufactor(runner, floor, floor.surfaceType, true)
       return nil if floor_ufactor.nil?
 
       adjacent_space = floor.adjacentSurface.get.space.get
@@ -2252,10 +2252,10 @@ class HVACSizing
 
         # Calculate the cooling design temperature for the unfinished attic based on Figure A12-14
         if Geometry.is_unfinished_attic(space)
-          attic_floor_r = get_space_r_value(runner, space, "floor", true)
+          attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
           return nil if attic_floor_r.nil?
 
-          attic_roof_r = get_space_r_value(runner, space, "roofceiling", true)
+          attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
           return nil if attic_roof_r.nil?
 
           if attic_floor_r > attic_roof_r
@@ -2663,7 +2663,7 @@ class HVACSizing
   end
 
   def self.get_fenestration_shgc(runner, surface)
-    simple_glazing = get_window_simple_glazing(runner, surface, true)
+    simple_glazing = self.get_window_simple_glazing(runner, surface, true)
     return nil if simple_glazing.nil?
 
     shgc_with_interior_shade_heat = simple_glazing.solarHeatGainCoefficient
@@ -3416,7 +3416,7 @@ class HVACSizing
           next
         end
       else
-        ufactor = get_surface_ufactor(runner, surface, surface.surfaceType, true)
+        ufactor = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
         return nil if ufactor.nil?
       end
 
@@ -3990,7 +3990,7 @@ class HVACSizing
     space.surfaces.each do |surface|
       next if surface.surfaceType.downcase != "roofceiling"
 
-      ceiling_ufactor = get_surface_ufactor(runner, surface, surface.surfaceType, true)
+      ceiling_ufactor = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
     end
     return nil if ceiling_ufactor.nil?
 
@@ -4031,7 +4031,7 @@ class HVACSizing
       wall_ins_height = UnitConversions.convert(foundation.exteriorVerticalInsulationDepth.get, "m", "ft").round
     end
 
-    wall_constr_rvalue = get_surface_ufactor(runner, surface, surface.surfaceType, true)
+    wall_constr_rvalue = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
 
     return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
   end
@@ -4385,6 +4385,76 @@ class HVACSizing
     end
 
     return true
+  end
+
+  def self.get_space_r_value(runner, space, surface_type, register_error = false)
+    # Get area-weighted space r-value
+    sum_surface_ua = 0.0
+    total_area = 0.0
+    space.surfaces.each do |surface|
+      next if surface.surfaceType.downcase != surface_type
+
+      surf_area = UnitConversions.convert(surface.netArea, "m^2", "ft^2")
+      ufactor = self.get_surface_ufactor(runner, surface, surface_type, register_error)
+      next if ufactor.nil?
+
+      sum_surface_ua += surf_area * ufactor
+      total_area += surf_area
+    end
+    return nil if sum_surface_ua == 0
+
+    return total_area / sum_surface_ua
+  end
+
+  def self.get_surface_ufactor(runner, surface, surface_type, register_error = false)
+    if surface_type.downcase.include?("window")
+      simple_glazing = self.get_window_simple_glazing(runner, surface, register_error)
+      return nil if simple_glazing.nil?
+
+      return UnitConversions.convert(simple_glazing.uFactor, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
+    else
+      if not surface.construction.is_initialized
+        if register_error
+          runner.registerError("Construction not assigned to '#{surface.name.to_s}'.")
+        end
+        return nil
+      end
+      ufactor = UnitConversions.convert(surface.uFactor.get, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
+      if surface.class.method_defined?('adjacentSurface') and surface.adjacentSurface.is_initialized
+        # Use average u-factor of adjacent surface, as OpenStudio returns
+        # two different values for, e.g., floor vs adjacent roofceiling
+        if not surface.adjacentSurface.get.construction.is_initialized
+          if register_error
+            runner.registerError("Construction not assigned to '#{surface.adjacentSurface.get.name.to_s}'.")
+          end
+          return nil
+        end
+        adjacent_ufactor = UnitConversions.convert(surface.adjacentSurface.get.uFactor.get, "W/(m^2*K)", "Btu/(hr*ft^2*F)")
+        return (ufactor + adjacent_ufactor) / 2.0
+      end
+      return ufactor
+    end
+  end
+
+  def self.get_window_simple_glazing(runner, surface, register_error = false)
+    if not surface.construction.is_initialized
+      if register_error
+        runner.registerError("Construction not assigned to '#{surface.name.to_s}'.")
+      end
+      return nil
+    end
+    construction = surface.construction.get
+    if not construction.to_LayeredConstruction.is_initialized
+      runner.registerError("Expected LayeredConstruction for '#{surface.name.to_s}'.")
+      return nil
+    end
+    window_layered_construction = construction.to_LayeredConstruction.get
+    if not window_layered_construction.getLayer(0).to_SimpleGlazing.is_initialized
+      runner.registerError("Expected SimpleGlazing for '#{surface.name.to_s}'.")
+      return nil
+    end
+    simple_glazing = window_layered_construction.getLayer(0).to_SimpleGlazing.get
+    return simple_glazing
   end
 
   def self.display_zone_loads(runner, zone_loads)
