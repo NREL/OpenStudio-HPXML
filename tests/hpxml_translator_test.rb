@@ -77,6 +77,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['skip_validation'] = false
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
+                            'bad-site-neighbor-azimuth.xml' => ["A neighbor building has an azimuth (145) not equal to the azimuth of any wall."],
                             'cfis-with-hydronic-distribution.xml' => ["Attached HVAC distribution system 'HVACDistribution' cannot be hydronic for mechanical ventilation 'MechanicalVentilation'."],
                             'clothes-dryer-location.xml' => ["ClothesDryer location is 'garage' but building does not have this location specified."],
                             'clothes-dryer-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/ClothesDryer[Location="],
@@ -94,8 +95,8 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
                                                        "Thermal zone 'garage' must have at least one roof/ceiling surface.",
                                                        "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
-                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoofNorth'."],
-                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'WallNorth'."],
+                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
+                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoof'."],
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
                             'unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for mechanical ventilation 'MechanicalVentilation'."],
@@ -344,7 +345,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       hpxml_value = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.07) # TODO: Higher due to outside air film?
+      assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
 
       # Net area
       hpxml_value = Float(XMLHelper.get_value(roof, 'Area'))
@@ -382,7 +383,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     bldg_details.elements.each('Enclosure/Foundations/Foundation/Slab') do |slab|
       slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
 
-      # Area
+      # Exposed Area
       hpxml_value = Float(XMLHelper.get_value(slab, 'Area'))
       query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
@@ -395,27 +396,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Foundations
-    # Ensure the correct number of Kiva instances
-    # TODO: Update for multiple foundations and garages.
-    # TODO: Update for walkout basements, which use multiple Kiva instances.
-    in_kiva_block = false
-    num_kiva_instances = 0
+    # Ensure Kiva instances have appropriate perimeter fraction
+    # TODO: Update for walkout basements, which use multiple Kiva instances per foundation.
     File.readlines(File.join(rundir, "eplusout.eio")).each do |eio_line|
-      if eio_line.start_with? "! <Kiva Foundation Name>"
-        in_kiva_block = true
-        next
-      elsif in_kiva_block
-        if eio_line.start_with? "! "
-          break # done reading
-        end
-
-        num_kiva_instances += 1
+      if eio_line.start_with? "Foundation Kiva"
+        kiva_perim_frac = Float(eio_line.split(",")[5])
+        assert_equal(1.0, kiva_perim_frac)
       end
-    end
-    if XMLHelper.has_element(bldg_details, "Enclosure/Foundations/Foundation/FoundationType/Ambient")
-      assert_equal(0, num_kiva_instances)
-    else
-      assert_equal(1, num_kiva_instances)
     end
 
     # Enclosure Walls

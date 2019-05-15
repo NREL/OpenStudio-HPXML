@@ -8,17 +8,7 @@ require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
-                 cfa, cfa_ag, nbeds, nbaths, ncfl, ncfl_ag, window_area)
-    raise "Expected Infiltration object" if not infil.is_a? Infiltration
-    raise "Expected MechanicalVentilation object" if not mech_vent.is_a? MechanicalVentilation
-    raise "Expected NaturalVentilation object" if not nat_vent.is_a? NaturalVentilation
-
-    duct_systems.each do |ducts, air_loops|
-      ducts.each do |duct|
-        raise "Expected Duct object" if not duct.is_a? Duct
-      end
-    end
-
+                 cfa, cfa_ag, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
       return false
@@ -65,7 +55,7 @@ class Airflow
     building.ncfl_ag = ncfl_ag
     building.window_area = window_area
 
-    wind_speed = process_wind_speed_correction(infil.terrain, infil.shelter_coef, Geometry.get_closest_neighbor_distance(model), building.height)
+    wind_speed = process_wind_speed_correction(infil.terrain, infil.shelter_coef, min_neighbor_distance, building.height)
     if not process_infiltration(model, infil, wind_speed, building, weather)
       return false
     end
@@ -193,7 +183,7 @@ class Airflow
 
   private
 
-  def self.process_wind_speed_correction(terrain, shelter_coef, neighbors_min_nonzero_offset, height)
+  def self.process_wind_speed_correction(terrain, shelter_coef, min_neighbor_distance, building_height)
     wind_speed = WindSpeed.new
     wind_speed.height = 32.8 # ft (Standard weather station height)
 
@@ -232,10 +222,10 @@ class Airflow
 
     # Local Shielding
     if shelter_coef == Constants.Auto
-      if neighbors_min_nonzero_offset == 0
+      if min_neighbor_distance.nil?
         # Typical shelter for isolated rural house
         wind_speed.S_wo = 0.90
-      elsif neighbors_min_nonzero_offset > height
+      elsif min_neighbor_distance > building_height
         # Typical shelter caused by other building across the street
         wind_speed.S_wo = 0.70
       else
@@ -1050,10 +1040,10 @@ class Airflow
     ra_duct_zone.setName(air_loop_name + " ret air zone")
     ra_duct_zone.setVolume(0.25)
 
-    sw_point = OpenStudio::Point3d.new(0, 74, 0)
-    nw_point = OpenStudio::Point3d.new(0, 74.1, 0)
-    ne_point = OpenStudio::Point3d.new(0.1, 74.1, 0)
-    se_point = OpenStudio::Point3d.new(0.1, 74, 0)
+    sw_point = OpenStudio::Point3d.new(0, 0, 0)
+    nw_point = OpenStudio::Point3d.new(0, 0.1, 0)
+    ne_point = OpenStudio::Point3d.new(0.1, 0.1, 0)
+    se_point = OpenStudio::Point3d.new(0.1, 0, 0)
     ra_duct_polygon = Geometry.make_polygon(sw_point, nw_point, ne_point, se_point)
 
     ra_space = OpenStudio::Model::Space::fromFloorPrint(ra_duct_polygon, 1, model)
