@@ -301,6 +301,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
     File.readlines(File.join(rundir, "eplusout.err")).each do |err_line|
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input' # FIXME
+      next if err_line.include? 'Schedule:Constant="ALWAYS OFF DISCRETE", Blank Schedule Type Limits Name input' # FIXME
 
       assert_equal(err_line.include?("Blank Schedule Type Limits Name input"), false)
     end
