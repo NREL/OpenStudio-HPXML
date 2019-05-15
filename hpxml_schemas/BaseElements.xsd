@@ -828,6 +828,12 @@
 												type="AdjacentTo"/>
 												<xs:element minOccurs="0" name="InteriorStuds"
 												type="StudProperties"/>
+												<xs:element minOccurs="0" name="InsulationHeight"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[ft] Height of the insulation, spanning from the top of the foundation wall downward.</xs:documentation>
+												</xs:annotation>
+												</xs:element>
 												<xs:element maxOccurs="1" minOccurs="0"
 												name="Insulation" type="InsulationInfo"/>
 												<xs:element minOccurs="0" ref="extension"/>
@@ -877,6 +883,9 @@
 												</xs:annotation>
 												</xs:element>
 												<xs:element minOccurs="0"
+												name="UnderSlabInsulationSpansEntireSlab"
+												type="xs:boolean"/>
+												<xs:element minOccurs="0"
 												name="OnGradeExposedPerimeter"
 												type="LengthMeasurement">
 												<xs:annotation>
@@ -896,6 +905,200 @@
 												<xs:element minOccurs="0" name="UnderSlabInsulation"
 												type="InsulationInfo"/>
 												<xs:element minOccurs="0" ref="extension"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element name="AnnualEnergyUse" minOccurs="0">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="ConsumptionInfo"
+												type="ConsumptionInfoType"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element ref="extension" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="Garages">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="Garage">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace">
+										<xs:annotation>
+											<xs:documentation/>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="GarageType">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element minOccurs="0" name="AttachedtoHouse"
+												type="xs:boolean"/>
+												<xs:element minOccurs="0" name="Vented"
+												type="xs:boolean"/>
+												<xs:element minOccurs="0" name="Conditioned"
+												type="xs:boolean"/>
+												<xs:element minOccurs="0" ref="extension"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="Ceilings">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="Ceiling" maxOccurs="unbounded"
+												minOccurs="1">
+												<xs:complexType>
+												<xs:sequence>
+												<xs:group ref="SystemInfo"/>
+												<xs:element name="AdjacentTo" type="AdjacentTo"
+												minOccurs="0"> </xs:element>
+												<xs:element minOccurs="0" name="CeilingJoists"
+												type="StudProperties"/>
+												<xs:element minOccurs="0" name="CeilingTrusses"
+												type="StudProperties"/>
+												<xs:element minOccurs="0" name="Area"
+												type="SurfaceArea">
+												<xs:annotation>
+												<xs:documentation>[sq.ft.]</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" maxOccurs="1"
+												name="Insulation" type="InsulationInfo"> </xs:element>
+												<xs:element minOccurs="0" ref="extension"/>
+												</xs:sequence>
+												</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element name="Walls" minOccurs="0">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="Wall" maxOccurs="unbounded">
+												<xs:complexType>
+												<xs:sequence>
+												<xs:group ref="SystemInfo"/>
+												<xs:element minOccurs="0" ref="AttachedToSpace"/>
+												<xs:element name="AdjacentTo" type="AdjacentTo"
+												minOccurs="0"> </xs:element>
+												<xs:element name="WallType" type="WallType"
+												minOccurs="0"> </xs:element>
+												<xs:element minOccurs="0" name="Thickness"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[in] Thickness of the wall assembly</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" name="Area"
+												type="SurfaceArea">
+												<xs:annotation>
+												<xs:documentation>[sq.ft.] Gross wall area</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" name="Orientation"
+												type="OrientationType"/>
+												<xs:element name="Azimuth" type="AzimuthType"
+												minOccurs="0">
+												<xs:annotation>
+												<xs:documentation>[deg]</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" name="Studs"
+												type="StudProperties"/>
+												<xs:element minOccurs="0" name="Siding"
+												type="Siding"/>
+												<xs:element minOccurs="0" name="Color"
+												type="WallAndRoofColor"/>
+												<xs:element minOccurs="0" name="SolarAbsorptance"
+												type="SolarAbsorptance"/>
+												<xs:element minOccurs="0" name="Emittance"
+												type="Emittance"/>
+												<xs:element minOccurs="0" maxOccurs="1"
+												name="Insulation" type="InsulationInfo"/>
+												<xs:element name="AnnualEnergyUse" minOccurs="0">
+												<xs:complexType>
+												<xs:sequence>
+												<xs:element name="ConsumptionInfo"
+												type="ConsumptionInfoType"/>
+												</xs:sequence>
+												</xs:complexType>
+												</xs:element>
+												<xs:element ref="extension" minOccurs="0"/>
+												</xs:sequence>
+												</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" name="Slabs">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="Slab" maxOccurs="unbounded"
+												minOccurs="1">
+												<xs:complexType>
+												<xs:sequence>
+												<xs:group ref="SystemInfo"/>
+												<xs:element minOccurs="0" name="Area"
+												type="SurfaceArea">
+												<xs:annotation>
+												<xs:documentation>[sq.ft.] Area of the slab</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" name="Thickness"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[in] Thickness of foundation slab.</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" name="Perimeter"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[ft] Length of slab perimeter.</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" name="ExposedPerimeter"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[ft] Perimeter of the slab exposed to ambient conditions</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0"
+												name="PerimeterInsulationDepth"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[ft] Depth from grade to bottom of vertical slab perimeter insulation</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0"
+												name="UnderSlabInsulationWidth"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[ft] Width from slab edge inward of horizontal under-slab insulation.</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0"
+												name="OnGradeExposedPerimeter"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[ft] Perimeter of slab measuerd in feet that is on-grade (2 ft. below grade or less) and exposed to ambient conditions.</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" name="FloorCovering"
+												type="FloorCovering"/>
+												<xs:element maxOccurs="1" minOccurs="0"
+												name="PerimeterInsulation" type="InsulationInfo"/>
+												<xs:element minOccurs="0"
+												name="UnderSlabInsulation" type="InsulationInfo"/>
+												<xs:element minOccurs="0" ref="extension"/>
+												</xs:sequence>
+												</xs:complexType>
+												</xs:element>
 											</xs:sequence>
 										</xs:complexType>
 									</xs:element>
