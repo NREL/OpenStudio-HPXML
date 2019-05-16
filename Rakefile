@@ -75,6 +75,7 @@ def create_hpxmls
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-garage.xml' => 'base.xml',
+    'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
@@ -710,6 +711,7 @@ def get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zo
 end
 
 def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltration_measurement_values, building_construction_values)
+  infil_volume = building_construction_values[:conditioned_building_volume]
   if ['base.xml'].include? hpxml_file
     air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
                                             :house_pressure => 50,
@@ -718,8 +720,13 @@ def get_hpxml_file_air_infiltration_measurement_values(hpxml_file, air_infiltrat
   elsif ['base-infiltration-ach-natural.xml'].include? hpxml_file
     air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
                                             :constant_ach_natural => 0.67 }
+  elsif ['base-enclosure-infil-cfm50.xml'].include? hpxml_file
+    air_infiltration_measurement_values = { :id => "InfiltrationMeasurement",
+                                            :house_pressure => 50,
+                                            :unit_of_measure => "CFM",
+                                            :air_leakage => 3.0 / 60.0 * infil_volume }
   end
-  air_infiltration_measurement_values[:infiltration_volume] = building_construction_values[:conditioned_building_volume]
+  air_infiltration_measurement_values[:infiltration_volume] = infil_volume
   return air_infiltration_measurement_values
 end
 
