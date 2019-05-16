@@ -49,7 +49,7 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
 
-        "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50 or constant nACH; see [AirInfiltration]
+        "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50, CFM50, or constant nACH; see [AirInfiltration]
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume" => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
 
         "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic" => one_or_more, # See [Attic]
