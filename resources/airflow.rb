@@ -969,12 +969,7 @@ class Airflow
     avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
     avail_sch.setName(obj_name_natvent + " avail schedule")
 
-    schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
-    schedule_type_limits.setName(avail_sch.name.to_s)
-    schedule_type_limits.setLowerLimitValue(0)
-    schedule_type_limits.setUpperLimitValue(1)
-    schedule_type_limits.setNumericType("Discrete")
-    avail_sch.setScheduleTypeLimits(schedule_type_limits)
+    Schedule.createScheduleTypeLimits(model, avail_sch, lower_limit_value = 0, upper_limit_value = 1, numeric_type = "Discrete")
 
     day_endm = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]
     day_startm = [0, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
