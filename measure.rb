@@ -2887,20 +2887,25 @@ class OSModel
 
   def self.add_airflow(runner, model, building, spaces)
     # Infiltration
+    infil_volume = nil
+    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
+      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
+      infil_volume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
+    end
+    if infil_volume.nil?
+      infil_volume = @cvolume
+    end
+
     infil_ach50 = nil
     infil_const_ach = nil
-    infil_volume = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
       air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
+      elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
+        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infil_volume # Convert CFM50 to ACH50
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
-      end
-      # FIXME: Pass infil_volume to infiltration model
-      infil_volume = air_infiltration_measurement_values[:infiltration_volume]
-      if infil_volume.nil?
-        infil_volume = @cvolume
       end
     end
 
