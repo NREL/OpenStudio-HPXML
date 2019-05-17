@@ -138,7 +138,6 @@ class HPXML
                                      number_of_bedrooms:,
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
-                                     load_distribution_scheme: nil,
                                      use_only_ideal_air_system: nil,
                                      **remainder)
     building_construction = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
@@ -148,8 +147,7 @@ class HPXML
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
     HPXML.add_extension(parent: building_construction,
-                        extensions: { "LoadDistributionScheme": load_distribution_scheme,
-                                      "UseOnlyIdealAirSystem": to_bool_or_nil(use_only_ideal_air_system) })
+                        extensions: { "UseOnlyIdealAirSystem": to_bool_or_nil(use_only_ideal_air_system) })
 
     check_remainder(remainder,
                     calling_method: __method__.to_s,
@@ -168,7 +166,6 @@ class HPXML
              :number_of_bedrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
              :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
-             :load_distribution_scheme => XMLHelper.get_value(building_construction, "extension/LoadDistributionScheme"),
              :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
   end
 
