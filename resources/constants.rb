@@ -371,14 +371,8 @@ class Constants
     return "airflow"
   end
 
-  def self.ObjectNameAirSourceHeatPump(mode = nil)
-    s_mode = ""
-    if not mode.nil?
-      fail "Mode '#{mode}' should be either #{:htg} or #{:clg}." unless [:htg, :clg].include? mode
-
-      s_mode = " #{mode}"
-    end
-    return "ashp#{s_mode}"
+  def self.ObjectNameAirSourceHeatPump
+    return "ashp"
   end
 
   def self.ObjectNameBoiler
@@ -391,6 +385,10 @@ class Constants
 
   def self.ObjectNameCentralAirConditioner
     return "central ac"
+  end
+
+  def self.ObjectNameCentralAirConditionerAndFurnace
+    return "central ac and furnace"
   end
 
   def self.ObjectNameClothesWasher
@@ -444,14 +442,8 @@ class Constants
     return "furniture"
   end
 
-  def self.ObjectNameGroundSourceHeatPump(mode = nil)
-    s_mode = ""
-    if not mode.nil?
-      fail "Mode '#{mode}' should be either #{:htg} or #{:clg}." unless [:htg, :clg].include? mode
-
-      s_mode = " #{mode}"
-    end
-    return "gshp#{s_mode}"
+  def self.ObjectNameGroundSourceHeatPump
+    return "gshp"
   end
 
   def self.ObjectNameHeatingSeason
@@ -470,12 +462,8 @@ class Constants
     return "dhw distribution"
   end
 
-  def self.ObjectNameIdealAirSystemCooling
-    return "ideal cool"
-  end
-
-  def self.ObjectNameIdealAirSystemHeating
-    return "ideal heat"
+  def self.ObjectNameIdealAirSystem
+    return "ideal"
   end
 
   def self.ObjectNameInfiltration
@@ -490,13 +478,8 @@ class Constants
     return "mech vent"
   end
 
-  def self.ObjectNameMiniSplitHeatPump(mode = nil)
-    if not mode.nil?
-      fail "Mode '#{mode}' should be either #{:htg} or #{:clg}." unless [:htg, :clg].include? mode
-
-      s_mode = " #{mode}"
-    end
-    return "mshp#{s_mode}"
+  def self.ObjectNameMiniSplitHeatPump
+    return "mshp"
   end
 
   def self.ObjectNameMiscPlugLoads
@@ -705,10 +688,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACCompanionObject # Link between, e.g., heat pump heating/cooling systems or air conditioner and furnace
-    return __method__.to_s
-  end
-
   def self.SizingInfoHVACOtherZoneObject # Link between zonal equipment in control zone and slave zones
     return __method__.to_s
   end
@@ -721,7 +700,11 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACType
+  def self.SizingInfoHVACCoolType
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACHeatType
     return __method__.to_s
   end
 

@@ -2548,53 +2548,47 @@ class HVACSizing
   def self.get_hvacs(runner, model)
     hvacs = []
 
-    # Get unique set of cooling and heating equipment
-    clg_equips = {}
-    htg_equips = {}
+    # Get unique set of HVAC equipment
+    equips = {}
 
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
     control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
 
     control_slave_zones_hash.keys.each do |control_zone|
-      HVAC.existing_cooling_equipment(model, runner, control_zone).each do |clg_equip|
-        next if clg_equips.keys.include? clg_equip
-        next if clg_equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
+      HVAC.existing_equipment(model, runner, control_zone).each do |equip|
+        next if equips.keys.include? equip
+        next if equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
 
-        clg_equips[clg_equip] = control_zone
-      end
-
-      HVAC.existing_heating_equipment(model, runner, control_zone).each do |htg_equip|
-        next if htg_equips.keys.include? htg_equip
-        next if htg_equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
-
-        htg_equips[htg_equip] = control_zone
+        equips[equip] = control_zone
       end
     end
 
-    # Cooling equipment
-    clg_equips.each do |clg_equip, control_zone|
+    # Process each equipment
+    equips.each do |equip, control_zone|
       hvac = HVACInfo.new
       hvacs << hvac
 
-      hvac.Objects = [clg_equip]
+      hvac.Objects = [equip]
 
-      clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(clg_equip)
+      clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
 
-      # Get type of system
-      clg_type = get_feature(runner, clg_equip, Constants.SizingInfoHVACType, 'string', false)
-      if clg_type.nil?
-        clg_type = get_feature(runner, clg_coil, Constants.SizingInfoHVACType, 'string')
-        return nil if clg_type.nil?
+      # Get type of heating/cooling system
+      hvac.CoolType = get_feature(runner, equip, Constants.SizingInfoHVACCoolType, 'string', false)
+      if hvac.CoolType.nil? and not clg_coil.nil?
+        hvac.CoolType = get_feature(runner, clg_coil, Constants.SizingInfoHVACCoolType, 'string', false)
       end
-      hvac.Types = [clg_type]
+      hvac.HeatType = get_feature(runner, equip, Constants.SizingInfoHVACHeatType, 'string', false)
+      if hvac.HeatType.nil? and not htg_coil.nil?
+        hvac.HeatType = get_feature(runner, htg_coil, Constants.SizingInfoHVACHeatType, 'string', false)
+      end
 
       # Retrieve ducts if they exist
-      if clg_equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+      if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
         air_loop = nil
         control_zone.airLoopHVACs.each do |loop|
           loop.supplyComponents.each do |supply_component|
             next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
-            next unless supply_component.to_AirLoopHVACUnitarySystem.get.handle == clg_equip.handle
+            next unless supply_component.to_AirLoopHVACUnitarySystem.get.handle == equip.handle
 
             air_loop = loop
           end
@@ -2605,19 +2599,21 @@ class HVACSizing
         end
       end
 
-      ratedCFMperTonCooling = get_feature(runner, clg_equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string', false)
-      if not ratedCFMperTonCooling.nil?
-        hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(",").map(&:to_f)
-      end
+      if not clg_coil.nil?
+        ratedCFMperTonCooling = get_feature(runner, equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string', false)
+        if not ratedCFMperTonCooling.nil?
+          hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(",").map(&:to_f)
+        end
 
-      hvac.CoolingLoadFraction = get_feature(runner, clg_equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
-      return nil if hvac.CoolingLoadFraction.nil?
+        hvac.CoolingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
+        return nil if hvac.CoolingLoadFraction.nil?
+      end
 
       if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
         hvac.NumSpeedsCooling = 1
 
         if hvac.has_type(Constants.ObjectNameRoomAirConditioner)
-          coolingCFMs = get_feature(runner, clg_equip, Constants.SizingInfoHVACCoolingCFMs, 'string')
+          coolingCFMs = get_feature(runner, equip, Constants.SizingInfoHVACCoolingCFMs, 'string')
           return nil if coolingCFMs.nil?
 
           hvac.CoolingCFMs = coolingCFMs.split(",").map(&:to_f)
@@ -2642,16 +2638,16 @@ class HVACSizing
           hvac.OverSizeLimit = 1.3
         end
 
-        capacityRatioCooling = get_feature(runner, clg_equip, Constants.SizingInfoHVACCapacityRatioCooling, 'string')
+        capacityRatioCooling = get_feature(runner, equip, Constants.SizingInfoHVACCapacityRatioCooling, 'string')
         return nil if capacityRatioCooling.nil?
 
         hvac.CapacityRatioCooling = capacityRatioCooling.split(",").map(&:to_f)
 
-        if not clg_equip.designSpecificationMultispeedObject.is_initialized
-          runner.registerError("DesignSpecificationMultispeedObject not set for #{clg_equip.name.to_s}.")
+        if not equip.designSpecificationMultispeedObject.is_initialized
+          runner.registerError("DesignSpecificationMultispeedObject not set for #{equip.name.to_s}.")
           return nil
         end
-        perf = clg_equip.designSpecificationMultispeedObject.get
+        perf = equip.designSpecificationMultispeedObject.get
         hvac.FanspeedRatioCooling = []
         perf.supplyAirflowRatioFields.each do |airflowRatioField|
           if not airflowRatioField.coolingRatio.is_initialized
@@ -2676,8 +2672,8 @@ class HVACSizing
         end
         hvac.COOL_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsCooling)
 
-        if clg_equip.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
-          coolingCFMs = get_feature(runner, clg_equip, Constants.SizingInfoHVACCoolingCFMs, 'string')
+        if hvac.CoolType == Constants.ObjectNameMiniSplitHeatPump
+          coolingCFMs = get_feature(runner, equip, Constants.SizingInfoHVACCoolingCFMs, 'string')
           return nil if coolingCFMs.nil?
 
           hvac.CoolingCFMs = coolingCFMs.split(",").map(&:to_f)
@@ -2700,17 +2696,17 @@ class HVACSizing
                            clg_coil.sensibleCoolingCapacityCoefficient6]
         hvac.COOL_SH_FT_SPEC = [HVAC.convert_curve_gshp(cOOL_SH_FT_SPEC, true)]
 
-        cOIL_BF_FT_SPEC = get_feature(runner, clg_equip, Constants.SizingInfoGSHPCoil_BF_FT_SPEC, 'string')
+        cOIL_BF_FT_SPEC = get_feature(runner, equip, Constants.SizingInfoGSHPCoil_BF_FT_SPEC, 'string')
         return nil if cOIL_BF_FT_SPEC.nil?
 
         hvac.COIL_BF_FT_SPEC = [cOIL_BF_FT_SPEC.split(",").map(&:to_f)]
 
-        shr_rated = get_feature(runner, clg_equip, Constants.SizingInfoHVACSHR, 'string')
+        shr_rated = get_feature(runner, equip, Constants.SizingInfoHVACSHR, 'string')
         return nil if shr_rated.nil?
 
         hvac.SHRRated = shr_rated.split(",").map(&:to_f)
 
-        hvac.CoilBF = get_feature(runner, clg_equip, Constants.SizingInfoGSHPCoilBF, 'double')
+        hvac.CoilBF = get_feature(runner, equip, Constants.SizingInfoGSHPCoilBF, 'double')
         return nil if hvac.CoilBF.nil?
 
         if clg_coil.ratedTotalCoolingCapacity.is_initialized
@@ -2719,85 +2715,36 @@ class HVACSizing
 
         hvac.CoolingEIR = 1.0 / clg_coil.ratedCoolingCoefficientofPerformance
 
-        hvac.GSHP_BoreSpacing = get_feature(runner, clg_equip, Constants.SizingInfoGSHPBoreSpacing, 'double')
-        hvac.GSHP_BoreHoles = get_feature(runner, clg_equip, Constants.SizingInfoGSHPBoreHoles, 'string')
-        hvac.GSHP_BoreDepth = get_feature(runner, clg_equip, Constants.SizingInfoGSHPBoreDepth, 'string')
-        hvac.GSHP_BoreConfig = get_feature(runner, clg_equip, Constants.SizingInfoGSHPBoreConfig, 'string')
-        hvac.GSHP_SpacingType = get_feature(runner, clg_equip, Constants.SizingInfoGSHPUTubeSpacingType, 'string')
+        hvac.GSHP_BoreSpacing = get_feature(runner, equip, Constants.SizingInfoGSHPBoreSpacing, 'double')
+        hvac.GSHP_BoreHoles = get_feature(runner, equip, Constants.SizingInfoGSHPBoreHoles, 'string')
+        hvac.GSHP_BoreDepth = get_feature(runner, equip, Constants.SizingInfoGSHPBoreDepth, 'string')
+        hvac.GSHP_BoreConfig = get_feature(runner, equip, Constants.SizingInfoGSHPBoreConfig, 'string')
+        hvac.GSHP_SpacingType = get_feature(runner, equip, Constants.SizingInfoGSHPUTubeSpacingType, 'string')
         return nil if hvac.GSHP_BoreSpacing.nil? or hvac.GSHP_BoreHoles.nil? or hvac.GSHP_BoreDepth.nil? or hvac.GSHP_BoreConfig.nil? or hvac.GSHP_SpacingType.nil?
 
       elsif not clg_coil.nil?
         runner.registerError("Unexpected cooling coil: #{clg_coil.name}.")
         return nil
       end
-    end
 
-    # Heating equipment
-    htg_equips.each do |htg_equip, control_zone|
-      clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(htg_equip)
-
-      # Combine heating/cooling objects for heat pumps or ACs w/ attached furnaces
-      corresponding_object = get_feature(runner, htg_equip, Constants.SizingInfoHVACCompanionObject, 'string', false)
-      if not corresponding_object.nil?
-        hvac = nil
-        hvacs.each do |h|
-          next if h.Objects.nil? or h.Objects.size > 1
-          next unless h.Objects[0].handle.to_s == corresponding_object
-
-          hvac = h
-          hvac.Objects << htg_equip
+      if not htg_coil.nil?
+        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
+          hvac.HPSizedForMaxLoad = get_feature(runner, equip, Constants.SizingInfoHPSizedForMaxLoad, 'boolean')
+          return nil if hvac.HPSizedForMaxLoad.nil?
         end
-      else
-        hvac = HVACInfo.new
-        hvacs << hvac
-        hvac.Objects = [htg_equip]
-      end
 
-      # Get type of system
-      htg_type = get_feature(runner, htg_equip, Constants.SizingInfoHVACType, 'string', false)
-      if htg_type.nil?
-        htg_type = get_feature(runner, htg_coil, Constants.SizingInfoHVACType, 'string')
-        return nil if htg_type.nil?
-      end
-      if not hvac.Types.nil?
-        hvac.Types << htg_type
-      else
-        hvac.Types = [htg_type]
-      end
-
-      # Retrieve ducts if they exist
-      if htg_equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-        air_loop = nil
-        control_zone.airLoopHVACs.each do |loop|
-          loop.supplyComponents.each do |supply_component|
-            next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
-            next unless supply_component.to_AirLoopHVACUnitarySystem.get.handle == htg_equip.handle
-
-            air_loop = loop
-          end
+        ratedCFMperTonHeating = get_feature(runner, equip, Constants.SizingInfoHVACRatedCFMperTonHeating, 'string', false)
+        if not ratedCFMperTonHeating.nil?
+          hvac.RatedCFMperTonHeating = ratedCFMperTonHeating.split(",").map(&:to_f)
         end
-        if not air_loop.nil?
-          hvac.Ducts = get_ducts_for_air_loop(runner, air_loop)
-          return nil if hvac.Ducts.nil?
-        end
+
+        hvac.HeatingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracHeatLoadServed, 'double')
+        return nil if hvac.HeatingLoadFraction.nil?
       end
 
-      if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-        hvac.HPSizedForMaxLoad = get_feature(runner, htg_equip, Constants.SizingInfoHPSizedForMaxLoad, 'boolean')
-        return nil if hvac.HPSizedForMaxLoad.nil?
-      end
-
-      ratedCFMperTonHeating = get_feature(runner, htg_equip, Constants.SizingInfoHVACRatedCFMperTonHeating, 'string', false)
-      if not ratedCFMperTonHeating.nil?
-        hvac.RatedCFMperTonHeating = ratedCFMperTonHeating.split(",").map(&:to_f)
-      end
-
-      hvac.HeatingLoadFraction = get_feature(runner, htg_equip, Constants.SizingInfoHVACFracHeatLoadServed, 'double')
-      return nil if hvac.HeatingLoadFraction.nil?
-
-      if htg_equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric
-        if htg_equip.nominalCapacity.is_initialized
-          hvac.FixedHeatingCapacity = UnitConversions.convert(htg_equip.nominalCapacity.get, "W", "ton")
+      if equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric
+        if equip.nominalCapacity.is_initialized
+          hvac.FixedHeatingCapacity = UnitConversions.convert(equip.nominalCapacity.get, "W", "ton")
         end
 
       elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
@@ -2838,7 +2785,7 @@ class HVACSizing
       elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
         hvac.NumSpeedsHeating = htg_coil.stages.size
 
-        capacityRatioHeating = get_feature(runner, htg_equip, Constants.SizingInfoHVACCapacityRatioHeating, 'string')
+        capacityRatioHeating = get_feature(runner, equip, Constants.SizingInfoHVACCapacityRatioHeating, 'string')
         return nil if capacityRatioHeating.nil?
 
         hvac.CapacityRatioHeating = capacityRatioHeating.split(",").map(&:to_f)
@@ -2852,13 +2799,13 @@ class HVACSizing
         end
         hvac.HEAT_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsHeating)
 
-        if htg_equip.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
-          heatingCFMs = get_feature(runner, htg_equip, Constants.SizingInfoHVACHeatingCFMs, 'string')
+        if hvac.HeatType == Constants.ObjectNameMiniSplitHeatPump
+          heatingCFMs = get_feature(runner, equip, Constants.SizingInfoHVACHeatingCFMs, 'string')
           return nil if heatingCFMs.nil?
 
           hvac.HeatingCFMs = heatingCFMs.split(",").map(&:to_f)
 
-          hvac.HeatingCapacityOffset = get_feature(runner, htg_equip, Constants.SizingInfoHVACHeatingCapacityOffset, 'double')
+          hvac.HeatingCapacityOffset = get_feature(runner, equip, Constants.SizingInfoHVACHeatingCapacityOffset, 'double')
           return nil if hvac.HeatingCapacityOffset.nil?
         end
 
@@ -3721,37 +3668,17 @@ class HVACSizing
 
     hvac.Objects.each do |object|
       if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-
-        # Check if unitary system is on an air loop
-        if hvac.has_type([Constants.ObjectNameAirSourceHeatPump,
-                          Constants.ObjectNameGroundSourceHeatPump,
-                          Constants.ObjectNameMiniSplitHeatPump,
-                          Constants.ObjectNameCentralAirConditioner,
-                          Constants.ObjectNameFurnace])
-          is_air_loop = true
-        elsif hvac.has_type(Constants.ObjectNameUnitHeater)
-          is_air_loop = false
-        else
-          runner.registerError("Unexpected unitary system for #{hvac.Types}.")
-          return false
-        end
-
-        # Check if system has both heating & cooling (e.g., heat pump or AC/furnace on same distribution system)
-        corresponding_object = get_feature(runner, object, Constants.SizingInfoHVACCompanionObject, 'string', false)
-        has_heating_and_cooling = !corresponding_object.nil?
-
         # Fan Airflow
-        if has_heating_and_cooling
+        if object.coolingCoil.is_initialized and object.heatingCoil.is_initialized
           fan_airflow = [hvac_final_values.Heat_Airflow, hvac_final_values.Cool_Airflow].max
         elsif object.coolingCoil.is_initialized
           fan_airflow = hvac_final_values.Cool_Airflow
         elsif object.heatingCoil.is_initialized
           fan_airflow = hvac_final_values.Heat_Airflow
         end
-
       end
 
-      if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem and is_air_loop
+      if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem and object.airLoopHVAC.is_initialized
 
         ## Air Loop HVAC Unitary System ##
 
@@ -3789,11 +3716,11 @@ class HVACSizing
         end
 
         # Coils
-        setCoilsObjectValues(runner, hvac, object, hvac_final_values, 1.0)
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, 1.0)
 
         if hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
 
-          clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(object)
+          clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, object)
 
           if not htg_coil.nil?
             plant_loop = htg_coil.plantLoop.get
@@ -3822,7 +3749,7 @@ class HVACSizing
           end
         end
 
-      elsif object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem and not is_air_loop
+      elsif object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
 
         ## Zone HVAC Unitary System ##
 
@@ -3847,7 +3774,7 @@ class HVACSizing
         fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, "cfm", "m^3/s") * zone_ratios[thermal_zone])
 
         # Coils
-        setCoilsObjectValues(runner, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
 
@@ -3906,7 +3833,7 @@ class HVACSizing
         fanonoff.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
 
         # Coils
-        setCoilsObjectValues(runner, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
 
         # Heating Coil override
         ptac_htg_coil = object.heatingCoil.to_CoilHeatingElectric.get
@@ -3921,10 +3848,10 @@ class HVACSizing
     return true
   end
 
-  def self.setCoilsObjectValues(runner, hvac, equip, hvac_final_values, zone_ratio)
+  def self.setCoilsObjectValues(runner, model, hvac, equip, hvac_final_values, zone_ratio)
     # zone_ratio is 1.0 unless there are multiple coils for the system (e.g., living coil and conditioned basement coil)
 
-    clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(equip)
+    clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
 
     # Cooling coil
     if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
@@ -4156,14 +4083,14 @@ class HVACInfo
       name_or_names = [name_or_names]
     end
     name_or_names.each do |name|
-      next unless self.Types.include? name
+      next unless self.HeatType == name or self.CoolType == name
 
       return true
     end
     return false
   end
 
-  attr_accessor(:Types, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
+  attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
                 :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity,
                 :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
