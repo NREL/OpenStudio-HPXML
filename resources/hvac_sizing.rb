@@ -1388,6 +1388,12 @@ class HVACSizing
     hvac_init_loads.Cool_Lat *= hvac.CoolingLoadFraction
     hvac_init_loads.Cool_Tot *= hvac.CoolingLoadFraction
 
+    # Prevent error for, e.g., an ASHP with CoolingLoadFraction == 0.
+    hvac_init_loads.Heat = [hvac_init_loads.Heat, 0.001].max
+    hvac_init_loads.Cool_Sens = [hvac_init_loads.Cool_Sens, 0.001].max
+    hvac_init_loads.Cool_Lat = [hvac_init_loads.Cool_Lat, 0.001].max
+    hvac_init_loads.Cool_Tot = [hvac_init_loads.Cool_Tot, 0.001].max
+
     return hvac_init_loads
   end
 
@@ -3658,11 +3664,6 @@ class HVACSizing
 
   def self.set_object_values(runner, model, hvac, hvac_final_values, zone_ratios)
     # Updates object properties in the model
-
-    # Prevent E+ error if, say, an ASHP with CoolingLoadFraction == 0
-    # is defined as a unitary system with a zero cooling airflow rate.
-    hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, 1].max
-    hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, 1].max
 
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
 
