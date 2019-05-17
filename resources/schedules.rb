@@ -7,7 +7,7 @@ class HourlyByMonthSchedule
   # weekend_month_by_hour_values must be a 12-element array of 24-element arrays of numbers.
   def initialize(model, runner, sch_name, weekday_month_by_hour_values, weekend_month_by_hour_values,
                  normalize_values = true, create_sch_object = true,
-                 lower_limit_value = nil, upper_limit_value = nil, numeric_type = nil, unit_type = nil)
+                 schedule_type_limits_name = nil)
     @validated = true
     @model = model
     @runner = runner
@@ -15,6 +15,7 @@ class HourlyByMonthSchedule
     @schedule = nil
     @weekday_month_by_hour_values = validateValues(weekday_month_by_hour_values, 12, 24)
     @weekend_month_by_hour_values = validateValues(weekend_month_by_hour_values, 12, 24)
+    @schedule_type_limits_name = schedule_type_limits_name
     if not @validated
       return
     end
@@ -26,7 +27,6 @@ class HourlyByMonthSchedule
     end
     if create_sch_object
       @schedule = createSchedule()
-      Schedule.createScheduleTypeLimits(@model, @schedule, lower_limit_value, upper_limit_value, numeric_type, unit_type)
     end
   end
 
@@ -174,6 +174,8 @@ class HourlyByMonthSchedule
       end
     end
 
+    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+
     return schedule
   end
 end
@@ -185,7 +187,7 @@ class MonthWeekdayWeekendSchedule
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   def initialize(model, runner, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true,
-                 lower_limit_value = nil, upper_limit_value = nil, numeric_type = nil, unit_type = nil)
+                 schedule_type_limits_name = nil)
     @validated = true
     @model = model
     @runner = runner
@@ -196,6 +198,7 @@ class MonthWeekdayWeekendSchedule
     @weekday_hourly_values = validateValues(weekday_hourly_values, 24, "weekday")
     @weekend_hourly_values = validateValues(weekend_hourly_values, 24, "weekend")
     @monthly_values = validateValues(monthly_values, 12, "monthly")
+    @schedule_type_limits_name = schedule_type_limits_name
     if not @validated
       return
     end
@@ -212,7 +215,6 @@ class MonthWeekdayWeekendSchedule
     end
     if create_sch_object
       @schedule = createSchedule()
-      Schedule.createScheduleTypeLimits(@model, @schedule, lower_limit_value, upper_limit_value, numeric_type, unit_type)
     end
   end
 
@@ -415,6 +417,8 @@ class MonthWeekdayWeekendSchedule
       end
     end
 
+    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+
     return schedule
   end
 end
@@ -422,7 +426,7 @@ end
 class HotWaterSchedule
   def initialize(model, runner, sch_name, temperature_sch_name, num_bedrooms, days_shift, 
                  file_prefix, target_water_temperature, create_sch_object = true,
-                 lower_limit_value = nil, upper_limit_value = nil, numeric_type = nil, unit_type = nil)
+                 schedule_type_limits_name = nil)
     @validated = true
     @model = model
     @runner = runner
@@ -432,6 +436,7 @@ class HotWaterSchedule
     @days_shift = days_shift
     @nbeds = ([num_bedrooms, 5].min).to_i
     @target_water_temperature = UnitConversions.convert(target_water_temperature, "F", "C")
+    @schedule_type_limits_name = schedule_type_limits_name
     if file_prefix == "ClothesDryer"
       @file_prefix = "ClothesWasher"
     else
@@ -449,7 +454,6 @@ class HotWaterSchedule
     end
     if create_sch_object
       @schedule = createSchedule(data, timestep_minutes, weeks)
-      Schedule.createScheduleTypeLimits(@model, @schedule, lower_limit_value, upper_limit_value, numeric_type, unit_type)
     end
   end
 
@@ -481,7 +485,7 @@ class HotWaterSchedule
     temperature_sch = OpenStudio::Model::ScheduleConstant.new(@model)
     temperature_sch.setValue(@target_water_temperature)
     temperature_sch.setName(@temperature_sch_name)
-    Schedule.createScheduleTypeLimits(@model, temperature_sch, nil, nil, "Continuous")
+    Schedule.set_schedule_type_limits(@model, temperature_sch, Constants.ScheduleTypeLimitsTemperature)
     return temperature_sch
   end
 
@@ -639,6 +643,8 @@ class HotWaterSchedule
       end
     end
 
+    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+
     return schedule
   end
 end
@@ -782,16 +788,34 @@ class Schedule
     return annual_flh
   end
 
-  def self.createScheduleTypeLimits(model, schedule, lower_limit_value = nil, upper_limit_value = nil, numeric_type = nil, unit_type = nil)
-    if not lower_limit_value.nil? or not upper_limit_value.nil? or not numeric_type.nil? or not unit_type.nil?
-      schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
-      schedule_type_limits.setName(schedule.name.to_s)
-      schedule_type_limits.setLowerLimitValue(lower_limit_value) unless lower_limit_value.nil?
-      schedule_type_limits.setUpperLimitValue(upper_limit_value) unless upper_limit_value.nil?
-      schedule_type_limits.setNumericType(numeric_type) unless numeric_type.nil?
-      schedule_type_limits.setUnitType(unit_type) unless unit_type.nil?
-      schedule.setScheduleTypeLimits(schedule_type_limits)
+  def self.set_schedule_type_limits(model, schedule, schedule_type_limits_name)
+    return if schedule_type_limits_name.nil?
+
+    schedule_type_limits = nil
+    model.getScheduleTypeLimitss.each do |stl|
+      next if stl.name.to_s != schedule_type_limits_name
+
+      schedule_type_limits = stl
+      break
     end
+
+    if schedule_type_limits.nil?
+      schedule_type_limits = OpenStudio::Model::ScheduleTypeLimits.new(model)
+      schedule_type_limits.setName(schedule_type_limits_name)
+      if schedule_type_limits_name == Constants.ScheduleTypeLimitsFraction
+        schedule_type_limits.setLowerLimitValue(0)
+        schedule_type_limits.setUpperLimitValue(1)
+        schedule_type_limits.setNumericType("Continuous")
+      elsif schedule_type_limits_name == Constants.ScheduleTypeLimitsOnOff
+        schedule_type_limits.setLowerLimitValue(0)
+        schedule_type_limits.setUpperLimitValue(1)
+        schedule_type_limits.setNumericType("Discrete")
+      elsif schedule_type_limits_name == Constants.ScheduleTypeLimitsTemperature
+        schedule_type_limits.setNumericType("Continuous")
+      end
+    end
+
+    schedule.setScheduleTypeLimits(schedule_type_limits)
   end
 
   def self.set_weekday_rule(rule)
