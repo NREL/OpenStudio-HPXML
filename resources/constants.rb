@@ -219,6 +219,14 @@ class Constants
     return __method__.to_s
   end
 
+  def self.DuctSideReturn
+    return 'return'
+  end
+
+  def self.DuctSideSupply
+    return 'supply'
+  end
+
   def self.DuctedInfoMiniSplitHeatPump
     return __method__.to_s
   end
@@ -360,172 +368,176 @@ class Constants
   end
 
   def self.ObjectNameAirflow
-    return "res airflow"
+    return "airflow"
   end
 
   def self.ObjectNameAirSourceHeatPump
-    return "res ashp"
+    return "ashp"
   end
 
-  def self.ObjectNameBoiler(fueltype = "")
-    return "res boiler #{fueltype}"
+  def self.ObjectNameBoiler
+    return "boiler"
   end
 
   def self.ObjectNameCeilingFan
-    return "res ceiling fan"
+    return "ceiling fan"
   end
 
   def self.ObjectNameCentralAirConditioner
-    return "res central ac"
+    return "central ac"
+  end
+
+  def self.ObjectNameCentralAirConditionerAndFurnace
+    return "central ac and furnace"
   end
 
   def self.ObjectNameClothesWasher
-    return "res clothes washer"
+    return "clothes washer"
   end
 
-  def self.ObjectNameClothesDryer(fueltype)
-    s_fuel = ""
-    if not fueltype.nil?
-      s_fuel = " #{fueltype}"
-    end
-    return "res clothes dryer#{s_fuel}"
+  def self.ObjectNameClothesDryer
+    return "clothes dryer"
   end
 
-  def self.ObjectNameCookingRange(fueltype)
-    s_fuel = ""
-    if not fueltype.nil?
-      s_fuel = " #{fueltype}"
-    end
-    return "res cooking range#{s_fuel}"
+  def self.ObjectNameCookingRange
+    return "cooking range"
   end
 
   def self.ObjectNameCoolingSeason
-    return 'res cooling season'
+    return 'cooling season'
   end
 
   def self.ObjectNameCoolingSetpoint
-    return 'res cooling setpoint'
+    return 'cooling setpoint'
   end
 
   def self.ObjectNameDehumidifier
-    return "res dehumidifier"
+    return "dehumidifier"
   end
 
   def self.ObjectNameDishwasher
-    return "res dishwasher"
-  end
-
-  def self.ObjectNameDucts(airloop_name)
-    return "res ducts #{airloop_name}"
+    return "dishwasher"
   end
 
   def self.ObjectNameEaves(facade = "")
     if facade != ""
       facade = " #{facade}"
     end
-    return "res eaves#{facade}"
+    return "eaves#{facade}"
   end
 
   def self.ObjectNameElectricBaseboard
-    return "res baseboard"
+    return "baseboard"
   end
 
   def self.ObjectNameFixtures
-    return "res dhw fixtures"
+    return "dhw fixtures"
   end
 
-  def self.ObjectNameFurnace(fueltype = "")
-    return "res furnace #{fueltype}"
+  def self.ObjectNameFurnace
+    return "furnace"
   end
 
   def self.ObjectNameFurniture
-    return "res furniture"
+    return "furniture"
   end
 
-  def self.ObjectNameGroundSourceHeatPumpVerticalBore
-    return "res gshp"
+  def self.ObjectNameGroundSourceHeatPump
+    return "gshp"
   end
 
   def self.ObjectNameHeatingSeason
-    return 'res heating season'
+    return 'heating season'
   end
 
   def self.ObjectNameHeatingSetpoint
-    return 'res heating setpoint'
+    return 'heating setpoint'
   end
 
   def self.ObjectNameHotWaterRecircPump
-    return "res dhw recirc pump"
+    return "dhw recirc pump"
   end
 
   def self.ObjectNameHotWaterDistribution
-    return "res dhw distribution"
+    return "dhw distribution"
+  end
+
+  def self.ObjectNameIdealAirSystem
+    return "ideal"
   end
 
   def self.ObjectNameInfiltration
-    return "res infil"
+    return "infil"
   end
 
   def self.ObjectNameLighting
-    return "res lighting"
+    return "lighting"
   end
 
   def self.ObjectNameMechanicalVentilation
-    return "res mech vent"
+    return "mech vent"
   end
 
   def self.ObjectNameMiniSplitHeatPump
-    return "res minisplit"
+    return "mshp"
   end
 
   def self.ObjectNameMiscPlugLoads
-    return "res misc plug loads"
+    return "misc plug loads"
   end
 
   def self.ObjectNameMiscTelevision
-    return "res misc television"
+    return "misc tv"
   end
 
   def self.ObjectNameNaturalVentilation
-    return "res natural vent"
+    return "natural vent"
   end
 
   def self.ObjectNameNeighbors(facade = "")
     if facade != ""
       facade = " #{facade}"
     end
-    return "res neighbors#{facade}"
+    return "neighbors#{facade}"
   end
 
   def self.ObjectNameOccupants
-    return "res occupants"
+    return "occupants"
   end
 
   def self.ObjectNameOverhangs(facade = "")
     if facade != ""
       facade = " #{facade}"
     end
-    return "res overhangs#{facade}"
+    return "overhangs#{facade}"
+  end
+
+  def self.ObjectNamePhotovoltaics
+    return "photovoltaics"
   end
 
   def self.ObjectNameRefrigerator
-    return "res fridge"
+    return "fridge"
   end
 
   def self.ObjectNameRelativeHumiditySetpoint
-    return "res rh setpoint"
+    return "rh setpoint"
   end
 
   def self.ObjectNameRoomAirConditioner
-    return "res room ac"
+    return "room ac"
   end
 
-  def self.ObjectNameUnitHeater(fueltype = "")
-    return "res unit heater #{fueltype}"
+  def self.ObjectNameSolarHotWater
+    return "solar hot water"
+  end
+
+  def self.ObjectNameUnitHeater
+    return "unit heater"
   end
 
   def self.ObjectNameWaterHeater
-    return "res water heater"
+    return "water heater"
   end
 
   def self.OptionTypeLightingFractions
@@ -648,35 +660,35 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsLocationFrac
+  def self.SizingInfoDuctExist
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsLocationZone
+  def self.SizingInfoDuctSides
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsReturnLoss
+  def self.SizingInfoDuctLocationZones
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsReturnRvalue
+  def self.SizingInfoDuctLeakageFracs
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsReturnSurfaceArea
+  def self.SizingInfoDuctLeakageCFM25s
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsSupplyLoss
+  def self.SizingInfoDuctAreas
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsSupplyRvalue
+  def self.SizingInfoDuctRvalues
     return __method__.to_s
   end
 
-  def self.SizingInfoDuctsSupplySurfaceArea
+  def self.SizingInfoHVACOtherZoneObject # Link between zonal equipment in control zone and slave zones
     return __method__.to_s
   end
 
@@ -685,6 +697,14 @@ class Constants
   end
 
   def self.SizingInfoHVACFracCoolLoadServed
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACCoolType
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACHeatType
     return __method__.to_s
   end
 
@@ -848,8 +868,8 @@ class Constants
     return 'crawlspace'
   end
 
-  def self.SpaceTypeFinishedBasement
-    return 'finished basement'
+  def self.SpaceTypeConditionedBasement
+    return 'conditioned basement'
   end
 
   def self.SpaceTypeGarage
@@ -864,12 +884,12 @@ class Constants
     return 'pier and beam'
   end
 
-  def self.SpaceTypeUnfinishedAttic
-    return 'unfinished attic'
+  def self.SpaceTypeUnconditionedAttic
+    return 'unconditioned attic'
   end
 
-  def self.SpaceTypeUnfinishedBasement
-    return 'unfinished basement'
+  def self.SpaceTypeUnconditionedBasement
+    return 'unconditioned basement'
   end
 
   def self.TerrainOcean
@@ -930,15 +950,5 @@ class Constants
 
   def self.WaterHeaterTypeHeatPump
     return 'heatpump'
-  end
-
-  def self.ZoneHVACPriorityList
-    return ["ZoneHVACEnergyRecoveryVentilator",
-            "AirLoopHVACUnitarySystem",
-            "ZoneHVACBaseboardConvectiveElectric",
-            "ZoneHVACBaseboardConvectiveWater",
-            "AirTerminalSingleDuctUncontrolled",
-            "ZoneHVACDehumidifierDX",
-            "ZoneHVACPackagedTerminalAirConditioner"]
   end
 end

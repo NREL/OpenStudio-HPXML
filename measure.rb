@@ -260,13 +260,12 @@ class OSModel
     @default_azimuth = get_default_azimuth(building)
     @min_neighbor_distance = get_min_neighbor_distance(building)
 
-    loop_hvacs = {} # mapping between HPXML HVAC systems and model air/plant loops
-    zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
-    loop_dhws = {}  # mapping between HPXML Water Heating systems and plant loops
+    @hvac_map = {} # mapping between HPXML HVAC systems and model air/plant loops or zonal HVACs
+    @dhw_map = {}  # mapping between HPXML Water Heating systems and plant loops
 
-    use_only_ideal_air = false
+    @use_only_ideal_air = false
     if not building_construction_values[:use_only_ideal_air_system].nil?
-      use_only_ideal_air = building_construction_values[:use_only_ideal_air_system]
+      @use_only_ideal_air = building_construction_values[:use_only_ideal_air_system]
     end
 
     # Geometry/Envelope
@@ -282,25 +281,30 @@ class OSModel
 
     # Hot Water
 
-    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
+    success = add_hot_water_and_appliances(runner, model, building, weather, spaces)
     return false if not success
 
     # HVAC
 
+    @total_frac_remaining_heat_load_served = 1.0
+    @total_frac_remaining_cool_load_served = 1.0
+
     control_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
-    slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
+    slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
     @control_slave_zones_hash = { control_zone => slave_zones }
 
-    success = add_cooling_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    # FIXME: Temporarily adding ideal air systems first to work around E+ bug
+    # https://github.com/NREL/EnergyPlus/issues/7264
+    success = add_residual_hvac(runner, model, building)
     return false if not success
 
-    success = add_heating_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_cooling_system(runner, model, building)
     return false if not success
 
-    success = add_heat_pump(runner, model, building, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
+    success = add_heating_system(runner, model, building)
     return false if not success
 
-    success = add_residual_hvac(runner, model, building, use_only_ideal_air)
+    success = add_heat_pump(runner, model, building, weather)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather, spaces)
@@ -308,21 +312,6 @@ class OSModel
 
     success = add_ceiling_fans(runner, model, building, spaces)
     return false if not success
-
-    # FIXME: remove the following logic eventually
-    if not building_construction_values[:load_distribution_scheme].nil?
-      if not ["UniformLoad", "SequentialLoad"].include? building_construction_values[:load_distribution_scheme]
-        fail "Unexpected load distribution scheme #{building_construction_values[:load_distribution_scheme]}."
-      end
-
-      thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
-      control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
-      control_slave_zones_hash.each do |control_zone, slave_zones|
-        ([control_zone] + slave_zones).each do |zone|
-          HVAC.prioritize_zone_hvac(model, runner, zone, building_construction_values[:load_distribution_scheme])
-        end
-      end
-    end
 
     # Plug Loads & Lighting
 
@@ -334,19 +323,19 @@ class OSModel
 
     # Other
 
-    success = add_airflow(runner, model, building, loop_hvacs)
+    success = add_airflow(runner, model, building, spaces)
     return false if not success
 
     success = add_hvac_sizing(runner, model, weather)
     return false if not success
 
-    success = add_fuel_heating_eae(runner, model, building, loop_hvacs, zone_hvacs)
+    success = add_fuel_heating_eae(runner, model, building)
     return false if not success
 
     success = add_photovoltaics(runner, model, building)
     return false if not success
 
-    success = add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, loop_dhws, map_tsv_dir)
+    success = add_building_output_variables(runner, model, map_tsv_dir)
     return false if not success
 
     return true
@@ -408,7 +397,7 @@ class OSModel
     success = add_attics(runner, model, building, spaces)
     return false if not success
 
-    success = add_finished_floor_area(runner, model, building, spaces)
+    success = add_conditioned_floor_area(runner, model, building, spaces)
     return false if not success
 
     success = add_thermal_mass(runner, model, building)
@@ -436,7 +425,7 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_finished_basement(thermal_zone) or Geometry.is_unfinished_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
+      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
         zones_updated += 1
 
         zone_floor_area = 0.0
@@ -455,7 +444,7 @@ class OSModel
 
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
 
-        if Geometry.is_finished_basement(thermal_zone)
+        if Geometry.is_conditioned_basement(thermal_zone)
           living_volume = @cvolume - zone_volume
         end
 
@@ -477,7 +466,7 @@ class OSModel
 
     # Attic
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_unfinished_attic(thermal_zone)
+      if Geometry.is_unconditioned_attic(thermal_zone)
         zones_updated += 1
 
         zone_surfaces = []
@@ -1309,16 +1298,16 @@ class OSModel
     return true
   end
 
-  def self.add_finished_floor_area(runner, model, building, spaces)
+  def self.add_conditioned_floor_area(runner, model, building, spaces)
     # TODO: Use HPXML values not Model values
     building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     cfa = building_construction_values[:conditioned_floor_area].round(1)
 
-    # First check if we need to add a finished basement ceiling
+    # First check if we need to add a conditioned basement ceiling
     foundation_top = get_foundation_top(model)
 
     model.getThermalZones.each do |zone|
-      next if not Geometry.is_finished_basement(zone)
+      next if not Geometry.is_conditioned_basement(zone)
 
       floor_area = 0.0
       ceiling_area = 0.0
@@ -1334,17 +1323,17 @@ class OSModel
 
       addtl_cfa = floor_area - ceiling_area
       if addtl_cfa > 0
-        runner.registerWarning("Adding finished basement adiabatic ceiling with #{addtl_cfa.to_s} ft^2.")
+        runner.registerWarning("Adding conditioned basement adiabatic ceiling with #{addtl_cfa.to_s} ft^2.")
 
-        finishedfloor_width = Math::sqrt(addtl_cfa)
-        finishedfloor_length = addtl_cfa / finishedfloor_width
+        conditioned_floor_width = Math::sqrt(addtl_cfa)
+        conditioned_floor_length = addtl_cfa / conditioned_floor_width
         z_origin = foundation_top
 
-        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
+        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
         surface.setSunExposure("NoSun")
         surface.setWindExposure("NoWind")
-        surface.setName("inferred finished basement ceiling")
+        surface.setName("inferred conditioned basement ceiling")
         surface.setSurfaceType("RoofCeiling")
         surface.setSpace(zone.spaces[0])
         surface.setOutsideBoundaryCondition("Adiabatic")
@@ -1355,12 +1344,12 @@ class OSModel
       end
     end
 
-    # Next check if we need to add floors between finished spaces (e.g., 2-story buildings).
+    # Next check if we need to add floors between conditioned spaces (e.g., 2-story buildings).
 
     # Calculate cfa already added to model
     model_cfa = 0.0
     model.getSpaces.each do |space|
-      next unless Geometry.space_is_finished(space)
+      next unless Geometry.space_is_conditioned(space)
 
       space.surfaces.each do |surface|
         next unless surface.surfaceType.downcase.to_s == "floor"
@@ -1379,15 +1368,15 @@ class OSModel
 
     runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_cfa.to_s} ft^2 to preserve building total conditioned floor area.")
 
-    finishedfloor_width = Math::sqrt(addtl_cfa)
-    finishedfloor_length = addtl_cfa / finishedfloor_width
+    conditioned_floor_width = Math::sqrt(addtl_cfa)
+    conditioned_floor_length = addtl_cfa / conditioned_floor_width
     z_origin = foundation_top + 8.0 * (@ncfl_ag - 1)
 
-    surface = OpenStudio::Model::Surface.new(add_floor_polygon(-finishedfloor_width, -finishedfloor_length, z_origin), model)
+    surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
     surface.setSunExposure("NoSun")
     surface.setWindExposure("NoWind")
-    surface.setName("inferred finished floor")
+    surface.setName("inferred conditioned floor")
     surface.setSurfaceType("Floor")
     surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     surface.setOutsideBoundaryCondition("Adiabatic")
@@ -2010,7 +1999,7 @@ class OSModel
     return true
   end
 
-  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
+  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces)
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -2150,6 +2139,9 @@ class OSModel
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
+        sys_id = water_heating_system_values[:id]
+        @dhw_map[sys_id] = []
+
         if wh_type == "storage water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
@@ -2161,9 +2153,10 @@ class OSModel
           capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_tank(model, runner, nil, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
-                                           oncycle_power, offcycle_power, ec_adj, @nbeds)
+                                           oncycle_power, offcycle_power, ec_adj,
+                                           @nbeds, @dhw_map, sys_id)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -2176,10 +2169,10 @@ class OSModel
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_tankless(model, runner, nil, space, to_beopt_fuel(fuel),
+          success = Waterheater.apply_tankless(model, runner, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                               @nbeds)
+                                               @nbeds, @dhw_map, sys_id)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -2197,13 +2190,12 @@ class OSModel
           tank_ua = 3.9 # FIXME
           int_factor = 1.0 # FIXME
           temp_depress = 0.0 # FIXME
-          ducting = "none"
           # FIXME: Use ef, ec_adj
-          success = Waterheater.apply_heatpump(model, runner, nil, space, weather,
+          success = Waterheater.apply_heatpump(model, runner, space, weather,
                                                e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
                                                cap, cop, shr, airflow_rate, fan_power,
                                                parasitics, tank_ua, int_factor, temp_depress,
-                                               @nbeds, ducting)
+                                               @nbeds, @dhw_map, sys_id)
           return false if not success
 
         else
@@ -2214,8 +2206,6 @@ class OSModel
 
         new_plant_loop = (model.getPlantLoops - orig_plant_loops)[0]
         dhw_loop_fracs[new_plant_loop] = dhw_load_frac
-
-        update_loop_dhws(loop_dhws, model, dhw, orig_plant_loops)
       end
     end
 
@@ -2238,8 +2228,8 @@ class OSModel
     return true
   end
 
-  def self.add_cooling_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
-    return true if use_only_ideal_air
+  def self.add_cooling_system(runner, model, building)
+    return true if @use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
       cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
@@ -2252,12 +2242,13 @@ class OSModel
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
+      sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
+      @total_frac_remaining_cool_load_served -= load_frac
 
-      dse_heat, dse_cool, has_dse = get_dse(building, clgsys)
+      dse_heat, dse_cool, has_dse = get_dse(building, cooling_system_values)
 
-      orig_air_loops = model.getAirLoopHVACs
-      orig_plant_loops = model.getPlantLoops
-      orig_zone_hvacs = get_zone_hvacs(model)
+      sys_id = cooling_system_values[:id]
+      @hvac_map[sys_id] = []
 
       if clg_type == "central air conditioning"
 
@@ -2272,11 +2263,11 @@ class OSModel
           eers = [0.82 * seer + 0.64]
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
-          eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           success = HVAC.apply_central_ac_1speed(model, runner, seer, eers, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 eer_capacity_derates, cool_capacity_btuh,
-                                                 dse_cool, load_frac, @control_slave_zones_hash)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2286,12 +2277,12 @@ class OSModel
           capacity_ratios = [0.72, 1.0]
           fan_speed_ratios = [0.86, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
-          eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           success = HVAC.apply_central_ac_2speed(model, runner, seer, eers, shrs,
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 eer_capacity_derates, cool_capacity_btuh,
-                                                 dse_cool, load_frac, @control_slave_zones_hash)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2301,12 +2292,12 @@ class OSModel
           capacity_ratios = [0.36, 0.64, 1.0, 1.16]
           fan_speed_ratios = [0.51, 0.84, 1.0, 1.19]
           fan_power_installed = get_fan_power_installed(seer)
-          eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           success = HVAC.apply_central_ac_4speed(model, runner, seer, eers, shrs,
                                                  capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 eer_capacity_derates, cool_capacity_btuh,
-                                                 dse_cool, load_frac, @control_slave_zones_hash)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 @hvac_map, sys_id)
           return false if not success
 
         else
@@ -2320,111 +2311,125 @@ class OSModel
         eer = cooling_system_values[:cooling_efficiency_eer]
         shr = 0.65
         airflow_rate = 350.0
-
-        success = HVAC.apply_room_ac(model, runner, eer, shr, airflow_rate, cool_capacity_btuh,
-                                     load_frac, @control_slave_zones_hash)
+        success = HVAC.apply_room_ac(model, runner, eer, shr,
+                                     airflow_rate, cool_capacity_btuh, load_frac,
+                                     sequential_load_frac, @control_slave_zones_hash,
+                                     @hvac_map, sys_id)
         return false if not success
 
       end
-
-      update_loop_hvacs(loop_hvacs, zone_hvacs, model, clgsys, orig_air_loops, orig_plant_loops, orig_zone_hvacs)
     end
 
     return true
   end
 
-  def self.add_heating_system(runner, model, building, loop_hvacs, zone_hvacs, use_only_ideal_air)
-    return true if use_only_ideal_air
+  def self.add_heating_system(runner, model, building)
+    return true if @use_only_ideal_air
 
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
-      heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
+    # We need to process furnaces attached to ACs before any other heating system
+    # such that the sequential load heating fraction is properly applied.
 
-      fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
+    [true, false].each do |only_furnaces_attached_to_cooling|
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |htgsys|
+        heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
 
-      heat_capacity_btuh = heating_system_values[:heating_capacity]
-      if heat_capacity_btuh <= 0.0
-        heat_capacity_btuh = Constants.SizingAuto
+        htg_type = heating_system_values[:heating_system_type]
+
+        attached_clg_system = get_attached_system(heating_system_values, building,
+                                                  "CoolingSystem")
+
+        if only_furnaces_attached_to_cooling
+          next unless htg_type == "Furnace" and not attached_clg_system.nil?
+        else
+          next if htg_type == "Furnace" and not attached_clg_system.nil?
+        end
+
+        fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
+
+        heat_capacity_btuh = heating_system_values[:heating_capacity]
+        if heat_capacity_btuh <= 0.0
+          heat_capacity_btuh = Constants.SizingAuto
+        end
+
+        load_frac = heating_system_values[:fraction_heat_load_served]
+        sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
+        @total_frac_remaining_heat_load_served -= load_frac
+
+        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
+
+        sys_id = heating_system_values[:id]
+        @hvac_map[sys_id] = []
+
+        if htg_type == "Furnace"
+
+          afue = heating_system_values[:heating_efficiency_afue]
+          fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
+          success = HVAC.apply_furnace(model, runner, fuel, afue,
+                                       heat_capacity_btuh, fan_power, dse_heat,
+                                       load_frac, sequential_load_frac,
+                                       attached_clg_system, @control_slave_zones_hash,
+                                       @hvac_map, sys_id)
+          return false if not success
+
+        elsif htg_type == "WallFurnace"
+
+          afue = heating_system_values[:heating_efficiency_afue]
+          fan_power = 0.0
+          airflow_rate = 0.0
+          success = HVAC.apply_unit_heater(model, runner, fuel,
+                                           afue, heat_capacity_btuh, fan_power,
+                                           airflow_rate, load_frac,
+                                           sequential_load_frac, @control_slave_zones_hash,
+                                           @hvac_map, sys_id)
+          return false if not success
+
+        elsif htg_type == "Boiler"
+
+          system_type = Constants.BoilerTypeForcedDraft
+          afue = heating_system_values[:heating_efficiency_afue]
+          oat_reset_enabled = false
+          oat_high = nil
+          oat_low = nil
+          oat_hwst_high = nil
+          oat_hwst_low = nil
+          design_temp = 180.0
+          success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
+                                      oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
+                                      heat_capacity_btuh, design_temp, dse_heat, load_frac,
+                                      sequential_load_frac, @control_slave_zones_hash,
+                                      @hvac_map, sys_id)
+          return false if not success
+
+        elsif htg_type == "ElectricResistance"
+
+          efficiency = heating_system_values[:heating_efficiency_percent]
+          success = HVAC.apply_electric_baseboard(model, runner, efficiency,
+                                                  heat_capacity_btuh, load_frac,
+                                                  sequential_load_frac, @control_slave_zones_hash,
+                                                  @hvac_map, sys_id)
+          return false if not success
+
+        elsif htg_type == "Stove"
+
+          efficiency = heating_system_values[:heating_efficiency_percent]
+          airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
+          fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
+          success = HVAC.apply_unit_heater(model, runner, fuel,
+                                           efficiency, heat_capacity_btuh, fan_power,
+                                           airflow_rate, load_frac,
+                                           sequential_load_frac, @control_slave_zones_hash,
+                                           @hvac_map, sys_id)
+          return false if not success
+
+        end
       end
-      htg_type = heating_system_values[:heating_system_type]
-
-      load_frac = heating_system_values[:fraction_heat_load_served]
-
-      dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
-
-      orig_air_loops = model.getAirLoopHVACs
-      orig_plant_loops = model.getPlantLoops
-      orig_zone_hvacs = get_zone_hvacs(model)
-
-      if htg_type == "Furnace"
-
-        afue = heating_system_values[:heating_efficiency_afue]
-        fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
-        attached_to_multispeed_ac = get_attached_to_multispeed_ac(heating_system_values, building)
-        success = HVAC.apply_furnace(model, runner, fuel, afue,
-                                     heat_capacity_btuh, fan_power, dse_heat,
-                                     load_frac, attached_to_multispeed_ac,
-                                     @control_slave_zones_hash)
-        return false if not success
-
-      elsif htg_type == "WallFurnace"
-
-        afue = heating_system_values[:heating_efficiency_afue]
-        fan_power = 0.0
-        airflow_rate = 0.0
-        # TODO: Allow DSE
-        success = HVAC.apply_unit_heater(model, runner, fuel,
-                                         afue, heat_capacity_btuh, fan_power,
-                                         airflow_rate, load_frac,
-                                         @control_slave_zones_hash)
-        return false if not success
-
-      elsif htg_type == "Boiler"
-
-        system_type = Constants.BoilerTypeForcedDraft
-        afue = heating_system_values[:heating_efficiency_afue]
-        oat_reset_enabled = false
-        oat_high = nil
-        oat_low = nil
-        oat_hwst_high = nil
-        oat_hwst_low = nil
-        design_temp = 180.0
-        success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
-                                    oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                    heat_capacity_btuh, design_temp, dse_heat, load_frac,
-                                    @control_slave_zones_hash)
-        return false if not success
-
-      elsif htg_type == "ElectricResistance"
-
-        efficiency = heating_system_values[:heating_efficiency_percent]
-        # TODO: Allow DSE
-        success = HVAC.apply_electric_baseboard(model, runner, efficiency,
-                                                heat_capacity_btuh, load_frac,
-                                                @control_slave_zones_hash)
-        return false if not success
-
-      elsif htg_type == "Stove"
-
-        efficiency = heating_system_values[:heating_efficiency_percent]
-        airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
-        fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
-        # TODO: Allow DSE
-        success = HVAC.apply_unit_heater(model, runner, fuel,
-                                         efficiency, heat_capacity_btuh, fan_power,
-                                         airflow_rate, load_frac,
-                                         @control_slave_zones_hash)
-        return false if not success
-
-      end
-
-      update_loop_hvacs(loop_hvacs, zone_hvacs, model, htgsys, orig_air_loops, orig_plant_loops, orig_zone_hvacs)
     end
 
     return true
   end
 
-  def self.add_heat_pump(runner, model, building, weather, loop_hvacs, zone_hvacs, use_only_ideal_air)
-    return true if use_only_ideal_air
+  def self.add_heat_pump(runner, model, building, weather)
+    return true if @use_only_ideal_air
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
       heat_pump_values = HPXML.get_heat_pump_values(heat_pump: hp)
@@ -2437,23 +2442,27 @@ class OSModel
       end
 
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
+      sequential_load_frac_heat = load_frac_heat / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
+      @total_frac_remaining_heat_load_served -= load_frac_heat
+
       load_frac_cool = heat_pump_values[:fraction_cool_load_served]
+      sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
+      @total_frac_remaining_cool_load_served -= load_frac_cool
 
       backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity] # TODO: Require in ERI Use Case?
       if backup_heat_capacity_btuh.nil?
         backup_heat_capacity_btuh = Constants.SizingAuto
       end
 
-      dse_heat, dse_cool, has_dse = get_dse(building, hp)
+      dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
         # TODO: Can we remove this since we use separate airloops for
         # heating and cooling?
         fail "Cannot handle different distribution system efficiency (DSE) values for heating and cooling."
       end
 
-      orig_air_loops = model.getAirLoopHVACs
-      orig_plant_loops = model.getPlantLoops
-      orig_zone_hvacs = get_zone_hvacs(model)
+      sys_id = heat_pump_values[:id]
+      @hvac_map[sys_id] = []
 
       if hp_type == "air-to-air"
 
@@ -2476,16 +2485,14 @@ class OSModel
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
-          eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
-          cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
-                                                   @control_slave_zones_hash)
+                                                   sequential_load_frac_heat, sequential_load_frac_cool,
+                                                   @control_slave_zones_hash, @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2498,17 +2505,15 @@ class OSModel
           fan_speed_ratios_heating = [0.8, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
-          eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
-          cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
-                                                   @control_slave_zones_hash)
+                                                   sequential_load_frac_heat, sequential_load_frac_cool,
+                                                   @control_slave_zones_hash, @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2521,17 +2526,15 @@ class OSModel
           fan_speed_ratios_heating = [0.74, 0.92, 1.0, 1.22]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
-          eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
-          cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
-                                                   @control_slave_zones_hash)
+                                                   sequential_load_frac_heat, sequential_load_frac_cool,
+                                                   @control_slave_zones_hash, @hvac_map, sys_id)
           return false if not success
 
         else
@@ -2571,7 +2574,8 @@ class OSModel
                                   is_ducted, cool_capacity_btuh,
                                   supplemental_efficiency, backup_heat_capacity_btuh,
                                   dse_heat, load_frac_heat, load_frac_cool,
-                                  @control_slave_zones_hash)
+                                  sequential_load_frac_heat, sequential_load_frac_cool,
+                                  @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success
 
       elsif hp_type == "ground-to-air"
@@ -2609,23 +2613,19 @@ class OSModel
                                   fan_power, heat_pump_capacity, supplemental_efficiency,
                                   supplemental_capacity, dse_heat,
                                   load_frac_heat, load_frac_cool,
-                                  @control_slave_zones_hash)
+                                  sequential_load_frac_heat, sequential_load_frac_cool,
+                                  @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success
 
       end
-
-      update_loop_hvacs(loop_hvacs, zone_hvacs, model, hp, orig_air_loops, orig_plant_loops, orig_zone_hvacs)
     end
 
     return true
   end
 
-  def self.add_residual_hvac(runner, model, building, use_only_ideal_air)
-    if use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads_heating(model, runner, 1, @control_slave_zones_hash)
-      return false if not success
-
-      success = HVAC.apply_ideal_air_loads_cooling(model, runner, 1, @control_slave_zones_hash)
+  def self.add_residual_hvac(runner, model, building)
+    if @use_only_ideal_air
+      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, 1, 1, @control_slave_zones_hash)
       return false if not success
 
       return true
@@ -2634,18 +2634,26 @@ class OSModel
     # Residual heating
     htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
     htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-    residual_htg_load_frac = 1.0 - htg_load_frac
-    if residual_htg_load_frac > 0.02 and residual_htg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
-      success = HVAC.apply_ideal_air_loads_heating(model, runner, residual_htg_load_frac, @control_slave_zones_hash)
-      return false if not success
-    end
+    residual_heat_load_served = 1.0 - htg_load_frac
+    @total_frac_remaining_heat_load_served -= residual_heat_load_served
 
     # Residual cooling
     clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
     clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-    residual_clg_load_frac = 1.0 - clg_load_frac
-    if residual_clg_load_frac > 0.02 and residual_clg_load_frac < 1 # TODO: Ensure that E+ will re-normalize if == 0.01
-      success = HVAC.apply_ideal_air_loads_cooling(model, runner, residual_clg_load_frac, @control_slave_zones_hash)
+    residual_cool_load_served = 1.0 - clg_load_frac
+    @total_frac_remaining_cool_load_served -= residual_cool_load_served
+
+    # Don't add ideal air if no heating system
+    residual_heat_load_served = 0 if residual_heat_load_served >= 1.0
+
+    # Don't add ideal air if no cooling system
+    residual_cool_load_served = 0 if residual_cool_load_served >= 1.0
+
+    # Only add ideal air if heating/cooling system doesn't meet entire load
+    if residual_heat_load_served > 0.02 or residual_cool_load_served > 0.02
+      success = HVAC.apply_ideal_air_loads(model, runner, residual_cool_load_served, residual_heat_load_served,
+                                           residual_cool_load_served, residual_heat_load_served,
+                                           @control_slave_zones_hash)
       return false if not success
     end
 
@@ -2656,7 +2664,7 @@ class OSModel
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
 
-    conditioned_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement]).map { |z| z.thermalZone.get }.compact
+    conditioned_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
 
     control_type = hvac_control_values[:control_type]
     heating_temp = hvac_control_values[:setpoint_temp_heating_season]
@@ -2742,7 +2750,7 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
                                       @cfa, conditioned_spaces)
     return false if not success
@@ -2750,97 +2758,40 @@ class OSModel
     return true
   end
 
-  def self.get_dse(building, system)
-    if system.elements["DistributionSystem"].nil? # No distribution system
+  def self.get_dse(building, system_values)
+    dist_id = system_values[:distribution_system_idref]
+    if dist_id.nil? # No distribution system
       return 1.0, 1.0, false
     end
 
     # Get attached distribution system
-    ducts = nil
+    attached_dist = nil
+    found_attached_dist = nil
     annual_cooling_dse = nil
     annual_heating_dse = nil
-    duct_id = system.elements["DistributionSystem"].attributes["idref"]
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
-      next if duct_id != hvac_distribution_values[:id]
-      next if dist.elements["DistributionSystemType[Other='DSE']"].nil?
+      next if dist_id != hvac_distribution_values[:id]
 
-      ducts = dist
+      found_attached_dist = true
+      next if hvac_distribution_values[:distribution_system_type] != 'DSE'
+
+      attached_dist = dist
       annual_cooling_dse = hvac_distribution_values[:annual_cooling_dse]
       annual_heating_dse = hvac_distribution_values[:annual_heating_dse]
     end
-    if ducts.nil? # No attached DSEs for system
+
+    if not found_attached_dist
+      fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_values[:id]}'."
+    end
+
+    if attached_dist.nil? # No attached DSEs for system
       return 1.0, 1.0, false
     end
 
     dse_cool = annual_cooling_dse
     dse_heat = annual_heating_dse
     return dse_heat, dse_cool, true
-  end
-
-  def self.get_zone_hvacs(model)
-    zone_hvacs = []
-    model.getThermalZones.each do |zone|
-      zone.equipment.each do |zone_hvac|
-        next unless zone_hvac.to_ZoneHVACComponent.is_initialized
-
-        zone_hvacs << zone_hvac
-      end
-    end
-    return zone_hvacs
-  end
-
-  def self.update_loop_hvacs(loop_hvacs, zone_hvacs, model, sys, orig_air_loops, orig_plant_loops, orig_zone_hvacs)
-    sys_id = sys.elements["SystemIdentifier"].attributes["id"]
-    loop_hvacs[sys_id] = []
-    zone_hvacs[sys_id] = []
-
-    model.getAirLoopHVACs.each do |air_loop|
-      next if orig_air_loops.include? air_loop # Only include newly added air loops
-
-      loop_hvacs[sys_id] << air_loop
-    end
-
-    model.getPlantLoops.each do |plant_loop|
-      next if orig_plant_loops.include? plant_loop # Only include newly added plant loops
-
-      loop_hvacs[sys_id] << plant_loop
-    end
-
-    get_zone_hvacs(model).each do |zone_hvac|
-      next if orig_zone_hvacs.include? zone_hvac
-
-      zone_hvacs[sys_id] << zone_hvac
-    end
-
-    loop_hvacs.each do |sys_id, loops|
-      next if not loops.empty?
-
-      loop_hvacs.delete(sys_id)
-    end
-
-    zone_hvacs.each do |sys_id, hvacs|
-      next if not hvacs.empty?
-
-      zone_hvacs.delete(sys_id)
-    end
-  end
-
-  def self.update_loop_dhws(loop_dhws, model, sys, orig_plant_loops)
-    sys_id = sys.elements["SystemIdentifier"].attributes["id"]
-    loop_dhws[sys_id] = []
-
-    model.getPlantLoops.each do |plant_loop|
-      next if orig_plant_loops.include? plant_loop # Only include newly added plant loops
-
-      loop_dhws[sys_id] << plant_loop
-    end
-
-    loop_dhws.each do |sys_id, loops|
-      next if not loops.empty?
-
-      loop_dhws.delete(sys_id)
-    end
   end
 
   def self.add_mels(runner, model, building, spaces)
@@ -2892,7 +2843,7 @@ class OSModel
       tv_annual_kwh = 0
     end
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
                                         misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh,
                                         @cfa, conditioned_spaces)
@@ -2925,7 +2876,7 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement])
+    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     garage_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeGarage])
     success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
                                   conditioned_spaces, garage_spaces)
@@ -2934,27 +2885,22 @@ class OSModel
     return true
   end
 
-  def self.add_airflow(runner, model, building, loop_hvacs)
+  def self.add_airflow(runner, model, building, spaces)
     # Infiltration
-    infil_volume = nil
-    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
-      infil_volume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
-    end
-    if infil_volume.nil?
-      infil_volume = @cvolume
-    end
-
     infil_ach50 = nil
     infil_const_ach = nil
+    infil_volume = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
       air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
-      elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
-        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infil_volume # Convert CFM50 to ACH50
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
+      end
+      # FIXME: Pass infil_volume to infiltration model
+      infil_volume = air_infiltration_measurement_values[:infiltration_volume]
+      if infil_volume.nil?
+        infil_volume = @cvolume
       end
     end
 
@@ -3002,8 +2948,8 @@ class OSModel
     living_ach50 = infil_ach50
     living_constant_ach = infil_const_ach
     garage_ach50 = infil_ach50
-    finished_basement_ach = 0 # TODO: Need to handle above-grade basement
-    unfinished_basement_ach = 0.1 # TODO: Need to handle above-grade basement
+    conditioned_basement_ach = 0 # TODO: Need to handle above-grade basement
+    unconditioned_basement_ach = 0.1 # TODO: Need to handle above-grade basement
     crawl_ach = crawl_sla # FIXME: sla vs ach
     pier_beam_ach = 100
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
@@ -3014,21 +2960,19 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unfinished_basement_ach,
-                             finished_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unconditioned_basement_ach,
+                             conditioned_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
-    if whole_house_fan_values.nil?
-      mech_vent_type = Constants.VentTypeNone
-      mech_vent_total_efficiency = 0.0
-      mech_vent_sensible_efficiency = 0.0
-      mech_vent_fan_power = 0.0
-      mech_vent_cfm = 0.0
-    else
-      # FIXME: HoursInOperation isn't hooked up
-      # FIXME: AttachedToHVACDistributionSystem isn't hooked up
+    mech_vent_type = Constants.VentTypeNone
+    mech_vent_total_efficiency = 0.0
+    mech_vent_sensible_efficiency = 0.0
+    mech_vent_fan_w = 0.0
+    mech_vent_cfm = 0.0
+    cfis_open_time = 0.0
+    if not whole_house_fan_values.nil?
       fan_type = whole_house_fan_values[:fan_type]
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
@@ -3052,25 +2996,71 @@ class OSModel
         mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
       end
       mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
-      mech_vent_w = whole_house_fan_values[:fan_power]
-      mech_vent_fan_power = mech_vent_w / mech_vent_cfm / num_fans
+      mech_vent_fan_w = whole_house_fan_values[:fan_power]
+      if mech_vent_type == Constants.VentTypeCFIS
+        # CFIS: Specify minimum open time in minutes
+        cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
+      else
+        # Other: Adjust CFM based on hours/day of operation
+        mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
+      end
     end
-    mech_vent_ashrae_std = '2013'
-    mech_vent_infil_credit = true
-    mech_vent_cfis_open_time = 20.0
-    mech_vent_cfis_airflow_frac = 1.0
+    cfis_airflow_frac = 1.0
     clothes_dryer_exhaust = 0.0
     range_exhaust = 0.0
     range_exhaust_hour = 16
     bathroom_exhaust = 0.0
     bathroom_exhaust_hour = 5
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_infil_credit, mech_vent_total_efficiency,
-                                          nil, mech_vent_cfm, mech_vent_fan_power, mech_vent_sensible_efficiency,
-                                          mech_vent_ashrae_std, clothes_dryer_exhaust, range_exhaust,
-                                          range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour)
-    # FIXME: AttachedToHVACDistributionSystem isn't hooked up
-    cfis = CFIS.new(mech_vent_cfis_open_time, mech_vent_cfis_airflow_frac)
-    cfis_systems = { cfis => model.getAirLoopHVACs }
+
+    # Get AirLoop associated with CFIS
+    cfis_airloop = nil
+    if mech_vent_type == Constants.VentTypeCFIS
+      # Get HVAC distribution system CFIS is attached to
+      cfis_hvac_dist = nil
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_dist|
+        next unless hvac_dist.elements["SystemIdentifier"].attributes["id"] == whole_house_fan.elements["AttachedToHVACDistributionSystem"].attributes["idref"]
+
+        cfis_hvac_dist = hvac_dist
+      end
+      if cfis_hvac_dist.nil?
+        fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
+      end
+
+      cfis_hvac_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: cfis_hvac_dist)
+      if cfis_hvac_dist_values[:distribution_system_type] == 'HydronicDistribution'
+        fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' cannot be hydronic for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
+      end
+
+      # Get HVAC systems attached to this distribution system
+      cfis_sys_ids = []
+      hvac_plant = building.elements["BuildingDetails/Systems/HVAC/HVACPlant"]
+      hvac_plant.elements.each("HeatingSystem | CoolingSystem | HeatPump") do |hvac|
+        next unless XMLHelper.has_element(hvac, "DistributionSystem")
+        next unless cfis_hvac_dist.elements["SystemIdentifier"].attributes["id"] == hvac.elements["DistributionSystem"].attributes["idref"]
+
+        cfis_sys_ids << hvac.elements["SystemIdentifier"].attributes["id"]
+      end
+
+      # Get AirLoopHVACs associated with these HVAC systems
+      @hvac_map.each do |sys_id, hvacs|
+        next unless cfis_sys_ids.include? sys_id
+
+        hvacs.each do |loop|
+          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+          next if cfis_airloop == loop # already assigned
+
+          fail "Two airloops found for CFIS. Aborting..." unless cfis_airloop.nil?
+
+          cfis_airloop = loop
+        end
+      end
+    end
+
+    mech_vent = MechanicalVentilation.new(mech_vent_type, nil, mech_vent_total_efficiency,
+                                          nil, mech_vent_cfm, mech_vent_fan_w, mech_vent_sensible_efficiency,
+                                          nil, clothes_dryer_exhaust, range_exhaust,
+                                          range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
+                                          cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
     # Natural Ventilation
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
@@ -3109,93 +3099,76 @@ class OSModel
 
     # Ducts
     duct_systems = {}
-    location_map = { 'living space' => Constants.SpaceTypeLiving,
-                     'basement - conditioned' => Constants.SpaceTypeFinishedBasement,
-                     'basement - unconditioned' => Constants.SpaceTypeUnfinishedBasement,
-                     'crawlspace - vented' => Constants.SpaceTypeCrawl,
-                     'crawlspace - unvented' => Constants.SpaceTypeCrawl,
-                     'attic - vented' => Constants.SpaceTypeUnfinishedAttic,
-                     'attic - unvented' => Constants.SpaceTypeUnfinishedAttic,
-                     'attic - conditioned' => Constants.SpaceTypeLiving,
-                     'garage' => Constants.SpaceTypeGarage }
+    side_map = { 'supply' => Constants.DuctSideSupply,
+                 'return' => Constants.DuctSideReturn }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      # Ducts
-      # FIXME: Values below
-      supply_duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: air_distribution.elements["DuctLeakageMeasurement[DuctType='supply']"])
-      supply_cfm25 = supply_duct_leakage_measurement_values[:duct_leakage_value]
-      return_duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: air_distribution.elements["DuctLeakageMeasurement[DuctType='return']"])
-      return_cfm25 = return_duct_leakage_measurement_values[:duct_leakage_value]
-      supply_ducts_values = HPXML.get_ducts_values(ducts: air_distribution.elements["Ducts[DuctType='supply']"])
-      supply_r = supply_ducts_values[:duct_insulation_r_value]
-      return_ducts_values = HPXML.get_ducts_values(ducts: air_distribution.elements["Ducts[DuctType='return']"])
-      return_r = return_ducts_values[:duct_insulation_r_value]
-      supply_area = supply_ducts_values[:duct_surface_area]
-      return_area = return_ducts_values[:duct_surface_area]
-      duct_location = location_map[supply_ducts_values[:duct_location]]
-      duct_total_leakage = 0.3
-      duct_supply_frac = 0.6
-      duct_return_frac = 0.067
-      duct_ah_supply_frac = 0.067
-      duct_ah_return_frac = 0.267
-      duct_location_frac = 1.0
-      duct_num_returns = 1
-      duct_supply_area_mult = supply_area / 100.0
-      duct_return_area_mult = return_area / 100.0
-      duct_r = 4.0
-      duct_norm_leakage_25pa = nil
+      air_ducts = []
 
-      ducts = Ducts.new(duct_total_leakage, duct_norm_leakage_25pa, duct_supply_area_mult, duct_return_area_mult, duct_r,
-                        duct_supply_frac, duct_return_frac, duct_ah_supply_frac, duct_ah_return_frac, duct_location_frac,
-                        duct_num_returns, duct_location)
+      # Duct leakage
+      leakage_to_outside_cfm25 = { Constants.DuctSideSupply => 0.0,
+                                   Constants.DuctSideReturn => 0.0 }
+      air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
+        duct_leakage_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
+        next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
+
+        duct_side = side_map[duct_leakage_values[:duct_type]]
+        leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
+      end
+
+      # Duct location, Rvalue, Area
+      total_duct_area = { Constants.DuctSideSupply => 0.0,
+                          Constants.DuctSideReturn => 0.0 }
+      air_distribution.elements.each("Ducts") do |ducts|
+        ducts_values = HPXML.get_ducts_values(ducts: ducts)
+        next if ['living space', 'basement - conditioned', 'attic - conditioned'].include? ducts_values[:duct_location]
+
+        # Calculate total duct area in unconditioned spaces
+        duct_side = side_map[ducts_values[:duct_type]]
+        total_duct_area[duct_side] += ducts_values[:duct_surface_area]
+      end
+
+      air_distribution.elements.each("Ducts") do |ducts|
+        ducts_values = HPXML.get_ducts_values(ducts: ducts)
+        next if ['living space', 'basement - conditioned', 'attic - conditioned'].include? ducts_values[:duct_location]
+
+        duct_side = side_map[ducts_values[:duct_type]]
+        duct_area = ducts_values[:duct_surface_area]
+        duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
+        # Apportion leakage to individual ducts by surface area
+        duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
+                            duct_area / total_duct_area[duct_side])
+
+        air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+      end
 
       # Connect AirLoopHVACs to ducts
-      systems_for_this_duct = []
-      duct_id = hvac_distribution_values[:id]
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0] |
-                              BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0] |
-                              BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[FractionHeatLoadServed > 0 && FractionCoolLoadServed > 0]") do |sys|
-        next if sys.elements["DistributionSystem"].nil? or duct_id != sys.elements["DistributionSystem"].attributes["idref"]
+      dist_id = hvac_distribution_values[:id]
+      heating_systems_attached = []
+      cooling_systems_attached = []
+      ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
+        building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
+          next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
 
-        sys_id = sys.elements["SystemIdentifier"].attributes["id"]
-        loop_hvacs[sys_id].each do |loop|
-          next if not loop.is_a? OpenStudio::Model::AirLoopHVAC
+          sys_id = sys.elements["SystemIdentifier"].attributes["id"]
+          heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys
+          cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys
 
-          systems_for_this_duct << loop
-        end
-      end
+          @hvac_map[sys_id].each do |loop|
+            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+            next if duct_systems[air_ducts] == loop # already assigned
 
-      duct_systems[ducts] = systems_for_this_duct
-    end
-
-    # Set no ducts for HVAC without duct systems
-    systems_for_no_duct = []
-    no_ducts = Ducts.new(0.0, nil, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Constants.Auto, Constants.Auto, "none")
-    loop_hvacs.each do |sys_id, loops|
-      loops.each do |loop|
-        next if not loop.is_a? OpenStudio::Model::AirLoopHVAC
-
-        # Look for loop already associated with a duct system
-        loop_found = false
-        duct_systems.keys.each do |duct_system|
-          if duct_systems[duct_system].include? loop
-            loop_found = true
+            duct_systems[air_ducts] = loop
           end
         end
-        next if loop_found
-
-        # Loop has no associated ducts; associate with no duct system
-        systems_for_no_duct << loop
       end
-    end
-    if not systems_for_no_duct.empty?
-      duct_systems[no_ducts] = systems_for_no_duct
-    end
 
-    # FIXME: Throw error if, e.g., multiple heating systems connected to same distribution system?
+      fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if cooling_systems_attached.size > 1
+      fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
+    end
 
     window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
@@ -3203,8 +3176,9 @@ class OSModel
       window_area += window_values[:area]
     end
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems, cfis_systems,
-                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area, @min_neighbor_distance)
+    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
+                            @min_neighbor_distance)
     return false if not success
 
     return true
@@ -3217,51 +3191,24 @@ class OSModel
     return true
   end
 
-  def self.add_fuel_heating_eae(runner, model, building, loop_hvacs, zone_hvacs)
+  def self.add_fuel_heating_eae(runner, model, building)
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
+    # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[FractionHeatLoadServed > 0]") do |htgsys|
       heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
       htg_type = heating_system_values[:heating_system_type]
-      next if not ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
+      next unless ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
 
       fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
       next if fuel == Constants.FuelTypeElectric
 
       fuel_eae = heating_system_values[:electric_auxiliary_energy]
-
       load_frac = heating_system_values[:fraction_heat_load_served]
-
-      dse_heat, dse_cool, has_dse = get_dse(building, htgsys)
-
+      dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
       sys_id = heating_system_values[:id]
 
-      eae_loop_hvac = nil
-      eae_zone_hvacs = nil
-      eae_loop_hvac_cool = nil
-      if loop_hvacs.keys.include? sys_id
-        eae_loop_hvac = loop_hvacs[sys_id][0]
-        has_furnace = (htg_type == "Furnace")
-        has_boiler = (htg_type == "Boiler")
-
-        if has_furnace
-          # Check for cooling system on the same supply fan
-          htgdist = htgsys.elements["DistributionSystem"]
-          building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0]") do |clgsys|
-            cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
-            clgdist = clgsys.elements["DistributionSystem"]
-            next if htgdist.nil? or clgdist.nil?
-            next if cooling_system_values[:distribution_system_idref] != heating_system_values[:distribution_system_idref]
-
-            eae_loop_hvac_cool = loop_hvacs[cooling_system_values[:id]][0]
-          end
-        end
-      elsif zone_hvacs.keys.include? sys_id
-        eae_zone_hvacs = zone_hvacs[sys_id]
-      end
-
-      success = HVAC.apply_eae_to_heating_fan(runner, eae_loop_hvac, eae_zone_hvacs, fuel_eae, fuel, dse_heat,
-                                              has_furnace, has_boiler, load_frac, eae_loop_hvac_cool)
+      success = HVAC.apply_eae_to_heating_fan(runner, @hvac_map[sys_id], fuel_eae, fuel, dse_heat, load_frac, htg_type)
       return false if not success
     end
 
@@ -3305,134 +3252,15 @@ class OSModel
     return true
   end
 
-  def self.add_building_output_variables(runner, model, loop_hvacs, zone_hvacs, loop_dhws, map_tsv_dir)
-    htg_mapping = {}
-    clg_mapping = {}
-    dhw_mapping = {}
-
-    # AirLoopHVAC systems
-    loop_hvacs.each do |sys_id, loops|
-      htg_mapping[sys_id] = []
-      clg_mapping[sys_id] = []
-      loops.each do |loop|
-        next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-
-        loop.supplyComponents.each do |comp|
-          next unless comp.to_AirLoopHVACUnitarySystem.is_initialized
-
-          unitary_system = comp.to_AirLoopHVACUnitarySystem.get
-          if unitary_system.coolingCoil.is_initialized
-            # Cooling system: Cooling coil, supply fan
-            clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.coolingCoil.get)
-            clg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
-          elsif unitary_system.heatingCoil.is_initialized
-            # Heating system: Heating coil, supply fan, supplemental coil
-            htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.heatingCoil.get)
-            htg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
-            if unitary_system.supplementalHeatingCoil.is_initialized
-              htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.supplementalHeatingCoil.get)
-            end
-          end
-        end
-      end
+  def self.add_building_output_variables(runner, model, map_tsv_dir)
+    @hvac_map.each do |sys_id, hvac_equip_list|
+      add_output_variables(model, OutputVars.SpaceHeatingElectricity, hvac_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingFuel, hvac_equip_list)
+      add_output_variables(model, OutputVars.SpaceHeatingLoad, hvac_equip_list)
+      add_output_variables(model, OutputVars.SpaceCoolingElectricity, hvac_equip_list)
+      add_output_variables(model, OutputVars.SpaceCoolingLoad, hvac_equip_list)
     end
-
-    zone_hvacs.each do |sys_id, hvacs|
-      htg_mapping[sys_id] = []
-      clg_mapping[sys_id] = []
-      hvacs.each do |hvac|
-        next unless hvac.to_ZoneHVACComponent.is_initialized
-
-        if hvac.to_AirLoopHVACUnitarySystem.is_initialized
-
-          unitary_system = hvac.to_AirLoopHVACUnitarySystem.get
-          if unitary_system.coolingCoil.is_initialized
-            # Cooling system: Cooling coil, supply fan
-            clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.coolingCoil.get)
-            clg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
-          elsif unitary_system.heatingCoil.is_initialized
-            # Heating system: Heating coil, supply fan
-            htg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(unitary_system.heatingCoil.get)
-            htg_mapping[sys_id] << unitary_system.supplyFan.get.to_FanOnOff.get
-          end
-
-        elsif hvac.to_ZoneHVACPackagedTerminalAirConditioner.is_initialized
-
-          ptac = hvac.to_ZoneHVACPackagedTerminalAirConditioner.get
-          clg_mapping[sys_id] << HVAC.get_coil_from_hvac_component(ptac.coolingCoil)
-
-        elsif hvac.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-
-          htg_mapping[sys_id] << hvac.to_ZoneHVACBaseboardConvectiveElectric.get
-
-        elsif hvac.to_ZoneHVACBaseboardConvectiveWater.is_initialized
-
-          baseboard = hvac.to_ZoneHVACBaseboardConvectiveWater.get
-          baseboard.heatingCoil.plantLoop.get.components.each do |comp|
-            next unless comp.to_BoilerHotWater.is_initialized
-
-            htg_mapping[sys_id] << comp.to_BoilerHotWater.get
-          end
-
-        end
-      end
-    end
-
-    loop_dhws.each do |sys_id, loops|
-      dhw_mapping[sys_id] = []
-      loops.each do |loop|
-        loop.supplyComponents.each do |comp|
-          if comp.to_WaterHeaterMixed.is_initialized
-
-            water_heater = comp.to_WaterHeaterMixed.get
-            dhw_mapping[sys_id] << water_heater
-
-          elsif comp.to_WaterHeaterStratified.is_initialized
-
-            hpwh_tank = comp.to_WaterHeaterStratified.get
-            dhw_mapping[sys_id] << hpwh_tank
-
-            model.getWaterHeaterHeatPumpWrappedCondensers.each do |hpwh|
-              next if hpwh.tank.name.to_s != hpwh_tank.name.to_s
-
-              water_heater_coil = hpwh.dXCoil.to_CoilWaterHeatingAirToWaterHeatPumpWrapped.get
-              dhw_mapping[sys_id] << water_heater_coil
-            end
-
-          end
-        end
-
-        recirc_pump_name = loop.additionalProperties.getFeatureAsString("PlantLoopRecircPump")
-        if recirc_pump_name.is_initialized
-          recirc_pump_name = recirc_pump_name.get
-          model.getElectricEquipments.each do |ee|
-            next unless ee.name.to_s == recirc_pump_name
-
-            dhw_mapping[sys_id] << ee
-          end
-        end
-
-        loop.demandComponents.each do |comp|
-          if comp.to_WaterUseConnections.is_initialized
-
-            water_use_connections = comp.to_WaterUseConnections.get
-            dhw_mapping[sys_id] << water_use_connections
-
-          end
-        end
-      end
-    end
-
-    htg_mapping.each do |sys_id, htg_equip_list|
-      add_output_variables(model, OutputVars.SpaceHeatingElectricity, htg_equip_list)
-      add_output_variables(model, OutputVars.SpaceHeatingFuel, htg_equip_list)
-      add_output_variables(model, OutputVars.SpaceHeatingLoad, htg_equip_list)
-    end
-    clg_mapping.each do |sys_id, clg_equip_list|
-      add_output_variables(model, OutputVars.SpaceCoolingElectricity, clg_equip_list)
-      add_output_variables(model, OutputVars.SpaceCoolingLoad, clg_equip_list)
-    end
-    dhw_mapping.each do |sys_id, dhw_equip_list|
+    @dhw_map.each do |sys_id, dhw_equip_list|
       add_output_variables(model, OutputVars.WaterHeatingElectricity, dhw_equip_list)
       add_output_variables(model, OutputVars.WaterHeatingElectricityRecircPump, dhw_equip_list)
       add_output_variables(model, OutputVars.WaterHeatingFuel, dhw_equip_list)
@@ -3441,9 +3269,8 @@ class OSModel
 
     if map_tsv_dir.is_initialized
       map_tsv_dir = map_tsv_dir.get
-      write_mapping(htg_mapping, File.join(map_tsv_dir, "map_hvac_heating.tsv"))
-      write_mapping(clg_mapping, File.join(map_tsv_dir, "map_hvac_cooling.tsv"))
-      write_mapping(dhw_mapping, File.join(map_tsv_dir, "map_water_heating.tsv"))
+      write_mapping(@hvac_map, File.join(map_tsv_dir, "map_hvac.tsv"))
+      write_mapping(@dhw_map, File.join(map_tsv_dir, "map_water_heating.tsv"))
     end
 
     return true
@@ -3458,9 +3285,7 @@ class OSModel
       end
     else
       objects.each do |object|
-        if vars[object.class.to_s].nil?
-          fail "Unexpected object type #{object.class.to_s}."
-        end
+        next if vars[object.class.to_s].nil?
 
         vars[object.class.to_s].each do |object_var|
           outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
@@ -3471,7 +3296,7 @@ class OSModel
     end
   end
 
-  def self.write_mapping(mapping, map_tsv_path)
+  def self.write_mapping(map, map_tsv_path)
     # Write simple mapping TSV file for use by ERI calculation. Mapping file correlates
     # EnergyPlus object name to a HPXML object name.
 
@@ -3479,9 +3304,9 @@ class OSModel
       # Header
       tsv << ["HPXML Name", "E+ Name(s)"]
 
-      mapping.each do |sys_id, objects|
+      map.each do |sys_id, objects|
         out_data = [sys_id]
-        objects.each do |object|
+        objects.uniq.each do |object|
           out_data << object.name.to_s
         end
         tsv << out_data if out_data.size > 1
@@ -3672,7 +3497,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? WoodStudConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? WoodStudConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3693,7 +3518,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? SteelStudConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? SteelStudConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3713,7 +3538,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? DoubleStudConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? DoubleStudConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3743,7 +3568,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? SIPConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? SIPConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
       non_cavity_r += Material.new(nil, constr_set.sheath_thick_in, BaseMaterial.Wood).rvalue
@@ -3778,7 +3603,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? CMUConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? CMUConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3804,7 +3629,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? ICFConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? ICFConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3829,7 +3654,7 @@ class OSModel
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail "Unexpected object." if not constr_set.is_a? GenericConstructionSet
+      fail "Unexpected object." unless constr_set.is_a? GenericConstructionSet
 
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
@@ -3873,20 +3698,27 @@ class OSModel
     end
   end
 
-  def self.get_attached_to_multispeed_ac(heating_system_values, building)
-    attached_to_multispeed_ac = false
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clgsys|
-      cooling_system_values = HPXML.get_cooling_system_values(cooling_system: clgsys)
-      next unless cooling_system_values[:cooling_system_type] == "central air conditioning"
-      next unless heating_system_values[:distribution_system_idref] == cooling_system_values[:distribution_system_idref]
+  def self.get_attached_system(system_values, building, system_to_search)
+    return nil if system_values[:distribution_system_idref].nil?
 
-      seer = cooling_system_values[:cooling_efficiency_seer]
-      next unless get_ac_num_speeds(seer) != "1-Speed"
+    # Finds the OpenStudio object of the heating (or cooling) system attached (i.e., on the same
+    # distribution system) to the current cooling (or heating) system.
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{system_to_search}") do |other_sys|
+      if system_to_search == "CoolingSystem"
+        attached_system_values = HPXML.get_cooling_system_values(cooling_system: other_sys)
+      elsif system_to_search == "HeatingSystem"
+        attached_system_values = HPXML.get_heating_system_values(heating_system: other_sys)
+      end
+      next unless system_values[:distribution_system_idref] == attached_system_values[:distribution_system_idref]
 
-      attached_to_multispeed_ac = true
+      @hvac_map[attached_system_values[:id]].each do |hvac_object|
+        next unless hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+
+        return hvac_object
+      end
     end
 
-    return attached_to_multispeed_ac
+    return nil
   end
 
   def self.set_surface_interior(model, spaces, surface, surface_id, interior_adjacent_to)
@@ -3895,13 +3727,13 @@ class OSModel
     elsif ["garage"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
     elsif ["basement - unconditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement))
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement))
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
     elsif ["crawlspace - vented", "crawlspace - unvented"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
     elsif ["attic - unvented", "attic - vented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic))
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
     elsif ["attic - conditioned", "flat roof", "cathedral ceiling"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     else
@@ -3919,13 +3751,13 @@ class OSModel
     elsif ["garage"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
     elsif ["basement - unconditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
     elsif ["crawlspace - vented", "crawlspace - unvented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
     elsif ["attic - unvented", "attic - vented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
     elsif ["attic - conditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     else
@@ -4001,13 +3833,13 @@ class OSModel
     if location == 'living space'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - conditioned'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeFinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement)
     elsif location == 'basement - unconditioned'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement)
     elsif location == 'garage'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
     elsif location == 'attic - unvented' or location == 'attic - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnfinishedAttic)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic)
     elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
     end
@@ -4334,21 +4166,15 @@ class OutputVars
              'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
              'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
              'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
-             'OpenStudio::Model::CoilHeatingGas' => [],
              'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Electric Energy'],
              'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'],
              'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
   end
 
   def self.SpaceHeatingFuel
-    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => [],
-             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => [],
-             'OpenStudio::Model::CoilHeatingElectric' => [],
-             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => [],
-             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy', 'Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy', 'Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
              'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy', 'Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy', 'Boiler Propane Energy', 'Boiler FuelOil#1 Energy'],
-             'OpenStudio::Model::FanOnOff' => [] }
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy', 'Boiler Propane Energy', 'Boiler FuelOil#1 Energy'] }
   end
 
   def self.SpaceHeatingLoad
@@ -4379,33 +4205,20 @@ class OutputVars
   def self.WaterHeatingElectricity
     return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
              'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
-             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'],
-             'OpenStudio::Model::WaterUseConnections' => [],
-             'OpenStudio::Model::ElectricEquipment' => [] }
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'] }
   end
 
   def self.WaterHeatingElectricityRecircPump
-    return { 'OpenStudio::Model::WaterHeaterMixed' => [],
-             'OpenStudio::Model::WaterHeaterStratified' => [],
-             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
-             'OpenStudio::Model::WaterUseConnections' => [],
-             'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
+    return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
   end
 
   def self.WaterHeatingFuel
     return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
-             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
-             'OpenStudio::Model::WaterUseConnections' => [],
-             'OpenStudio::Model::ElectricEquipment' => [] }
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'] }
   end
 
   def self.WaterHeatingLoad
-    return { 'OpenStudio::Model::WaterHeaterMixed' => [],
-             'OpenStudio::Model::WaterHeaterStratified' => [],
-             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => [],
-             'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'],
-             'OpenStudio::Model::ElectricEquipment' => [] }
+    return { 'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'] }
   end
 end
 

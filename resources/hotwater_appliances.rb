@@ -102,7 +102,7 @@ class HotWaterAndAppliances
     # Clothes dryer
     if not cw_mef.nil? and not cd_ef.nil?
       cd_annual_kwh, cd_annual_therm, cd_frac_sens, cd_frac_lat = self.calc_clothes_dryer_energy(nbeds, cd_fuel, cd_ef, cd_control, cw_ler, cw_cap, cw_mef)
-      cd_name = Constants.ObjectNameClothesDryer(cd_fuel)
+      cd_name = Constants.ObjectNameClothesDryer
       cd_weekday_sch = "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024"
       cd_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
       cd_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cd_name, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0)
@@ -137,7 +137,7 @@ class HotWaterAndAppliances
     # Cooking Range
     if not cook_fuel_type.nil?
       cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = self.calc_range_oven_energy(nbeds, cook_fuel_type, cook_is_induction, oven_is_convection)
-      cook_name = Constants.ObjectNameCookingRange(cook_fuel_type)
+      cook_name = Constants.ObjectNameCookingRange
       cook_weekday_sch = "0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011"
       cook_monthly_sch = "1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097"
       cook_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cook_name, cook_weekday_sch, cook_weekday_sch, cook_monthly_sch, 1.0, 1.0)
