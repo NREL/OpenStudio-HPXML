@@ -1896,7 +1896,7 @@ class Airflow
     end
   end
 
-  def self.get_mech_vent_whole_house_cfm(frac622, num_beds, ffa, std)
+  def self.get_mech_vent_whole_house_cfm(frac622, num_beds, cfa, std)
     # Returns the ASHRAE 62.2 whole house mechanical ventilation rate, excluding any infiltration credit.
     if std == '2013'
       return frac622 * ((num_beds + 1.0) * 7.5 + 0.03 * cfa)

@@ -2335,8 +2335,10 @@ class OSModel
 
         htg_type = heating_system_values[:heating_system_type]
 
+        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
+
         attached_clg_system = get_attached_system(heating_system_values, building,
-                                                  "CoolingSystem")
+                                                  "CoolingSystem", has_dse)
 
         if only_furnaces_attached_to_cooling
           next unless htg_type == "Furnace" and not attached_clg_system.nil?
@@ -2354,8 +2356,6 @@ class OSModel
         load_frac = heating_system_values[:fraction_heat_load_served]
         sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
         @total_frac_remaining_heat_load_served -= load_frac
-
-        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
 
         sys_id = heating_system_values[:id]
         @hvac_map[sys_id] = []
@@ -3277,14 +3277,12 @@ class OSModel
   end
 
   def self.add_output_variables(model, vars, objects)
-    if objects.nil?
-      vars[nil].each do |object_var|
-        outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
+    objects.each do |object|
+      if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+        outputVariable = OpenStudio::Model::OutputVariable.new(object.name.to_s, model)
         outputVariable.setReportingFrequency('runperiod')
         outputVariable.setKeyValue('*')
-      end
-    else
-      objects.each do |object|
+      else
         next if vars[object.class.to_s].nil?
 
         vars[object.class.to_s].each do |object_var|
@@ -3698,8 +3696,9 @@ class OSModel
     end
   end
 
-  def self.get_attached_system(system_values, building, system_to_search)
+  def self.get_attached_system(system_values, building, system_to_search, has_dse)
     return nil if system_values[:distribution_system_idref].nil?
+    return nil if has_dse
 
     # Finds the OpenStudio object of the heating (or cooling) system attached (i.e., on the same
     # distribution system) to the current cooling (or heating) system.
@@ -4167,8 +4166,7 @@ class OutputVars
              'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
              'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
              'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Electric Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'],
-             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'] }
   end
 
   def self.SpaceHeatingFuel
@@ -4184,22 +4182,19 @@ class OutputVars
              'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Heating Energy'],
              'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Heating Energy'],
              'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Total Heating Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'],
-             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
   end
 
   def self.SpaceCoolingElectricity
     return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
              'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'] }
   end
 
   def self.SpaceCoolingLoad
     return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Total Cooling Energy'],
              'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Total Cooling Energy'],
-             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Total Cooling Energy'],
-             'OpenStudio::Model::FanOnOff' => ['Fan Electric Energy'] }
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Total Cooling Energy'] }
   end
 
   def self.WaterHeatingElectricity
