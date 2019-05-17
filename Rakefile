@@ -89,7 +89,6 @@ def create_hpxmls
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
-    'base-enclosure-orientation-45.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
     'base-enclosure-walltype-cmu.xml' => 'base.xml',
@@ -1901,16 +1900,16 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
                                            :duct_leakage_value => 25 }]
-  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip',
+  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml.skip',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml',
+         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml',
+         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml',
+         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] /= 3.0
     duct_leakage_measurements_values[0][1][:duct_leakage_value] /= 3.0
     duct_leakage_measurements_values << [{ :duct_type => "supply",
@@ -2023,16 +2022,16 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                          :duct_insulation_r_value => 4,
                          :duct_location => "attic - unvented",
                          :duct_surface_area => 100 }
-  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip',
+  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml.skip',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml',
+         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml',
+         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml',
+         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml'].include? hpxml_file
     ducts_values[0][0][:duct_surface_area] /= 3.0
     ducts_values[0][1][:duct_surface_area] /= 3.0
     ducts_values << [{ :duct_type => "supply",
