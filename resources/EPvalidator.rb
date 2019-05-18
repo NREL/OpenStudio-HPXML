@@ -87,11 +87,6 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']" => zero_or_one, # See [Television]
       },
 
-      # [ClimateZone]
-      "/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC" => {
-        "[ClimateZone='1A' or ClimateZone='1B' or ClimateZone='1C' or ClimateZone='2A' or ClimateZone='2B' or ClimateZone='2C' or ClimateZone='3A' or ClimateZone='3B' or ClimateZone='3C' or ClimateZone='4A' or ClimateZone='4B' or ClimateZone='4C' or ClimateZone='5A' or ClimateZone='5B' or ClimateZone='5C' or ClimateZone='6A' or ClimateZone='6B' or ClimateZone='6C' or ClimateZone='7' or ClimateZone='8']" => one,
-      },
-
       # [WeatherStation]
       "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => {
         "SystemIdentifier" => one, # Required by HPXML schema

@@ -35,10 +35,6 @@ class HPXML
     project_status = XMLHelper.add_element(building, "ProjectStatus")
     XMLHelper.add_element(project_status, "EventType", event_type)
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:schema_version, :created_date_and_time])
-
     return doc
   end
 
@@ -73,10 +69,6 @@ class HPXML
                         extensions: { "ShelterCoefficient": to_float_or_nil(shelter_coefficient),
                                       "DisableNaturalVentilation": to_bool_or_nil(disable_natural_ventilation) })
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:surroundings, :orientation_of_front_of_home])
-
     return site
   end
 
@@ -99,10 +91,6 @@ class HPXML
     XMLHelper.add_element(neighbor_building, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(neighbor_building, "Distance", Float(distance))
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return neighbor_building
   end
 
@@ -118,10 +106,6 @@ class HPXML
                                   **remainder)
     building_occupancy = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingOccupancy"])
     XMLHelper.add_element(building_occupancy, "NumberofResidents", Float(number_of_residents)) unless number_of_residents.nil?
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return building_occupancy
   end
@@ -150,10 +134,6 @@ class HPXML
     HPXML.add_extension(parent: building_construction,
                         extensions: { "LoadDistributionScheme": load_distribution_scheme,
                                       "UseOnlyIdealAirSystem": to_bool_or_nil(use_only_ideal_air_system) })
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:year_built, :average_ceiling_height])
 
     return building_construction
   end
@@ -205,10 +185,6 @@ class HPXML
     XMLHelper.add_element(weather_station, "Name", weather_station_name)
     XMLHelper.add_element(weather_station, "WMO", weather_station_wmo)
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:iecc2003, :iecc2006, :iecc2009, :iecc2012, :iecc2015, :iecc2018])
-
     return climate_and_risk_zones
   end
 
@@ -251,10 +227,6 @@ class HPXML
     XMLHelper.add_element(air_infiltration_measurement, "InfiltrationVolume", Float(infiltration_volume)) unless infiltration_volume.nil?
     HPXML.add_extension(parent: air_infiltration_measurement,
                         extensions: { "ConstantACHnatural": to_float_or_nil(constant_ach_natural) })
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:leakiness_description])
 
     return air_infiltration_measurement
   end
@@ -305,10 +277,6 @@ class HPXML
     else
       fail "Unhandled attic type '#{attic_type}'."
     end
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return attic
   end
@@ -362,10 +330,6 @@ class HPXML
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:roof_type, :roof_color, :insulation_cavity_r_value, :insulation_continuous_r_value])
-
     return roof
   end
 
@@ -406,10 +370,6 @@ class HPXML
     add_assembly_insulation(parent: floor,
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:insulation_cavity_r_value, :insulation_continuous_r_value])
 
     return floor
   end
@@ -454,10 +414,6 @@ class HPXML
     add_assembly_insulation(parent: wall,
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :siding])
 
     return wall
   end
@@ -509,10 +465,6 @@ class HPXML
       fail "Unhandled foundation type '#{foundation_type}'."
     end
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return foundation
   end
 
@@ -556,10 +508,6 @@ class HPXML
     add_assembly_insulation(parent: frame_floor,
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:insulation_cavity_r_value, :insulation_continuous_r_value])
 
     return frame_floor
   end
@@ -612,10 +560,6 @@ class HPXML
                            id: insulation_id,
                            continuous_nominal_r_value: Float(insulation_r_value))
     end
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return foundation_wall
   end
@@ -677,10 +621,6 @@ class HPXML
                         extensions: { "CarpetFraction": to_float_or_nil(carpet_fraction),
                                       "CarpetRValue": to_float_or_nil(carpet_r_value) })
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return slab
   end
 
@@ -714,10 +654,6 @@ class HPXML
     sys_id = XMLHelper.add_element(garage, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return garage
   end
 
@@ -743,10 +679,6 @@ class HPXML
     add_assembly_insulation(parent: ceiling,
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:insulation_cavity_r_value, :insulation_continuous_r_value])
 
     return ceiling
   end
@@ -791,10 +723,6 @@ class HPXML
     add_assembly_insulation(parent: garage_wall,
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:insulation_continuous_r_value])
 
     return garage_wall
   end
@@ -849,10 +777,6 @@ class HPXML
                          id: under_slab_insulation_id,
                          continuous_nominal_r_value: Float(under_slab_insulation_r_value))
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return slab
   end
 
@@ -900,10 +824,6 @@ class HPXML
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return rim_joist
   end
 
@@ -950,10 +870,6 @@ class HPXML
     add_assembly_insulation(parent: wall,
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :siding, :insulation_cavity_r_value, :insulation_continuous_r_value, :optimum_value_engineering])
 
     return wall
   end
@@ -1013,10 +929,6 @@ class HPXML
     HPXML.add_extension(parent: window,
                         extensions: { "InteriorShadingFactorSummer": to_float_or_nil(interior_shading_factor_summer),
                                       "InteriorShadingFactorWinter": to_float_or_nil(interior_shading_factor_winter) })
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading, :aluminum_thermal_break])
-
     return window
   end
 
@@ -1067,10 +979,6 @@ class HPXML
     attached_to_roof = XMLHelper.add_element(skylight, "AttachedToRoof")
     XMLHelper.add_attribute(attached_to_roof, "idref", roof_idref)
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:orientation, :frame_type, :glass_layers, :glass_type, :gas_fill, :exterior_shading, :aluminum_thermal_break])
-
     return skylight
   end
 
@@ -1113,10 +1021,6 @@ class HPXML
     XMLHelper.add_element(door, "Area", Float(area))
     XMLHelper.add_element(door, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(door, "RValue", Float(r_value))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return door
   end
@@ -1169,10 +1073,6 @@ class HPXML
     end
     XMLHelper.add_element(heating_system, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heating_system, "ElectricAuxiliaryEnergy", Float(electric_auxiliary_energy)) unless electric_auxiliary_energy.nil?
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:year_installed])
 
     return heating_system
   end
@@ -1229,10 +1129,6 @@ class HPXML
       XMLHelper.add_element(annual_efficiency, "Units", units)
       XMLHelper.add_element(annual_efficiency, "Value", Float(value))
     end
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:year_installed])
 
     return cooling_system
   end
@@ -1310,10 +1206,6 @@ class HPXML
       XMLHelper.add_element(annual_efficiency, "Value", Float(value))
     end
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:year_installed])
-
     return heat_pump
   end
 
@@ -1354,10 +1246,6 @@ class HPXML
     XMLHelper.add_element(hvac_control, "SetpointTempHeatingSeason", Float(setpoint_temp_heating_season)) unless setpoint_temp_heating_season.nil?
     XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", Float(setpoint_temp_cooling_season)) unless setpoint_temp_cooling_season.nil?
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return hvac_control
   end
 
@@ -1391,10 +1279,6 @@ class HPXML
       fail "Unexpected distribution_system_type '#{distribution_system_type}'."
     end
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:duct_system_sealed])
-
     return hvac_distribution
   end
 
@@ -1424,10 +1308,6 @@ class HPXML
     XMLHelper.add_element(duct_leakage, "Value", Float(duct_leakage_value))
     XMLHelper.add_element(duct_leakage, "TotalOrToOutside", "to outside")
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:duct_leakage_units, :duct_leakage_total_or_to_outside, :duct_leakage_test_method])
-
     return duct_leakage_measurement
   end
 
@@ -1452,10 +1332,6 @@ class HPXML
     XMLHelper.add_element(ducts, "DuctInsulationRValue", Float(duct_insulation_r_value))
     XMLHelper.add_element(ducts, "DuctLocation", duct_location)
     XMLHelper.add_element(ducts, "DuctSurfaceArea", Float(duct_surface_area))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:duct_fraction_area, :duct_insulation_present])
 
     return ducts
   end
@@ -1496,10 +1372,6 @@ class HPXML
       attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, "AttachedToHVACDistributionSystem")
       XMLHelper.add_attribute(attached_to_hvac_distribution_system, "idref", distribution_system_idref)
     end
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return ventilation_fan
   end
@@ -1544,10 +1416,6 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "EnergyFactor", Float(energy_factor)) unless energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "UniformEnergyFactor", Float(uniform_energy_factor)) unless uniform_energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", Float(recovery_efficiency)) unless recovery_efficiency.nil?
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:year_installed])
 
     return water_heating_system
   end
@@ -1608,10 +1476,6 @@ class HPXML
       XMLHelper.add_element(drain_water_heat_recovery, "Efficiency", Float(dwhr_efficiency))
     end
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return hot_water_distribution
   end
 
@@ -1642,10 +1506,6 @@ class HPXML
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(water_fixture, "WaterFixtureType", water_fixture_type)
     XMLHelper.add_element(water_fixture, "LowFlow", Boolean(low_flow))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return water_fixture
   end
@@ -1681,10 +1541,6 @@ class HPXML
     XMLHelper.add_element(pv_system, "MaxPowerOutput", Float(max_power_output))
     XMLHelper.add_element(pv_system, "InverterEfficiency", Float(inverter_efficiency))
     XMLHelper.add_element(pv_system, "SystemLossesFraction", Float(system_losses_fraction))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [:array_orientation, :number_of_panels])
 
     return pv_system
   end
@@ -1734,10 +1590,6 @@ class HPXML
     XMLHelper.add_element(clothes_washer, "LabelAnnualGasCost", Float(label_annual_gas_cost))
     XMLHelper.add_element(clothes_washer, "Capacity", Float(capacity))
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return clothes_washer
   end
 
@@ -1778,10 +1630,6 @@ class HPXML
     end
     XMLHelper.add_element(clothes_dryer, "ControlType", control_type)
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return clothes_dryer
   end
 
@@ -1815,10 +1663,6 @@ class HPXML
     end
     XMLHelper.add_element(dishwasher, "PlaceSettingCapacity", Integer(place_setting_capacity)) unless place_setting_capacity.nil?
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return dishwasher
   end
 
@@ -1843,10 +1687,6 @@ class HPXML
     XMLHelper.add_element(refrigerator, "Location", location)
     XMLHelper.add_element(refrigerator, "RatedAnnualkWh", Float(rated_annual_kwh))
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return refrigerator
   end
 
@@ -1870,10 +1710,6 @@ class HPXML
     XMLHelper.add_element(cooking_range, "FuelType", fuel_type)
     XMLHelper.add_element(cooking_range, "IsInduction", Boolean(is_induction))
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return cooking_range
   end
 
@@ -1894,10 +1730,6 @@ class HPXML
     sys_id = XMLHelper.add_element(oven, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(oven, "IsConvection", Boolean(is_convection))
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return oven
   end
@@ -1961,10 +1793,6 @@ class HPXML
     XMLHelper.add_element(lighting_group, "FractionofUnitsInLocation", Float(fraction_tier_ii_garage))
     XMLHelper.add_element(lighting_group, "ThirdPartyCertification", "ERI Tier II")
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return lighting_group
   end
 
@@ -1994,10 +1822,6 @@ class HPXML
       XMLHelper.add_element(airflow, "Efficiency", Float(efficiency))
     end
     XMLHelper.add_element(ceiling_fan, "Quantity", Integer(quantity)) unless quantity.nil?
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return ceiling_fan
   end
@@ -2031,10 +1855,6 @@ class HPXML
                         extensions: { "FracSensible": to_float_or_nil(frac_sensible),
                                       "FracLatent": to_float_or_nil(frac_latent) })
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return plug_load
   end
 
@@ -2059,10 +1879,6 @@ class HPXML
                                       "WeekendScheduleFractions": weekend_fractions,
                                       "MonthlyScheduleMultipliers": monthly_multipliers })
 
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
-
     return misc_loads
   end
 
@@ -2086,10 +1902,6 @@ class HPXML
       XMLHelper.add_attribute(sys_id, "id", HPXML.get_id(parent) + "Insulation")
     end
     XMLHelper.add_element(insulation, "AssemblyEffectiveRValue", Float(assembly_r_value)) unless assembly_r_value.nil?
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return insulation
   end
@@ -2124,10 +1936,6 @@ class HPXML
       XMLHelper.add_element(layer, "InstallationType", "continuous")
       XMLHelper.add_element(layer, "NominalRValue", Float(continuous_nominal_r_value)) unless continuous_nominal_r_value.nil?
     end
-
-    check_remainder(remainder,
-                    calling_method: __method__.to_s,
-                    expected_kwargs: [])
 
     return insulation
   end
@@ -2187,13 +1995,5 @@ class HPXML
     return nil if value.nil?
 
     return Boolean(value)
-  end
-
-  def self.check_remainder(remainder, calling_method:, expected_kwargs:)
-    remainder.keys.each do |k|
-      next if expected_kwargs.include? k
-
-      fail "Unexpected keyword '#{k}' passed to #{calling_method}."
-    end
   end
 end
