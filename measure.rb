@@ -260,8 +260,8 @@ class OSModel
     @default_azimuth = get_default_azimuth(building)
     @min_neighbor_distance = get_min_neighbor_distance(building)
 
-    @hvac_map = {} # mapping between HPXML HVAC systems and model air/plant loops or zonal HVACs
-    @dhw_map = {}  # mapping between HPXML Water Heating systems and plant loops
+    @hvac_map = {} # mapping between HPXML HVAC systems and model objects
+    @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
 
     @use_only_ideal_air = false
     if not building_construction_values[:use_only_ideal_air_system].nil?
@@ -3256,21 +3256,50 @@ class OSModel
   end
 
   def self.add_building_output_variables(runner, model, map_tsv_dir)
-    @hvac_map.each do |sys_id, hvac_equip_list|
-      add_output_variables(model, OutputVars.SpaceHeatingElectricity, hvac_equip_list)
-      add_output_variables(model, OutputVars.SpaceHeatingFuel, hvac_equip_list)
-      add_output_variables(model, OutputVars.SpaceHeatingLoad, hvac_equip_list)
-      add_output_variables(model, OutputVars.SpaceCoolingElectricity, hvac_equip_list)
-      add_output_variables(model, OutputVars.SpaceCoolingLoad, hvac_equip_list)
+    hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
+                        OutputVars.SpaceHeatingFuel,
+                        OutputVars.SpaceHeatingLoad,
+                        OutputVars.SpaceCoolingElectricity,
+                        OutputVars.SpaceCoolingLoad]
+
+    dhw_output_vars = [OutputVars.WaterHeatingElectricity,
+                       OutputVars.WaterHeatingElectricityRecircPump,
+                       OutputVars.WaterHeatingFuel,
+                       OutputVars.WaterHeatingLoad]
+
+    # Remove objects that are not referenced by output vars and are not
+    # EMS output vars.
+    { @hvac_map => hvac_output_vars,
+      @dhw_map => dhw_output_vars }.each do |map, vars|
+      all_vars = vars.reduce({}, :merge)
+      map.each do |sys_id, objects|
+        objects_to_delete = []
+        objects.each do |object|
+          next if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+          next unless all_vars[object.class.to_s].nil? # Referenced?
+
+          objects_to_delete << object
+        end
+        objects_to_delete.uniq.each do |object|
+          map[sys_id].delete object
+        end
+      end
     end
-    @dhw_map.each do |sys_id, dhw_equip_list|
-      add_output_variables(model, OutputVars.WaterHeatingElectricity, dhw_equip_list)
-      add_output_variables(model, OutputVars.WaterHeatingElectricityRecircPump, dhw_equip_list)
-      add_output_variables(model, OutputVars.WaterHeatingFuel, dhw_equip_list)
-      add_output_variables(model, OutputVars.WaterHeatingLoad, dhw_equip_list)
+
+    # Add output variables to model
+    @hvac_map.each do |sys_id, hvac_objects|
+      hvac_output_vars.each do |hvac_output_var|
+        add_output_variables(model, hvac_output_var, hvac_objects)
+      end
+    end
+    @dhw_map.each do |sys_id, dhw_objects|
+      dhw_output_vars.each do |dhw_output_var|
+        add_output_variables(model, dhw_output_var, dhw_objects)
+      end
     end
 
     if map_tsv_dir.is_initialized
+      # Write maps to file
       map_tsv_dir = map_tsv_dir.get
       write_mapping(@hvac_map, File.join(map_tsv_dir, "map_hvac.tsv"))
       write_mapping(@dhw_map, File.join(map_tsv_dir, "map_water_heating.tsv"))
