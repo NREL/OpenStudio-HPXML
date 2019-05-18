@@ -2120,8 +2120,6 @@ class OSModel
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
 
-        orig_plant_loops = model.getPlantLoops
-
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
@@ -2204,8 +2202,7 @@ class OSModel
 
         end
 
-        new_plant_loop = (model.getPlantLoops - orig_plant_loops)[0]
-        dhw_loop_fracs[new_plant_loop] = dhw_load_frac
+        dhw_loop_fracs[sys_id] = dhw_load_frac
       end
     end
 
@@ -2222,7 +2219,8 @@ class OSModel
                                           recirc_branch_length, recirc_control_type,
                                           recirc_pump_power, dwhr_present,
                                           dwhr_facilities_connected, dwhr_is_equal_flow,
-                                          dwhr_efficiency, dhw_loop_fracs, @eri_version)
+                                          dwhr_efficiency, dhw_loop_fracs, @eri_version,
+                                          @dhw_map)
     return false if not success
 
     return true
