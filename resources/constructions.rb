@@ -1163,8 +1163,6 @@ class Constructions
       return 0.060
     elsif ["7", "8"].include? iecc_zone_2006
       return 0.057
-    else
-      return nil
     end
   end
 
@@ -1268,8 +1266,6 @@ class Constructions
       return 0.047
     elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
       return 0.033
-    else
-      return nil
     end
   end
 
@@ -1282,8 +1278,6 @@ class Constructions
       return 0.030
     elsif ["6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
       return 0.026
-    else
-      return nil
     end
   end
 
@@ -1294,8 +1288,6 @@ class Constructions
       return 0.360
     elsif ["4A", "4B", "4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
       return 0.059
-    else
-      return nil
     end
   end
 
@@ -1308,8 +1300,6 @@ class Constructions
       return 10.0, 2.0
     elsif ["6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
       return 10.0, 4.0
-    else
-      return nil
     end
   end
 
@@ -1337,8 +1327,6 @@ class Constructions
       return 0.40, 0.40
     elsif ["4C", "5A", "5B", "5C", "6A", "6B", "6C", "7", "8"].include? iecc_zone_2006
       return 0.35, 0.40
-    else
-      return nil
     end
   end
 
