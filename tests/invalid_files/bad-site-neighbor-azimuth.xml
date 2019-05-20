@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:26:35-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-05-09T14:40:34-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -25,6 +25,18 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
+          <extension>
+            <Neighbors>
+              <NeighborBuilding>
+                <Azimuth>145</Azimuth>
+                <Distance>10.0</Distance>
+              </NeighborBuilding>
+              <NeighborBuilding>
+                <Azimuth>180</Azimuth>
+                <Distance>15.0</Distance>
+              </NeighborBuilding>
+            </Neighbors>
+          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
@@ -319,7 +331,7 @@
             <SystemIdentifier id='WaterHeater'/>
             <FuelType>electricity</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>crawlspace - vented</Location>
+            <Location>living space</Location>
             <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
