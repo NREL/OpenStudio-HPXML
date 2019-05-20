@@ -155,11 +155,33 @@ class Waterheater
     return true
   end
 
-  def self.apply_heatpump(model, unit, runner, loop, space, weather,
-                          e_cap, vol, t_set, min_temp, max_temp,
-                          cap, cop, shr, airflow_rate, fan_power,
-                          parasitics, tank_ua, int_factor, temp_depress,
-                          ducting = "none", unit_index = 0)
+  def self.apply_heatpump(model, unit, runner, loop, space, weather, 
+                          t_set, vol, ef, ef_adj, ec_adj)
+                          
+    #Hard coded values for things that wouldn't be captured by hpxml
+    int_factor = 1.0 #unitless
+    temp_depress = 0.0 #F
+    ducting = "none"
+    unit_index = 0
+    
+    #Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
+    if vol <= 58
+      tank_ua = 3.6 #Btu/h-R
+    elsif vol <= 73
+      tank_ua = 4.0 #Btu/h-R
+    else
+      tank_ua = 4.7 #Btu/h-R
+    end
+    
+    e_cap = 4.5 #kW
+    min_temp = 42.0 #F
+    max_temp = 120.0 #F
+    cap = 0.5 #kW
+    shr = 0.88 #unitless
+    airflow_rate = 181.0 #cfm
+    fan_power = 0.0462 # FIXME
+    parasitics = 3.0 #W
+    
 
     # Validate inputs
     if vol <= 0.0
@@ -184,10 +206,6 @@ class Waterheater
     end
     if cap <= 0.0
       runner.registerError("Rated capacity must be greater than 0.")
-      return false
-    end
-    if cop <= 0.0
-      runner.registerError("Rated COP must be greater than 0.")
       return false
     end
     if shr < 0.0 or shr > 1.0
@@ -218,6 +236,10 @@ class Waterheater
       runner.registerError("Temperature depression must be greater than 0.")
       return false
     end
+    
+    #Calculate the COP based on EF and EF_adj
+    uef = (0.60522 + (ef*ef_adj)) / 1.2101
+    cop = 1.174536058 * uef #Based on simulation of the UEF test procedure at varying COPs
 
     # Get unit beds/baths
     nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
@@ -250,12 +272,14 @@ class Waterheater
 
     # Only ever going to make HPWHs in this measure, so don't split this code out to waterheater.rb
     # Calculate some geometry parameters for UA, the location of sensors and heat sources in the tank
-
-    if vol > 50
-      hpwh_param = 80
-    else
-      hpwh_param = 50
-    end
+    
+    hpwh_param = 80
+    
+    #if vol > 50
+    #  hpwh_param = 80
+    #else
+    #  hpwh_param = 50
+    #end
 
     h_tank = 0.0188 * vol + 0.0935 # Linear relationship that gets GE height at 50 gal and AO Smith height at 80 gal
     v_actual = 0.9 * vol

@@ -1956,25 +1956,9 @@ class OSModel
         elsif wh_type == "heat pump water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
-          e_cap = 4.5 # FIXME
-          min_temp = 45.0 # FIXME
-          max_temp = 120.0 # FIXME
-          cap = 0.5 # FIXME
-          cop = 2.8 # FIXME
-          shr = 0.88 # FIXME
-          airflow_rate = 181.0 # FIXME
-          fan_power = 0.0462 # FIXME
-          parasitics = 3.0 # FIXME
-          tank_ua = 3.9 # FIXME
-          int_factor = 1.0 # FIXME
-          temp_depress = 0.0 # FIXME
-          ducting = "none"
           # FIXME: Use ef, ef_adj, ec_adj
-          success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather,
-                                               e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
-                                               cap, cop, shr, airflow_rate, fan_power,
-                                               parasitics, tank_ua, int_factor, temp_depress,
-                                               ducting, 0)
+          success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather, setpoint_temp, tank_vol, ef, ef_adj, ec_adj)
+          
           return false if not success
 
         else
