@@ -2333,10 +2333,8 @@ class OSModel
 
         htg_type = heating_system_values[:heating_system_type]
 
-        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
-
         attached_clg_system = get_attached_system(heating_system_values, building,
-                                                  "CoolingSystem", has_dse)
+                                                  "CoolingSystem")
 
         if only_furnaces_attached_to_cooling
           next unless htg_type == "Furnace" and not attached_clg_system.nil?
@@ -2354,6 +2352,8 @@ class OSModel
         load_frac = heating_system_values[:fraction_heat_load_served]
         sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
         @total_frac_remaining_heat_load_served -= load_frac
+
+        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
 
         sys_id = heating_system_values[:id]
         @hvac_map[sys_id] = []
@@ -3728,9 +3728,8 @@ class OSModel
     end
   end
 
-  def self.get_attached_system(system_values, building, system_to_search, has_dse)
+  def self.get_attached_system(system_values, building, system_to_search)
     return nil if system_values[:distribution_system_idref].nil?
-    return nil if has_dse
 
     # Finds the OpenStudio object of the heating (or cooling) system attached (i.e., on the same
     # distribution system) to the current cooling (or heating) system.
