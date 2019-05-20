@@ -144,7 +144,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     # two-speed air source heat pump
     capacity_ratios = [0.72, 1.0]
     fan_speed_ratios = [0.86, 1.0]
-    hspf_to_seer = { 8.6 => 16, 8.7 => 17, 9.3 => 18, 9.5 => 19 }    
+    hspf_to_seer = { 8.6 => 16, 8.7 => 17, 9.3 => 18, 9.5 => 19 }
     seer_to_expected_eers = { 16 => [13.2, 12.2], 17 => [14.1, 13.0], 18 => [14.9, 13.9], 19 => [15.7, 14.7] }
     seer_to_expected_eers.each do |seer, expected_eers|
       fan_power_rated = HVAC.get_fan_power_rated(seer)
@@ -177,12 +177,22 @@ class HPXMLTranslatorTest < MiniTest::Test
     # variable-speed air source heat pump
     cap_ratio_seer = [0.36, 0.51, 1.0]
     fan_speed_seer = [0.42, 0.54, 1.0]
-    seer_to_expected_eers = { 24.5 => [19.5, 20.2, 19.7, 18.3] }
+    seer_to_expected_eers = { 22.0 => [17.49, 18.09, 17.64, 16.43], 24.5 => [19.5, 20.2, 19.7, 18.3] }
     seer_to_expected_eers.each do |seer, expected_eers|
       fan_power_rated = HVAC.get_fan_power_rated(seer)
       actual_eers = HVAC.calc_EERs_cooling_4spd(nil, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC([0, 1, 4]), HVAC.cOOL_CAP_FT_SPEC_AC([0, 1, 4]), curves_in_ip = false)
       expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
         assert_in_epsilon(expected_eer, actual_eer, 0.01)
+      end
+    end
+    capacity_ratios = [0.33, 0.56, 1.0, 1.17]
+    fan_speed_ratios = [0.63, 0.76, 1.0, 1.19]
+    hspf_to_expected_cops = { 10.0 => [5.18, 4.48, 3.83, 3.67] }
+    hspf_to_expected_cops.each do |hspf, expected_cops|
+      fan_power_rated = 0.14
+      actual_cops = HVAC.calc_COPs_heating_4spd(nil, hspf, Constants.C_d(var_speed = true), capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(4), HVAC.hEAT_CAP_FT_SPEC_ASHP(4), curves_in_ip = true)
+      expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
+        assert_in_epsilon(expected_cop, actual_cop, 0.01)
       end
     end
   end
@@ -773,10 +783,9 @@ class HPXMLTranslatorTest < MiniTest::Test
           hpxml_value = hp_cap
           query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='ComponentSizingSummary' AND ReportForString='Entire Facility' AND TableName LIKE 'Coil:Cooling:%' AND ColumnName LIKE '%User-Specified%Total Cooling Capacity' AND Units='W'"
           sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'Btu/hr')
-          if hp_type == "mini-split" or (hp_type == "air-to-air" and get_ashp_num_speeds_by_seer(hp_seer) == "Variable-Speed")
+          cap_adj = 1.0
+          if hp_type == "mini-split"
             cap_adj = 1.20 # TODO: Generalize this
-          else
-            cap_adj = 1.0
           end
           assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
         end
