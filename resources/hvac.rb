@@ -13,12 +13,12 @@ class HVAC
       return [[3.940185508, -0.104723455, 0.001019298, 0.006471171, -0.00000953, -0.000161658],
               [3.109456535, -0.085520461, 0.000863238, 0.00863049, -0.0000210, -0.000140186]]
     else
-      # The following coefficients (SI-units) were generated using NREL experimental performance mapping for the Carrier unit
-      cOOL_CAP_coeff_perf_map = [[1.203, 7.866E-2, -1.797E-3, -9.527E-2, 1.340E-3, 9.421E-4],
-                                 [-1.070, 2.633E-1, -6.290E-3, -3.907E-2, 5.085E-4, 1.078E-4],
-                                 [-6.195E-1, 1.621E-1, -3.028E-3, -2.812E-3, -2.590E-5, -3.764E-4],
-                                 [-3.549E-1, 1.281E-1, -2.132E-3, 1.923E-3, -9.240E-5, -4.161E-4],
-                                 [1.037, -2.036E-2, 2.231E-3, -2.538E-4, 4.604E-5, -7.790E-4]]
+      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
+      cOOL_CAP_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
+                                 [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
+                                 [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
+                                 [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
+                                 [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
       return cOOL_CAP_coeff_perf_map.select { |i| num_speeds.include? cOOL_CAP_coeff_perf_map.index(i) }
     end
   end
@@ -30,12 +30,12 @@ class HVAC
       return [[-3.877526888, 0.164566276, -0.001272755, -0.019956043, 0.000256512, -0.000133539],
               [-1.990708931, 0.093969249, -0.00073335, -0.009062553, 0.000165099, -0.0000997]]
     else
-      # The following coefficients (SI-units) were generated using NREL experimental performance mapping for the Carrier unit
-      cOOL_EIR_coeff_perf_map = [[1.021, -1.214E-1, 3.936E-3, 5.435E-2, 2.830E-4, -2.057E-3],
-                                 [1.999, -1.977E-1, 6.001E-3, 3.196E-2, 6.380E-4, -1.948E-3],
-                                 [1.745, -1.546E-1, 4.585E-3, 2.595E-2, 6.609E-4, -1.752E-3],
-                                 [8.258E-1, -3.497E-2, 1.241E-3, 1.269E-2, 8.047E-4, -1.538E-3],
-                                 [2.555E-1, 3.711E-2, -1.427E-3, 8.907E-3, 5.665E-4, -6.538E-4]]
+      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
+      cOOL_EIR_coeff_perf_map = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
+                                 [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
+                                 [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
+                                 [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
+                                 [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
       return cOOL_EIR_coeff_perf_map.select { |i| num_speeds.include? cOOL_EIR_coeff_perf_map.index(i) }
     end
   end
@@ -72,7 +72,6 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    curves_in_ip = true
 
     # Cooling Coil
     rated_airflow_rate = 386.1 # cfm
@@ -87,7 +86,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC, cOOL_EIR_FT_SPEC_AC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC, cOOL_EIR_FFLOW_SPEC_AC, curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC, cOOL_EIR_FT_SPEC_AC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC, cOOL_EIR_FFLOW_SPEC_AC, dse)
 
       # _processSystemCoolingCoil
 
@@ -197,7 +196,6 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
-    curves_in_ip = true
 
     # Cooling Coil
     rated_airflow_rate = 355.2 # cfm
@@ -212,7 +210,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC(2), cOOL_EIR_FT_SPEC_AC(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(2), cOOL_EIR_FFLOW_SPEC_AC(2), curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC(2), cOOL_EIR_FT_SPEC_AC(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(2), cOOL_EIR_FFLOW_SPEC_AC(2), dse)
 
       # _processSystemCoolingCoil
 
@@ -329,7 +327,6 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
-    curves_in_ip = false
 
     cap_ratio_seer = [capacity_ratios[0], capacity_ratios[1], capacity_ratios[3]]
     fan_speed_seer = [fan_speed_ratios[0], fan_speed_ratios[1], fan_speed_ratios[3]]
@@ -337,7 +334,7 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate = 315.8 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
-    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_AC([0, 1, 4]), cOOL_CAP_FT_SPEC_AC([0, 1, 4]), curves_in_ip)
+    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_AC([0, 1, 4]), cOOL_CAP_FT_SPEC_AC([0, 1, 4]))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -347,7 +344,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_AC([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(4), cOOL_EIR_FFLOW_SPEC_AC(4), curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_AC([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(4), cOOL_EIR_FFLOW_SPEC_AC(4), dse)
 
       # _processSystemCoolingCoil
 
@@ -563,7 +560,6 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    curves_in_ip = true
 
     # Cooling Coil
     rated_airflow_rate_cooling = 394.2 # cfm
@@ -588,7 +584,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP, hEAT_EIR_FT_SPEC_ASHP, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP, hEAT_EIR_FFLOW_SPEC_ASHP, curves_in_ip, dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP, hEAT_EIR_FT_SPEC_ASHP, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP, hEAT_EIR_FFLOW_SPEC_ASHP, dse)
 
       # _processSystemHeatingCoil
 
@@ -695,7 +691,7 @@ class HVAC
 
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP, cOOL_EIR_FT_SPEC_ASHP, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP, cOOL_EIR_FFLOW_SPEC_ASHP, curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP, cOOL_EIR_FT_SPEC_ASHP, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP, cOOL_EIR_FFLOW_SPEC_ASHP, dse)
 
       # _processSystemCoolingCoil
 
@@ -810,7 +806,6 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
-    curves_in_ip = true
 
     # Cooling Coil
     rated_airflow_rate_cooling = 344.1 # cfm
@@ -834,7 +829,8 @@ class HVAC
 
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(2), hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(2), hEAT_EIR_FFLOW_SPEC_ASHP(2), curves_in_ip, dse)
+
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(2), hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(2), hEAT_EIR_FFLOW_SPEC_ASHP(2), dse)
 
       # _processSystemHeatingCoil
 
@@ -952,7 +948,7 @@ class HVAC
 
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP(2), cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(2), cOOL_EIR_FFLOW_SPEC_ASHP(2), curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP(2), cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(2), cOOL_EIR_FFLOW_SPEC_ASHP(2), dse)
 
       # _processSystemCoolingCoil
 
@@ -1084,7 +1080,7 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate_cooling = 315.8 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios_cooling)
-    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP([0, 1, 4]), cOOL_CAP_FT_SPEC_ASHP([0, 1, 4]), curves_in_ip = false)
+    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(var_speed = true), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP([0, 1, 4]), cOOL_CAP_FT_SPEC_ASHP([0, 1, 4]))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -1092,7 +1088,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 296.9 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios_heating)
-    cops = calc_COPs_heating_4spd(runner, hspf, Constants.C_d(var_speed = true), capacity_ratios_heating, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CAP_FT_SPEC_ASHP(4), curves_in_ip = true)
+    cops = calc_COPs_heating_4spd(runner, hspf, Constants.C_d(var_speed = true), capacity_ratios_heating, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CAP_FT_SPEC_ASHP(4))
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -1104,7 +1100,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(4), hEAT_EIR_FFLOW_SPEC_ASHP(4), curves_in_ip = true, dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(4), hEAT_EIR_FFLOW_SPEC_ASHP(4), dse)
 
       # _processSystemHeatingCoil
 
@@ -1222,7 +1218,7 @@ class HVAC
 
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(4), cOOL_EIR_FFLOW_SPEC_ASHP(4), curves_in_ip = false, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(4), cOOL_EIR_FFLOW_SPEC_ASHP(4), dse)
 
       # _processSystemCoolingCoil
 
@@ -1355,19 +1351,17 @@ class HVAC
     max_defrost_temp = 40.0 # F
 
     # Performance curves
-    # NOTE: These coefficients are in SI UNITS
-    curves_in_ip = false
-    cOOL_CAP_FT_SPEC = [[1.008993521905866, 0.006512749025457, 0.0, 0.003917565735935, -0.000222646705889, 0.0]] * num_speeds
-    cOOL_EIR_FT_SPEC = [[0.429214441601141, -0.003604841598515, 0.000045783162727, 0.026490875804937, -0.000159212286878, -0.000159062656483]] * num_speeds
+    cOOL_CAP_FT_SPEC = [[0.7531983499655835, 0.003618193903031667, 0.0, 0.006574385031351544, -6.87181191015432e-05, 0.0]] * num_speeds
+    cOOL_EIR_FT_SPEC = [[-0.06376924779982301, -0.0013360593470367282, 1.413060577993827e-05, 0.019433076486584752, -4.91395947154321e-05, -4.909341249475308e-05]] * num_speeds
     cOOL_CAP_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
     cOOL_EIR_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
 
     # Mini-Split Heat Pump Heating Curve Coefficients
     # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
-    x_A = UnitConversions.convert(cap_retention_temp, "F", "C")
+    x_A = cap_retention_temp
     y_A = cap_retention_frac
-    x_B = UnitConversions.convert(47.0, "F", "C") # 47F is the rating point
+    x_B = 47.0 # 47F is the rating point
     y_B = 1.0 # Maximum capacity factor is 1 at the rating point, by definition (this is maximum capacity, not nominal capacity)
     oat_slope = (y_B - y_A) / (x_B - x_A)
     oat_intercept = y_A - (x_A * oat_slope)
@@ -1413,7 +1407,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXHeating
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, mshp_indices, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, curves_in_ip, dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, mshp_indices, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, dse)
 
       # _processSystemHeatingCoil
 
@@ -1581,7 +1575,7 @@ class HVAC
 
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, mshp_indices, cooling_eirs, shrs_rated, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, curves_in_ip, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, mshp_indices, cooling_eirs, shrs_rated, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, dse)
 
       # _processSystemCoolingCoil
 
@@ -2036,17 +2030,19 @@ class HVAC
 
     # Performance curves
     # From Frigidaire 10.7 EER unit in Winkler et. al. Lab Testing of Window ACs (2013)
-    # NOTE: These coefficients are in SI UNITS
-    cOOL_CAP_FT_SPEC = [0.6405, 0.01568, 0.0004531, 0.001615, -0.0001825, 0.00006614]
-    cOOL_EIR_FT_SPEC = [2.287, -0.1732, 0.004745, 0.01662, 0.000484, -0.001306]
+
+    cOOL_CAP_FT_SPEC = [0.43945980246913574, -0.0008922469135802481, 0.00013984567901234569, 0.0038489259259259253, -5.6327160493827156e-05, 2.041358024691358e-05]
+    cOOL_CAP_FT_SPEC_si = convert_curve_biquadratic(cOOL_CAP_FT_SPEC)
+    cOOL_EIR_FT_SPEC = [6.310506172839506, -0.17705185185185185, 0.0014645061728395061, 0.012571604938271608, 0.0001493827160493827, -0.00040308641975308644]
+    cOOL_EIR_FT_SPEC_si = convert_curve_biquadratic(cOOL_EIR_FT_SPEC)
     cOOL_CAP_FFLOW_SPEC = [0.887, 0.1128, 0]
     cOOL_EIR_FFLOW_SPEC = [1.763, -0.6081, 0]
     cOOL_PLF_FPLR = [0.78, 0.22, 0]
     cfms_ton_rated = [312] # medium speed
 
-    roomac_cap_ft_curve = create_curve_biquadratic(model, cOOL_CAP_FT_SPEC, "RoomAC-Cap-fT", 0, 100, 0, 100)
+    roomac_cap_ft_curve = create_curve_biquadratic(model, cOOL_CAP_FT_SPEC_si, "RoomAC-Cap-fT", 0, 100, 0, 100)
     roomac_cap_fff_curve = create_curve_quadratic(model, cOOL_CAP_FFLOW_SPEC, "RoomAC-Cap-fFF", 0, 2, 0, 2)
-    roomac_eir_ft_curve = create_curve_biquadratic(model, cOOL_EIR_FT_SPEC, "RoomAC-EIR-fT", 0, 100, 0, 100)
+    roomac_eir_ft_curve = create_curve_biquadratic(model, cOOL_EIR_FT_SPEC_si, "RoomAC-EIR-fT", 0, 100, 0, 100)
     roomcac_eir_fff_curve = create_curve_quadratic(model, cOOL_EIR_FFLOW_SPEC, "RoomAC-EIR-fFF", 0, 2, 0, 2)
     roomac_plf_fplr_curve = create_curve_quadratic(model, cOOL_PLF_FPLR, "RoomAC-PLF-fPLR", 0, 1, 0, 1)
 
@@ -3312,7 +3308,7 @@ class HVAC
     return calc_EERs_from_EIR_2spd(eer_c, fan_power_rated, is_heat_pump)
   end
 
-  def self.calc_EERs_cooling_4spd(runner, seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip)
+  def self.calc_EERs_cooling_4spd(runner, seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
     # Iterate to find rated net EERs given SEER using simple bisection method for two stage and variable speed air conditioners    
 
     # Initial large bracket of EER (A condition) to span possible seer range
@@ -3327,10 +3323,10 @@ class HVAC
     eer_c = (eer_a + eer_b) / 2.0
     (1..iter_max).each do |n|            
       eers = calc_EERs_from_EIR_4spd(eer_a, fan_power_rated, calc_type = 'seer')
-      f_a = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip) - seer
+      f_a = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
 
       eers = calc_EERs_from_EIR_4spd(eer_c, fan_power_rated, calc_type = 'seer')
-      f_c = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip) - seer
+      f_c = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
       
       if f_c == 0
         return eer_c
@@ -3416,7 +3412,7 @@ class HVAC
     return seer
   end
 
-  def self.calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip)
+  def self.calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
     n_max = 2
     n_int = 1
     n_min = 0
@@ -3425,12 +3421,6 @@ class HVAC
     tout_B = 82.0
     tout_E = 87.0
     tout_F = 67.0
-    unless curves_in_ip
-      wBin = UnitConversions.convert(wBin, "F", "C")
-      tout_B = UnitConversions.convert(tout_B, "F", "C")
-      tout_E = UnitConversions.convert(tout_E, "F", "C")
-      tout_F = UnitConversions.convert(tout_F, "F", "C")
-    end
     
     eir_A2 = calc_EIR_from_EER(eers[n_max], fan_power_rated)    
     eir_B2 = eir_A2 * calc_biquad(coeff_eir[n_max], wBin, tout_B)
@@ -3680,7 +3670,7 @@ class HVAC
     return calc_COPs_from_EIR_2spd(cop_c, fan_power_rated)
   end
 
-  def self.calc_COPs_heating_4spd(runner, hspf, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip)
+  def self.calc_COPs_heating_4spd(runner, hspf, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
     # Iterate to find rated net COPs given HSPF using simple bisection method for variable speed heat pumps
     
     # Initial large bracket of COP to span possible hspf range
@@ -3695,10 +3685,10 @@ class HVAC
     cop_c = (cop_a + cop_b) / 2.0
     (1..iter_max).each do |n|
       cops = calc_COPs_from_EIR_4spd(cop_a, fan_power_rated, calc_type = 'hspf')
-      f_a = calc_HSPF_VariableSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip) - hspf
+      f_a = calc_HSPF_VariableSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
 
       cops = calc_COPs_from_EIR_4spd(cop_c, fan_power_rated, calc_type = 'hspf')
-      f_c = calc_HSPF_VariableSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip) - hspf
+      f_c = calc_HSPF_VariableSpeed(cops, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - hspf
 
       if f_c == 0
         return cop_c
@@ -3835,7 +3825,7 @@ class HVAC
     return hspf
   end
 
-  def self.calc_HSPF_VariableSpeed(cop_47, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q, curves_in_ip)
+  def self.calc_HSPF_VariableSpeed(cop_47, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
     n_max = 2
     n_int = 1
     n_min = 0
@@ -3844,12 +3834,6 @@ class HVAC
     tout_3 = 17.0
     tout_2 = 35.0
     tout_0 = 62.0
-    unless curves_in_ip
-      tin = UnitConversions.convert(tin, "F", "C")    
-      tout_3 = UnitConversions.convert(tout_3, "F", "C")
-      tout_2 = UnitConversions.convert(tout_2, "F", "C")
-      tout_0 = UnitConversions.convert(tout_0, "F", "C")
-    end
         
     eir_H1_2 = calc_EIR_from_COP(cop_47[n_max], fan_power_rated)
     eir_H3_2 = eir_H1_2 * calc_biquad(coeff_eir[n_max], tin, tout_3)
@@ -4006,7 +3990,7 @@ class HVAC
     return constant_cubic
   end
 
-  def self.convert_curve_biquadratic(coeff, ip_to_si)
+  def self.convert_curve_biquadratic(coeff, ip_to_si = true)
     if ip_to_si
       # Convert IP curves to SI curves
       si_coeff = []
@@ -4135,20 +4119,15 @@ class HVAC
     return curve
   end
 
-  def self.calc_coil_stage_data_cooling(model, outputCapacity, speeds, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, curves_in_ip, distributionSystemEfficiency)
+  def self.calc_coil_stage_data_cooling(model, outputCapacity, speeds, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, distributionSystemEfficiency)
     const_biquadratic = create_curve_biquadratic_constant(model)
 
     clg_coil_stage_data = []
     speeds.each_with_index do |speed, i|
-      if curves_in_ip
-        cOOL_CAP_FT_SPEC_ip = convert_curve_biquadratic(cOOL_CAP_FT_SPEC[speed], true)
-        cOOL_EIR_FT_SPEC_ip = convert_curve_biquadratic(cOOL_EIR_FT_SPEC[speed], true)
-      else
-        cOOL_CAP_FT_SPEC_ip = cOOL_CAP_FT_SPEC[speed]
-        cOOL_EIR_FT_SPEC_ip = cOOL_EIR_FT_SPEC[speed]
-      end
-      cool_cap_ft_curve = create_curve_biquadratic(model, cOOL_CAP_FT_SPEC_ip, "Cool-Cap-fT#{speed + 1}", 13.88, 23.88, 18.33, 51.66)
-      cool_eir_ft_curve = create_curve_biquadratic(model, cOOL_EIR_FT_SPEC_ip, "Cool-EIR-fT#{speed + 1}", 13.88, 23.88, 18.33, 51.66)
+      cOOL_CAP_FT_SPEC_si = convert_curve_biquadratic(cOOL_CAP_FT_SPEC[speed])
+      cOOL_EIR_FT_SPEC_si = convert_curve_biquadratic(cOOL_EIR_FT_SPEC[speed])
+      cool_cap_ft_curve = create_curve_biquadratic(model, cOOL_CAP_FT_SPEC_si, "Cool-Cap-fT#{speed + 1}", 13.88, 23.88, 18.33, 51.66)
+      cool_eir_ft_curve = create_curve_biquadratic(model, cOOL_EIR_FT_SPEC_si, "Cool-EIR-fT#{speed + 1}", 13.88, 23.88, 18.33, 51.66)
       cool_plf_fplr_curve = create_curve_quadratic(model, cOOL_CLOSS_FPLR_SPEC[speed], "Cool-PLF-fPLR#{speed + 1}", 0, 1, 0.7, 1)
       cool_cap_fff_curve = create_curve_quadratic(model, cOOL_CAP_FFLOW_SPEC[speed], "Cool-Cap-fFF#{speed + 1}", 0, 2, 0, 2)
       cool_eir_fff_curve = create_curve_quadratic(model, cOOL_EIR_FFLOW_SPEC[speed], "Cool-EIR-fFF#{speed + 1}", 0, 2, 0, 2)
@@ -4175,21 +4154,16 @@ class HVAC
     return clg_coil_stage_data
   end
 
-  def self.calc_coil_stage_data_heating(model, outputCapacity, speeds, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, curves_in_ip, distributionSystemEfficiency)
+  def self.calc_coil_stage_data_heating(model, outputCapacity, speeds, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, distributionSystemEfficiency)
     const_biquadratic = create_curve_biquadratic_constant(model)
 
     htg_coil_stage_data = []
     # Loop through speeds to create curves for each speed
     speeds.each_with_index do |speed, i|
-      if curves_in_ip
-        hEAT_CAP_FT_SPEC_ip = convert_curve_biquadratic(hEAT_CAP_FT_SPEC[speed], true)
-        hEAT_EIR_FT_SPEC_ip = convert_curve_biquadratic(hEAT_EIR_FT_SPEC[speed], true)
-      else
-        hEAT_CAP_FT_SPEC_ip = hEAT_CAP_FT_SPEC[speed]
-        hEAT_EIR_FT_SPEC_ip = hEAT_EIR_FT_SPEC[speed]
-      end
-      hp_heat_cap_ft_curve = create_curve_biquadratic(model, hEAT_CAP_FT_SPEC_ip, "HP_Heat-Cap-fT#{speed + 1}", -100, 100, -100, 100)
-      hp_heat_eir_ft_curve = create_curve_biquadratic(model, hEAT_EIR_FT_SPEC_ip, "HP_Heat-EIR-fT#{speed + 1}", -100, 100, -100, 100)
+      hEAT_CAP_FT_SPEC_si = convert_curve_biquadratic(hEAT_CAP_FT_SPEC[speed])
+      hEAT_EIR_FT_SPEC_si = convert_curve_biquadratic(hEAT_EIR_FT_SPEC[speed])
+      hp_heat_cap_ft_curve = create_curve_biquadratic(model, hEAT_CAP_FT_SPEC_si, "HP_Heat-Cap-fT#{speed + 1}", -100, 100, -100, 100)
+      hp_heat_eir_ft_curve = create_curve_biquadratic(model, hEAT_EIR_FT_SPEC_si, "HP_Heat-EIR-fT#{speed + 1}", -100, 100, -100, 100)
       hp_heat_plf_fplr_curve = create_curve_quadratic(model, hEAT_CLOSS_FPLR_SPEC[speed], "HP_Heat-PLF-fPLR#{speed + 1}", 0, 1, 0.7, 1)
       hp_heat_cap_fff_curve = create_curve_quadratic(model, hEAT_CAP_FFLOW_SPEC[speed], "HP_Heat-CAP-fFF#{speed + 1}", 0, 2, 0, 2)
       hp_heat_eir_fff_curve = create_curve_quadratic(model, hEAT_EIR_FFLOW_SPEC[speed], "HP_Heat-EIR-fFF#{speed + 1}", 0, 2, 0, 2)
