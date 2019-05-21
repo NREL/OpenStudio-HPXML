@@ -2146,9 +2146,12 @@ class OSModel
         if num_speeds == "1-Speed"
 
           shrs = [0.73]
+          capacity_ratios = [1.0]
+          fan_speed_ratios = [1.0]
           fan_power_installed = get_fan_power_installed(seer)
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
+                                                 capacity_ratios, fan_speed_ratios,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  eer_capacity_derates, cool_capacity_btuh,
                                                  dse_cool, load_frac, @control_slave_zones_hash)
@@ -2345,12 +2348,15 @@ class OSModel
         if num_speeds == "1-Speed"
 
           shrs = [0.73]
+          capacity_ratios = [1.0]
+          fan_speed_ratios = [1.0]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
+                                                   capacity_ratios, fan_speed_ratios,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,
@@ -2382,18 +2388,18 @@ class OSModel
         elsif num_speeds == "Variable-Speed"
 
           shrs = [0.84, 0.79, 0.76, 0.77]
-          capacity_ratios_cooling = [0.36, 0.51, 0.67, 1.0]
-          fan_speed_ratios_cooling = [0.42, 0.54, 0.68, 1.0]
           capacity_ratios_heating = [0.33, 0.56, 1.0, 1.17]
+          capacity_ratios_cooling = [0.36, 0.51, 0.67, 1.0]
           fan_speed_ratios_heating = [0.63, 0.76, 1.0, 1.19]
+          fan_speed_ratios_cooling = [0.42, 0.54, 0.68, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
           eer_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           cop_capacity_derates = [1.0, 1.0, 1.0, 1.0, 1.0]
           supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
-                                                   capacity_ratios_cooling, fan_speed_ratios_cooling,
-                                                   capacity_ratios_heating, fan_speed_ratios_heating,
+                                                   capacity_ratios_heating, capacity_ratios_cooling,
+                                                   fan_speed_ratios_heating, fan_speed_ratios_cooling,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    eer_capacity_derates, cop_capacity_derates,
                                                    cool_capacity_btuh, supplemental_efficiency,

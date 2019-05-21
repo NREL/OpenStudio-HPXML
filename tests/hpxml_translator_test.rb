@@ -108,7 +108,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def test_generalized_hvac
     # single-speed air conditioner
-    seer_to_expected_eer = { 13 => 11.2, 14 => 12.1, 15 => 13.0 } # FIXME: update 16 => 13.9
+    seer_to_expected_eer = { 13 => 11.2, 14 => 12.1, 15 => 13.0, 16 => 13.6 }
     seer_to_expected_eer.each do |seer, expected_eer|
       fan_power_rated = HVAC.get_fan_power_rated(seer)
       actual_eer = HVAC.calc_EER_cooling_1spd(seer, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC)
