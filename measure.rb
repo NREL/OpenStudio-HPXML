@@ -2235,7 +2235,7 @@ class OSModel
       clg_type = cooling_system_values[:cooling_system_type]
 
       cool_capacity_btuh = cooling_system_values[:cooling_capacity]
-      if cool_capacity_btuh <= 0.0
+      if cool_capacity_btuh <= 0.0 or cool_capacity_btuh.nil?
         cool_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2345,7 +2345,7 @@ class OSModel
         fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
 
         heat_capacity_btuh = heating_system_values[:heating_capacity]
-        if heat_capacity_btuh <= 0.0
+        if heat_capacity_btuh <= 0.0 or heat_capacity_btuh.nil?
           heat_capacity_btuh = Constants.SizingAuto
         end
 
@@ -2435,7 +2435,7 @@ class OSModel
       hp_type = heat_pump_values[:heat_pump_type]
 
       cool_capacity_btuh = heat_pump_values[:cooling_capacity]
-      if cool_capacity_btuh.nil?
+      if cool_capacity_btuh <= 0.0 or cool_capacity_btuh.nil?
         cool_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2454,8 +2454,7 @@ class OSModel
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
-        # TODO: Can we remove this since we use separate airloops for
-        # heating and cooling?
+        # FUTURE: Remove this when available in E+
         fail "Cannot handle different distribution system efficiency (DSE) values for heating and cooling."
       end
 
@@ -2633,19 +2632,20 @@ class OSModel
     htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
     htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
     residual_heat_load_served = 1.0 - htg_load_frac
-    @total_frac_remaining_heat_load_served -= residual_heat_load_served
 
     # Residual cooling
     clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
     clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
     residual_cool_load_served = 1.0 - clg_load_frac
-    @total_frac_remaining_cool_load_served -= residual_cool_load_served
 
     # Don't add ideal air if no heating system
     residual_heat_load_served = 0 if residual_heat_load_served >= 1.0
 
     # Don't add ideal air if no cooling system
     residual_cool_load_served = 0 if residual_cool_load_served >= 1.0
+
+    @total_frac_remaining_heat_load_served -= residual_heat_load_served
+    @total_frac_remaining_cool_load_served -= residual_cool_load_served
 
     # Only add ideal air if heating/cooling system doesn't meet entire load
     if residual_heat_load_served > 0.02 or residual_cool_load_served > 0.02
