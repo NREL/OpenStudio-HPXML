@@ -1016,12 +1016,12 @@ class Airflow
     # Create the return air plenum zone, space
     ra_duct_zone = OpenStudio::Model::ThermalZone.new(model)
     ra_duct_zone.setName(air_loop_name + " ret air zone")
-    ra_duct_zone.setVolume(0.25)
+    ra_duct_zone.setVolume(1.0)
 
     sw_point = OpenStudio::Point3d.new(0, 0, 0)
-    nw_point = OpenStudio::Point3d.new(0, 0.1, 0)
-    ne_point = OpenStudio::Point3d.new(0.1, 0.1, 0)
-    se_point = OpenStudio::Point3d.new(0.1, 0, 0)
+    nw_point = OpenStudio::Point3d.new(0, 1.0, 0)
+    ne_point = OpenStudio::Point3d.new(1.0, 1.0, 0)
+    se_point = OpenStudio::Point3d.new(1.0, 0, 0)
     ra_duct_polygon = Geometry.make_polygon(sw_point, nw_point, ne_point, se_point)
 
     ra_space = OpenStudio::Model::Space::fromFloorPrint(ra_duct_polygon, 1, model)
@@ -1139,7 +1139,7 @@ class Airflow
       end
 
       # Return air humidity ratio
-      ra_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} RaW".gsub(" ", "_"))
+      ra_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} Ra W".gsub(" ", "_"))
       if not living_zone_return_air_node.nil?
         ra_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Humidity Ratio")
         ra_w_sensor.setName("#{ra_w_var.name} s")
@@ -1418,14 +1418,11 @@ class Airflow
 
           duct_program.addLine("If #{mech_vent.cfis_on_for_hour_var.name}")
 
-          duct_program.addLine("  Set mxsfmfr = #{mech_vent.cfis_fan_mfr_max_var}")
-          duct_program.addLine("  Set cfis_m3s = (mxsfmfr / 1.16097654) * #{mech_vent.cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
-          duct_program.addLine("  Set fan_rtf = #{mech_vent.cfis_fan_rtf_sensor}")
-          duct_program.addLine("  Set cfis_rtf = 1.0 - fan_rtf")
-          duct_program.addLine("  Set #{ah_vfr_var.name} = cfis_rtf*#{mech_vent.cfis_f_damper_open_var.name}*cfis_m3s")
+          duct_program.addLine("  Set cfis_m3s = (#{mech_vent.cfis_fan_mfr_max_var} / 1.16097654) * #{mech_vent.cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
+          duct_program.addLine("  Set #{fan_rtf_var.name} = (1.0-#{mech_vent.cfis_fan_rtf_sensor})*#{mech_vent.cfis_f_damper_open_var.name}")
+          duct_program.addLine("  Set #{ah_vfr_var.name} = #{fan_rtf_var.name}*cfis_m3s")
           duct_program.addLine("  Set rho_in = (@RhoAirFnPbTdbW #{pbar_sensor.name} #{tin_sensor.name} #{win_sensor.name})")
           duct_program.addLine("  Set #{ah_mfr_var.name} = #{ah_vfr_var.name} * rho_in")
-          duct_program.addLine("  Set #{fan_rtf_var.name} = cfis_rtf*#{mech_vent.cfis_f_damper_open_var.name}")
           duct_program.addLine("  Set #{ah_tout_var.name} = #{ra_t_sensor.name}")
           duct_program.addLine("  Set #{ah_wout_var.name} = #{ra_w_sensor.name}")
           duct_program.addLine("  Set #{ra_t_var.name} = #{ra_t_sensor.name}")
@@ -1492,15 +1489,17 @@ class Airflow
     mech_vent.cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
     mech_vent.cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_f_damper_open") # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
 
-    supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(mech_vent.cfis_air_loop).supplyFan.get.to_FanOnOff.get
+    if mech_vent.fan_power_w.nil?
+      supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(mech_vent.cfis_air_loop).supplyFan.get.to_FanOnOff.get
 
-    mech_vent.cfis_fan_pressure_rise = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Pressure Rise")
-    mech_vent.cfis_fan_pressure_rise.setName("#{Constants.ObjectNameMechanicalVentilation} sup fan press".gsub(" ", "_"))
-    mech_vent.cfis_fan_pressure_rise.setInternalDataIndexKeyName(supply_fan.name.to_s)
+      mech_vent.cfis_fan_pressure_rise = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Pressure Rise")
+      mech_vent.cfis_fan_pressure_rise.setName("#{Constants.ObjectNameMechanicalVentilation} sup fan press".gsub(" ", "_"))
+      mech_vent.cfis_fan_pressure_rise.setInternalDataIndexKeyName(supply_fan.name.to_s)
 
-    mech_vent.cfis_fan_efficiency = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Total Efficiency")
-    mech_vent.cfis_fan_efficiency.setName("#{Constants.ObjectNameMechanicalVentilation} sup fan eff".gsub(" ", "_"))
-    mech_vent.cfis_fan_efficiency.setInternalDataIndexKeyName(supply_fan.name.to_s)
+      mech_vent.cfis_fan_efficiency = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Nominal Total Efficiency")
+      mech_vent.cfis_fan_efficiency.setName("#{Constants.ObjectNameMechanicalVentilation} sup fan eff".gsub(" ", "_"))
+      mech_vent.cfis_fan_efficiency.setInternalDataIndexKeyName(supply_fan.name.to_s)
+    end
 
     # CFIS Program
     cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -1686,8 +1685,7 @@ class Airflow
         infil_program.addLine("Set CFIS_fan_power = #{mech_vent.cfis_fan_pressure_rise.name} / #{mech_vent.cfis_fan_efficiency.name} * #{UnitConversions.convert(1.0, 'cfm', 'm^3/s').round(6)}") # W/cfm
       else
         # Use specified CFIS fan W
-        infil_program.addLine("Set mxsfmfr = #{mech_vent.cfis_fan_mfr_max_var}")
-        infil_program.addLine("Set airloop_cfm = (mxsfmfr / 1.16097654) * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
+        infil_program.addLine("Set airloop_cfm = (#{mech_vent.cfis_fan_mfr_max_var} / 1.16097654) * #{UnitConversions.convert(1.0, 'm^3/s', 'cfm')}") # Density of 1.16097654 was back calculated using E+ results
         infil_program.addLine("Set CFIS_fan_w = #{mech_vent.fan_power_w}") # W
         infil_program.addLine("Set CFIS_fan_power = CFIS_fan_w / airloop_cfm") # W/cfm
       end
