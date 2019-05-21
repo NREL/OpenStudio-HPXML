@@ -2263,8 +2263,8 @@ class HVAC
 
     cooling_season = get_season(model, weather, runner, Constants.ObjectNameCoolingSeason)
 
-    heating_season_schedule = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameHeatingSeason, Array.new(24, 1), Array.new(24, 1), heating_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false)
-    unless heating_season_schedule.validated?
+    heating_season_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameHeatingSeason, Array.new(24, 1), Array.new(24, 1), heating_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsOnOff)
+    unless heating_season_sch.validated?
       return false
     end
 
@@ -2394,7 +2394,7 @@ class HVAC
 
     heating_season = get_season(model, weather, runner, Constants.ObjectNameHeatingSeason)
 
-    cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false)
+    cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsOnOff)
     unless cooling_season_sch.validated?
       return false
     end
@@ -2674,7 +2674,7 @@ class HVAC
                               cfa, conditioned_spaces)
     obj_name = Constants.ObjectNameCeilingFan
 
-    ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, runner, obj_name + " schedule", weekday_sch, weekend_sch, [1] * 12)
+    ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, runner, obj_name + " schedule", weekday_sch, weekend_sch, [1] * 12, mult_weekday = 1.0, mult_weekend = 1.0, normalized_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
     if not ceiling_fan_sch.validated?
       return false
     end
