@@ -2497,12 +2497,13 @@ class OSModel
 
           shrs = [0.71, 0.724]
           capacity_ratios = [0.72, 1.0]
-          fan_speed_ratios = [0.86, 1.0]
+          fan_speed_ratios_heating = [0.8, 1.0]
+          fan_speed_ratios_cooling = [0.86, 1.0]          
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
           supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                                   capacity_ratios, fan_speed_ratios,
+                                                   capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, supplemental_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
