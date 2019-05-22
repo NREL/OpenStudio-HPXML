@@ -1026,7 +1026,7 @@ class Constructions
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
                                  drywall_thick_in, frac_of_ffa)
 
-    spaces = Geometry.get_finished_spaces(model.getSpaces)
+    spaces = Geometry.get_conditioned_spaces(model.getSpaces)
 
     return true if spaces.empty?
 
@@ -1071,8 +1071,8 @@ class Constructions
 
     model_spaces = model.getSpaces
 
-    finished_spaces = Geometry.get_finished_spaces(model_spaces)
-    unfinished_basement_spaces = Geometry.get_unfinished_basement_spaces(model_spaces)
+    conditioned_spaces = Geometry.get_conditioned_spaces(model_spaces)
+    unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
     garage_spaces = Geometry.get_garage_spaces(model_spaces)
 
     # Add user-specified furniture mass
@@ -1082,7 +1082,7 @@ class Constructions
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if finished_spaces.include?(space) or unfinished_basement_spaces.include?(space)
+      if conditioned_spaces.include?(space) or unconditioned_basement_spaces.include?(space)
         furnAreaFraction = frac_of_ffa
         furnMass = mass_lb_per_sqft
       elsif garage_spaces.include?(space)
