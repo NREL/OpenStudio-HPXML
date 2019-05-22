@@ -119,6 +119,7 @@ class HVAC
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
+      control_zone.setSequentialHeatingFraction(air_terminal_living, 0)
 
       slave_zones.each do |slave_zone|
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -129,6 +130,7 @@ class HVAC
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, sequential_cool_load_frac.round(5))
+        slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, 0)
       end # slave_zone
 
       # Store info for HVAC Sizing measure
@@ -260,6 +262,7 @@ class HVAC
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
+      control_zone.setSequentialHeatingFraction(air_terminal_living, 0)
 
       slave_zones.each do |slave_zone|
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -270,6 +273,7 @@ class HVAC
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, sequential_cool_load_frac.round(5))
+        slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, 0)
       end # slave_zone
 
       # Store info for HVAC Sizing measure
@@ -406,6 +410,7 @@ class HVAC
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
+      control_zone.setSequentialHeatingFraction(air_terminal_living, 0)
 
       slave_zones.each do |slave_zone|
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -416,6 +421,7 @@ class HVAC
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, sequential_cool_load_frac.round(5))
+        slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, 0)
       end # slave_zone
 
       # Store info for HVAC Sizing measure
@@ -1638,6 +1644,7 @@ class HVAC
         hvac_map[sys_id] << ptac
 
         zone.setSequentialCoolingFraction(ptac, sequential_cool_load_frac.round(5))
+        zone.setSequentialHeatingFraction(ptac, 0)
 
         # Store info for HVAC Sizing measure
         ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, airflow_rate.to_s)
@@ -1751,6 +1758,7 @@ class HVAC
         runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
         control_zone.setSequentialHeatingFraction(air_terminal_living, sequential_heat_load_frac.round(5))
+        control_zone.setSequentialCoolingFraction(air_terminal_living, 0)
 
         slave_zones.each do |slave_zone|
           air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
@@ -1761,6 +1769,7 @@ class HVAC
           runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
           slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, sequential_heat_load_frac.round(5))
+          slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, 0)
         end
 
         air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -1984,6 +1993,7 @@ class HVAC
         plant_loop.addDemandBranchForComponent(baseboard_coil)
 
         zone.setSequentialHeatingFraction(baseboard_heater, sequential_heat_load_frac.round(5))
+        zone.setSequentialCoolingFraction(baseboard_heater, 0)
 
         # Store info for HVAC Sizing measure
         baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -2021,6 +2031,7 @@ class HVAC
         runner.registerInfo("Added '#{baseboard_heater.name}' to '#{zone.name}'")
 
         zone.setSequentialHeatingFraction(baseboard_heater, sequential_heat_load_frac.round(5))
+        zone.setSequentialCoolingFraction(baseboard_heater, 0)
 
         # Store info for HVAC Sizing measure
         baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -2107,6 +2118,7 @@ class HVAC
         unitary_system.addToThermalZone(zone)
 
         zone.setSequentialHeatingFraction(unitary_system, sequential_heat_load_frac.round(5))
+        zone.setSequentialCoolingFraction(unitary_system, 0)
 
         # Store info for HVAC Sizing measure
         unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, airflow_rate.to_s)
