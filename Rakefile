@@ -26,22 +26,34 @@ def create_hpxmls
   # Hash of HPXML -> Parent HPXML
   hpxmls_files = {
     'base.xml' => nil,
+
     'invalid_files/bad-wmo.xml' => 'base.xml',
     'invalid_files/bad-site-neighbor-azimuth.xml' => 'base-site-neighbors.xml',
+    'invalid_files/cfis-with-hydronic-distribution.xml' => 'base-hvac-boiler-gas-only.xml',
     'invalid_files/clothes-washer-location.xml' => 'base.xml',
+    'invalid_files/clothes-washer-location-other.xml' => 'base.xml',
     'invalid_files/clothes-dryer-location.xml' => 'base.xml',
-    'invalid_files/duct-location.xml.skip' => 'base.xml',
-    'invalid_files/refrigerator-location.xml' => 'base.xml',
-    'invalid_files/water-heater-location.xml' => 'base.xml',
+    'invalid_files/clothes-dryer-location-other.xml' => 'base.xml',
+    'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
+    'invalid_files/duct-location.xml' => 'base.xml',
+    'invalid_files/duct-location-other.xml' => 'base.xml',
+    'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/missing-surfaces.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
-    'invalid_files/unattached-cfis.xml.skip' => 'base.xml',
+    'invalid_files/refrigerator-location.xml' => 'base.xml',
+    'invalid_files/refrigerator-location-other.xml' => 'base.xml',
+    'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
-    'invalid_files/unattached-hvac.xml.skip' => 'base.xml',
+    'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
+    'invalid_files/water-heater-location.xml' => 'base.xml',
+    'invalid_files/water-heater-location-other.xml' => 'base.xml',
+
     'base-addenda-exclude-g.xml' => 'base.xml',
     'base-addenda-exclude-g-e.xml' => 'base.xml',
     'base-addenda-exclude-g-e-a.xml' => 'base.xml',
@@ -112,6 +124,7 @@ def create_hpxmls
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
     'base-hvac-dse.xml' => 'base.xml',
+    'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -127,6 +140,7 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-no-backup.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
+    'base-hvac-multiple-ducts.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-none-no-fuel-access.xml' => 'base-hvac-none.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
@@ -135,6 +149,7 @@ def create_hpxmls
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-oil-only-no-eae.xml' => 'base-hvac-stove-oil-only.xml',
+    'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only-no-eae.xml' => 'base-hvac-wall-furnace-propane-only.xml',
     'base-infiltration-ach-natural.xml' => 'base.xml',
@@ -154,9 +169,10 @@ def create_hpxmls
     'base-pv-array-fixed-open-rack.xml' => 'base.xml',
     'base-pv-module-premium.xml' => 'base.xml',
     'base-pv-module-standard.xml' => 'base.xml',
-    'base-pv-module-thinfilm.xml.skip' => 'base.xml',
+    'base-pv-module-thinfilm.xml' => 'base.xml',
     'base-pv-multiple.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
+
     'cfis/base-cfis.xml' => 'base.xml',
     'cfis/base-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'cfis/base-hvac-air-to-air-heat-pump-2-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -165,6 +181,8 @@ def create_hpxmls
     'cfis/base-hvac-central-ac-only-1-speed-cfis.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'cfis/base-hvac-central-ac-only-2-speed-cfis.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'cfis/base-hvac-central-ac-only-var-speed-cfis.xml' => 'base-hvac-central-ac-only-var-speed.xml',
+    'cfis/base-hvac-dse-cfis.xml' => 'base-hvac-dse.xml',
+    'cfis/base-hvac-ducts-in-conditioned-space-cfis.xml' => 'base-hvac-ducts-in-conditioned-space.xml',
     'cfis/base-hvac-furnace-elec-only-cfis.xml' => 'base-hvac-furnace-elec-only.xml',
     'cfis/base-hvac-furnace-gas-central-ac-2-speed-cfis.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'cfis/base-hvac-furnace-gas-central-ac-var-speed-cfis.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -172,6 +190,7 @@ def create_hpxmls
     'cfis/base-hvac-furnace-gas-room-ac-cfis.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'cfis/base-hvac-ground-to-air-heat-pump-cfis.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'cfis/base-hvac-room-ac-furnace-gas-cfis.xml' => 'base-hvac-room-ac-furnace-gas.xml',
+
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-2-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
@@ -194,39 +213,49 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-room-ac-furnace-gas-autosize.xml' => 'base-hvac-room-ac-furnace-gas.xml',
     'hvac_autosizing/base-hvac-room-ac-only-autosize.xml' => 'base-hvac-room-ac-only.xml',
     'hvac_autosizing/base-hvac-stove-oil-only-autosize.xml' => 'base-hvac-stove-oil-only.xml',
+    'hvac_autosizing/base-hvac-wall-furnace-elec-only-autosize.xml' => 'base-hvac-wall-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-wall-furnace-propane-only-autosize.xml' => 'base-hvac-wall-furnace-propane-only.xml',
+
+    'hvac_base/base-base.xml' => 'base.xml',
+    'hvac_base/base-hvac-air-to-air-heat-pump-1-speed-base.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'hvac_base/base-hvac-air-to-air-heat-pump-2-speed-base.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'hvac_base/base-hvac-air-to-air-heat-pump-var-speed-base.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'hvac_base/base-hvac-boiler-elec-only-base.xml' => 'base-hvac-boiler-elec-only.xml',
+    'hvac_base/base-hvac-boiler-gas-only-base.xml' => 'base-hvac-boiler-gas-only.xml',
+    'hvac_base/base-hvac-central-ac-only-1-speed-base.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'hvac_base/base-hvac-central-ac-only-2-speed-base.xml' => 'base-hvac-central-ac-only-2-speed.xml',
+    'hvac_base/base-hvac-central-ac-only-var-speed-base.xml' => 'base-hvac-central-ac-only-var-speed.xml',
+    'hvac_base/base-hvac-elec-resistance-only-base.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_base/base-hvac-furnace-elec-only-base.xml' => 'base-hvac-furnace-elec-only.xml',
+    'hvac_base/base-hvac-furnace-gas-central-ac-2-speed-base.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
+    'hvac_base/base-hvac-furnace-gas-central-ac-var-speed-base.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
+    'hvac_base/base-hvac-furnace-gas-only-base.xml' => 'base-hvac-furnace-gas-only.xml',
+    'hvac_base/base-hvac-furnace-gas-room-ac-base.xml' => 'base-hvac-furnace-gas-room-ac.xml',
+    'hvac_base/base-hvac-ground-to-air-heat-pump-base.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'hvac_base/base-hvac-mini-split-heat-pump-ducted-base.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'hvac_base/base-hvac-mini-split-heat-pump-ductless-base.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
+    'hvac_base/base-hvac-room-ac-only-base.xml' => 'base-hvac-room-ac-only.xml',
+    'hvac_base/base-hvac-stove-oil-only-base.xml' => 'base-hvac-stove-oil-only.xml',
+    'hvac_base/base-hvac-wall-furnace-elec-only-base.xml' => 'base-hvac-wall-furnace-elec-only.xml',
+    'hvac_base/base-hvac-wall-furnace-propane-only-base.xml' => 'base-hvac-wall-furnace-propane-only.xml',
+
     'hvac_dse/base-dse-0.8.xml' => 'base.xml',
-    'hvac_dse/base-dse-1.0.xml' => 'hvac_dse/base-dse-0.8.xml',
     'hvac_dse/base-hvac-air-to-air-heat-pump-1-speed-dse-0.8.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'hvac_dse/base-hvac-air-to-air-heat-pump-1-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-air-to-air-heat-pump-1-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-air-to-air-heat-pump-2-speed-dse-0.8.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
-    'hvac_dse/base-hvac-air-to-air-heat-pump-2-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-air-to-air-heat-pump-2-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-air-to-air-heat-pump-var-speed-dse-0.8.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
-    'hvac_dse/base-hvac-air-to-air-heat-pump-var-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-air-to-air-heat-pump-var-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-boiler-elec-only-dse-0.8.xml' => 'base-hvac-boiler-elec-only.xml',
-    'hvac_dse/base-hvac-boiler-elec-only-dse-1.0.xml' => 'hvac_dse/base-hvac-boiler-elec-only-dse-0.8.xml',
     'hvac_dse/base-hvac-boiler-gas-only-dse-0.8.xml' => 'base-hvac-boiler-gas-only.xml',
-    'hvac_dse/base-hvac-boiler-gas-only-dse-1.0.xml' => 'hvac_dse/base-hvac-boiler-gas-only-dse-0.8.xml',
     'hvac_dse/base-hvac-central-ac-only-1-speed-dse-0.8.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'hvac_dse/base-hvac-central-ac-only-1-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-central-ac-only-1-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-central-ac-only-2-speed-dse-0.8.xml' => 'base-hvac-central-ac-only-2-speed.xml',
-    'hvac_dse/base-hvac-central-ac-only-2-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-central-ac-only-2-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-central-ac-only-var-speed-dse-0.8.xml' => 'base-hvac-central-ac-only-var-speed.xml',
-    'hvac_dse/base-hvac-central-ac-only-var-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-central-ac-only-var-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-furnace-elec-only-dse-0.8.xml' => 'base-hvac-furnace-elec-only.xml',
-    'hvac_dse/base-hvac-furnace-elec-only-dse-1.0.xml' => 'hvac_dse/base-hvac-furnace-elec-only-dse-0.8.xml',
     'hvac_dse/base-hvac-furnace-gas-central-ac-2-speed-dse-0.8.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
-    'hvac_dse/base-hvac-furnace-gas-central-ac-2-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-furnace-gas-central-ac-2-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-furnace-gas-central-ac-var-speed-dse-0.8.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
-    'hvac_dse/base-hvac-furnace-gas-central-ac-var-speed-dse-1.0.xml' => 'hvac_dse/base-hvac-furnace-gas-central-ac-var-speed-dse-0.8.xml',
     'hvac_dse/base-hvac-furnace-gas-only-dse-0.8.xml' => 'base-hvac-furnace-gas-only.xml',
-    'hvac_dse/base-hvac-furnace-gas-only-dse-1.0.xml' => 'hvac_dse/base-hvac-furnace-gas-only-dse-0.8.xml',
     'hvac_dse/base-hvac-furnace-gas-room-ac-dse-0.8.xml' => 'base-hvac-furnace-gas-room-ac.xml',
-    'hvac_dse/base-hvac-furnace-gas-room-ac-dse-1.0.xml' => 'hvac_dse/base-hvac-furnace-gas-room-ac-dse-0.8.xml',
-    'hvac_dse/base-hvac-ground-to-air-heat-pump-dse-0.8.xml.skip' => 'base-hvac-ground-to-air-heat-pump.xml',
-    'hvac_dse/base-hvac-ground-to-air-heat-pump-dse-1.0.xml.skip' => 'hvac_dse/base-hvac-ground-to-air-heat-pump-dse-0.8.xml.skip',
+    'hvac_dse/base-hvac-ground-to-air-heat-pump-dse-0.8.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'hvac_dse/base-hvac-mini-split-heat-pump-ducted-dse-0.8.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'hvac_dse/base-hvac-mini-split-heat-pump-ducted-dse-1.0.xml' => 'hvac_dse/base-hvac-mini-split-heat-pump-ducted-dse-0.8.xml',
+
     'hvac_load_fracs/base-hvac-air-to-air-heat-pump-1-speed-zero-cool.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'hvac_load_fracs/base-hvac-air-to-air-heat-pump-1-speed-zero-heat.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'hvac_load_fracs/base-hvac-air-to-air-heat-pump-1-speed-zero-heat-cool.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -236,14 +265,6 @@ def create_hpxmls
     'hvac_load_fracs/base-hvac-air-to-air-heat-pump-var-speed-zero-cool.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'hvac_load_fracs/base-hvac-air-to-air-heat-pump-var-speed-zero-heat.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'hvac_load_fracs/base-hvac-air-to-air-heat-pump-var-speed-zero-heat-cool.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
-    'hvac_load_fracs/base-hvac-boiler-elec-only-zero-heat.xml' => 'base-hvac-boiler-elec-only.xml',
-    'hvac_load_fracs/base-hvac-boiler-gas-only-zero-heat.xml' => 'base-hvac-boiler-gas-only.xml',
-    'hvac_load_fracs/base-hvac-central-ac-only-1-speed-zero-cool.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'hvac_load_fracs/base-hvac-central-ac-only-2-speed-zero-cool.xml' => 'base-hvac-central-ac-only-2-speed.xml',
-    'hvac_load_fracs/base-hvac-central-ac-only-var-speed-zero-cool.xml' => 'base-hvac-central-ac-only-var-speed.xml',
-    'hvac_load_fracs/base-hvac-elec-resistance-only-zero-heat.xml' => 'base-hvac-elec-resistance-only.xml',
-    'hvac_load_fracs/base-hvac-furnace-elec-only-zero-heat.xml' => 'base-hvac-furnace-elec-only.xml',
-    'hvac_load_fracs/base-hvac-furnace-gas-only-zero-heat.xml' => 'base-hvac-furnace-gas-only.xml',
     'hvac_load_fracs/base-hvac-ground-to-air-heat-pump-zero-cool.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'hvac_load_fracs/base-hvac-ground-to-air-heat-pump-zero-heat.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'hvac_load_fracs/base-hvac-ground-to-air-heat-pump-zero-heat-cool.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
@@ -253,47 +274,49 @@ def create_hpxmls
     'hvac_load_fracs/base-hvac-mini-split-heat-pump-ductless-zero-cool.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'hvac_load_fracs/base-hvac-mini-split-heat-pump-ductless-zero-heat.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'hvac_load_fracs/base-hvac-mini-split-heat-pump-ductless-zero-heat-cool.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
-    'hvac_load_fracs/base-hvac-room-ac-only-zero-cool.xml' => 'base-hvac-room-ac-only.xml',
-    'hvac_load_fracs/base-hvac-stove-oil-only-zero-heat.xml' => 'base-hvac-stove-oil-only.xml',
-    'hvac_load_fracs/base-hvac-wall-furnace-propane-only-zero-heat.xml' => 'base-hvac-wall-furnace-propane-only.xml',
-    'hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
-    'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+
+    'hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'hvac_multiple/base-hvac-boiler-elec-only-x3.xml' => 'base-hvac-boiler-elec-only.xml',
     'hvac_multiple/base-hvac-boiler-gas-only-x3.xml' => 'base-hvac-boiler-gas-only.xml',
     'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_multiple/base-hvac-elec-resistance-only-x3.xml' => 'base-hvac-elec-resistance-only.xml',
-    'hvac_multiple/base-hvac-furnace-elec-only-x3.xml.skip' => 'base-hvac-furnace-elec-only.xml',
-    'hvac_multiple/base-hvac-furnace-gas-only-x3.xml.skip' => 'base-hvac-furnace-gas-only.xml',
-    'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml.skip' => 'base-hvac-ground-to-air-heat-pump.xml',
-    'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml.skip' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'hvac_multiple/base-hvac-mini-split-heat-pump-ductless-x3.xml.skip' => 'base-hvac-mini-split-heat-pump-ductless.xml',
+    'hvac_multiple/base-hvac-furnace-elec-only-x3.xml' => 'base-hvac-furnace-elec-only.xml',
+    'hvac_multiple/base-hvac-furnace-gas-only-x3.xml' => 'base-hvac-furnace-gas-only.xml',
+    'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'hvac_multiple/base-hvac-mini-split-heat-pump-ductless-x3.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'hvac_multiple/base-hvac-room-ac-only-x3.xml' => 'base-hvac-room-ac-only.xml',
-    'hvac_multiple/base-hvac-stove-oil-only-x3.xml.skip' => 'base-hvac-stove-oil-only.xml',
-    'hvac_multiple/base-hvac-wall-furnace-propane-only-x3.xml.skip' => 'base-hvac-wall-furnace-propane-only.xml',
-    'hvac_partial/base-50percent.xml.skip' => 'base.xml',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-50percent.xml.skip' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-50percent.xml.skip' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-50percent.xml.skip' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'hvac_multiple/base-hvac-stove-oil-only-x3.xml' => 'base-hvac-stove-oil-only.xml',
+    'hvac_multiple/base-hvac-wall-furnace-elec-only-x3.xml' => 'base-hvac-wall-furnace-elec-only.xml',
+    'hvac_multiple/base-hvac-wall-furnace-propane-only-x3.xml' => 'base-hvac-wall-furnace-propane-only.xml',
+
+    'hvac_partial/base-50percent.xml' => 'base.xml',
+    'hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-50percent.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-50percent.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-50percent.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'hvac_partial/base-hvac-boiler-elec-only-50percent.xml' => 'base-hvac-boiler-elec-only.xml',
     'hvac_partial/base-hvac-boiler-gas-only-50percent.xml' => 'base-hvac-boiler-gas-only.xml',
-    'hvac_partial/base-hvac-central-ac-only-1-speed-50percent.xml.skip' => 'base-hvac-central-ac-only-1-speed.xml',
-    'hvac_partial/base-hvac-central-ac-only-2-speed-50percent.xml.skip' => 'base-hvac-central-ac-only-2-speed.xml',
-    'hvac_partial/base-hvac-central-ac-only-var-speed-50percent.xml.skip' => 'base-hvac-central-ac-only-var-speed.xml',
+    'hvac_partial/base-hvac-central-ac-only-1-speed-50percent.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'hvac_partial/base-hvac-central-ac-only-2-speed-50percent.xml' => 'base-hvac-central-ac-only-2-speed.xml',
+    'hvac_partial/base-hvac-central-ac-only-var-speed-50percent.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_partial/base-hvac-elec-resistance-only-50percent.xml' => 'base-hvac-elec-resistance-only.xml',
-    'hvac_partial/base-hvac-furnace-elec-only-50percent.xml.skip' => 'base-hvac-furnace-elec-only.xml',
-    'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
-    'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
-    'hvac_partial/base-hvac-furnace-gas-only-50percent.xml.skip' => 'base-hvac-furnace-gas-only.xml',
-    'hvac_partial/base-hvac-furnace-gas-room-ac-50percent.xml.skip' => 'base-hvac-furnace-gas-room-ac.xml',
-    'hvac_partial/base-hvac-ground-to-air-heat-pump-50percent.xml.skip' => 'base-hvac-ground-to-air-heat-pump.xml',
-    'hvac_partial/base-hvac-mini-split-heat-pump-ducted-50percent.xml.skip' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'hvac_partial/base-hvac-mini-split-heat-pump-ductless-50percent.xml.skip' => 'base-hvac-mini-split-heat-pump-ductless.xml',
+    'hvac_partial/base-hvac-furnace-elec-only-50percent.xml' => 'base-hvac-furnace-elec-only.xml',
+    'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-50percent.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
+    'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-50percent.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
+    'hvac_partial/base-hvac-furnace-gas-only-50percent.xml' => 'base-hvac-furnace-gas-only.xml',
+    'hvac_partial/base-hvac-furnace-gas-room-ac-50percent.xml' => 'base-hvac-furnace-gas-room-ac.xml',
+    'hvac_partial/base-hvac-ground-to-air-heat-pump-50percent.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'hvac_partial/base-hvac-mini-split-heat-pump-ducted-50percent.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'hvac_partial/base-hvac-mini-split-heat-pump-ductless-50percent.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'hvac_partial/base-hvac-room-ac-only-50percent.xml' => 'base-hvac-room-ac-only.xml',
     'hvac_partial/base-hvac-stove-oil-only-50percent.xml' => 'base-hvac-stove-oil-only.xml',
+    'hvac_partial/base-hvac-wall-furnace-elec-only-50percent.xml' => 'base-hvac-wall-furnace-elec-only.xml',
     'hvac_partial/base-hvac-wall-furnace-propane-only-50percent.xml' => 'base-hvac-wall-furnace-propane-only.xml',
+
     'water_heating_multiple/base-dhw-tankless-electric-x3.xml' => 'base-dhw-tankless-electric.xml',
     'water_heating_multiple/base-dhw-tankless-gas-x3.xml' => 'base-dhw-tankless-gas.xml',
     'water_heating_multiple/base-dhw-tankless-oil-x3.xml' => 'base-dhw-tankless-oil.xml',
@@ -635,50 +658,15 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
          'base-foundation-slab.xml',
          'base-foundation-unconditioned-basement.xml',
          'base-foundation-unvented-crawlspace.xml',
-         'base-foundation-vented-crawlspace.xml'].include? hpxml_file
+         'base-foundation-vented-crawlspace.xml'].include? hpxml_file or
+        hpxml_file.include? 'hvac_partial' or
+        hpxml_file.include? 'hvac_multiple' or
+        hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
+        hpxml_file.include? 'hvac_load_fracs'
     building_construction_values[:number_of_conditioned_floors] -= 1
     building_construction_values[:conditioned_floor_area] -= 1350
     building_construction_values[:conditioned_building_volume] -= 1350 * 8
-  elsif ['base-hvac-multiple.xml',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-boiler-elec-only-x3.xml',
-         'hvac_multiple/base-hvac-boiler-gas-only-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-elec-resistance-only-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml.skip',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml.skip',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ductless-x3.xml.skip',
-         'hvac_multiple/base-hvac-room-ac-only-x3.xml',
-         'hvac_multiple/base-hvac-stove-oil-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-wall-furnace-propane-only-x3.xml.skip',
-         'hvac_partial/base-50percent.xml.skip',
-         'hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-boiler-elec-only-50percent.xml',
-         'hvac_partial/base-hvac-boiler-gas-only-50percent.xml',
-         'hvac_partial/base-hvac-central-ac-only-1-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-central-ac-only-2-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-central-ac-only-var-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-elec-resistance-only-50percent.xml',
-         'hvac_partial/base-hvac-furnace-elec-only-50percent.xml.skip',
-         'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-50percent.xml.skip',
-         'hvac_partial/base-hvac-furnace-gas-only-50percent.xml.skip',
-         'hvac_partial/base-hvac-furnace-gas-room-ac-50percent.xml.skip',
-         'hvac_partial/base-hvac-ground-to-air-heat-pump-50percent.xml.skip',
-         'hvac_partial/base-hvac-mini-split-heat-pump-ducted-50percent.xml.skip',
-         'hvac_partial/base-hvac-mini-split-heat-pump-ductless-50percent.xml.skip',
-         'hvac_partial/base-hvac-room-ac-only-50percent.xml',
-         'hvac_partial/base-hvac-stove-oil-only-50percent.xml',
-         'hvac_partial/base-hvac-wall-furnace-propane-only-50percent.xml'].include? hpxml_file
-    building_construction_values[:load_distribution_scheme] = "UniformLoad" # TODO: Temporary
   elsif ['base-hvac-ideal-air.xml'].include? hpxml_file
     building_construction_values[:use_only_ideal_air_system] = true
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -868,7 +856,12 @@ def get_hpxml_file_foundations_values(hpxml_file, foundations_values)
                             :foundation_type => "ConditionedBasement" }]
   elsif ['base-foundation-pier-beam.xml'].include? hpxml_file
     foundations_values[0][:foundation_type] = "Ambient"
-  elsif ['base-foundation-slab.xml'].include? hpxml_file
+  elsif ['base-foundation-slab.xml'].include? hpxml_file or
+        hpxml_file.include? 'hvac_partial' or
+        hpxml_file.include? 'hvac_multiple' or
+        hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
+        hpxml_file.include? 'hvac_load_fracs'
     foundations_values[0][:foundation_type] = "SlabOnGrade"
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundations_values[0][:foundation_type] = "UnconditionedBasement"
@@ -927,7 +920,12 @@ def get_hpxml_file_foundations_walls_values(hpxml_file, foundations_walls_values
                                    :insulation_height => 4,
                                    :insulation_r_value => 8.9 }]
   elsif ['base-foundation-pier-beam.xml',
-         'base-foundation-slab.xml'].include? hpxml_file
+         'base-foundation-slab.xml'].include? hpxml_file or
+        hpxml_file.include? 'hvac_partial' or
+        hpxml_file.include? 'hvac_multiple' or
+        hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
+        hpxml_file.include? 'hvac_load_fracs'
     foundations_walls_values = [[]]
   end
   return foundations_walls_values
@@ -948,7 +946,12 @@ def get_hpxml_file_foundations_slabs_values(hpxml_file, foundations_slabs_values
                                    :carpet_r_value => 0 }]]
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     foundations_slabs_values[0][0][:depth_below_grade] = 4
-  elsif ['base-foundation-slab.xml'].include? hpxml_file
+  elsif ['base-foundation-slab.xml'].include? hpxml_file or
+        hpxml_file.include? 'hvac_partial' or
+        hpxml_file.include? 'hvac_multiple' or
+        hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
+        hpxml_file.include? 'hvac_load_fracs'
     foundations_slabs_values[0][0][:under_slab_insulation_width] = nil
     foundations_slabs_values[0][0][:under_slab_insulation_spans_entire_slab] = true
     foundations_slabs_values[0][0][:depth_below_grade] = 0
@@ -1105,7 +1108,12 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :emittance => 0.9,
                            :insulation_assembly_r_value => 23.0 }]
   elsif ['base-foundation-pier-beam.xml',
-         'base-foundation-slab.xml'].include? hpxml_file
+         'base-foundation-slab.xml'].include? hpxml_file or
+        hpxml_file.include? 'hvac_partial' or
+        hpxml_file.include? 'hvac_multiple' or
+        hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
+        hpxml_file.include? 'hvac_load_fracs'
     rim_joists_values = []
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..rim_joists_values.size - 1
@@ -1533,6 +1541,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
                                 :heating_efficiency_afue => 0.8,
                                 :fraction_heat_load_served => 0.1,
                                 :electric_auxiliary_energy => 200 }
+  elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
+    heating_systems_values[0][:fraction_heat_load_served] += 0.1
   elsif ['base-hvac-stove-oil-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "Stove"
@@ -1540,13 +1550,19 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_efficiency_afue] = nil
     heating_systems_values[0][:heating_efficiency_percent] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
+  elsif ['base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
+    heating_systems_values[0][:distribution_system_idref] = nil
+    heating_systems_values[0][:heating_system_type] = "WallFurnace"
+    heating_systems_values[0][:heating_system_fuel] = "electricity"
+    heating_systems_values[0][:heating_efficiency_afue] = 1.0
+    heating_systems_values[0][:electric_auxiliary_energy] = 200
   elsif ['base-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "WallFurnace"
     heating_systems_values[0][:heating_system_fuel] = "propane"
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
-  elsif ['invalid_files/unattached-hvac.xml.skip'].include? hpxml_file
+  elsif ['invalid_files/unattached-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = "foobar"
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] = -1
@@ -1597,6 +1613,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-stove-oil-only.xml',
+         'base-hvac-wall-furnace-elec-only.xml',
          'base-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
     cooling_systems_values = []
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
@@ -1623,6 +1640,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
                                 :cooling_capacity => 48000,
                                 :fraction_cool_load_served => 0.2,
                                 :cooling_efficiency_eer => 8.5 }
+  elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
+    cooling_systems_values[0][:fraction_cool_load_served] += 0.2
   elsif hpxml_file.include? 'hvac_autosizing' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] = -1
   elsif hpxml_file.include? '-zero-cool.xml' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
@@ -1725,6 +1744,10 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 0.2,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
+  elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
+    heat_pumps_values[0][:distribution_system_idref] = "HVACDistribution3"
+  elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
+    heat_pumps_values[0][:distribution_system_idref] = "HVACDistribution4"
   elsif hpxml_file.include? 'hvac_autosizing' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] = -1
   elsif hpxml_file.include? '-zero-heat-cool.xml' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
@@ -1786,6 +1809,7 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-room-ac-only.xml',
          'base-hvac-stove-oil-only.xml',
+         'base-hvac-wall-furnace-elec-only.xml',
          'base-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
     hvac_distributions_values = []
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
@@ -1805,32 +1829,26 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
     hvac_distributions_values[0][:annual_heating_dse] = 0.75
     hvac_distributions_values[0][:annual_cooling_dse] = 0.75
   elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-0.8.xml'
-    hvac_distributions_values[0][:distribution_system_type] = "DSE"
-    hvac_distributions_values[0][:annual_heating_dse] = 0.8
-    hvac_distributions_values[0][:annual_cooling_dse] = 0.8
-  elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-1.0.xml'
-    hvac_distributions_values[0][:annual_heating_dse] = 1
-    hvac_distributions_values[0][:annual_cooling_dse] = 1
-  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml.skip',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
-    hvac_distributions_values << { :id => "HVACDistribution2",
-                                   :distribution_system_type => "AirDistribution" }
-    hvac_distributions_values << { :id => "HVACDistribution3",
-                                   :distribution_system_type => "AirDistribution" }
-  elsif ['hvac_multiple/base-hvac-boiler-elec-only-x3.xml',
-         'hvac_multiple/base-hvac-boiler-gas-only-x3.xml'].include? hpxml_file
-    hvac_distributions_values << { :id => "HVACDistribution2",
-                                   :distribution_system_type => "HydronicDistribution" }
-    hvac_distributions_values << { :id => "HVACDistribution3",
-                                   :distribution_system_type => "HydronicDistribution" }
+    hvac_distributions_values = [{ :id => "HVACDistribution",
+                                   :distribution_system_type => "DSE",
+                                   :annual_heating_dse => 0.8,
+                                   :annual_cooling_dse => 0.8 }]
+  elsif ['base-hvac-dse.xml'].include? hpxml_file or
+        (hpxml_file.include? 'hvac_partial' and not hvac_distributions_values.empty?) or
+        (hpxml_file.include? 'hvac_base' and not hvac_distributions_values.empty?)
+    hvac_distributions_values = [{ :id => "HVACDistribution",
+                                   :distribution_system_type => "DSE",
+                                   :annual_heating_dse => 1,
+                                   :annual_cooling_dse => 1 }]
+  elsif hpxml_file.include? 'hvac_multiple' and not hvac_distributions_values.empty?
+    hvac_distributions_values = [{ :id => "HVACDistribution",
+                                   :distribution_system_type => "DSE",
+                                   :annual_heating_dse => 1,
+                                   :annual_cooling_dse => 1 }]
+    hvac_distributions_values << hvac_distributions_values[0].dup
+    hvac_distributions_values[1][:id] = "HVACDistribution2"
+    hvac_distributions_values << hvac_distributions_values[0].dup
+    hvac_distributions_values[2][:id] = "HVACDistribution3"
   end
   return hvac_distributions_values
 end
@@ -1869,16 +1887,16 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
                                            :duct_leakage_value => 25 }]
-  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip',
+  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml.skip',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml',
+         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml',
+         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml',
+         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] /= 3.0
     duct_leakage_measurements_values[0][1][:duct_leakage_value] /= 3.0
     duct_leakage_measurements_values << [{ :duct_type => "supply",
@@ -1922,9 +1940,17 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
     ducts_values[0][0][:duct_location] = "attic - conditioned"
     ducts_values[0][1][:duct_location] = "attic - conditioned"
   elsif ['base-enclosure-garage.xml',
-         'invalid_files/duct-location.xml.skip'].include? hpxml_file
+         'invalid_files/duct-location.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "garage"
     ducts_values[0][1][:duct_location] = "garage"
+  elsif ['invalid_files/duct-location-other.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "unconditioned space"
+    ducts_values[0][1][:duct_location] = "unconditioned space"
+  elsif ['base-hvac-ducts-in-conditioned-space.xml',
+         'base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "living space"
+    ducts_values[0][1][:duct_location] = "living space"
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     ducts_values[0] = []
     ducts_values << [{ :duct_type => "supply",
@@ -1974,16 +2000,25 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]
-  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml.skip',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml.skip',
+  elsif ['base-hvac-multiple-ducts.xml'].include? hpxml_file
+    ducts_values[0] << { :duct_type => "supply",
+                         :duct_insulation_r_value => 8,
+                         :duct_location => "attic - unvented",
+                         :duct_surface_area => 300 }
+    ducts_values[0] << { :duct_type => "return",
+                         :duct_insulation_r_value => 4,
+                         :duct_location => "attic - unvented",
+                         :duct_surface_area => 100 }
+  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',
+         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
          'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml.skip',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml.skip',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml.skip'].include? hpxml_file
+         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml',
+         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml',
+         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml',
+         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml'].include? hpxml_file
     ducts_values[0][0][:duct_surface_area] /= 3.0
     ducts_values[0][1][:duct_surface_area] /= 3.0
     ducts_values << [{ :duct_type => "supply",
@@ -2013,7 +2048,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :rated_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :fan_power => 60 }
-  elsif ['invalid_files/unattached-cfis.xml.skip',
+  elsif ['invalid_files/unattached-cfis.xml',
+         'invalid_files/cfis-with-hydronic-distribution.xml',
          'base-mechvent-cfis.xml',
          'cfis/base-cfis.xml',
          'cfis/base-hvac-air-to-air-heat-pump-1-speed-cfis.xml',
@@ -2022,6 +2058,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
          'cfis/base-hvac-central-ac-only-1-speed-cfis.xml',
          'cfis/base-hvac-central-ac-only-2-speed-cfis.xml',
          'cfis/base-hvac-central-ac-only-var-speed-cfis.xml',
+         'cfis/base-hvac-dse-cfis.xml',
+         'cfis/base-hvac-ducts-in-conditioned-space-cfis.xml',
          'cfis/base-hvac-furnace-elec-only-cfis.xml',
          'cfis/base-hvac-furnace-gas-central-ac-2-speed-cfis.xml',
          'cfis/base-hvac-furnace-gas-central-ac-var-speed-cfis.xml',
@@ -2035,6 +2073,9 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :hours_in_operation => 8,
                                  :fan_power => 300,
                                  :distribution_system_idref => "HVACDistribution" }
+    if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
+      ventilation_fans_values[0][:distribution_system_idref] = "foobar"
+    end
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
@@ -2113,6 +2154,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :location => "living space",
                                       :fraction_dhw_load_served => 0.2,
                                       :energy_factor => 0.82 }
+  elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
+    water_heating_systems_values[0][:fraction_dhw_load_served] += 0.15
   elsif ['base-dhw-tank-gas.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
@@ -2176,6 +2219,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "basement - conditioned"
   elsif ['invalid_files/water-heater-location.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "crawlspace - vented"
+  elsif ['invalid_files/water-heater-location-other.xml'].include? hpxml_file
+    water_heating_systems_values[0][:location] = "unconditioned space"
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "garage"
   elsif ['base-dhw-none.xml'].include? hpxml_file
@@ -2315,7 +2360,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :max_power_output => 4000,
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
-  elsif ['base-pv-module-thinfilm.xml.skip'].include? hpxml_file
+  elsif ['base-pv-module-thinfilm.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "thin film",
                            :location => "roof",
@@ -2370,6 +2415,8 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-washer-location.xml'].include? hpxml_file
     clothes_washer_values[:location] = "garage"
+  elsif ['invalid_files/clothes-washer-location-other.xml'].include? hpxml_file
+    clothes_washer_values[:location] = "other"
   end
   return clothes_washer_values
 end
@@ -2402,6 +2449,8 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/clothes-dryer-location.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "garage"
+  elsif ['invalid_files/clothes-dryer-location-other.xml'].include? hpxml_file
+    clothes_dryer_values[:location] = "other"
   end
   return clothes_dryer_values
 end
@@ -2435,6 +2484,8 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
   elsif ['base-enclosure-garage.xml',
          'invalid_files/refrigerator-location.xml'].include? hpxml_file
     refrigerator_values[:location] = "garage"
+  elsif ['invalid_files/refrigerator-location-other.xml'].include? hpxml_file
+    refrigerator_values[:location] = "other"
   end
   return refrigerator_values
 end
