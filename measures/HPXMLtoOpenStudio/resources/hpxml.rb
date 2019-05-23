@@ -1339,7 +1339,7 @@ class HPXML
 
   def self.add_water_heating_system(hpxml:,
                                     id:,
-                                    fuel_type:,
+                                    fuel_type: nil,
                                     water_heater_type:,
                                     location:,
                                     performance_adjustment: nil,
@@ -1354,7 +1354,7 @@ class HPXML
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
     sys_id = XMLHelper.add_element(water_heating_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(water_heating_system, "FuelType", fuel_type)
+    XMLHelper.add_element(water_heating_system, "FuelType", fuel_type) unless fuel_type.nil?
     XMLHelper.add_element(water_heating_system, "WaterHeaterType", water_heater_type)
     XMLHelper.add_element(water_heating_system, "Location", location)
     XMLHelper.add_element(water_heating_system, "PerformanceAdjustment", to_float(performance_adjustment)) unless performance_adjustment.nil?
