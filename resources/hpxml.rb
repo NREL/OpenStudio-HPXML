@@ -123,7 +123,9 @@ class HPXML
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
                                      vented_crawlspace_sla: nil,
+                                     vented_crawlspace_constant_ach: nil,
                                      vented_attic_sla: nil,
+                                     vented_attic_constant_ach: nil,
                                      use_only_ideal_air_system: nil,
                                      **remainder)
     building_construction = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
@@ -136,11 +138,19 @@ class HPXML
       ventilation_rate = XMLHelper.add_element(building_construction, "FoundationVentilationRate")
       XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
       XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_sla))
+    elsif not vented_crawlspace_constant_ach.nil?
+      ventilation_rate = XMLHelper.add_element(building_construction, "FoundationVentilationRate")
+      XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+      XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_constant_ach))
     end
     if not vented_attic_sla.nil?
       ventilation_rate = XMLHelper.add_element(building_construction, "AtticVentilationRate")
       XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
       XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_sla))
+    elsif not vented_attic_constant_ach.nil?
+      ventilation_rate = XMLHelper.add_element(building_construction, "AtticVentilationRate")
+      XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+      XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_constant_ach))
     end
     HPXML.add_extension(parent: building_construction,
                         extensions: { "UseOnlyIdealAirSystem": to_bool_or_nil(use_only_ideal_air_system) })
@@ -158,6 +168,10 @@ class HPXML
              :number_of_bedrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
              :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
+             :vented_crawlspace_sla => to_float_or_nil(XMLHelper.get_value(building_construction, "FoundationVentilationRate[UnitofMeasure='SLA']/Value")),
+             :vented_crawlspace_constant_ach => to_float_or_nil(XMLHelper.get_value(building_construction, "FoundationVentilationRate[UnitofMeasure='ACHnatural']/Value")),
+             :vented_attic_sla => to_float_or_nil(XMLHelper.get_value(building_construction, "AtticVentilationRate[UnitofMeasure='SLA']/Value")),
+             :vented_attic_constant_ach => to_float_or_nil(XMLHelper.get_value(building_construction, "AtticVentilationRate[UnitofMeasure='ACHnatural']/Value")),
              :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
   end
 
