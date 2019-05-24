@@ -304,6 +304,7 @@ class HPXML
     insulation_layer_values = get_layer_insulation_values(insulation: roof.elements["Insulation"])
 
     return { :id => HPXML.get_id(roof),
+             :exterior_adjacent_to => "outside",
              :interior_adjacent_to => XMLHelper.get_value(roof, "InteriorAdjacentTo"),
              :area => to_float_or_nil(XMLHelper.get_value(roof, "Area")),
              :azimuth => to_integer_or_nil(XMLHelper.get_value(roof, "Azimuth")),
@@ -317,6 +318,50 @@ class HPXML
              :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
              :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
              :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
+  end
+
+  def self.add_rim_joist(hpxml:,
+                         id:,
+                         exterior_adjacent_to:,
+                         interior_adjacent_to:,
+                         area:,
+                         azimuth: nil,
+                         solar_absorptance:,
+                         emittance:,
+                         insulation_id: nil,
+                         insulation_assembly_r_value:,
+                         **remainder)
+    rim_joists = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "RimJoists"])
+    rim_joist = XMLHelper.add_element(rim_joists, "RimJoist")
+    sys_id = XMLHelper.add_element(rim_joist, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(rim_joist, "ExteriorAdjacentTo", exterior_adjacent_to)
+    XMLHelper.add_element(rim_joist, "InteriorAdjacentTo", interior_adjacent_to)
+    XMLHelper.add_element(rim_joist, "Area", Float(area))
+    XMLHelper.add_element(rim_joist, "Azimuth", Integer(azimuth)) unless azimuth.nil?
+    XMLHelper.add_element(rim_joist, "SolarAbsorptance", Float(solar_absorptance))
+    XMLHelper.add_element(rim_joist, "Emittance", Float(emittance))
+    add_assembly_insulation(parent: rim_joist,
+                            id: insulation_id,
+                            assembly_r_value: Float(insulation_assembly_r_value))
+
+    return rim_joist
+  end
+
+  def self.get_rim_joist_values(rim_joist:)
+    return nil if rim_joist.nil?
+
+    insulation_values = get_assembly_insulation_values(insulation: rim_joist.elements["Insulation"])
+
+    return { :id => HPXML.get_id(rim_joist),
+             :exterior_adjacent_to => XMLHelper.get_value(rim_joist, "ExteriorAdjacentTo"),
+             :interior_adjacent_to => XMLHelper.get_value(rim_joist, "InteriorAdjacentTo"),
+             :area => to_float_or_nil(XMLHelper.get_value(rim_joist, "Area")),
+             :azimuth => to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth")),
+             :solar_absorptance => to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance")),
+             :emittance => to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance")),
+             :insulation_id => insulation_values[:id],
+             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
   end
 
   def self.add_wall(hpxml:,
@@ -371,50 +416,6 @@ class HPXML
              :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
              :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
              :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
-  end
-
-  def self.add_rim_joist(hpxml:,
-                         id:,
-                         exterior_adjacent_to:,
-                         interior_adjacent_to:,
-                         area:,
-                         azimuth: nil,
-                         solar_absorptance:,
-                         emittance:,
-                         insulation_id: nil,
-                         insulation_assembly_r_value:,
-                         **remainder)
-    rim_joists = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "RimJoists"])
-    rim_joist = XMLHelper.add_element(rim_joists, "RimJoist")
-    sys_id = XMLHelper.add_element(rim_joist, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(rim_joist, "ExteriorAdjacentTo", exterior_adjacent_to)
-    XMLHelper.add_element(rim_joist, "InteriorAdjacentTo", interior_adjacent_to)
-    XMLHelper.add_element(rim_joist, "Area", Float(area))
-    XMLHelper.add_element(rim_joist, "Azimuth", Integer(azimuth)) unless azimuth.nil?
-    XMLHelper.add_element(rim_joist, "SolarAbsorptance", Float(solar_absorptance))
-    XMLHelper.add_element(rim_joist, "Emittance", Float(emittance))
-    add_assembly_insulation(parent: rim_joist,
-                            id: insulation_id,
-                            assembly_r_value: Float(insulation_assembly_r_value))
-
-    return rim_joist
-  end
-
-  def self.get_rim_joist_values(rim_joist:)
-    return nil if rim_joist.nil?
-
-    insulation_values = get_assembly_insulation_values(insulation: rim_joist.elements["Insulation"])
-
-    return { :id => HPXML.get_id(rim_joist),
-             :exterior_adjacent_to => XMLHelper.get_value(rim_joist, "ExteriorAdjacentTo"),
-             :interior_adjacent_to => XMLHelper.get_value(rim_joist, "InteriorAdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(rim_joist, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth")),
-             :solar_absorptance => to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance")),
-             :emittance => to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
   end
 
   def self.add_foundation_wall(hpxml:,
@@ -567,6 +568,7 @@ class HPXML
 
     return { :id => HPXML.get_id(slab),
              :interior_adjacent_to => XMLHelper.get_value(slab, "InteriorAdjacentTo"),
+             :exterior_adjacent_to => "outside",
              :area => to_float_or_nil(XMLHelper.get_value(slab, "Area")),
              :thickness => to_float_or_nil(XMLHelper.get_value(slab, "Thickness")),
              :exposed_perimeter => to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter")),

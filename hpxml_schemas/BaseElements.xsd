@@ -755,6 +755,58 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
+			<xs:element minOccurs="0" name="RimJoists">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="RimJoist">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace"/>
+									<xs:element minOccurs="0" name="ExteriorAdjacentTo"
+										type="AdjacentTo"/>
+									<xs:element minOccurs="0" name="InteriorAdjacentTo"
+										type="AdjacentTo"/>
+									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
+										<xs:annotation>
+											<xs:documentation>[sq.ft.]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Orientation"
+										type="OrientationType"/>
+									<xs:element name="Azimuth" type="AzimuthType" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>[deg]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Perimeter"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="SolarAbsorptance"
+										type="SolarAbsorptance"/>
+									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
+									<xs:element minOccurs="0" name="Insulation"
+										type="InsulationInfo"/>
+									<xs:element minOccurs="0" name="FloorJoists"
+										type="StudProperties"/>
+									<xs:element name="AnnualEnergyUse" minOccurs="0">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="ConsumptionInfo"
+												type="ConsumptionInfoType"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element name="Walls" minOccurs="0">
 				<xs:complexType>
 					<xs:sequence>
@@ -805,58 +857,6 @@
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-					</xs:sequence>
-				</xs:complexType>
-			</xs:element>
-			<xs:element minOccurs="0" name="RimJoists">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element maxOccurs="unbounded" name="RimJoist">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:group ref="SystemInfo"/>
-									<xs:element minOccurs="0" ref="AttachedToSpace"/>
-									<xs:element minOccurs="0" name="ExteriorAdjacentTo"
-										type="AdjacentTo"/>
-									<xs:element minOccurs="0" name="InteriorAdjacentTo"
-										type="AdjacentTo"/>
-									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
-										<xs:annotation>
-											<xs:documentation>[sq.ft.]</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="Orientation"
-										type="OrientationType"/>
-									<xs:element name="Azimuth" type="AzimuthType" minOccurs="0">
-										<xs:annotation>
-											<xs:documentation>[deg]</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="Perimeter"
-										type="LengthMeasurement">
-										<xs:annotation>
-											<xs:documentation>[ft]</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="SolarAbsorptance"
-										type="SolarAbsorptance"/>
-									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
-									<xs:element minOccurs="0" name="Insulation"
-										type="InsulationInfo"/>
-									<xs:element minOccurs="0" name="FloorJoists"
-										type="StudProperties"/>
-									<xs:element name="AnnualEnergyUse" minOccurs="0">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element name="ConsumptionInfo"
-												type="ConsumptionInfoType"/>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
-									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>

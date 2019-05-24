@@ -76,6 +76,20 @@
             </Insulation>
           </Roof>
         </Roofs>
+        <RimJoists>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistFoundation'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>crawlspace - vented</InteriorAdjacentTo>
+            <Area>116.0</Area>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+        </RimJoists>
         <Walls>
           <Wall>
             <SystemIdentifier id='Wall'/>
@@ -108,25 +122,11 @@
             </Insulation>
           </Wall>
         </Walls>
-        <RimJoists>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>crawlspace - vented</InteriorAdjacentTo>
-            <Area>116.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistFoundationInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-        </RimJoists>
         <FoundationWalls>
           <FoundationWall>
             <SystemIdentifier id='FoundationWall'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>crawlspace - vented</InteriorAdjacentTo>
             <Height>4.0</Height>
             <Area>600.0</Area>
             <Thickness>8.0</Thickness>
@@ -166,7 +166,7 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab'/>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>crawlspace - vented</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Thickness>0.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>

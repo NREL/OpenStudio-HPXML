@@ -85,6 +85,20 @@
             </Insulation>
           </Roof>
         </Roofs>
+        <RimJoists>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistFoundation'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>116.0</Area>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+        </RimJoists>
         <Walls>
           <Wall>
             <SystemIdentifier id='Wall'/>
@@ -132,20 +146,6 @@
             </Insulation>
           </Wall>
         </Walls>
-        <RimJoists>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>116.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistFoundationInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-        </RimJoists>
         <FoundationWalls>
           <FoundationWall>
             <SystemIdentifier id='FoundationWall'/>
@@ -206,6 +206,34 @@
             </PerimeterInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabUnderSlabInsulation'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+            </UnderSlabInsulation>
+            <extension>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
+            </extension>
+          </Slab>
+          <Slab>
+            <SystemIdentifier id='SlabUnderGarage'/>
+            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
+            <Area>600.0</Area>
+            <Thickness>4.0</Thickness>
+            <ExposedPerimeter>70.0</ExposedPerimeter>
+            <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
+            <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
+            <DepthBelowGrade>0.0</DepthBelowGrade>
+            <PerimeterInsulation>
+              <SystemIdentifier id='SlabUnderGaragePerimeterInsulation'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+              </Layer>
+            </PerimeterInsulation>
+            <UnderSlabInsulation>
+              <SystemIdentifier id='SlabUnderGarageUnderSlabInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>

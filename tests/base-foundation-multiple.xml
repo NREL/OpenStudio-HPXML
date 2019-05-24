@@ -72,6 +72,32 @@
             </Insulation>
           </Roof>
         </Roofs>
+        <RimJoists>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistFoundation'/>
+            <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
+            <Area>116.0</Area>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistCrawlspace'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
+            <Area>81.0</Area>
+            <SolarAbsorptance>0.75</SolarAbsorptance>
+            <Emittance>0.9</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistCrawlspaceInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+        </RimJoists>
         <Walls>
           <Wall>
             <SystemIdentifier id='Wall'/>
@@ -104,37 +130,11 @@
             </Insulation>
           </Wall>
         </Walls>
-        <RimJoists>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistFoundation'/>
-            <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
-            <Area>116.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistFoundationInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-          <RimJoist>
-            <SystemIdentifier id='RimJoistCrawlspace'/>
-            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>crawlspace - unvented</InteriorAdjacentTo>
-            <Area>81.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
-            <Insulation>
-              <SystemIdentifier id='RimJoistCrawlspaceInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
-            </Insulation>
-          </RimJoist>
-        </RimJoists>
         <FoundationWalls>
           <FoundationWall>
             <SystemIdentifier id='FoundationWall'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
             <Area>600.0</Area>
             <Thickness>8.0</Thickness>
@@ -218,7 +218,7 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab'/>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Area>675.0</Area>
             <Thickness>4.0</Thickness>
             <ExposedPerimeter>75.0</ExposedPerimeter>
