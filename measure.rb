@@ -4085,40 +4085,6 @@ def to_beopt_wh_type(type)
            'heat pump water heater' => Constants.WaterHeaterTypeHeatPump }[type]
 end
 
-def get_foundation_adjacent_to(fnd_type)
-  if fnd_type == "ConditionedBasement"
-    return "basement - conditioned"
-  elsif fnd_type == "UnconditionedBasement"
-    return "basement - unconditioned"
-  elsif fnd_type == "VentedCrawlspace"
-    return "crawlspace - vented"
-  elsif fnd_type == "UnventedCrawlspace"
-    return "crawlspace - unvented"
-  elsif fnd_type == "SlabOnGrade"
-    return "living space"
-  elsif fnd_type == "Ambient"
-    return "outside"
-  end
-
-  fail "Unexpected foundation type (#{fnd_type})."
-end
-
-def get_attic_adjacent_to(attic_type)
-  if attic_type == "UnventedAttic"
-    return "attic - unvented"
-  elsif attic_type == "VentedAttic"
-    return "attic - vented"
-  elsif attic_type == "ConditionedAttic"
-    return "attic - conditioned"
-  elsif attic_type == "CathedralCeiling"
-    return "living space"
-  elsif attic_type == "FlatRoof"
-    return "living space"
-  end
-
-  fail "Unexpected attic type (#{attic_type})."
-end
-
 def is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
   interior_conditioned = is_adjacent_to_conditioned(interior_adjacent_to)
   exterior_conditioned = is_adjacent_to_conditioned(exterior_adjacent_to)
@@ -4151,6 +4117,16 @@ def is_adjacent_to_conditioned(adjacent_to)
   end
 
   fail "Unexpected adjacent_to (#{adjacent_to})."
+end
+
+def hpxml_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
+  if floor_interior_adjacent_to.include? "attic"
+    return true
+  elsif floor_exterior_adjacent_to.include? "attic"
+    return true
+  end
+
+  return false
 end
 
 def get_ac_num_speeds(seer)
