@@ -234,12 +234,12 @@
 					</xs:element>
 					<xs:element minOccurs="0" name="EnergyFactor" type="xs:double">
 						<xs:annotation>
-							<xs:documentation>lbs dry clothes/kWh</xs:documentation>
+							<xs:documentation>[lbs dry clothes/kWh] The energy performance metric for ENERGY STAR certified residential clothes dryers prior to September 13, 2013. The new metric is Combined Energy Factor.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element minOccurs="0" name="CombinedEnergyFactor" type="xs:double">
 						<xs:annotation>
-							<xs:documentation>The efficiency metric effective September 13, 2013, it includes the active drying cycle energy as well as energy consumed during Stand-by and Off modes. lbs dry clothes/kWh</xs:documentation>
+							<xs:documentation>[lbs dry clothes/kWh] The energy performance metric for ENERGY STAR certified residential clothes dryers as of September 13, 2013, it includes the active drying cycle energy as well as energy consumed during Stand-by and Off modes.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
 					<xs:element maxOccurs="unbounded" minOccurs="0" name="ControlType">
@@ -263,13 +263,21 @@
 				<xs:sequence>
 					<xs:element name="Type" type="ClothesWasherType" minOccurs="0"/>
 					<xs:element minOccurs="0" name="Location" type="LaundryMachineLocation"/>
-					<xs:element name="ModifiedEnergyFactor" type="xs:double" minOccurs="0"/>
+					<xs:element name="ModifiedEnergyFactor" type="xs:double" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>The energy performance metric for ENERGY STAR certified residential clothes washers prior to March 7, 2015. The new metric is Integrated Modified Energy Factor.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element name="IntegratedModifiedEnergyFactor" type="xs:double" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element name="WaterFactor" type="xs:double" minOccurs="0"/>
+					<xs:element name="WaterFactor" type="xs:double" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>The water performance metric for ENERGY STAR certified residential clothes washers prior to March 7, 2015. The new metric is Integrated Water Factor.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element name="IntegratedWaterFactor" type="xs:double" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>The water performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.</xs:documentation>
@@ -576,6 +584,9 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Attic">
+							<xs:annotation>
+								<xs:documentation>Use a different Attic element for each type of attic.</xs:documentation>
+							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
@@ -584,141 +595,13 @@
 											<xs:documentation>The space over which this attic is</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element name="AtticType" type="AtticType" minOccurs="1"/>
-									<xs:element minOccurs="0" name="Roofs">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element name="Roof" maxOccurs="unbounded">
-												<xs:complexType>
-												<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.] Surface area of the roof itself</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Orientation"
-												type="OrientationType"/>
-												<xs:element name="Azimuth" type="AzimuthType"
-												minOccurs="0">
-												<xs:annotation>
-												<xs:documentation>[deg]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="RoofType"
-												type="RoofType"/>
-												<xs:element minOccurs="0" name="RoofColor"
-												type="WallAndRoofColor"/>
-												<xs:element minOccurs="0" name="SolarAbsorptance"
-												type="SolarAbsorptance"/>
-												<xs:element minOccurs="0" name="Emittance"
-												type="Emittance"/>
-												<xs:element minOccurs="0" name="Rafters"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="DeckType"
-												type="DeckType"/>
-												<xs:element minOccurs="0" name="Pitch"
-												type="Pitch">
-												<xs:annotation>
-												<xs:documentation>Pitch of roof ?/12</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element name="RadiantBarrier"
-												type="xs:boolean" minOccurs="0"/>
-												<xs:element name="RadiantBarrierLocation"
-												type="RadiantBarrierLocation" minOccurs="0"/>
-												<xs:element minOccurs="0" name="Insulation"
-												type="InsulationInfo"/>
-												<xs:element ref="extension" minOccurs="0"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
-									<xs:element minOccurs="0" name="Floors">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element maxOccurs="unbounded" name="Floor">
-												<xs:complexType>
-												<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" name="AdjacentTo"
-												type="AdjacentTo"/>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.] Area of the floor</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="FloorJoists"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="Insulation"
-												type="InsulationInfo">
-												<xs:annotation>
-												<xs:documentation>For attic floor insulation that covers the rafters, two layers should be defined: 1.) a cavity later with thickness equal to the rafter height, and 2.) a continuous layer above that.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" ref="extension"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
-									<xs:element minOccurs="0" name="Walls">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element maxOccurs="unbounded" name="Wall">
-												<xs:complexType>
-												<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" name="AdjacentTo"
-												type="AdjacentTo"/>
-												<xs:element name="AtticWallType"
-												type="AtticWallType" minOccurs="0"/>
-												<xs:element name="WallType" type="WallType"
-												minOccurs="0"> </xs:element>
-												<xs:element minOccurs="0" name="Thickness"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[in] Thickness of the wall assembly</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.] Gross wall area</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Orientation"
-												type="OrientationType"/>
-												<xs:element name="Azimuth" type="AzimuthType"
-												minOccurs="0">
-												<xs:annotation>
-												<xs:documentation>[deg]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Studs"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="Siding"
-												type="Siding"/>
-												<xs:element minOccurs="0" name="Color"
-												type="WallAndRoofColor"/>
-												<xs:element minOccurs="0" name="SolarAbsorptance"
-												type="SolarAbsorptance"/>
-												<xs:element minOccurs="0" name="Emittance"
-												type="Emittance"/>
-												<xs:element minOccurs="0" maxOccurs="1"
-												name="Insulation" type="InsulationInfo"/>
-												<xs:element minOccurs="0" ref="extension"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
+									<xs:element minOccurs="1" name="AtticType" type="AtticType"/>
+									<xs:element minOccurs="0" name="AttachedToRoof"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFloor"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToWall"
+										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
 											<xs:sequence>
@@ -748,166 +631,14 @@
 									<xs:element name="FoundationType" type="FoundationType"/>
 									<xs:element minOccurs="0" name="ThermalBoundary"
 										type="FoundationThermalBoundary"/>
-									<xs:element name="FrameFloor" maxOccurs="unbounded"
-										minOccurs="0">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element name="AdjacentTo" type="AdjacentTo"
-												minOccurs="0"> </xs:element>
-												<xs:element minOccurs="0" name="FloorJoists"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="FloorTrusses"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="FloorCovering"
-												type="FloorCovering"/>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" maxOccurs="1"
-												name="Insulation" type="InsulationInfo"> </xs:element>
-												<xs:element minOccurs="0" ref="extension"/>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
-									<xs:element name="FoundationWall" maxOccurs="unbounded"
-										minOccurs="0">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" name="Type"
-												type="FoundationWallType"/>
-												<xs:element minOccurs="0" name="Length"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Total length of foundation wall</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Height"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Total height in feet of foundation wall</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Orientation"
-												type="OrientationType"/>
-												<xs:element name="Azimuth" type="AzimuthType"
-												minOccurs="0">
-												<xs:annotation>
-												<xs:documentation>[deg]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Thickness"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[in] Thickness of foundation wall excluding interior framing.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="DepthBelowGrade"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Depth below grade of foundation wall</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="AdjacentToFoundation" type="LocalReference">
-												<xs:annotation>
-												<xs:documentation>If this foundation wall is adjacent to another foundation, use this reference to indicate which one.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="AdjacentTo"
-												type="AdjacentTo"/>
-												<xs:element minOccurs="0" name="InteriorStuds"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="InsulationHeight"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Height of the insulation, spanning from the top of the foundation wall downward.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element maxOccurs="1" minOccurs="0"
-												name="Insulation" type="InsulationInfo"/>
-												<xs:element minOccurs="0" ref="extension"/>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
-									<xs:element name="Slab" maxOccurs="unbounded" minOccurs="0">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.] Area of the slab</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Thickness"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[in] Thickness of foundation slab.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Perimeter"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Length of slab perimeter.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="ExposedPerimeter"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Perimeter of the slab exposed to ambient conditions</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="PerimeterInsulationDepth"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Depth from grade to bottom of vertical slab perimeter insulation</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="UnderSlabInsulationWidth"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Width from slab edge inward of horizontal under-slab insulation.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="UnderSlabInsulationSpansEntireSlab"
-												type="xs:boolean"/>
-												<xs:element minOccurs="0"
-												name="OnGradeExposedPerimeter"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Perimeter of slab measuerd in feet that is on-grade (2 ft. below grade or less) and exposed to ambient conditions.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="DepthBelowGrade"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Depth from the top of the slab surface to grade</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="FloorCovering"
-												type="FloorCovering"/>
-												<xs:element maxOccurs="1" minOccurs="0"
-												name="PerimeterInsulation" type="InsulationInfo"/>
-												<xs:element minOccurs="0" name="UnderSlabInsulation"
-												type="InsulationInfo"/>
-												<xs:element minOccurs="0" ref="extension"/>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
+									<xs:element minOccurs="0" name="AttachedToFloor"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToWall"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFoundationWall"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToSlab"
+										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
 											<xs:sequence>
@@ -927,6 +658,9 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Garage">
+							<xs:annotation>
+								<xs:documentation>Use a different Garage element for each type of garage.</xs:documentation>
+							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
@@ -948,160 +682,120 @@
 											</xs:sequence>
 										</xs:complexType>
 									</xs:element>
-									<xs:element minOccurs="0" name="Ceilings">
+									<xs:element minOccurs="0" name="AttachedToRoof"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFloor"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToWall"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFoundationWall"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToSlab"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
 											<xs:sequence>
-												<xs:element name="Ceiling" maxOccurs="unbounded"
-												minOccurs="1">
-												<xs:complexType>
-												<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element name="AdjacentTo" type="AdjacentTo"
-												minOccurs="0"> </xs:element>
-												<xs:element minOccurs="0" name="CeilingJoists"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="CeilingTrusses"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" maxOccurs="1"
-												name="Insulation" type="InsulationInfo"> </xs:element>
-												<xs:element minOccurs="0" ref="extension"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-											</xs:sequence>
-										</xs:complexType>
-									</xs:element>
-									<xs:element name="Walls" minOccurs="0">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element name="Wall" maxOccurs="unbounded">
-												<xs:complexType>
-												<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" ref="AttachedToSpace"/>
-												<xs:element name="AdjacentTo" type="AdjacentTo"
-												minOccurs="0"> </xs:element>
-												<xs:element name="WallType" type="WallType"
-												minOccurs="0"> </xs:element>
-												<xs:element minOccurs="0" name="Thickness"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[in] Thickness of the wall assembly</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.] Gross wall area</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Orientation"
-												type="OrientationType"/>
-												<xs:element name="Azimuth" type="AzimuthType"
-												minOccurs="0">
-												<xs:annotation>
-												<xs:documentation>[deg]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Studs"
-												type="StudProperties"/>
-												<xs:element minOccurs="0" name="Siding"
-												type="Siding"/>
-												<xs:element minOccurs="0" name="Color"
-												type="WallAndRoofColor"/>
-												<xs:element minOccurs="0" name="SolarAbsorptance"
-												type="SolarAbsorptance"/>
-												<xs:element minOccurs="0" name="Emittance"
-												type="Emittance"/>
-												<xs:element minOccurs="0" maxOccurs="1"
-												name="Insulation" type="InsulationInfo"/>
-												<xs:element name="AnnualEnergyUse" minOccurs="0">
-												<xs:complexType>
-												<xs:sequence>
 												<xs:element name="ConsumptionInfo"
 												type="ConsumptionInfoType"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-												<xs:element ref="extension" minOccurs="0"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
 											</xs:sequence>
 										</xs:complexType>
 									</xs:element>
-									<xs:element minOccurs="0" name="Slabs">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element name="Slab" maxOccurs="unbounded"
-												minOccurs="1">
-												<xs:complexType>
-												<xs:sequence>
-												<xs:group ref="SystemInfo"/>
-												<xs:element minOccurs="0" name="Area"
-												type="SurfaceArea">
-												<xs:annotation>
-												<xs:documentation>[sq.ft.] Area of the slab</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Thickness"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[in] Thickness of foundation slab.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="Perimeter"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Length of slab perimeter.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="ExposedPerimeter"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Perimeter of the slab exposed to ambient conditions</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="PerimeterInsulationDepth"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Depth from grade to bottom of vertical slab perimeter insulation</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="UnderSlabInsulationWidth"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Width from slab edge inward of horizontal under-slab insulation.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="OnGradeExposedPerimeter"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[ft] Perimeter of slab measuerd in feet that is on-grade (2 ft. below grade or less) and exposed to ambient conditions.</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" name="FloorCovering"
-												type="FloorCovering"/>
-												<xs:element maxOccurs="1" minOccurs="0"
-												name="PerimeterInsulation" type="InsulationInfo"/>
-												<xs:element minOccurs="0"
-												name="UnderSlabInsulation" type="InsulationInfo"/>
-												<xs:element minOccurs="0" ref="extension"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
-											</xs:sequence>
-										</xs:complexType>
+									<xs:element ref="extension" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="Roofs">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Roof" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace"/>
+									<xs:element minOccurs="0" name="InteriorAdjacentTo"
+										type="AdjacentTo"/>
+									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
+										<xs:annotation>
+											<xs:documentation>[sq.ft.] Surface area of the roof itself</xs:documentation>
+										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="Orientation"
+										type="OrientationType"/>
+									<xs:element name="Azimuth" type="AzimuthType" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>[deg]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="RoofType" type="RoofType"/>
+									<xs:element minOccurs="0" name="RoofColor"
+										type="WallAndRoofColor"/>
+									<xs:element minOccurs="0" name="SolarAbsorptance"
+										type="SolarAbsorptance"/>
+									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
+									<xs:element minOccurs="0" name="Rafters" type="StudProperties"/>
+									<xs:element minOccurs="0" name="DeckType" type="DeckType"/>
+									<xs:element minOccurs="0" name="Pitch" type="Pitch">
+										<xs:annotation>
+											<xs:documentation>Pitch of roof ?/12</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="RadiantBarrier" type="xs:boolean"
+										minOccurs="0"/>
+									<xs:element name="RadiantBarrierLocation"
+										type="RadiantBarrierLocation" minOccurs="0"/>
+									<xs:element minOccurs="0" name="Insulation"
+										type="InsulationInfo"/>
+									<xs:element ref="extension" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Walls" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Wall" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace"/>
+									<xs:element name="ExteriorAdjacentTo" type="AdjacentTo"
+										minOccurs="0"> </xs:element>
+									<xs:element minOccurs="0" name="InteriorAdjacentTo"
+										type="AdjacentTo"/>
+									<xs:element minOccurs="0" name="AtticWallType"
+										type="AtticWallType"/>
+									<xs:element name="WallType" type="WallType" minOccurs="0"> </xs:element>
+									<xs:element minOccurs="0" name="Thickness"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[in] Thickness of the wall assembly</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
+										<xs:annotation>
+											<xs:documentation>[sq.ft.] Gross wall area</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Orientation"
+										type="OrientationType"/>
+									<xs:element name="Azimuth" type="AzimuthType" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>[deg]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Studs" type="StudProperties"/>
+									<xs:element minOccurs="0" name="Siding" type="Siding"/>
+									<xs:element minOccurs="0" name="Color" type="WallAndRoofColor"/>
+									<xs:element minOccurs="0" name="SolarAbsorptance"
+										type="SolarAbsorptance"/>
+									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
+									<xs:element minOccurs="0" maxOccurs="1" name="Insulation"
+										type="InsulationInfo"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
 											<xs:sequence>
@@ -1141,6 +835,12 @@
 											<xs:documentation>[deg]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="Perimeter"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element minOccurs="0" name="SolarAbsorptance"
 										type="SolarAbsorptance"/>
 									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
@@ -1163,10 +863,10 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="Walls" minOccurs="0">
+			<xs:element minOccurs="0" name="FoundationWalls">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Wall" maxOccurs="unbounded">
+						<xs:element name="FoundationWall" maxOccurs="unbounded" minOccurs="1">
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
@@ -1175,16 +875,20 @@
 										minOccurs="0"> </xs:element>
 									<xs:element minOccurs="0" name="InteriorAdjacentTo"
 										type="AdjacentTo"/>
-									<xs:element name="WallType" type="WallType" minOccurs="0"> </xs:element>
-									<xs:element minOccurs="0" name="Thickness"
-										type="LengthMeasurement">
+									<xs:element minOccurs="0" name="Type" type="FoundationWallType"/>
+									<xs:element minOccurs="0" name="Length" type="LengthMeasurement">
 										<xs:annotation>
-											<xs:documentation>[in] Thickness of the wall assembly</xs:documentation>
+											<xs:documentation>[ft] Total length of foundation wall</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Height" type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Total height in feet of foundation wall</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
 										<xs:annotation>
-											<xs:documentation>[sq.ft.] Gross wall area</xs:documentation>
+											<xs:documentation>[sq.ft.]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="Orientation"
@@ -1194,23 +898,142 @@
 											<xs:documentation>[deg]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="Studs" type="StudProperties"/>
-									<xs:element minOccurs="0" name="Siding" type="Siding"/>
-									<xs:element minOccurs="0" name="Color" type="WallAndRoofColor"/>
-									<xs:element minOccurs="0" name="SolarAbsorptance"
-										type="SolarAbsorptance"/>
-									<xs:element minOccurs="0" name="Emittance" type="Emittance"/>
-									<xs:element minOccurs="0" maxOccurs="1" name="Insulation"
-										type="InsulationInfo"/>
-									<xs:element name="AnnualEnergyUse" minOccurs="0">
-										<xs:complexType>
-											<xs:sequence>
-												<xs:element name="ConsumptionInfo"
-												type="ConsumptionInfoType"/>
-											</xs:sequence>
-										</xs:complexType>
+									<xs:element minOccurs="0" name="Thickness"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[in] Thickness of foundation wall excluding interior framing.</xs:documentation>
+										</xs:annotation>
 									</xs:element>
-									<xs:element ref="extension" minOccurs="0"/>
+									<xs:element minOccurs="0" name="DepthBelowGrade"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Depth below grade of foundation wall</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="AdjacentToFoundation"
+										type="LocalReference">
+										<xs:annotation>
+											<xs:documentation>If this foundation wall is adjacent to another foundation, use this reference to indicate which one.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="InteriorStuds"
+										type="StudProperties"/>
+									<xs:element minOccurs="0" name="InsulationHeight"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Height of the insulation, spanning from the top of the foundation wall downward.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element maxOccurs="1" minOccurs="0" name="Insulation"
+										type="InsulationInfo"/>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="Floors">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Floor" maxOccurs="unbounded" minOccurs="1">
+							<xs:annotation>
+								<xs:documentation>Use the Floor element for, e.g., attic floors, floors above foundations, floors of bonus rooms, etc.</xs:documentation>
+							</xs:annotation>
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace"/>
+									<xs:element name="ExteriorAdjacentTo" type="AdjacentTo"
+										minOccurs="0"> </xs:element>
+									<xs:element minOccurs="0" name="InteriorAdjacentTo"
+										type="AdjacentTo"/>
+									<xs:element minOccurs="0" name="FloorJoists"
+										type="StudProperties"/>
+									<xs:element minOccurs="0" name="FloorTrusses"
+										type="StudProperties"/>
+									<xs:element minOccurs="0" name="FloorCovering"
+										type="FloorCovering"/>
+									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
+										<xs:annotation>
+											<xs:documentation>[sq.ft.]</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" maxOccurs="1" name="Insulation"
+										type="InsulationInfo"> </xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="Slabs">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Slab" maxOccurs="unbounded" minOccurs="1">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="AttachedToSpace"/>
+									<xs:element minOccurs="0" name="InteriorAdjacentTo"
+										type="AdjacentTo"/>
+									<xs:element minOccurs="0" name="Area" type="SurfaceArea">
+										<xs:annotation>
+											<xs:documentation>[sq.ft.] Area of the slab</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Thickness"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[in] Thickness of foundation slab.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Perimeter"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Length of slab perimeter.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="ExposedPerimeter"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Perimeter of the slab exposed to ambient conditions</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="PerimeterInsulationDepth"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Depth from grade to bottom of vertical slab perimeter insulation</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="UnderSlabInsulationWidth"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Width from slab edge inward of horizontal under-slab insulation</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0"
+										name="UnderSlabInsulationSpansEntireSlab" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="OnGradeExposedPerimeter"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Perimeter of slab measured in feet that is on-grade (2 ft. below grade or less) and exposed to ambient conditions.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="DepthBelowGrade"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Depth from the top of the slab surface to grade</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="FloorCovering"
+										type="FloorCovering"/>
+									<xs:element maxOccurs="1" minOccurs="0"
+										name="PerimeterInsulation" type="InsulationInfo"/>
+									<xs:element minOccurs="0" name="UnderSlabInsulation"
+										type="InsulationInfo"/>
+									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -1653,27 +1476,6 @@
 												</xs:sequence>
 												</xs:complexType>
 												</xs:element>
-												<xs:element minOccurs="0" name="TankWall">
-												<xs:annotation>
-												<xs:documentation>Refers to the insulation in the tank wall itself. This information is sometimes vailable on the water heater's name plate or the units specification sheet, or can be estimated by removing the water heater's access plate.</xs:documentation>
-												</xs:annotation>
-												<xs:complexType>
-												<xs:sequence>
-												<xs:element minOccurs="0"
-												name="InsulationMaterial"
-												type="InsulationMaterial"/>
-												<xs:element name="TankWallRValue" type="RValue"
-												minOccurs="0"/>
-												<xs:element minOccurs="0" name="Thickness"
-												type="LengthMeasurement">
-												<xs:annotation>
-												<xs:documentation>[in]</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0" ref="extension"/>
-												</xs:sequence>
-												</xs:complexType>
-												</xs:element>
 											</xs:sequence>
 										</xs:complexType>
 									</xs:element>
@@ -1697,6 +1499,11 @@
 										type="xs:boolean"/>
 									<xs:element name="CombustionVentingSystem" minOccurs="0"
 										type="LocalReference"> </xs:element>
+									<xs:element minOccurs="0" name="AutomaticVentDamper"
+										type="xs:boolean"/>
+									<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="IntermittentIgnitionDevice"
+										type="xs:boolean"/>
 									<xs:element name="RelatedHeatingSystem" type="LocalReference"
 										minOccurs="0"/>
 									<xs:element minOccurs="0" name="Installation">
@@ -1978,7 +1785,7 @@
 									<xs:element minOccurs="0" name="AnnualOutput"
 										type="RatedAnnualkWh">
 										<xs:annotation>
-											<xs:documentation>[kWh] Projected Annual Output for a typical meterological year as determined by PVWatts or similar. </xs:documentation>
+											<xs:documentation>[kWh] Projected Annual Output for a typical meteorological year as determined by PVWatts or similar. </xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="LevelizedCostOfElectricity"
@@ -2079,7 +1886,7 @@
 		<xs:sequence>
 			<xs:element name="LightingGroup" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
-					<xs:documentation>Light units of the same type. For example you could have all the 60W incandescants.</xs:documentation>
+					<xs:documentation>Light units of the same type. For example you could have all the 60W incandescents.</xs:documentation>
 				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
@@ -2798,7 +2605,7 @@
 							<xs:annotation>
 								<xs:documentation>If moisture management of a crawlspace (e.g., installation of polyethylene sheeting) or radon mitigation measures were a part of the scope of work,were measures installed to be compliant with one of the following:
 - Specifications of EPA’s Indoor airPLUS program
-- Techniques detailed in EPA's Radon-Resistent New Construction
+- Techniques detailed in EPA's Radon-Resistant New Construction
 - ASTM E2121, Standard Practice for Installing Radon Mitigation Systems in Existing Low-Rise Residential Buildings (section 7.3)</xs:documentation>
 							</xs:annotation>
 						</xs:element>
@@ -3222,7 +3029,7 @@ NOTE: This is for ALL measures that may create entry points for vermin. For exam
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="WallFurnace" type="WallAndFloorFurnace"/>
+			<xs:element name="WallFurnace" type="WallAndFloorFurnace"> </xs:element>
 			<xs:element name="FloorFurnace" type="WallAndFloorFurnace"/>
 			<xs:element name="Boiler">
 				<xs:complexType>
@@ -3260,6 +3067,10 @@ NOTE: This is for ALL measures that may create entry points for vermin. For exam
 http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:documentation>
 							</xs:annotation>
 						</xs:element>
+						<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="IntermittentIgnitionDevice"
+							type="xs:boolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 				</xs:complexType>
@@ -3273,6 +3084,10 @@ http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:docum
 http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:documentation>
 							</xs:annotation>
 						</xs:element>
+						<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="IntermittentIgnitionDevice"
+							type="xs:boolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 				</xs:complexType>
@@ -3782,9 +3597,21 @@ Volume inside the building envelope of the conditioned spaces. This metric can b
 											<xs:documentation>Primary foundation type of building</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="FoundationVentilationRate"
+										type="VentilationType">
+										<xs:annotation>
+											<xs:documentation>The ventilation rate of, e.g., a vented crawlspace</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element name="AtticType" type="AtticType" minOccurs="0">
 										<xs:annotation>
 											<xs:documentation>Primary attic type of building</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="AtticVentilationRate"
+										type="VentilationType">
+										<xs:annotation>
+											<xs:documentation>The ventilation rate of, e.g., a vented attic</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element name="AverageAtticRValue" type="RValue"
@@ -4651,8 +4478,6 @@ master meter with sub-metering = tenant sub-metered by building owner</xs:docume
 					<xs:sequence>
 						<xs:element minOccurs="0" name="Vented" type="xs:boolean"/>
 						<xs:element minOccurs="0" name="Conditioned" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="SpecificLeakageArea"
-							type="SpecificLeakageAreaType"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 				</xs:complexType>
@@ -4960,7 +4785,7 @@ https://hpxml.nrel.gov/wiki/WallTypes</xs:documentation>
 						</xs:element>
 						<xs:element minOccurs="0" name="LastReplaced" type="xs:gYearMonth">
 							<xs:annotation>
-								<xs:documentation>The Year and Month the filter was last replacced.</xs:documentation>
+								<xs:documentation>The Year and Month the filter was last replaced.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
@@ -5160,28 +4985,6 @@ https://hpxml.nrel.gov/wiki/WallTypes</xs:documentation>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
 	</xs:complexType>
-	<xs:element name="ExternalResource">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="URL" type="xs:anyURI"/>
-				<xs:element name="Type">
-					<xs:simpleType>
-						<xs:restriction base="xs:string">
-							<xs:enumeration value="photo"/>
-							<xs:enumeration value="illustration"/>
-							<xs:enumeration value="document"/>
-							<xs:enumeration value="spreadsheet"/>
-							<xs:enumeration value="website"/>
-							<xs:enumeration value="other"/>
-						</xs:restriction>
-					</xs:simpleType>
-				</xs:element>
-				<xs:element name="Description" type="xs:string"/>
-				<xs:element minOccurs="0" ref="extension"/>
-			</xs:sequence>
-			<xs:attribute name="id" use="required"/>
-		</xs:complexType>
-	</xs:element>
 	<xs:complexType name="AtticType">
 		<xs:choice>
 			<xs:element name="Attic">
@@ -5190,8 +4993,6 @@ https://hpxml.nrel.gov/wiki/WallTypes</xs:documentation>
 						<xs:element minOccurs="0" name="Vented" type="xs:boolean"/>
 						<xs:element minOccurs="0" name="Conditioned" type="xs:boolean"/>
 						<xs:element minOccurs="0" name="CapeCod" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="SpecificLeakageArea"
-							type="SpecificLeakageAreaType"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
 				</xs:complexType>
@@ -5219,4 +5020,32 @@ https://hpxml.nrel.gov/wiki/WallTypes</xs:documentation>
 			</xs:element>
 		</xs:choice>
 	</xs:complexType>
+	<xs:complexType name="VentilationType">
+		<xs:sequence>
+			<xs:element name="UnitofMeasure" type="VentilationUnit" minOccurs="0"/>
+			<xs:element name="Value" type="BuildingAirLeakage" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ExternalResource">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="URL" type="xs:anyURI"/>
+				<xs:element name="Type">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="photo"/>
+							<xs:enumeration value="illustration"/>
+							<xs:enumeration value="document"/>
+							<xs:enumeration value="spreadsheet"/>
+							<xs:enumeration value="website"/>
+							<xs:enumeration value="other"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="Description" type="xs:string"/>
+				<xs:element minOccurs="0" ref="extension"/>
+			</xs:sequence>
+			<xs:attribute name="id" use="required"/>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>
