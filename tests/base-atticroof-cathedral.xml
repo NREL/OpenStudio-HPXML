@@ -206,7 +206,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='AtticGable'/>
+            <AttachedToWall idref='WallAtticGable'/>
           </Window>
           <Window>
             <SystemIdentifier id='AtticGableWindowWest'/>
@@ -214,7 +214,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='AtticGable'/>
+            <AttachedToWall idref='WallAtticGable'/>
           </Window>
         </Windows>
         <Doors>

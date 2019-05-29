@@ -295,7 +295,7 @@
           </Door>
           <Door>
             <SystemIdentifier id='GarageDoorSouth'/>
-            <AttachedToWall idref='GarageWall'/>
+            <AttachedToWall idref='WallGarageExterior'/>
             <Area>70.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>

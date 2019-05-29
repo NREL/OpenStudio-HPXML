@@ -1222,13 +1222,13 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGableCond" }
+                        :wall_idref => "WallAtticGableCond" }
     windows_values << { :id => "AtticGableWindowWest",
                         :area => 12,
                         :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGableCond" }
+                        :wall_idref => "WallAtticGableCond" }
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
     windows_values[0][:area] = 54
     windows_values[1][:area] = 54
@@ -1239,13 +1239,13 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGable" }
+                        :wall_idref => "WallAtticGable" }
     windows_values << { :id => "AtticGableWindowWest",
                         :area => 12,
                         :azimuth => 270,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "AtticGable" }
+                        :wall_idref => "WallAtticGable" }
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     windows_values.delete_at(2)
     windows_values << { :id => "GarageWindowEast",
@@ -1253,7 +1253,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :azimuth => 90,
                         :ufactor => 0.33,
                         :shgc => 0.45,
-                        :wall_idref => "GarageWall" }
+                        :wall_idref => "WallGarageExterior" }
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     windows_values[0][:area] = 108
     windows_values[1][:area] = 108
@@ -1332,7 +1332,7 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
   elsif ['base-enclosure-garage.xml',
          'base-enclosure-2stories-garage.xml'].include? hpxml_file
     doors_values << { :id => "GarageDoorSouth",
-                      :wall_idref => "GarageWall",
+                      :wall_idref => "WallGarageExterior",
                       :area => 70,
                       :azimuth => 180,
                       :r_value => 4.4 }
@@ -1843,8 +1843,8 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
     ducts_values[0][0][:duct_location] = "attic - vented"
     ducts_values[0][1][:duct_location] = "attic - vented"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
-    ducts_values[0][0][:duct_location] = "attic - conditioned"
-    ducts_values[0][1][:duct_location] = "attic - conditioned"
+    ducts_values[0][0][:duct_location] = "living space"
+    ducts_values[0][1][:duct_location] = "living space"
   elsif ['base-enclosure-garage.xml',
          'invalid_files/duct-location.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "garage"

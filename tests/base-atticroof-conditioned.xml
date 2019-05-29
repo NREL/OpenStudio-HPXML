@@ -261,7 +261,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='AtticGableCond'/>
+            <AttachedToWall idref='WallAtticGableCond'/>
           </Window>
           <Window>
             <SystemIdentifier id='AtticGableWindowWest'/>
@@ -269,7 +269,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='AtticGableCond'/>
+            <AttachedToWall idref='WallAtticGableCond'/>
           </Window>
         </Windows>
         <Doors>
@@ -346,13 +346,13 @@
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>attic - conditioned</DuctLocation>
+                  <DuctLocation>living space</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>attic - conditioned</DuctLocation>
+                  <DuctLocation>living space</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
