@@ -274,11 +274,6 @@ class OSModel
     success = add_num_occupants(model, building, runner)
     return false if not success
 
-    # Hot Water
-
-    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
-    return false if not success
-
     # HVAC
 
     control_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
@@ -317,6 +312,11 @@ class OSModel
         end
       end
     end
+
+    # Hot Water
+
+    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws, loop_hvacs)
+    return false if not success
 
     # Plug Loads & Lighting
 
@@ -1886,7 +1886,7 @@ class OSModel
     return true
   end
 
-  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws)
+  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws, loop_hvacs)
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -2017,7 +2017,10 @@ class OSModel
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
           uef = water_heating_system_values[:uniform_energy_factor]
-          ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
+          # allow systems not requiring ef and not specifying fuel type,  eg.indirect water heater
+          if not uef.nil?
+            ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
+          end
         end
 
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
@@ -2080,6 +2083,20 @@ class OSModel
                                                cap, cop, shr, airflow_rate, fan_power,
                                                parasitics, tank_ua, int_factor, temp_depress,
                                                @nbeds, ducting)
+          return false if not success
+
+        elsif wh_type == "space-heating boiler with storage tank"
+          tank_vol = water_heating_system_values[:tank_volume]
+          fuel_type = Constants.FuelTypeElectric
+		  ef = 0.95 # FIXME
+          heating_souce_id = water_heating_system_values[:related_htg_sys_idref]
+          boiler_plant_loop = get_boiler_loop(loop_hvacs, heating_souce_id)
+          capacity_kbtuh = 0.0
+          oncycle_power = 0.0
+          offcycle_power = 0.0
+          success = Waterheater.apply_indirect(model, runner, fuel_type, nil, space, capacity_kbtuh,
+                                               tank_vol, ef, re, setpoint_temp, oncycle_power, 
+											   offcycle_power, ec_adj, @nbeds, boiler_plant_loop)
           return false if not success
 
         else
@@ -2664,6 +2681,16 @@ class OSModel
       end
     end
     return zone_hvacs
+  end
+
+  def self.get_boiler_loop(loop_hvacs, heating_souce_id)
+    # Search for the right boiler OS object
+    combined_hvac = loop_hvacs[heating_souce_id]
+    combined_hvac.each do |comp|
+      if comp.is_a? OpenStudio::Model::PlantLoop
+        return comp
+      end
+    end
   end
 
   def self.update_loop_hvacs(loop_hvacs, zone_hvacs, model, sys, orig_air_loops, orig_plant_loops, orig_zone_hvacs)
