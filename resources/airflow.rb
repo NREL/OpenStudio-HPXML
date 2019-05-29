@@ -167,6 +167,8 @@ class Airflow
 
       obj.remove
     end
+
+    return true
   end
 
   def self.get_default_shelter_coefficient()
