@@ -768,28 +768,28 @@ class Waterheater
     new_tank.setIndirectAlternateSetpointTemperatureSchedule (alternate_stp_sch)
 
     # Create loop for source side
-	temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
+    temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
     source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), Constants.WaterHeaterTypeTank)
 
     # Add heat exchanger, pump, setpointManager,tank in source side loop
     indirect_hx = create_new_hx(model, Constants.ObjectNameTankHX)
     source_loop.addSupplyBranchForComponent(indirect_hx)
-	if source_loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
+    if source_loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
       new_pump = create_new_pump(model)
       new_pump.addToNode(source_loop.supplyInletNode)
     end
     if source_loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(alt_temp, model, Constants.WaterHeaterTypeTank)
+      new_manager = create_new_schedule_manager(UnitConversions.convert(alt_temp, "C", "F"), model, Constants.WaterHeaterTypeTank)
       new_manager.addToNode(source_loop.supplyOutletNode)
     end
-	bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
-	source_loop.addDemandBranchForComponent(new_tank)
-	source_loop.addDemandBranchForComponent(bypass_pipe)
+    bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+    source_loop.addDemandBranchForComponent(new_tank)
+    source_loop.addDemandBranchForComponent(bypass_pipe)
 
     # Add heat exchanger to boiler loop
     boiler_plant_loop.addDemandBranchForComponent(indirect_hx)
-	
-	storage_tank = Waterheater.get_shw_storage_tank(model)
+
+    storage_tank = Waterheater.get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(new_tank)
@@ -798,16 +798,16 @@ class Waterheater
       storage_tank.setHeater2SetpointTemperatureSchedule(new_tank.heater2SetpointTemperatureSchedule)
       new_tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
     end
-	
-	return true
+
+    return true
   end
 
   def self.create_new_hx(model, name)
     hx = OpenStudio::Model::HeatExchangerFluidToFluid.new(model)
     hx.setName(name)
     hx.setControlType("OperationSchemeModulated")
-	
-	return hx
+
+    return hx
   end
 
   def self.get_location_hierarchy(ba_cz_name)

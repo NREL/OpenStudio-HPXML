@@ -2088,15 +2088,15 @@ class OSModel
         elsif wh_type == "space-heating boiler with storage tank"
           tank_vol = water_heating_system_values[:tank_volume]
           fuel_type = Constants.FuelTypeElectric
-		  ef = 0.95 # FIXME
+          ef = 0.95 # FIXME
           heating_souce_id = water_heating_system_values[:related_htg_sys_idref]
           boiler_plant_loop = get_boiler_loop(loop_hvacs, heating_souce_id)
           capacity_kbtuh = 0.0
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, fuel_type, nil, space, capacity_kbtuh,
-                                               tank_vol, ef, re, setpoint_temp, oncycle_power, 
-											   offcycle_power, ec_adj, @nbeds, boiler_plant_loop)
+                                               tank_vol, ef, re, setpoint_temp, oncycle_power,
+                                               offcycle_power, ec_adj, @nbeds, boiler_plant_loop)
           return false if not success
 
         else
