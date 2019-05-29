@@ -520,7 +520,7 @@ class EnergyPlusValidator
 
       ## [WHType=Indirect]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with storage tank']" => {
-        # keep this area for potential input: WaterHeatingSystem/RelatedHeatingSystem
+        "RelatedHeatingSystem" => one,
       },
 
       # [HotWaterDistribution]

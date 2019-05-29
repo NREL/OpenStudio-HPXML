@@ -729,6 +729,87 @@ class Waterheater
     return true
   end
 
+  def self.apply_indirect(model, runner, fuel_type, loop, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop)
+    obj_name_indirect = Constants.ObjectNameWaterHeater.gsub("|", "_")
+    # Validate inputs
+    if vol <= 0
+      runner.registerError("Indirect tank volume must be greater than 0.")
+      return false
+    end
+    if t_set <= 0 or t_set >= 212
+      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
+      return false
+    end
+
+    if loop.nil?
+      runner.registerInfo("A new plant loop for DHW will be added to the model")
+      runner.registerInitialCondition("No water heater model currently exists")
+      loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
+    end
+
+    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
+      new_pump = create_new_pump(model)
+      new_pump.addToNode(loop.supplyInletNode)
+    end
+
+    if loop.supplyOutletNode.setpointManagers.empty?
+      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
+      new_manager.addToNode(loop.supplyOutletNode)
+    end
+    # Create an initial simple tank model by calling create_new_heater
+    new_tank = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+
+    # Create alternate setpoint schedule for source side flow control
+    alternate_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    alternate_stp_sch.setName("#{obj_name_indirect} Alt Spt")
+    alt_temp = 55
+    alternate_stp_sch.setValue(alt_temp) # 55C is reasonable for highest desired hot water temperature
+    new_tank.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
+    new_tank.setIndirectAlternateSetpointTemperatureSchedule (alternate_stp_sch)
+
+    # Create loop for source side
+	temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
+    source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), Constants.WaterHeaterTypeTank)
+
+    # Add heat exchanger, pump, setpointManager,tank in source side loop
+    indirect_hx = create_new_hx(model, Constants.ObjectNameTankHX)
+    source_loop.addSupplyBranchForComponent(indirect_hx)
+	if source_loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
+      new_pump = create_new_pump(model)
+      new_pump.addToNode(source_loop.supplyInletNode)
+    end
+    if source_loop.supplyOutletNode.setpointManagers.empty?
+      new_manager = create_new_schedule_manager(alt_temp, model, Constants.WaterHeaterTypeTank)
+      new_manager.addToNode(source_loop.supplyOutletNode)
+    end
+	bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
+	source_loop.addDemandBranchForComponent(new_tank)
+	source_loop.addDemandBranchForComponent(bypass_pipe)
+
+    # Add heat exchanger to boiler loop
+    boiler_plant_loop.addDemandBranchForComponent(indirect_hx)
+	
+	storage_tank = Waterheater.get_shw_storage_tank(model)
+
+    if storage_tank.nil?
+      loop.addSupplyBranchForComponent(new_tank)
+    else
+      storage_tank.setHeater1SetpointTemperatureSchedule(new_tank.heater1SetpointTemperatureSchedule)
+      storage_tank.setHeater2SetpointTemperatureSchedule(new_tank.heater2SetpointTemperatureSchedule)
+      new_tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
+    end
+	
+	return true
+  end
+
+  def self.create_new_hx(model, name)
+    hx = OpenStudio::Model::HeatExchangerFluidToFluid.new(model)
+    hx.setName(name)
+    hx.setControlType("OperationSchemeModulated")
+	
+	return hx
+  end
+
   def self.get_location_hierarchy(ba_cz_name)
     if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
       return [Constants.SpaceTypeGarage,

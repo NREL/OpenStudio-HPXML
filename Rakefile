@@ -1943,11 +1943,11 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
   elsif ['base-dhw-indirect.xml'].include? hpxml_file
-    water_heating_systems_values[0][:fuel_type] = nil
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with storage tank"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = nil
+    water_heating_systems_values[0][:related_htg_sys_idref] = "HeatingSystem"
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file

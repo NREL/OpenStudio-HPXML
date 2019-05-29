@@ -1349,6 +1349,7 @@ class HPXML
                                     energy_factor: nil,
                                     uniform_energy_factor: nil,
                                     recovery_efficiency: nil,
+                                    related_htg_sys_idref: nil,
                                     **remainder)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
@@ -1364,7 +1365,8 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "EnergyFactor", to_float(energy_factor)) unless energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "UniformEnergyFactor", to_float(uniform_energy_factor)) unless uniform_energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", to_float(recovery_efficiency)) unless recovery_efficiency.nil?
-
+    related_htg_sys = XMLHelper.add_element(water_heating_system, "RelatedHeatingSystem") unless related_htg_sys_idref.nil?
+    XMLHelper.add_attribute(related_htg_sys, "idref", related_htg_sys_idref) unless related_htg_sys_idref.nil?
     check_remainder(remainder,
                     calling_method: __method__.to_s,
                     expected_kwargs: [:year_installed])
@@ -1386,7 +1388,8 @@ class HPXML
              :heating_capacity => to_float(XMLHelper.get_value(water_heating_system, "HeatingCapacity")),
              :energy_factor => to_float(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
-             :recovery_efficiency => to_float(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")) }
+             :recovery_efficiency => to_float(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
+             :related_htg_sys_idref => HPXML.get_idref(water_heating_system, "RelatedHeatingSystem") }
   end
 
   def self.add_hot_water_distribution(hpxml:,

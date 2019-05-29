@@ -528,6 +528,10 @@ class Constants
     return "res water heater"
   end
 
+  def self.ObjectNameTankHX
+    return "dhw source hx"
+  end
+
   def self.OptionTypeLightingFractions
     return 'Lamp Fractions'
   end
