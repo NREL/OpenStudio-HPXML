@@ -3496,6 +3496,15 @@ class OSModel
       return
     end
 
+    # Check foundation walls
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+      next unless fnd_wall_values[:id] == wall_idref
+
+      set_surface_interior(model, spaces, surface, subsurface_id, fnd_wall_values[:interior_adjacent_to])
+      return
+    end
+
     if not surface.space.is_initialized
       fail "Attached wall '#{wall_idref}' not found for #{subsurface_type} '#{subsurface_id}'."
     end
