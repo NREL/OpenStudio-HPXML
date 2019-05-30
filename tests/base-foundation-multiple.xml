@@ -155,7 +155,7 @@
             <Height>8.0</Height>
             <Area>360.0</Area>
             <Thickness>8.0</Thickness>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <DepthBelowGrade>4.0</DepthBelowGrade>
             <InsulationHeight>0.0</InsulationHeight>
             <Insulation>
               <SystemIdentifier id='FoundationWallInteriorInsulation'/>
