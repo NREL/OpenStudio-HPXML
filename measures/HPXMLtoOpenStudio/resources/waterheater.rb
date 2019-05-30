@@ -756,6 +756,7 @@ class Waterheater
       new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
       new_manager.addToNode(loop.supplyOutletNode)
     end
+
     # Create an initial simple tank model by calling create_new_heater
     new_tank = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
 
@@ -771,20 +772,25 @@ class Waterheater
     temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
     source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), Constants.WaterHeaterTypeTank)
 
-    # Add heat exchanger, pump, setpointManager,tank in source side loop
+    # Create heat exchanger
     indirect_hx = create_new_hx(model, Constants.ObjectNameTankHX)
+
+    # Add heat exchanger to the load distribution scheme
+    scheme = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
+    scheme.addEquipment(1000000000, indirect_hx)
+    source_loop.setPrimaryPlantEquipmentOperationScheme(scheme)
+
+    # Add components to the tank source side plant loop
     source_loop.addSupplyBranchForComponent(indirect_hx)
     if source_loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
       new_pump = create_new_pump(model)
       new_pump.addToNode(source_loop.supplyInletNode)
     end
     if source_loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(UnitConversions.convert(alt_temp, "C", "F"), model, Constants.WaterHeaterTypeTank)
-      new_manager.addToNode(source_loop.supplyOutletNode)
+      new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, alternate_stp_sch)
+      new_source_manager.addToNode(source_loop.supplyOutletNode)
     end
-    bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
     source_loop.addDemandBranchForComponent(new_tank)
-    source_loop.addDemandBranchForComponent(bypass_pipe)
 
     # Add heat exchanger to boiler loop
     boiler_plant_loop.addDemandBranchForComponent(indirect_hx)
