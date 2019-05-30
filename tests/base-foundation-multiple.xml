@@ -151,7 +151,7 @@
           <FoundationWall>
             <SystemIdentifier id='FoundationWallInterior'/>
             <ExteriorAdjacentTo>crawlspace - unvented</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - unconditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
             <Area>360.0</Area>
             <Thickness>8.0</Thickness>

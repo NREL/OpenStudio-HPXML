@@ -349,7 +349,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Roofs
-    bldg_details.elements.each('Enclosure/Attics/Attic/Roofs/Roof') do |roof|
+    bldg_details.elements.each('Enclosure/Roofs/Roof') do |roof|
       roof_id = roof.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -391,7 +391,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Foundation Slabs
-    bldg_details.elements.each('Enclosure/Foundations/Foundation/Slab') do |slab|
+    bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
       slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
 
       # Exposed Area
@@ -417,7 +417,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Walls
-    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="outside"]] | Enclosure/Attics/Attic/Walls/Wall[extension[ExteriorAdjacentTo="outside"]]') do |wall|
+    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="outside"]]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -489,7 +489,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_epsilon(90.0, sql_value, 0.01)
       elsif XMLHelper.has_element(subsurface, "AttachedToRoof")
         hpxml_value = nil
-        bldg_details.elements.each('Enclosure/Attics/Attic/Roofs/Roof') do |roof|
+        bldg_details.elements.each('Enclosure/Roofs/Roof') do |roof|
           next if roof.elements["SystemIdentifier"].attributes["id"] != subsurface.elements["AttachedToRoof"].attributes["idref"]
 
           hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")

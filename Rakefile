@@ -985,7 +985,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
     foundation_walls_values[0][:area] = 600
     foundation_walls_values << { :id => "FoundationWallInterior",
                                  :exterior_adjacent_to => "crawlspace - unvented",
-                                 :interior_adjacent_to => "basement - conditioned",
+                                 :interior_adjacent_to => "basement - unconditioned",
                                  :height => 8,
                                  :area => 360,
                                  :thickness => 8,
