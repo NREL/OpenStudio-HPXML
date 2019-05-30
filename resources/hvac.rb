@@ -1121,9 +1121,9 @@ class HVAC
     # Mini-Split Heat Pump Heating Curve Coefficients
     # Derive coefficients from user input for capacity retention at outdoor drybulb temperature X [C].
     # Biquadratic: capacity multiplier = a + b*IAT + c*IAT^2 + d*OAT + e*OAT^2 + f*IAT*OAT
-    x_A = cap_retention_temp
+    x_A = UnitConversions.convert(cap_retention_temp, "F", "C")
     y_A = cap_retention_frac
-    x_B = 47.0 # 47F is the rating point
+    x_B = UnitConversions.convert(47.0, "F", "C") # 47F is the rating point
     y_B = 1.0 # Maximum capacity factor is 1 at the rating point, by definition (this is maximum capacity, not nominal capacity)
     oat_slope = (y_B - y_A) / (x_B - x_A)
     oat_intercept = y_A - (x_A * oat_slope)
@@ -1138,11 +1138,19 @@ class HVAC
     d = oat_slope
     e = 0
     f = 0
+
+    a = a - 160.0 / 9.0 * (b + d) + 25600.0 / 81.0 * (c + e + f)
+    b = 5.0 / 9.0 * (b - 320.0 / 9.0 * c - 160.0 / 9.0 * f)
+    c = 25.0 / 81.0 * c
+    d = 5.0 / 9.0 * (d - 320.0 / 9.0 * e - 160.0 / 9.0 * f)
+    e = 25.0 / 81.0 * e
+    f = 25.0 / 81.0 * f
+
     hEAT_CAP_FT_SPEC = [[a, b, c, d, e, f]] * num_speeds
 
     # COP/EIR as a function of temperature
     # Generic "BEoptDefault" curves (=Daikin from lab data)
-    hEAT_EIR_FT_SPEC = [[0.966475472847719, 0.005914950101249, 0.000191201688297, -0.012965668198361, 0.000042253229429, -0.000524002558712]] * num_speeds
+    hEAT_EIR_FT_SPEC = [[0.9999941697687026, 0.004684593830254383, 5.901286675833333e-05, -0.0028624467783091973, 1.3041120194135802e-05, -0.00016172918478765433]] * num_speeds
     hEAT_CAP_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
     hEAT_EIR_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
 
@@ -4497,10 +4505,10 @@ class HVAC
     n_min = 0.0
     n_int = (n_min + (n_max - n_min) / 3.0).ceil.to_i
 
-    wBin = UnitConversions.convert(67.0, "F", "C")
-    tout_B = UnitConversions.convert(82.0, "F", "C")
-    tout_E = UnitConversions.convert(87.0, "F", "C")
-    tout_F = UnitConversions.convert(67.0, "F", "C")
+    wBin = 67.0
+    tout_B = 82.0
+    tout_E = 87.0
+    tout_F = 67.0
 
     eir_A2 = calc_EIR_from_EER(eer_A[n_max], fan_power_rated[n_max])
     eir_B2 = eir_A2 * MathTools.biquadratic(wBin, tout_B, cOOL_EIR_FT_SPEC[n_max])
@@ -4671,10 +4679,10 @@ class HVAC
     n_min = 0
     n_int = (n_min + (n_max - n_min) / 3.0).ceil.to_i
 
-    tin = UnitConversions.convert(70.0, "F", "C")
-    tout_3 = UnitConversions.convert(17.0, "F", "C")
-    tout_2 = UnitConversions.convert(35.0, "F", "C")
-    tout_0 = UnitConversions.convert(62.0, "F", "C")
+    tin = 70.0
+    tout_3 = 17.0
+    tout_2 = 35.0
+    tout_0 = 62.0
 
     eir_H1_2 = calc_EIR_from_COP(cop_47[n_max], fan_power_rated[n_max])
     eir_H3_2 = eir_H1_2 * MathTools.biquadratic(tin, tout_3, hEAT_EIR_FT_SPEC[n_max])
