@@ -62,8 +62,8 @@
             <SystemIdentifier id='Roof'/>
             <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
             <Area>1510.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
@@ -75,8 +75,8 @@
             <SystemIdentifier id='RoofGarage'/>
             <InteriorAdjacentTo>garage</InteriorAdjacentTo>
             <Area>670.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
@@ -91,8 +91,8 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>116.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='RimJoistFoundationInsulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -108,8 +108,8 @@
               <WoodStud/>
             </WallType>
             <Area>960.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallInsulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -123,8 +123,8 @@
               <WoodStud/>
             </WallType>
             <Area>240.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallGarageInteriorInsulation'/>
               <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
@@ -138,8 +138,8 @@
               <WoodStud/>
             </WallType>
             <Area>560.0</Area>
-            <SolarAbsorptance>0.75</SolarAbsorptance>
-            <Emittance>0.9</Emittance>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallGarageExteriorInsulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
