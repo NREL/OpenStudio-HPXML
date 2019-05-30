@@ -86,6 +86,7 @@ def create_hpxmls
     'base-dhw-uef.xml' => 'base.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
+    'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
@@ -732,6 +733,8 @@ def get_hpxml_file_roofs_values(hpxml_file, roofs_values)
                       :pitch => 6,
                       :radiant_barrier => false,
                       :insulation_assembly_r_value => 2.3 }
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    roofs_values = []
   end
   return roofs_values
 end
@@ -784,6 +787,12 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :solar_absorptance => 0.75,
                            :emittance => 0.9,
                            :insulation_assembly_r_value => 23.0 }
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    rim_joists_values << rim_joists_values[0].dup
+    rim_joists_values[0][:area] *= 0.25
+    rim_joists_values[-1][:area] *= 0.75
+    rim_joists_values[-1][:id] += "Adiabatic"
+    rim_joists_values[-1][:exterior_adjacent_to] = "other housing unit"
   end
   return rim_joists_values
 end
@@ -930,6 +939,13 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :solar_absorptance => 0.75,
                       :emittance => 0.9,
                       :insulation_assembly_r_value => 4 }]
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    walls_values.delete_at(1)
+    walls_values << walls_values[0].dup
+    walls_values[0][:area] *= 0.25
+    walls_values[-1][:area] *= 0.75
+    walls_values[-1][:id] += "Adiabatic"
+    walls_values[-1][:exterior_adjacent_to] = "other housing unit"
   end
   return walls_values
 end
@@ -993,6 +1009,12 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
         hpxml_file.include? 'hvac_dse' or
         hpxml_file.include? 'hvac_load_fracs'
     foundation_walls_values = []
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    foundation_walls_values << foundation_walls_values[0].dup
+    foundation_walls_values[0][:area] *= 0.25
+    foundation_walls_values[-1][:area] *= 0.75
+    foundation_walls_values[-1][:id] += "Adiabatic"
+    foundation_walls_values[-1][:exterior_adjacent_to] = "other housing unit"
   end
   return foundation_walls_values
 end
@@ -1054,6 +1076,12 @@ def get_hpxml_file_floors_values(hpxml_file, floors_values)
                        :interior_adjacent_to => "living space",
                        :area => 400,
                        :insulation_assembly_r_value => 18.7 }
+  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+    floors_values = [{ :id => "FloorAboveAdiabatic",
+                       :exterior_adjacent_to => "other housing unit",
+                       :interior_adjacent_to => "living space",
+                       :area => 1350,
+                       :insulation_assembly_r_value => 39.3 }]
   end
   return floors_values
 end
@@ -1842,7 +1870,8 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['base-atticroof-vented.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "attic - vented"
     ducts_values[0][1][:duct_location] = "attic - vented"
-  elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
+  elsif ['base-atticroof-conditioned.xml',
+         'base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "living space"
     ducts_values[0][1][:duct_location] = "living space"
   elsif ['base-enclosure-garage.xml',
