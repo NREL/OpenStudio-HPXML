@@ -1138,11 +1138,11 @@ class OSModel
         slabs << slab
       end
 
-      # Calculate sum of foundation wall lengths
+      # Calculate sum of exterior foundation wall lengths
       sum_wall_length = 0.0
       fnd_walls.each do |fnd_wall|
         fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-        next unless fnd_wall_values[:exterior_adjacent_to] == "ground" # FIXME: Review
+        next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
         net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
         sum_wall_length += net_area / fnd_wall_values[:height]
@@ -1155,11 +1155,11 @@ class OSModel
         slabs_perimeter_exposed[slab_values[:id]] = slab_values[:exposed_perimeter]
       end
 
-      # Foundation wall surfaces
+      # Exterior foundation wall surfaces
       foundation_object = {}
       fnd_walls.each do |fnd_wall|
         fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-        next unless fnd_wall_values[:exterior_adjacent_to] == "ground" # FIXME: Review
+        next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
         height = fnd_wall_values[:height]
         net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
@@ -1296,6 +1296,57 @@ class OSModel
 
         # FIXME: Temporary code for sizing
         surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
+      end
+
+      # Interior foundation wall surfaces
+      # The above-grade portion of the walls are modeled as EnergyPlus surfaces with standard adjacency.
+      # The below-grade portion of the walls (in contact with ground) are not modeled, as Kiva does not
+      # calculate heat flow between two zones through the ground.
+      fnd_walls.each do |fnd_wall|
+        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+        next unless fnd_wall_values[:exterior_adjacent_to] != "ground"
+
+        ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
+        ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
+        length = ag_net_area / ag_height
+        z_origin = -1 * ag_height
+        azimuth = @default_azimuth
+        if not fnd_wall_values[:azimuth].nil?
+          azimuth = fnd_wall_values[:azimuth]
+        end
+
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
+        surface.additionalProperties.setFeature("Length", length)
+        surface.additionalProperties.setFeature("Azimuth", azimuth)
+        surface.additionalProperties.setFeature("Tilt", 90.0)
+        surface.setName(fnd_wall_values[:id])
+        surface.setSurfaceType("Wall")
+        set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
+        set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
+        surface.setSunExposure("NoSun")
+        surface.setWindExposure("NoWind")
+
+        # Apply construction
+
+        wall_type = "SolidConcrete"
+        solar_absorptance = 0.75
+        emittance = 0.9
+        if is_thermal_boundary(fnd_wall_values)
+          drywall_thick_in = 0.5
+        else
+          drywall_thick_in = 0.0
+        end
+        film_r = 2.0 * Material.AirFilmVertical.rvalue
+        assembly_r = fnd_wall_values[:insulation_assembly_r_value]
+        if assembly_r.nil?
+          concrete_thick_in = fnd_wall_values[:thickness]
+          assembly_r = fnd_wall_values[:insulation_r_value] + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
+        end
+        mat_ext_finish = nil
+
+        success = apply_wall_construction(runner, model, surface, fnd_wall_values[:id], wall_type, assembly_r,
+                                          drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance)
+        return false if not success
       end
     end
   end

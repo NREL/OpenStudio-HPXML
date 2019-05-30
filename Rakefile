@@ -989,7 +989,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :height => 8,
                                  :area => 360,
                                  :thickness => 8,
-                                 :depth_below_grade => 7,
+                                 :depth_below_grade => 4,
                                  :insulation_height => 0,
                                  :insulation_r_value => 0 }
     foundation_walls_values << { :id => "FoundationWallCrawlspace",
