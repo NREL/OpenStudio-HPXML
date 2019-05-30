@@ -642,32 +642,25 @@ class OSModel
     # 2. At least one roofceiling surface
     # 3. At least one surface adjacent to outside/ground
     model.getThermalZones.each do |zone|
-      n_floors = 0
-      n_roofsceilings = 0
+      n_floorsroofsceilings = 0
       n_exteriors = 0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
           if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
             n_exteriors += 1
           end
-          if surface.surfaceType.downcase == "floor"
-            n_floors += 1
-          elsif surface.surfaceType.downcase == "roofceiling"
-            n_roofsceilings += 1
+          if ["floor", "roofceiling"].include? surface.surfaceType.downcase
+            n_floorsroofsceilings += 1
           end
         end
       end
 
-      if n_floors == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one floor surface.")
-      end
-      if n_roofsceilings == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one roof/ceiling surface.")
+      if n_floorsroofsceilings < 1
+        runner.registerError("Thermal zone '#{zone.name}' must have at least two floor/roof/ceiling surfaces.")
+        return false
       end
       if n_exteriors == 0
         runner.registerError("Thermal zone '#{zone.name}' must have at least one surface adjacent to outside/ground.")
-      end
-      if n_floors == 0 or n_roofsceilings == 0 or n_exteriors == 0
         return false
       end
     end
@@ -903,7 +896,7 @@ class OSModel
       set_surface_interior(model, spaces, surface, roof_values[:id], roof_values[:interior_adjacent_to])
 
       # Apply construction
-      if is_external_thermal_boundary(roof_values[:interior_adjacent_to], roof_values[:exterior_adjacent_to])
+      if is_thermal_boundary(roof_values)
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
@@ -974,7 +967,7 @@ class OSModel
       # The code below constructs a reasonable wall construction based on the
       # wall type while ensuring the correct assembly R-value.
 
-      if is_external_thermal_boundary(wall_values[:interior_adjacent_to], wall_values[:exterior_adjacent_to])
+      if is_thermal_boundary(wall_values)
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
@@ -1022,7 +1015,7 @@ class OSModel
 
       # Apply construction
 
-      if is_external_thermal_boundary(rim_joist_values[:interior_adjacent_to], rim_joist_values[:exterior_adjacent_to])
+      if is_thermal_boundary(rim_joist_values)
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
@@ -1088,7 +1081,7 @@ class OSModel
 
       # Apply construction
 
-      if is_external_thermal_boundary(floor_values[:interior_adjacent_to], floor_values[:exterior_adjacent_to])
+      if is_thermal_boundary(floor_values)
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
@@ -1195,7 +1188,7 @@ class OSModel
           set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
           set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
 
-          if is_external_thermal_boundary(fnd_wall_values[:interior_adjacent_to], fnd_wall_values[:exterior_adjacent_to])
+          if is_thermal_boundary(fnd_wall_values)
             drywall_thick_in = 0.5
           else
             drywall_thick_in = 0.0
@@ -3627,38 +3620,22 @@ def to_beopt_wh_type(type)
            'heat pump water heater' => Constants.WaterHeaterTypeHeatPump }[type]
 end
 
-def is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-  interior_conditioned = is_adjacent_to_conditioned(interior_adjacent_to)
-  exterior_conditioned = is_adjacent_to_conditioned(exterior_adjacent_to)
+def is_thermal_boundary(surface_values)
+  if surface_values[:exterior_adjacent_to] == "other housing unit"
+    return false # adiabatic
+  end
+
+  interior_conditioned = is_adjacent_to_conditioned(surface_values[:interior_adjacent_to])
+  exterior_conditioned = is_adjacent_to_conditioned(surface_values[:exterior_adjacent_to])
   return (interior_conditioned != exterior_conditioned)
 end
 
 def is_adjacent_to_conditioned(adjacent_to)
-  if adjacent_to == "living space"
-    return true
-  elsif adjacent_to == "garage"
-    return false
-  elsif adjacent_to == "attic - vented"
-    return false
-  elsif adjacent_to == "attic - unvented"
-    return false
-  elsif adjacent_to == "basement - unconditioned"
-    return false
-  elsif adjacent_to == "basement - conditioned"
-    return true
-  elsif adjacent_to == "crawlspace - vented"
-    return false
-  elsif adjacent_to == "crawlspace - unvented"
-    return false
-  elsif adjacent_to == "outside"
-    return false
-  elsif adjacent_to == "ground"
-    return false
-  elsif adjacent_to == "other housing unit"
+  if ["living space", "basement - conditioned"].include? adjacent_to
     return true
   end
 
-  fail "Unexpected AdjacentTo (#{adjacent_to})."
+  return false
 end
 
 def hpxml_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
