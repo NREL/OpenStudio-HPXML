@@ -768,6 +768,11 @@ class Waterheater
     new_tank.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
     new_tank.setIndirectAlternateSetpointTemperatureSchedule (alternate_stp_sch)
 
+    # change loop equipment operation scheme to heating load
+    scheme_dhw = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
+    scheme_dhw.addEquipment(1000000000, new_tank)
+    loop.setPrimaryPlantEquipmentOperationScheme(scheme_dhw)
+
     # Create loop for source side
     temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
     source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), Constants.WaterHeaterTypeTank)
