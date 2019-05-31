@@ -56,7 +56,7 @@ def create_hpxmls
     'base-atticroof-vented.xml' => 'base.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
-    'base-dhw-multiple.xml' => 'base.xml',
+    'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
     'base-dhw-recirc-demand.xml' => 'base.xml',
     'base-dhw-recirc-manual.xml' => 'base.xml',
@@ -1891,8 +1891,14 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :fuel_type => "natural gas",
                                       :water_heater_type => "instantaneous water heater",
                                       :location => "living space",
-                                      :fraction_dhw_load_served => 0.2,
+                                      :fraction_dhw_load_served => 0.1,
                                       :energy_factor => 0.82 }
+    water_heating_systems_values << { :id => "WaterHeater6",
+                                      :water_heater_type => "space-heating boiler with storage tank",
+                                      :location => "living space",
+                                      :tank_volume => 50,
+                                      :fraction_dhw_load_served => 0.1,
+                                      :related_htg_sys_idref => "HeatingSystem" }
   elsif ['base-dhw-tank-gas.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
