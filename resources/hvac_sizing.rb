@@ -1189,7 +1189,6 @@ class HVACSizing
 
     gains.each do |gain|
       # TODO: The lines below are for equivalence with BEopt
-      next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterDistribution)
       next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterRecircPump)
 
       sched = nil
@@ -1249,7 +1248,16 @@ class HVACSizing
       if sched.is_a? OpenStudio::Model::ScheduleRuleset or sched.is_a? OpenStudio::Model::ScheduleFixedInterval
         # Override any hot water schedules with smoothed schedules; TODO: Is there a better approach?
         max_mult = nil
-        if gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
+        if gain.name.to_s.start_with?(Constants.ObjectNameShower)
+          sched_values = [0.011, 0.005, 0.003, 0.005, 0.014, 0.052, 0.118, 0.117, 0.095, 0.074, 0.060, 0.047, 0.034, 0.029, 0.026, 0.025, 0.030, 0.039, 0.042, 0.042, 0.042, 0.041, 0.029, 0.021]
+          max_mult = 1.05 * 1.04
+        elsif gain.name.to_s.start_with?(Constants.ObjectNameSink) or gain.name.to_s.start_with?(Constants.ObjectNameFixtures)
+          sched_values = [0.014, 0.007, 0.005, 0.005, 0.007, 0.018, 0.042, 0.062, 0.066, 0.062, 0.054, 0.050, 0.049, 0.045, 0.043, 0.041, 0.048, 0.065, 0.075, 0.069, 0.057, 0.048, 0.040, 0.027]
+          max_mult = 1.04 * 1.04
+        elsif gain.name.to_s.start_with?(Constants.ObjectNameBath)
+          sched_values = [0.008, 0.004, 0.004, 0.004, 0.008, 0.019, 0.046, 0.058, 0.066, 0.058, 0.046, 0.035, 0.031, 0.023, 0.023, 0.023, 0.039, 0.046, 0.077, 0.100, 0.100, 0.077, 0.066, 0.039]
+          max_mult = 1.26 * 1.04
+        elsif gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
           sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
           max_mult = 1.05 * 1.04
         elsif gain.name.to_s.start_with?(Constants.ObjectNameClothesWasher)
