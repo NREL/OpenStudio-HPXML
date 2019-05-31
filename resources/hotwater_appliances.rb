@@ -15,20 +15,33 @@ class HotWaterAndAppliances
                  recirc_branch_length, recirc_control_type,
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
-                 dwhr_efficiency, dhw_loop_fracs, eri_version)
+                 dwhr_efficiency, dhw_loop_fracs, eri_version,
+                 dhw_map)
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
-    start_datetime = OpenStudio::DateTime.new(model.getYearDescription.makeDate(1, 1), OpenStudio::Time.new(0, 0))
+    start_date = OpenStudio::Date.new(OpenStudio::MonthOfYear.new(1), 1, model.getYearDescription.assumedYear)
     timestep_day = OpenStudio::Time.new(1, 0)
+
+    # Map plant loops to sys_ids
+    dhw_loops = {}
+    dhw_map.each do |sys_id, dhw_objects|
+      dhw_objects.each do |dhw_object|
+        next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
+
+        dhw_loops[sys_id] = dhw_object
+      end
+    end
 
     if not dist_type.nil?
 
       water_use_connections = {}
       setpoint_scheds = {}
 
-      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+      dhw_loop_fracs.each do |sys_id, dhw_load_frac|
+        dhw_loop = dhw_loops[sys_id]
         water_use_connections[dhw_loop] = OpenStudio::Model::WaterUseConnections.new(model)
+        dhw_map[sys_id] << water_use_connections[dhw_loop]
         dhw_loop.addDemandBranchForComponent(water_use_connections[dhw_loop])
 
         # Get water heater setpoint schedule
@@ -46,7 +59,7 @@ class HotWaterAndAppliances
 
       # Replace mains water temperature schedule with water heater inlet temperature schedule.
       # These are identical unless there is a DWHR.
-      time_series_tmains = OpenStudio::TimeSeries.new(start_datetime, timestep_day, OpenStudio::createVector(daily_wh_inlet_temperatures_c), "C")
+      time_series_tmains = OpenStudio::TimeSeries.new(start_date, timestep_day, OpenStudio::createVector(daily_wh_inlet_temperatures_c), "C")
       schedule_tmains = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series_tmains, model).get
       schedule_tmains.setName("mains temperature schedule")
       model.getSiteWaterMainsTemperature.setTemperatureSchedule(schedule_tmains)
@@ -60,7 +73,8 @@ class HotWaterAndAppliances
       cw_peak_flow = cw_schedule.calcPeakFlowFromDailygpm(cw_gpd)
       cw_design_level_w = cw_schedule.calcDesignLevelFromDailykWh(cw_annual_kwh / 365.0)
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
-      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+      dhw_loop_fracs.each do |sys_id, dhw_load_frac|
+        dhw_loop = dhw_loops[sys_id]
         add_water_use_equipment(model, cw_name, cw_peak_flow * dhw_load_frac, cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
@@ -71,7 +85,7 @@ class HotWaterAndAppliances
       cd_name = Constants.ObjectNameClothesDryer
       cd_weekday_sch = "0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024"
       cd_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      cd_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cd_name, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, 1.0, 1.0)
+      cd_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cd_name, cd_weekday_sch, cd_weekday_sch, cd_monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
       cd_design_level_e = cd_schedule.calcDesignLevelFromDailykWh(cd_annual_kwh / 365.0)
       cd_design_level_f = cd_schedule.calcDesignLevelFromDailyTherm(cd_annual_therm / 365.0)
       add_electric_equipment(model, cd_name, cd_space, cd_design_level_e, cd_frac_sens, cd_frac_lat, cd_schedule.schedule)
@@ -86,7 +100,8 @@ class HotWaterAndAppliances
       dw_peak_flow = dw_schedule.calcPeakFlowFromDailygpm(dw_gpd)
       dw_design_level_w = dw_schedule.calcDesignLevelFromDailykWh(dw_annual_kwh / 365.0)
       add_electric_equipment(model, dw_name, living_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
-      dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+      dhw_loop_fracs.each do |sys_id, dhw_load_frac|
+        dhw_loop = dhw_loops[sys_id]
         add_water_use_equipment(model, dw_name, dw_peak_flow * dhw_load_frac, dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
@@ -96,7 +111,7 @@ class HotWaterAndAppliances
       fridge_name = Constants.ObjectNameRefrigerator
       fridge_weekday_sch = "0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041"
       fridge_monthly_sch = "0.837, 0.835, 1.084, 1.084, 1.084, 1.096, 1.096, 1.096, 1.096, 0.931, 0.925, 0.837"
-      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, runner, fridge_name, fridge_weekday_sch, fridge_weekday_sch, fridge_monthly_sch, 1.0, 1.0)
+      fridge_schedule = MonthWeekdayWeekendSchedule.new(model, runner, fridge_name, fridge_weekday_sch, fridge_weekday_sch, fridge_monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
       fridge_design_level = fridge_schedule.calcDesignLevelFromDailykWh(fridge_annual_kwh / 365.0)
       add_electric_equipment(model, fridge_name, fridge_space, fridge_design_level, 1.0, 0.0, fridge_schedule.schedule)
     end
@@ -104,10 +119,10 @@ class HotWaterAndAppliances
     # Cooking Range
     if not cook_fuel_type.nil?
       cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = self.calc_range_oven_energy(nbeds, cook_fuel_type, cook_is_induction, oven_is_convection)
-      cook_name = Constants.ObjectNameCookingRange(cook_fuel_type)
+      cook_name = Constants.ObjectNameCookingRange
       cook_weekday_sch = "0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011"
       cook_monthly_sch = "1.097, 1.097, 0.991, 0.987, 0.991, 0.890, 0.896, 0.896, 0.890, 1.085, 1.085, 1.097"
-      cook_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cook_name, cook_weekday_sch, cook_weekday_sch, cook_monthly_sch, 1.0, 1.0)
+      cook_schedule = MonthWeekdayWeekendSchedule.new(model, runner, cook_name, cook_weekday_sch, cook_weekday_sch, cook_monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
       cook_design_level_e = cook_schedule.calcDesignLevelFromDailykWh(cook_annual_kwh / 365.0)
       cook_design_level_f = cook_schedule.calcDesignLevelFromDailyTherm(cook_annual_therm / 365.0)
       add_electric_equipment(model, cook_name, living_space, cook_design_level_e, cook_frac_sens, cook_frac_lat, cook_schedule.schedule)
@@ -151,7 +166,8 @@ class HotWaterAndAppliances
         fx_design_level_sens = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_sens_btu * fx_frac, "Btu", "kWh") / 365.0)
         fx_design_level_lat = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_lat_btu * fx_frac, "Btu", "kWh") / 365.0)
 
-        dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        dhw_loop_fracs.each do |sys_id, dhw_load_frac|
+          dhw_loop = dhw_loops[sys_id]
           add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac, fx_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
         end
         add_other_equipment(model, fx_name_sens, living_space, fx_design_level_sens, 1.0, 0.0, fx_schedule.schedule, nil)
@@ -166,9 +182,10 @@ class HotWaterAndAppliances
         dist_pump_monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
         dist_pump_schedule = MonthWeekdayWeekendSchedule.new(model, runner, dist_pump_name, dist_pump_weekday_sch, dist_pump_weekday_sch, dist_pump_monthly_sch, 1.0, 1.0)
         dist_pump_design_level = dist_pump_schedule.calcDesignLevelFromDailykWh(dist_pump_annual_kwh / 365.0)
-        dhw_loop_fracs.each do |dhw_loop, dhw_load_frac|
+        dhw_loop_fracs.each do |sys_id, dhw_load_frac|
+          dhw_loop = dhw_loops[sys_id]
           dist_pump = add_electric_equipment(model, dist_pump_name, living_space, dist_pump_design_level * dhw_load_frac, 0.0, 0.0, dist_pump_schedule.schedule)
-          dhw_loop.additionalProperties.setFeature("PlantLoopRecircPump", dist_pump.name.to_s)
+          dhw_map[sys_id] << dist_pump unless dist_pump.nil?
         end
       end
     end

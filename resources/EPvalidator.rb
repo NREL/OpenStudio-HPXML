@@ -46,15 +46,15 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume" => one,
-        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/GaragePresent" => one,
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
 
-        "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50 or constant nACH; see [AirInfiltration]
+        "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50, CFM50, or constant nACH; see [AirInfiltration]
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume" => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
 
         "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic" => one_or_more, # See [Attic]
         "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation" => one_or_more, # See [Foundation]
+        "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage" => zero_or_more, # See [Garage]
         "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist" => zero_or_more, # See [RimJoist]
         "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall" => one_or_more, # See [Wall]
         "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window" => zero_or_more, # See [Window]
@@ -85,11 +85,6 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']" => zero_or_one, # See [PlugLoads]
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']" => zero_or_one, # See [Television]
-      },
-
-      # [ClimateZone]
-      "/HPXML/Building/BuildingDetails/ClimateandRiskZones/ClimateZoneIECC" => {
-        "[ClimateZone='1A' or ClimateZone='1B' or ClimateZone='1C' or ClimateZone='2A' or ClimateZone='2B' or ClimateZone='2C' or ClimateZone='3A' or ClimateZone='3B' or ClimateZone='3C' or ClimateZone='4A' or ClimateZone='4B' or ClimateZone='4C' or ClimateZone='5A' or ClimateZone='5B' or ClimateZone='5C' or ClimateZone='6A' or ClimateZone='6B' or ClimateZone='6C' or ClimateZone='7' or ClimateZone='8']" => one,
       },
 
       # [WeatherStation]
@@ -220,7 +215,9 @@ class EnergyPlusValidator
         "DepthBelowGrade" => one,
         "[AdjacentTo='ground' or AdjacentTo='basement - unconditioned' or AdjacentTo='basement - conditioned' or AdjacentTo='crawlspace - vented' or AdjacentTo='crawlspace - unvented']" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        "Insulation/AssemblyEffectiveRValue" => one,
+        # Either specify insulation layer R-value & height OR assembly R-value:
+        "InsulationHeight | Insulation/AssemblyEffectiveRValue" => one,
+        "Insulation/Layer[InstallationType='continuous']/NominalRValue | Insulation/AssemblyEffectiveRValue" => one,
       },
 
       ## [FoundationSlab]
@@ -230,7 +227,7 @@ class EnergyPlusValidator
         "Thickness" => one, # Use zero for dirt floor
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
-        "UnderSlabInsulationWidth" => one,
+        "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
         "DepthBelowGrade" => one,
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
@@ -238,6 +235,50 @@ class EnergyPlusValidator
         "UnderSlabInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "extension/CarpetFraction" => one,
         "extension/CarpetRValue" => one,
+      },
+
+      # [Garage]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "Ceilings/Ceiling" => zero_or_more, # See [GarageCeiling]
+        "Walls/Wall" => one_or_more, # See [GarageWall]
+        "Slabs/Slab" => one_or_more, # See [GarageSlab]
+      },
+
+      ## [GarageCeiling]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage/Ceilings/Ceiling" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[AdjacentTo='living space' or AdjacentTo='attic - vented' or AdjacentTo='attic - unvented' or AdjacentTo='attic - conditioned']" => one,
+        "Area" => one,
+        "Insulation/SystemIdentifier" => one, # Required by HPXML schema
+        "Insulation/AssemblyEffectiveRValue" => one,
+      },
+
+      ## [GarageWall]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage/Walls/Wall" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[AdjacentTo='outside' or AdjacentTo='living space']" => one,
+        "WallType[WoodStud | DoubleWoodStud | ConcreteMasonryUnit | StructurallyInsulatedPanel | InsulatedConcreteForms | SteelFrame | SolidConcrete | StructuralBrick | StrawBale | Stone | LogWall]" => one,
+        "Area" => one,
+        "Azimuth" => zero_or_one,
+        "SolarAbsorptance" => one,
+        "Emittance" => one,
+        "Insulation/SystemIdentifier" => one, # Required by HPXML schema
+        "Insulation/AssemblyEffectiveRValue" => one,
+      },
+
+      ## [GarageSlab]
+      "/HPXML/Building/BuildingDetails/Enclosure/Garages/Garage/Slabs/Slab" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "Area" => one,
+        "Thickness" => one, # Use zero for dirt floor
+        "ExposedPerimeter" => one,
+        "PerimeterInsulationDepth" => one,
+        "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
+        "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
+        "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
+        "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
+        "UnderSlabInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
       },
 
       # [RimJoist]
@@ -489,7 +530,6 @@ class EnergyPlusValidator
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented']" => one,
         "FractionDHWLoadServed" => one,
         "[EnergyFactor | UniformEnergyFactor]" => one,
-        "extension/EnergyFactorMultiplier" => zero_or_one, # Uses ERI assumption if not provided
       },
 
       ## [WHType=Tank]
@@ -507,6 +547,7 @@ class EnergyPlusValidator
       ## [WHType=Tankless]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='instantaneous water heater']" => {
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one,
+        "PerformanceAdjustment" => zero_or_one, # Uses ERI assumption for tankless cycling derate if not provided
       },
 
       ## [WHType=HeatPump]
@@ -553,8 +594,9 @@ class EnergyPlusValidator
       # [PVSystem]
       "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
+        "[Location='ground' or Location='roof']" => one,
         "[ModuleType='standard' or ModuleType='premium' or ModuleType='thin film']" => one,
-        "[ArrayType='fixed roof mount' or ArrayType='fixed open rack' or ArrayType='1-axis' or ArrayType='1-axis backtracked' or ArrayType='2-axis']" => one,
+        "[Tracking='fixed' or Tracking='1-axis' or Tracking='1-axis backtracked' or Tracking='2-axis']" => one,
         "ArrayAzimuth" => one,
         "ArrayTilt" => one,
         "MaxPowerOutput" => one,
@@ -681,20 +723,20 @@ class EnergyPlusValidator
     frac_cool_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed/text())"]
     frac_cool_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed/text())"]
     if frac_cool_load > 1
-      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load}."
+      errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
     end
 
     # Check sum of FractionHeatLoadServeds <= 1
     frac_heat_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed/text())"]
     frac_heat_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed/text())"]
     if frac_heat_load > 1
-      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load}."
+      errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
     end
 
     # Check sum of FractionDHWLoadServed == 1
     frac_dhw_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed/text())"]
     if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01)
-      errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load}."
+      errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
 
     return errors

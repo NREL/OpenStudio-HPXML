@@ -36,15 +36,15 @@ class Geometry
     return volume
   end
 
-  def self.get_above_grade_finished_volume(model, runner = nil)
+  def self.get_above_grade_conditioned_volume(model, runner = nil)
     volume = 0
     model.getThermalZones.each do |zone|
-      next if not (self.zone_is_finished(zone) and self.zone_is_above_grade(zone))
+      next if not (self.zone_is_conditioned(zone) and self.zone_is_above_grade(zone))
 
       volume += self.get_zone_volume(zone, runner)
     end
     if volume == 0 and not runner.nil?
-      runner.registerError("Could not find any above-grade finished volume.")
+      runner.registerError("Could not find any above-grade conditioned volume.")
       return nil
     end
     return volume
@@ -70,9 +70,9 @@ class Geometry
     return maxz - minz
   end
 
-  def self.zone_is_finished(zone)
+  def self.zone_is_conditioned(zone)
     zone.spaces.each do |space|
-      unless self.space_is_finished(space)
+      unless self.space_is_conditioned(space)
         return false
       end
     end
@@ -96,19 +96,19 @@ class Geometry
     return !self.zone_is_above_grade(zone)
   end
 
-  def self.get_finished_above_and_below_grade_zones(thermal_zones)
-    finished_living_zones = []
-    finished_basement_zones = []
+  def self.get_conditioned_above_and_below_grade_zones(thermal_zones)
+    conditioned_living_zones = []
+    conditioned_basement_zones = []
     thermal_zones.each do |thermal_zone|
-      next unless self.zone_is_finished(thermal_zone)
+      next unless self.zone_is_conditioned(thermal_zone)
 
       if self.zone_is_above_grade(thermal_zone)
-        finished_living_zones << thermal_zone
+        conditioned_living_zones << thermal_zone
       elsif self.zone_is_below_grade(thermal_zone)
-        finished_basement_zones << thermal_zone
+        conditioned_basement_zones << thermal_zone
       end
     end
-    return finished_living_zones, finished_basement_zones
+    return conditioned_living_zones, conditioned_basement_zones
   end
 
   def self.get_thermal_zones_from_spaces(spaces)
@@ -123,23 +123,23 @@ class Geometry
     return thermal_zones
   end
 
-  def self.space_is_unfinished(space)
-    return !self.space_is_finished(space)
+  def self.space_is_unconditioned(space)
+    return !self.space_is_conditioned(space)
   end
 
-  def self.space_is_finished(space)
+  def self.space_is_conditioned(space)
     unless space.isPlenum
       if space.spaceType.is_initialized
         if space.spaceType.get.standardsSpaceType.is_initialized
-          return self.is_living_space_type(space.spaceType.get.standardsSpaceType.get)
+          return self.is_conditioned_space_type(space.spaceType.get.standardsSpaceType.get)
         end
       end
     end
     return false
   end
 
-  def self.is_living_space_type(space_type)
-    if [Constants.SpaceTypeLiving, Constants.SpaceTypeFinishedBasement].include? space_type
+  def self.is_conditioned_space_type(space_type)
+    if [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement].include? space_type
       return true
     end
 
@@ -245,7 +245,7 @@ class Geometry
         next if surface.surfaceType.downcase != "wall"
         next if surface.outsideBoundaryCondition.downcase != "outdoors"
         next if surface.outsideBoundaryCondition.downcase == "foundation"
-        next unless self.space_is_finished(surface.space.get)
+        next unless self.space_is_conditioned(surface.space.get)
 
         wall_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
       end
@@ -264,7 +264,7 @@ class Geometry
     return UnitConversions.convert(tilts.max, "rad", "deg")
   end
 
-  # Checks if the surface is between finished and unfinished space
+  # Checks if the surface is between conditioned and unconditioned space
   def self.is_interzonal_surface(surface)
     if surface.outsideBoundaryCondition.downcase != "surface" or not surface.space.is_initialized or not surface.adjacentSurface.is_initialized
       return false
@@ -274,7 +274,7 @@ class Geometry
     if not adjacent_surface.space.is_initialized
       return false
     end
-    if self.space_is_finished(surface.space.get) == self.space_is_finished(adjacent_surface.space.get)
+    if self.space_is_conditioned(surface.space.get) == self.space_is_conditioned(adjacent_surface.space.get)
       return false
     end
 
@@ -293,16 +293,16 @@ class Geometry
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeCrawl)
   end
 
-  def self.is_finished_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeFinishedBasement)
+  def self.is_conditioned_basement(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeConditionedBasement)
   end
 
-  def self.is_unfinished_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnfinishedBasement)
+  def self.is_unconditioned_basement(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedBasement)
   end
 
-  def self.is_unfinished_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnfinishedAttic)
+  def self.is_unconditioned_attic(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedAttic)
   end
 
   def self.is_garage(space_or_zone)
@@ -334,24 +334,24 @@ class Geometry
     end
   end
 
-  def self.get_finished_spaces(spaces)
-    finished_spaces = []
+  def self.get_conditioned_spaces(spaces)
+    conditioned_spaces = []
     spaces.each do |space|
-      next if self.space_is_unfinished(space)
+      next if self.space_is_unconditioned(space)
 
-      finished_spaces << space
+      conditioned_spaces << space
     end
-    return finished_spaces
+    return conditioned_spaces
   end
 
-  def self.get_unfinished_basement_spaces(spaces)
-    unfinished_basement_spaces = []
+  def self.get_unconditioned_basement_spaces(spaces)
+    unconditioned_basement_spaces = []
     spaces.each do |space|
-      next if not self.is_unfinished_basement(space)
+      next if not self.is_unconditioned_basement(space)
 
-      unfinished_basement_spaces << space
+      unconditioned_basement_spaces << space
     end
-    return unfinished_basement_spaces
+    return unconditioned_basement_spaces
   end
 
   def self.get_garage_spaces(spaces)
@@ -410,40 +410,10 @@ class Geometry
     return zrange
   end
 
-  def self.get_closest_neighbor_distance(model)
-    house_points = []
-    neighbor_points = []
-    model.getSurfaces.each do |surface|
-      next unless surface.surfaceType.downcase == "wall"
-
-      surface.vertices.each do |vertex|
-        house_points << OpenStudio::Point3d.new(vertex)
-      end
-    end
-    model.getShadingSurfaces.each do |shading_surface|
-      next unless shading_surface.name.to_s.downcase.include? "neighbor"
-
-      shading_surface.vertices.each do |vertex|
-        neighbor_points << OpenStudio::Point3d.new(vertex)
-      end
-    end
-    neighbor_offsets = []
-    house_points.each do |house_point|
-      neighbor_points.each do |neighbor_point|
-        neighbor_offsets << OpenStudio::getDistance(house_point, neighbor_point)
-      end
-    end
-    if neighbor_offsets.empty?
-      return 0
-    end
-
-    return UnitConversions.convert(neighbor_offsets.min, "m", "ft")
-  end
-
   def self.get_spaces_above_grade_exterior_walls(spaces)
     above_grade_exterior_walls = []
     spaces.each do |space|
-      next if not Geometry.space_is_finished(space)
+      next if not Geometry.space_is_conditioned(space)
       next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
@@ -460,7 +430,7 @@ class Geometry
   def self.get_spaces_above_grade_exterior_floors(spaces)
     above_grade_exterior_floors = []
     spaces.each do |space|
-      next if not Geometry.space_is_finished(space)
+      next if not Geometry.space_is_conditioned(space)
       next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
@@ -477,7 +447,7 @@ class Geometry
   def self.get_spaces_above_grade_ground_floors(spaces)
     above_grade_ground_floors = []
     spaces.each do |space|
-      next if not Geometry.space_is_finished(space)
+      next if not Geometry.space_is_conditioned(space)
       next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
@@ -494,7 +464,7 @@ class Geometry
   def self.get_spaces_above_grade_exterior_roofs(spaces)
     above_grade_exterior_roofs = []
     spaces.each do |space|
-      next if not Geometry.space_is_finished(space)
+      next if not Geometry.space_is_conditioned(space)
       next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
@@ -539,7 +509,7 @@ class Geometry
   def self.get_spaces_below_grade_exterior_walls(spaces)
     below_grade_exterior_walls = []
     spaces.each do |space|
-      next if not Geometry.space_is_finished(space)
+      next if not Geometry.space_is_conditioned(space)
       next if not Geometry.space_is_below_grade(space)
 
       space.surfaces.each do |surface|
@@ -556,7 +526,7 @@ class Geometry
   def self.get_spaces_below_grade_exterior_floors(spaces)
     below_grade_exterior_floors = []
     spaces.each do |space|
-      next if not Geometry.space_is_finished(space)
+      next if not Geometry.space_is_conditioned(space)
       next if not Geometry.space_is_below_grade(space)
 
       space.surfaces.each do |surface|
@@ -610,7 +580,7 @@ class Geometry
     activity_sch = nil
 
     # Get spaces
-    ffa_spaces = self.get_finished_spaces(model.getSpaces)
+    ffa_spaces = self.get_conditioned_spaces(model.getSpaces)
 
     ffa_spaces.each do |space|
       space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
@@ -619,7 +589,7 @@ class Geometry
 
       if people_sch.nil?
         # Create schedule
-        people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch)
+        people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
         if not people_sch.validated?
           return false
         end
@@ -669,97 +639,5 @@ class Geometry
     sens = sens_gains / tot_gains
     lat = lat_gains / tot_gains
     return heat_gain, hrs_per_day, sens, lat
-  end
-
-  def self.process_neighbors(model, runner, left_neighbor_offset, right_neighbor_offset, back_neighbor_offset, front_neighbor_offset)
-    # Error checking
-    if left_neighbor_offset < 0 or right_neighbor_offset < 0 or back_neighbor_offset < 0 or front_neighbor_offset < 0
-      runner.registerError("Neighbor offsets must be greater than or equal to 0.")
-      return false
-    end
-
-    surfaces = model.getSurfaces
-    if surfaces.size == 0
-      runner.registerInfo("No surfaces found to copy for neighboring buildings.")
-      return true
-    end
-
-    # No neighbor shading surfaces to add? Exit here.
-    if [left_neighbor_offset, right_neighbor_offset, back_neighbor_offset, front_neighbor_offset].all? { |offset| offset == 0 }
-      runner.registerInfo("No #{Constants.ObjectNameNeighbors} shading surfaces to be added.")
-      return true
-    end
-
-    # Get x, y, z minima and maxima of wall surfaces
-    least_x = 9e99
-    greatest_x = -9e99
-    least_y = 9e99
-    greatest_y = -9e99
-    greatest_z = -9e99
-    surfaces.each do |surface|
-      next unless surface.surfaceType.downcase == "wall"
-
-      space = surface.space.get
-      surface.vertices.each do |vertex|
-        if vertex.x > greatest_x
-          greatest_x = vertex.x
-        end
-        if vertex.x < least_x
-          least_x = vertex.x
-        end
-        if vertex.y > greatest_y
-          greatest_y = vertex.y
-        end
-        if vertex.y < least_y
-          least_y = vertex.y
-        end
-        if vertex.z + space.zOrigin > greatest_z
-          greatest_z = vertex.z + space.zOrigin
-        end
-      end
-    end
-
-    directions = [[Constants.FacadeLeft, left_neighbor_offset], [Constants.FacadeRight, right_neighbor_offset], [Constants.FacadeBack, back_neighbor_offset], [Constants.FacadeFront, front_neighbor_offset]]
-
-    shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
-    shading_surface_group.setName(Constants.ObjectNameNeighbors)
-
-    num_added = 0
-    directions.each do |facade, neighbor_offset|
-      next unless neighbor_offset > 0
-
-      vertices = OpenStudio::Point3dVector.new
-      m = Geometry.initialize_transformation_matrix(OpenStudio::Matrix.new(4, 4, 0))
-      transformation = OpenStudio::Transformation.new(m)
-      if facade == Constants.FacadeLeft
-        vertices << OpenStudio::Point3d.new(least_x - neighbor_offset, least_y, 0)
-        vertices << OpenStudio::Point3d.new(least_x - neighbor_offset, least_y, greatest_z)
-        vertices << OpenStudio::Point3d.new(least_x - neighbor_offset, greatest_y, greatest_z)
-        vertices << OpenStudio::Point3d.new(least_x - neighbor_offset, greatest_y, 0)
-      elsif facade == Constants.FacadeRight
-        vertices << OpenStudio::Point3d.new(greatest_x + neighbor_offset, greatest_y, 0)
-        vertices << OpenStudio::Point3d.new(greatest_x + neighbor_offset, greatest_y, greatest_z)
-        vertices << OpenStudio::Point3d.new(greatest_x + neighbor_offset, least_y, greatest_z)
-        vertices << OpenStudio::Point3d.new(greatest_x + neighbor_offset, least_y, 0)
-      elsif facade == Constants.FacadeFront
-        vertices << OpenStudio::Point3d.new(greatest_x, least_y - neighbor_offset, 0)
-        vertices << OpenStudio::Point3d.new(greatest_x, least_y - neighbor_offset, greatest_z)
-        vertices << OpenStudio::Point3d.new(least_x, least_y - neighbor_offset, greatest_z)
-        vertices << OpenStudio::Point3d.new(least_x, least_y - neighbor_offset, 0)
-      elsif facade == Constants.FacadeBack
-        vertices << OpenStudio::Point3d.new(least_x, greatest_y + neighbor_offset, 0)
-        vertices << OpenStudio::Point3d.new(least_x, greatest_y + neighbor_offset, greatest_z)
-        vertices << OpenStudio::Point3d.new(greatest_x, greatest_y + neighbor_offset, greatest_z)
-        vertices << OpenStudio::Point3d.new(greatest_x, greatest_y + neighbor_offset, 0)
-      end
-      vertices = transformation * vertices
-      shading_surface = OpenStudio::Model::ShadingSurface.new(vertices, model)
-      shading_surface.setName(Constants.ObjectNameNeighbors(facade))
-      shading_surface.setShadingSurfaceGroup(shading_surface_group)
-      num_added += 1
-    end
-
-    runner.registerInfo("Added #{num_added} #{Constants.ObjectNameNeighbors} shading surfaces.")
-    return true
   end
 end
