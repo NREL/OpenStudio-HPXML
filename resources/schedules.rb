@@ -424,7 +424,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, runner, obj_name, nbeds, daily_mw_fractions = nil, days_shift = 0, create_sch_object = true, schedule_type_limits_name = nil)
+  def initialize(model, runner, obj_name, nbeds, daily_mw_fractions = nil, days_shift = 0, create_sch_object = true)
     @validated = true
     @model = model
     @runner = runner
@@ -438,7 +438,6 @@ class HotWaterSchedule
     else
       @nbeds = nbeds
     end
-    @schedule_type_limits_name = schedule_type_limits_name
     @daily_mw_fractions = daily_mw_fractions
 
     file_prefixes = { Constants.ObjectNameClothesWasher => "ClothesWasher",
@@ -667,7 +666,6 @@ class HotWaterSchedule
     end
 
     schedule.setName(@sch_name)
-    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
 
     return schedule
   end
