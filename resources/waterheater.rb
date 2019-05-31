@@ -118,19 +118,19 @@ class Waterheater
     dhw_map[sys_id] << loop
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = Waterheater.create_new_pump(model)
+      new_pump = create_new_pump(model)
       new_pump.addToNode(loop.supplyInletNode)
     end
 
     if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
+      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
-    new_heater = Waterheater.create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
-    storage_tank = Waterheater.get_shw_storage_tank(model)
+    storage_tank = get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(new_heater)
@@ -214,13 +214,13 @@ class Waterheater
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
     runner.registerInitialCondition("There is no existing water heater")
-    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
+    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
     dhw_map[sys_id] << loop
 
-    new_pump = Waterheater.create_new_pump(model)
+    new_pump = create_new_pump(model)
     new_pump.addToNode(loop.supplyInletNode)
 
-    new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Only ever going to make HPWHs in this measure, so don't split this code out to waterheater.rb
@@ -719,7 +719,7 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_ducting_program)
 
-    storage_tank = Waterheater.get_shw_storage_tank(model)
+    storage_tank = get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(tank)

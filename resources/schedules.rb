@@ -424,24 +424,30 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, runner, sch_name, temperature_sch_name, num_bedrooms, days_shift,
-                 file_prefix, target_water_temperature, create_sch_object = true,
-                 schedule_type_limits_name = nil)
+  def initialize(model, runner, obj_name, nbeds, daily_mw_fractions = nil, days_shift = 0, create_sch_object = true)
     @validated = true
     @model = model
     @runner = runner
-    @sch_name = sch_name
+    @sch_name = "#{obj_name} schedule"
     @schedule = nil
-    @temperature_sch_name = temperature_sch_name
     @days_shift = days_shift
-    @nbeds = ([num_bedrooms, 5].min).to_i
-    @target_water_temperature = UnitConversions.convert(target_water_temperature, "F", "C")
-    @schedule_type_limits_name = schedule_type_limits_name
-    if file_prefix == "ClothesDryer"
-      @file_prefix = "ClothesWasher"
+    if nbeds < 1
+      @nbeds = 1
+    elsif nbeds > 5
+      @nbeds = 5
     else
-      @file_prefix = file_prefix
+      @nbeds = nbeds
     end
+    @daily_mw_fractions = daily_mw_fractions
+
+    file_prefixes = { Constants.ObjectNameClothesWasher => "ClothesWasher",
+                      Constants.ObjectNameClothesDryer => "ClothesWasher",
+                      Constants.ObjectNameDishwasher => "Dishwasher",
+                      Constants.ObjectNameShower => "Shower",
+                      Constants.ObjectNameSink => "Sink",
+                      Constants.ObjectNameBath => "Bath",
+                      Constants.ObjectNameFixtures => "SSB" }
+    @file_prefix = file_prefixes[obj_name]
 
     timestep_minutes = (60 / @model.getTimestep.numberOfTimestepsPerHour).to_i
     weeks = 1 # use a single week that repeats
@@ -481,16 +487,8 @@ class HotWaterSchedule
     return @schedule
   end
 
-  def temperatureSchedule
-    temperature_sch = OpenStudio::Model::ScheduleConstant.new(@model)
-    temperature_sch.setValue(@target_water_temperature)
-    temperature_sch.setName(@temperature_sch_name)
-    Schedule.set_schedule_type_limits(@model, temperature_sch, Constants.ScheduleTypeLimitsTemperature)
-    return temperature_sch
-  end
-
-  def getOntimeFraction
-    return @ontime
+  def totalFlow
+    return @totflow
   end
 
   private
@@ -599,7 +597,8 @@ class HotWaterSchedule
   end
 
   def createSchedule(data, timestep_minutes, weeks)
-    if data.size == 0
+    data_size = data.size
+    if data_size == 0
       return nil
     end
 
@@ -609,41 +608,64 @@ class HotWaterSchedule
     last_day_of_year = 365
     last_day_of_year += 1 if year_description.isLeapYear
 
-    time = []
-    (timestep_minutes..24 * 60).step(timestep_minutes).to_a.each_with_index do |m, i|
-      time[i] = OpenStudio::Time.new(0, 0, m, 0)
-    end
+    if not @daily_mw_fractions.nil?
+      # Create ScheduleInterval with repeating weeks
+      # This is an annual schedule due to (daily) conversion between mixed water and hot water
 
-    schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
-    schedule.setName(@sch_name)
-
-    schedule_rules = []
-    for d in 1..7 * weeks # how many unique day schedules
-      next if d > last_day_of_year
-
-      rule = OpenStudio::Model::ScheduleRule.new(schedule)
-      rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{d}")
-      day_schedule = rule.daySchedule
-      day_schedule.setName(@sch_name + " #{Schedule.allday_name}#{d}")
-      previous_value = data[(d - 1) * 24 * 60 / timestep_minutes]
-      time.each_with_index do |m, i|
-        if i != time.length - 1
-          next if data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes] == previous_value
+      annual_values = []
+      data_idx = 0
+      for day in 0..last_day_of_year - 1
+        for hr in 0..23
+          for timestep in 1..(60.0 / timestep_minutes)
+            data_idx += 1
+            annual_values << data[data_idx % data_size] * @daily_mw_fractions[day]
+          end
         end
-        day_schedule.addValue(m, previous_value)
-        previous_value = data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes]
       end
-      Schedule.set_weekday_rule(rule)
-      Schedule.set_weekend_rule(rule)
-      for w in 0..52 # max num of weeks
-        next if d + (w * 7 * weeks) > last_day_of_year
 
-        date_s = OpenStudio::Date::fromDayOfYear(d + (w * 7 * weeks), assumed_year)
-        rule.addSpecificDate(date_s)
+      start_datetime = OpenStudio::DateTime.new(year_description.makeDate(1, 1), OpenStudio::Time.new(0, 0))
+      timestep_interval = OpenStudio::Time.new(0, 0, timestep_minutes)
+      time_series = OpenStudio::TimeSeries.new(start_datetime, timestep_interval, OpenStudio::createVector(annual_values), "")
+      schedule = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series, @model).get
+
+    else
+      # Create ScheduleRuleset with repeating weeks
+
+      time = []
+      (timestep_minutes..24 * 60).step(timestep_minutes).to_a.each_with_index do |m, i|
+        time[i] = OpenStudio::Time.new(0, 0, m, 0)
+      end
+
+      schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
+
+      schedule_rules = []
+      for d in 1..7 * weeks # how many unique day schedules
+        next if d > last_day_of_year
+
+        rule = OpenStudio::Model::ScheduleRule.new(schedule)
+        rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{d}")
+        day_schedule = rule.daySchedule
+        day_schedule.setName(@sch_name + " #{Schedule.allday_name}#{d}")
+        previous_value = data[(d - 1) * 24 * 60 / timestep_minutes]
+        time.each_with_index do |m, i|
+          if i != time.length - 1
+            next if data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes] == previous_value
+          end
+          day_schedule.addValue(m, previous_value)
+          previous_value = data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes]
+        end
+        Schedule.set_weekday_rule(rule)
+        Schedule.set_weekend_rule(rule)
+        for w in 0..52 # max num of weeks
+          next if d + (w * 7 * weeks) > last_day_of_year
+
+          date_s = OpenStudio::Date::fromDayOfYear(d + (w * 7 * weeks), assumed_year)
+          rule.addSpecificDate(date_s)
+        end
       end
     end
 
-    Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
+    schedule.setName(@sch_name)
 
     return schedule
   end
