@@ -987,7 +987,7 @@ class Waterheater
     new_heater.setDeadbandTemperatureDifference(deadband(wh_type))
 
     new_heater.setHeaterMinimumCapacity(0.0)
-    new_heater.setHeaterMaximumCapacity(UnitConversions.convert(100, "kBtu/hr", "W")) # Hard-sized to ensure no unmet water heating load
+    new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, "kBtu/hr", "W"))
     new_heater.setHeaterFuelType(HelperMethods.eplus_fuel_map(fuel))
     new_heater.setHeaterThermalEfficiency(eta_c / ec_adj)
     new_heater.setTankVolume(UnitConversions.convert(act_vol, "gal", "m^3"))
