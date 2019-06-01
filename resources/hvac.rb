@@ -2179,7 +2179,9 @@ class HVAC
       if htg_coil.is_a? OpenStudio::Model::CoilHeatingGas
         var = { 'NaturalGas' => 'Heating Coil Gas Energy',
                 'PropaneGas' => 'Heating Coil Propane Energy',
-                'FuelOil#1' => 'Heating Coil FuelOil#1 Energy' }[htg_coil.fuelType]
+                'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
+                'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
+                'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[htg_coil.fuelType]
       end
       fail "Unexpected heating coil '#{htg_coil.name}'." if var.nil?
 
