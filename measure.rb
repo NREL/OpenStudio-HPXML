@@ -2623,6 +2623,9 @@ class OSModel
     if @has_vented_attic
       attic_sla = construction_values[:vented_attic_sla]
       attic_const_ach = construction_values[:vented_attic_constant_ach]
+      if attic_sla.nil? and attic_const_ach.nil?
+        attic_sla = Airflow.get_default_vented_attic_sla()
+      end
     else
       attic_sla = 0.0
       attic_const_ach = nil
@@ -2632,6 +2635,9 @@ class OSModel
       crawl_ach = construction_values[:vented_crawlspace_constant_ach]
       if crawl_ach.nil?
         crawl_ach = construction_values[:vented_crawlspace_sla] # FIXME SLA vs ACH
+      end
+      if crawl_ach.nil?
+        crawl_ach = Airflow.get_default_vented_crawl_sla() # FIXME SLA vs ACH
       end
     else
       crawl_ach = 0.0
@@ -2845,8 +2851,8 @@ class OSModel
           next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
 
           sys_id = sys.elements["SystemIdentifier"].attributes["id"]
-          heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys
-          cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys
+          heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionHeatLoadServed")) > 0
+          cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionCoolLoadServed")) > 0
 
           @hvac_map[sys_id].each do |loop|
             next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
