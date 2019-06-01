@@ -1,4 +1,4 @@
-<?xml version='1.0'?> 
+<?xml version='1.0'?>
 <HPXML xmlns='http://hpxmlonline.com/2014/6' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' schemaVersion='3.0'>
   <XMLTransactionHeaderInformation>
     <XMLType/>
@@ -106,7 +106,6 @@
             </extension>
           </Roof>
         </Roofs>
-        <Roofs/>
         <Walls>
           <Wall>
             <SystemIdentifier id='front_wall'/>
