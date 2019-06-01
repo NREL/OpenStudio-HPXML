@@ -38,7 +38,6 @@ task :migrate_v3_hpxmls do
   require 'rexml/document'
   require 'rexml/xpath'
   require_relative 'measures/HPXMLtoOpenStudio/resources/xmlhelper.rb'
-  require_relative 'measures/HEScoreRuleset/resources/HESvalidator.rb'
 
   this_dir = File.dirname(__FILE__)
   xsd_path = File.join(this_dir, "measures", "HPXMLtoOpenStudio", "hpxml_schemas", "HPXML.xsd")
@@ -125,13 +124,6 @@ task :migrate_v3_hpxmls do
     # Validate against schema
     XMLHelper.write_file(hpxml_doc, xml)
     errors = XMLHelper.validate(hpxml_doc.to_s, xsd_path)
-    errors.each do |error|
-      puts error
-    end
-    fail if errors.size > 0
-
-    # Validate against HESvalidator
-    errors = HEScoreValidator.run_validator(hpxml_doc)
     errors.each do |error|
       puts error
     end

@@ -24,10 +24,12 @@ class HEScoreRuleset
 
     # Enclosure
     set_enclosure_air_infiltration(orig_details, hpxml)
-    set_enclosure_attics_roofs(orig_details, hpxml)
-    set_enclosure_foundations(orig_details, hpxml)
+    set_enclosure_roofs(orig_details, hpxml)
     set_enclosure_rim_joists(orig_details, hpxml)
     set_enclosure_walls(orig_details, hpxml)
+    set_enclosure_foundation_walls(orig_details, hpxml)
+    set_enclosure_floors(orig_details, hpxml)
+    set_enclosure_slabs(orig_details, hpxml)
     set_enclosure_windows(orig_details, hpxml)
     set_enclosure_skylights(orig_details, hpxml)
     set_enclosure_doors(orig_details, hpxml)
@@ -135,7 +137,7 @@ class HEScoreRuleset
                                            air_leakage: ach50)
   end
 
-  def self.set_enclosure_attics_roofs(orig_details, hpxml)
+  def self.set_enclosure_roofs(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
       attic_adjacent = get_attic_adjacent(orig_attic)
 
@@ -162,119 +164,8 @@ class HEScoreRuleset
                        emittance: 0.9, # ERI assumption; TODO get values from method
                        pitch: Math.tan(UnitConversions.convert(@roof_angle, "deg", "rad")) * 12,
                        radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
-                       insulation_id: "#{roof_values[:insulation_id]}_#{idx}",
                        insulation_assembly_r_value: roof_r)
       end
-
-      # Floor
-      if ["attic - unvented", "attic - vented"].include? attic_adjacent
-        floor_id = HPXML.get_idref(orig_attic, "AttachedToFloor")
-        floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
-        floor_values = HPXML.get_floor_values(floor: floor)
-        floor_r = get_ceiling_assembly_r(floor_values[:insulation_cavity_r_value])
-
-        HPXML.add_floor(hpxml: hpxml,
-                        id: "#{floor_values[:id]}_floor",
-                        exterior_adjacent_to: attic_adjacent,
-                        interior_adjacent_to: "living space",
-                        area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
-                        insulation_id: floor_values[:insulation_id],
-                        insulation_assembly_r_value: floor_r)
-      end
-
-      # Gable wall: Two surfaces per HES zone_roof
-      # FIXME: Do we want gable walls even for cathedral ceiling and conditioned attic where roof area is provided by the user?
-      gable_height = @bldg_length_side / 2 * Math.sin(UnitConversions.convert(@roof_angle, "deg", "rad"))
-      gable_area = @bldg_length_side / 2 * gable_height
-      gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270] # FIXME: Verify
-      gable_azimuths.each_with_index do |gable_azimuth, idx|
-        HPXML.add_wall(hpxml: hpxml,
-                       id: "#{roof_values[:id]}_gable_#{idx}",
-                       exterior_adjacent_to: "outside",
-                       interior_adjacent_to: attic_adjacent,
-                       wall_type: "WoodStud",
-                       area: gable_area, # FIXME: Verify
-                       azimuth: sanitize_azimuth(gable_azimuth),
-                       solar_absorptance: 0.75, # ERI assumption; TODO get values from method
-                       emittance: 0.9, # ERI assumption; TODO get values from method
-                       insulation_id: "#{roof_values[:insulation_id]}_gable_#{idx}",
-                       insulation_assembly_r_value: 4.0) # FIXME: Hard-coded
-      end
-    end
-  end
-
-  def self.set_enclosure_foundations(orig_details, hpxml)
-    orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
-      fnd_adjacent = get_foundation_adjacent(orig_foundation)
-
-      # FrameFloor
-      floor_id = HPXML.get_idref(orig_foundation, "AttachedToFloor")
-      floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
-      floor_values = HPXML.get_floor_values(floor: floor)
-      if ["basement - unconditioned", "crawlspace - vented", "crawlspace - unvented"].include? fnd_adjacent
-        floor_r = get_floor_assembly_r(floor_values[:insulation_cavity_r_value])
-
-        HPXML.add_floor(hpxml: hpxml,
-                        id: floor_values[:id],
-                        exterior_adjacent_to: fnd_adjacent,
-                        interior_adjacent_to: "living space",
-                        area: floor_values[:area],
-                        insulation_id: floor_values[:insulation_id],
-                        insulation_assembly_r_value: floor_r)
-      end
-
-      # FoundationWall
-      if ["basement - unconditioned", "basement - conditioned", "crawlspace - vented", "crawlspace - unvented"].include? fnd_adjacent
-        fndwall_id = HPXML.get_idref(orig_foundation, "AttachedToFoundationWall")
-        fndwall = orig_details.elements["Enclosure/FoundationWalls/FoundationWall[SystemIdentifier[@id='#{fndwall_id}']]"]
-        fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: fndwall)
-        # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
-        if ["basement - unconditioned", "basement - conditioned"].include? fnd_adjacent
-          fndwall_height = 8.0 # FIXME: Verify
-        else
-          fndwall_height = 2.5 # FIXME: Verify
-        end
-
-        HPXML.add_foundation_wall(hpxml: hpxml,
-                                  id: fndwall_values[:id],
-                                  exterior_adjacent_to: "ground",
-                                  interior_adjacent_to: fnd_adjacent,
-                                  height: fndwall_height,
-                                  area: fndwall_height * @bldg_perimeter, # FIXME: Verify
-                                  thickness: 8, # FIXME: Verify
-                                  depth_below_grade: fndwall_height, # FIXME: Verify
-                                  insulation_id: fndwall_values[:insulation_id],
-                                  insulation_assembly_r_value: fndwall_values[:insulation_r_value] + 3.0) # FIXME: need to convert from insulation R-value to assembly R-value
-      end
-
-      # Slab
-      if fnd_adjacent == "living space"
-        slab_id = HPXML.get_idref(orig_foundation, "AttachedToSlab")
-        slab = orig_details.elements["Enclosure/Slabs/Slab[SystemIdentifier[@id='#{slab_id}']]"]
-        slab_values = HPXML.get_slab_values(slab: slab)
-      else
-        slab_values = {}
-        slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
-        slab_values[:area] = floor_values[:area]
-        slab_values[:perimeter_insulation_id] = "#{slab_values[:id]}_perim_insulation"
-        slab_values[:perimeter_insulation_r_value] = 0
-      end
-
-      HPXML.add_slab(hpxml: hpxml,
-                     id: slab_values[:id],
-                     interior_adjacent_to: fnd_adjacent,
-                     area: slab_values[:area],
-                     thickness: 4,
-                     exposed_perimeter: @bldg_perimeter, # FIXME: Verify
-                     perimeter_insulation_depth: 1, # FIXME: Hard-coded
-                     under_slab_insulation_width: 0, # FIXME: Verify
-                     depth_below_grade: 0, # FIXME: Verify
-                     carpet_fraction: 0.5, # FIXME: Hard-coded
-                     carpet_r_value: 2, # FIXME: Hard-coded
-                     perimeter_insulation_id: slab_values[:perimeter_insulation_id],
-                     perimeter_insulation_r_value: slab_values[:perimeter_insulation_r_value],
-                     under_slab_insulation_id: "#{slab_values[:id]}_under_insulation",
-                     under_slab_insulation_r_value: 0)
     end
   end
 
@@ -283,6 +174,7 @@ class HEScoreRuleset
   end
 
   def self.set_enclosure_walls(orig_details, hpxml)
+    # Above-grade walls
     orig_details.elements.each("Enclosure/Walls/Wall") do |orig_wall|
       wall_values = HPXML.get_wall_values(wall: orig_wall)
 
@@ -318,8 +210,134 @@ class HEScoreRuleset
                      azimuth: orientation_to_azimuth(wall_values[:orientation]),
                      solar_absorptance: 0.75, # ERI assumption; TODO get values from method
                      emittance: 0.9, # ERI assumption; TODO get values from method
-                     insulation_id: "#{wall_values[:id]}_insulation",
                      insulation_assembly_r_value: wall_r)
+    end
+
+    # Gable walls
+    orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
+      attic_adjacent = get_attic_adjacent(orig_attic)
+
+      # Gable wall: Two surfaces per HES zone_roof
+      # FIXME: Do we want gable walls even for cathedral ceiling and conditioned attic where roof area is provided by the user?
+      gable_height = @bldg_length_side / 2 * Math.sin(UnitConversions.convert(@roof_angle, "deg", "rad"))
+      gable_area = @bldg_length_side / 2 * gable_height
+      gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270] # FIXME: Verify
+      gable_azimuths.each_with_index do |gable_azimuth, idx|
+        HPXML.add_wall(hpxml: hpxml,
+                       id: "#{HPXML.get_id(orig_attic)}_gable_#{idx}",
+                       exterior_adjacent_to: "outside",
+                       interior_adjacent_to: attic_adjacent,
+                       wall_type: "WoodStud",
+                       area: gable_area, # FIXME: Verify
+                       azimuth: sanitize_azimuth(gable_azimuth),
+                       solar_absorptance: 0.75, # ERI assumption; TODO get values from method
+                       emittance: 0.9, # ERI assumption; TODO get values from method
+                       insulation_assembly_r_value: 4.0) # FIXME: Hard-coded
+      end
+    end
+  end
+
+  def self.set_enclosure_foundation_walls(orig_details, hpxml)
+    orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
+      fnd_adjacent = get_foundation_adjacent(orig_foundation)
+
+      if ["basement - unconditioned", "basement - conditioned", "crawlspace - vented", "crawlspace - unvented"].include? fnd_adjacent
+        fndwall_id = HPXML.get_idref(orig_foundation, "AttachedToFoundationWall")
+        fndwall = orig_details.elements["Enclosure/FoundationWalls/FoundationWall[SystemIdentifier[@id='#{fndwall_id}']]"]
+        fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: fndwall)
+        # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
+        if ["basement - unconditioned", "basement - conditioned"].include? fnd_adjacent
+          fndwall_height = 8.0 # FIXME: Verify
+        else
+          fndwall_height = 2.5 # FIXME: Verify
+        end
+
+        HPXML.add_foundation_wall(hpxml: hpxml,
+                                  id: fndwall_values[:id],
+                                  exterior_adjacent_to: "ground",
+                                  interior_adjacent_to: fnd_adjacent,
+                                  height: fndwall_height,
+                                  area: fndwall_height * @bldg_perimeter, # FIXME: Verify
+                                  thickness: 8, # FIXME: Verify
+                                  depth_below_grade: fndwall_height, # FIXME: Verify
+                                  insulation_assembly_r_value: fndwall_values[:insulation_r_value] + 3.0) # FIXME: need to convert from insulation R-value to assembly R-value
+      end
+    end
+  end
+
+  def self.set_enclosure_floors(orig_details, hpxml)
+    # Floors above foundation
+    orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
+      fnd_adjacent = get_foundation_adjacent(orig_foundation)
+
+      floor_id = HPXML.get_idref(orig_foundation, "AttachedToFloor")
+      floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
+      floor_values = HPXML.get_floor_values(floor: floor)
+      if ["basement - unconditioned", "crawlspace - vented", "crawlspace - unvented"].include? fnd_adjacent
+        floor_r = get_floor_assembly_r(floor_values[:insulation_cavity_r_value])
+
+        HPXML.add_floor(hpxml: hpxml,
+                        id: floor_values[:id],
+                        exterior_adjacent_to: fnd_adjacent,
+                        interior_adjacent_to: "living space",
+                        area: floor_values[:area],
+                        insulation_assembly_r_value: floor_r)
+      end
+    end
+
+    # Floors below attic
+    orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
+      attic_adjacent = get_attic_adjacent(orig_attic)
+
+      if ["attic - unvented", "attic - vented"].include? attic_adjacent
+        floor_id = HPXML.get_idref(orig_attic, "AttachedToFloor")
+        floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
+        floor_values = HPXML.get_floor_values(floor: floor)
+        floor_r = get_ceiling_assembly_r(floor_values[:insulation_cavity_r_value])
+
+        HPXML.add_floor(hpxml: hpxml,
+                        id: floor_values[:id],
+                        exterior_adjacent_to: attic_adjacent,
+                        interior_adjacent_to: "living space",
+                        area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
+                        insulation_assembly_r_value: floor_r)
+      end
+    end
+  end
+
+  def self.set_enclosure_slabs(orig_details, hpxml)
+    orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
+      fnd_adjacent = get_foundation_adjacent(orig_foundation)
+
+      # Slab
+      if fnd_adjacent == "living space"
+        slab_id = HPXML.get_idref(orig_foundation, "AttachedToSlab")
+        slab = orig_details.elements["Enclosure/Slabs/Slab[SystemIdentifier[@id='#{slab_id}']]"]
+        slab_values = HPXML.get_slab_values(slab: slab)
+      else
+        floor_id = HPXML.get_idref(orig_foundation, "AttachedToFloor")
+        floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
+        floor_values = HPXML.get_floor_values(floor: floor)
+
+        slab_values = {}
+        slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
+        slab_values[:area] = floor_values[:area]
+        slab_values[:perimeter_insulation_r_value] = 0
+      end
+
+      HPXML.add_slab(hpxml: hpxml,
+                     id: slab_values[:id],
+                     interior_adjacent_to: fnd_adjacent,
+                     area: slab_values[:area],
+                     thickness: 4,
+                     exposed_perimeter: @bldg_perimeter, # FIXME: Verify
+                     perimeter_insulation_depth: 1, # FIXME: Hard-coded
+                     under_slab_insulation_width: 0, # FIXME: Verify
+                     depth_below_grade: 0, # FIXME: Verify
+                     carpet_fraction: 0.5, # FIXME: Hard-coded
+                     carpet_r_value: 2, # FIXME: Hard-coded
+                     perimeter_insulation_r_value: slab_values[:perimeter_insulation_r_value],
+                     under_slab_insulation_r_value: 0)
     end
   end
 
