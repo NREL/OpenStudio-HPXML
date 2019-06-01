@@ -66,34 +66,12 @@ class HEScoreValidator
       # [Attic]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic" => {
         "AtticType[Attic[Vented='true'] | Attic[Conditioned='true'] | CathedralCeiling]" => one, # See [AtticType=Vented] or [AtticType=Cathedral]
-        "Roofs/Roof" => one, # See [AtticRoof]
+        "AttachedToRoof" => one, # See [Roof]
       },
 
       ## [AtticType=Vented]
       "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]" => {
-        "Floors/Floor" => one, # See [AtticFloor]
-      },
-
-      ## [AtticType=Cathedral]
-      "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/CathedralCeiling]" => {
-        "Roofs/Roof/Area" => one,
-      },
-
-      ## AtticRoof
-      "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/Roofs/Roof" => {
-        "SystemIdentifier" => one, # Required by HPXML schema
-        "[RoofType='slate or tile shingles' or RoofType='wood shingles or shakes' or RoofType='asphalt or fiberglass shingles' or RoofType='plastic/rubber/synthetic sheeting' or RoofType='concrete']" => one,
-        "[SolarAbsorptance | [RoofColor='light' or RoofColor='medium' or RoofColor='medium dark' or RoofColor='dark' or RoofColor='white' or RoofColor='reflective']]" => one,
-        "RadiantBarrier" => one,
-        "Insulation/Layer[InstallationType='cavity']/NominalRValue" => one,
-        "Insulation/Layer[InstallationType='continuous']/NominalRValue" => zero_or_one,
-      },
-
-      ## [AtticFloor]
-      "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/Floors/Floor" => {
-        "SystemIdentifier" => one, # Required by HPXML schema
-        "Area" => one,
-        "Insulation/Layer[InstallationType='cavity']/NominalRValue" => one,
+        "AttachedToFloor" => one, # See [Floor]
       },
 
       # [Foundation]
@@ -104,23 +82,30 @@ class HEScoreValidator
       ## [FoundationType=Basement]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement]" => {
         "FoundationType/Basement/Conditioned" => one,
-        "FrameFloor/Area" => one,
-        "FrameFloor/Insulation/Layer[InstallationType='cavity']/NominalRValue" => one, # FIXME: Basement too?
-        "FoundationWall/Insulation/Layer[InstallationType='continuous']/NominalRValue" => one,
+        "AttachedToFloor" => one, # See [Floor]
+        "AttachedToFoundationWall" => one, # See [FoundationWall]
       },
 
       ## [FoundationType=Crawl]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace]" => {
         "FoundationType/Crawlspace/Vented" => one,
-        "FrameFloor/Area" => one,
-        "FrameFloor/Insulation/Layer[InstallationType='cavity']/NominalRValue" => one, # FIXME: Basement too?
-        "FoundationWall/Insulation/Layer[InstallationType='continuous']/NominalRValue" => one,
+        "AttachedToFloor" => one, # See [Floor]
+        "AttachedToFoundationWall" => one, # See [FoundationWall]
       },
 
       ## [FoundationType=Slab]
       "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/SlabOnGrade]" => {
-        "Slab/Area" => one,
-        "Slab/PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
+        "AttachedToSlab" => one, # See [Slab]
+      },
+
+      # [Roof]
+      "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[RoofType='slate or tile shingles' or RoofType='wood shingles or shakes' or RoofType='asphalt or fiberglass shingles' or RoofType='plastic/rubber/synthetic sheeting' or RoofType='concrete']" => one,
+        "[SolarAbsorptance | [RoofColor='light' or RoofColor='medium' or RoofColor='medium dark' or RoofColor='dark' or RoofColor='white' or RoofColor='reflective']]" => one,
+        "RadiantBarrier" => one,
+        "Insulation/Layer[InstallationType='cavity']/NominalRValue" => one,
+        "Insulation/Layer[InstallationType='continuous']/NominalRValue" => zero_or_one,
       },
 
       # [Wall]
@@ -156,6 +141,25 @@ class HEScoreValidator
         "[Siding='stucco']" => one,
         "Insulation/Layer[InstallationType='cavity']/NominalRValue" => zero,
         "Insulation/Layer[InstallationType='continuous']/NominalRValue" => zero,
+      },
+
+      # [FoundationWall]
+      "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "Insulation/Layer[InstallationType='continuous']/NominalRValue" => one,
+      },
+
+      # [Floor]
+      "/HPXML/Building/BuildingDetails/Enclosure/Floors/Floor" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "Area" => one,
+        "Insulation/Layer[InstallationType='cavity']/NominalRValue" => one,
+      },
+
+      # [Slab]
+      "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "Area" => one,
       },
 
       # [Window]
@@ -320,7 +324,7 @@ class HEScoreValidator
 
       # [WaterHeatingSystem]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem" => {
-        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump]
+        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater' or WaterHeaterType='space-heating boiler with storage tank' or WaterHeaterType='space-heating boiler with tankless coil']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump]
       },
 
       ## [WHType=Tank]

@@ -32,8 +32,8 @@ def get_output_meter_requests
     [:large_appliance, :electric] => ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
-                                      "#{Constants.ObjectNameClothesDryer(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity",
-                                      "#{Constants.ObjectNameCookingRange(Constants.FuelTypeElectric)}:InteriorEquipment:Electricity"],
+                                      "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity",
+                                      "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Electricity"],
 
     # Small Appliances
     # Note: large appliances are subtracted out from small appliances later

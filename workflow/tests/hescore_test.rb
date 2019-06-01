@@ -193,7 +193,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         elsif htg_fuels.include? fuel
           assert_operator(value, :>, 0)
         else
-          assert_equal(0, value)
+          assert_operator(value, :<, 0.5)
         end
         tested_categories << category
       end
@@ -203,7 +203,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         if has_clg
           assert_operator(value, :>, 0)
         else
-          assert_equal(0, value)
+          assert_operator(value, :<, 0.5)
         end
         tested_categories << category
       end
@@ -213,7 +213,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         if hw_fuels.include? fuel
           assert_operator(value, :>, 0)
         else
-          assert_equal(0, value)
+          assert_operator(value, :<, 0.5)
         end
         tested_categories << category
       end
@@ -223,7 +223,7 @@ class HEScoreTest < Minitest::Unit::TestCase
         if has_pv
           assert_operator(value, :>, 0)
         else
-          assert_equal(0, value)
+          assert_operator(value, :<, 0.5)
         end
         tested_categories << category
       end

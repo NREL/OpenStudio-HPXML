@@ -75,25 +75,7 @@
             <AtticType>
               <CathedralCeiling/>
             </AtticType>
-            <Roofs>
-              <Roof>
-                <SystemIdentifier id='roof1'/>
-                <Area>1000</Area>
-                <RoofType>asphalt or fiberglass shingles</RoofType>
-                <RoofColor>medium</RoofColor>
-                <RadiantBarrier>false</RadiantBarrier>
-                <Insulation>
-                  <SystemIdentifier id='roof1_insulation'/>
-                  <Layer>
-                    <InstallationType>cavity</InstallationType>
-                    <NominalRValue>11</NominalRValue>
-                  </Layer>
-                </Insulation>
-                <extension>
-                  <roof_assembly_code>rfwf11co</roof_assembly_code>
-                </extension>
-              </Roof>
-            </Roofs>
+            <AttachedToRoof idref='roof1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -104,29 +86,29 @@
                 <Vented>false</Vented>
               </Crawlspace>
             </FoundationType>
-            <FrameFloor>
-              <SystemIdentifier id='framefloor1'/>
-              <Area>1000</Area>
-              <Insulation>
-                <SystemIdentifier id='foundation1'/>
-                <Layer>
-                  <InstallationType>cavity</InstallationType>
-                  <NominalRValue>00</NominalRValue>
-                </Layer>
-              </Insulation>
-            </FrameFloor>
-            <FoundationWall>
-              <SystemIdentifier id='foundWall1'/>
-              <Insulation>
-                <SystemIdentifier id='insulation1'/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>0</NominalRValue>
-                </Layer>
-              </Insulation>
-            </FoundationWall>
+            <AttachedToFoundationWall idref='foundWall1'/>
+            <AttachedToFloor idref='framefloor1'/>
           </Foundation>
         </Foundations>
+        <Roofs>
+          <Roof>
+            <SystemIdentifier id='roof1'/>
+            <Area>1000</Area>
+            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofColor>medium</RoofColor>
+            <RadiantBarrier>false</RadiantBarrier>
+            <Insulation>
+              <SystemIdentifier id='roof1_insulation'/>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>11</NominalRValue>
+              </Layer>
+            </Insulation>
+            <extension>
+              <roof_assembly_code>rfwf11co</roof_assembly_code>
+            </extension>
+          </Roof>
+        </Roofs>
         <Walls>
           <Wall>
             <SystemIdentifier id='front_wall'/>
@@ -209,6 +191,31 @@
             </extension>
           </Wall>
         </Walls>
+        <FoundationWalls>
+          <FoundationWall>
+            <SystemIdentifier id='foundWall1'/>
+            <Insulation>
+              <SystemIdentifier id='insulation1'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>0</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+        </FoundationWalls>
+        <Floors>
+          <Floor>
+            <SystemIdentifier id='framefloor1'/>
+            <Area>1000</Area>
+            <Insulation>
+              <SystemIdentifier id='foundation1'/>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>00</NominalRValue>
+              </Layer>
+            </Insulation>
+          </Floor>
+        </Floors>
         <Windows>
           <Window>
             <SystemIdentifier id='front_window'/>

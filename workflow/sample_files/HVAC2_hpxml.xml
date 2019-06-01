@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-04-01T12:21:02-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-04-01T12:24:45-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id='bid-2137'>
+    <BuildingID id='bid-2167'>
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id='site1'/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.107</Address1>
+        <Address1>Regression run 6.137</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>HVAC heat pump heating only</comments>
+          <comments>HVAC2</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -73,27 +73,12 @@
           <Attic>
             <SystemIdentifier id='attic1'/>
             <AtticType>
-              <CathedralCeiling/>
+              <Attic>
+                <Vented>true</Vented>
+              </Attic>
             </AtticType>
-            <Roofs>
-              <Roof>
-                <SystemIdentifier id='roof1'/>
-                <Area>1000</Area>
-                <RoofType>asphalt or fiberglass shingles</RoofType>
-                <RoofColor>medium</RoofColor>
-                <RadiantBarrier>false</RadiantBarrier>
-                <Insulation>
-                  <SystemIdentifier id='roof1_insulation'/>
-                  <Layer>
-                    <InstallationType>cavity</InstallationType>
-                    <NominalRValue>11</NominalRValue>
-                  </Layer>
-                </Insulation>
-                <extension>
-                  <roof_assembly_code>rfwf11co</roof_assembly_code>
-                </extension>
-              </Roof>
-            </Roofs>
+            <AttachedToRoof idref='roof1'/>
+            <AttachedToFloor idref='roof1_floor'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -102,19 +87,27 @@
             <FoundationType>
               <SlabOnGrade/>
             </FoundationType>
-            <Slab>
-              <SystemIdentifier id='slab1'/>
-              <Area>1000</Area>
-              <PerimeterInsulation>
-                <SystemIdentifier id='foundation1'/>
-                <Layer>
-                  <InstallationType>continuous</InstallationType>
-                  <NominalRValue>0</NominalRValue>
-                </Layer>
-              </PerimeterInsulation>
-            </Slab>
+            <AttachedToSlab idref='slab1'/>
           </Foundation>
         </Foundations>
+        <Roofs>
+          <Roof>
+            <SystemIdentifier id='roof1'/>
+            <RoofType>asphalt or fiberglass shingles</RoofType>
+            <RoofColor>medium</RoofColor>
+            <RadiantBarrier>false</RadiantBarrier>
+            <Insulation>
+              <SystemIdentifier id='roof1_insulation'/>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>00</NominalRValue>
+              </Layer>
+            </Insulation>
+            <extension>
+              <roof_assembly_code>rfwf00co</roof_assembly_code>
+            </extension>
+          </Roof>
+        </Roofs>
         <Walls>
           <Wall>
             <SystemIdentifier id='front_wall'/>
@@ -197,6 +190,32 @@
             </extension>
           </Wall>
         </Walls>
+        <Floors>
+          <Floor>
+            <SystemIdentifier id='roof1_floor'/>
+            <Area>1000</Area>
+            <Insulation>
+              <SystemIdentifier id='roof1_floor_insulation'/>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>60</NominalRValue>
+              </Layer>
+            </Insulation>
+          </Floor>
+        </Floors>
+        <Slabs>
+          <Slab>
+            <SystemIdentifier id='slab1'/>
+            <Area>1000</Area>
+            <PerimeterInsulation>
+              <SystemIdentifier id='foundation1'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>0</NominalRValue>
+              </Layer>
+            </PerimeterInsulation>
+          </Slab>
+        </Slabs>
         <Windows>
           <Window>
             <SystemIdentifier id='front_window'/>
@@ -267,23 +286,40 @@
       <Systems>
         <HVAC>
           <HVACPlant>
+            <HeatingSystem>
+              <SystemIdentifier id='hvac1_heat'/>
+              <DistributionSystem idref='hvac1_dist'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.95</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.7</FractionHeatLoadServed>
+            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='hvac1_cool'/>
               <DistributionSystem idref='hvac1_dist'/>
               <CoolingSystemType>central air conditioning</CoolingSystemType>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.7</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>15</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
             <HeatPump>
-              <SystemIdentifier id='hvac1_heatpump'/>
-              <DistributionSystem idref='hvac1_dist'/>
+              <SystemIdentifier id='hvac2_heatpump'/>
+              <DistributionSystem idref='hvac2_dist'/>
               <HeatPumpType>air-to-air</HeatPumpType>
-              <FractionHeatLoadServed>1</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0</FractionCoolLoadServed>
-              <FloorAreaServed>2000</FloorAreaServed>
+              <FractionHeatLoadServed>0.3</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.3</FractionCoolLoadServed>
+              <FloorAreaServed>600</FloorAreaServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>10</Value>
+              </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
                 <Value>6</Value>
@@ -297,6 +333,21 @@
                 <Ducts>
                   <DuctInsulationPresent>true</DuctInsulationPresent>
                   <DuctLocation>living space</DuctLocation>
+                  <FractionDuctArea>1</FractionDuctArea>
+                </Ducts>
+              </AirDistribution>
+            </DistributionSystemType>
+            <HVACDistributionImprovement>
+              <DuctSystemSealed>true</DuctSystemSealed>
+            </HVACDistributionImprovement>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='hvac2_dist'/>
+            <DistributionSystemType>
+              <AirDistribution>
+                <Ducts>
+                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctLocation>attic - unconditioned</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
               </AirDistribution>
