@@ -119,8 +119,8 @@
           </Wall>
           <Wall>
             <SystemIdentifier id='WallGarage'/>
-            <ExteriorAdjacentTo>living space</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>garage</InteriorAdjacentTo>
+            <ExteriorAdjacentTo>garage</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
               <WoodStud/>
             </WallType>

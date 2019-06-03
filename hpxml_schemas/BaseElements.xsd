@@ -598,9 +598,9 @@
 									<xs:element minOccurs="1" name="AtticType" type="AtticType"/>
 									<xs:element minOccurs="0" name="AttachedToRoof"
 										type="LocalReference" maxOccurs="unbounded"/>
-									<xs:element minOccurs="0" name="AttachedToFloor"
-										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToWall"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFloor"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
@@ -631,11 +631,13 @@
 									<xs:element name="FoundationType" type="FoundationType"/>
 									<xs:element minOccurs="0" name="ThermalBoundary"
 										type="FoundationThermalBoundary"/>
-									<xs:element minOccurs="0" name="AttachedToFloor"
+									<xs:element minOccurs="0" name="AttachedToRimJoist"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToWall"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToFoundationWall"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFloor"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToSlab"
 										type="LocalReference" maxOccurs="unbounded"/>
@@ -669,7 +671,7 @@
 											<xs:documentation/>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="GarageType">
+									<xs:element minOccurs="1" name="GarageType">
 										<xs:complexType>
 											<xs:sequence>
 												<xs:element minOccurs="0" name="AttachedtoHouse"
@@ -684,11 +686,11 @@
 									</xs:element>
 									<xs:element minOccurs="0" name="AttachedToRoof"
 										type="LocalReference" maxOccurs="unbounded"/>
-									<xs:element minOccurs="0" name="AttachedToFloor"
-										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToWall"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToFoundationWall"
+										type="LocalReference" maxOccurs="unbounded"/>
+									<xs:element minOccurs="0" name="AttachedToFloor"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToSlab"
 										type="LocalReference" maxOccurs="unbounded"/>

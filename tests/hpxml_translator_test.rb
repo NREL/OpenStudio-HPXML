@@ -92,11 +92,9 @@ class HPXMLTranslatorTest < MiniTest::Test
                                                             "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                        "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
-                            'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least one floor surface.",
-                                                       "Thermal zone 'garage' must have at least one roof/ceiling surface.",
-                                                       "Thermal zone 'garage' must have at least one surface adjacent to outside/ground."],
+                            'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least two floor/roof/ceiling surfaces."],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
-                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'AtticRoof'."],
+                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'Roof'."],
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
                             'unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for mechanical ventilation 'MechanicalVentilation'."],
@@ -598,26 +596,6 @@ class HPXMLTranslatorTest < MiniTest::Test
             flunk "Unexpected heating system type '#{htg_sys_type}'."
           end
           assert_in_epsilon(hpxml_value, sql_value, 0.01)
-
-          if htg_sys_type == 'Furnace'
-            # Also check supply fan of cooling system as needed
-            htg_dist = htg_sys.elements['DistributionSystem']
-            bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem[FractionCoolLoadServed > 0]') do |clg_sys|
-              clg_dist = clg_sys.elements['DistributionSystem']
-              next if htg_dist.nil? or clg_dist.nil?
-              next if clg_dist.attributes['idref'] != htg_dist.attributes['idref']
-
-              clg_sys_type = XMLHelper.get_value(clg_sys, 'CoolingSystemType')
-              if clg_sys_type == 'central air conditioning'
-                query_w = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EquipmentSummary' AND ReportForString='Entire Facility' AND TableName='Fans' AND RowName LIKE '%#{Constants.ObjectNameCentralAirConditioner.upcase}%' AND ColumnName='Rated Electric Power' AND Units='W'"
-                sql_value_w = sqlFile.execAndReturnFirstDouble(query_w).get
-                sql_value = sql_value_w * sql_value_htg_airflow / sql_value_fan_airflow
-                assert_in_epsilon(hpxml_value, sql_value, 0.01)
-              else
-                flunk "Unexpected cooling system type: #{clg_sys_type}."
-              end
-            end
-          end
         end
 
       end
