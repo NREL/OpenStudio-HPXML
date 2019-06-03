@@ -880,8 +880,8 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
     walls_values[0][:insulation_assembly_r_value] = 7.9
   elsif ['invalid_files/missing-surfaces.xml'].include? hpxml_file
     walls_values << { :id => "WallGarage",
-                      :exterior_adjacent_to => "living space",
-                      :interior_adjacent_to => "garage",
+                      :exterior_adjacent_to => "garage",
+                      :interior_adjacent_to => "living space",
                       :wall_type => "WoodStud",
                       :area => 100,
                       :solar_absorptance => 0.7,
