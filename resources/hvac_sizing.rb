@@ -1510,7 +1510,10 @@ class HVACSizing
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
         dse_Fregains[duct.LocationSpace] = get_duct_regain_factor(runner, duct)
-        return nil if dse_Fregains[duct.LocationSpace].nil?
+        if dse_Fregains[duct.LocationSpace].nil?
+          runner.registerError("Unexpected duct location '#{duct.LocationSpace.name}'.")
+          return nil
+        end
       end
       fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
       dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
@@ -3608,7 +3611,10 @@ class HVACSizing
 
       ceiling_ufactor = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
     end
-    return nil if ceiling_ufactor.nil?
+    if ceiling_ufactor.nil?
+      runner.registerError("Unable to identify the foundation ceiling.")
+      return nil
+    end
 
     ceiling_rvalue = 1.0 / UnitConversions.convert(ceiling_ufactor, 'm^2*k/w', 'hr*ft^2*f/btu')
     if ceiling_rvalue >= 3.0
