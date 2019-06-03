@@ -979,8 +979,10 @@
 			<xs:enumeration value="water-to-air"/>
 			<xs:enumeration value="water-to-water"/>
 			<xs:enumeration value="air-to-air"/>
+			<xs:enumeration value="air-to-water"/>
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="ground-to-air"/>
+			<xs:enumeration value="ground-to-water"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="VentSystem">
@@ -1705,13 +1707,6 @@
 			<xs:minInclusive value="0"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:simpleType name="AtticWallType">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="gable"/>
-			<xs:enumeration value="knee wall"/>
-			<xs:enumeration value="other"/>
-		</xs:restriction>
-	</xs:simpleType>
 	<xs:simpleType name="ImprovementStatusType">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="Installed"/>
@@ -2157,17 +2152,24 @@
 			<xs:minInclusive value="0"/>
 			<xs:maxInclusive value="1"/>
 		</xs:restriction>
-    </xs:simpleType>
-	<xs:simpleType name="SpecificLeakageAreaType">
-		<xs:annotation>
-			<xs:documentation>Specific Leakage Area (SLA) is defined as the Effective Leakage Area (ELA) divided by the floor area.</xs:documentation>
-		</xs:annotation>
-		<xs:restriction base="xs:double"/>
+	</xs:simpleType>
+	<xs:simpleType name="AtticWallType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="gable"/>
+			<xs:enumeration value="knee wall"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="MinutesPerDay">
 		<xs:restriction base="xs:double">
 			<xs:minInclusive value="0"/>
 			<xs:maxInclusive value="1440"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="VentilationUnit">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SLA"/>
+			<xs:enumeration value="ACHnatural"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

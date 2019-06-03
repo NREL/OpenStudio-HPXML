@@ -6,7 +6,6 @@ require 'rexml/document'
 require 'rexml/xpath'
 require 'pathname'
 require_relative "resources/HESruleset"
-require_relative "resources/HESvalidator"
 require_relative "../HPXMLtoOpenStudio/resources/xmlhelper"
 
 # start the measure
@@ -19,12 +18,12 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
   # human readable description
   def description
-    return 'TODO'
+    return ''
   end
 
   # human readable description of modeling approach
   def modeler_description
-    return 'TODO'
+    return ''
   end
 
   # define the arguments that the user will input
@@ -36,20 +35,9 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Absolute (or relative) path of the HPXML file.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("schemas_dir", false)
-    arg.setDisplayName("HPXML Schemas Directory")
-    arg.setDescription("Absolute path of the hpxml schemas directory.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("hpxml_output_path", false)
     arg.setDisplayName("HPXML Output File Path")
     arg.setDescription("Absolute (or relative) path of the output HPXML file.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeBoolArgument("skip_validation", true)
-    arg.setDisplayName("Skip HPXML validation")
-    arg.setDescription("If true, only checks for and reports HPXML validation issues if an error occurs during processing. Used for faster runtime.")
-    arg.setDefaultValue(false)
     args << arg
 
     return args
@@ -66,9 +54,7 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue("hpxml_path", user_arguments)
-    schemas_dir = runner.getOptionalStringArgumentValue("schemas_dir", user_arguments)
     hpxml_output_path = runner.getOptionalStringArgumentValue("hpxml_output_path", user_arguments)
-    skip_validation = runner.getBoolArgumentValue("skip_validation", user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -80,24 +66,9 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
 
     hpxml_doc = REXML::Document.new(File.read(hpxml_path))
 
-    # Check for invalid HPXML file up front?
-    if not skip_validation
-      if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-        return false
-      end
-    end
-
     begin
-      # Apply HEScore ruleset on HPXML object
       new_hpxml_doc = HEScoreRuleset.apply_ruleset(hpxml_doc)
     rescue Exception => e
-      if skip_validation
-        # Something went wrong, check for invalid HPXML file now. This was previously
-        # skipped to reduce runtime (see https://github.com/NREL/OpenStudio-ERI/issues/47).
-        validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-      end
-
-      # Report exception
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false
     end
@@ -109,44 +80,6 @@ class HEScoreMeasure < OpenStudio::Measure::ModelMeasure
     end
 
     return true
-  end
-
-  def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-    is_valid = true
-
-    if schemas_dir.is_initialized
-      schemas_dir = schemas_dir.get
-      unless (Pathname.new schemas_dir).absolute?
-        schemas_dir = File.expand_path(File.join(File.dirname(__FILE__), schemas_dir))
-      end
-      unless Dir.exists?(schemas_dir)
-        runner.registerError("'#{schemas_dir}' does not exist.")
-        return false
-      end
-    else
-      schemas_dir = nil
-    end
-
-    # Validate input HPXML against schema
-    if not schemas_dir.nil?
-      XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
-        runner.registerError("#{hpxml_path}: #{error.to_s}")
-        is_valid = false
-      end
-      runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
-    else
-      runner.registerWarning("#{hpxml_path}: No schema dir provided, no HPXML validation performed.")
-    end
-
-    # Validate input HPXML against HEScore Use Case
-    errors = HEScoreValidator.run_validator(hpxml_doc)
-    errors.each do |error|
-      runner.registerError("#{hpxml_path}: #{error}")
-      is_valid = false
-    end
-    runner.registerInfo("#{hpxml_path}: Validated against HPXML HEScore Use Case.")
-
-    return is_valid
   end
 end
 
