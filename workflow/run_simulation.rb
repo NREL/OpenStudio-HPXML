@@ -28,15 +28,15 @@ def get_output_hpxml_path(resultsdir, designdir)
   return File.join(resultsdir, File.basename(designdir) + ".xml")
 end
 
-def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_validation)
+def run_design(basedir, designdir, design, resultsdir, hpxml, debug)
   puts "Creating input..."
-  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_validation)
+  create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
 
   puts "Running simulation..."
   run_energyplus(design, designdir)
 end
 
-def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_validation)
+def create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
   Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -54,7 +54,6 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_valida
   args = {}
   args['hpxml_path'] = hpxml
   args['hpxml_output_path'] = output_hpxml_path
-  args['skip_validation'] = skip_validation
   update_args_hash(measures, measure_subdir, args)
 
   # Add HPXML translator measure to workflow
@@ -66,7 +65,7 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_valida
   if debug
     args['osm_output_path'] = File.join(designdir, "in.osm")
   end
-  args['skip_validation'] = skip_validation
+  args['skip_validation'] = false
   update_args_hash(measures, measure_subdir, args)
 
   # Apply measures
@@ -280,11 +279,6 @@ OptionParser.new do |opts|
     options[:debug] = true
   end
 
-  options[:skip_validation] = false
-  opts.on('-s', '--skip-validation') do |t|
-    options[:skip_validation] = true
-  end
-
   opts.on_tail('-h', '--help', 'Display help') do
     puts opts
     exit!
@@ -331,7 +325,7 @@ puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
 designdir = get_designdir(options[:output_dir], design)
 rm_path(designdir)
-rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_validation])
+rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug])
 
 # Create output
 create_output(designdir, resultsdir)
