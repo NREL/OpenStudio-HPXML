@@ -429,7 +429,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 384.1 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios, capacity_ratios)
-    cops = [calc_COP_heating_1spd(hspf, HVAC.get_c_d_cooling(2, nil), fan_power_rated, hEAT_EIR_FT_SPEC_ASHP, hEAT_CAP_FT_SPEC_ASHP)]
+    cops = [calc_COP_heating_1spd(hspf, HVAC.get_c_d_heating(num_speeds, hspf), fan_power_rated, hEAT_EIR_FT_SPEC_ASHP, hEAT_CAP_FT_SPEC_ASHP)]
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)]
 
@@ -606,7 +606,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 352.2 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
-    cops = calc_COPs_heating_2spd(hspf, HVAC.get_c_d_cooling(num_speeds, nil), capacity_ratios, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CAP_FT_SPEC_ASHP(2))
+    cops = calc_COPs_heating_2spd(hspf, HVAC.get_c_d_heating(num_speeds, hspf), capacity_ratios, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CAP_FT_SPEC_ASHP(2))
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -793,7 +793,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 296.9 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios_heating)
-    cops = calc_COPs_heating_4spd(runner, hspf, HVAC.get_c_d_cooling(num_speeds, nil), capacity_ratios_heating, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CAP_FT_SPEC_ASHP(4))
+    cops = calc_COPs_heating_4spd(runner, hspf, HVAC.get_c_d_heating(num_speeds, hspf), capacity_ratios_heating, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CAP_FT_SPEC_ASHP(4))
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -997,7 +997,7 @@ class HVAC
     e = 0
     f = 0
 
-    hEAT_CAP_FT_SPEC = [convert_curve_biquadratic([a, b, c, d, e, f]), false] * num_speeds
+    hEAT_CAP_FT_SPEC = [convert_curve_biquadratic([a, b, c, d, e, f], false)] * num_speeds
 
     # COP/EIR as a function of temperature
     # Generic "BEoptDefault" curves (=Daikin from lab data)
@@ -1014,7 +1014,7 @@ class HVAC
     cooling_eirs = calc_mshp_cooling_eirs(runner, seer, fan_power, c_d_cooling, num_speeds, capacity_ratios_cooling, cfms_cooling, cOOL_EIR_FT_SPEC, cOOL_CAP_FT_SPEC)
 
     # Heating Coil
-    c_d_heating = 0.40
+    c_d_heating = HVAC.get_c_d_heating(num_speeds, hspf)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf, c_d_heating)] * num_speeds
     cfms_heating, capacity_ratios_heating = calc_mshp_cfms_ton_heating(min_heating_capacity, max_heating_capacity, min_heating_airflow_rate, max_heating_airflow_rate, num_speeds)
     heating_eirs = calc_mshp_heating_eirs(runner, hspf, fan_power, min_hp_temp, c_d_heating, cfms_cooling, num_speeds, capacity_ratios_heating, cfms_heating, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
@@ -4070,6 +4070,8 @@ class HVAC
       return 0.11
     elsif num_speeds == 4
       return 0.25
+    elsif num_speeds == 10
+      return 0.25
     end
   end
 
@@ -4085,6 +4087,8 @@ class HVAC
       return 0.11
     elsif num_speeds == 4
       return 0.24
+    elsif num_speeds == 10
+      return 0.40
     end
   end
 

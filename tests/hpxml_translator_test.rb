@@ -133,7 +133,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     hspf_to_expected_cop = { 7.7 => 3.09, 8.2 => 3.35, 8.5 => 3.51 }
     hspf_to_expected_cop.each do |hspf, expected_cop|
       fan_power_rated = HVAC.get_fan_power_rated(hspf_to_seer[hspf])
-      actual_cop = HVAC.calc_COP_heating_1spd(hspf, HVAC.get_c_d_cooling(2, nil), fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP, HVAC.hEAT_CAP_FT_SPEC_ASHP)
+      actual_cop = HVAC.calc_COP_heating_1spd(hspf, HVAC.get_c_d_heating(1, hspf), fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP, HVAC.hEAT_CAP_FT_SPEC_ASHP)
       assert_in_epsilon(expected_cop, actual_cop, 0.01)
     end
 
@@ -160,7 +160,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     hspf_to_expected_cops = { 8.6 => [3.85, 3.34], 8.7 => [3.90, 3.41], 9.3 => [4.24, 3.83], 9.5 => [4.35, 3.98] }
     hspf_to_expected_cops.each do |hspf, expected_cops|
       fan_power_rated = HVAC.get_fan_power_rated(hspf_to_seer[hspf])
-      actual_cops = HVAC.calc_COPs_heating_2spd(hspf, HVAC.get_c_d_cooling(2, nil), HVAC.two_speed_capacity_ratios, HVAC.two_speed_fan_speed_ratios_heating, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(2), HVAC.hEAT_CAP_FT_SPEC_ASHP(2))
+      actual_cops = HVAC.calc_COPs_heating_2spd(hspf, HVAC.get_c_d_heating(2, hspf), HVAC.two_speed_capacity_ratios, HVAC.two_speed_fan_speed_ratios_heating, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(2), HVAC.hEAT_CAP_FT_SPEC_ASHP(2))
       expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
         assert_in_epsilon(expected_cop, actual_cop, 0.01)
       end
@@ -198,7 +198,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     hspf_to_expected_cops = { 10.0 => [5.18, 4.48, 3.83, 3.67] }
     hspf_to_expected_cops.each do |hspf, expected_cops|
       fan_power_rated = 0.14
-      actual_cops = HVAC.calc_COPs_heating_4spd(nil, hspf, HVAC.get_c_d_cooling(4, nil), capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(4), HVAC.hEAT_CAP_FT_SPEC_ASHP(4))
+      actual_cops = HVAC.calc_COPs_heating_4spd(nil, hspf, HVAC.get_c_d_heating(4, hspf), capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(4), HVAC.hEAT_CAP_FT_SPEC_ASHP(4))
       expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
         assert_in_epsilon(expected_cop, actual_cop, 0.01)
       end
