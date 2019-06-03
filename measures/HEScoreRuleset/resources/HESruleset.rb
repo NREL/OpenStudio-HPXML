@@ -641,7 +641,7 @@ class HEScoreRuleset
         wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type])
       end
       if wh_sys_values[:water_heater_type] == "space-heating boiler with storage tank"
-        wh_sys_values[:fuel_type] = "electricity"
+        wh_sys_values[:fuel_type] = "electricity"  #FIX ME: Fuel type is only being set for purposes of defaulting a tank UA. Need to review
       end
       wh_tank_volume = nil
       if wh_sys_values[:water_heater_type] != "instantaneous water heater"
