@@ -14,8 +14,8 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    capacity_ratios = [1.0]
-    fan_speed_ratios = [1.0]
+    capacity_ratios = HVAC.one_speed_capacity_ratios
+    fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
     # Cooling Coil
     rated_airflow_rate = 386.1 # cfm
@@ -140,8 +140,8 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
-    capacity_ratios = [0.72, 1.0]
-    fan_speed_ratios = [0.86, 1.0]
+    capacity_ratios = HVAC.two_speed_capacity_ratios
+    fan_speed_ratios = HVAC.two_speed_fan_speed_ratios_cooling
 
     # Cooling Coil
     rated_airflow_rate = 355.2 # cfm
@@ -272,8 +272,8 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
-    capacity_ratios = [0.36, 0.51, 0.67, 1.0]
-    fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
+    capacity_ratios = HVAC.variable_speed_capacity_ratios_cooling
+    fan_speed_ratios = HVAC.variable_speed_fan_speed_ratios_cooling
 
     cap_ratio_seer = [capacity_ratios[0], capacity_ratios[1], capacity_ratios[3]]
     fan_speed_seer = [fan_speed_ratios[0], fan_speed_ratios[1], fan_speed_ratios[3]]
@@ -415,8 +415,8 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
-    capacity_ratios = [1.0]
-    fan_speed_ratios = [1.0]
+    capacity_ratios = HVAC.one_speed_capacity_ratios
+    fan_speed_ratios = HVAC.one_speed_fan_speed_ratios
 
     # Cooling Coil
     rated_airflow_rate_cooling = 394.2 # cfm
@@ -591,9 +591,9 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
-    capacity_ratios = [0.72, 1.0]
-    fan_speed_ratios_heating = [0.8, 1.0]
-    fan_speed_ratios_cooling = [0.86, 1.0]   
+    capacity_ratios = HVAC.two_speed_capacity_ratios
+    fan_speed_ratios_heating = HVAC.two_speed_fan_speed_ratios_heating
+    fan_speed_ratios_cooling = HVAC.two_speed_fan_speed_ratios_cooling
 
     # Cooling Coil
     rated_airflow_rate_cooling = 344.1 # cfm
@@ -774,10 +774,10 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
-    capacity_ratios_heating = [0.33, 0.56, 1.0, 1.17]
-    capacity_ratios_cooling = [0.36, 0.51, 0.67, 1.0]
-    fan_speed_ratios_heating = [0.63, 0.76, 1.0, 1.19]
-    fan_speed_ratios_cooling = [0.42, 0.54, 0.68, 1.0]
+    capacity_ratios_heating = HVAC.variable_speed_capacity_ratios_heating
+    capacity_ratios_cooling = HVAC.variable_speed_capacity_ratios_cooling
+    fan_speed_ratios_heating = HVAC.variable_speed_fan_speed_ratios_heating
+    fan_speed_ratios_cooling = HVAC.variable_speed_fan_speed_ratios_cooling
 
     cap_ratio_seer = [capacity_ratios_cooling[0], capacity_ratios_cooling[1], capacity_ratios_cooling[3]]
     fan_speed_seer = [fan_speed_ratios_cooling[0], fan_speed_ratios_cooling[1], fan_speed_ratios_cooling[3]]
@@ -2733,6 +2733,42 @@ class HVAC
     return eae
   end
 
+  def self.one_speed_capacity_ratios
+    return [1.0]
+  end
+
+  def self.one_speed_fan_speed_ratios
+    return [1.0]
+  end
+
+  def self.two_speed_capacity_ratios
+    return [0.72, 1.0]
+  end
+
+  def self.two_speed_fan_speed_ratios_heating
+    return [0.8, 1.0]
+  end
+
+  def self.two_speed_fan_speed_ratios_cooling
+    return [0.86, 1.0]
+  end
+
+  def self.variable_speed_capacity_ratios_cooling
+    return [0.36, 0.51, 0.67, 1.0]
+  end
+
+  def self.variable_speed_fan_speed_ratios_cooling
+    return [0.42, 0.54, 0.68, 1.0]
+  end
+
+  def self.variable_speed_capacity_ratios_heating
+    return [0.33, 0.56, 1.0, 1.17]
+  end
+
+  def self.variable_speed_fan_speed_ratios_heating
+    return [0.63, 0.76, 1.0, 1.19]
+  end
+
   def self.cOOL_CAP_FT_SPEC_AC(num_speeds = 1)
     if num_speeds == 1
       return [[3.670270705, -0.098652414, 0.000955906, 0.006552414, -0.0000156, -0.000131877]]
@@ -3509,12 +3545,12 @@ class HVAC
     eir_17_L = eir_47_L * calc_biquad(coeff_eir[0], 70.0, 17.0)
 
     q_H47 = 1.0
-    q_H35 = 0.7519 # Hard code Q_35 from BEopt1 #TODO: UPDATE!!
+    q_H35 = q_H47 * calc_biquad(coeff_q[1], 70.0, 35.0)
     q_H17 = q_H47 * calc_biquad(coeff_q[1], 70.0, 17.0)
 
     q_L47 = q_H47 * capacity_ratios[0]
     q_L62 = q_L47 * calc_biquad(coeff_q[0], 70.0, 62.0)
-    q_L35 = 0.7519 * capacity_ratios[0] # Hard code Q_35 from BEopt1  # TODO: UPDATE!!!
+    q_L35 = q_L47 * calc_biquad(coeff_q[0], 70.0, 35.0)
     q_L17 = q_L47 * calc_biquad(coeff_q[0], 70.0, 17.0)
 
     cfm_Btu_h = 400.0 / 12000.0
