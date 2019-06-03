@@ -98,7 +98,9 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'unattached-door.xml' => ["Attached wall 'foobar' not found for door 'DoorNorth'."],
                             'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'unattached-hvac.xml' => ["TODO"],
-                            'unattached-cfis.xml' => ["TODO"] }
+                            'unattached-cfis.xml' => ["TODO"],
+                            'invalid-idref-dhw-indirect.xml' => ["RelatedHeatingSystem 'HeatingSystem-bad' not found for water heating system 'WaterHeater'"],
+                            'two-repeating-idref-dhw-indirect.xml' => ["RelatedHeatingSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."] }
 
     # Test simulations
     Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
