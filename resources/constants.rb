@@ -5,20 +5,6 @@ class Constants
     return 73.5 # deg-F
   end
 
-  def self.C_d(num_speeds, seer = nil)
-    if not seer.nil?
-      if seer < 13
-        return 0.20
-      else
-        return 0.07
-      end
-    end
-    if num_speeds >= 4
-      return 0.25
-    end
-    return 0.11
-  end
-
   def self.DefaultCoolingSetpoint
     return 76.0
   end

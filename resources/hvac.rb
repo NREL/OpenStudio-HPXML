@@ -146,7 +146,7 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate = 355.2 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
-    eers = calc_EERs_cooling_2spd(runner, seer, Constants.C_d(num_speeds), capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC_AC(2), cOOL_CAP_FT_SPEC_AC(2))
+    eers = calc_EERs_cooling_2spd(runner, seer, HVAC.get_c_d_cooling(num_speeds, seer), capacity_ratios, fan_speed_ratios, fan_power_rated, cOOL_EIR_FT_SPEC_AC(2), cOOL_CAP_FT_SPEC_AC(2))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -281,7 +281,7 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate = 315.8 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
-    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(num_speeds), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_AC([0, 1, 4]), cOOL_CAP_FT_SPEC_AC([0, 1, 4]))
+    eers = calc_EERs_cooling_4spd(runner, seer, HVAC.get_c_d_cooling(num_speeds, seer), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_AC([0, 1, 4]), cOOL_CAP_FT_SPEC_AC([0, 1, 4]))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -429,7 +429,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 384.1 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios, capacity_ratios)
-    cops = [calc_COP_heating_1spd(hspf, Constants.C_d(num_speeds), fan_power_rated, hEAT_EIR_FT_SPEC_ASHP, hEAT_CAP_FT_SPEC_ASHP)]
+    cops = [calc_COP_heating_1spd(hspf, HVAC.get_c_d_cooling(2, nil), fan_power_rated, hEAT_EIR_FT_SPEC_ASHP, hEAT_CAP_FT_SPEC_ASHP)]
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)]
 
@@ -598,7 +598,7 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate_cooling = 344.1 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios)
-    eers = calc_EERs_cooling_2spd(runner, seer, Constants.C_d(num_speeds), capacity_ratios, fan_speed_ratios_cooling, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CAP_FT_SPEC_ASHP(2), true)
+    eers = calc_EERs_cooling_2spd(runner, seer, HVAC.get_c_d_cooling(num_speeds, seer), capacity_ratios, fan_speed_ratios_cooling, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CAP_FT_SPEC_ASHP(2), true)
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -606,7 +606,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 352.2 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios)
-    cops = calc_COPs_heating_2spd(hspf, Constants.C_d, capacity_ratios, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CAP_FT_SPEC_ASHP(2))
+    cops = calc_COPs_heating_2spd(hspf, HVAC.get_c_d_cooling(num_speeds, nil), capacity_ratios, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CAP_FT_SPEC_ASHP(2))
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -785,7 +785,7 @@ class HVAC
     # Cooling Coil
     rated_airflow_rate_cooling = 315.8 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios_cooling)
-    eers = calc_EERs_cooling_4spd(runner, seer, Constants.C_d(num_speeds), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP([0, 1, 4]), cOOL_CAP_FT_SPEC_ASHP([0, 1, 4]))
+    eers = calc_EERs_cooling_4spd(runner, seer, HVAC.get_c_d_cooling(num_speeds, seer), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP([0, 1, 4]), cOOL_CAP_FT_SPEC_ASHP([0, 1, 4]))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
     shrs_rated_gross = calc_shrs_rated_gross(num_speeds, shrs, fan_power_rated, cfms_ton_rated_cooling)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer)] * num_speeds
@@ -793,7 +793,7 @@ class HVAC
     # Heating Coil
     rated_airflow_rate_heating = 296.9 # cfm
     cfms_ton_rated_heating = calc_cfms_ton_rated(rated_airflow_rate_heating, fan_speed_ratios_heating, capacity_ratios_heating)
-    cops = calc_COPs_heating_4spd(runner, hspf, Constants.C_d(num_speeds), capacity_ratios_heating, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CAP_FT_SPEC_ASHP(4))
+    cops = calc_COPs_heating_4spd(runner, hspf, HVAC.get_c_d_cooling(num_speeds, nil), capacity_ratios_heating, fan_speed_ratios_heating, fan_power_rated, hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CAP_FT_SPEC_ASHP(4))
     heating_eirs = calc_heating_eirs(num_speeds, cops, fan_power_rated)
     hEAT_CLOSS_FPLR_SPEC = [calc_plr_coefficients_heating(num_speeds, hspf)] * num_speeds
 
@@ -1006,7 +1006,7 @@ class HVAC
     hEAT_EIR_FFLOW_SPEC = [[1, 0, 0]] * num_speeds
 
     # Cooling Coil
-    c_d_cooling = Constants.C_d(num_speeds)
+    c_d_cooling = HVAC.get_c_d_cooling(num_speeds, seer)
     cOOL_CLOSS_FPLR_SPEC = [calc_plr_coefficients_cooling(num_speeds, seer, c_d_cooling)] * num_speeds
     dB_rated = 80.0
     wB_rated = 67.0
@@ -3033,7 +3033,7 @@ class HVAC
   def self.calc_EER_cooling_1spd(seer, fan_power_rated, coeff_eir)
     # Directly calculate cooling coil net EER at condition A (95/80/67) using SEER
 
-    c_d = Constants.C_d(1, seer)
+    c_d = HVAC.get_c_d_cooling(1, seer)
 
     # 1. Calculate eer_b using SEER and c_d
     eer_b = seer / (1 - 0.5 * c_d)
