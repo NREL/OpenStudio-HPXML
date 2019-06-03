@@ -8,8 +8,8 @@ require_relative "unit_conversions"
 require_relative "psychrometrics"
 
 class Waterheater
-  def self.apply_tank(model, runner, loop, space, fuel_type, cap, vol, ef,
-                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds)
+  def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
+                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
 
     # Validate inputs
     if vol <= 0
@@ -47,11 +47,10 @@ class Waterheater
       end
     end
 
-    if loop.nil?
-      runner.registerInfo("A new plant loop for DHW will be added to the model")
-      runner.registerInitialCondition("No water heater model currently exists")
-      loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
-    end
+    runner.registerInfo("A new plant loop for DHW will be added to the model")
+    runner.registerInitialCondition("No water heater model currently exists")
+    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
+    dhw_map[sys_id] << loop
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
       new_pump = create_new_pump(model)
@@ -64,6 +63,7 @@ class Waterheater
     end
 
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    dhw_map[sys_id] << new_heater
 
     storage_tank = get_shw_storage_tank(model)
 
@@ -78,8 +78,8 @@ class Waterheater
     return true
   end
 
-  def self.apply_tankless(model, runner, loop, space, fuel_type, cap, ef,
-                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds)
+  def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
+                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
 
     # Validate inputs
     if ef > 1 or ef <= 0
@@ -112,25 +112,25 @@ class Waterheater
       end
     end
 
-    if loop.nil?
-      runner.registerInfo("A new plant loop for DHW will be added to the model")
-      runner.registerInitialCondition("No water heater model currently exists")
-      loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTankless)
-    end
+    runner.registerInfo("A new plant loop for DHW will be added to the model")
+    runner.registerInitialCondition("No water heater model currently exists")
+    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTankless)
+    dhw_map[sys_id] << loop
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = Waterheater.create_new_pump(model)
+      new_pump = create_new_pump(model)
       new_pump.addToNode(loop.supplyInletNode)
     end
 
     if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
+      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
-    new_heater = Waterheater.create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    dhw_map[sys_id] << new_heater
 
-    storage_tank = Waterheater.get_shw_storage_tank(model)
+    storage_tank = get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(new_heater)
@@ -143,11 +143,11 @@ class Waterheater
     return true
   end
 
-  def self.apply_heatpump(model, runner, loop, space, weather,
+  def self.apply_heatpump(model, runner, space, weather,
                           e_cap, vol, t_set, min_temp, max_temp,
                           cap, cop, shr, airflow_rate, fan_power,
                           parasitics, tank_ua, int_factor, temp_depress,
-                          nbeds, ducting = "none")
+                          nbeds, dhw_map, sys_id, ducting = "none")
 
     # Validate inputs
     if vol <= 0.0
@@ -207,19 +207,20 @@ class Waterheater
       return false
     end
 
-    obj_name_hpwh = Constants.ObjectNameWaterHeater.gsub("|", "_")
+    obj_name_hpwh = Constants.ObjectNameWaterHeater
 
     alt = weather.header.Altitude
     water_heater_tz = space.thermalZone.get
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
     runner.registerInitialCondition("There is no existing water heater")
-    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
+    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
+    dhw_map[sys_id] << loop
 
-    new_pump = Waterheater.create_new_pump(model)
+    new_pump = create_new_pump(model)
     new_pump.addToNode(loop.supplyInletNode)
 
-    new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Only ever going to make HPWHs in this measure, so don't split this code out to waterheater.rb
@@ -376,6 +377,7 @@ class Waterheater
     coil.setHeatingCapacityFunctionofTemperatureCurve(hpwh_cap)
     coil.setHeatingCOPFunctionofTemperatureCurve(hpwh_cop)
     coil.setMaximumAmbientTemperatureforCrankcaseHeaterOperation(0)
+    dhw_map[sys_id] << coil
 
     # WaterHeater:Stratified
     tank = hpwh.tank.to_WaterHeaterStratified.get
@@ -433,6 +435,7 @@ class Waterheater
     tank.setSourceSideFlowControlMode("")
     tank.setSourceSideInletHeight(0)
     tank.setSourceSideOutletHeight(0)
+    dhw_map[sys_id] << tank
 
     # Fan:OnOff
     fan = hpwh.fan.to_FanOnOff.get
@@ -569,7 +572,7 @@ class Waterheater
     # EMS Program for ducting
     hpwh_ducting_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_ducting_program.setName("#{obj_name_hpwh} InletAir")
-    if not (Geometry.is_finished_basement(water_heater_tz) or Geometry.is_living(water_heater_tz)) and temp_depress_c > 0
+    if not (Geometry.is_conditioned_basement(water_heater_tz) or Geometry.is_living(water_heater_tz)) and temp_depress_c > 0
       runner.registerWarning("Confined space HPWH installations are typically used to represent installations in locations like a utility closet. Utility closets installations are typically only done in conditioned spaces.")
     end
     if temp_depress_c > 0 and ducting == "none"
@@ -716,7 +719,7 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_ducting_program)
 
-    storage_tank = Waterheater.get_shw_storage_tank(model)
+    storage_tank = get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(tank)
@@ -729,7 +732,7 @@ class Waterheater
     return true
   end
 
-  def self.apply_indirect(model, runner, fuel_type, loop, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop)
+  def self.apply_indirect(model, runner, fuel_type, loop, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id)
     obj_name_indirect = Constants.ObjectNameWaterHeater.gsub("|", "_")
     # Validate inputs
     if vol <= 0
@@ -759,6 +762,7 @@ class Waterheater
 
     # Create an initial simple tank model by calling create_new_heater
     new_tank = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    dhw_map[sys_id] << new_tank
 
     # Create alternate setpoint schedule for source side flow control
     alternate_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
@@ -772,6 +776,7 @@ class Waterheater
     scheme_dhw = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
     scheme_dhw.addEquipment(1000000000, new_tank)
     loop.setPrimaryPlantEquipmentOperationScheme(scheme_dhw)
+    dhw_map[sys_id] << loop
 
     # Create loop for source side
     temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
@@ -779,6 +784,7 @@ class Waterheater
 
     # Create heat exchanger
     indirect_hx = create_new_hx(model, Constants.ObjectNameTankHX)
+    dhw_map[sys_id] << indirect_hx
 
     # Add heat exchanger to the load distribution scheme
     scheme = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
@@ -825,19 +831,19 @@ class Waterheater
     if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
       return [Constants.SpaceTypeGarage,
               Constants.SpaceTypeLiving,
-              Constants.SpaceTypeFinishedBasement,
+              Constants.SpaceTypeConditionedBasement,
               Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnfinishedAttic]
+              Constants.SpaceTypeUnconditionedAttic]
 
     elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-      return [Constants.SpaceTypeFinishedBasement,
-              Constants.SpaceTypeUnfinishedBasement,
+      return [Constants.SpaceTypeConditionedBasement,
+              Constants.SpaceTypeUnconditionedBasement,
               Constants.SpaceTypeLiving,
               Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnfinishedAttic]
+              Constants.SpaceTypeUnconditionedAttic]
     elsif ba_cz_name.nil?
-      return [Constants.SpaceTypeFinishedBasement,
-              Constants.SpaceTypeUnfinishedBasement,
+      return [Constants.SpaceTypeConditionedBasement,
+              Constants.SpaceTypeUnconditionedBasement,
               Constants.SpaceTypeGarage,
               Constants.SpaceTypeLiving]
     end
