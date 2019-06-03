@@ -6,64 +6,7 @@ require_relative "psychrometrics"
 require_relative "schedules"
 
 class HVAC
-  def self.cOOL_CAP_FT_SPEC_AC(num_speeds = 1)
-    if num_speeds == 1
-      return [[3.670270705, -0.098652414, 0.000955906, 0.006552414, -0.0000156, -0.000131877]]
-    elsif num_speeds == 2
-      return [[3.940185508, -0.104723455, 0.001019298, 0.006471171, -0.00000953, -0.000161658],
-              [3.109456535, -0.085520461, 0.000863238, 0.00863049, -0.0000210, -0.000140186]]
-    else
-      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
-      cOOL_CAP_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
-                                 [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
-                                 [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
-                                 [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
-                                 [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
-      return cOOL_CAP_coeff_perf_map.select { |i| num_speeds.include? cOOL_CAP_coeff_perf_map.index(i) }
-    end
-  end
-
-  def self.cOOL_EIR_FT_SPEC_AC(num_speeds = 1)
-    if num_speeds == 1
-      return [[-3.302695861, 0.137871531, -0.001056996, -0.012573945, 0.000214638, -0.000145054]]
-    elsif num_speeds == 2
-      return [[-3.877526888, 0.164566276, -0.001272755, -0.019956043, 0.000256512, -0.000133539],
-              [-1.990708931, 0.093969249, -0.00073335, -0.009062553, 0.000165099, -0.0000997]]
-    else
-      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
-      cOOL_EIR_coeff_perf_map = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
-                                 [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
-                                 [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
-                                 [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
-                                 [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
-      return cOOL_EIR_coeff_perf_map.select { |i| num_speeds.include? cOOL_EIR_coeff_perf_map.index(i) }
-    end
-  end
-
-  def self.cOOL_CAP_FFLOW_SPEC_AC(num_speeds = 1)
-    if num_speeds == 1
-      return [[0.718605468, 0.410099989, -0.128705457]]
-    elsif num_speeds == 2
-      return [[0.65673024, 0.516470835, -0.172887149],
-              [0.690334551, 0.464383753, -0.154507638]]
-    elsif num_speeds == 4
-      return [[1, 0, 0]] * 4
-    end
-  end
-
-  def self.cOOL_EIR_FFLOW_SPEC_AC(num_speeds = 1)
-    if num_speeds == 1
-      return [[1.32299905, -0.477711207, 0.154712157]]
-    elsif num_speeds == 2
-      return [[1.562945114, -0.791859997, 0.230030877],
-              [1.31565404, -0.482467162, 0.166239001]]
-    elsif num_speeds == 4
-      return [[1, 0, 0]] * 4
-    end
-  end
-
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
-                                   capacity_ratios, fan_speed_ratios,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
                                    sequential_cool_load_frac, control_slave_zones_hash,
@@ -71,6 +14,8 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
+    capacity_ratios = [1.0]
+    fan_speed_ratios = [1.0]
 
     # Cooling Coil
     rated_airflow_rate = 386.1 # cfm
@@ -188,7 +133,6 @@ class HVAC
   end
 
   def self.apply_central_ac_2speed(model, runner, seer, shrs,
-                                   capacity_ratios, fan_speed_ratios,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
                                    sequential_cool_load_frac, control_slave_zones_hash,
@@ -196,6 +140,8 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
+    capacity_ratios = [0.72, 1.0]
+    fan_speed_ratios = [0.86, 1.0]
 
     # Cooling Coil
     rated_airflow_rate = 355.2 # cfm
@@ -319,7 +265,6 @@ class HVAC
   end
 
   def self.apply_central_ac_4speed(model, runner, seer, shrs,
-                                   capacity_ratios, fan_speed_ratios,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
                                    capacity, dse, frac_cool_load_served,
                                    sequential_cool_load_frac, control_slave_zones_hash,
@@ -327,6 +272,8 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
+    capacity_ratios = [0.36, 0.51, 0.67, 1.0]
+    fan_speed_ratios = [0.42, 0.54, 0.68, 1.0]
 
     cap_ratio_seer = [capacity_ratios[0], capacity_ratios[1], capacity_ratios[3]]
     fan_speed_seer = [fan_speed_ratios[0], fan_speed_ratios[1], fan_speed_ratios[3]]
@@ -454,102 +401,7 @@ class HVAC
     return true
   end
 
-  def self.cOOL_CAP_FT_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
-    elsif num_speeds == 2
-      return [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
-              [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
-    else
-      return cOOL_CAP_FT_SPEC_AC(num_speeds)
-    end
-  end
-
-  def self.cOOL_EIR_FT_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
-    elsif num_speeds == 2
-      return [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
-              [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
-    else
-      return cOOL_EIR_FT_SPEC_AC(num_speeds)
-    end
-  end
-
-  def self.cOOL_CAP_FFLOW_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[0.718664047, 0.41797409, -0.136638137]]
-    elsif num_speeds == 2
-      return [[0.655239515, 0.511655216, -0.166894731],
-              [0.618281092, 0.569060264, -0.187341356]]
-    elsif num_speeds == 4
-      return [[1, 0, 0]] * 4
-    end
-  end
-
-  def self.cOOL_EIR_FFLOW_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[1.143487507, -0.13943972, -0.004047787]]
-    elsif num_speeds == 2
-      return [[1.639108268, -0.998953996, 0.359845728],
-              [1.570774717, -0.914152018, 0.343377302]]
-    elsif num_speeds == 4
-      return [[1, 0, 0]] * 4
-    end
-  end
-
-  def self.hEAT_CAP_FT_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
-    elsif num_speeds == 2
-      return [[0.335690634, 0.002405123, -0.0000464, 0.013498735, 0.0000499, -0.00000725],
-              [0.306358843, 0.005376987, -0.0000579, 0.011645092, 0.0000591, -0.0000203]]
-    elsif num_speeds == 4
-      return [[0.304192655, -0.003972566, 0.0000196432, 0.024471251, -0.000000774126, -0.0000841323],
-              [0.496381324, -0.00144792, 0.0, 0.016020855, 0.0000203447, -0.0000584118],
-              [0.697171186, -0.006189599, 0.0000337077, 0.014291981, 0.0000105633, -0.0000387956],
-              [0.555513805, -0.001337363, -0.00000265117, 0.014328826, 0.0000163849, -0.0000480711]]
-    end
-  end
-
-  def self.hEAT_EIR_FT_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
-    elsif num_speeds == 2
-      return [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
-              [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
-    elsif num_speeds == 4
-      return [[0.708311527, 0.020732093, 0.000391479, -0.037640031, 0.000979937, -0.001079042],
-              [0.025480155, 0.020169585, 0.000121341, -0.004429789, 0.000166472, -0.00036447],
-              [0.379003189, 0.014195012, 0.0000821046, -0.008894061, 0.000151519, -0.000210299],
-              [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
-    end
-  end
-
-  def self.hEAT_CAP_FFLOW_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[0.694045465, 0.474207981, -0.168253446]]
-    elsif num_speeds == 2
-      return [[0.741466907, 0.378645444, -0.119754733],
-              [0.76634609, 0.32840943, -0.094701495]]
-    elsif num_speeds == 4
-      return [[1, 0, 0]] * 4
-    end
-  end
-
-  def self.hEAT_EIR_FFLOW_SPEC_ASHP(num_speeds = 1)
-    if num_speeds == 1
-      return [[2.185418751, -1.942827919, 0.757409168]]
-    elsif num_speeds == 2
-      return [[2.153618211, -1.737190609, 0.584269478],
-              [2.001041353, -1.58869128, 0.587593517]]
-    elsif num_speeds == 4
-      return [[1, 0, 0]] * 4
-    end
-  end
-
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
-                                     capacity_ratios, fan_speed_ratios,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
@@ -563,6 +415,8 @@ class HVAC
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
+    capacity_ratios = [1.0]
+    fan_speed_ratios = [1.0]
 
     # Cooling Coil
     rated_airflow_rate_cooling = 394.2 # cfm
@@ -728,7 +582,6 @@ class HVAC
   end
 
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                     capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
@@ -738,6 +591,9 @@ class HVAC
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
+    capacity_ratios = [0.72, 1.0]
+    fan_speed_ratios_heating = [0.8, 1.0]
+    fan_speed_ratios_cooling = [0.86, 1.0]   
 
     # Cooling Coil
     rated_airflow_rate_cooling = 344.1 # cfm
@@ -909,8 +765,6 @@ class HVAC
   end
 
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
-                                     capacity_ratios_heating, capacity_ratios_cooling,
-                                     fan_speed_ratios_heating, fan_speed_ratios_cooling,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse,
@@ -920,6 +774,10 @@ class HVAC
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
+    capacity_ratios_heating = [0.33, 0.56, 1.0, 1.17]
+    capacity_ratios_cooling = [0.36, 0.51, 0.67, 1.0]
+    fan_speed_ratios_heating = [0.63, 0.76, 1.0, 1.19]
+    fan_speed_ratios_cooling = [0.42, 0.54, 0.68, 1.0]
 
     cap_ratio_seer = [capacity_ratios_cooling[0], capacity_ratios_cooling[1], capacity_ratios_cooling[3]]
     fan_speed_seer = [fan_speed_ratios_cooling[0], fan_speed_ratios_cooling[1], fan_speed_ratios_cooling[3]]
@@ -2880,6 +2738,156 @@ class HVAC
       eae = 0.0 # FIXME: Is this right?
     end
     return eae
+  end
+
+  def self.cOOL_CAP_FT_SPEC_AC(num_speeds = 1)
+    if num_speeds == 1
+      return [[3.670270705, -0.098652414, 0.000955906, 0.006552414, -0.0000156, -0.000131877]]
+    elsif num_speeds == 2
+      return [[3.940185508, -0.104723455, 0.001019298, 0.006471171, -0.00000953, -0.000161658],
+              [3.109456535, -0.085520461, 0.000863238, 0.00863049, -0.0000210, -0.000140186]]
+    else
+      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
+      cOOL_CAP_coeff_perf_map = [[1.6516044444444447, 0.0698916049382716, -0.0005546296296296296, -0.08870160493827162, 0.0004135802469135802, 0.00029077160493827157],
+                                 [-6.84948049382716, 0.26946, -0.0019413580246913577, -0.03281469135802469, 0.00015694444444444442, 3.32716049382716e-05],
+                                 [-4.53543086419753, 0.15358543209876546, -0.0009345679012345678, 0.002666913580246914, -7.993827160493826e-06, -0.00011617283950617283],
+                                 [-3.500948395061729, 0.11738987654320988, -0.0006580246913580248, 0.007003148148148148, -2.8518518518518517e-05, -0.0001284259259259259],
+                                 [1.8769221728395058, -0.04768641975308643, 0.0006885802469135801, 0.006643395061728395, 1.4209876543209876e-05, -0.00024043209876543206]]
+      return cOOL_CAP_coeff_perf_map.select { |i| num_speeds.include? cOOL_CAP_coeff_perf_map.index(i) }
+    end
+  end
+
+  def self.cOOL_EIR_FT_SPEC_AC(num_speeds = 1)
+    if num_speeds == 1
+      return [[-3.302695861, 0.137871531, -0.001056996, -0.012573945, 0.000214638, -0.000145054]]
+    elsif num_speeds == 2
+      return [[-3.877526888, 0.164566276, -0.001272755, -0.019956043, 0.000256512, -0.000133539],
+              [-1.990708931, 0.093969249, -0.00073335, -0.009062553, 0.000165099, -0.0000997]]
+    else
+      # The following coefficients were generated using NREL experimental performance mapping for the Carrier unit
+      cOOL_EIR_coeff_perf_map = [[2.896298765432099, -0.12487654320987657, 0.0012148148148148148, 0.04492037037037037, 8.734567901234567e-05, -0.0006348765432098764],
+                                 [6.428076543209876, -0.20913209876543212, 0.0018521604938271604, 0.024392592592592594, 0.00019691358024691356, -0.0006012345679012346],
+                                 [5.136356049382716, -0.1591530864197531, 0.0014151234567901232, 0.018665555555555557, 0.00020398148148148147, -0.0005407407407407407],
+                                 [1.3823471604938273, -0.02875123456790123, 0.00038302469135802463, 0.006344814814814816, 0.00024836419753086417, -0.00047469135802469134],
+                                 [-1.0411735802469133, 0.055261604938271605, -0.0004404320987654321, 0.0002154938271604939, 0.00017484567901234564, -0.0002017901234567901]]
+      return cOOL_EIR_coeff_perf_map.select { |i| num_speeds.include? cOOL_EIR_coeff_perf_map.index(i) }
+    end
+  end
+
+  def self.cOOL_CAP_FFLOW_SPEC_AC(num_speeds = 1)
+    if num_speeds == 1
+      return [[0.718605468, 0.410099989, -0.128705457]]
+    elsif num_speeds == 2
+      return [[0.65673024, 0.516470835, -0.172887149],
+              [0.690334551, 0.464383753, -0.154507638]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
+    end
+  end
+
+  def self.cOOL_EIR_FFLOW_SPEC_AC(num_speeds = 1)
+    if num_speeds == 1
+      return [[1.32299905, -0.477711207, 0.154712157]]
+    elsif num_speeds == 2
+      return [[1.562945114, -0.791859997, 0.230030877],
+              [1.31565404, -0.482467162, 0.166239001]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
+    end
+  end
+
+  def self.cOOL_CAP_FT_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[3.68637657, -0.098352478, 0.000956357, 0.005838141, -0.0000127, -0.000131702]]
+    elsif num_speeds == 2
+      return [[3.998418659, -0.108728222, 0.001056818, 0.007512314, -0.0000139, -0.000164716],
+              [3.466810106, -0.091476056, 0.000901205, 0.004163355, -0.00000919, -0.000110829]]
+    else
+      return cOOL_CAP_FT_SPEC_AC(num_speeds)
+    end
+  end
+
+  def self.cOOL_EIR_FT_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[-3.437356399, 0.136656369, -0.001049231, -0.0079378, 0.000185435, -0.0001441]]
+    elsif num_speeds == 2
+      return [[-4.282911381, 0.181023691, -0.001357391, -0.026310378, 0.000333282, -0.000197405],
+              [-3.557757517, 0.112737397, -0.000731381, 0.013184877, 0.000132645, -0.000338716]]
+    else
+      return cOOL_EIR_FT_SPEC_AC(num_speeds)
+    end
+  end
+
+  def self.cOOL_CAP_FFLOW_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[0.718664047, 0.41797409, -0.136638137]]
+    elsif num_speeds == 2
+      return [[0.655239515, 0.511655216, -0.166894731],
+              [0.618281092, 0.569060264, -0.187341356]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
+    end
+  end
+
+  def self.cOOL_EIR_FFLOW_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[1.143487507, -0.13943972, -0.004047787]]
+    elsif num_speeds == 2
+      return [[1.639108268, -0.998953996, 0.359845728],
+              [1.570774717, -0.914152018, 0.343377302]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
+    end
+  end
+
+  def self.hEAT_CAP_FT_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[0.566333415, -0.000744164, -0.0000103, 0.009414634, 0.0000506, -0.00000675]]
+    elsif num_speeds == 2
+      return [[0.335690634, 0.002405123, -0.0000464, 0.013498735, 0.0000499, -0.00000725],
+              [0.306358843, 0.005376987, -0.0000579, 0.011645092, 0.0000591, -0.0000203]]
+    elsif num_speeds == 4
+      return [[0.304192655, -0.003972566, 0.0000196432, 0.024471251, -0.000000774126, -0.0000841323],
+              [0.496381324, -0.00144792, 0.0, 0.016020855, 0.0000203447, -0.0000584118],
+              [0.697171186, -0.006189599, 0.0000337077, 0.014291981, 0.0000105633, -0.0000387956],
+              [0.555513805, -0.001337363, -0.00000265117, 0.014328826, 0.0000163849, -0.0000480711]]
+    end
+  end
+
+  def self.hEAT_EIR_FT_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[0.718398423, 0.003498178, 0.000142202, -0.005724331, 0.00014085, -0.000215321]]
+    elsif num_speeds == 2
+      return [[0.36338171, 0.013523725, 0.000258872, -0.009450269, 0.000439519, -0.000653723],
+              [0.981100941, -0.005158493, 0.000243416, -0.005274352, 0.000230742, -0.000336954]]
+    elsif num_speeds == 4
+      return [[0.708311527, 0.020732093, 0.000391479, -0.037640031, 0.000979937, -0.001079042],
+              [0.025480155, 0.020169585, 0.000121341, -0.004429789, 0.000166472, -0.00036447],
+              [0.379003189, 0.014195012, 0.0000821046, -0.008894061, 0.000151519, -0.000210299],
+              [0.690404655, 0.00616619, 0.000137643, -0.009350199, 0.000153427, -0.000213258]]
+    end
+  end
+
+  def self.hEAT_CAP_FFLOW_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[0.694045465, 0.474207981, -0.168253446]]
+    elsif num_speeds == 2
+      return [[0.741466907, 0.378645444, -0.119754733],
+              [0.76634609, 0.32840943, -0.094701495]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
+    end
+  end
+
+  def self.hEAT_EIR_FFLOW_SPEC_ASHP(num_speeds = 1)
+    if num_speeds == 1
+      return [[2.185418751, -1.942827919, 0.757409168]]
+    elsif num_speeds == 2
+      return [[2.153618211, -1.737190609, 0.584269478],
+              [2.001041353, -1.58869128, 0.587593517]]
+    elsif num_speeds == 4
+      return [[1, 0, 0]] * 4
+    end
   end
 
   private
