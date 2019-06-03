@@ -258,6 +258,8 @@ class OSModel
     zone_hvacs = {} # mapping between HPXML HVAC systems and model zonal HVACs
     loop_dhws = {}  # mapping between HPXML Water Heating systems and plant loops
 
+    related_htg_list = [] # list of heating systems refered in water heating system "RelatedHeatingSystem" element
+
     use_only_ideal_air = false
     if not building_construction_values[:use_only_ideal_air_system].nil?
       use_only_ideal_air = building_construction_values[:use_only_ideal_air_system]
@@ -315,7 +317,7 @@ class OSModel
 
     # Hot Water
 
-    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws, loop_hvacs)
+    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws, loop_hvacs, related_htg_list)
     return false if not success
 
     # Plug Loads & Lighting
@@ -1886,7 +1888,7 @@ class OSModel
     return true
   end
 
-  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws, loop_hvacs)
+  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws, loop_hvacs, related_htg_list)
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -2087,10 +2089,19 @@ class OSModel
 
         elsif wh_type == "space-heating boiler with storage tank"
           tank_vol = water_heating_system_values[:tank_volume]
-          fuel_type = Constants.FuelTypeElectric
+          if not water_heating_system_values[:fuel_type].nil?
+            fuel_type = to_beopt_fuel(water_heating_system_values[:fuel_type])
+          else
+            fuel_type = Constants.FuelTypeElectric
+          end
           ef = 0.95 # FIXME
-          heating_souce_id = water_heating_system_values[:related_htg_sys_idref]
-          boiler_plant_loop = get_boiler_loop(loop_hvacs, heating_souce_id)
+          heating_source_id = water_heating_system_values[:related_htg_sys_idref]
+          if not related_htg_list.include? heating_source_id
+            related_htg_list << heating_source_id
+            boiler_plant_loop = get_boiler_loop(loop_hvacs, heating_source_id, water_heating_system_values)
+          else
+            fail "RelatedHeatingSystem '#{heating_source_id}' for water heating system '#{water_heating_system_values[:id]}' is already attached to another water heating system."
+          end
           capacity_kbtuh = 0.0
           oncycle_power = 0.0
           offcycle_power = 0.0
@@ -2683,13 +2694,17 @@ class OSModel
     return zone_hvacs
   end
 
-  def self.get_boiler_loop(loop_hvacs, heating_souce_id)
+  def self.get_boiler_loop(loop_hvacs, heating_source_id, wh)
     # Search for the right boiler OS object
-    combined_hvac = loop_hvacs[heating_souce_id]
-    combined_hvac.each do |comp|
-      if comp.is_a? OpenStudio::Model::PlantLoop
-        return comp
+    if loop_hvacs.keys.include? heating_source_id
+      combined_hvac = loop_hvacs[heating_source_id]
+      combined_hvac.each do |comp|
+        if comp.is_a? OpenStudio::Model::PlantLoop
+          return comp
+        end
       end
+    else
+      fail "RelatedHeatingSystem '#{heating_source_id}' not found for water heating system '#{wh[:id]}'."
     end
   end
 

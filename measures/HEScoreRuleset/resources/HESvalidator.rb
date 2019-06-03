@@ -320,7 +320,7 @@ class HEScoreValidator
 
       # [WaterHeatingSystem]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem" => {
-        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump]
+        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater' or WaterHeaterType='space-heating boiler with storage tank']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect]
       },
 
       ## [WHType=Tank]
@@ -338,6 +338,11 @@ class HEScoreValidator
       ## [WHType=HeatPump]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='heat pump water heater']" => {
         "[EnergyFactor | UniformEnergyFactor]" => one,
+      },
+
+      # [WHType=Indirect]
+      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with storage tank']" => {
+        "RelatedHeatingSystem" => one,
       },
 
       # [PVSystem]

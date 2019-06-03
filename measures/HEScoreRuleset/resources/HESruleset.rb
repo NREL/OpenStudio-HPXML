@@ -614,6 +614,9 @@ class HEScoreRuleset
       if wh_sys_values[:water_heater_type] == "storage water heater" and wh_sys_values[:fuel_type] != "electricity"
         wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type])
       end
+      if wh_sys_values[:water_heater_type] == "space-heating boiler with storage tank"
+        wh_sys_values[:fuel_type] = "electricity"
+      end
       wh_tank_volume = nil
       if wh_sys_values[:water_heater_type] != "instantaneous water heater"
         wh_tank_volume = get_default_water_heater_volume(wh_sys_values[:fuel_type])
@@ -628,7 +631,8 @@ class HEScoreRuleset
                                      heating_capacity: wh_capacity,
                                      energy_factor: wh_sys_values[:energy_factor],
                                      uniform_energy_factor: wh_sys_values[:uniform_energy_factor],
-                                     recovery_efficiency: wh_recovery_efficiency)
+                                     recovery_efficiency: wh_recovery_efficiency,
+                                     related_htg_sys_idref: wh_sys_values[:related_htg_sys_idref])
     end
   end
 

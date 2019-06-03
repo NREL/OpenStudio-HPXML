@@ -310,6 +310,7 @@
           <WaterHeatingSystem>
             <SystemIdentifier id="water_heater1"/>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
+			<RelatedHeatingSystem idref='hvac1_heat'/>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>
