@@ -2280,7 +2280,7 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          shrs = [0.98, 0.82, 0.745, 0.77]
+          shrs = [0.87, 0.80, 0.79, 0.78]
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
@@ -2498,7 +2498,7 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          shrs = [0.84, 0.79, 0.76, 0.77]
+          shrs = [0.87, 0.80, 0.79, 0.78]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
           supplemental_efficiency = 1.0
