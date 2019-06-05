@@ -230,6 +230,7 @@ class OSModel
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
     building = hpxml_doc.elements["/HPXML/Building"]
+    enclosure = building.elements["BuildingDetails/Enclosure"]
 
     @eri_version = hpxml_values[:eri_calculation_version]
     fail "Could not find ERI Version" if @eri_version.nil?
@@ -238,12 +239,12 @@ class OSModel
     construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = construction_values[:conditioned_floor_area]
     @cfa_ag = @cfa
-    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='basement - conditioned']") do |slab|
+    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='basement - conditioned']") do |slab|
       slab_values = HPXML.get_slab_values(slab: slab)
       @cfa_ag -= slab_values[:area]
     end
     @gfa = 0 # garage floor area
-    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='garage']") do |garage_slab|
+    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='garage']") do |garage_slab|
       slab_values = HPXML.get_slab_values(slab: garage_slab)
       @gfa += slab_values[:area]
     end
@@ -252,9 +253,9 @@ class OSModel
     @ncfl_ag = construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = construction_values[:number_of_bedrooms]
     @nbaths = 3.0 # TODO: Arbitrary, but update
-    @has_uncond_bsmnt = !building.elements["BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='basement - unconditioned']"].nil?
-    @has_vented_attic = !building.elements["BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo='attic - vented']"].nil?
-    @has_unvented_attic = !building.elements["BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo='attic - unvented']"].nil?
+    @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
+    @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
+    @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
     @subsurface_areas_by_surface = calc_subsurface_areas_by_surface(building)
     @default_azimuth = get_default_azimuth(building)
     @min_neighbor_distance = get_min_neighbor_distance(building)
@@ -322,7 +323,7 @@ class OSModel
 
     # Other
 
-    success = add_airflow(runner, model, building, spaces, construction_values)
+    success = add_airflow(runner, model, building, spaces)
     return false if not success
 
     success = add_hvac_sizing(runner, model, weather)
@@ -383,7 +384,7 @@ class OSModel
     success = add_rim_joists(runner, model, building, spaces)
     return false if not success
 
-    success = add_floors(runner, model, building, spaces)
+    success = add_framefloors(runner, model, building, spaces)
     return false if not success
 
     success = add_foundation_walls_slabs(runner, model, building, spaces)
@@ -1055,39 +1056,39 @@ class OSModel
     return true
   end
 
-  def self.add_floors(runner, model, building, spaces)
-    building.elements.each("BuildingDetails/Enclosure/Floors/Floor") do |floor|
-      floor_values = HPXML.get_floor_values(floor: floor)
+  def self.add_framefloors(runner, model, building, spaces)
+    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
 
-      area = floor_values[:area]
+      area = framefloor_values[:area]
       width = Math::sqrt(area)
       length = area / width
-      if floor_values[:interior_adjacent_to].include? "attic" or floor_values[:exterior_adjacent_to].include? "attic"
+      if framefloor_values[:interior_adjacent_to].include? "attic" or framefloor_values[:exterior_adjacent_to].include? "attic"
         z_origin = @walls_top
       else
         z_origin = @foundation_top
       end
 
-      if floor_values[:exterior_adjacent_to].include? "attic"
+      if framefloor_values[:exterior_adjacent_to].include? "attic"
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
       else
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
       end
-      set_surface_interior(model, spaces, surface, floor_values[:id], floor_values[:interior_adjacent_to])
-      set_surface_exterior(model, spaces, surface, floor_values[:id], floor_values[:exterior_adjacent_to])
-      surface.setName(floor_values[:id])
+      set_surface_interior(model, spaces, surface, framefloor_values[:id], framefloor_values[:interior_adjacent_to])
+      set_surface_exterior(model, spaces, surface, framefloor_values[:id], framefloor_values[:exterior_adjacent_to])
+      surface.setName(framefloor_values[:id])
       surface.setSunExposure("NoSun")
       surface.setWindExposure("NoWind")
 
       # Apply construction
 
-      if is_thermal_boundary(floor_values)
+      if is_thermal_boundary(framefloor_values)
         drywall_thick_in = 0.5
       else
         drywall_thick_in = 0.0
       end
       film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
-      assembly_r = floor_values[:insulation_assembly_r_value]
+      assembly_r = framefloor_values[:insulation_assembly_r_value]
 
       constr_sets = [
         WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
@@ -1095,13 +1096,13 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
       ]
-      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, floor_values[:id])
+      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, framefloor_values[:id])
 
       mat_floor_covering = nil
       install_grade = 1
 
       # Floor
-      success = Constructions.apply_floor(runner, model, [surface], "#{floor_values[:id]} construction",
+      success = Constructions.apply_floor(runner, model, [surface], "#{framefloor_values[:id]} construction",
                                           cavity_r, install_grade,
                                           constr_set.framing_factor, constr_set.stud.thick_in,
                                           constr_set.osb_thick_in, constr_set.rigid_r,
@@ -1209,7 +1210,7 @@ class OSModel
               rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
             end
           else
-            rigid_height = fnd_wall_values[:insulation_height]
+            rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
             rigid_r = fnd_wall_values[:insulation_r_value]
           end
 
@@ -2596,7 +2597,7 @@ class OSModel
     return true
   end
 
-  def self.add_airflow(runner, model, building, spaces, construction_values)
+  def self.add_airflow(runner, model, building, spaces)
     # Infiltration
     infil_volume = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
@@ -2620,9 +2621,16 @@ class OSModel
       end
     end
 
+    # FIXME: Update code below for SLA vs nACH vs constant nACH
+
     if @has_vented_attic
-      attic_sla = construction_values[:vented_attic_sla]
-      attic_const_ach = construction_values[:vented_attic_constant_ach]
+      attic_sla = nil
+      attic_const_ach = nil
+      building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
+        vented_attic_values = HPXML.get_attic_values(attic: vented_attic)
+        attic_sla = vented_attic_values[:vented_attic_sla]
+        attic_const_ach = vented_attic_values[:vented_attic_constant_ach]
+      end
       if attic_sla.nil? and attic_const_ach.nil?
         attic_sla = Airflow.get_default_vented_attic_sla()
       end
@@ -2632,15 +2640,23 @@ class OSModel
     end
 
     if @has_vented_crawl
-      crawl_ach = construction_values[:vented_crawlspace_constant_ach]
-      if crawl_ach.nil?
-        crawl_ach = construction_values[:vented_crawlspace_sla] # FIXME SLA vs ACH
+      crawl_sla = nil
+      crawl_ach = nil
+      building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
+        vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
+        crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
+        crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
       end
-      if crawl_ach.nil?
-        crawl_ach = Airflow.get_default_vented_crawl_sla() # FIXME SLA vs ACH
+      if crawl_sla.nil? and crawl_ach.nil?
+        crawl_sla = Airflow.get_default_vented_crawl_sla()
       end
     else
       crawl_ach = 0.0
+      crawl_sla = nil
+    end
+    if crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
+      crawl_ach = crawl_sla
+      crawl_sla = nil
     end
 
     living_ach50 = infil_ach50
