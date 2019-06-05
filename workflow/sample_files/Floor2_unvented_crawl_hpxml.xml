@@ -94,7 +94,7 @@
               </Crawlspace>
             </FoundationType>
             <AttachedToFoundationWall idref='foundWall2'/>
-            <AttachedToFloor idref='framefloor2'/>
+            <AttachedToFrameFloor idref='framefloor2'/>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -210,8 +210,8 @@
             </Insulation>
           </FoundationWall>
         </FoundationWalls>
-        <Floors>
-          <Floor>
+        <FrameFloors>
+          <FrameFloor>
             <SystemIdentifier id='framefloor2'/>
             <Area>400</Area>
             <Insulation>
@@ -221,8 +221,8 @@
                 <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='slab1'/>

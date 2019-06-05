@@ -28,7 +28,7 @@ class HEScoreRuleset
     set_enclosure_rim_joists(orig_details, hpxml)
     set_enclosure_walls(orig_details, hpxml)
     set_enclosure_foundation_walls(orig_details, hpxml)
-    set_enclosure_floors(orig_details, hpxml)
+    set_enclosure_framefloors(orig_details, hpxml)
     set_enclosure_slabs(orig_details, hpxml)
     set_enclosure_windows(orig_details, hpxml)
     set_enclosure_skylights(orig_details, hpxml)
@@ -265,23 +265,23 @@ class HEScoreRuleset
     end
   end
 
-  def self.set_enclosure_floors(orig_details, hpxml)
+  def self.set_enclosure_framefloors(orig_details, hpxml)
     # Floors above foundation
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
       fnd_adjacent = get_foundation_adjacent(orig_foundation)
 
-      floor_id = HPXML.get_idref(orig_foundation, "AttachedToFloor")
-      floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
-      floor_values = HPXML.get_floor_values(floor: floor)
+      framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
+      framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
       if ["basement - unconditioned", "crawlspace - vented", "crawlspace - unvented"].include? fnd_adjacent
-        floor_r = get_floor_assembly_r(floor_values[:insulation_cavity_r_value])
+        framefloor_r = get_floor_assembly_r(framefloor_values[:insulation_cavity_r_value])
 
-        HPXML.add_floor(hpxml: hpxml,
-                        id: floor_values[:id],
-                        exterior_adjacent_to: fnd_adjacent,
-                        interior_adjacent_to: "living space",
-                        area: floor_values[:area],
-                        insulation_assembly_r_value: floor_r)
+        HPXML.add_framefloor(hpxml: hpxml,
+                             id: framefloor_values[:id],
+                             exterior_adjacent_to: fnd_adjacent,
+                             interior_adjacent_to: "living space",
+                             area: framefloor_values[:area],
+                             insulation_assembly_r_value: framefloor_r)
       end
     end
 
@@ -290,17 +290,17 @@ class HEScoreRuleset
       attic_adjacent = get_attic_adjacent(orig_attic)
 
       if ["attic - unvented", "attic - vented"].include? attic_adjacent
-        floor_id = HPXML.get_idref(orig_attic, "AttachedToFloor")
-        floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
-        floor_values = HPXML.get_floor_values(floor: floor)
-        floor_r = get_ceiling_assembly_r(floor_values[:insulation_cavity_r_value])
+        framefloor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
+        framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+        framefloor_r = get_ceiling_assembly_r(framefloor_values[:insulation_cavity_r_value])
 
-        HPXML.add_floor(hpxml: hpxml,
-                        id: floor_values[:id],
-                        exterior_adjacent_to: attic_adjacent,
-                        interior_adjacent_to: "living space",
-                        area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
-                        insulation_assembly_r_value: floor_r)
+        HPXML.add_framefloor(hpxml: hpxml,
+                             id: framefloor_values[:id],
+                             exterior_adjacent_to: attic_adjacent,
+                             interior_adjacent_to: "living space",
+                             area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
+                             insulation_assembly_r_value: framefloor_r)
       end
     end
   end
@@ -315,13 +315,13 @@ class HEScoreRuleset
         slab = orig_details.elements["Enclosure/Slabs/Slab[SystemIdentifier[@id='#{slab_id}']]"]
         slab_values = HPXML.get_slab_values(slab: slab)
       else
-        floor_id = HPXML.get_idref(orig_foundation, "AttachedToFloor")
-        floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
-        floor_values = HPXML.get_floor_values(floor: floor)
+        framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
+        framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
 
         slab_values = {}
         slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
-        slab_values[:area] = floor_values[:area]
+        slab_values[:area] = framefloor_values[:area]
         slab_values[:perimeter_insulation_r_value] = 0
       end
 
@@ -1255,10 +1255,10 @@ def get_foundation_details(orig_details)
     fnd_adjacent = get_foundation_adjacent(orig_foundation)
     fnd_adjacents << fnd_adjacent
     if fnd_adjacent == "basement - conditioned"
-      floor_id = HPXML.get_idref(orig_foundation, "AttachedToFloor")
-      floor = orig_details.elements["Enclosure/Floors/Floor[SystemIdentifier[@id='#{floor_id}']]"]
-      floor_values = HPXML.get_floor_values(floor: floor)
-      fnd_cfa += floor_values[:area]
+      framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
+      framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+      fnd_cfa += framefloor_values[:area]
     end
   end
   return fnd_adjacents, fnd_cfa

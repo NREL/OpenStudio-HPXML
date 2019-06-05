@@ -78,7 +78,7 @@
               </Attic>
             </AtticType>
             <AttachedToRoof idref='roof1'/>
-            <AttachedToFloor idref='roof1_floor'/>
+            <AttachedToFrameFloor idref='roof1_floor'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -190,8 +190,8 @@
             </extension>
           </Wall>
         </Walls>
-        <Floors>
-          <Floor>
+        <FrameFloors>
+          <FrameFloor>
             <SystemIdentifier id='roof1_floor'/>
             <Area>1000</Area>
             <Insulation>
@@ -201,8 +201,8 @@
                 <NominalRValue>60</NominalRValue>
               </Layer>
             </Insulation>
-          </Floor>
-        </Floors>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='slab1'/>
