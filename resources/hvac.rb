@@ -279,7 +279,7 @@ class HVAC
     fan_speed_seer = [fan_speed_ratios[0], fan_speed_ratios[1], fan_speed_ratios[3]]
 
     # Cooling Coil
-    rated_airflow_rate = 315.8 # cfm
+    rated_airflow_rate = 411.0 # cfm
     cfms_ton_rated = calc_cfms_ton_rated(rated_airflow_rate, fan_speed_ratios, capacity_ratios)
     eers = calc_EERs_cooling_4spd(runner, seer, HVAC.get_c_d_cooling(num_speeds, seer), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_AC([0, 1, 4]), cOOL_CAP_FT_SPEC_AC([0, 1, 4]))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
@@ -783,7 +783,7 @@ class HVAC
     fan_speed_seer = [fan_speed_ratios_cooling[0], fan_speed_ratios_cooling[1], fan_speed_ratios_cooling[3]]
 
     # Cooling Coil
-    rated_airflow_rate_cooling = 315.8 # cfm
+    rated_airflow_rate_cooling = 411.0 # cfm
     cfms_ton_rated_cooling = calc_cfms_ton_rated(rated_airflow_rate_cooling, fan_speed_ratios_cooling, capacity_ratios_cooling)
     eers = calc_EERs_cooling_4spd(runner, seer, HVAC.get_c_d_cooling(num_speeds, seer), cap_ratio_seer, fan_speed_seer, fan_power_rated, cOOL_EIR_FT_SPEC_ASHP([0, 1, 4]), cOOL_CAP_FT_SPEC_ASHP([0, 1, 4]))
     cooling_eirs = calc_cooling_eirs(num_speeds, eers, fan_power_rated)
