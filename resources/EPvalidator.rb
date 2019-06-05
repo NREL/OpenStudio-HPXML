@@ -46,19 +46,19 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume" => one,
-        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/FoundationVentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented crawlspace if provided
-        "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AtticVentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented attic if provided
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
 
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50, CFM50, or constant nACH; see [AirInfiltration]
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume" => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
 
+        "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]/VentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented attic if provided
+        "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]/VentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented crawlspace if provided
         "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof" => zero_or_more, # See [Roof]
         "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall" => one_or_more, # See [Wall]
         "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist" => zero_or_more, # See [RimJoist]
         "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall" => zero_or_more, # See [FoundationWall]
-        "/HPXML/Building/BuildingDetails/Enclosure/Floors/Floor" => zero_or_more, # See [Floor]
+        "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor" => zero_or_more, # See [FrameFloor]
         "/HPXML/Building/BuildingDetails/Enclosure/Slabs/Slab" => zero_or_more, # See [Slab]
         "/HPXML/Building/BuildingDetails/Enclosure/Windows/Window" => zero_or_more, # See [Window]
         "/HPXML/Building/BuildingDetails/Enclosure/Skylights/Skylight" => zero_or_more, # See [Skylight]
@@ -154,13 +154,13 @@ class EnergyPlusValidator
         "Thickness" => one,
         "DepthBelowGrade" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        # Either specify insulation layer R-value & height OR assembly R-value:
-        "InsulationHeight | Insulation/AssemblyEffectiveRValue" => one,
+        # Either specify insulation layer R-value and insulation height OR assembly R-value:
+        "DistanceToBottomOfInsulation | Insulation/AssemblyEffectiveRValue" => one,
         "Insulation/Layer[InstallationType='continuous']/NominalRValue | Insulation/AssemblyEffectiveRValue" => one,
       },
 
-      # [Floor]
-      "/HPXML/Building/BuildingDetails/Enclosure/Floors/Floor" => {
+      # [FrameFloor]
+      "/HPXML/Building/BuildingDetails/Enclosure/FrameFloors/FrameFloor" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[ExteriorAdjacentTo='outside' or ExteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - unvented' or ExteriorAdjacentTo='basement - conditioned' or ExteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - unvented' or ExteriorAdjacentTo='garage' or ExteriorAdjacentTo='other housing unit']" => one,
         "[InteriorAdjacentTo='living space' or InteriorAdjacentTo='attic - vented' or InteriorAdjacentTo='attic - unvented' or InteriorAdjacentTo='basement - conditioned' or InteriorAdjacentTo='basement - unconditioned' or InteriorAdjacentTo='crawlspace - vented' or InteriorAdjacentTo='crawlspace - unvented' or InteriorAdjacentTo='garage']" => one,
