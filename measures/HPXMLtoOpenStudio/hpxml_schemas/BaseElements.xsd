@@ -596,11 +596,13 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="1" name="AtticType" type="AtticType"/>
+									<xs:element minOccurs="0" name="VentilationRate"
+										type="VentilationType"/>
 									<xs:element minOccurs="0" name="AttachedToRoof"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToWall"
 										type="LocalReference" maxOccurs="unbounded"/>
-									<xs:element minOccurs="0" name="AttachedToFloor"
+									<xs:element minOccurs="0" name="AttachedToFrameFloor"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element name="AnnualEnergyUse" minOccurs="0">
 										<xs:complexType>
@@ -629,6 +631,8 @@
 									<xs:group ref="SystemInfo"/>
 									<xs:element minOccurs="0" ref="AttachedToSpace"/>
 									<xs:element name="FoundationType" type="FoundationType"/>
+									<xs:element minOccurs="0" name="VentilationRate"
+										type="VentilationType"/>
 									<xs:element minOccurs="0" name="ThermalBoundary"
 										type="FoundationThermalBoundary"/>
 									<xs:element minOccurs="0" name="AttachedToRimJoist"
@@ -637,7 +641,7 @@
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToFoundationWall"
 										type="LocalReference" maxOccurs="unbounded"/>
-									<xs:element minOccurs="0" name="AttachedToFloor"
+									<xs:element minOccurs="0" name="AttachedToFrameFloor"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToSlab"
 										type="LocalReference" maxOccurs="unbounded"/>
@@ -690,7 +694,7 @@
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToFoundationWall"
 										type="LocalReference" maxOccurs="unbounded"/>
-									<xs:element minOccurs="0" name="AttachedToFloor"
+									<xs:element minOccurs="0" name="AttachedToFrameFloor"
 										type="LocalReference" maxOccurs="unbounded"/>
 									<xs:element minOccurs="0" name="AttachedToSlab"
 										type="LocalReference" maxOccurs="unbounded"/>
@@ -713,6 +717,9 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="Roof" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation>Use the Roof element for all pitched/horizontal surfaces underneath ambient conditions.</xs:documentation>
+							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
@@ -920,10 +927,16 @@
 									</xs:element>
 									<xs:element minOccurs="0" name="InteriorStuds"
 										type="StudProperties"/>
-									<xs:element minOccurs="0" name="InsulationHeight"
+									<xs:element minOccurs="0" name="DistanceToTopOfInsulation"
 										type="LengthMeasurement">
 										<xs:annotation>
-											<xs:documentation>[ft] Height of the insulation, spanning from the top of the foundation wall downward.</xs:documentation>
+											<xs:documentation>[ft] Vertical distance from top of foundation wall to top of insulation.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="DistanceToBottomOfInsulation"
+										type="LengthMeasurement">
+										<xs:annotation>
+											<xs:documentation>[ft] Vertical distance from top of foundation wall to bottom of insulation.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element maxOccurs="1" minOccurs="0" name="Insulation"
@@ -935,12 +948,12 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element minOccurs="0" name="Floors">
+			<xs:element minOccurs="0" name="FrameFloors">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Floor" maxOccurs="unbounded" minOccurs="1">
+						<xs:element name="FrameFloor" maxOccurs="unbounded" minOccurs="1">
 							<xs:annotation>
-								<xs:documentation>Use the Floor element for, e.g., attic floors, floors above foundations, floors of bonus rooms, etc.</xs:documentation>
+								<xs:documentation>Use the FrameFloor element for all floors/ceilings. For example, living space ceilings/attic floors, floors above foundations, floors under bonus rooms, cantilevered floors, etc.</xs:documentation>
 							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
@@ -974,6 +987,9 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="Slab" maxOccurs="unbounded" minOccurs="1">
+							<xs:annotation>
+								<xs:documentation>Use the Slab element for all horizontal surfaces adjacent to the ground.</xs:documentation>
+							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
@@ -3599,21 +3615,9 @@ Volume inside the building envelope of the conditioned spaces. This metric can b
 											<xs:documentation>Primary foundation type of building</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="FoundationVentilationRate"
-										type="VentilationType">
-										<xs:annotation>
-											<xs:documentation>The ventilation rate of, e.g., a vented crawlspace</xs:documentation>
-										</xs:annotation>
-									</xs:element>
 									<xs:element name="AtticType" type="AtticType" minOccurs="0">
 										<xs:annotation>
 											<xs:documentation>Primary attic type of building</xs:documentation>
-										</xs:annotation>
-									</xs:element>
-									<xs:element minOccurs="0" name="AtticVentilationRate"
-										type="VentilationType">
-										<xs:annotation>
-											<xs:documentation>The ventilation rate of, e.g., a vented attic</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element name="AverageAtticRValue" type="RValue"
