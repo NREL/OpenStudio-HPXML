@@ -1792,6 +1792,7 @@
 			<xs:enumeration value="tile"/>
 			<xs:enumeration value="hardwood"/>
 			<xs:enumeration value="vinyl"/>
+			<xs:enumeration value="none"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="Pitch">
@@ -2170,6 +2171,7 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="SLA"/>
 			<xs:enumeration value="ACHnatural"/>
+			<xs:enumeration value="CFM per sq.ft."/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>
