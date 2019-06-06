@@ -230,32 +230,32 @@ class OSModel
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
     building = hpxml_doc.elements["/HPXML/Building"]
+    enclosure = building.elements["BuildingDetails/Enclosure"]
 
     @eri_version = hpxml_values[:eri_calculation_version]
     fail "Could not find ERI Version" if @eri_version.nil?
 
     # Global variables
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    @cfa = building_construction_values[:conditioned_floor_area]
+    construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    @cfa = construction_values[:conditioned_floor_area]
     @cfa_ag = @cfa
-    building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='true']]") do |foundation|
-      foundation.elements.each("Slab") do |fnd_slab|
-        slab_values = HPXML.get_foundation_slab_values(slab: fnd_slab)
-        @cfa_ag -= slab_values[:area]
-      end
+    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='basement - conditioned']") do |slab|
+      slab_values = HPXML.get_slab_values(slab: slab)
+      @cfa_ag -= slab_values[:area]
     end
     @gfa = 0 # garage floor area
-    building.elements.each("BuildingDetails/Enclosure/Garages/Garage/Slabs/Slab") do |garage_slab|
-      slab_values = HPXML.get_garage_slab_values(slab: garage_slab)
+    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='garage']") do |garage_slab|
+      slab_values = HPXML.get_slab_values(slab: garage_slab)
       @gfa += slab_values[:area]
     end
-    @cvolume = building_construction_values[:conditioned_building_volume]
-    @ncfl = building_construction_values[:number_of_conditioned_floors]
-    @ncfl_ag = building_construction_values[:number_of_conditioned_floors_above_grade]
-    @nbeds = building_construction_values[:number_of_bedrooms]
+    @cvolume = construction_values[:conditioned_building_volume]
+    @ncfl = construction_values[:number_of_conditioned_floors]
+    @ncfl_ag = construction_values[:number_of_conditioned_floors_above_grade]
+    @nbeds = construction_values[:number_of_bedrooms]
     @nbaths = 3.0 # TODO: Arbitrary, but update
-    foundation_values = HPXML.get_foundation_values(foundation: building.elements["BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Basement[Conditioned='false']]"])
-    @has_uncond_bsmnt = (not foundation_values.nil?)
+    @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
+    @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
+    @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
     @subsurface_areas_by_surface = calc_subsurface_areas_by_surface(building)
     @default_azimuth = get_default_azimuth(building)
     @min_neighbor_distance = get_min_neighbor_distance(building)
@@ -264,8 +264,8 @@ class OSModel
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
 
     @use_only_ideal_air = false
-    if not building_construction_values[:use_only_ideal_air_system].nil?
-      @use_only_ideal_air = building_construction_values[:use_only_ideal_air_system]
+    if not construction_values[:use_only_ideal_air_system].nil?
+      @use_only_ideal_air = construction_values[:use_only_ideal_air_system]
     end
 
     # Geometry/Envelope
@@ -368,19 +368,24 @@ class OSModel
   end
 
   def self.add_geometry_envelope(runner, model, building, weather, spaces)
+    @foundation_top, @walls_top = get_foundation_and_walls_top(building)
+
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather, runner)
     return false if heating_season.nil? or cooling_season.nil?
 
-    success = add_foundations(runner, model, building, spaces)
-    return false if not success
-
-    success = add_garages(runner, model, building, spaces)
+    success = add_roofs(runner, model, building, spaces)
     return false if not success
 
     success = add_walls(runner, model, building, spaces)
     return false if not success
 
     success = add_rim_joists(runner, model, building, spaces)
+    return false if not success
+
+    success = add_framefloors(runner, model, building, spaces)
+    return false if not success
+
+    success = add_foundation_walls_slabs(runner, model, building, spaces)
     return false if not success
 
     success = add_windows(runner, model, building, spaces, weather, cooling_season)
@@ -390,9 +395,6 @@ class OSModel
     return false if not success
 
     success = add_skylights(runner, model, building, spaces, weather, cooling_season)
-    return false if not success
-
-    success = add_attics(runner, model, building, spaces)
     return false if not success
 
     success = add_conditioned_floor_area(runner, model, building, spaces)
@@ -423,7 +425,8 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
+      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_unvented_crawl(thermal_zone) or
+         Geometry.is_vented_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
         zones_updated += 1
 
         zone_floor_area = 0.0
@@ -464,7 +467,7 @@ class OSModel
 
     # Attic
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_unconditioned_attic(thermal_zone)
+      if Geometry.is_vented_attic(thermal_zone) or Geometry.is_unvented_attic(thermal_zone)
         zones_updated += 1
 
         zone_surfaces = []
@@ -585,9 +588,9 @@ class OSModel
 
       if surface.surfaceType.downcase == "roofceiling"
         # Ensure pitched surfaces are positioned outward justified with walls, etc.
-        roof_tilt = surface.additionalProperties.getFeatureAsDouble("Tilt").get
-        roof_width = surface.additionalProperties.getFeatureAsDouble("Width").get
-        distance -= 0.5 * Math.cos(Math.atan(roof_tilt)) * roof_width
+        tilt = surface.additionalProperties.getFeatureAsDouble("Tilt").get
+        width = surface.additionalProperties.getFeatureAsDouble("Width").get
+        distance -= 0.5 * Math.cos(Math.atan(tilt)) * width
       end
       transformation = get_surface_transformation(distance, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0)
 
@@ -639,32 +642,25 @@ class OSModel
     # 2. At least one roofceiling surface
     # 3. At least one surface adjacent to outside/ground
     model.getThermalZones.each do |zone|
-      n_floors = 0
-      n_roofceilings = 0
+      n_floorsroofsceilings = 0
       n_exteriors = 0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
           if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
             n_exteriors += 1
           end
-          if surface.surfaceType.downcase == "floor"
-            n_floors += 1
-          elsif surface.surfaceType.downcase == "roofceiling"
-            n_roofceilings += 1
+          if ["floor", "roofceiling"].include? surface.surfaceType.downcase
+            n_floorsroofsceilings += 1
           end
         end
       end
 
-      if n_floors == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one floor surface.")
-      end
-      if n_roofceilings == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one roof/ceiling surface.")
+      if n_floorsroofsceilings < 1
+        runner.registerError("Thermal zone '#{zone.name}' must have at least two floor/roof/ceiling surfaces.")
+        return false
       end
       if n_exteriors == 0
         runner.registerError("Thermal zone '#{zone.name}' must have at least one surface adjacent to outside/ground.")
-      end
-      if n_floors == 0 or n_roofceilings == 0 or n_exteriors == 0
         return false
       end
     end
@@ -875,53 +871,305 @@ class OSModel
     return spaces[spacetype]
   end
 
-  def self.add_foundations(runner, model, building, spaces)
-    # TODO: Refactor by creating methods for add_foundation_walls(), add_foundation_slabs(), etc.
+  def self.add_roofs(runner, model, building, spaces)
+    building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+      roof_values = HPXML.get_roof_values(roof: roof)
 
-    building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
-      foundation_values = HPXML.get_foundation_values(foundation: foundation)
+      net_area = net_surface_area(roof_values[:area], roof_values[:id], "Roof")
+      width = Math::sqrt(net_area)
+      length = net_area / width
+      tilt = roof_values[:pitch] / 12.0
+      z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
+      azimuth = @default_azimuth
+      if not roof_values[:azimuth].nil?
+        azimuth = roof_values[:azimuth]
+      end
 
-      fnd_id = foundation_values[:id]
-      foundation_type = foundation_values[:foundation_type]
-      interior_adjacent_to = get_foundation_adjacent_to(foundation_type)
+      surface = OpenStudio::Model::Surface.new(add_roof_polygon(length, width, z_origin, azimuth, tilt), model)
+      surface.additionalProperties.setFeature("Length", length)
+      surface.additionalProperties.setFeature("Width", width)
+      surface.additionalProperties.setFeature("Azimuth", azimuth)
+      surface.additionalProperties.setFeature("Tilt", tilt)
+      surface.setName(roof_values[:id])
+      surface.setSurfaceType("RoofCeiling")
+      surface.setOutsideBoundaryCondition("Outdoors")
+      set_surface_interior(model, spaces, surface, roof_values[:id], roof_values[:interior_adjacent_to])
 
-      # Calculate sum of foundation wall lengths
+      # Apply construction
+      if is_thermal_boundary(roof_values)
+        drywall_thick_in = 0.5
+      else
+        drywall_thick_in = 0.0
+      end
+      film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surface])).rvalue
+      mat_roofing = Material.RoofingAsphaltShinglesDark
+      solar_abs = roof_values[:solar_absorptance]
+      emitt = roof_values[:emittance]
+      has_radiant_barrier = roof_values[:radiant_barrier]
+
+      assembly_r = roof_values[:insulation_assembly_r_value]
+      constr_sets = [
+        WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, drywall_thick_in, mat_roofing), # 2x8, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 5.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c. + R5
+        WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),      # 2x6, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, drywall_thick_in, mat_roofing),       # 2x4, 16" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, mat_roofing),                    # Fallback
+      ]
+      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, roof_values[:id])
+
+      install_grade = 1
+
+      success = Constructions.apply_closed_cavity_roof(runner, model, [surface], "#{roof_values[:id]} construction",
+                                                       cavity_r, install_grade,
+                                                       constr_set.stud.thick_in,
+                                                       true, constr_set.framing_factor,
+                                                       constr_set.drywall_thick_in,
+                                                       constr_set.osb_thick_in, constr_set.rigid_r,
+                                                       constr_set.exterior_material)
+      return false if not success
+
+      check_surface_assembly_rvalue(surface, film_r, assembly_r)
+
+      apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
+    end
+
+    return true
+  end
+
+  def self.add_walls(runner, model, building, spaces)
+    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
+      wall_values = HPXML.get_wall_values(wall: wall)
+
+      net_area = net_surface_area(wall_values[:area], wall_values[:id], "Wall")
+      height = 8.0 * @ncfl_ag
+      length = net_area / height
+      z_origin = @foundation_top
+      azimuth = @default_azimuth
+      if not wall_values[:azimuth].nil?
+        azimuth = wall_values[:azimuth]
+      end
+
+      surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+      surface.additionalProperties.setFeature("Length", length)
+      surface.additionalProperties.setFeature("Azimuth", azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
+      surface.setName(wall_values[:id])
+      surface.setSurfaceType("Wall")
+      set_surface_interior(model, spaces, surface, wall_values[:id], wall_values[:interior_adjacent_to])
+      set_surface_exterior(model, spaces, surface, wall_values[:id], wall_values[:exterior_adjacent_to])
+      if wall_values[:exterior_adjacent_to] != "outside"
+        surface.setSunExposure("NoSun")
+        surface.setWindExposure("NoWind")
+      end
+
+      # Apply construction
+      # The code below constructs a reasonable wall construction based on the
+      # wall type while ensuring the correct assembly R-value.
+
+      if is_thermal_boundary(wall_values)
+        drywall_thick_in = 0.5
+      else
+        drywall_thick_in = 0.0
+      end
+      if wall_values[:exterior_adjacent_to] == "outside"
+        film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
+        mat_ext_finish = Material.ExtFinishWoodLight
+      else
+        film_r = 2.0 * Material.AirFilmVertical.rvalue
+        mat_ext_finish = nil
+      end
+
+      success = apply_wall_construction(runner, model, surface, wall_values[:id], wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
+                                        drywall_thick_in, film_r, mat_ext_finish, wall_values[:solar_absorptance], wall_values[:emittance])
+      return false if not success
+    end
+
+    return true
+  end
+
+  def self.add_rim_joists(runner, model, building, spaces)
+    building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
+      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
+
+      height = 1.0
+      length = rim_joist_values[:area] / height
+      z_origin = @foundation_top
+      azimuth = @default_azimuth
+      if not rim_joist_values[:azimuth].nil?
+        azimuth = rim_joist_values[:azimuth]
+      end
+
+      surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+      surface.additionalProperties.setFeature("Length", length)
+      surface.additionalProperties.setFeature("Azimuth", azimuth)
+      surface.additionalProperties.setFeature("Tilt", 90.0)
+      surface.setName(rim_joist_values[:id])
+      surface.setSurfaceType("Wall")
+      set_surface_interior(model, spaces, surface, rim_joist_values[:id], rim_joist_values[:interior_adjacent_to])
+      set_surface_exterior(model, spaces, surface, rim_joist_values[:id], rim_joist_values[:exterior_adjacent_to])
+      if rim_joist_values[:exterior_adjacent_to] != "outside"
+        surface.setSunExposure("NoSun")
+        surface.setWindExposure("NoWind")
+      end
+
+      # Apply construction
+
+      if is_thermal_boundary(rim_joist_values)
+        drywall_thick_in = 0.5
+      else
+        drywall_thick_in = 0.0
+      end
+      if rim_joist_values[:exterior_adjacent_to] == "outside"
+        film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
+        mat_ext_finish = Material.ExtFinishWoodLight
+      else
+        film_r = 2.0 * Material.AirFilmVertical.rvalue
+        mat_ext_finish = nil
+      end
+      solar_abs = rim_joist_values[:solar_absorptance]
+      emitt = rim_joist_values[:emittance]
+
+      assembly_r = rim_joist_values[:insulation_assembly_r_value]
+
+      constr_sets = [
+        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, drywall_thick_in, mat_ext_finish),  # 2x4 + R10
+        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 5.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4 + R5
+        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4
+        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, 0.0, nil),                           # Fallback
+      ]
+      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, rim_joist_values[:id])
+      install_grade = 1
+
+      success = Constructions.apply_rim_joist(runner, model, [surface], "#{rim_joist_values[:id]} construction",
+                                              cavity_r, install_grade, constr_set.framing_factor,
+                                              constr_set.drywall_thick_in, constr_set.osb_thick_in,
+                                              constr_set.rigid_r, constr_set.exterior_material)
+      return false if not success
+
+      check_surface_assembly_rvalue(surface, film_r, assembly_r)
+
+      apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
+    end
+
+    return true
+  end
+
+  def self.add_framefloors(runner, model, building, spaces)
+    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+
+      area = framefloor_values[:area]
+      width = Math::sqrt(area)
+      length = area / width
+      if framefloor_values[:interior_adjacent_to].include? "attic" or framefloor_values[:exterior_adjacent_to].include? "attic"
+        z_origin = @walls_top
+      else
+        z_origin = @foundation_top
+      end
+
+      if framefloor_values[:exterior_adjacent_to].include? "attic"
+        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
+      else
+        surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
+      end
+      set_surface_interior(model, spaces, surface, framefloor_values[:id], framefloor_values[:interior_adjacent_to])
+      set_surface_exterior(model, spaces, surface, framefloor_values[:id], framefloor_values[:exterior_adjacent_to])
+      surface.setName(framefloor_values[:id])
+      surface.setSunExposure("NoSun")
+      surface.setWindExposure("NoWind")
+
+      # Apply construction
+
+      if is_thermal_boundary(framefloor_values)
+        drywall_thick_in = 0.5
+      else
+        drywall_thick_in = 0.0
+      end
+      film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
+      assembly_r = framefloor_values[:insulation_assembly_r_value]
+
+      constr_sets = [
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
+        WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
+        WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
+      ]
+      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, framefloor_values[:id])
+
+      mat_floor_covering = nil
+      install_grade = 1
+
+      # Floor
+      success = Constructions.apply_floor(runner, model, [surface], "#{framefloor_values[:id]} construction",
+                                          cavity_r, install_grade,
+                                          constr_set.framing_factor, constr_set.stud.thick_in,
+                                          constr_set.osb_thick_in, constr_set.rigid_r,
+                                          mat_floor_covering, constr_set.exterior_material)
+      return false if not success
+
+      if not assembly_r.nil?
+        check_surface_assembly_rvalue(surface, film_r, assembly_r)
+      end
+    end
+
+    return true
+  end
+
+  def self.add_foundation_walls_slabs(runner, model, building, spaces)
+    # Get foundation types
+    foundation_types = []
+    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab/InteriorAdjacentTo") do |int_adjacent_to|
+      next if foundation_types.include? int_adjacent_to.text
+
+      foundation_types << int_adjacent_to.text
+    end
+
+    foundation_types.each do |foundation_type|
+      # Create Kiva foundation for each type
+
+      # Get attached foundation walls/slabs
+      fnd_walls = []
+      slabs = []
+      building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall[InteriorAdjacentTo='#{foundation_type}']") do |fnd_wall|
+        fnd_walls << fnd_wall
+      end
+      building.elements.each("BuildingDetails/Enclosure/Slabs/Slab[InteriorAdjacentTo='#{foundation_type}']") do |slab|
+        slabs << slab
+      end
+
+      # Calculate sum of exterior foundation wall lengths
       sum_wall_length = 0.0
-      foundation.elements.each("FoundationWall") do |fnd_wall|
-        foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-        next if foundation_wall_values[:adjacent_to] != "ground"
+      fnd_walls.each do |fnd_wall|
+        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+        next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
-        wall_net_area = net_surface_area(foundation_wall_values[:area], foundation_wall_values[:id], "Wall")
-        sum_wall_length += wall_net_area / foundation_wall_values[:height]
+        net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
+        sum_wall_length += net_area / fnd_wall_values[:height]
       end
 
       # Obtain the exposed perimeter for each slab
       slabs_perimeter_exposed = {}
-      foundation.elements.each("Slab") do |fnd_slab|
-        slab_values = HPXML.get_foundation_slab_values(slab: fnd_slab)
+      slabs.each do |slab|
+        slab_values = HPXML.get_slab_values(slab: slab)
         slabs_perimeter_exposed[slab_values[:id]] = slab_values[:exposed_perimeter]
       end
 
-      # Foundation wall surfaces
+      # Exterior foundation wall surfaces
       foundation_object = {}
-      foundation_wall_heights = []
-      foundation.elements.each("FoundationWall") do |fnd_wall|
-        foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-        next if foundation_wall_values[:adjacent_to] != "ground"
+      fnd_walls.each do |fnd_wall|
+        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+        next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
-        wall_id = foundation_wall_values[:id]
-        exterior_adjacent_to = foundation_wall_values[:adjacent_to]
+        height = fnd_wall_values[:height]
+        net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
+        height_ag = height - fnd_wall_values[:depth_below_grade]
+        z_origin = -1 * fnd_wall_values[:depth_below_grade]
+        total_length = net_area / height
 
-        wall_height = foundation_wall_values[:height]
-        wall_net_area = net_surface_area(foundation_wall_values[:area], wall_id, "Wall")
-        foundation_wall_heights << wall_height
-        wall_height_above_grade = wall_height - foundation_wall_values[:depth_below_grade]
-        z_origin = -1 * foundation_wall_values[:depth_below_grade]
-        wall_length = wall_net_area / wall_height
-
-        wall_azimuth = @default_azimuth # don't split up surface due to the Kiva runtime impact
-        if not foundation_wall_values[:azimuth].nil?
-          wall_azimuth = foundation_wall_values[:azimuth]
+        azimuth = @default_azimuth # don't split up surface due to the Kiva runtime impact
+        if not fnd_wall_values[:azimuth].nil?
+          azimuth = fnd_wall_values[:azimuth]
         end
 
         # Attach a portion of the foundation wall to each slab. This is
@@ -929,55 +1177,54 @@ class OSModel
         slabs_perimeter_exposed.each do |slab_id, slab_perimeter_exposed|
           # Calculate exposed section of wall based on slab's total exposed perimeter.
           # Apportioned to each foundation wall.
-          wall_length = wall_length * slab_perimeter_exposed / sum_wall_length
+          length = total_length * slab_perimeter_exposed / sum_wall_length
 
-          surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
-                                                                    wall_azimuth), model)
-
-          surface.additionalProperties.setFeature("Length", wall_length)
-          surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+          surface.additionalProperties.setFeature("Length", length)
+          surface.additionalProperties.setFeature("Azimuth", azimuth)
           surface.additionalProperties.setFeature("Tilt", 90.0)
-          surface.setName(wall_id)
+          surface.setName(fnd_wall_values[:id])
           surface.setSurfaceType("Wall")
-          set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
-          set_surface_exterior(model, spaces, surface, wall_id, exterior_adjacent_to)
+          set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
+          set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
 
-          if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-            wall_drywall_thick_in = 0.5
+          if is_thermal_boundary(fnd_wall_values)
+            drywall_thick_in = 0.5
           else
-            wall_drywall_thick_in = 0.0
+            drywall_thick_in = 0.0
           end
-          wall_filled_cavity = true
-          wall_concrete_thick_in = foundation_wall_values[:thickness]
-          wall_cavity_r = 0.0
-          wall_cavity_depth_in = 0.0
-          wall_install_grade = 1
-          wall_framing_factor = 0.0
-          wall_assembly_r = foundation_wall_values[:insulation_assembly_r_value]
-          if not wall_assembly_r.nil?
-            wall_rigid_height = wall_height
-            wall_film_r = Material.AirFilmVertical.rvalue
-            wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
-            if wall_rigid_r < 0 # Try without drywall
-              wall_drywall_thick_in = 0.0
-              wall_rigid_r = wall_assembly_r - Material.Concrete(wall_concrete_thick_in).rvalue - Material.GypsumWall(wall_drywall_thick_in).rvalue - wall_film_r
+          filled_cavity = true
+          concrete_thick_in = fnd_wall_values[:thickness]
+          cavity_r = 0.0
+          cavity_depth_in = 0.0
+          install_grade = 1
+          framing_factor = 0.0
+          assembly_r = fnd_wall_values[:insulation_assembly_r_value]
+          if not assembly_r.nil?
+            rigid_height = height
+            film_r = Material.AirFilmVertical.rvalue
+            rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
+            if rigid_r < 0 # Try without drywall
+              drywall_thick_in = 0.0
+              rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
             end
           else
-            wall_rigid_height = foundation_wall_values[:insulation_height]
-            wall_rigid_r = foundation_wall_values[:insulation_r_value]
+            rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
+            rigid_r = fnd_wall_values[:insulation_r_value]
           end
 
+          foundation = foundation_object[slab_id]
+
           # TODO: Currently assumes all walls have the same height, insulation height, etc.
-          # Refactor so that we create the single Kiva foundation object based on average values.
-          success = Constructions.apply_foundation_wall(runner, model, [surface], "FndWallConstruction",
-                                                        wall_rigid_height, wall_cavity_r, wall_install_grade,
-                                                        wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
-                                                        wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                                        wall_height, wall_height_above_grade, foundation_object[slab_id])
+          success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
+                                                        rigid_height, cavity_r, install_grade,
+                                                        cavity_depth_in, filled_cavity, framing_factor,
+                                                        rigid_r, drywall_thick_in, concrete_thick_in,
+                                                        height, height_ag, foundation)
           return false if not success
 
-          if not wall_assembly_r.nil?
-            check_surface_assembly_rvalue(surface, wall_film_r, wall_assembly_r)
+          if not assembly_r.nil?
+            check_surface_assembly_rvalue(surface, film_r, assembly_r)
           end
 
           foundation_object[slab_id] = surface.adjacentFoundation.get
@@ -985,60 +1232,53 @@ class OSModel
       end
 
       # Foundation slab surfaces
-      slab_depth_below_grade = nil
-      foundation.elements.each("Slab") do |fnd_slab|
-        slab_values = HPXML.get_foundation_slab_values(slab: fnd_slab)
-
-        slab_id = slab_values[:id]
+      slabs.each do |slab|
+        slab_values = HPXML.get_slab_values(slab: slab)
 
         # Need to ensure surface perimeter >= user-specified exposed perimeter
         # (for Kiva) and surface area == user-specified area.
-        slab_exp_perim = slab_values[:exposed_perimeter]
-        slab_tot_perim = slab_exp_perim
-        if slab_tot_perim**2 - 16.0 * slab_values[:area] <= 0
+        exp_perim = slab_values[:exposed_perimeter]
+        tot_perim = exp_perim
+        if tot_perim**2 - 16.0 * slab_values[:area] <= 0
           # Cannot construct rectangle with this perimeter/area. Some of the
           # perimeter is presumably not exposed, so bump up perimeter value.
-          slab_tot_perim = Math.sqrt(16.0 * slab_values[:area])
+          tot_perim = Math.sqrt(16.0 * slab_values[:area])
         end
-        sqrt_term = slab_tot_perim**2 - 16.0 * slab_values[:area]
-        slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
-        slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
+        sqrt_term = tot_perim**2 - 16.0 * slab_values[:area]
+        length = tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
+        width = tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
 
-        slab_depth_below_grade = slab_values[:depth_below_grade]
-        z_origin = -1 * slab_depth_below_grade
+        z_origin = -1 * slab_values[:depth_below_grade]
 
-        surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
-
-        surface.setName(slab_id)
+        surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
+        surface.setName(slab_values[:id])
         surface.setSurfaceType("Floor")
         surface.setOutsideBoundaryCondition("Foundation")
-        set_surface_interior(model, spaces, surface, slab_id, interior_adjacent_to)
+        set_surface_interior(model, spaces, surface, slab_values[:id], slab_values[:interior_adjacent_to])
         surface.setSunExposure("NoSun")
         surface.setWindExposure("NoWind")
 
-        slab_concrete_thick_in = slab_values[:thickness]
-
-        slab_perim_r = slab_values[:perimeter_insulation_r_value]
-        slab_perim_depth = slab_values[:perimeter_insulation_depth]
-        if slab_perim_r == 0 or slab_perim_depth == 0
-          slab_perim_r = 0
-          slab_perim_depth = 0
+        perim_r = slab_values[:perimeter_insulation_r_value]
+        perim_depth = slab_values[:perimeter_insulation_depth]
+        if perim_r == 0 or perim_depth == 0
+          perim_r = 0
+          perim_depth = 0
         end
 
         if slab_values[:under_slab_insulation_spans_entire_slab]
-          slab_whole_r = slab_values[:under_slab_insulation_r_value]
-          slab_under_r = 0
-          slab_under_width = 0
+          whole_r = slab_values[:under_slab_insulation_r_value]
+          under_r = 0
+          under_width = 0
         else
-          slab_under_r = slab_values[:under_slab_insulation_r_value]
-          slab_under_width = slab_values[:under_slab_insulation_width]
-          if slab_under_r == 0 or slab_under_width == 0
-            slab_under_r = 0
-            slab_under_width = 0
+          under_r = slab_values[:under_slab_insulation_r_value]
+          under_width = slab_values[:under_slab_insulation_width]
+          if under_r == 0 or under_width == 0
+            under_r = 0
+            under_width = 0
           end
-          slab_whole_r = 0
+          whole_r = 0
         end
-        slab_gap_r = slab_under_r
+        slab_gap_r = under_r
 
         mat_carpet = nil
         if slab_values[:carpet_fraction] > 0 and slab_values[:carpet_r_value] > 0
@@ -1046,263 +1286,75 @@ class OSModel
                                              slab_values[:carpet_r_value])
         end
 
-        success = Constructions.apply_foundation_slab(runner, model, surface, "SlabConstruction",
-                                                      slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
-                                                      slab_perim_depth, slab_whole_r, slab_concrete_thick_in,
-                                                      slab_exp_perim, mat_carpet, foundation_object[slab_id])
+        foundation = foundation_object[slab_values[:id]]
+
+        success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
+                                                      under_r, under_width, slab_gap_r, perim_r,
+                                                      perim_depth, whole_r, slab_values[:thickness],
+                                                      exp_perim, mat_carpet, foundation)
         return false if not success
 
         # FIXME: Temporary code for sizing
         surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
       end
 
-      # Foundation ceiling surfaces
-      foundation.elements.each("FrameFloor") do |fnd_floor|
-        frame_floor_values = HPXML.get_foundation_framefloor_values(floor: fnd_floor)
+      # Interior foundation wall surfaces
+      # The above-grade portion of the walls are modeled as EnergyPlus surfaces with standard adjacency.
+      # The below-grade portion of the walls (in contact with ground) are not modeled, as Kiva does not
+      # calculate heat flow between two zones through the ground.
+      fnd_walls.each do |fnd_wall|
+        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+        next unless fnd_wall_values[:exterior_adjacent_to] != "ground"
 
-        floor_id = frame_floor_values[:id]
-
-        exterior_adjacent_to = frame_floor_values[:adjacent_to]
-
-        framefloor_area = frame_floor_values[:area]
-        framefloor_width = Math::sqrt(framefloor_area)
-        framefloor_length = framefloor_area / framefloor_width
-
-        if foundation_type == "Ambient"
-          z_origin = 2.0
-        elsif foundation_type.include? "Basement" or foundation_type.include? "Crawlspace"
-          avg_foundation_wall_height = foundation_wall_heights.reduce(:+) / foundation_wall_heights.size.to_f
-          z_origin = -1 * slab_depth_below_grade + avg_foundation_wall_height
+        ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
+        ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
+        length = ag_net_area / ag_height
+        z_origin = -1 * ag_height
+        azimuth = @default_azimuth
+        if not fnd_wall_values[:azimuth].nil?
+          azimuth = fnd_wall_values[:azimuth]
         end
 
-        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(framefloor_length, framefloor_width, z_origin), model)
-
-        surface.setName(floor_id)
-        if interior_adjacent_to == "outside" # pier & beam foundation
-          surface.setSurfaceType("Floor")
-          set_surface_interior(model, spaces, surface, floor_id, exterior_adjacent_to)
-          set_surface_exterior(model, spaces, surface, floor_id, interior_adjacent_to)
-        else
-          surface.setSurfaceType("RoofCeiling")
-          set_surface_interior(model, spaces, surface, floor_id, interior_adjacent_to)
-          set_surface_exterior(model, spaces, surface, floor_id, exterior_adjacent_to)
-        end
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-
-        floor_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
-        floor_assembly_r = frame_floor_values[:insulation_assembly_r_value]
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
-        ]
-        floor_constr_set, floor_cav_r = pick_wood_stud_construction_set(floor_assembly_r, constr_sets, floor_film_r, "foundation framefloor #{floor_id}")
-
-        mat_floor_covering = nil
-        floor_grade = 1
-
-        # Foundation ceiling
-        success = Constructions.apply_floor(runner, model, [surface], "FndCeilingConstruction",
-                                            floor_cav_r, floor_grade,
-                                            floor_constr_set.framing_factor, floor_constr_set.stud.thick_in,
-                                            floor_constr_set.osb_thick_in, floor_constr_set.rigid_r,
-                                            mat_floor_covering, floor_constr_set.exterior_material)
-        return false if not success
-
-        if not floor_assembly_r.nil?
-          check_surface_assembly_rvalue(surface, floor_film_r, floor_assembly_r)
-        end
-      end
-    end
-
-    return true
-  end
-
-  def self.add_garages(runner, model, building, spaces)
-    # TODO: Refactor by creating methods for add_garage_ceilings(), add_garage_walls(), etc.
-
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-
-    building.elements.each("BuildingDetails/Enclosure/Garages/Garage") do |garage|
-      garage_values = HPXML.get_garage_values(garage: garage)
-
-      interior_adjacent_to = "garage"
-
-      # Garage ceiling surface
-      garage.elements.each("Ceilings/Ceiling") do |garage_ceiling|
-        ceiling_values = HPXML.get_garage_ceiling_values(ceiling: garage_ceiling)
-
-        ceiling_id = ceiling_values[:id]
-
-        exterior_adjacent_to = ceiling_values[:adjacent_to]
-
-        ceiling_area = ceiling_values[:area]
-        ceiling_width = Math::sqrt(ceiling_area)
-        ceiling_length = ceiling_area / ceiling_width
-
-        z_origin = 8.0
-
-        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(ceiling_length, ceiling_width, z_origin), model)
-
-        surface.setName(ceiling_id)
-        surface.setSurfaceType("RoofCeiling")
-        set_surface_interior(model, spaces, surface, ceiling_id, interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, ceiling_id, exterior_adjacent_to)
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-
-        ceiling_film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
-        ceiling_assembly_r = ceiling_values[:insulation_assembly_r_value]
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 10.0, 0.75, 0.0, Material.CoveringBare), # 2x6, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.10, 0.0, 0.75, 0.0, Material.CoveringBare),  # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
-        ]
-        ceiling_constr_set, ceiling_cav_r = pick_wood_stud_construction_set(ceiling_assembly_r, constr_sets, ceiling_film_r, "garage ceiling #{ceiling_id}")
-
-        mat_ceiling_covering = nil
-        ceiling_grade = 1
-
-        success = Constructions.apply_floor(runner, model, [surface], "FndCeilingConstruction",
-                                            ceiling_cav_r, ceiling_grade,
-                                            ceiling_constr_set.framing_factor, ceiling_constr_set.stud.thick_in,
-                                            ceiling_constr_set.osb_thick_in, ceiling_constr_set.rigid_r,
-                                            mat_ceiling_covering, ceiling_constr_set.exterior_material)
-        return false if not success
-
-        if not ceiling_assembly_r.nil?
-          check_surface_assembly_rvalue(surface, ceiling_film_r, ceiling_assembly_r)
-        end
-      end
-
-      # Garage wall surfaces
-      garage.elements.each("Walls/Wall") do |garage_wall|
-        wall_values = HPXML.get_garage_wall_values(wall: garage_wall)
-
-        interior_adjacent_to = "garage"
-        exterior_adjacent_to = wall_values[:adjacent_to]
-        wall_id = wall_values[:id]
-        wall_net_area = net_surface_area(wall_values[:area], wall_id, "Wall")
-        wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
-        wall_length = wall_net_area / wall_height
-        z_origin = 0
-
-        wall_azimuth = @default_azimuth
-        if not wall_values[:azimuth].nil?
-          wall_azimuth = wall_values[:azimuth]
-        end
-
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
-                                                                  wall_azimuth), model)
-
-        surface.additionalProperties.setFeature("Length", wall_length)
-        surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
+        surface.additionalProperties.setFeature("Length", length)
+        surface.additionalProperties.setFeature("Azimuth", azimuth)
         surface.additionalProperties.setFeature("Tilt", 90.0)
-        surface.setName(wall_id)
+        surface.setName(fnd_wall_values[:id])
         surface.setSurfaceType("Wall")
-        set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, wall_id, exterior_adjacent_to)
-        if exterior_adjacent_to != "outside"
-          surface.setSunExposure("NoSun")
-          surface.setWindExposure("NoWind")
-        end
+        set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
+        set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
+        surface.setSunExposure("NoSun")
+        surface.setWindExposure("NoWind")
 
         # Apply construction
-        # The code below constructs a reasonable wall construction based on the
-        # wall type while ensuring the correct assembly R-value.
 
-        if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
+        wall_type = "SolidConcrete"
+        solar_absorptance = 0.75
+        emittance = 0.9
+        if is_thermal_boundary(fnd_wall_values)
           drywall_thick_in = 0.5
         else
           drywall_thick_in = 0.0
         end
-        if exterior_adjacent_to == "outside"
-          film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
-          mat_ext_finish = Material.ExtFinishWoodLight
-        else
-          film_r = 2.0 * Material.AirFilmVertical.rvalue
-          mat_ext_finish = nil
+        film_r = 2.0 * Material.AirFilmVertical.rvalue
+        assembly_r = fnd_wall_values[:insulation_assembly_r_value]
+        if assembly_r.nil?
+          concrete_thick_in = fnd_wall_values[:thickness]
+          assembly_r = fnd_wall_values[:insulation_r_value] + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
         end
+        mat_ext_finish = nil
 
-        apply_wall_construction(runner, model, surface, wall_id, wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
-                                drywall_thick_in, film_r, mat_ext_finish, wall_values[:solar_absorptance], wall_values[:emittance])
-      end
-
-      # Garage slab surfaces
-      garage.elements.each("Slabs/Slab") do |garage_slab|
-        slab_values = HPXML.get_garage_slab_values(slab: garage_slab)
-
-        slab_id = slab_values[:id]
-
-        # Need to ensure surface perimeter >= user-specified exposed perimeter
-        # (for Kiva) and surface area == user-specified area.
-        slab_exp_perim = slab_values[:exposed_perimeter]
-        slab_tot_perim = slab_exp_perim
-        if slab_tot_perim**2 - 16.0 * slab_values[:area] <= 0
-          # Cannot construct rectangle with this perimeter/area. Some of the
-          # perimeter is presumably not exposed, so bump up perimeter value.
-          slab_tot_perim = Math.sqrt(16.0 * slab_values[:area])
-        end
-        sqrt_term = slab_tot_perim**2 - 16.0 * slab_values[:area]
-        slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
-        slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
-
-        z_origin = 0
-
-        surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
-
-        surface.setName(slab_id)
-        surface.setSurfaceType("Floor")
-        surface.setOutsideBoundaryCondition("Foundation")
-        set_surface_interior(model, spaces, surface, slab_id, "garage")
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-
-        slab_concrete_thick_in = slab_values[:thickness]
-
-        slab_perim_r = slab_values[:perimeter_insulation_r_value]
-        slab_perim_depth = slab_values[:perimeter_insulation_depth]
-        if slab_perim_r == 0 or slab_perim_depth == 0
-          slab_perim_r = 0
-          slab_perim_depth = 0
-        end
-
-        if slab_values[:under_slab_insulation_spans_entire_slab]
-          slab_whole_r = slab_values[:under_slab_insulation_r_value]
-          slab_under_r = 0
-          slab_under_width = 0
-        else
-          slab_under_r = slab_values[:under_slab_insulation_r_value]
-          slab_under_width = slab_values[:under_slab_insulation_width]
-          if slab_under_r == 0 or slab_under_width == 0
-            slab_under_r = 0
-            slab_under_width = 0
-          end
-          slab_whole_r = 0
-        end
-        slab_gap_r = slab_under_r
-
-        success = Constructions.apply_foundation_slab(runner, model, surface, "GarageSlabConstruction",
-                                                      slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
-                                                      slab_perim_depth, slab_whole_r, slab_concrete_thick_in,
-                                                      slab_values[:exposed_perimeter], nil, nil)
+        success = apply_wall_construction(runner, model, surface, fnd_wall_values[:id], wall_type, assembly_r,
+                                          drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance)
         return false if not success
       end
     end
-
-    return true
   end
 
   def self.add_conditioned_floor_area(runner, model, building, spaces)
+    # FIXME: Simplify this.
     # TODO: Use HPXML values not Model values
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    cfa = building_construction_values[:conditioned_floor_area].round(1)
-
-    # First check if we need to add a conditioned basement ceiling
-    foundation_top = get_foundation_top(model)
+    cfa = @cfa.round(1)
 
     model.getThermalZones.each do |zone|
       next if not Geometry.is_conditioned_basement(zone)
@@ -1325,7 +1377,7 @@ class OSModel
 
         conditioned_floor_width = Math::sqrt(addtl_cfa)
         conditioned_floor_length = addtl_cfa / conditioned_floor_width
-        z_origin = foundation_top
+        z_origin = @foundation_top
 
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
@@ -1368,7 +1420,7 @@ class OSModel
 
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
-    z_origin = foundation_top + 8.0 * (@ncfl_ag - 1)
+    z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
 
     surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
@@ -1406,78 +1458,21 @@ class OSModel
     return true
   end
 
-  def self.add_walls(runner, model, building, spaces)
-    foundation_top = get_foundation_top(model)
-    building_construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-
-    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)
-      interior_adjacent_to = wall_values[:interior_adjacent_to]
-      exterior_adjacent_to = wall_values[:exterior_adjacent_to]
-      wall_id = wall_values[:id]
-      wall_net_area = net_surface_area(wall_values[:area], wall_id, "Wall")
-      wall_height = 8.0 * building_construction_values[:number_of_conditioned_floors_above_grade]
-      wall_length = wall_net_area / wall_height
-      z_origin = foundation_top
-      wall_azimuth = @default_azimuth
-      if not wall_values[:azimuth].nil?
-        wall_azimuth = wall_values[:azimuth]
-      end
-
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
-                                                                wall_azimuth), model)
-
-      surface.additionalProperties.setFeature("Length", wall_length)
-      surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
-      surface.additionalProperties.setFeature("Tilt", 90.0)
-      surface.setName(wall_id)
-      surface.setSurfaceType("Wall")
-      set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
-      set_surface_exterior(model, spaces, surface, wall_id, exterior_adjacent_to)
-      if exterior_adjacent_to != "outside"
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-      end
-
-      # Apply construction
-      # The code below constructs a reasonable wall construction based on the
-      # wall type while ensuring the correct assembly R-value.
-
-      if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-        drywall_thick_in = 0.5
-      else
-        drywall_thick_in = 0.0
-      end
-      if exterior_adjacent_to == "outside"
-        film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
-        mat_ext_finish = Material.ExtFinishWoodLight
-      else
-        film_r = 2.0 * Material.AirFilmVertical.rvalue
-        mat_ext_finish = nil
-      end
-
-      apply_wall_construction(runner, model, surface, wall_id, wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
-                              drywall_thick_in, film_r, mat_ext_finish, wall_values[:solar_absorptance], wall_values[:emittance])
-    end
-
-    return true
-  end
-
-  def self.add_neighbors(runner, model, building, wall_length)
+  def self.add_neighbors(runner, model, building, length)
     # Get the max z-value of any model surface
-    wall_height = -9e99
+    height = -9e99
     model.getSpaces.each do |space|
       z_origin = space.zOrigin
       space.surfaces.each do |surface|
         surface.vertices.each do |vertex|
           surface_z = vertex.z + z_origin
-          next if surface_z < wall_height
+          next if surface_z < height
 
-          wall_height = surface_z
+          height = surface_z
         end
       end
     end
-    wall_height = UnitConversions.convert(wall_height, "m", "ft")
+    height = UnitConversions.convert(height, "m", "ft")
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -1486,7 +1481,7 @@ class OSModel
       azimuth = neighbor_building_values[:azimuth]
       distance = neighbor_building_values[:distance]
 
-      shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(wall_length, wall_height, z_origin, azimuth), model)
+      shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
       shading_surface.additionalProperties.setFeature("Azimuth", azimuth)
       shading_surface.additionalProperties.setFeature("Distance", distance)
       shading_surface.setName("Neighbor azimuth #{azimuth} distance #{distance}")
@@ -1505,279 +1500,7 @@ class OSModel
     return true
   end
 
-  def self.add_rim_joists(runner, model, building, spaces)
-    foundation_top = get_foundation_top(model)
-
-    building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
-      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
-      interior_adjacent_to = rim_joist_values[:interior_adjacent_to]
-      exterior_adjacent_to = rim_joist_values[:exterior_adjacent_to]
-      rim_joist_id = rim_joist_values[:id]
-
-      rim_joist_height = 1.0
-      rim_joist_length = rim_joist_values[:area] / rim_joist_height
-      z_origin = foundation_top
-      rim_joist_azimuth = @default_azimuth
-      if not rim_joist_values[:azimuth].nil?
-        rim_joist_azimuth = rim_joist_values[:azimuth]
-      end
-
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(rim_joist_length, rim_joist_height, z_origin,
-                                                                rim_joist_azimuth), model)
-
-      surface.additionalProperties.setFeature("Length", rim_joist_length)
-      surface.additionalProperties.setFeature("Azimuth", rim_joist_azimuth)
-      surface.additionalProperties.setFeature("Tilt", 90.0)
-      surface.setName(rim_joist_id)
-      surface.setSurfaceType("Wall")
-      set_surface_interior(model, spaces, surface, rim_joist_id, interior_adjacent_to)
-      set_surface_exterior(model, spaces, surface, rim_joist_id, exterior_adjacent_to)
-      if exterior_adjacent_to != "outside"
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-      end
-
-      # Apply construction
-
-      if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-        drywall_thick_in = 0.5
-      else
-        drywall_thick_in = 0.0
-      end
-      if exterior_adjacent_to == "outside"
-        film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
-        mat_ext_finish = Material.ExtFinishWoodLight
-      else
-        film_r = 2.0 * Material.AirFilmVertical.rvalue
-        mat_ext_finish = nil
-      end
-      solar_abs = rim_joist_values[:solar_absorptance]
-      emitt = rim_joist_values[:emittance]
-
-      assembly_r = rim_joist_values[:insulation_assembly_r_value]
-
-      constr_sets = [
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 10.0, 2.0, drywall_thick_in, mat_ext_finish),  # 2x4 + R10
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 5.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4 + R5
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4
-        WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, 0.0, nil),                           # Fallback
-      ]
-      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "rim joist #{rim_joist_id}")
-      install_grade = 1
-
-      success = Constructions.apply_rim_joist(runner, model, [surface], "RimJoistConstruction",
-                                              cavity_r, install_grade, constr_set.framing_factor,
-                                              constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                              constr_set.rigid_r, constr_set.exterior_material)
-      return false if not success
-
-      check_surface_assembly_rvalue(surface, film_r, assembly_r)
-
-      apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
-    end
-
-    return true
-  end
-
-  def self.add_attics(runner, model, building, spaces)
-    # TODO: Refactor by creating methods for add_attic_floors(), add_attic_walls(), etc.
-
-    walls_top = get_walls_top(model)
-
-    building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
-      attic_values = HPXML.get_attic_values(attic: attic)
-
-      interior_adjacent_to = get_attic_adjacent_to(attic_values[:attic_type])
-
-      # Attic floors
-      attic.elements.each("Floors/Floor") do |floor|
-        attic_floor_values = HPXML.get_attic_floor_values(floor: floor)
-
-        floor_id = attic_floor_values[:id]
-        exterior_adjacent_to = attic_floor_values[:adjacent_to]
-
-        floor_area = attic_floor_values[:area]
-        floor_width = Math::sqrt(floor_area)
-        floor_length = floor_area / floor_width
-        z_origin = walls_top
-
-        surface = OpenStudio::Model::Surface.new(add_floor_polygon(floor_length, floor_width, z_origin), model)
-
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-        surface.setName(floor_id)
-        surface.setSurfaceType("Floor")
-        set_surface_interior(model, spaces, surface, floor_id, interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, floor_id, exterior_adjacent_to)
-
-        # Apply construction
-
-        if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-          drywall_thick_in = 0.5
-        else
-          drywall_thick_in = 0.0
-        end
-        film_r = 2 * Material.AirFilmFloorAverage.rvalue
-
-        assembly_r = attic_floor_values[:insulation_assembly_r_value]
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.11, 0.0, 0.0, drywall_thick_in, nil), # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.24, 0.0, 0.0, drywall_thick_in, nil), # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),              # Fallback
-        ]
-
-        constr_set, ceiling_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "attic floor #{floor_id}")
-        ceiling_joist_height_in = constr_set.stud.thick_in
-        ceiling_ins_thick_in = ceiling_joist_height_in
-        ceiling_framing_factor = constr_set.framing_factor
-        ceiling_drywall_thick_in = constr_set.drywall_thick_in
-        ceiling_install_grade = 1
-
-        success = Constructions.apply_ceiling(runner, model, [surface], "FloorConstruction",
-                                              ceiling_r, ceiling_install_grade,
-                                              ceiling_ins_thick_in, ceiling_framing_factor,
-                                              ceiling_joist_height_in, ceiling_drywall_thick_in)
-        return false if not success
-
-        check_surface_assembly_rvalue(surface, film_r, assembly_r)
-      end
-
-      # Attic roofs
-      attic.elements.each("Roofs/Roof") do |roof|
-        attic_roof_values = HPXML.get_attic_roof_values(roof: roof)
-
-        roof_id = attic_roof_values[:id]
-        roof_net_area = net_surface_area(attic_roof_values[:area], roof_id, "Roof")
-        roof_width = Math::sqrt(roof_net_area)
-        roof_length = roof_net_area / roof_width
-        if attic_values[:attic_type] != "FlatRoof"
-          roof_tilt = attic_roof_values[:pitch] / 12.0
-        else
-          roof_tilt = 0.0
-        end
-        z_origin = walls_top + 0.5 * Math.sin(Math.atan(roof_tilt)) * roof_width
-        roof_azimuth = @default_azimuth
-        if not attic_roof_values[:azimuth].nil?
-          roof_azimuth = attic_roof_values[:azimuth]
-        end
-
-        surface = OpenStudio::Model::Surface.new(add_roof_polygon(roof_length, roof_width, z_origin,
-                                                                  roof_azimuth, roof_tilt), model)
-
-        surface.additionalProperties.setFeature("Length", roof_length)
-        surface.additionalProperties.setFeature("Width", roof_width)
-        surface.additionalProperties.setFeature("Azimuth", roof_azimuth)
-        surface.additionalProperties.setFeature("Tilt", roof_tilt)
-        surface.setName(roof_id)
-        surface.setSurfaceType("RoofCeiling")
-        surface.setOutsideBoundaryCondition("Outdoors")
-        set_surface_interior(model, spaces, surface, roof_id, interior_adjacent_to)
-
-        # Apply construction
-        if is_external_thermal_boundary(interior_adjacent_to, "outside")
-          drywall_thick_in = 0.5
-        else
-          drywall_thick_in = 0.0
-        end
-        film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surface])).rvalue
-        mat_roofing = Material.RoofingAsphaltShinglesDark
-        solar_abs = attic_roof_values[:solar_absorptance]
-        emitt = attic_roof_values[:emittance]
-        has_radiant_barrier = attic_roof_values[:radiant_barrier]
-
-        assembly_r = attic_roof_values[:insulation_assembly_r_value]
-        constr_sets = [
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 10.0, 0.75, drywall_thick_in, mat_roofing), # 2x8, 24" o.c. + R10
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 5.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c. + R5
-          WoodStudConstructionSet.new(Material.Stud2x(8.0), 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),  # 2x8, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x6, 0.07, 0.0, 0.75, drywall_thick_in, mat_roofing),      # 2x6, 24" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, drywall_thick_in, mat_roofing),       # 2x4, 16" o.c.
-          WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, mat_roofing),                    # Fallback
-        ]
-        constr_set, roof_cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "attic roof #{roof_id}")
-
-        roof_install_grade = 1
-
-        if drywall_thick_in > 0
-          success = Constructions.apply_closed_cavity_roof(runner, model, [surface], "RoofConstruction",
-                                                           roof_cavity_r, roof_install_grade,
-                                                           constr_set.stud.thick_in,
-                                                           true, constr_set.framing_factor,
-                                                           constr_set.drywall_thick_in,
-                                                           constr_set.osb_thick_in, constr_set.rigid_r,
-                                                           constr_set.exterior_material)
-        else
-          success = Constructions.apply_open_cavity_roof(runner, model, [surface], "RoofConstruction",
-                                                         roof_cavity_r, roof_install_grade,
-                                                         constr_set.stud.thick_in,
-                                                         constr_set.framing_factor,
-                                                         constr_set.stud.thick_in,
-                                                         constr_set.osb_thick_in, constr_set.rigid_r,
-                                                         constr_set.exterior_material, has_radiant_barrier)
-          return false if not success
-        end
-
-        check_surface_assembly_rvalue(surface, film_r, assembly_r)
-
-        apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
-      end
-
-      # Attic walls
-      attic.elements.each("Walls/Wall") do |wall|
-        attic_wall_values = HPXML.get_attic_wall_values(wall: wall)
-
-        exterior_adjacent_to = attic_wall_values[:adjacent_to]
-        wall_id = attic_wall_values[:id]
-        wall_net_area = net_surface_area(attic_wall_values[:area], wall_id, "Wall")
-        wall_height = 8.0
-        wall_length = wall_net_area / wall_height
-        z_origin = walls_top
-        wall_azimuth = @default_azimuth
-        if not attic_wall_values[:azimuth].nil?
-          wall_azimuth = attic_wall_values[:azimuth]
-        end
-
-        surface = OpenStudio::Model::Surface.new(add_wall_polygon(wall_length, wall_height, z_origin,
-                                                                  wall_azimuth), model)
-
-        surface.additionalProperties.setFeature("Length", wall_length)
-        surface.additionalProperties.setFeature("Azimuth", wall_azimuth)
-        surface.additionalProperties.setFeature("Tilt", 90.0)
-        surface.setName(wall_id)
-        surface.setSurfaceType("Wall")
-        set_surface_interior(model, spaces, surface, wall_id, interior_adjacent_to)
-        set_surface_exterior(model, spaces, surface, wall_id, exterior_adjacent_to)
-        if exterior_adjacent_to != "outside"
-          surface.setSunExposure("NoSun")
-          surface.setWindExposure("NoWind")
-        end
-
-        # Apply construction
-
-        if is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-          drywall_thick_in = 0.5
-        else
-          drywall_thick_in = 0.0
-        end
-        if exterior_adjacent_to == "outside"
-          film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
-          mat_ext_finish = Material.ExtFinishWoodLight
-        else
-          film_r = 2.0 * Material.AirFilmVertical.rvalue
-          mat_ext_finish = nil
-        end
-
-        apply_wall_construction(runner, model, surface, wall_id, attic_wall_values[:wall_type], attic_wall_values[:insulation_assembly_r_value],
-                                drywall_thick_in, film_r, mat_ext_finish, attic_wall_values[:solar_absorptance], attic_wall_values[:emittance])
-      end
-    end
-
-    return true
-  end
-
   def self.add_windows(runner, model, building, spaces, weather, cooling_season)
-    foundation_top = get_foundation_top(model)
-
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
@@ -1795,7 +1518,7 @@ class OSModel
 
       window_area = window_values[:area]
       window_width = window_area / window_height
-      z_origin = foundation_top
+      z_origin = @foundation_top
       window_azimuth = window_values[:azimuth]
 
       # Create parent surface slightly bigger than window
@@ -1851,8 +1574,6 @@ class OSModel
   end
 
   def self.add_skylights(runner, model, building, spaces, weather, cooling_season)
-    walls_top = get_walls_top(model)
-
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_values = HPXML.get_skylight_values(skylight: skylight)
@@ -1861,15 +1582,11 @@ class OSModel
 
       # Obtain skylight tilt from attached roof
       skylight_tilt = nil
-      building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
-        attic_values = HPXML.get_attic_values(attic: attic)
+      building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+        roof_values = HPXML.get_roof_values(roof: roof)
+        next unless roof_values[:id] == skylight_values[:roof_idref]
 
-        attic.elements.each("Roofs/Roof") do |roof|
-          attic_roof_values = HPXML.get_attic_roof_values(roof: roof)
-          next unless attic_roof_values[:id] == skylight_values[:roof_idref]
-
-          skylight_tilt = attic_roof_values[:pitch] / 12.0
-        end
+        skylight_tilt = roof_values[:pitch] / 12.0
       end
       if skylight_tilt.nil?
         fail "Attached roof '#{skylight_values[:roof_idref]}' not found for skylight '#{skylight_id}'."
@@ -1878,7 +1595,7 @@ class OSModel
       skylight_area = skylight_values[:area]
       skylight_height = Math::sqrt(skylight_area)
       skylight_width = skylight_area / skylight_height
-      z_origin = walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
+      z_origin = @walls_top + 0.5 * Math.sin(Math.atan(skylight_tilt)) * skylight_height
       skylight_azimuth = skylight_values[:azimuth]
 
       # Create parent surface slightly bigger than skylight
@@ -1920,8 +1637,6 @@ class OSModel
   end
 
   def self.add_doors(runner, model, building, spaces)
-    foundation_top = get_foundation_top(model)
-
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
       door_values = HPXML.get_door_values(door: door)
@@ -1932,7 +1647,7 @@ class OSModel
 
       door_height = 6.67 # ft
       door_width = door_area / door_height
-      z_origin = foundation_top
+      z_origin = @foundation_top
 
       # Create parent surface slightly bigger than door
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
@@ -2233,7 +1948,7 @@ class OSModel
       clg_type = cooling_system_values[:cooling_system_type]
 
       cool_capacity_btuh = cooling_system_values[:cooling_capacity]
-      if cool_capacity_btuh <= 0.0 or cool_capacity_btuh.nil?
+      if cool_capacity_btuh < 0
         cool_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2256,10 +1971,9 @@ class OSModel
 
         if num_speeds == "1-Speed"
 
-          eers = [0.82 * seer + 0.64]
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
-          success = HVAC.apply_central_ac_1speed(model, runner, seer, eers, shrs,
+          success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
@@ -2268,13 +1982,9 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          eers = [0.83 * seer + 0.15, 0.56 * seer + 3.57]
           shrs = [0.71, 0.73]
-          capacity_ratios = [0.72, 1.0]
-          fan_speed_ratios = [0.86, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
-          success = HVAC.apply_central_ac_2speed(model, runner, seer, eers, shrs,
-                                                 capacity_ratios, fan_speed_ratios,
+          success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
@@ -2283,13 +1993,9 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          eers = [0.80 * seer, 0.75 * seer, 0.65 * seer, 0.60 * seer]
-          shrs = [0.98, 0.82, 0.745, 0.77]
-          capacity_ratios = [0.36, 0.64, 1.0, 1.16]
-          fan_speed_ratios = [0.51, 0.84, 1.0, 1.19]
+          shrs = [0.87, 0.80, 0.79, 0.78]
           fan_power_installed = get_fan_power_installed(seer)
-          success = HVAC.apply_central_ac_4speed(model, runner, seer, eers, shrs,
-                                                 capacity_ratios, fan_speed_ratios,
+          success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
@@ -2331,8 +2037,10 @@ class OSModel
 
         htg_type = heating_system_values[:heating_system_type]
 
+        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
+
         attached_clg_system = get_attached_system(heating_system_values, building,
-                                                  "CoolingSystem")
+                                                  "CoolingSystem", has_dse)
 
         if only_furnaces_attached_to_cooling
           next unless htg_type == "Furnace" and not attached_clg_system.nil?
@@ -2343,15 +2051,13 @@ class OSModel
         fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
 
         heat_capacity_btuh = heating_system_values[:heating_capacity]
-        if heat_capacity_btuh <= 0.0 or heat_capacity_btuh.nil?
+        if heat_capacity_btuh < 0
           heat_capacity_btuh = Constants.SizingAuto
         end
 
         load_frac = heating_system_values[:fraction_heat_load_served]
         sequential_load_frac = load_frac / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
         @total_frac_remaining_heat_load_served -= load_frac
-
-        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
 
         sys_id = heating_system_values[:id]
         @hvac_map[sys_id] = []
@@ -2433,7 +2139,7 @@ class OSModel
       hp_type = heat_pump_values[:heat_pump_type]
 
       cool_capacity_btuh = heat_pump_values[:cooling_capacity]
-      if cool_capacity_btuh <= 0.0 or cool_capacity_btuh.nil?
+      if cool_capacity_btuh < 0
         cool_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2445,10 +2151,12 @@ class OSModel
       sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity] # TODO: Require in ERI Use Case?
-      if backup_heat_capacity_btuh.nil?
+      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
+      if backup_heat_capacity_btuh < 0
         backup_heat_capacity_btuh = Constants.SizingAuto
       end
+
+      backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
@@ -2472,18 +2180,15 @@ class OSModel
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
+        min_temp = 0.0 # FIXME
 
         if num_speeds == "1-Speed"
 
-          eers = [0.80 * seer + 1.00]
-          cops = [0.57 * hspf - 1.30]
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
-          min_temp = 0.0
-          supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, eers, cops, shrs,
+          success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, supplemental_efficiency,
+                                                   cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2492,19 +2197,11 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          eers = [0.78 * seer + 0.60, 0.68 * seer + 1.00]
-          cops = [0.60 * hspf - 1.40, 0.50 * hspf - 0.94]
           shrs = [0.71, 0.724]
-          capacity_ratios = [0.72, 1.0]
-          fan_speed_ratios_cooling = [0.86, 1.0]
-          fan_speed_ratios_heating = [0.8, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
-          min_temp = 0.0
-          supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, eers, cops, shrs,
-                                                   capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
+          success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, supplemental_efficiency,
+                                                   cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2513,19 +2210,11 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          eers = [0.80 * seer, 0.75 * seer, 0.65 * seer, 0.60 * seer]
-          cops = [0.48 * hspf, 0.45 * hspf, 0.39 * hspf, 0.39 * hspf]
-          shrs = [0.84, 0.79, 0.76, 0.77]
-          capacity_ratios = [0.49, 0.67, 1.0, 1.2]
-          fan_speed_ratios_cooling = [0.7, 0.9, 1.0, 1.26]
-          fan_speed_ratios_heating = [0.74, 0.92, 1.0, 1.22]
+          shrs = [0.87, 0.80, 0.79, 0.78]
           fan_power_installed = get_fan_power_installed(seer)
-          min_temp = 0.0
-          supplemental_efficiency = 1.0
-          success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
-                                                   capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
+          success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, supplemental_efficiency,
+                                                   cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2558,7 +2247,6 @@ class OSModel
         pan_heater_power = 0.0
         fan_power = 0.07
         is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
-        supplemental_efficiency = 1.0
         success = HVAC.apply_mshp(model, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
                                   min_cooling_airflow_rate, max_cooling_airflow_rate,
@@ -2567,7 +2255,7 @@ class OSModel
                                   heating_capacity_offset, cap_retention_frac,
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
-                                  supplemental_efficiency, backup_heat_capacity_btuh,
+                                  backup_heat_efficiency, backup_heat_capacity_btuh,
                                   dse_heat, load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2595,9 +2283,6 @@ class OSModel
         u_tube_leg_spacing = 0.9661
         u_tube_spacing_type = "b"
         fan_power = 0.5
-        heat_pump_capacity = cool_capacity_btuh
-        supplemental_efficiency = 1
-        supplemental_capacity = backup_heat_capacity_btuh
         success = HVAC.apply_gshp(model, runner, weather, cop, eer, shr,
                                   ground_conductivity, grout_conductivity,
                                   bore_config, bore_holes, bore_depth,
@@ -2605,8 +2290,8 @@ class OSModel
                                   ground_diffusivity, fluid_type, frac_glycol,
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
-                                  fan_power, heat_pump_capacity, supplemental_efficiency,
-                                  supplemental_capacity, dse_heat,
+                                  fan_power, cool_capacity_btuh, backup_heat_efficiency,
+                                  backup_heat_capacity_btuh, dse_heat,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2903,54 +2588,47 @@ class OSModel
       end
     end
 
-    # Vented crawl SLA
-    vented_crawl_area = 0.0
-    vented_crawl_sla_area = 0.0
-    building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
-      foundation_values = HPXML.get_foundation_values(foundation: vented_crawl)
-      frame_floor_values = HPXML.get_foundation_framefloor_values(floor: vented_crawl.elements["FrameFloor"])
-      area = frame_floor_values[:area]
-      vented_crawl_sla_area += (foundation_values[:specific_leakage_area] * area)
-      vented_crawl_area += area
-    end
-    if vented_crawl_area > 0
-      crawl_sla = vented_crawl_sla_area / vented_crawl_area
+    vented_attic_sla = nil
+    vented_attic_const_ach = nil
+    if @has_vented_attic
+      building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
+        vented_attic_values = HPXML.get_attic_values(attic: vented_attic)
+        vented_attic_sla = vented_attic_values[:vented_attic_sla]
+        vented_attic_const_ach = vented_attic_values[:vented_attic_constant_ach]
+      end
+      if vented_attic_sla.nil? and vented_attic_const_ach.nil?
+        vented_attic_sla = Airflow.get_default_vented_attic_sla()
+      end
     else
-      crawl_sla = 0.0
+      vented_attic_sla = 0.0
     end
 
-    # Vented attic SLA
-    vented_attic_area = 0.0
-    vented_attic_sla_area = 0.0
-    vented_attic_const_ach = nil
-    building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
-      attic_values = HPXML.get_attic_values(attic: vented_attic)
-      attic_floor_values = HPXML.get_attic_floor_values(floor: vented_attic.elements["Floors/Floor"])
-      area = attic_floor_values[:area]
-      vented_attic_const_ach = attic_values[:constant_ach_natural]
-      if not attic_values[:specific_leakage_area].nil?
-        vented_attic_sla_area += (attic_values[:specific_leakage_area] * area)
+    crawl_sla = nil
+    vented_crawl_ach = nil
+    if @has_vented_crawl
+      building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
+        vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
+        crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
+        vented_crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
       end
-      vented_attic_area += area
-    end
-    if not vented_attic_const_ach.nil?
-      attic_sla = nil
-      attic_const_ach = vented_attic_const_ach
-    elsif vented_attic_sla_area > 0
-      attic_sla = vented_attic_sla_area / vented_attic_area
-      attic_const_ach = nil
+      if crawl_sla.nil? and vented_crawl_ach.nil?
+        crawl_sla = Airflow.get_default_vented_crawl_sla()
+      end
     else
-      attic_sla = 0
-      attic_const_ach = nil
+      vented_crawl_ach = 0.0
+    end
+    if vented_crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
+      vented_crawl_ach = crawl_sla
+      crawl_sla = nil
     end
 
     living_ach50 = infil_ach50
     living_constant_ach = infil_const_ach
     garage_ach50 = infil_ach50
-    conditioned_basement_ach = 0 # TODO: Need to handle above-grade basement
-    unconditioned_basement_ach = 0.1 # TODO: Need to handle above-grade basement
-    crawl_ach = crawl_sla # FIXME: sla vs ach
-    pier_beam_ach = 100
+    conditioned_basement_ach = 0
+    unconditioned_basement_ach = 0.1
+    unvented_crawl_ach = 0.1
+    unvented_attic_sla = 0
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
     if shelter_coef.nil?
@@ -2959,8 +2637,9 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unconditioned_basement_ach,
-                             conditioned_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_ach, unvented_crawl_ach,
+                             vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
+                             conditioned_basement_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
@@ -3123,7 +2802,7 @@ class OSModel
                           Constants.DuctSideReturn => 0.0 }
       air_distribution.elements.each("Ducts") do |ducts|
         ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned', 'attic - conditioned'].include? ducts_values[:duct_location]
+        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
 
         # Calculate total duct area in unconditioned spaces
         duct_side = side_map[ducts_values[:duct_type]]
@@ -3132,7 +2811,7 @@ class OSModel
 
       air_distribution.elements.each("Ducts") do |ducts|
         ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned', 'attic - conditioned'].include? ducts_values[:duct_location]
+        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
 
         duct_side = side_map[ducts_values[:duct_type]]
         duct_area = ducts_values[:duct_surface_area]
@@ -3153,8 +2832,8 @@ class OSModel
           next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
 
           sys_id = sys.elements["SystemIdentifier"].attributes["id"]
-          heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys
-          cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys
+          heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionHeatLoadServed")) > 0
+          cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionCoolLoadServed")) > 0
 
           @hvac_map[sys_id].each do |loop|
             next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
@@ -3371,9 +3050,9 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                          # Fallback
       ]
-      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, wall_id)
 
-      success = Constructions.apply_wood_stud_wall(runner, model, [surface], "WallConstruction",
+      success = Constructions.apply_wood_stud_wall(runner, model, [surface], "#{wall_id} construction",
                                                    cavity_r, install_grade, constr_set.stud.thick_in,
                                                    cavity_filled, constr_set.framing_factor,
                                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -3724,8 +3403,9 @@ class OSModel
     end
   end
 
-  def self.get_attached_system(system_values, building, system_to_search)
+  def self.get_attached_system(system_values, building, system_to_search, has_dse)
     return nil if system_values[:distribution_system_idref].nil?
+    return nil if has_dse
 
     # Finds the OpenStudio object of the heating (or cooling) system attached (i.e., on the same
     # distribution system) to the current cooling (or heating) system.
@@ -3756,12 +3436,14 @@ class OSModel
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
-    elsif ["crawlspace - vented", "crawlspace - unvented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
-    elsif ["attic - unvented", "attic - vented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
-    elsif ["attic - conditioned", "flat roof", "cathedral ceiling"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    elsif ["crawlspace - vented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
+    elsif ["crawlspace - unvented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl))
+    elsif ["attic - vented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic))
+    elsif ["attic - unvented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic))
     else
       fail "Unhandled AdjacentTo value (#{interior_adjacent_to}) for surface '#{surface_id}'."
     end
@@ -3772,6 +3454,8 @@ class OSModel
       surface.setOutsideBoundaryCondition("Outdoors")
     elsif ["ground"].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition("Foundation")
+    elsif ["other housing unit"].include? exterior_adjacent_to
+      surface.setOutsideBoundaryCondition("Adiabatic")
     elsif ["living space"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     elsif ["garage"].include? exterior_adjacent_to
@@ -3780,76 +3464,17 @@ class OSModel
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
-    elsif ["crawlspace - vented", "crawlspace - unvented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
-    elsif ["attic - unvented", "attic - vented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
-    elsif ["attic - conditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    elsif ["crawlspace - vented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
+    elsif ["crawlspace - unvented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl))
+    elsif ["attic - vented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic))
+    elsif ["attic - unvented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic))
     else
       fail "Unhandled AdjacentTo value (#{exterior_adjacent_to}) for surface '#{surface_id}'."
     end
-  end
-
-  def self.get_foundation_top(model)
-    # Get top of foundation surfaces
-    foundation_top = -9999
-    model.getSpaces.each do |space|
-      next unless Geometry.space_is_below_grade(space)
-
-      space.surfaces.each do |surface|
-        surface.vertices.each do |v|
-          next if v.z < foundation_top
-
-          foundation_top = v.z
-        end
-      end
-    end
-
-    if foundation_top == -9999
-      foundation_top = 9999
-      # Pier & beam foundation; get lowest floor vertex
-      model.getSpaces.each do |space|
-        space.surfaces.each do |surface|
-          next unless surface.surfaceType.downcase == "floor"
-
-          surface.vertices.each do |v|
-            next if v.z > foundation_top
-
-            foundation_top = v.z
-          end
-        end
-      end
-    end
-
-    if foundation_top == 9999
-      fail "Could not calculate foundation top."
-    end
-
-    return UnitConversions.convert(foundation_top, "m", "ft")
-  end
-
-  def self.get_walls_top(model)
-    # Get top of wall surfaces
-    walls_top = -9999
-    model.getSpaces.each do |space|
-      space.surfaces.each do |surface|
-        next unless surface.surfaceType.downcase == "wall"
-        next unless surface.subSurfaces.size == 0
-
-        surface.vertices.each do |v|
-          next if v.z < walls_top
-
-          walls_top = v.z
-        end
-      end
-    end
-
-    if walls_top == -9999
-      fail "Could not calculate walls top."
-    end
-
-    return UnitConversions.convert(walls_top, "m", "ft")
   end
 
   def self.get_space_from_location(location, object_name, model, spaces)
@@ -3864,10 +3489,14 @@ class OSModel
       space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement)
     elsif location == 'garage'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
-    elsif location == 'attic - unvented' or location == 'attic - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic)
-    elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
+    elsif location == 'attic - vented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic)
+    elsif location == 'attic - unvented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic)
+    elsif location == 'crawlspace - vented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl)
+    elsif location == 'crawlspace - unvented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl)
     end
 
     if space.nil?
@@ -3901,61 +3530,22 @@ class OSModel
   end
 
   def self.assign_space_to_subsurface(surface, subsurface_id, wall_idref, building, spaces, model, subsurface_type)
-    # First check walls
+    # Check walls
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
       wall_values = HPXML.get_wall_values(wall: wall)
       next unless wall_values[:id] == wall_idref
 
-      interior_adjacent_to = wall_values[:interior_adjacent_to]
-      set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
+      set_surface_interior(model, spaces, surface, subsurface_id, wall_values[:interior_adjacent_to])
       return
     end
 
-    # Next check foundation walls
-    if not surface.space.is_initialized
-      building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation") do |foundation|
-        foundation_values = HPXML.get_foundation_values(foundation: foundation)
-        interior_adjacent_to = get_foundation_adjacent_to(foundation_values[:foundation_type])
+    # Check foundation walls
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+      next unless fnd_wall_values[:id] == wall_idref
 
-        foundation.elements.each("FoundationWall") do |foundation_wall|
-          foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
-          next unless foundation_wall_values[:id] == wall_idref
-
-          set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
-          return
-        end
-      end
-    end
-
-    # Next check attic walls
-    if not surface.space.is_initialized
-      building.elements.each("BuildingDetails/Enclosure/Attics/Attic") do |attic|
-        attic_values = HPXML.get_attic_values(attic: attic)
-        interior_adjacent_to = get_attic_adjacent_to(attic_values[:attic_type])
-
-        attic.elements.each("Walls/Wall") do |attic_wall|
-          attic_wall_values = HPXML.get_attic_wall_values(wall: attic_wall)
-          next unless attic_wall_values[:id] == wall_idref
-
-          set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
-          return
-        end
-      end
-    end
-
-    # Next check garage walls
-    if not surface.space.is_initialized
-      building.elements.each("BuildingDetails/Enclosure/Garages/Garage") do |garage|
-        interior_adjacent_to = "garage"
-
-        garage.elements.each("Walls/Wall") do |garage_wall|
-          garage_wall_values = HPXML.get_garage_wall_values(wall: garage_wall)
-          next unless garage_wall_values[:id] == wall_idref
-
-          set_surface_interior(model, spaces, surface, subsurface_id, interior_adjacent_to)
-          return
-        end
-      end
+      set_surface_interior(model, spaces, surface, subsurface_id, fnd_wall_values[:interior_adjacent_to])
+      return
     end
 
     if not surface.space.is_initialized
@@ -4080,72 +3670,43 @@ def to_beopt_wh_type(type)
            'heat pump water heater' => Constants.WaterHeaterTypeHeatPump }[type]
 end
 
-def get_foundation_adjacent_to(fnd_type)
-  if fnd_type == "ConditionedBasement"
-    return "basement - conditioned"
-  elsif fnd_type == "UnconditionedBasement"
-    return "basement - unconditioned"
-  elsif fnd_type == "VentedCrawlspace"
-    return "crawlspace - vented"
-  elsif fnd_type == "UnventedCrawlspace"
-    return "crawlspace - unvented"
-  elsif fnd_type == "SlabOnGrade"
-    return "living space"
-  elsif fnd_type == "Ambient"
-    return "outside"
+def is_thermal_boundary(surface_values)
+  if surface_values[:exterior_adjacent_to] == "other housing unit"
+    return false # adiabatic
   end
 
-  fail "Unexpected foundation type (#{fnd_type})."
-end
-
-def get_attic_adjacent_to(attic_type)
-  if attic_type == "UnventedAttic"
-    return "attic - unvented"
-  elsif attic_type == "VentedAttic"
-    return "attic - vented"
-  elsif attic_type == "ConditionedAttic"
-    return "attic - conditioned"
-  elsif attic_type == "CathedralCeiling"
-    return "living space"
-  elsif attic_type == "FlatRoof"
-    return "living space"
-  end
-
-  fail "Unexpected attic type (#{attic_type})."
-end
-
-def is_external_thermal_boundary(interior_adjacent_to, exterior_adjacent_to)
-  interior_conditioned = is_adjacent_to_conditioned(interior_adjacent_to)
-  exterior_conditioned = is_adjacent_to_conditioned(exterior_adjacent_to)
+  interior_conditioned = is_adjacent_to_conditioned(surface_values[:interior_adjacent_to])
+  exterior_conditioned = is_adjacent_to_conditioned(surface_values[:exterior_adjacent_to])
   return (interior_conditioned != exterior_conditioned)
 end
 
 def is_adjacent_to_conditioned(adjacent_to)
-  if adjacent_to == "living space"
+  if ["living space", "basement - conditioned"].include? adjacent_to
     return true
-  elsif adjacent_to == "garage"
-    return false
-  elsif adjacent_to == "attic - vented"
-    return false
-  elsif adjacent_to == "attic - unvented"
-    return false
-  elsif adjacent_to == "attic - conditioned"
-    return true
-  elsif adjacent_to == "basement - unconditioned"
-    return false
-  elsif adjacent_to == "basement - conditioned"
-    return true
-  elsif adjacent_to == "crawlspace - vented"
-    return false
-  elsif adjacent_to == "crawlspace - unvented"
-    return false
-  elsif adjacent_to == "outside"
-    return false
-  elsif adjacent_to == "ground"
-    return false
   end
 
-  fail "Unexpected adjacent_to (#{adjacent_to})."
+  return false
+end
+
+def hpxml_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
+  if floor_interior_adjacent_to.include? "attic"
+    return true
+  elsif floor_exterior_adjacent_to.include? "attic"
+    return true
+  end
+
+  return false
+end
+
+def get_foundation_and_walls_top(building)
+  foundation_top = 0
+  building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
+    fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+    top = -1 * fnd_wall_values[:depth_below_grade] + fnd_wall_values[:height]
+    foundation_top = top if top > foundation_top
+  end
+  walls_top = foundation_top + 8.0 * @ncfl_ag
+  return foundation_top, walls_top
 end
 
 def get_ac_num_speeds(seer)
