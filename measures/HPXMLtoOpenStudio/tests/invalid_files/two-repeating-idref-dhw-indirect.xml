@@ -263,7 +263,6 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
-            <FuelType>electricity</FuelType>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
@@ -272,7 +271,6 @@
           </WaterHeatingSystem>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater2'/>
-            <FuelType>electricity</FuelType>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>

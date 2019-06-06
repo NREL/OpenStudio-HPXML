@@ -641,11 +641,13 @@ class HEScoreRuleset
         wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type])
       end
       if wh_sys_values[:water_heater_type] == "space-heating boiler with storage tank"
-        wh_sys_values[:fuel_type] = "electricity"  #FIX ME: Fuel type is only being set for purposes of defaulting a tank UA. Need to review
+        fuel_type = "electricity"  # Set default fuel_type to call function : get_default_water_heater_volume, not passing this input to EP-HPXML
+	  else
+	    fuel_type = wh_sys_values[:fuel_type]
       end
       wh_tank_volume = nil
       if wh_sys_values[:water_heater_type] != "instantaneous water heater"
-        wh_tank_volume = get_default_water_heater_volume(wh_sys_values[:fuel_type])
+        wh_tank_volume = get_default_water_heater_volume(fuel_type)
       end
       HPXML.add_water_heating_system(hpxml: hpxml,
                                      id: wh_sys_values[:id],

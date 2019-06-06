@@ -35,7 +35,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     results = {}
     parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
     xmldir = "#{parent_dir}/sample_files"
-    Dir["#{xmldir}/*.xml"].sort.each do |xml|
+    Dir["#{xmldir}/DHW_indirect_hpxml.xml"].sort.each do |xml|
       results[File.basename(xml)] = run_and_check(xml, parent_dir, false, zipfile)
     end
 
