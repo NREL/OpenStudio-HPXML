@@ -122,10 +122,6 @@ class HPXML
                                      number_of_bedrooms:,
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
-                                     vented_crawlspace_sla: nil,
-                                     vented_crawlspace_constant_ach: nil,
-                                     vented_attic_sla: nil,
-                                     vented_attic_constant_ach: nil,
                                      use_only_ideal_air_system: nil,
                                      **remainder)
     building_construction = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "BuildingConstruction"])
@@ -134,24 +130,6 @@ class HPXML
     XMLHelper.add_element(building_construction, "NumberofBedrooms", Integer(number_of_bedrooms))
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
-    if not vented_crawlspace_sla.nil?
-      ventilation_rate = XMLHelper.add_element(building_construction, "FoundationVentilationRate")
-      XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
-      XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_sla))
-    elsif not vented_crawlspace_constant_ach.nil?
-      ventilation_rate = XMLHelper.add_element(building_construction, "FoundationVentilationRate")
-      XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
-      XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_constant_ach))
-    end
-    if not vented_attic_sla.nil?
-      ventilation_rate = XMLHelper.add_element(building_construction, "AtticVentilationRate")
-      XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
-      XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_sla))
-    elsif not vented_attic_constant_ach.nil?
-      ventilation_rate = XMLHelper.add_element(building_construction, "AtticVentilationRate")
-      XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
-      XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_constant_ach))
-    end
     HPXML.add_extension(parent: building_construction,
                         extensions: { "UseOnlyIdealAirSystem": to_bool_or_nil(use_only_ideal_air_system) })
 
@@ -168,10 +146,6 @@ class HPXML
              :number_of_bedrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
              :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
-             :vented_crawlspace_sla => to_float_or_nil(XMLHelper.get_value(building_construction, "FoundationVentilationRate[UnitofMeasure='SLA']/Value")),
-             :vented_crawlspace_constant_ach => to_float_or_nil(XMLHelper.get_value(building_construction, "FoundationVentilationRate[UnitofMeasure='ACHnatural']/Value")),
-             :vented_attic_sla => to_float_or_nil(XMLHelper.get_value(building_construction, "AtticVentilationRate[UnitofMeasure='SLA']/Value")),
-             :vented_attic_constant_ach => to_float_or_nil(XMLHelper.get_value(building_construction, "AtticVentilationRate[UnitofMeasure='ACHnatural']/Value")),
              :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
   end
 
@@ -265,6 +239,140 @@ class HPXML
              :infiltration_volume => to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "InfiltrationVolume")),
              :constant_ach_natural => to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural")),
              :leakiness_description => XMLHelper.get_value(air_infiltration_measurement, "LeakinessDescription") }
+  end
+
+  def self.add_attic(hpxml:,
+                     id:,
+                     attic_type:,
+                     vented_attic_sla: nil,
+                     vented_attic_constant_ach: nil,
+                     **remainder)
+    attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
+    attic = XMLHelper.add_element(attics, "Attic")
+    sys_id = XMLHelper.add_element(attic, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    unless attic_type.nil?
+      attic_type_e = XMLHelper.add_element(attic, "AtticType")
+      if attic_type == "UnventedAttic"
+        attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
+        XMLHelper.add_element(attic_type_attic, "Vented", false)
+      elsif attic_type == "VentedAttic"
+        attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
+        XMLHelper.add_element(attic_type_attic, "Vented", true)
+        if not vented_attic_sla.nil?
+          ventilation_rate = XMLHelper.add_element(attic, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_sla))
+        elsif not vented_attic_constant_ach.nil?
+          ventilation_rate = XMLHelper.add_element(attic, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_constant_ach))
+        end
+      elsif attic_type == "FlatRoof" or attic_type == "CathedralCeiling"
+        XMLHelper.add_element(attic_type_e, attic_type)
+      else
+        fail "Unhandled attic type '#{attic_type}'."
+      end
+    end
+
+    return attic
+  end
+
+  def self.get_attic_values(attic:)
+    return nil if attic.nil?
+
+    attic_type = nil
+    vented_attic_sla = nil
+    vented_attic_constant_ach = nil
+    if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
+      attic_type = "UnventedAttic"
+    elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
+      attic_type = "VentedAttic"
+      vented_attic_sla = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='SLA']/Value"))
+      vented_attic_constant_ach = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
+    elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
+      attic_type = "ConditionedAttic"
+    elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
+      attic_type = "FlatRoof"
+    elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
+      attic_type = "CathedralCeiling"
+    end
+
+    return { :id => HPXML.get_id(attic),
+             :attic_type => attic_type,
+             :vented_attic_sla => vented_attic_sla,
+             :vented_attic_constant_ach => vented_attic_constant_ach }
+  end
+
+  def self.add_foundation(hpxml:,
+                          id:,
+                          foundation_type:,
+                          vented_crawlspace_sla: nil,
+                          vented_crawlspace_constant_ach: nil,
+                          **remainder)
+    foundations = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Foundations"])
+    foundation = XMLHelper.add_element(foundations, "Foundation")
+    sys_id = XMLHelper.add_element(foundation, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    unless foundation_type.nil?
+      foundation_type_e = XMLHelper.add_element(foundation, "FoundationType")
+      if ["SlabOnGrade", "Ambient"].include? foundation_type
+        XMLHelper.add_element(foundation_type_e, foundation_type)
+      elsif foundation_type == "ConditionedBasement"
+        basement = XMLHelper.add_element(foundation_type_e, "Basement")
+        XMLHelper.add_element(basement, "Conditioned", true)
+      elsif foundation_type == "UnconditionedBasement"
+        basement = XMLHelper.add_element(foundation_type_e, "Basement")
+        XMLHelper.add_element(basement, "Conditioned", false)
+      elsif foundation_type == "VentedCrawlspace"
+        crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
+        XMLHelper.add_element(crawlspace, "Vented", true)
+        if not vented_crawlspace_sla.nil?
+          ventilation_rate = XMLHelper.add_element(foundation, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_sla))
+        elsif not vented_crawlspace_constant_ach.nil?
+          ventilation_rate = XMLHelper.add_element(foundation, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_constant_ach))
+        end
+      elsif foundation_type == "UnventedCrawlspace"
+        crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
+        XMLHelper.add_element(crawlspace, "Vented", false)
+      else
+        fail "Unhandled foundation type '#{foundation_type}'."
+      end
+    end
+
+    return foundation
+  end
+
+  def self.get_foundation_values(foundation:)
+    return nil if foundation.nil?
+
+    foundation_type = nil
+    vented_crawlspace_sla = nil
+    vented_crawlspace_constant_ach = nil
+    if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
+      foundation_type = "SlabOnGrade"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
+      foundation_type = "UnconditionedBasement"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
+      foundation_type = "ConditionedBasement"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
+      foundation_type = "UnventedCrawlspace"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
+      foundation_type = "VentedCrawlspace"
+      vented_crawlspace_sla = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='SLA']/Value"))
+      vented_crawlspace_constant_ach = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
+    elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
+      foundation_type = "Ambient"
+    end
+
+    return { :id => HPXML.get_id(foundation),
+             :foundation_type => foundation_type,
+             :vented_crawlspace_sla => vented_crawlspace_sla,
+             :vented_crawlspace_constant_ach => vented_crawlspace_constant_ach }
   end
 
   def self.add_roof(hpxml:,
@@ -427,7 +535,7 @@ class HPXML
                                azimuth: nil,
                                thickness:,
                                depth_below_grade:,
-                               insulation_height: nil,
+                               insulation_distance_to_bottom: nil,
                                insulation_id: nil,
                                insulation_r_value: nil,
                                insulation_assembly_r_value: nil,
@@ -448,7 +556,7 @@ class HPXML
                               id: insulation_id,
                               assembly_r_value: Float(insulation_assembly_r_value))
     else
-      XMLHelper.add_element(foundation_wall, "InsulationHeight", Float(insulation_height))
+      XMLHelper.add_element(foundation_wall, "DistanceToBottomOfInsulation", Float(insulation_distance_to_bottom))
       add_layer_insulation(parent: foundation_wall,
                            element_name: "Insulation",
                            id: insulation_id,
@@ -472,44 +580,44 @@ class HPXML
              :azimuth => to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth")),
              :thickness => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness")),
              :depth_below_grade => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
-             :insulation_height => to_float_or_nil(XMLHelper.get_value(foundation_wall, "InsulationHeight")),
+             :insulation_distance_to_bottom => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DistanceToBottomOfInsulation")),
              :insulation_id => insulation_layer_values[:id],
              :insulation_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]),
              :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
   end
 
-  def self.add_floor(hpxml:,
-                     id:,
-                     exterior_adjacent_to:,
-                     interior_adjacent_to:,
-                     area:,
-                     insulation_id: nil,
-                     insulation_assembly_r_value:,
-                     **remainder)
-    floors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Floors"])
-    floor = XMLHelper.add_element(floors, "Floor")
-    sys_id = XMLHelper.add_element(floor, "SystemIdentifier")
+  def self.add_framefloor(hpxml:,
+                          id:,
+                          exterior_adjacent_to:,
+                          interior_adjacent_to:,
+                          area:,
+                          insulation_id: nil,
+                          insulation_assembly_r_value:,
+                          **remainder)
+    framefloors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "FrameFloors"])
+    framefloor = XMLHelper.add_element(framefloors, "FrameFloor")
+    sys_id = XMLHelper.add_element(framefloor, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(floor, "ExteriorAdjacentTo", exterior_adjacent_to)
-    XMLHelper.add_element(floor, "InteriorAdjacentTo", interior_adjacent_to)
-    XMLHelper.add_element(floor, "Area", Float(area))
-    add_assembly_insulation(parent: floor,
+    XMLHelper.add_element(framefloor, "ExteriorAdjacentTo", exterior_adjacent_to)
+    XMLHelper.add_element(framefloor, "InteriorAdjacentTo", interior_adjacent_to)
+    XMLHelper.add_element(framefloor, "Area", Float(area))
+    add_assembly_insulation(parent: framefloor,
                             id: insulation_id,
                             assembly_r_value: Float(insulation_assembly_r_value))
 
-    return floor
+    return framefloor
   end
 
-  def self.get_floor_values(floor:)
-    return nil if floor.nil?
+  def self.get_framefloor_values(framefloor:)
+    return nil if framefloor.nil?
 
-    insulation_values = get_assembly_insulation_values(insulation: floor.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: floor.elements["Insulation"])
+    insulation_values = get_assembly_insulation_values(insulation: framefloor.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: framefloor.elements["Insulation"])
 
-    return { :id => HPXML.get_id(floor),
-             :exterior_adjacent_to => XMLHelper.get_value(floor, "ExteriorAdjacentTo"),
-             :interior_adjacent_to => XMLHelper.get_value(floor, "InteriorAdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(floor, "Area")),
+    return { :id => HPXML.get_id(framefloor),
+             :exterior_adjacent_to => XMLHelper.get_value(framefloor, "ExteriorAdjacentTo"),
+             :interior_adjacent_to => XMLHelper.get_value(framefloor, "InteriorAdjacentTo"),
+             :area => to_float_or_nil(XMLHelper.get_value(framefloor, "Area")),
              :insulation_id => insulation_values[:id],
              :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
              :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
