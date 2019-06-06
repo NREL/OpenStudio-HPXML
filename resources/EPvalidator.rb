@@ -568,8 +568,6 @@ class EnergyPlusValidator
 
     }
 
-    # TODO: Make common across all validators
-    # TODO: Profile code for runtime improvements
     errors = []
     requirements.each do |parent, requirement|
       if parent.nil? # Unconditional
