@@ -254,7 +254,7 @@ class OSModel
     @nbeds = construction_values[:number_of_bedrooms]
     @nbaths = construction_values[:number_of_bathrooms]
     if @nbaths.nil?
-      Waterheater.get_default_num_bathrooms(@nbeds)
+      @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
     end
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
@@ -820,7 +820,7 @@ class OSModel
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
-      weekday_sch_sum = weekday_sch.inject { |sum, n| sum + n }
+      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject { |sum, n| sum + n }
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
         runner.registerError("Occupancy schedule inconsistent with hrs_per_day.")
         return false
