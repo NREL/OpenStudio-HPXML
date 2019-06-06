@@ -2897,7 +2897,7 @@ class HVACSizing
     curves.each do |curve|
       bi = curve.to_CurveBiquadratic.get
       c_si = [bi.coefficient1Constant, bi.coefficient2x, bi.coefficient3xPOW2, bi.coefficient4y, bi.coefficient5yPOW2, bi.coefficient6xTIMESY]
-      vector << HVAC.convert_curve_biquadratic(c_si, false)
+      vector << HVAC.convert_curve_biquadratic(c_si, curves_in_ip = false)
     end
     if num_speeds > 1 and vector.size == 1
       # Repeat coefficients for each speed
