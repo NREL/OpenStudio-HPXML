@@ -2190,6 +2190,7 @@ class OSModel
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
+        min_temp = 0.0 # FIXME
 
         if num_speeds == "1-Speed"
 
@@ -2197,7 +2198,6 @@ class OSModel
           cops = [0.57 * hspf - 1.30]
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
-          min_temp = 0.0
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
@@ -2216,7 +2216,6 @@ class OSModel
           fan_speed_ratios_cooling = [0.86, 1.0]
           fan_speed_ratios_heating = [0.8, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
-          min_temp = 0.0
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
@@ -2236,7 +2235,6 @@ class OSModel
           fan_speed_ratios_cooling = [0.7, 0.9, 1.0, 1.26]
           fan_speed_ratios_heating = [0.74, 0.92, 1.0, 1.22]
           fan_power_installed = get_fan_power_installed(seer)
-          min_temp = 0.0
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
