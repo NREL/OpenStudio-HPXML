@@ -1949,7 +1949,7 @@ class OSModel
       clg_type = cooling_system_values[:cooling_system_type]
 
       cool_capacity_btuh = cooling_system_values[:cooling_capacity]
-      if cool_capacity_btuh <= 0.0 or cool_capacity_btuh.nil?
+      if cool_capacity_btuh < 0
         cool_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2061,7 +2061,7 @@ class OSModel
         fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
 
         heat_capacity_btuh = heating_system_values[:heating_capacity]
-        if heat_capacity_btuh <= 0.0 or heat_capacity_btuh.nil?
+        if heat_capacity_btuh < 0
           heat_capacity_btuh = Constants.SizingAuto
         end
 
@@ -2149,7 +2149,7 @@ class OSModel
       hp_type = heat_pump_values[:heat_pump_type]
 
       cool_capacity_btuh = heat_pump_values[:cooling_capacity]
-      if cool_capacity_btuh <= 0.0 or cool_capacity_btuh.nil?
+      if cool_capacity_btuh < 0
         cool_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2161,10 +2161,12 @@ class OSModel
       sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity] # TODO: Require in ERI Use Case?
-      if backup_heat_capacity_btuh.nil?
+      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
+      if backup_heat_capacity_btuh < 0
         backup_heat_capacity_btuh = Constants.SizingAuto
       end
+
+      backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
@@ -2196,10 +2198,9 @@ class OSModel
           shrs = [0.73]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
-          supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, supplemental_efficiency,
+                                                   cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2216,11 +2217,10 @@ class OSModel
           fan_speed_ratios_heating = [0.8, 1.0]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
-          supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, supplemental_efficiency,
+                                                   cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2237,11 +2237,10 @@ class OSModel
           fan_speed_ratios_heating = [0.74, 0.92, 1.0, 1.22]
           fan_power_installed = get_fan_power_installed(seer)
           min_temp = 0.0
-          supplemental_efficiency = 1.0
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, eers, cops, shrs,
                                                    capacity_ratios, fan_speed_ratios_cooling, fan_speed_ratios_heating,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, supplemental_efficiency,
+                                                   cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2274,7 +2273,6 @@ class OSModel
         pan_heater_power = 0.0
         fan_power = 0.07
         is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
-        supplemental_efficiency = 1.0
         success = HVAC.apply_mshp(model, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
                                   min_cooling_airflow_rate, max_cooling_airflow_rate,
@@ -2283,7 +2281,7 @@ class OSModel
                                   heating_capacity_offset, cap_retention_frac,
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
-                                  supplemental_efficiency, backup_heat_capacity_btuh,
+                                  backup_heat_efficiency, backup_heat_capacity_btuh,
                                   dse_heat, load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2311,9 +2309,6 @@ class OSModel
         u_tube_leg_spacing = 0.9661
         u_tube_spacing_type = "b"
         fan_power = 0.5
-        heat_pump_capacity = cool_capacity_btuh
-        supplemental_efficiency = 1
-        supplemental_capacity = backup_heat_capacity_btuh
         success = HVAC.apply_gshp(model, runner, weather, cop, eer, shr,
                                   ground_conductivity, grout_conductivity,
                                   bore_config, bore_holes, bore_depth,
@@ -2321,8 +2316,8 @@ class OSModel
                                   ground_diffusivity, fluid_type, frac_glycol,
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
-                                  fan_power, heat_pump_capacity, supplemental_efficiency,
-                                  supplemental_capacity, dse_heat,
+                                  fan_power, cool_capacity_btuh, backup_heat_efficiency,
+                                  backup_heat_capacity_btuh, dse_heat,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)

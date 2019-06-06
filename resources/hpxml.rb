@@ -951,7 +951,8 @@ class HPXML
                          heat_pump_fuel:,
                          heating_capacity: nil,
                          cooling_capacity:,
-                         backup_heating_capacity: nil,
+                         backup_heating_capacity:,
+                         backup_heating_efficiency_percent:,
                          fraction_heat_load_served:,
                          fraction_cool_load_served:,
                          heating_efficiency_percent: nil,
@@ -975,6 +976,9 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel)
     XMLHelper.add_element(heat_pump, "HeatingCapacity", Float(heating_capacity)) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", Float(cooling_capacity))
+    backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
+    XMLHelper.add_element(backup_eff, "Units", "Percent")
+    XMLHelper.add_element(backup_eff, "Value", Float(backup_heating_efficiency_percent))
     XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", Float(backup_heating_capacity)) unless backup_heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", Float(fraction_cool_load_served))
@@ -1015,6 +1019,7 @@ class HPXML
              :heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity")),
              :cooling_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity")),
              :backup_heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")),
+             :backup_heating_efficiency_percent => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")),
              :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")),
              :fraction_cool_load_served => to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed")),
              :heating_efficiency_percent => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='Percent']/Value")),
