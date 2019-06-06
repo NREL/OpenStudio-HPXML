@@ -427,7 +427,8 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
+      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_unvented_crawl(thermal_zone) or
+         Geometry.is_vented_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
         zones_updated += 1
 
         zone_floor_area = 0.0
@@ -468,7 +469,7 @@ class OSModel
 
     # Attic
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_unconditioned_attic(thermal_zone)
+      if Geometry.is_vented_attic(thermal_zone) or Geometry.is_unvented_attic(thermal_zone)
         zones_updated += 1
 
         zone_surfaces = []
@@ -2621,50 +2622,47 @@ class OSModel
       end
     end
 
-    # FIXME: Update code below for SLA vs nACH vs constant nACH
-
+    vented_attic_sla = nil
+    vented_attic_const_ach = nil
     if @has_vented_attic
-      attic_sla = nil
-      attic_const_ach = nil
       building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
         vented_attic_values = HPXML.get_attic_values(attic: vented_attic)
-        attic_sla = vented_attic_values[:vented_attic_sla]
-        attic_const_ach = vented_attic_values[:vented_attic_constant_ach]
+        vented_attic_sla = vented_attic_values[:vented_attic_sla]
+        vented_attic_const_ach = vented_attic_values[:vented_attic_constant_ach]
       end
-      if attic_sla.nil? and attic_const_ach.nil?
-        attic_sla = Airflow.get_default_vented_attic_sla()
+      if vented_attic_sla.nil? and vented_attic_const_ach.nil?
+        vented_attic_sla = Airflow.get_default_vented_attic_sla()
       end
     else
-      attic_sla = 0.0
-      attic_const_ach = nil
+      vented_attic_sla = 0.0
     end
 
+    crawl_sla = nil
+    vented_crawl_ach = nil
     if @has_vented_crawl
-      crawl_sla = nil
-      crawl_ach = nil
       building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
         vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
         crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
-        crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
+        vented_crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
       end
-      if crawl_sla.nil? and crawl_ach.nil?
+      if crawl_sla.nil? and vented_crawl_ach.nil?
         crawl_sla = Airflow.get_default_vented_crawl_sla()
       end
     else
-      crawl_ach = 0.0
-      crawl_sla = nil
+      vented_crawl_ach = 0.0
     end
-    if crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
-      crawl_ach = crawl_sla
+    if vented_crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
+      vented_crawl_ach = crawl_sla
       crawl_sla = nil
     end
 
     living_ach50 = infil_ach50
     living_constant_ach = infil_const_ach
     garage_ach50 = infil_ach50
-    conditioned_basement_ach = 0 # TODO: Need to handle above-grade basement
-    unconditioned_basement_ach = 0.1 # TODO: Need to handle above-grade basement
-    pier_beam_ach = 100
+    conditioned_basement_ach = 0
+    unconditioned_basement_ach = 0.1
+    unvented_crawl_ach = 0.1
+    unvented_attic_sla = 0
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
     if shelter_coef.nil?
@@ -2673,8 +2671,9 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, crawl_ach, attic_sla, attic_const_ach, unconditioned_basement_ach,
-                             conditioned_basement_ach, pier_beam_ach, has_flue_chimney, is_existing_home, terrain)
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_ach, unvented_crawl_ach,
+                             vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
+                             conditioned_basement_ach, has_flue_chimney, is_existing_home, terrain)
 
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
@@ -3471,10 +3470,14 @@ class OSModel
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
-    elsif ["crawlspace - vented", "crawlspace - unvented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
-    elsif ["attic - unvented", "attic - vented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
+    elsif ["crawlspace - vented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
+    elsif ["crawlspace - unvented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl))
+    elsif ["attic - vented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic))
+    elsif ["attic - unvented"].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic))
     else
       fail "Unhandled AdjacentTo value (#{interior_adjacent_to}) for surface '#{surface_id}'."
     end
@@ -3495,10 +3498,14 @@ class OSModel
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
-    elsif ["crawlspace - vented", "crawlspace - unvented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeCrawl))
-    elsif ["attic - unvented", "attic - vented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic))
+    elsif ["crawlspace - vented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
+    elsif ["crawlspace - unvented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl))
+    elsif ["attic - vented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic))
+    elsif ["attic - unvented"].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic))
     else
       fail "Unhandled AdjacentTo value (#{exterior_adjacent_to}) for surface '#{surface_id}'."
     end
@@ -3516,10 +3523,14 @@ class OSModel
       space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement)
     elsif location == 'garage'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
-    elsif location == 'attic - unvented' or location == 'attic - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedAttic)
-    elsif location == 'crawlspace - unvented' or location == 'crawlspace - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeCrawl)
+    elsif location == 'attic - vented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic)
+    elsif location == 'attic - unvented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic)
+    elsif location == 'crawlspace - vented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl)
+    elsif location == 'crawlspace - unvented'
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl)
     end
 
     if space.nil?
