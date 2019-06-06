@@ -2199,7 +2199,7 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          shrs = [0.71, 0.724]       
+          shrs = [0.71, 0.724]
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
