@@ -1916,11 +1916,7 @@ class OSModel
 
         elsif wh_type == "space-heating boiler with storage tank"
           tank_vol = water_heating_system_values[:tank_volume]
-          if not water_heating_system_values[:fuel_type].nil?
-            fuel_type = to_beopt_fuel(water_heating_system_values[:fuel_type])
-          else
-            fuel_type = Constants.FuelTypeElectric
-          end
+          fuel_type = Constants.FuelTypeElectric # FIX ME: Fuel type is only being set for purposes of defaulting a tank UA. Need to review
           ef = 0.95 # FIXME
           heating_source_id = water_heating_system_values[:related_htg_sys_idref]
           if not related_htg_list.include? heating_source_id
