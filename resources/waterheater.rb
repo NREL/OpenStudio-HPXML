@@ -737,15 +737,19 @@ class Waterheater
       return [Constants.SpaceTypeGarage,
               Constants.SpaceTypeLiving,
               Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnconditionedAttic]
+              Constants.SpaceTypeUnventedCrawl,
+              Constants.SpaceTypeVentedCrawl,
+              Constants.SpaceTypeUnventedAttic,
+              Constants.SpaceTypeVentedAttic]
 
     elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
       return [Constants.SpaceTypeConditionedBasement,
               Constants.SpaceTypeUnconditionedBasement,
               Constants.SpaceTypeLiving,
-              Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnconditionedAttic]
+              Constants.SpaceTypeUnventedCrawl,
+              Constants.SpaceTypeVentedCrawl,
+              Constants.SpaceTypeUnventedAttic,
+              Constants.SpaceTypeVentedAttic]
     elsif ba_cz_name.nil?
       return [Constants.SpaceTypeConditionedBasement,
               Constants.SpaceTypeUnconditionedBasement,
