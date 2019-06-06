@@ -285,12 +285,12 @@ class Geometry
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeLiving)
   end
 
-  def self.is_pier_beam(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypePierBeam)
+  def self.is_vented_crawl(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeVentedCrawl)
   end
 
-  def self.is_crawl(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeCrawl)
+  def self.is_unvented_crawl(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedCrawl)
   end
 
   def self.is_conditioned_basement(space_or_zone)
@@ -301,8 +301,12 @@ class Geometry
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedBasement)
   end
 
-  def self.is_unconditioned_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedAttic)
+  def self.is_vented_attic(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeVentedAttic)
+  end
+
+  def self.is_unvented_attic(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedAttic)
   end
 
   def self.is_garage(space_or_zone)

@@ -177,9 +177,9 @@ class HVACSizing
       # Garage
       heat_temp = design_db + 13
 
-    elsif Geometry.is_unconditioned_attic(space)
+    elsif Geometry.is_vented_attic(space) or Geometry.is_unvented_attic(space)
 
-      is_vented = space_is_vented(space, 0.001)
+      is_vented = Geometry.is_vented_attic(space)
 
       attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
       return nil if attic_floor_r.nil?
@@ -204,10 +204,6 @@ class HVACSizing
         heat_temp = design_db
 
       end
-
-    elsif Geometry.is_pier_beam(space)
-      # Pier & beam
-      heat_temp = design_db
 
     else
       # Unconditioned basement, Crawlspace
@@ -258,9 +254,9 @@ class HVACSizing
                      (12 * (1 - garage_frac_under_conditioned)))
       end
 
-    elsif Geometry.is_unconditioned_attic(space)
+    elsif Geometry.is_vented_attic(space) or Geometry.is_unvented_attic(space)
 
-      is_vented = space_is_vented(space, 0.001)
+      is_vented = Geometry.is_vented_attic(space)
 
       attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
       return nil if attic_floor_r.nil?
@@ -386,10 +382,6 @@ class HVACSizing
         cool_temp += (weather.design.CoolingDrybulb - 95) + @daily_range_temp_adjust[@daily_range_num]
 
       end
-
-    elsif Geometry.is_pier_beam(space)
-      # Pier & beam
-      cool_temp = weather.design.CoolingDrybulb
 
     else
       # Unconditioned basement, Crawlspace
@@ -1445,7 +1437,7 @@ class HVACSizing
         end
       end
 
-    elsif Geometry.is_crawl(duct.LocationSpace) or Geometry.is_pier_beam(duct.LocationSpace)
+    elsif Geometry.is_vented_crawl(duct.LocationSpace) or Geometry.is_unvented_crawl(duct.LocationSpace)
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
@@ -1471,7 +1463,7 @@ class HVACSizing
         end
       end
 
-    elsif Geometry.is_unconditioned_attic(duct.LocationSpace)
+    elsif Geometry.is_vented_attic(duct.LocationSpace) or Geometry.is_unvented_attic(duct.LocationSpace)
       dse_Fregain = 0.10 # This would likely be higher for unvented attics with roof insulation
 
     elsif Geometry.is_garage(duct.LocationSpace)

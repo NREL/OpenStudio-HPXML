@@ -104,7 +104,7 @@ def create_hpxmls
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
-    'base-foundation-pier-beam.xml' => 'base.xml',
+    'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
     'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -621,7 +621,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
                                      :number_of_bedrooms => 3,
                                      :conditioned_floor_area => 2700,
                                      :conditioned_building_volume => 2700 * 8 }
-  elsif ['base-foundation-pier-beam.xml',
+  elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml',
          'base-foundation-unconditioned-basement.xml',
          'base-foundation-unvented-crawlspace.xml',
@@ -773,7 +773,7 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :solar_absorptance => 0.7,
                            :emittance => 0.92,
                            :insulation_assembly_r_value => 23.0 }]
-  elsif ['base-foundation-pier-beam.xml',
+  elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file or
         hpxml_file.include? 'hvac_partial' or
         hpxml_file.include? 'hvac_multiple' or
@@ -1024,7 +1024,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :depth_below_grade => 3,
                                  :insulation_distance_to_bottom => 4,
                                  :insulation_r_value => 8.9 }
-  elsif ['base-foundation-pier-beam.xml',
+  elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file or
         hpxml_file.include? 'hvac_partial' or
         hpxml_file.include? 'hvac_multiple' or
@@ -1062,7 +1062,7 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :interior_adjacent_to => "garage",
                             :area => 600,
                             :insulation_assembly_r_value => 2.1 }
-  elsif ['base-foundation-pier-beam.xml'].include? hpxml_file
+  elsif ['base-foundation-ambient.xml'].include? hpxml_file
     framefloors_values << { :id => "FloorAboveAmbient",
                             :exterior_adjacent_to => "outside",
                             :interior_adjacent_to => "living space",
@@ -1165,7 +1165,7 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :under_slab_insulation_r_value => 0,
                       :carpet_fraction => 0,
                       :carpet_r_value => 0 }
-  elsif ['base-foundation-pier-beam.xml'].include? hpxml_file
+  elsif ['base-foundation-ambient.xml'].include? hpxml_file
     slabs_values = []
   elsif ['base-enclosure-2stories-garage.xml'].include? hpxml_file
     slabs_values[0][:area] -= 400
