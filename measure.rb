@@ -2161,12 +2161,17 @@ class OSModel
       sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
-      if backup_heat_capacity_btuh < 0
-        backup_heat_capacity_btuh = Constants.SizingAuto
+      backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
+      if not backup_heat_fuel.nil?
+        backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
+        if backup_heat_capacity_btuh < 0
+          backup_heat_capacity_btuh = Constants.SizingAuto
+        end
+        backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
+      else
+        backup_heat_capacity_btuh = 0.0
+        backup_heat_efficiency = 1.0
       end
-
-      backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
