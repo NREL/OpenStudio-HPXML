@@ -3015,7 +3015,7 @@ class HVAC
     cop_ratios = [1.07, 1.11, 1.08, 1.05, 1.0] # Gross COP
 
     # SEER calculation is based on performance at three speeds
-    cops = [ cop_ratios[indices[0]], cop_ratios[indices[1]], cop_ratios[indices[2]] ]
+    cops = [cop_ratios[indices[0]], cop_ratios[indices[1]], cop_ratios[indices[2]]]
 
     unless calc_type.include? 'seer'
       cops << cop_ratios[indices[3]]
@@ -3042,18 +3042,18 @@ class HVAC
 
   def self.calc_COPs_from_EIR_4spd(cop_nom, fan_power_rated, calc_type = 'hspf')
     # Returns rated COP at minimum, intermediate, and nominal speed given rated COP
-        
-    eir_nom = calc_EIR_from_COP(cop_nom, fan_power_rated)        
-        
+
+    eir_nom = calc_EIR_from_COP(cop_nom, fan_power_rated)
+
     cop_ratios = [1.385171617, 1.183214059, 1.0, 0.95544453] # Updated based on Nordyne 3 ton heat pump
 
-    # HSPF calculation is based on performance at three speeds        
+    # HSPF calculation is based on performance at three speeds
     if calc_type.include? 'hspf'
       indices = [0, 1, 2]
     else
       indices = [0, 1, 2, 3]
     end
-        
+
     cops_net = []
     indices.each do |i|
       eir = eir_nom / cop_ratios[i]
@@ -3131,25 +3131,25 @@ class HVAC
   end
 
   def self.calc_EERs_cooling_4spd(runner, seer, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
-    # Iterate to find rated net EERs given SEER using simple bisection method for two stage and variable speed air conditioners    
+    # Iterate to find rated net EERs given SEER using simple bisection method for two stage and variable speed air conditioners
 
     # Initial large bracket of EER (A condition) to span possible seer range
     eer_a = 5.0
     eer_b = 30.0
-    
+
     # Iterate
     iter_max = 100
-    tol = 0.0001    
-    
+    tol = 0.0001
+
     err = 1
     eer_c = (eer_a + eer_b) / 2.0
-    (1..iter_max).each do |n|            
+    (1..iter_max).each do |n|
       eers = calc_EERs_from_EIR_4spd(eer_a, fan_power_rated, calc_type = 'seer')
       f_a = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
 
       eers = calc_EERs_from_EIR_4spd(eer_c, fan_power_rated, calc_type = 'seer')
       f_c = calc_SEER_VariableSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q) - seer
-      
+
       if f_c == 0
         return eer_c
       elsif f_a * f_c < 0
@@ -3157,7 +3157,7 @@ class HVAC
       else
         eer_a = eer_c
       end
-      
+
       eer_c = (eer_a + eer_b) / 2.0
       err = (eer_b - eer_a) / 2.0
 
@@ -3170,7 +3170,7 @@ class HVAC
       eer_c = -99
       runner.registerWarning('Variable-speed cooling EERs iteration failed to converge.')
     end
-        
+
     return calc_EERs_from_EIR_4spd(eer_c, fan_power_rated, calc_type = 'model')
   end
 
@@ -3238,64 +3238,64 @@ class HVAC
     n_max = 2
     n_int = 1
     n_min = 0
-    
+
     wBin = 67.0
     tout_B = 82.0
     tout_E = 87.0
     tout_F = 67.0
-    
-    eir_A2 = calc_EIR_from_EER(eers[n_max], fan_power_rated)    
+
+    eir_A2 = calc_EIR_from_EER(eers[n_max], fan_power_rated)
     eir_B2 = eir_A2 * calc_biquad(coeff_eir[n_max], wBin, tout_B)
-    
+
     eir_Av = calc_EIR_from_EER(eers[n_int], fan_power_rated)
     eir_Ev = eir_Av * calc_biquad(coeff_eir[n_int], wBin, tout_E)
-    
+
     eir_A1 = calc_EIR_from_EER(eers[n_min], fan_power_rated)
-    eir_B1 = eir_A1 * calc_biquad(coeff_eir[n_min], wBin, tout_B) 
+    eir_B1 = eir_A1 * calc_biquad(coeff_eir[n_min], wBin, tout_B)
     eir_F1 = eir_A1 * calc_biquad(coeff_eir[n_min], wBin, tout_F)
-    
+
     q_A2 = capacity_ratios[n_max]
-    q_B2 = q_A2 * calc_biquad(coeff_q[n_max], wBin, tout_B)    
-    q_Ev = capacity_ratios[n_int] * calc_biquad(coeff_q[n_int], wBin, tout_E)            
+    q_B2 = q_A2 * calc_biquad(coeff_q[n_max], wBin, tout_B)
+    q_Ev = capacity_ratios[n_int] * calc_biquad(coeff_q[n_int], wBin, tout_E)
     q_B1 = capacity_ratios[n_min] * calc_biquad(coeff_q[n_min], wBin, tout_B)
     q_F1 = capacity_ratios[n_min] * calc_biquad(coeff_q[n_min], wBin, tout_F)
 
     cfm_Btu_h = 400.0 / 12000.0
-        
+
     q_A2_net = q_A2 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
     q_B2_net = q_B2 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
     q_Ev_net = q_Ev - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_int]
     q_B1_net = q_B1 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
     q_F1_net = q_F1 - fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
-    
+
     p_A2 = (q_A2 * eir_A2) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_max]
     p_B2 = (q_B2 * eir_B2) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_max]
     p_Ev = (q_Ev * eir_Ev) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_int]
     p_B1 = (q_B1 * eir_B1) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_min]
     p_F1 = (q_F1 * eir_F1) / 3.412 + fan_power_rated * cfm_Btu_h * fanspeed_ratios[n_min]
-    
+
     q_k1_87 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (87.0 - 67.0)
     q_k2_87 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (87.0 - 82.0)
     n_Q = (q_Ev_net - q_k1_87) / (q_k2_87 - q_k1_87)
-    m_Q = (q_B1_net - q_F1_net) / (82.0 - 67.0) * (1.0 - n_Q) + (q_A2_net - q_B2_net) / (95.0 - 82.0) * n_Q    
+    m_Q = (q_B1_net - q_F1_net) / (82.0 - 67.0) * (1.0 - n_Q) + (q_A2_net - q_B2_net) / (95.0 - 82.0) * n_Q
     p_k1_87 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (87.0 - 67.0)
     p_k2_87 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (87.0 - 82.0)
     n_E = (p_Ev - p_k1_87) / (p_k2_87 - p_k1_87)
     m_E = (p_B1 - p_F1) / (82.0 - 67.0) * (1.0 - n_E) + (p_A2 - p_B2) / (95.0 - 82.0) * n_E
-    
+
     c_T_1_1 = q_A2_net / (1.1 * (95.0 - 65.0))
     c_T_1_2 = q_F1_net
     c_T_1_3 = (q_B1_net - q_F1_net) / (82.0 - 67.0)
     t_1 = (c_T_1_2 - 67.0 * c_T_1_3 + 65.0 * c_T_1_1) / (c_T_1_1 - c_T_1_3)
     q_T_1 = q_F1_net + (q_B1_net - q_F1_net) / (82.0 - 67.0) * (t_1 - 67.0)
     p_T_1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_1 - 67.0)
-    eer_T_1 = q_T_1 / p_T_1 
-     
+    eer_T_1 = q_T_1 / p_T_1
+
     t_v = (q_Ev_net - 87.0 * m_Q + 65.0 * c_T_1_1) / (c_T_1_1 - m_Q)
     q_T_v = q_Ev_net + m_Q * (t_v - 87.0)
     p_T_v = p_Ev + m_E * (t_v - 87.0)
     eer_T_v = q_T_v / p_T_v
-    
+
     c_T_2_1 = c_T_1_1
     c_T_2_2 = q_B2_net
     c_T_2_3 = (q_A2_net - q_B2_net) / (95.0 - 82.0)
@@ -3303,15 +3303,15 @@ class HVAC
     q_T_2 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (t_2 - 82.0)
     p_T_2 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (t_2 - 82.0)
     eer_T_2 = q_T_2 / p_T_2
-    
-    d = (t_2 ** 2.0 - t_1 ** 2.0) / (t_v ** 2.0 - t_1 ** 2.0)
+
+    d = (t_2**2.0 - t_1**2.0) / (t_v**2.0 - t_1**2.0)
     b = (eer_T_1 - eer_T_2 - d * (eer_T_1 - eer_T_v)) / (t_1 - t_2 - d * (t_1 - t_v))
-    c = (eer_T_1 - eer_T_2 - b * (t_1 - t_2)) / (t_1 ** 2.0 - t_2 ** 2.0)
-    a = eer_T_2 - b * t_2 - c * t_2 ** 2.0
+    c = (eer_T_1 - eer_T_2 - b * (t_1 - t_2)) / (t_1**2.0 - t_2**2.0)
+    a = eer_T_2 - b * t_2 - c * t_2**2.0
 
     t_bins = [67.0, 72.0, 77.0, 82.0, 87.0, 92.0, 97.0, 102.0]
-    frac_hours = [0.214, 0.231, 0.216, 0.161, 0.104, 0.052, 0.018, 0.004]    
-    
+    frac_hours = [0.214, 0.231, 0.216, 0.161, 0.104, 0.052, 0.018, 0.004]
+
     e_tot = 0.0
     q_tot = 0.0
     (0..7).each do |i|
@@ -3320,23 +3320,23 @@ class HVAC
       p_k1 = p_F1 + (p_B1 - p_F1) / (82.0 - 67.0) * (t_bins[i] - 67)
       q_k2 = q_B2_net + (q_A2_net - q_B2_net) / (95.0 - 82.0) * (t_bins[i] - 82.0)
       p_k2 = p_B2 + (p_A2 - p_B2) / (95.0 - 82.0) * (t_bins[i] - 82.0)
-              
+
       if bL <= q_k1
-        x_k1 = bL / q_k1        
+        x_k1 = bL / q_k1
         q_Tj_N = x_k1 * q_k1 * frac_hours[i]
         e_Tj_N = x_k1 * p_k1 * frac_hours[i] / (1.0 - c_d * (1.0 - x_k1))
       elsif q_k1 < bL and bL <= q_k2
         q_Tj_N = bL * frac_hours[i]
-        eer_T_j = a + b * t_bins[i] + c * t_bins[i] ** 2.0
+        eer_T_j = a + b * t_bins[i] + c * t_bins[i]**2.0
         e_Tj_N = q_Tj_N / eer_T_j
       else
         q_Tj_N = frac_hours[i] * q_k2
         e_Tj_N = frac_hours[i] * p_k2
       end
-        
+
       q_tot += q_Tj_N
-      e_tot += e_Tj_N 
-    end  
+      e_tot += e_Tj_N
+    end
 
     seer = q_tot / e_tot
     return seer
@@ -3494,15 +3494,15 @@ class HVAC
 
   def self.calc_COPs_heating_4spd(runner, hspf, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
     # Iterate to find rated net COPs given HSPF using simple bisection method for variable speed heat pumps
-    
+
     # Initial large bracket of COP to span possible hspf range
     cop_a = 1.0
     cop_b = 15.0
-    
+
     # Iterate
     iter_max = 100
-    tol = 0.0001    
-    
+    tol = 0.0001
+
     err = 1
     cop_c = (cop_a + cop_b) / 2.0
     (1..iter_max).each do |n|
@@ -3519,7 +3519,7 @@ class HVAC
       else
         cop_a = cop_c
       end
-      
+
       cop_c = (cop_a + cop_b) / 2.0
       err = (cop_b - cop_a) / 2.0
 
@@ -3527,12 +3527,12 @@ class HVAC
         break
       end
     end
-        
+
     if err > tol
       cop_c = -99
       runner.registerWarning('Variable-speed heating COPs iteration failed to converge.')
     end
-    
+
     return calc_COPs_from_EIR_4spd(cop_c, fan_power_rated, calc_type = 'model')
   end
 
@@ -3656,38 +3656,38 @@ class HVAC
     tout_3 = 17.0
     tout_2 = 35.0
     tout_0 = 62.0
-        
+
     eir_H1_2 = calc_EIR_from_COP(cop_47[n_max], fan_power_rated)
     eir_H3_2 = eir_H1_2 * calc_biquad(coeff_eir[n_max], tin, tout_3)
 
-    eir_adjv = calc_EIR_from_COP(cop_47[n_int], fan_power_rated)    
+    eir_adjv = calc_EIR_from_COP(cop_47[n_int], fan_power_rated)
     eir_H2_v = eir_adjv * calc_biquad(coeff_eir[n_int], tin, tout_2)
 
     eir_H1_1 = calc_EIR_from_COP(cop_47[n_min], fan_power_rated)
     eir_H0_1 = eir_H1_1 * calc_biquad(coeff_eir[n_min], tin, tout_0)
-        
+
     q_H1_2 = capacity_ratios[n_max]
     q_H3_2 = q_H1_2 * calc_biquad(coeff_q[n_max], tin, tout_3)
-        
+
     q_H2_v = capacity_ratios[n_int] * calc_biquad(coeff_q[n_int], tin, tout_2)
-    
+
     q_H1_1 = capacity_ratios[n_min]
     q_H0_1 = q_H1_1 * calc_biquad(coeff_q[n_min], tin, tout_0)
-    
+
     cfm_Btu_h = 400.0 / 12000.0
-    
+
     q_H1_2_net = q_H1_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
     q_H3_2_net = q_H3_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
     q_H2_v_net = q_H2_v + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_int]
     q_H1_1_net = q_H1_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
     q_H0_1_net = q_H0_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
-                                 
+
     p_H1_2 = q_H1_2 * eir_H1_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
     p_H3_2 = q_H3_2 * eir_H3_2 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_max]
     p_H2_v = q_H2_v * eir_H2_v + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_int]
     p_H1_1 = q_H1_1 * eir_H1_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
     p_H0_1 = q_H0_1 * eir_H0_1 + fan_power_rated * 3.412 * cfm_Btu_h * fanspeed_ratios[n_min]
-        
+
     q_H35_2 = 0.9 * (q_H3_2_net + 0.6 * (q_H1_2_net - q_H3_2_net))
     p_H35_2 = 0.985 * (p_H3_2 + 0.6 * (p_H1_2 - p_H3_2))
     q_H35_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (35.0 - 47.0)
@@ -3696,10 +3696,10 @@ class HVAC
     m_Q = (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (1 - n_Q) + n_Q * (q_H35_2 - q_H3_2_net) / (35.0 - 17.0)
     n_E = (p_H2_v - p_H35_1) / (p_H35_2 - p_H35_1)
     m_E = (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (1.0 - n_E) + n_E * (p_H35_2 - p_H3_2) / (35.0 - 17.0)
-    
+
     t_OD = 5.0
     dHR = q_H1_2_net * (65.0 - t_OD) / 60.0
-    
+
     c_T_3_1 = q_H1_1_net
     c_T_3_2 = (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0)
     c_T_3_3 = 0.77 * dHR / (65.0 - t_OD)
@@ -3707,14 +3707,14 @@ class HVAC
     q_HT3_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_3 - 47.0)
     p_HT3_1 = p_H1_1 + (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (t_3 - 47.0)
     cop_T3_1 = q_HT3_1 / p_HT3_1
-    
+
     c_T_v_1 = q_H2_v_net
     c_T_v_3 = c_T_3_3
     t_v = (35.0 * m_Q + 65 * c_T_v_3 - c_T_v_1) / (m_Q + c_T_v_3)
     q_HTv_v = q_H2_v_net + m_Q * (t_v - 35.0)
     p_HTv_v = p_H2_v + m_E * (t_v - 35.0)
     cop_Tv_v = q_HTv_v / p_HTv_v
-    
+
     c_T_4_1 = q_H3_2_net
     c_T_4_2 = (q_H35_2 - q_H3_2_net) / (35.0 - 17.0)
     c_T_4_3 = c_T_v_3
@@ -3722,25 +3722,25 @@ class HVAC
     q_HT4_2 = q_H3_2_net + (q_H35_2 - q_H3_2_net) / (35.0 - 17.0) * (t_4 - 17.0)
     p_HT4_2 = p_H3_2 + (p_H35_2 - p_H3_2) / (35.0 - 17.0) * (t_4 - 17.0)
     cop_T4_2 = q_HT4_2 / p_HT4_2
-    
-    d = (t_3 ** 2.0 - t_4 ** 2.0) / (t_v ** 2.0 - t_4 ** 2.0)
+
+    d = (t_3**2.0 - t_4**2.0) / (t_v**2.0 - t_4**2.0)
     b = (cop_T4_2 - cop_T3_1 - d * (cop_T4_2 - cop_Tv_v)) / (t_4 - t_3 - d * (t_4 - t_v))
-    c = (cop_T4_2 - cop_T3_1 - b * (t_4 - t_3)) / (t_4 ** 2.0 - t_3 ** 2.0)
-    a = cop_T4_2 - b * t_4 - c * t_4 ** 2.0
-    
+    c = (cop_T4_2 - cop_T3_1 - b * (t_4 - t_3)) / (t_4**2.0 - t_3**2.0)
+    a = cop_T4_2 - b * t_4 - c * t_4**2.0
+
     t_bins = [62.0, 57.0, 52.0, 47.0, 42.0, 37.0, 32.0, 27.0, 22.0, 17.0, 12.0, 7.0, 2.0, -3.0, -8.0]
     frac_hours = [0.132, 0.111, 0.103, 0.093, 0.100, 0.109, 0.126, 0.087, 0.055, 0.036, 0.026, 0.013, 0.006, 0.002, 0.001]
-        
+
     t_off = 10.0
     t_on = t_off + 4
     etot = 0.0
     bLtot = 0.0
-    (0..14).each do |i|        
+    (0..14).each do |i|
       bL = ((65.0 - t_bins[i]) / (65.0 - t_OD)) * 0.77 * dHR
-      
+
       q_1 = q_H1_1_net + (q_H0_1_net - q_H1_1_net) / (62.0 - 47.0) * (t_bins[i] - 47.0)
       p_1 = p_H1_1 + (p_H0_1 - p_H1_1) / (62.0 - 47.0) * (t_bins[i] - 47.0)
-      
+
       if t_bins[i] <= 17.0 or t_bins[i] >= 45.0
         q_2 = q_H3_2_net + (q_H1_2_net - q_H3_2_net) * (t_bins[i] - 17.0) / (47.0 - 17.0)
         p_2 = p_H3_2 + (p_H1_2 - p_H3_2) * (t_bins[i] - 17.0) / (47.0 - 17.0)
@@ -3748,7 +3748,7 @@ class HVAC
         q_2 = q_H3_2_net + (q_H35_2 - q_H3_2_net) * (t_bins[i] - 17.0) / (35.0 - 17.0)
         p_2 = p_H3_2 + (p_H35_2 - p_H3_2) * (t_bins[i] - 17.0) / (35.0 - 17.0)
       end
-      
+
       if t_bins[i] <= t_off
         delta = 0.0
       elsif t_bins[i] >= t_on
@@ -3756,22 +3756,22 @@ class HVAC
       else
         delta = 0.5
       end
-      
+
       if bL <= q_1
         x_1 = bL / q_1
         e_Tj_n = delta * x_1 * p_1 * frac_hours[i] / (1.0 - c_d * (1.0 - x_1))
       elsif q_1 < bL and bL <= q_2
-        cop_T_j = a + b * t_bins[i] + c * t_bins[i] ** 2.0
+        cop_T_j = a + b * t_bins[i] + c * t_bins[i]**2.0
         e_Tj_n = delta * frac_hours[i] * bL / cop_T_j + (1.0 - delta) * bL * (frac_hours[i])
       else
-        e_Tj_n = delta * frac_hours[i] * p_2 + frac_hours[i] * (bL - delta *  q_2)
+        e_Tj_n = delta * frac_hours[i] * p_2 + frac_hours[i] * (bL - delta * q_2)
       end
-      
+
       bLtot += frac_hours[i] * bL
       etot += e_Tj_n
     end
-    
-    hspf = bLtot / (etot / 3.412)    
+
+    hspf = bLtot / (etot / 3.412)
     return hspf
   end
 

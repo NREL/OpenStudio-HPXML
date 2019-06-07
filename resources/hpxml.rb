@@ -120,6 +120,7 @@ class HPXML
                                      number_of_conditioned_floors:,
                                      number_of_conditioned_floors_above_grade:,
                                      number_of_bedrooms:,
+                                     number_of_bathrooms: nil,
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
                                      use_only_ideal_air_system: nil,
@@ -128,6 +129,7 @@ class HPXML
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(number_of_conditioned_floors))
     XMLHelper.add_element(building_construction, "NumberofConditionedFloorsAboveGrade", Integer(number_of_conditioned_floors_above_grade))
     XMLHelper.add_element(building_construction, "NumberofBedrooms", Integer(number_of_bedrooms))
+    XMLHelper.add_element(building_construction, "NumberofBathrooms", Integer(number_of_bathrooms)) unless number_of_bathrooms.nil?
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
     HPXML.add_extension(parent: building_construction,
@@ -144,6 +146,7 @@ class HPXML
              :number_of_conditioned_floors_above_grade => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade")),
              :average_ceiling_height => to_float_or_nil(XMLHelper.get_value(building_construction, "AverageCeilingHeight")),
              :number_of_bedrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
+             :number_of_bathrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms")),
              :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
              :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
