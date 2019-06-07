@@ -52,8 +52,8 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50, CFM50, or constant nACH; see [AirInfiltration]
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume" => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
 
-        "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]/VentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented attic if provided
-        "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]/VentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented crawlspace if provided
+        "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]/VentilationRate[[UnitofMeasure='SLA']/Value | extension/ConstantACHnatural]" => zero_or_one, # SLA or constant nACH; used for vented attic if provided
+        "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]/VentilationRate[UnitofMeasure='SLA']/Value" => zero_or_one, # SLA; used for vented crawlspace if provided
         "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof" => zero_or_more, # See [Roof]
         "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall" => one_or_more, # See [Wall]
         "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist" => zero_or_more, # See [RimJoist]
