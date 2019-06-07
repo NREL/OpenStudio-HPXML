@@ -252,7 +252,10 @@ class OSModel
     @ncfl = construction_values[:number_of_conditioned_floors]
     @ncfl_ag = construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = construction_values[:number_of_bedrooms]
-    @nbaths = 3.0 # TODO: Arbitrary, but update
+    @nbaths = construction_values[:number_of_bathrooms]
+    if @nbaths.nil?
+      @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
+    end
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
     @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
@@ -817,6 +820,11 @@ class OSModel
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
+      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject { |sum, n| sum + n }
+      if (weekday_sch_sum - hrs_per_day).abs > 0.1
+        runner.registerError("Occupancy schedule inconsistent with hrs_per_day.")
+        return false
+      end
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
       success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
@@ -2153,12 +2161,17 @@ class OSModel
       sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
-      if backup_heat_capacity_btuh < 0
-        backup_heat_capacity_btuh = Constants.SizingAuto
+      backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
+      if not backup_heat_fuel.nil?
+        backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
+        if backup_heat_capacity_btuh < 0
+          backup_heat_capacity_btuh = Constants.SizingAuto
+        end
+        backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
+      else
+        backup_heat_capacity_btuh = 0.0
+        backup_heat_efficiency = 1.0
       end
-
-      backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
