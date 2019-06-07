@@ -120,6 +120,7 @@ class HPXML
                                      number_of_conditioned_floors:,
                                      number_of_conditioned_floors_above_grade:,
                                      number_of_bedrooms:,
+                                     number_of_bathrooms: nil,
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
                                      use_only_ideal_air_system: nil,
@@ -128,6 +129,7 @@ class HPXML
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(number_of_conditioned_floors))
     XMLHelper.add_element(building_construction, "NumberofConditionedFloorsAboveGrade", Integer(number_of_conditioned_floors_above_grade))
     XMLHelper.add_element(building_construction, "NumberofBedrooms", Integer(number_of_bedrooms))
+    XMLHelper.add_element(building_construction, "NumberofBathrooms", Integer(number_of_bathrooms)) unless number_of_bathrooms.nil?
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
     HPXML.add_extension(parent: building_construction,
@@ -144,6 +146,7 @@ class HPXML
              :number_of_conditioned_floors_above_grade => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade")),
              :average_ceiling_height => to_float_or_nil(XMLHelper.get_value(building_construction, "AverageCeilingHeight")),
              :number_of_bedrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
+             :number_of_bathrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms")),
              :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
              :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
@@ -244,35 +247,35 @@ class HPXML
   def self.add_attic(hpxml:,
                      id:,
                      attic_type:,
-                     specific_leakage_area: nil,
-                     constant_ach_natural: nil,
+                     vented_attic_sla: nil,
+                     vented_attic_constant_ach: nil,
                      **remainder)
     attics = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Attics"])
     attic = XMLHelper.add_element(attics, "Attic")
     sys_id = XMLHelper.add_element(attic, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    attic_type_e = XMLHelper.add_element(attic, "AtticType")
-    if attic_type == "UnventedAttic"
-      attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
-      XMLHelper.add_element(attic_type_attic, "Vented", false)
-    elsif attic_type == "VentedAttic"
-      attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
-      XMLHelper.add_element(attic_type_attic, "Vented", true)
-      if not specific_leakage_area.nil?
-        XMLHelper.add_element(attic_type_attic, "SpecificLeakageArea", Float(specific_leakage_area))
-      elsif not constant_ach_natural.nil?
-        HPXML.add_extension(parent: attic_type_attic,
-                            extensions: { "ConstantACHnatural": Float(constant_ach_natural) })
+    unless attic_type.nil?
+      attic_type_e = XMLHelper.add_element(attic, "AtticType")
+      if attic_type == "UnventedAttic"
+        attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
+        XMLHelper.add_element(attic_type_attic, "Vented", false)
+      elsif attic_type == "VentedAttic"
+        attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
+        XMLHelper.add_element(attic_type_attic, "Vented", true)
+        if not vented_attic_sla.nil?
+          ventilation_rate = XMLHelper.add_element(attic, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_sla))
+        elsif not vented_attic_constant_ach.nil?
+          ventilation_rate = XMLHelper.add_element(attic, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_constant_ach))
+        end
+      elsif attic_type == "FlatRoof" or attic_type == "CathedralCeiling"
+        XMLHelper.add_element(attic_type_e, attic_type)
       else
-        fail "Either specific_leakage_area or constant_ach_natural must be provided."
+        fail "Unhandled attic type '#{attic_type}'."
       end
-    elsif attic_type == "ConditionedAttic"
-      attic_type_attic = XMLHelper.add_element(attic_type_e, "Attic")
-      XMLHelper.add_element(attic_type_attic, "Conditioned", true)
-    elsif attic_type == "FlatRoof" or attic_type == "CathedralCeiling"
-      XMLHelper.add_element(attic_type_e, attic_type)
-    else
-      fail "Unhandled attic type '#{attic_type}'."
     end
 
     return attic
@@ -282,41 +285,116 @@ class HPXML
     return nil if attic.nil?
 
     attic_type = nil
+    vented_attic_sla = nil
+    vented_attic_constant_ach = nil
     if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
       attic_type = "UnventedAttic"
     elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
       attic_type = "VentedAttic"
+      vented_attic_sla = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='SLA']/Value"))
+      vented_attic_constant_ach = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
     elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
       attic_type = "ConditionedAttic"
     elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
       attic_type = "FlatRoof"
     elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
       attic_type = "CathedralCeiling"
-    else
-      fail "Unhandled attic type."
     end
 
     return { :id => HPXML.get_id(attic),
              :attic_type => attic_type,
-             :specific_leakage_area => to_float_or_nil(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/SpecificLeakageArea")),
-             :constant_ach_natural => to_float_or_nil(XMLHelper.get_value(attic, "AtticType/Attic[Vented='true']/extension/ConstantACHnatural")) }
+             :vented_attic_sla => vented_attic_sla,
+             :vented_attic_constant_ach => vented_attic_constant_ach }
   end
 
-  def self.add_attic_roof(attic:,
+  def self.add_foundation(hpxml:,
                           id:,
-                          area:,
-                          azimuth: nil,
-                          solar_absorptance:,
-                          emittance:,
-                          pitch:,
-                          radiant_barrier:,
-                          insulation_id: nil,
-                          insulation_assembly_r_value:,
+                          foundation_type:,
+                          vented_crawlspace_sla: nil,
+                          vented_crawlspace_constant_ach: nil,
                           **remainder)
-    roofs = XMLHelper.create_elements_as_needed(attic, ["Roofs"])
+    foundations = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Foundations"])
+    foundation = XMLHelper.add_element(foundations, "Foundation")
+    sys_id = XMLHelper.add_element(foundation, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    unless foundation_type.nil?
+      foundation_type_e = XMLHelper.add_element(foundation, "FoundationType")
+      if ["SlabOnGrade", "Ambient"].include? foundation_type
+        XMLHelper.add_element(foundation_type_e, foundation_type)
+      elsif foundation_type == "ConditionedBasement"
+        basement = XMLHelper.add_element(foundation_type_e, "Basement")
+        XMLHelper.add_element(basement, "Conditioned", true)
+      elsif foundation_type == "UnconditionedBasement"
+        basement = XMLHelper.add_element(foundation_type_e, "Basement")
+        XMLHelper.add_element(basement, "Conditioned", false)
+      elsif foundation_type == "VentedCrawlspace"
+        crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
+        XMLHelper.add_element(crawlspace, "Vented", true)
+        if not vented_crawlspace_sla.nil?
+          ventilation_rate = XMLHelper.add_element(foundation, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_sla))
+        elsif not vented_crawlspace_constant_ach.nil?
+          ventilation_rate = XMLHelper.add_element(foundation, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_constant_ach))
+        end
+      elsif foundation_type == "UnventedCrawlspace"
+        crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
+        XMLHelper.add_element(crawlspace, "Vented", false)
+      else
+        fail "Unhandled foundation type '#{foundation_type}'."
+      end
+    end
+
+    return foundation
+  end
+
+  def self.get_foundation_values(foundation:)
+    return nil if foundation.nil?
+
+    foundation_type = nil
+    vented_crawlspace_sla = nil
+    vented_crawlspace_constant_ach = nil
+    if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
+      foundation_type = "SlabOnGrade"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
+      foundation_type = "UnconditionedBasement"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
+      foundation_type = "ConditionedBasement"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
+      foundation_type = "UnventedCrawlspace"
+    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
+      foundation_type = "VentedCrawlspace"
+      vented_crawlspace_sla = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='SLA']/Value"))
+      vented_crawlspace_constant_ach = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
+    elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
+      foundation_type = "Ambient"
+    end
+
+    return { :id => HPXML.get_id(foundation),
+             :foundation_type => foundation_type,
+             :vented_crawlspace_sla => vented_crawlspace_sla,
+             :vented_crawlspace_constant_ach => vented_crawlspace_constant_ach }
+  end
+
+  def self.add_roof(hpxml:,
+                    id:,
+                    interior_adjacent_to:,
+                    area:,
+                    azimuth: nil,
+                    solar_absorptance:,
+                    emittance:,
+                    pitch:,
+                    radiant_barrier:,
+                    insulation_id: nil,
+                    insulation_assembly_r_value:,
+                    **remainder)
+    roofs = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Roofs"])
     roof = XMLHelper.add_element(roofs, "Roof")
     sys_id = XMLHelper.add_element(roof, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(roof, "InteriorAdjacentTo", interior_adjacent_to)
     XMLHelper.add_element(roof, "Area", Float(area))
     XMLHelper.add_element(roof, "Azimuth", Integer(azimuth)) unless azimuth.nil?
     XMLHelper.add_element(roof, "SolarAbsorptance", Float(solar_absorptance))
@@ -330,13 +408,15 @@ class HPXML
     return roof
   end
 
-  def self.get_attic_roof_values(roof:)
+  def self.get_roof_values(roof:)
     return nil if roof.nil?
 
     insulation_values = get_assembly_insulation_values(insulation: roof.elements["Insulation"])
     insulation_layer_values = get_layer_insulation_values(insulation: roof.elements["Insulation"])
 
     return { :id => HPXML.get_id(roof),
+             :exterior_adjacent_to => "outside",
+             :interior_adjacent_to => XMLHelper.get_value(roof, "InteriorAdjacentTo"),
              :area => to_float_or_nil(XMLHelper.get_value(roof, "Area")),
              :azimuth => to_integer_or_nil(XMLHelper.get_value(roof, "Azimuth")),
              :roof_type => XMLHelper.get_value(roof, "RoofType"),
@@ -349,451 +429,6 @@ class HPXML
              :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
              :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
              :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
-  end
-
-  def self.add_attic_floor(attic:,
-                           id:,
-                           adjacent_to:,
-                           area:,
-                           insulation_id: nil,
-                           insulation_assembly_r_value:,
-                           **remainder)
-    floors = XMLHelper.create_elements_as_needed(attic, ["Floors"])
-    floor = XMLHelper.add_element(floors, "Floor")
-    sys_id = XMLHelper.add_element(floor, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(floor, "AdjacentTo", adjacent_to)
-    XMLHelper.add_element(floor, "Area", Float(area))
-    add_assembly_insulation(parent: floor,
-                            id: insulation_id,
-                            assembly_r_value: Float(insulation_assembly_r_value))
-
-    return floor
-  end
-
-  def self.get_attic_floor_values(floor:)
-    return nil if floor.nil?
-
-    insulation_values = get_assembly_insulation_values(insulation: floor.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: floor.elements["Insulation"])
-
-    return { :id => HPXML.get_id(floor),
-             :adjacent_to => XMLHelper.get_value(floor, "AdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(floor, "Area")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
-             :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
-             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
-  end
-
-  def self.add_attic_wall(attic:,
-                          id:,
-                          adjacent_to:,
-                          wall_type:,
-                          area:,
-                          azimuth: nil,
-                          solar_absorptance:,
-                          emittance:,
-                          insulation_id: nil,
-                          insulation_assembly_r_value:,
-                          **remainder)
-    walls = XMLHelper.create_elements_as_needed(attic, ["Walls"])
-    wall = XMLHelper.add_element(walls, "Wall")
-    sys_id = XMLHelper.add_element(wall, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(wall, "AdjacentTo", adjacent_to)
-    wall_type_e = XMLHelper.add_element(wall, "WallType")
-    XMLHelper.add_element(wall_type_e, wall_type)
-    XMLHelper.add_element(wall, "Area", Float(area))
-    XMLHelper.add_element(wall, "Azimuth", Integer(azimuth)) unless azimuth.nil?
-    XMLHelper.add_element(wall, "SolarAbsorptance", Float(solar_absorptance))
-    XMLHelper.add_element(wall, "Emittance", Float(emittance))
-    add_assembly_insulation(parent: wall,
-                            id: insulation_id,
-                            assembly_r_value: Float(insulation_assembly_r_value))
-
-    return wall
-  end
-
-  def self.get_attic_wall_values(wall:)
-    return nil if wall.nil?
-
-    insulation_values = get_assembly_insulation_values(insulation: wall.elements["Insulation"])
-
-    return { :id => HPXML.get_id(wall),
-             :adjacent_to => XMLHelper.get_value(wall, "AdjacentTo"),
-             :wall_type => XMLHelper.get_child_name(wall, "WallType"),
-             :area => to_float_or_nil(XMLHelper.get_value(wall, "Area")),
-             :orientation => XMLHelper.get_value(wall, "Orientation"),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(wall, "Azimuth")),
-             :siding => XMLHelper.get_value(wall, "Siding"),
-             :solar_absorptance => to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance")),
-             :emittance => to_float_or_nil(XMLHelper.get_value(wall, "Emittance")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
-  end
-
-  def self.add_foundation(hpxml:,
-                          id:,
-                          foundation_type:,
-                          specific_leakage_area: nil,
-                          **remainder)
-    foundations = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Foundations"])
-    foundation = XMLHelper.add_element(foundations, "Foundation")
-    sys_id = XMLHelper.add_element(foundation, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    foundation_type_e = XMLHelper.add_element(foundation, "FoundationType")
-    if ["SlabOnGrade", "Ambient"].include? foundation_type
-      XMLHelper.add_element(foundation_type_e, foundation_type)
-    elsif foundation_type == "ConditionedBasement"
-      basement = XMLHelper.add_element(foundation_type_e, "Basement")
-      XMLHelper.add_element(basement, "Conditioned", true)
-    elsif foundation_type == "UnconditionedBasement"
-      basement = XMLHelper.add_element(foundation_type_e, "Basement")
-      XMLHelper.add_element(basement, "Conditioned", false)
-    elsif foundation_type == "VentedCrawlspace"
-      crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
-      XMLHelper.add_element(crawlspace, "Vented", true)
-      XMLHelper.add_element(crawlspace, "SpecificLeakageArea", Float(specific_leakage_area))
-    elsif foundation_type == "UnventedCrawlspace"
-      crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
-      XMLHelper.add_element(crawlspace, "Vented", false)
-    else
-      fail "Unhandled foundation type '#{foundation_type}'."
-    end
-
-    return foundation
-  end
-
-  def self.get_foundation_values(foundation:)
-    return nil if foundation.nil?
-
-    foundation_type = nil
-    if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
-      foundation_type = "SlabOnGrade"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
-      foundation_type = "UnconditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
-      foundation_type = "ConditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
-      foundation_type = "UnventedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
-      foundation_type = "VentedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
-      foundation_type = "Ambient"
-    else
-      fail "Unhandled foundation type."
-    end
-
-    return { :id => HPXML.get_id(foundation),
-             :foundation_type => foundation_type,
-             :specific_leakage_area => to_float_or_nil(XMLHelper.get_value(foundation, "FoundationType/Crawlspace[Vented='true']/SpecificLeakageArea")) }
-  end
-
-  def self.add_foundation_framefloor(foundation:,
-                                     id:,
-                                     adjacent_to:,
-                                     area:,
-                                     insulation_id: nil,
-                                     insulation_assembly_r_value:,
-                                     **remainder)
-    frame_floor = XMLHelper.add_element(foundation, "FrameFloor")
-    sys_id = XMLHelper.add_element(frame_floor, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(frame_floor, "AdjacentTo", adjacent_to)
-    XMLHelper.add_element(frame_floor, "Area", Float(area))
-    add_assembly_insulation(parent: frame_floor,
-                            id: insulation_id,
-                            assembly_r_value: Float(insulation_assembly_r_value))
-
-    return frame_floor
-  end
-
-  def self.get_foundation_framefloor_values(floor:)
-    return nil if floor.nil?
-
-    insulation_values = get_assembly_insulation_values(insulation: floor.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: floor.elements["Insulation"])
-
-    return { :id => HPXML.get_id(floor),
-             :adjacent_to => XMLHelper.get_value(floor, "AdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(floor, "Area")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
-             :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
-             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
-  end
-
-  def self.add_foundation_wall(foundation:,
-                               id:,
-                               height:,
-                               area:,
-                               azimuth: nil,
-                               thickness:,
-                               depth_below_grade:,
-                               adjacent_to:,
-                               insulation_height: nil,
-                               insulation_id: nil,
-                               insulation_r_value: nil,
-                               insulation_assembly_r_value: nil,
-                               **remainder)
-    foundation_wall = XMLHelper.add_element(foundation, "FoundationWall")
-    sys_id = XMLHelper.add_element(foundation_wall, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(foundation_wall, "Height", Float(height))
-    XMLHelper.add_element(foundation_wall, "Area", Float(area))
-    XMLHelper.add_element(foundation_wall, "Azimuth", Integer(azimuth)) unless azimuth.nil?
-    XMLHelper.add_element(foundation_wall, "Thickness", Float(thickness))
-    XMLHelper.add_element(foundation_wall, "DepthBelowGrade", Float(depth_below_grade))
-    XMLHelper.add_element(foundation_wall, "AdjacentTo", adjacent_to)
-    if not insulation_assembly_r_value.nil?
-      add_assembly_insulation(parent: foundation_wall,
-                              id: insulation_id,
-                              assembly_r_value: Float(insulation_assembly_r_value))
-    else
-      XMLHelper.add_element(foundation_wall, "InsulationHeight", Float(insulation_height))
-      add_layer_insulation(parent: foundation_wall,
-                           element_name: "Insulation",
-                           id: insulation_id,
-                           continuous_nominal_r_value: Float(insulation_r_value))
-    end
-
-    return foundation_wall
-  end
-
-  def self.get_foundation_wall_values(foundation_wall:)
-    return nil if foundation_wall.nil?
-
-    insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
-
-    return { :id => HPXML.get_id(foundation_wall),
-             :height => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Height")),
-             :area => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth")),
-             :thickness => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness")),
-             :depth_below_grade => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
-             :adjacent_to => XMLHelper.get_value(foundation_wall, "AdjacentTo"),
-             :insulation_height => to_float_or_nil(XMLHelper.get_value(foundation_wall, "InsulationHeight")),
-             :insulation_id => insulation_layer_values[:id],
-             :insulation_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]),
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
-  end
-
-  def self.add_foundation_slab(foundation:,
-                               id:,
-                               area:,
-                               thickness:,
-                               exposed_perimeter:,
-                               perimeter_insulation_depth:,
-                               under_slab_insulation_width: nil,
-                               under_slab_insulation_spans_entire_slab: nil,
-                               depth_below_grade:,
-                               carpet_fraction:,
-                               carpet_r_value:,
-                               perimeter_insulation_id: nil,
-                               perimeter_insulation_r_value:,
-                               under_slab_insulation_id: nil,
-                               under_slab_insulation_r_value:,
-                               **remainder)
-    slab = XMLHelper.add_element(foundation, "Slab")
-    sys_id = XMLHelper.add_element(slab, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(slab, "Area", Float(area))
-    XMLHelper.add_element(slab, "Thickness", Float(thickness))
-    XMLHelper.add_element(slab, "ExposedPerimeter", Float(exposed_perimeter))
-    XMLHelper.add_element(slab, "PerimeterInsulationDepth", Float(perimeter_insulation_depth))
-    XMLHelper.add_element(slab, "UnderSlabInsulationWidth", Float(under_slab_insulation_width)) unless under_slab_insulation_width.nil?
-    XMLHelper.add_element(slab, "UnderSlabInsulationSpansEntireSlab", Boolean(under_slab_insulation_spans_entire_slab)) unless under_slab_insulation_spans_entire_slab.nil?
-    XMLHelper.add_element(slab, "DepthBelowGrade", Float(depth_below_grade))
-    add_layer_insulation(parent: slab,
-                         element_name: "PerimeterInsulation",
-                         id: perimeter_insulation_id,
-                         continuous_nominal_r_value: Float(perimeter_insulation_r_value))
-    add_layer_insulation(parent: slab,
-                         element_name: "UnderSlabInsulation",
-                         id: under_slab_insulation_id,
-                         continuous_nominal_r_value: Float(under_slab_insulation_r_value))
-    HPXML.add_extension(parent: slab,
-                        extensions: { "CarpetFraction": to_float_or_nil(carpet_fraction),
-                                      "CarpetRValue": to_float_or_nil(carpet_r_value) })
-
-    return slab
-  end
-
-  def self.get_foundation_slab_values(slab:)
-    return nil if slab.nil?
-
-    perimeter_insulation_values = get_layer_insulation_values(insulation: slab.elements["PerimeterInsulation"])
-    under_slab_insulation_values = get_layer_insulation_values(insulation: slab.elements["UnderSlabInsulation"])
-
-    return { :id => HPXML.get_id(slab),
-             :area => to_float_or_nil(XMLHelper.get_value(slab, "Area")),
-             :thickness => to_float_or_nil(XMLHelper.get_value(slab, "Thickness")),
-             :exposed_perimeter => to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter")),
-             :perimeter_insulation_depth => to_float_or_nil(XMLHelper.get_value(slab, "PerimeterInsulationDepth")),
-             :under_slab_insulation_width => to_float_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationWidth")),
-             :under_slab_insulation_spans_entire_slab => to_bool_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab")),
-             :depth_below_grade => to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade")),
-             :carpet_fraction => to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction")),
-             :carpet_r_value => to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue")),
-             :perimeter_insulation_id => perimeter_insulation_values[:id],
-             :perimeter_insulation_r_value => to_float_or_nil(perimeter_insulation_values[:continuous_nominal_r_value]),
-             :under_slab_insulation_id => under_slab_insulation_values[:id],
-             :under_slab_insulation_r_value => to_float_or_nil(under_slab_insulation_values[:continuous_nominal_r_value]) }
-  end
-
-  def self.add_garage(hpxml:,
-                      id:,
-                      **remainder)
-    garages = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Garages"])
-    garage = XMLHelper.add_element(garages, "Garage")
-    sys_id = XMLHelper.add_element(garage, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-
-    return garage
-  end
-
-  def self.get_garage_values(garage:)
-    return nil if garage.nil?
-
-    return { :id => HPXML.get_id(garage) }
-  end
-
-  def self.add_garage_ceiling(garage:,
-                              id:,
-                              adjacent_to:,
-                              area:,
-                              insulation_id: nil,
-                              insulation_assembly_r_value:,
-                              **remainder)
-    ceilings = XMLHelper.create_elements_as_needed(garage, ["Ceilings"])
-    ceiling = XMLHelper.add_element(ceilings, "Ceiling")
-    sys_id = XMLHelper.add_element(ceiling, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(ceiling, "AdjacentTo", adjacent_to)
-    XMLHelper.add_element(ceiling, "Area", Float(area))
-    add_assembly_insulation(parent: ceiling,
-                            id: insulation_id,
-                            assembly_r_value: Float(insulation_assembly_r_value))
-
-    return ceiling
-  end
-
-  def self.get_garage_ceiling_values(ceiling:)
-    return nil if ceiling.nil?
-
-    insulation_values = get_assembly_insulation_values(insulation: ceiling.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: ceiling.elements["Insulation"])
-
-    return { :id => HPXML.get_id(ceiling),
-             :adjacent_to => XMLHelper.get_value(ceiling, "AdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(ceiling, "Area")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
-             :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
-             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
-  end
-
-  def self.add_garage_wall(garage:,
-                           id:,
-                           adjacent_to:,
-                           wall_type:,
-                           area:,
-                           azimuth: nil,
-                           solar_absorptance:,
-                           emittance:,
-                           insulation_id: nil,
-                           insulation_assembly_r_value:,
-                           **remainder)
-    walls = XMLHelper.create_elements_as_needed(garage, ["Walls"])
-    garage_wall = XMLHelper.add_element(walls, "Wall")
-    sys_id = XMLHelper.add_element(garage_wall, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(garage_wall, "AdjacentTo", adjacent_to)
-    wall_type_e = XMLHelper.add_element(garage_wall, "WallType")
-    XMLHelper.add_element(wall_type_e, wall_type)
-    XMLHelper.add_element(garage_wall, "Area", Float(area))
-    XMLHelper.add_element(garage_wall, "Azimuth", Integer(azimuth)) unless azimuth.nil?
-    XMLHelper.add_element(garage_wall, "SolarAbsorptance", Float(solar_absorptance))
-    XMLHelper.add_element(garage_wall, "Emittance", Float(emittance))
-    add_assembly_insulation(parent: garage_wall,
-                            id: insulation_id,
-                            assembly_r_value: Float(insulation_assembly_r_value))
-
-    return garage_wall
-  end
-
-  def self.get_garage_wall_values(wall:)
-    return nil if wall.nil?
-
-    insulation_values = get_assembly_insulation_values(insulation: wall.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: wall.elements["Insulation"])
-
-    return { :id => HPXML.get_id(wall),
-             :adjacent_to => XMLHelper.get_value(wall, "AdjacentTo"),
-             :wall_type => XMLHelper.get_child_name(wall, "WallType"),
-             :area => to_float_or_nil(XMLHelper.get_value(wall, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(wall, "Azimuth")),
-             :solar_absorptance => to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance")),
-             :emittance => to_float_or_nil(XMLHelper.get_value(wall, "Emittance")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
-             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
-  end
-
-  def self.add_garage_slab(garage:,
-                           id:,
-                           area:,
-                           thickness:,
-                           exposed_perimeter:,
-                           perimeter_insulation_depth:,
-                           under_slab_insulation_width: nil,
-                           under_slab_insulation_spans_entire_slab: nil,
-                           perimeter_insulation_id: nil,
-                           perimeter_insulation_r_value:,
-                           under_slab_insulation_id: nil,
-                           under_slab_insulation_r_value:,
-                           **remainder)
-    slabs = XMLHelper.create_elements_as_needed(garage, ["Slabs"])
-    slab = XMLHelper.add_element(slabs, "Slab")
-    sys_id = XMLHelper.add_element(slab, "SystemIdentifier")
-    XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(slab, "Area", Float(area))
-    XMLHelper.add_element(slab, "Thickness", Float(thickness))
-    XMLHelper.add_element(slab, "ExposedPerimeter", Float(exposed_perimeter))
-    XMLHelper.add_element(slab, "PerimeterInsulationDepth", Float(perimeter_insulation_depth))
-    XMLHelper.add_element(slab, "UnderSlabInsulationWidth", Float(under_slab_insulation_width)) unless under_slab_insulation_width.nil?
-    XMLHelper.add_element(slab, "UnderSlabInsulationSpansEntireSlab", Boolean(under_slab_insulation_spans_entire_slab)) unless under_slab_insulation_spans_entire_slab.nil?
-    add_layer_insulation(parent: slab,
-                         element_name: "PerimeterInsulation",
-                         id: perimeter_insulation_id,
-                         continuous_nominal_r_value: Float(perimeter_insulation_r_value))
-    add_layer_insulation(parent: slab,
-                         element_name: "UnderSlabInsulation",
-                         id: under_slab_insulation_id,
-                         continuous_nominal_r_value: Float(under_slab_insulation_r_value))
-
-    return slab
-  end
-
-  def self.get_garage_slab_values(slab:)
-    return nil if slab.nil?
-
-    perimeter_insulation_values = get_layer_insulation_values(insulation: slab.elements["PerimeterInsulation"])
-    under_slab_insulation_values = get_layer_insulation_values(insulation: slab.elements["UnderSlabInsulation"])
-
-    return { :id => HPXML.get_id(slab),
-             :area => to_float_or_nil(XMLHelper.get_value(slab, "Area")),
-             :thickness => to_float_or_nil(XMLHelper.get_value(slab, "Thickness")),
-             :exposed_perimeter => to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter")),
-             :perimeter_insulation_depth => to_float_or_nil(XMLHelper.get_value(slab, "PerimeterInsulationDepth")),
-             :under_slab_insulation_width => to_float_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationWidth")),
-             :under_slab_insulation_spans_entire_slab => to_bool_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab")),
-             :perimeter_insulation_id => perimeter_insulation_values[:id],
-             :perimeter_insulation_r_value => to_float_or_nil(perimeter_insulation_values[:continuous_nominal_r_value]),
-             :under_slab_insulation_id => under_slab_insulation_values[:id],
-             :under_slab_insulation_r_value => to_float_or_nil(under_slab_insulation_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_rim_joist(hpxml:,
@@ -892,6 +527,172 @@ class HPXML
              :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
              :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
              :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
+  end
+
+  def self.add_foundation_wall(hpxml:,
+                               id:,
+                               exterior_adjacent_to:,
+                               interior_adjacent_to:,
+                               height:,
+                               area:,
+                               azimuth: nil,
+                               thickness:,
+                               depth_below_grade:,
+                               insulation_distance_to_bottom: nil,
+                               insulation_id: nil,
+                               insulation_r_value: nil,
+                               insulation_assembly_r_value: nil,
+                               **remainder)
+    foundation_walls = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "FoundationWalls"])
+    foundation_wall = XMLHelper.add_element(foundation_walls, "FoundationWall")
+    sys_id = XMLHelper.add_element(foundation_wall, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(foundation_wall, "ExteriorAdjacentTo", exterior_adjacent_to)
+    XMLHelper.add_element(foundation_wall, "InteriorAdjacentTo", interior_adjacent_to)
+    XMLHelper.add_element(foundation_wall, "Height", Float(height))
+    XMLHelper.add_element(foundation_wall, "Area", Float(area))
+    XMLHelper.add_element(foundation_wall, "Azimuth", Integer(azimuth)) unless azimuth.nil?
+    XMLHelper.add_element(foundation_wall, "Thickness", Float(thickness))
+    XMLHelper.add_element(foundation_wall, "DepthBelowGrade", Float(depth_below_grade))
+    if not insulation_assembly_r_value.nil?
+      add_assembly_insulation(parent: foundation_wall,
+                              id: insulation_id,
+                              assembly_r_value: Float(insulation_assembly_r_value))
+    else
+      XMLHelper.add_element(foundation_wall, "DistanceToBottomOfInsulation", Float(insulation_distance_to_bottom))
+      add_layer_insulation(parent: foundation_wall,
+                           element_name: "Insulation",
+                           id: insulation_id,
+                           continuous_nominal_r_value: Float(insulation_r_value))
+    end
+
+    return foundation_wall
+  end
+
+  def self.get_foundation_wall_values(foundation_wall:)
+    return nil if foundation_wall.nil?
+
+    insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
+
+    return { :id => HPXML.get_id(foundation_wall),
+             :exterior_adjacent_to => XMLHelper.get_value(foundation_wall, "ExteriorAdjacentTo"),
+             :interior_adjacent_to => XMLHelper.get_value(foundation_wall, "InteriorAdjacentTo"),
+             :height => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Height")),
+             :area => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Area")),
+             :azimuth => to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth")),
+             :thickness => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness")),
+             :depth_below_grade => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
+             :insulation_distance_to_bottom => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DistanceToBottomOfInsulation")),
+             :insulation_id => insulation_layer_values[:id],
+             :insulation_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]),
+             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
+  end
+
+  def self.add_framefloor(hpxml:,
+                          id:,
+                          exterior_adjacent_to:,
+                          interior_adjacent_to:,
+                          area:,
+                          insulation_id: nil,
+                          insulation_assembly_r_value:,
+                          **remainder)
+    framefloors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "FrameFloors"])
+    framefloor = XMLHelper.add_element(framefloors, "FrameFloor")
+    sys_id = XMLHelper.add_element(framefloor, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(framefloor, "ExteriorAdjacentTo", exterior_adjacent_to)
+    XMLHelper.add_element(framefloor, "InteriorAdjacentTo", interior_adjacent_to)
+    XMLHelper.add_element(framefloor, "Area", Float(area))
+    add_assembly_insulation(parent: framefloor,
+                            id: insulation_id,
+                            assembly_r_value: Float(insulation_assembly_r_value))
+
+    return framefloor
+  end
+
+  def self.get_framefloor_values(framefloor:)
+    return nil if framefloor.nil?
+
+    insulation_values = get_assembly_insulation_values(insulation: framefloor.elements["Insulation"])
+    insulation_layer_values = get_layer_insulation_values(insulation: framefloor.elements["Insulation"])
+
+    return { :id => HPXML.get_id(framefloor),
+             :exterior_adjacent_to => XMLHelper.get_value(framefloor, "ExteriorAdjacentTo"),
+             :interior_adjacent_to => XMLHelper.get_value(framefloor, "InteriorAdjacentTo"),
+             :area => to_float_or_nil(XMLHelper.get_value(framefloor, "Area")),
+             :insulation_id => insulation_values[:id],
+             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
+             :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
+             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
+  end
+
+  def self.add_slab(hpxml:,
+                    id:,
+                    interior_adjacent_to:,
+                    area:,
+                    thickness:,
+                    exposed_perimeter:,
+                    perimeter_insulation_depth:,
+                    under_slab_insulation_width: nil,
+                    under_slab_insulation_spans_entire_slab: nil,
+                    depth_below_grade:,
+                    carpet_fraction:,
+                    carpet_r_value:,
+                    perimeter_insulation_id: nil,
+                    perimeter_insulation_r_value:,
+                    under_slab_insulation_id: nil,
+                    under_slab_insulation_r_value:,
+                    **remainder)
+    slabs = foundation_walls = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Slabs"])
+    slab = XMLHelper.add_element(slabs, "Slab")
+    sys_id = XMLHelper.add_element(slab, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(slab, "InteriorAdjacentTo", interior_adjacent_to)
+    XMLHelper.add_element(slab, "Area", Float(area))
+    XMLHelper.add_element(slab, "Thickness", Float(thickness))
+    XMLHelper.add_element(slab, "ExposedPerimeter", Float(exposed_perimeter))
+    XMLHelper.add_element(slab, "PerimeterInsulationDepth", Float(perimeter_insulation_depth))
+    XMLHelper.add_element(slab, "UnderSlabInsulationWidth", Float(under_slab_insulation_width)) unless under_slab_insulation_width.nil?
+    XMLHelper.add_element(slab, "UnderSlabInsulationSpansEntireSlab", Boolean(under_slab_insulation_spans_entire_slab)) unless under_slab_insulation_spans_entire_slab.nil?
+    XMLHelper.add_element(slab, "DepthBelowGrade", Float(depth_below_grade))
+    add_layer_insulation(parent: slab,
+                         element_name: "PerimeterInsulation",
+                         id: perimeter_insulation_id,
+                         continuous_nominal_r_value: Float(perimeter_insulation_r_value))
+    add_layer_insulation(parent: slab,
+                         element_name: "UnderSlabInsulation",
+                         id: under_slab_insulation_id,
+                         continuous_nominal_r_value: Float(under_slab_insulation_r_value))
+    HPXML.add_extension(parent: slab,
+                        extensions: { "CarpetFraction": to_float_or_nil(carpet_fraction),
+                                      "CarpetRValue": to_float_or_nil(carpet_r_value) })
+
+    return slab
+  end
+
+  def self.get_slab_values(slab:)
+    return nil if slab.nil?
+
+    perimeter_insulation_values = get_layer_insulation_values(insulation: slab.elements["PerimeterInsulation"])
+    under_slab_insulation_values = get_layer_insulation_values(insulation: slab.elements["UnderSlabInsulation"])
+
+    return { :id => HPXML.get_id(slab),
+             :interior_adjacent_to => XMLHelper.get_value(slab, "InteriorAdjacentTo"),
+             :exterior_adjacent_to => "outside",
+             :area => to_float_or_nil(XMLHelper.get_value(slab, "Area")),
+             :thickness => to_float_or_nil(XMLHelper.get_value(slab, "Thickness")),
+             :exposed_perimeter => to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter")),
+             :perimeter_insulation_depth => to_float_or_nil(XMLHelper.get_value(slab, "PerimeterInsulationDepth")),
+             :under_slab_insulation_width => to_float_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationWidth")),
+             :under_slab_insulation_spans_entire_slab => to_bool_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab")),
+             :depth_below_grade => to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade")),
+             :carpet_fraction => to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction")),
+             :carpet_r_value => to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue")),
+             :perimeter_insulation_id => perimeter_insulation_values[:id],
+             :perimeter_insulation_r_value => to_float_or_nil(perimeter_insulation_values[:continuous_nominal_r_value]),
+             :under_slab_insulation_id => under_slab_insulation_values[:id],
+             :under_slab_insulation_r_value => to_float_or_nil(under_slab_insulation_values[:continuous_nominal_r_value]) }
   end
 
   def self.add_window(hpxml:,
@@ -1153,7 +954,9 @@ class HPXML
                          heat_pump_fuel:,
                          heating_capacity: nil,
                          cooling_capacity:,
+                         backup_heating_fuel: nil,
                          backup_heating_capacity: nil,
+                         backup_heating_efficiency_percent: nil,
                          fraction_heat_load_served:,
                          fraction_cool_load_served:,
                          heating_efficiency_percent: nil,
@@ -1177,7 +980,13 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel)
     XMLHelper.add_element(heat_pump, "HeatingCapacity", Float(heating_capacity)) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", Float(cooling_capacity))
-    XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", Float(backup_heating_capacity)) unless backup_heating_capacity.nil?
+    if not backup_heating_fuel.nil?
+      XMLHelper.add_element(heat_pump, "BackupSystemFuel", backup_heating_fuel)
+      backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
+      XMLHelper.add_element(backup_eff, "Units", "Percent")
+      XMLHelper.add_element(backup_eff, "Value", Float(backup_heating_efficiency_percent))
+      XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", Float(backup_heating_capacity))
+    end
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", Float(fraction_cool_load_served))
     efficiencies = { "kW/ton" => cooling_efficiency_kw_per_ton,
@@ -1216,7 +1025,9 @@ class HPXML
              :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
              :heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity")),
              :cooling_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity")),
+             :backup_heating_fuel => XMLHelper.get_value(heat_pump, "BackupSystemFuel"),
              :backup_heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")),
+             :backup_heating_efficiency_percent => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")),
              :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")),
              :fraction_cool_load_served => to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed")),
              :heating_efficiency_percent => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='Percent']/Value")),

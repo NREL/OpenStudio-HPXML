@@ -375,6 +375,10 @@ class Constants
     return "ashp"
   end
 
+  def self.ObjectNameBath
+    return "res baths"
+  end
+
   def self.ObjectNameBoiler
     return "boiler"
   end
@@ -458,10 +462,6 @@ class Constants
     return "dhw recirc pump"
   end
 
-  def self.ObjectNameHotWaterDistribution
-    return "dhw distribution"
-  end
-
   def self.ObjectNameIdealAirSystem
     return "ideal"
   end
@@ -526,6 +526,14 @@ class Constants
 
   def self.ObjectNameRoomAirConditioner
     return "room ac"
+  end
+
+  def self.ObjectNameShower
+    return "res showers"
+  end
+
+  def self.ObjectNameSink
+    return "res sinks"
   end
 
   def self.ObjectNameSolarHotWater
@@ -876,8 +884,12 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SpaceTypeCrawl
-    return 'crawlspace'
+  def self.SpaceTypeVentedCrawl
+    return 'vented crawlspace'
+  end
+
+  def self.SpaceTypeUnventedCrawl
+    return 'unvented crawlspace'
   end
 
   def self.SpaceTypeConditionedBasement
@@ -892,12 +904,12 @@ class Constants
     return 'living'
   end
 
-  def self.SpaceTypePierBeam
-    return 'pier and beam'
+  def self.SpaceTypeVentedAttic
+    return 'vented attic'
   end
 
-  def self.SpaceTypeUnconditionedAttic
-    return 'unconditioned attic'
+  def self.SpaceTypeUnventedAttic
+    return 'unvented attic'
   end
 
   def self.SpaceTypeUnconditionedBasement

@@ -177,9 +177,9 @@ class HVACSizing
       # Garage
       heat_temp = design_db + 13
 
-    elsif Geometry.is_unconditioned_attic(space)
+    elsif Geometry.is_vented_attic(space) or Geometry.is_unvented_attic(space)
 
-      is_vented = space_is_vented(space, 0.001)
+      is_vented = Geometry.is_vented_attic(space)
 
       attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
       return nil if attic_floor_r.nil?
@@ -204,10 +204,6 @@ class HVACSizing
         heat_temp = design_db
 
       end
-
-    elsif Geometry.is_pier_beam(space)
-      # Pier & beam
-      heat_temp = design_db
 
     else
       # Unconditioned basement, Crawlspace
@@ -258,9 +254,9 @@ class HVACSizing
                      (12 * (1 - garage_frac_under_conditioned)))
       end
 
-    elsif Geometry.is_unconditioned_attic(space)
+    elsif Geometry.is_vented_attic(space) or Geometry.is_unvented_attic(space)
 
-      is_vented = space_is_vented(space, 0.001)
+      is_vented = Geometry.is_vented_attic(space)
 
       attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
       return nil if attic_floor_r.nil?
@@ -386,10 +382,6 @@ class HVACSizing
         cool_temp += (weather.design.CoolingDrybulb - 95) + @daily_range_temp_adjust[@daily_range_num]
 
       end
-
-    elsif Geometry.is_pier_beam(space)
-      # Pier & beam
-      cool_temp = weather.design.CoolingDrybulb
 
     else
       # Unconditioned basement, Crawlspace
@@ -1189,7 +1181,6 @@ class HVACSizing
 
     gains.each do |gain|
       # TODO: The lines below are for equivalence with BEopt
-      next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterDistribution)
       next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterRecircPump)
 
       sched = nil
@@ -1249,7 +1240,16 @@ class HVACSizing
       if sched.is_a? OpenStudio::Model::ScheduleRuleset or sched.is_a? OpenStudio::Model::ScheduleFixedInterval
         # Override any hot water schedules with smoothed schedules; TODO: Is there a better approach?
         max_mult = nil
-        if gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
+        if gain.name.to_s.start_with?(Constants.ObjectNameShower)
+          sched_values = [0.011, 0.005, 0.003, 0.005, 0.014, 0.052, 0.118, 0.117, 0.095, 0.074, 0.060, 0.047, 0.034, 0.029, 0.026, 0.025, 0.030, 0.039, 0.042, 0.042, 0.042, 0.041, 0.029, 0.021]
+          max_mult = 1.05 * 1.04
+        elsif gain.name.to_s.start_with?(Constants.ObjectNameSink) or gain.name.to_s.start_with?(Constants.ObjectNameFixtures)
+          sched_values = [0.014, 0.007, 0.005, 0.005, 0.007, 0.018, 0.042, 0.062, 0.066, 0.062, 0.054, 0.050, 0.049, 0.045, 0.043, 0.041, 0.048, 0.065, 0.075, 0.069, 0.057, 0.048, 0.040, 0.027]
+          max_mult = 1.04 * 1.04
+        elsif gain.name.to_s.start_with?(Constants.ObjectNameBath)
+          sched_values = [0.008, 0.004, 0.004, 0.004, 0.008, 0.019, 0.046, 0.058, 0.066, 0.058, 0.046, 0.035, 0.031, 0.023, 0.023, 0.023, 0.039, 0.046, 0.077, 0.100, 0.100, 0.077, 0.066, 0.039]
+          max_mult = 1.26 * 1.04
+        elsif gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
           sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
           max_mult = 1.05 * 1.04
         elsif gain.name.to_s.start_with?(Constants.ObjectNameClothesWasher)
@@ -1437,7 +1437,7 @@ class HVACSizing
         end
       end
 
-    elsif Geometry.is_crawl(duct.LocationSpace) or Geometry.is_pier_beam(duct.LocationSpace)
+    elsif Geometry.is_vented_crawl(duct.LocationSpace) or Geometry.is_unvented_crawl(duct.LocationSpace)
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
@@ -1463,7 +1463,7 @@ class HVACSizing
         end
       end
 
-    elsif Geometry.is_unconditioned_attic(duct.LocationSpace)
+    elsif Geometry.is_vented_attic(duct.LocationSpace) or Geometry.is_unvented_attic(duct.LocationSpace)
       dse_Fregain = 0.10 # This would likely be higher for unvented attics with roof insulation
 
     elsif Geometry.is_garage(duct.LocationSpace)
@@ -1502,7 +1502,10 @@ class HVACSizing
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
         dse_Fregains[duct.LocationSpace] = get_duct_regain_factor(runner, duct)
-        return nil if dse_Fregains[duct.LocationSpace].nil?
+        if dse_Fregains[duct.LocationSpace].nil?
+          runner.registerError("Unexpected duct location '#{duct.LocationSpace.name}'.")
+          return nil
+        end
       end
       fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
       dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
@@ -2894,7 +2897,7 @@ class HVACSizing
     curves.each do |curve|
       bi = curve.to_CurveBiquadratic.get
       c_si = [bi.coefficient1Constant, bi.coefficient2x, bi.coefficient3xPOW2, bi.coefficient4y, bi.coefficient5yPOW2, bi.coefficient6xTIMESY]
-      vector << HVAC.convert_curve_biquadratic(c_si, false)
+      vector << HVAC.convert_curve_biquadratic(c_si, curves_in_ip = false)
     end
     if num_speeds > 1 and vector.size == 1
       # Repeat coefficients for each speed
@@ -3600,7 +3603,10 @@ class HVACSizing
 
       ceiling_ufactor = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
     end
-    return nil if ceiling_ufactor.nil?
+    if ceiling_ufactor.nil?
+      runner.registerError("Unable to identify the foundation ceiling.")
+      return nil
+    end
 
     ceiling_rvalue = 1.0 / UnitConversions.convert(ceiling_ufactor, 'm^2*k/w', 'hr*ft^2*f/btu')
     if ceiling_rvalue >= 3.0

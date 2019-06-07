@@ -118,19 +118,19 @@ class Waterheater
     dhw_map[sys_id] << loop
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = Waterheater.create_new_pump(model)
+      new_pump = create_new_pump(model)
       new_pump.addToNode(loop.supplyInletNode)
     end
 
     if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
+      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
-    new_heater = Waterheater.create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
-    storage_tank = Waterheater.get_shw_storage_tank(model)
+    storage_tank = get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(new_heater)
@@ -214,13 +214,13 @@ class Waterheater
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
     runner.registerInitialCondition("There is no existing water heater")
-    loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
+    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
     dhw_map[sys_id] << loop
 
-    new_pump = Waterheater.create_new_pump(model)
+    new_pump = create_new_pump(model)
     new_pump.addToNode(loop.supplyInletNode)
 
-    new_manager = Waterheater.create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeHeatPump)
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Only ever going to make HPWHs in this measure, so don't split this code out to waterheater.rb
@@ -719,7 +719,7 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_ducting_program)
 
-    storage_tank = Waterheater.get_shw_storage_tank(model)
+    storage_tank = get_shw_storage_tank(model)
 
     if storage_tank.nil?
       loop.addSupplyBranchForComponent(tank)
@@ -737,15 +737,19 @@ class Waterheater
       return [Constants.SpaceTypeGarage,
               Constants.SpaceTypeLiving,
               Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnconditionedAttic]
+              Constants.SpaceTypeUnventedCrawl,
+              Constants.SpaceTypeVentedCrawl,
+              Constants.SpaceTypeUnventedAttic,
+              Constants.SpaceTypeVentedAttic]
 
     elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
       return [Constants.SpaceTypeConditionedBasement,
               Constants.SpaceTypeUnconditionedBasement,
               Constants.SpaceTypeLiving,
-              Constants.SpaceTypeCrawl,
-              Constants.SpaceTypeUnconditionedAttic]
+              Constants.SpaceTypeUnventedCrawl,
+              Constants.SpaceTypeVentedCrawl,
+              Constants.SpaceTypeUnventedAttic,
+              Constants.SpaceTypeVentedAttic]
     elsif ba_cz_name.nil?
       return [Constants.SpaceTypeConditionedBasement,
               Constants.SpaceTypeUnconditionedBasement,
@@ -754,60 +758,13 @@ class Waterheater
     end
   end
 
-  # FIXME: Merge this method and calc_water_heater_capacity
-  def self.calc_capacity(cap, fuel, num_beds, num_baths)
+  def self.calc_water_heater_capacity(fuel, num_beds, num_baths = nil)
     # Calculate the capacity of the water heater based on the fuel type and number of bedrooms and bathrooms in a home
     # returns the capacity in kBtu/hr
-    if cap == Constants.Auto
-      if fuel != Constants.FuelTypeElectric
-        if num_beds <= 3
-          input_power = 36
-        elsif num_beds == 4
-          if num_baths <= 2.5
-            input_power = 36
-          else
-            input_power = 38
-          end
-        elsif num_beds == 5
-          input_power = 47
-        else
-          input_power = 50
-        end
-        return input_power
 
-      else
-        if num_beds == 1
-          input_power = UnitConversions.convert(2.5, "kW", "kBtu/hr")
-        elsif num_beds == 2
-          if num_baths <= 1.5
-            input_power = UnitConversions.convert(3.5, "kW", "kBtu/hr")
-          else
-            input_power = UnitConversions.convert(4.5, "kW", "kBtu/hr")
-          end
-        elsif num_beds == 3
-          if num_baths <= 1.5
-            input_power = UnitConversions.convert(4.5, "kW", "kBtu/hr")
-          else
-            input_power = UnitConversions.convert(5.5, "kW", "kBtu/hr")
-          end
-        else
-          input_power = UnitConversions.convert(5.5, "kW", "kBtu/hr")
-        end
-        return input_power
-      end
-
-    else # fixed heater size
-      return cap.to_f
+    if num_baths.nil?
+      num_baths = get_default_num_bathrooms(num_beds)
     end
-  end
-
-  def self.calc_water_heater_capacity(fuel, num_beds)
-    # Calculate the capacity of the water heater based on the fuel type and number of bedrooms and bathrooms in a home
-    # returns the capacity in kBtu/hr
-
-    # From https://www.sansomeandgeorge.co.uk/news-updates/what-is-the-ideal-ratio-of-bathrooms-to-bedrooms.html
-    # "According to 70% of estate agents, a property should have two bathrooms for every three bedrooms..."
-    num_baths = 2.0 / 3.0 * num_beds
 
     if fuel != Constants.FuelTypeElectric
       if num_beds <= 3
@@ -864,6 +821,12 @@ class Waterheater
       end
     end
     return nil
+  end
+
+  def self.get_default_num_bathrooms(num_beds)
+    # From https://www.sansomeandgeorge.co.uk/news-updates/what-is-the-ideal-ratio-of-bathrooms-to-bedrooms.html
+    # "According to 70% of estate agents, a property should have two bathrooms for every three bedrooms..."
+    num_baths = 2.0 / 3.0 * num_beds
   end
 
   def self.get_default_hot_water_temperature(eri_version)
