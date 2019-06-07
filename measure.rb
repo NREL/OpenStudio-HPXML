@@ -2620,23 +2620,17 @@ class OSModel
       vented_attic_sla = 0.0
     end
 
-    crawl_sla = nil
-    vented_crawl_ach = nil
+    vented_crawl_sla = nil
     if @has_vented_crawl
       building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
         vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
-        crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
-        vented_crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
+        vented_crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
       end
-      if crawl_sla.nil? and vented_crawl_ach.nil?
-        crawl_sla = Airflow.get_default_vented_crawl_sla()
+      if vented_crawl_sla.nil?
+        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
       end
     else
-      vented_crawl_ach = 0.0
-    end
-    if vented_crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
-      vented_crawl_ach = crawl_sla
-      crawl_sla = nil
+      vented_crawl_sla = 0.0
     end
 
     living_ach50 = infil_ach50
@@ -2644,7 +2638,7 @@ class OSModel
     garage_ach50 = infil_ach50
     conditioned_basement_ach = 0
     unconditioned_basement_ach = 0.1
-    unvented_crawl_ach = 0.1
+    unvented_crawl_sla = 0
     unvented_attic_sla = 0
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
@@ -2654,7 +2648,7 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_ach, unvented_crawl_ach,
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
                              conditioned_basement_ach, has_flue_chimney, is_existing_home, terrain)
 
