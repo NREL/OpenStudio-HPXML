@@ -761,14 +761,19 @@ class Waterheater
     end
 
     # Create an initial simple tank model by calling create_new_heater
-    new_tank = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    new_tank.setIndirectWaterHeatingRecoveryTime(0.2) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
     # Create alternate setpoint schedule for source side flow control
     alternate_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
     alternate_stp_sch.setName("#{obj_name_indirect} Alt Spt")
-    alt_temp = 55
-    alternate_stp_sch.setValue(alt_temp) # 55C is reasonable for highest desired hot water temperature
+    hx_stp_sch.setName("#{obj_name_indirect} HX Spt")
+    alt_temp = 54
+    hx_temp = 54 # 54C is more reasonable for highest desired hot water temperature, with 2C deadband, it would be expected to be controlled between 52C - 54C
+    alternate_stp_sch.setValue(alt_temp)
+    hx_stp_sch.setValue(hx_temp)
     new_tank.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
     new_tank.setIndirectAlternateSetpointTemperatureSchedule (alternate_stp_sch)
 
@@ -798,7 +803,7 @@ class Waterheater
       new_pump.addToNode(source_loop.supplyInletNode)
     end
     if source_loop.supplyOutletNode.setpointManagers.empty?
-      new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, alternate_stp_sch)
+      new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
       new_source_manager.addToNode(source_loop.supplyOutletNode)
     end
     source_loop.addDemandBranchForComponent(new_tank)
@@ -815,6 +820,47 @@ class Waterheater
       storage_tank.setHeater2SetpointTemperatureSchedule(new_tank.heater2SetpointTemperatureSchedule)
       new_tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
     end
+
+    # EMS for offsetting reaction lag and recover tank temperature
+    # Sensors
+    use_heat_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Use Side Heat Transfer Energy")
+    use_heat_sensor.setName("#{obj_name_indirect} Use Side Energy")
+    use_heat_sensor.setKeyName("#{obj_name_indirect}")
+
+    tank_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Tank Temperature")
+    tank_temp_sensor.setName("#{obj_name_indirect} Tank Temp")
+    tank_temp_sensor.setKeyName("#{obj_name_indirect}")
+
+    stp_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    stp_temp_sensor.setName("#{obj_name_indirect} Setpoint Temperature")
+    stp_temp_sensor.setKeyName("WH Setpoint Temp")
+
+    wh_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Heat Loss Energy")
+    wh_loss_sensor.setName("#{obj_name_indirect} Loss Energy")
+    wh_loss_sensor.setKeyName("#{obj_name_indirect}")
+
+    tank_volume_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Water Volume")
+    tank_volume_sensor.setName("#{obj_name_indirect} Volume")
+    tank_volume_sensor.setKeyName("#{obj_name_indirect}")
+
+    # Actuators
+    altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alternate_stp_sch, "Schedule:Constant", "Schedule Value")
+    altsch_actuator.setName("#{obj_name_indirect} AltSchedOverride")
+
+    # Program
+    indirect_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    indirect_ctrl_program.setName("#{obj_name_indirect} Source Control")
+    indirect_ctrl_program.addLine("If - #{use_heat_sensor.name} -  #{wh_loss_sensor.name}> (#{tank_temp_sensor.name} - #{stp_temp_sensor.name}) * #{tank_volume_sensor.name} * (@RhoH2O #{tank_temp_sensor.name}) * (@CpHW #{tank_temp_sensor.name})")
+    indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
+    indirect_ctrl_program.addLine("Else")
+    indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = #{alternate_stp_sch.value}")
+    indirect_ctrl_program.addLine("EndIf")
+
+    # ProgramCallingManagers
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{obj_name_indirect} ProgramManager")
+    program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
+    program_calling_manager.addProgram(indirect_ctrl_program)
 
     return true
   end
