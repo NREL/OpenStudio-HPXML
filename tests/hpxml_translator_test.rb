@@ -1002,7 +1002,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         next if result_x1 == 0.0 and result_x3 == 0.0
 
         _display_result_epsilon(xml, result_x1, result_x3, k)
-        assert_in_epsilon(result_x1, result_x3, 0.07)
+        assert_in_epsilon(result_x1, result_x3, 0.12)
       end
     end
   end
