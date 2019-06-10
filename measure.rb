@@ -2583,13 +2583,13 @@ class OSModel
 
   def self.add_airflow(runner, model, building, spaces)
     # Infiltration
-    infil_volume = nil
+    infilvolume = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
       air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
-      infil_volume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
+      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
     end
-    if infil_volume.nil?
-      infil_volume = @cvolume
+    if infilvolume.nil?
+      infilvolume = @cvolume
     end
 
     infil_ach50 = nil
@@ -2599,7 +2599,7 @@ class OSModel
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
       elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
-        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infil_volume # Convert CFM50 to ACH50
+        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
       end
@@ -2646,7 +2646,6 @@ class OSModel
       shelter_coef = Airflow.get_default_shelter_coefficient()
     end
     has_flue_chimney = false
-    is_existing_home = false
     terrain = Constants.TerrainSuburban
     infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
@@ -2745,9 +2744,9 @@ class OSModel
       end
     end
 
-    mech_vent = MechanicalVentilation.new(mech_vent_type, nil, mech_vent_total_efficiency,
-                                          nil, mech_vent_cfm, mech_vent_fan_w, mech_vent_sensible_efficiency,
-                                          nil, clothes_dryer_exhaust, range_exhaust,
+    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_efficiency, mech_vent_cfm,
+                                          mech_vent_fan_w, mech_vent_sensible_efficiency,
+                                          clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
@@ -2866,7 +2865,7 @@ class OSModel
     end
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
-                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
+                            @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
                             @min_neighbor_distance)
     return false if not success
 
