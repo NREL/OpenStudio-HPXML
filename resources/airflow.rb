@@ -374,7 +374,7 @@ class Airflow
       building.living.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.living_ach50, n_i, building.cfa, building.infilvolume)
 
       # Effective Leakage Area (ft^2)
-      a_o = building.SLA * building.cfa
+      a_o = building.living.SLA * building.cfa
 
       # Flow Coefficient (cfm/inH2O^n) (based on ASHRAE HoF)
       c_i = a_o * (2.0 / outside_air_density)**0.5 * delta_pref**(0.5 - n_i) * inf_conv_factor
