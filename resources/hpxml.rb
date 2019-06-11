@@ -120,7 +120,6 @@ class HPXML
                                      number_of_conditioned_floors:,
                                      number_of_conditioned_floors_above_grade:,
                                      number_of_bedrooms:,
-                                     number_of_bathrooms: nil,
                                      conditioned_floor_area:,
                                      conditioned_building_volume:,
                                      use_only_ideal_air_system: nil,
@@ -129,7 +128,6 @@ class HPXML
     XMLHelper.add_element(building_construction, "NumberofConditionedFloors", Integer(number_of_conditioned_floors))
     XMLHelper.add_element(building_construction, "NumberofConditionedFloorsAboveGrade", Integer(number_of_conditioned_floors_above_grade))
     XMLHelper.add_element(building_construction, "NumberofBedrooms", Integer(number_of_bedrooms))
-    XMLHelper.add_element(building_construction, "NumberofBathrooms", Integer(number_of_bathrooms)) unless number_of_bathrooms.nil?
     XMLHelper.add_element(building_construction, "ConditionedFloorArea", Float(conditioned_floor_area))
     XMLHelper.add_element(building_construction, "ConditionedBuildingVolume", Float(conditioned_building_volume))
     HPXML.add_extension(parent: building_construction,
@@ -146,7 +144,6 @@ class HPXML
              :number_of_conditioned_floors_above_grade => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade")),
              :average_ceiling_height => to_float_or_nil(XMLHelper.get_value(building_construction, "AverageCeilingHeight")),
              :number_of_bedrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
-             :number_of_bathrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms")),
              :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
              :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
@@ -267,7 +264,9 @@ class HPXML
           XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
           XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_sla))
         elsif not vented_attic_constant_ach.nil?
-          XMLHelper.add_element(attic, "extension/ConstantACHnatural", Float(vented_attic_constant_ach))
+          ventilation_rate = XMLHelper.add_element(attic, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_attic_constant_ach))
         end
       elsif attic_type == "FlatRoof" or attic_type == "CathedralCeiling"
         XMLHelper.add_element(attic_type_e, attic_type)
@@ -290,7 +289,7 @@ class HPXML
     elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
       attic_type = "VentedAttic"
       vented_attic_sla = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='SLA']/Value"))
-      vented_attic_constant_ach = to_float_or_nil(XMLHelper.get_value(attic, "extension/ConstantACHnatural"))
+      vented_attic_constant_ach = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
     elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
       attic_type = "ConditionedAttic"
     elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
@@ -309,6 +308,7 @@ class HPXML
                           id:,
                           foundation_type:,
                           vented_crawlspace_sla: nil,
+                          vented_crawlspace_constant_ach: nil,
                           **remainder)
     foundations = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Foundations"])
     foundation = XMLHelper.add_element(foundations, "Foundation")
@@ -331,6 +331,10 @@ class HPXML
           ventilation_rate = XMLHelper.add_element(foundation, "VentilationRate")
           XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "SLA")
           XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_sla))
+        elsif not vented_crawlspace_constant_ach.nil?
+          ventilation_rate = XMLHelper.add_element(foundation, "VentilationRate")
+          XMLHelper.add_element(ventilation_rate, "UnitofMeasure", "ACHnatural")
+          XMLHelper.add_element(ventilation_rate, "Value", Float(vented_crawlspace_constant_ach))
         end
       elsif foundation_type == "UnventedCrawlspace"
         crawlspace = XMLHelper.add_element(foundation_type_e, "Crawlspace")
@@ -348,6 +352,7 @@ class HPXML
 
     foundation_type = nil
     vented_crawlspace_sla = nil
+    vented_crawlspace_constant_ach = nil
     if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
       foundation_type = "SlabOnGrade"
     elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
@@ -359,13 +364,15 @@ class HPXML
     elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
       foundation_type = "VentedCrawlspace"
       vented_crawlspace_sla = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='SLA']/Value"))
+      vented_crawlspace_constant_ach = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='ACHnatural']/Value"))
     elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
       foundation_type = "Ambient"
     end
 
     return { :id => HPXML.get_id(foundation),
              :foundation_type => foundation_type,
-             :vented_crawlspace_sla => vented_crawlspace_sla }
+             :vented_crawlspace_sla => vented_crawlspace_sla,
+             :vented_crawlspace_constant_ach => vented_crawlspace_constant_ach }
   end
 
   def self.add_roof(hpxml:,
@@ -944,9 +951,8 @@ class HPXML
                          heat_pump_fuel:,
                          heating_capacity: nil,
                          cooling_capacity:,
-                         backup_heating_fuel: nil,
-                         backup_heating_capacity: nil,
-                         backup_heating_efficiency_percent: nil,
+                         backup_heating_capacity:,
+                         backup_heating_efficiency_percent:,
                          fraction_heat_load_served:,
                          fraction_cool_load_served:,
                          heating_efficiency_percent: nil,
@@ -970,13 +976,10 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel)
     XMLHelper.add_element(heat_pump, "HeatingCapacity", Float(heating_capacity)) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", Float(cooling_capacity))
-    if not backup_heating_fuel.nil?
-      XMLHelper.add_element(heat_pump, "BackupSystemFuel", backup_heating_fuel)
-      backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
-      XMLHelper.add_element(backup_eff, "Units", "Percent")
-      XMLHelper.add_element(backup_eff, "Value", Float(backup_heating_efficiency_percent))
-      XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", Float(backup_heating_capacity))
-    end
+    backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
+    XMLHelper.add_element(backup_eff, "Units", "Percent")
+    XMLHelper.add_element(backup_eff, "Value", Float(backup_heating_efficiency_percent))
+    XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", Float(backup_heating_capacity)) unless backup_heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", Float(fraction_cool_load_served))
     efficiencies = { "kW/ton" => cooling_efficiency_kw_per_ton,
@@ -1015,7 +1018,6 @@ class HPXML
              :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
              :heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity")),
              :cooling_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity")),
-             :backup_heating_fuel => XMLHelper.get_value(heat_pump, "BackupSystemFuel"),
              :backup_heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")),
              :backup_heating_efficiency_percent => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")),
              :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")),

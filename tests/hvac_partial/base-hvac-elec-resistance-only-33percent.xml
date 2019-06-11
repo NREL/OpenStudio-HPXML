@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:27:32-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-05-21T18:57:59-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -200,17 +200,19 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem'/>
-              <CoolingSystemType>room air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
-              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>8.5</Value>
-              </AnnualCoolingEfficiency>
-            </CoolingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem'/>
+              <HeatingSystemType>
+                <ElectricResistance/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+            </HeatingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>

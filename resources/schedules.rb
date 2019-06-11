@@ -1,3 +1,4 @@
+# TODO: Need to handle vacations
 require_relative "unit_conversions"
 
 # Annual schedule defined by 12 24-hour values for weekdays and weekends.

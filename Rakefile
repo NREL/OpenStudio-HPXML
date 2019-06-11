@@ -295,28 +295,28 @@ def create_hpxmls
     'hvac_multiple/base-hvac-wall-furnace-elec-only-x3.xml' => 'base-hvac-wall-furnace-elec-only.xml',
     'hvac_multiple/base-hvac-wall-furnace-propane-only-x3.xml' => 'base-hvac-wall-furnace-propane-only.xml',
 
-    'hvac_partial/base-50percent.xml' => 'base.xml',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-50percent.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-50percent.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
-    'hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-50percent.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
-    'hvac_partial/base-hvac-boiler-elec-only-50percent.xml' => 'base-hvac-boiler-elec-only.xml',
-    'hvac_partial/base-hvac-boiler-gas-only-50percent.xml' => 'base-hvac-boiler-gas-only.xml',
-    'hvac_partial/base-hvac-central-ac-only-1-speed-50percent.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'hvac_partial/base-hvac-central-ac-only-2-speed-50percent.xml' => 'base-hvac-central-ac-only-2-speed.xml',
-    'hvac_partial/base-hvac-central-ac-only-var-speed-50percent.xml' => 'base-hvac-central-ac-only-var-speed.xml',
-    'hvac_partial/base-hvac-elec-resistance-only-50percent.xml' => 'base-hvac-elec-resistance-only.xml',
-    'hvac_partial/base-hvac-furnace-elec-only-50percent.xml' => 'base-hvac-furnace-elec-only.xml',
-    'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-50percent.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
-    'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-50percent.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
-    'hvac_partial/base-hvac-furnace-gas-only-50percent.xml' => 'base-hvac-furnace-gas-only.xml',
-    'hvac_partial/base-hvac-furnace-gas-room-ac-50percent.xml' => 'base-hvac-furnace-gas-room-ac.xml',
-    'hvac_partial/base-hvac-ground-to-air-heat-pump-50percent.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
-    'hvac_partial/base-hvac-mini-split-heat-pump-ducted-50percent.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
-    'hvac_partial/base-hvac-mini-split-heat-pump-ductless-50percent.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
-    'hvac_partial/base-hvac-room-ac-only-50percent.xml' => 'base-hvac-room-ac-only.xml',
-    'hvac_partial/base-hvac-stove-oil-only-50percent.xml' => 'base-hvac-stove-oil-only.xml',
-    'hvac_partial/base-hvac-wall-furnace-elec-only-50percent.xml' => 'base-hvac-wall-furnace-elec-only.xml',
-    'hvac_partial/base-hvac-wall-furnace-propane-only-50percent.xml' => 'base-hvac-wall-furnace-propane-only.xml',
+    'hvac_partial/base-33percent.xml' => 'base.xml',
+    'hvac_partial/base-hvac-air-to-air-heat-pump-1-speed-33percent.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'hvac_partial/base-hvac-air-to-air-heat-pump-2-speed-33percent.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'hvac_partial/base-hvac-air-to-air-heat-pump-var-speed-33percent.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'hvac_partial/base-hvac-boiler-elec-only-33percent.xml' => 'base-hvac-boiler-elec-only.xml',
+    'hvac_partial/base-hvac-boiler-gas-only-33percent.xml' => 'base-hvac-boiler-gas-only.xml',
+    'hvac_partial/base-hvac-central-ac-only-1-speed-33percent.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'hvac_partial/base-hvac-central-ac-only-2-speed-33percent.xml' => 'base-hvac-central-ac-only-2-speed.xml',
+    'hvac_partial/base-hvac-central-ac-only-var-speed-33percent.xml' => 'base-hvac-central-ac-only-var-speed.xml',
+    'hvac_partial/base-hvac-elec-resistance-only-33percent.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_partial/base-hvac-furnace-elec-only-33percent.xml' => 'base-hvac-furnace-elec-only.xml',
+    'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-33percent.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
+    'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-33percent.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
+    'hvac_partial/base-hvac-furnace-gas-only-33percent.xml' => 'base-hvac-furnace-gas-only.xml',
+    'hvac_partial/base-hvac-furnace-gas-room-ac-33percent.xml' => 'base-hvac-furnace-gas-room-ac.xml',
+    'hvac_partial/base-hvac-ground-to-air-heat-pump-33percent.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'hvac_partial/base-hvac-mini-split-heat-pump-ducted-33percent.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'hvac_partial/base-hvac-mini-split-heat-pump-ductless-33percent.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
+    'hvac_partial/base-hvac-room-ac-only-33percent.xml' => 'base-hvac-room-ac-only.xml',
+    'hvac_partial/base-hvac-stove-oil-only-33percent.xml' => 'base-hvac-stove-oil-only.xml',
+    'hvac_partial/base-hvac-wall-furnace-elec-only-33percent.xml' => 'base-hvac-wall-furnace-elec-only.xml',
+    'hvac_partial/base-hvac-wall-furnace-propane-only-33percent.xml' => 'base-hvac-wall-furnace-propane-only.xml',
 
     'water_heating_multiple/base-dhw-tankless-electric-x3.xml' => 'base-dhw-tankless-electric.xml',
     'water_heating_multiple/base-dhw-tankless-gas-x3.xml' => 'base-dhw-tankless-gas.xml',
@@ -1537,9 +1537,9 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[2][:id] = "SpaceHeat_ID3"
     heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless heating_systems_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not heating_systems_values.nil? and heating_systems_values.size > 0
-    heating_systems_values[0][:heating_capacity] /= 2.0
-    heating_systems_values[0][:fraction_heat_load_served] = 0.5
-    heating_systems_values[0][:electric_auxiliary_energy] /= 2.0 unless heating_systems_values[0][:electric_auxiliary_energy].nil?
+    heating_systems_values[0][:heating_capacity] /= 3.0
+    heating_systems_values[0][:fraction_heat_load_served] = 0.333
+    heating_systems_values[0][:electric_auxiliary_energy] /= 3.0 unless heating_systems_values[0][:electric_auxiliary_energy].nil?
   end
   return heating_systems_values
 end
@@ -1615,8 +1615,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[2][:id] = "SpaceCool_ID3"
     cooling_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless cooling_systems_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
-    cooling_systems_values[0][:cooling_capacity] /= 2.0
-    cooling_systems_values[0][:fraction_cool_load_served] = 0.5
+    cooling_systems_values[0][:cooling_capacity] /= 3.0
+    cooling_systems_values[0][:fraction_cool_load_served] = 0.333
   end
   return cooling_systems_values
 end
@@ -1628,7 +1628,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1641,7 +1640,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1654,7 +1652,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1667,7 +1664,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "ground-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1680,7 +1676,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1690,14 +1685,13 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     heat_pumps_values[0][:distribution_system_idref] = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
-    heat_pumps_values[0][:backup_heating_fuel] = nil
+    heat_pumps_values[0][:backup_heating_capacity] = 0
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution5",
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 4800,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 0.1,
@@ -1709,7 +1703,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "ground-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 4800,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 0.1,
@@ -1720,7 +1713,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 4800,
-                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 0.1,
@@ -1753,10 +1745,10 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[2][:id] = "SpaceHeatPump_ID3"
     heat_pumps_values[2][:distribution_system_idref] = "HVACDistribution3" unless heat_pumps_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
-    heat_pumps_values[0][:cooling_capacity] /= 2.0
-    heat_pumps_values[0][:backup_heating_capacity] /= 2.0
-    heat_pumps_values[0][:fraction_heat_load_served] = 0.5
-    heat_pumps_values[0][:fraction_cool_load_served] = 0.5
+    heat_pumps_values[0][:cooling_capacity] /= 3.0
+    heat_pumps_values[0][:backup_heating_capacity] /= 3.0
+    heat_pumps_values[0][:fraction_heat_load_served] = 0.333
+    heat_pumps_values[0][:fraction_cool_load_served] = 0.333
   end
   return heat_pumps_values
 end
