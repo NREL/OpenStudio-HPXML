@@ -1663,10 +1663,6 @@ class Airflow
     end
 
     if mech_vent.type == Constants.VentTypeCFIS
-      cfis_outdoor_airflow = 0.0
-      if mech_vent.cfis_open_time > 0.0
-        cfis_outdoor_airflow = mech_vent.whole_house_cfm * (60.0 / mech_vent.cfis_open_time)
-      end
 
       infil_program.addLine("Set fan_rtf = #{mech_vent.cfis_fan_rtf_sensor}")
       if mech_vent.fan_power_w.nil?
@@ -1685,7 +1681,7 @@ class Airflow
       infil_program.addLine("EndIf")
 
       infil_program.addLine("Set CFIS_t_min_hr_open = #{mech_vent.cfis_open_time}") # minutes per hour the CFIS damper is open
-      infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(cfis_outdoor_airflow, 'cfm', 'm^3/s')}")
+      infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(mech_vent.whole_house_cfm, 'cfm', 'm^3/s')}")
       infil_program.addLine("Set #{mech_vent.cfis_f_damper_open_var.name} = 0") # fraction of the timestep the CFIS damper is open
 
       infil_program.addLine("If #{mech_vent.cfis_t_sum_open_var.name} < CFIS_t_min_hr_open")
