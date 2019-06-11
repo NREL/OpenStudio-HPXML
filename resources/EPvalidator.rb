@@ -52,8 +52,8 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration[AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | AirInfiltrationMeasurement/extension/ConstantACHnatural]" => one, # ACH50, CFM50, or constant nACH; see [AirInfiltration]
         "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/InfiltrationVolume" => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
 
-        "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]/VentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented attic if provided
-        "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]/VentilationRate[UnitofMeasure='SLA' or UnitofMeasure='ACHnatural']/Value" => zero_or_one, # Used for vented crawlspace if provided
+        "/HPXML/Building/BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]/VentilationRate[[UnitofMeasure='SLA']/Value | extension/ConstantACHnatural]" => zero_or_one, # SLA or constant nACH; used for vented attic if provided
+        "/HPXML/Building/BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]/VentilationRate[UnitofMeasure='SLA']/Value" => zero_or_one, # SLA; used for vented crawlspace if provided
         "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof" => zero_or_more, # See [Roof]
         "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall" => one_or_more, # See [Wall]
         "/HPXML/Building/BuildingDetails/Enclosure/RimJoists/RimJoist" => zero_or_more, # See [RimJoist]
@@ -277,7 +277,7 @@ class EnergyPlusValidator
         "ElectricAuxiliaryEnergy" => zero_or_one, # If not provided, uses 301 defaults for furnace/boiler and zero for other heating systems
       },
 
-      ## [CoolingSystem]
+      # [CoolingSystem]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
@@ -300,15 +300,14 @@ class EnergyPlusValidator
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
       },
 
-      ## [HeatPump]
+      # [HeatPump]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
         "[HeatPumpType='air-to-air' or HeatPumpType='mini-split' or HeatPumpType='ground-to-air']" => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP]
         "[HeatPumpFuel='electricity']" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
-        "BackupAnnualHeatingEfficiency[Units='Percent']/Value" => one,
-        "BackupHeatingCapacity" => one, # Use -1 for autosizing
+        "[BackupSystemFuel='electricity']" => zero_or_one, # See [HeatPumpBackup]
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
       },
@@ -335,6 +334,12 @@ class EnergyPlusValidator
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
         "AnnualHeatingEfficiency[Units='COP']/Value" => one,
+      },
+
+      ## [HeatPumpBackup]
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]" => {
+        "BackupAnnualHeatingEfficiency[Units='Percent']/Value" => one,
+        "BackupHeatingCapacity" => one, # Use -1 for autosizing
       },
 
       # [HVACControl]
@@ -568,8 +573,6 @@ class EnergyPlusValidator
 
     }
 
-    # TODO: Make common across all validators
-    # TODO: Profile code for runtime improvements
     errors = []
     requirements.each do |parent, requirement|
       if parent.nil? # Unconditional
