@@ -1628,6 +1628,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1640,6 +1641,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1652,6 +1654,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1664,6 +1667,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "ground-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1676,6 +1680,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 48000,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 1,
@@ -1685,13 +1690,14 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     heat_pumps_values[0][:distribution_system_idref] = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
-    heat_pumps_values[0][:backup_heating_capacity] = 0
+    heat_pumps_values[0][:backup_heating_fuel] = nil
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution5",
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 4800,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 0.1,
@@ -1703,6 +1709,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "ground-to-air",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 4800,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 0.1,
@@ -1713,6 +1720,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
                            :cooling_capacity => 4800,
+                           :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
                            :backup_heating_efficiency_percent => 1.0,
                            :fraction_heat_load_served => 0.1,
