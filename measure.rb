@@ -252,7 +252,10 @@ class OSModel
     @ncfl = construction_values[:number_of_conditioned_floors]
     @ncfl_ag = construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = construction_values[:number_of_bedrooms]
-    @nbaths = 3.0 # TODO: Arbitrary, but update
+    @nbaths = construction_values[:number_of_bathrooms]
+    if @nbaths.nil?
+      @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
+    end
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
     @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
@@ -815,6 +818,11 @@ class OSModel
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
+      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject { |sum, n| sum + n }
+      if (weekday_sch_sum - hrs_per_day).abs > 0.1
+        runner.registerError("Occupancy schedule inconsistent with hrs_per_day.")
+        return false
+      end
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
       success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
@@ -2151,12 +2159,17 @@ class OSModel
       sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
-      if backup_heat_capacity_btuh < 0
-        backup_heat_capacity_btuh = Constants.SizingAuto
+      backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
+      if not backup_heat_fuel.nil?
+        backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
+        if backup_heat_capacity_btuh < 0
+          backup_heat_capacity_btuh = Constants.SizingAuto
+        end
+        backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
+      else
+        backup_heat_capacity_btuh = 0.0
+        backup_heat_efficiency = 1.0
       end
-
-      backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
@@ -2603,23 +2616,17 @@ class OSModel
       vented_attic_sla = 0.0
     end
 
-    crawl_sla = nil
-    vented_crawl_ach = nil
+    vented_crawl_sla = nil
     if @has_vented_crawl
       building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
         vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
-        crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
-        vented_crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
+        vented_crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
       end
-      if crawl_sla.nil? and vented_crawl_ach.nil?
-        crawl_sla = Airflow.get_default_vented_crawl_sla()
+      if vented_crawl_sla.nil?
+        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
       end
     else
-      vented_crawl_ach = 0.0
-    end
-    if vented_crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
-      vented_crawl_ach = crawl_sla
-      crawl_sla = nil
+      vented_crawl_sla = 0.0
     end
 
     living_ach50 = infil_ach50
@@ -2627,7 +2634,7 @@ class OSModel
     garage_ach50 = infil_ach50
     conditioned_basement_ach = 0
     unconditioned_basement_ach = 0.1
-    unvented_crawl_ach = 0.1
+    unvented_crawl_sla = 0
     unvented_attic_sla = 0
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
@@ -2637,7 +2644,7 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_ach, unvented_crawl_ach,
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
                              conditioned_basement_ach, has_flue_chimney, is_existing_home, terrain)
 

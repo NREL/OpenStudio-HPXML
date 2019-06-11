@@ -361,6 +361,7 @@
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>4800.0</CoolingCapacity>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -383,6 +384,7 @@
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>4800.0</CoolingCapacity>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
@@ -404,6 +406,7 @@
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <CoolingCapacity>4800.0</CoolingCapacity>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
