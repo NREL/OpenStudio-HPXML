@@ -94,7 +94,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = "2.8.0"
+    os_version = "2.8.1"
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -252,10 +252,7 @@ class OSModel
     @ncfl = construction_values[:number_of_conditioned_floors]
     @ncfl_ag = construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = construction_values[:number_of_bedrooms]
-    @nbaths = construction_values[:number_of_bathrooms]
-    if @nbaths.nil?
-      @nbaths = Waterheater.get_default_num_bathrooms(@nbeds)
-    end
+    @nbaths = 3.0 # TODO: Arbitrary, but update
     @has_uncond_bsmnt = !enclosure.elements["*/*[InteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='basement - unconditioned']"].nil?
     @has_vented_attic = !enclosure.elements["*/*[InteriorAdjacentTo='attic - vented' or ExteriorAdjacentTo='attic - vented']"].nil?
     @has_vented_crawl = !enclosure.elements["*/*[InteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - vented']"].nil?
@@ -296,11 +293,6 @@ class OSModel
     slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
     @control_slave_zones_hash = { control_zone => slave_zones }
 
-    # FIXME: Temporarily adding ideal air systems first to work around E+ bug
-    # https://github.com/NREL/EnergyPlus/issues/7264
-    success = add_residual_hvac(runner, model, building)
-    return false if not success
-
     success = add_cooling_system(runner, model, building)
     return false if not success
 
@@ -308,6 +300,9 @@ class OSModel
     return false if not success
 
     success = add_heat_pump(runner, model, building, weather)
+    return false if not success
+
+    success = add_residual_hvac(runner, model, building)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather, spaces)
@@ -820,11 +815,6 @@ class OSModel
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
-      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject { |sum, n| sum + n }
-      if (weekday_sch_sum - hrs_per_day).abs > 0.1
-        runner.registerError("Occupancy schedule inconsistent with hrs_per_day.")
-        return false
-      end
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
       success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
@@ -2161,17 +2151,12 @@ class OSModel
       sequential_load_frac_cool = load_frac_cool / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
-      if not backup_heat_fuel.nil?
-        backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
-        if backup_heat_capacity_btuh < 0
-          backup_heat_capacity_btuh = Constants.SizingAuto
-        end
-        backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
-      else
-        backup_heat_capacity_btuh = 0.0
-        backup_heat_efficiency = 1.0
+      backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
+      if backup_heat_capacity_btuh < 0
+        backup_heat_capacity_btuh = Constants.SizingAuto
       end
+
+      backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
       if dse_heat != dse_cool
@@ -2326,29 +2311,27 @@ class OSModel
       return true
     end
 
-    # Residual heating
-    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-    residual_heat_load_served = 1.0 - htg_load_frac
-
-    # Residual cooling
-    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-    residual_cool_load_served = 1.0 - clg_load_frac
-
-    # Don't add ideal air if no heating system
-    residual_heat_load_served = 0 if residual_heat_load_served >= 1.0
-
-    # Don't add ideal air if no cooling system
-    residual_cool_load_served = 0 if residual_cool_load_served >= 1.0
-
-    @total_frac_remaining_heat_load_served -= residual_heat_load_served
-    @total_frac_remaining_cool_load_served -= residual_cool_load_served
+    @total_frac_remaining_cool_load_served = 0 if @total_frac_remaining_cool_load_served >= 0.99
+    @total_frac_remaining_heat_load_served = 0 if @total_frac_remaining_heat_load_served >= 0.99
 
     # Only add ideal air if heating/cooling system doesn't meet entire load
-    if residual_heat_load_served > 0.02 or residual_cool_load_served > 0.02
-      success = HVAC.apply_ideal_air_loads(model, runner, residual_cool_load_served, residual_heat_load_served,
-                                           residual_cool_load_served, residual_heat_load_served,
+    if @total_frac_remaining_heat_load_served > 0.01 or @total_frac_remaining_cool_load_served > 0.01
+      if @total_frac_remaining_cool_load_served > 0.01
+        sequential_cool_load_frac = 1
+      else
+        sequential_cool_load_frac = 0
+      end
+
+      if @total_frac_remaining_heat_load_served > 0.01
+        sequential_heat_load_frac = 1
+      else
+        sequential_heat_load_frac = 0
+      end
+      success = HVAC.apply_ideal_air_loads(model, runner,
+                                           @total_frac_remaining_cool_load_served,
+                                           @total_frac_remaining_heat_load_served,
+                                           sequential_cool_load_frac,
+                                           sequential_heat_load_frac,
                                            @control_slave_zones_hash)
       return false if not success
     end
@@ -2620,17 +2603,23 @@ class OSModel
       vented_attic_sla = 0.0
     end
 
-    vented_crawl_sla = nil
+    crawl_sla = nil
+    vented_crawl_ach = nil
     if @has_vented_crawl
       building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
         vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
-        vented_crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
+        crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
+        vented_crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
       end
-      if vented_crawl_sla.nil?
-        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
+      if crawl_sla.nil? and vented_crawl_ach.nil?
+        crawl_sla = Airflow.get_default_vented_crawl_sla()
       end
     else
-      vented_crawl_sla = 0.0
+      vented_crawl_ach = 0.0
+    end
+    if vented_crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
+      vented_crawl_ach = crawl_sla
+      crawl_sla = nil
     end
 
     living_ach50 = infil_ach50
@@ -2638,7 +2627,7 @@ class OSModel
     garage_ach50 = infil_ach50
     conditioned_basement_ach = 0
     unconditioned_basement_ach = 0.1
-    unvented_crawl_sla = 0
+    unvented_crawl_ach = 0.1
     unvented_attic_sla = 0
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
@@ -2648,7 +2637,7 @@ class OSModel
     has_flue_chimney = false
     is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_ach, unvented_crawl_ach,
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
                              conditioned_basement_ach, has_flue_chimney, is_existing_home, terrain)
 
