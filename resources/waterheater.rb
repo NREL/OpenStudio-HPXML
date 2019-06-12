@@ -143,8 +143,8 @@ class Waterheater
     return true
   end
 
-  def self.apply_heatpump(model, unit, runner, loop, space, weather,
-                          t_set, vol, ef, ef_adj, ec_adj)
+  def self.apply_heatpump(model, runner, space, weather, t_set, vol, ef,
+                          ec_adj, nbeds, dhw_map, sys_id)
 
     # FIXME: Use ec_adj
 
@@ -152,7 +152,6 @@ class Waterheater
     int_factor = 1.0 # unitless
     temp_depress = 0.0 # F
     ducting = "none"
-    unit_index = 0
 
     # Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
     if vol <= 58
@@ -226,15 +225,9 @@ class Waterheater
       return false
     end
 
-    # Calculate the COP based on EF and EF_adj
-    uef = (0.60522 + (ef * ef_adj)) / 1.2101
+    # Calculate the COP based on EF
+    uef = (0.60522 + ef) / 1.2101
     cop = 1.174536058 * uef # Based on simulation of the UEF test procedure at varying COPs
-
-    # Get unit beds/baths
-    nbeds, nbaths = Geometry.get_unit_beds_baths(model, unit, runner)
-    if nbeds.nil? or nbaths.nil?
-      return false
-    end
 
     obj_name_hpwh = Constants.ObjectNameWaterHeater
 
@@ -640,18 +633,6 @@ class Waterheater
     hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
     if ducting == Constants.VentTypeSupply or ducting == Constants.VentTypeBalanced
       hpwh_ctrl_program.addLine("If (HPWH_out_temp < #{UnitConversions.convert(min_temp, "F", "C")}) || (HPWH_out_temp > #{UnitConversions.convert(max_temp, "F", "C")})")
-    else
-      hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp, "F", "C").round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp, "F", "C").round(2)})")
-    end
-    hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = #{tset_C}")
-    hpwh_ctrl_program.addLine("Else")
-    hpwh_ctrl_program.addLine("Set #{leschedoverride_actuator.name} = 0")
-    hpwh_ctrl_program.addLine("EndIf")
-
-    hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
-    if ducting == Constants.VentTypeSupply or ducting == Constants.VentTypeBalanced
-      hpwh_ctrl_program.addLine("If (HPWH_out_temp_#{unit_index} < #{UnitConversions.convert(min_temp, "F", "C")}) || (HPWH_out_temp_#{unit_index} > #{UnitConversions.convert(max_temp, "F", "C")})")
     else
       hpwh_ctrl_program.addLine("If (#{amb_temp_sensor.name}<#{UnitConversions.convert(min_temp, "F", "C").round(2)}) || (#{amb_temp_sensor.name}>#{UnitConversions.convert(max_temp, "F", "C").round(2)})")
     end

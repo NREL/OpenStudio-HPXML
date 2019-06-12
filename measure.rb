@@ -1899,7 +1899,8 @@ class OSModel
         elsif wh_type == "heat pump water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
-          success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather, setpoint_temp, tank_vol, ef, ef_adj, ec_adj)
+          success = Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
+                                               @nbeds, @dhw_map, sys_id)
 
           return false if not success
 
