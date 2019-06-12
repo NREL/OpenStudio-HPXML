@@ -1956,9 +1956,8 @@ class OSModel
         elsif wh_type == "heat pump water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
-          # FIXME: Use ef, ef_adj, ec_adj
           success = Waterheater.apply_heatpump(model, unit, runner, nil, space, weather, setpoint_temp, tank_vol, ef, ef_adj, ec_adj)
-          
+
           return false if not success
 
         else

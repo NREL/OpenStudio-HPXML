@@ -48,9 +48,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/valid*.xml"].sort.each do |xml|
-        #next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
-        #next if File.basename(xml) != "valid-dhw-tank-heat-pump.xml" # TODO: Remove when HVAC sizing has been updated
-        next if File.basename(xml) != "valid-dhw-tank-heat-pump.xml"
+        next if File.basename(xml) == "valid-hvac-multiple.xml" # TODO: Remove when HVAC sizing has been updated
 
         xmls << File.absolute_path(xml)
       end
@@ -259,7 +257,6 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       return
     else
-      puts success
       assert_equal(true, success)
     end
 
