@@ -819,7 +819,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_delta(hpxml_value, sql_value, 0.001)
 
         # Flow rate
-        hpxml_value = Float(XMLHelper.get_value(mv, "RatedFlowRate"))
+        hpxml_value = Float(XMLHelper.get_value(mv, "RatedFlowRate")) * Float(XMLHelper.get_value(mv, "HoursInOperation")) / 24.0
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_flow_rate_output_var.variableName}')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.001)
