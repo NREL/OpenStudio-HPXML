@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T11:46:54-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-05-21T18:57:59-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -204,16 +204,15 @@
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <HeatingSystemType>
-                <Furnace/>
+                <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>32000.0</HeatingCapacity>
+              <HeatingSystemFuel>electricity</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.92</Value>
+                <Value>1.0</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
-              <ElectricAuxiliaryEnergy>350.0</ElectricAuxiliaryEnergy>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
             </HeatingSystem>
           </HVACPlant>
           <HVACControl>

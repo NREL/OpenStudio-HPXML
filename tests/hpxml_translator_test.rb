@@ -945,6 +945,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
     # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
+    puts "DSE test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_dse_dir
       next if not xml.include? "-dse-0.8"
@@ -957,7 +958,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if results_dse100.nil?
 
       # Compare results
-      puts "\nResults for #{File.basename(xml)}:"
       results_dse80.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
         next if not ["General"].include? k[2] # Exclude crankcase/defrost
@@ -972,15 +972,16 @@ class HPXMLTranslatorTest < MiniTest::Test
         if File.basename(xml) == "base-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
           dse_expect = 1.0 # TODO: Generalize this
         end
-        puts "dse: #{dse_actual.round(2)} #{k}"
+
+        _display_result_epsilon(xml, dse_expect, dse_actual, k)
         assert_in_epsilon(dse_expect, dse_actual, 0.03)
       end
-      puts "\n"
     end
   end
 
   def _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     # Compare end use results for three of an HVAC system to results for one HVAC system.
+    puts "Multiple HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
 
@@ -992,7 +993,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if results_x1.nil?
 
       # Compare results
-      puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
         next if not ["General"].include? k[2] # Exclude crankcase/defrost
@@ -1001,16 +1001,15 @@ class HPXMLTranslatorTest < MiniTest::Test
         result_x3 = results_x3[k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
 
-        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
-
-        assert_in_epsilon(result_x1, result_x3, 0.15)
+        _display_result_epsilon(xml, result_x1, result_x3, k)
+        assert_in_epsilon(result_x1, result_x3, 0.12)
       end
-      puts "\n"
     end
   end
 
   def _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     # Compare end use results for three tankless water heaters to results for one tankless water heater.
+    puts "Multiple water heater test results:"
     xmls.sort.each do |xml|
       next if not xml.include? water_heating_multiple_dir
 
@@ -1022,7 +1021,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if results_x1.nil?
 
       # Compare results
-      puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
         next if [@simulation_runtime_key, @workflow_runtime_key].include? k
 
@@ -1030,42 +1028,48 @@ class HPXMLTranslatorTest < MiniTest::Test
         result_x3 = results_x3[k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
 
-        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
-
-        assert_in_delta(result_x1, result_x3, 0.2)
+        _display_result_delta(xml, result_x1, result_x3, k)
+        assert_in_delta(result_x1, result_x3, 0.1)
       end
-      puts "\n"
     end
   end
 
   def _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     # Compare end use results for a partial HVAC system to a full HVAC system.
+    puts "Partial HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
 
-      xml_50 = File.absolute_path(xml)
-      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-50percent.xml", "-base.xml"))
+      xml_33 = File.absolute_path(xml)
+      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-33percent.xml", "-base.xml"))
 
-      results_50 = all_results[xml_50]
+      results_33 = all_results[xml_33]
       results_100 = all_results[xml_100]
       next if results_100.nil?
 
       # Compare results
-      puts "\nResults for #{xml}:"
-      results_50.keys.each do |k|
+      results_33.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
         next if not ["General"].include? k[2] # Exclude crankcase/defrost
 
-        result_50 = results_50[k].to_f
+        result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f
-        next if result_50 == 0.0 and result_100 == 0.0
+        next if result_33 == 0.0 and result_100 == 0.0
 
-        puts "50%, 100%: #{result_50.round(2)}, #{result_100.round(2)} #{k}"
-
-        assert_in_epsilon(result_50, result_100 / 2.0, 0.05)
+        _display_result_epsilon(xml, result_33, result_100 / 3.0, k)
+        assert_in_epsilon(result_33, result_100 / 3.0, 0.05)
       end
-      puts "\n"
     end
+  end
+
+  def _display_result_epsilon(xml, result1, result2, key)
+    epsilon = (result1 - result2).abs / [result1, result2].min
+    puts "#{xml}: epsilon=#{epsilon.round(5)} [#{key}]"
+  end
+
+  def _display_result_delta(xml, result1, result2, key)
+    delta = (result1 - result2).abs
+    puts "#{xml}: delta=#{delta.round(5)} [#{key}]"
   end
 
   def _rm_path(path)

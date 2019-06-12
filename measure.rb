@@ -94,7 +94,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = "2.8.0"
+    os_version = "2.8.1"
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -296,11 +296,6 @@ class OSModel
     slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
     @control_slave_zones_hash = { control_zone => slave_zones }
 
-    # FIXME: Temporarily adding ideal air systems first to work around E+ bug
-    # https://github.com/NREL/EnergyPlus/issues/7264
-    success = add_residual_hvac(runner, model, building)
-    return false if not success
-
     success = add_cooling_system(runner, model, building)
     return false if not success
 
@@ -308,6 +303,9 @@ class OSModel
     return false if not success
 
     success = add_heat_pump(runner, model, building, weather)
+    return false if not success
+
+    success = add_residual_hvac(runner, model, building)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather, spaces)
@@ -2326,29 +2324,27 @@ class OSModel
       return true
     end
 
-    # Residual heating
-    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-    residual_heat_load_served = 1.0 - htg_load_frac
-
-    # Residual cooling
-    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-    residual_cool_load_served = 1.0 - clg_load_frac
-
-    # Don't add ideal air if no heating system
-    residual_heat_load_served = 0 if residual_heat_load_served >= 1.0
-
-    # Don't add ideal air if no cooling system
-    residual_cool_load_served = 0 if residual_cool_load_served >= 1.0
-
-    @total_frac_remaining_heat_load_served -= residual_heat_load_served
-    @total_frac_remaining_cool_load_served -= residual_cool_load_served
+    @total_frac_remaining_cool_load_served = 0 if @total_frac_remaining_cool_load_served >= 0.99
+    @total_frac_remaining_heat_load_served = 0 if @total_frac_remaining_heat_load_served >= 0.99
 
     # Only add ideal air if heating/cooling system doesn't meet entire load
-    if residual_heat_load_served > 0.02 or residual_cool_load_served > 0.02
-      success = HVAC.apply_ideal_air_loads(model, runner, residual_cool_load_served, residual_heat_load_served,
-                                           residual_cool_load_served, residual_heat_load_served,
+    if @total_frac_remaining_heat_load_served > 0.01 or @total_frac_remaining_cool_load_served > 0.01
+      if @total_frac_remaining_cool_load_served > 0.01
+        sequential_cool_load_frac = 1
+      else
+        sequential_cool_load_frac = 0
+      end
+
+      if @total_frac_remaining_heat_load_served > 0.01
+        sequential_heat_load_frac = 1
+      else
+        sequential_heat_load_frac = 0
+      end
+      success = HVAC.apply_ideal_air_loads(model, runner,
+                                           @total_frac_remaining_cool_load_served,
+                                           @total_frac_remaining_heat_load_served,
+                                           sequential_cool_load_frac,
+                                           sequential_heat_load_frac,
                                            @control_slave_zones_hash)
       return false if not success
     end
