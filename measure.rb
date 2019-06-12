@@ -265,6 +265,8 @@ class OSModel
 
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
+	
+	@related_hvac_list = [] # list of hvac systems refered in water heating system "RelatedHvac" element
 
     @use_only_ideal_air = false
     if not construction_values[:use_only_ideal_air_system].nil?
@@ -280,11 +282,6 @@ class OSModel
     # Bedrooms, Occupants
 
     success = add_num_occupants(model, building, runner)
-    return false if not success
-
-    # Hot Water
-
-    success = add_hot_water_and_appliances(runner, model, building, weather, spaces)
     return false if not success
 
     # HVAC
@@ -314,6 +311,11 @@ class OSModel
     return false if not success
 
     success = add_ceiling_fans(runner, model, building, spaces)
+    return false if not success
+	
+	# Hot Water
+
+    success = add_hot_water_and_appliances(runner, model, building, weather, spaces)
     return false if not success
 
     # Plug Loads & Lighting
@@ -1847,6 +1849,12 @@ class OSModel
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
+		
+		has_desuperheater = water_heating_system_values[:has_desuperheater]
+		relatedhvac = water_heating_system_values[:related_hvac]
+		if has_desuperheater && relatedhvac.nil?
+		  fail "WaterHeatingSystem: '#{water_heating_system_values[:id]}' lacks RelatedHVACSystem information for desuperheater"
+		end
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1874,10 +1882,20 @@ class OSModel
           capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
+		  if has_desuperheater
+		    puts "Desuperheater detected, verify the related hvac system"
+		    if not @related_hvac_list.include? relatedhvac
+			  @related_hvac_list << relatedhvac
+			  coil_object = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
+			  puts coil_object
+			else
+			  fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
+			end
+		  end
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj,
-                                           @nbeds, @dhw_map, sys_id)
+                                           @nbeds, @dhw_map, sys_id, has_desuperheater, coil_object)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1949,6 +1967,30 @@ class OSModel
     return true
   end
 
+  def self.get_desuperheatercoil(hvac_map, relatedhvac, wh_id)
+    # search for the related cooling coil object for desuperheater
+	
+	coil_found = false
+	# Supported cooling coil options
+	clg_coil_supported = [OpenStudio::Model::CoilCoolingDXSingleSpeed, OpenStudio::Model::CoilCoolingDXMultiSpeed, OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit]
+	if hvac_map.keys.include? relatedhvac
+	  target_hvac = hvac_map[relatedhvac]
+	  target_hvac.each do |comp|
+	    clg_coil_supported.each do |coiltype|
+		  if comp.is_a? coiltype
+		    return comp
+			coil_found = true
+		  end
+		end
+	  end
+	  if coil_found == false
+	    fail "The Related HVAC system '#{relatedhvac}' for WaterHeatingSystem '#{wh_id}' is not currently supported for desuperheater simulation"
+	  end
+	else
+	   fail "RelatedHVACSystem '#{relatedhvac}' not found for water heating system '#{wh_id}'."
+	end
+  end
+  
   def self.add_cooling_system(runner, model, building)
     return true if @use_only_ideal_air
 

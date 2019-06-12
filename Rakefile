@@ -84,6 +84,7 @@ def create_hpxmls
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
+    'base-dhw-desuperheater-singlespeed.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
@@ -2192,6 +2193,9 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
+  elsif ['base-dhw-desuperheater-singlespeed.xml'].include? hpxml_file
+    water_heating_systems_values[0][:has_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file

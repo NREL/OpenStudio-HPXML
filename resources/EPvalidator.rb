@@ -437,6 +437,11 @@ class EnergyPlusValidator
         "TankVolume" => one,
       },
 
+      ## [Have desuperheater]
+      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[HasDesuperheater='true']" => {
+        "RelatedHVACSystem" => one,
+      },
+
       # [HotWaterDistribution]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution" => {
         "SystemIdentifier" => one, # Required by HPXML schema
