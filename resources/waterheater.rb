@@ -74,10 +74,10 @@ class Waterheater
       storage_tank.setHeater2SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
       new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
     end
-	
-	if has_desuperhater
-	  add_desuperheater(model, t_set, new_heater, related_clg_coil, Constants.WaterHeaterTypeTank)
-	end
+
+    if has_desuperhater
+      add_desuperheater(model, t_set, new_heater, related_clg_coil, Constants.WaterHeaterTypeTank)
+    end
     return true
   end
 
@@ -736,22 +736,22 @@ class Waterheater
   end
 
   def self.add_desuperheater(model, t_set, tank, related_clg_coil, wh_type)
-    # Create a schedule for desuperheater control (schedule value - desuperheater deadband = a little bit over tank stp would be good) 
-	new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    # Create a schedule for desuperheater control (schedule value - desuperheater deadband = a little bit over tank stp would be good)
+    new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     new_schedule.setName("#{tank.name} desuperheater setpoint schedule")
     new_schedule.setValue(UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0 + 0.5)
-	
+
     # create a desuperheater objects
-	desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
-	desuperheater.setDeadBandTemperatureDifference(0.2)
-	desuperheater.setRatedHeatReclaimRecoveryEfficiency(0.25)
-	desuperheater.addToHeatRejectionTarget(tank)
-	desuperheater.setWaterPumpPower(0)
-	
-	# attach to the clg coil source
-	desuperheater.setHeatingSource(related_clg_coil)
+    desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
+    desuperheater.setDeadBandTemperatureDifference(0.2)
+    desuperheater.setRatedHeatReclaimRecoveryEfficiency(0.25)
+    desuperheater.addToHeatRejectionTarget(tank)
+    desuperheater.setWaterPumpPower(0)
+
+    # attach to the clg coil source
+    desuperheater.setHeatingSource(related_clg_coil)
   end
-  
+
   def self.get_location_hierarchy(ba_cz_name)
     if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
       return [Constants.SpaceTypeGarage,
