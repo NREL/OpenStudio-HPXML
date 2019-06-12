@@ -1852,9 +1852,6 @@ class OSModel
 
         has_desuperheater = water_heating_system_values[:has_desuperheater]
         relatedhvac = water_heating_system_values[:related_hvac]
-        if has_desuperheater && relatedhvac.nil?
-          fail "WaterHeatingSystem: '#{water_heating_system_values[:id]}' lacks RelatedHVACSystem information for desuperheater"
-        end
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1883,11 +1880,9 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           if has_desuperheater
-            puts "Desuperheater detected, verify the related hvac system"
             if not @related_hvac_list.include? relatedhvac
               @related_hvac_list << relatedhvac
               coil_object = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
-              puts coil_object
             else
               fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end

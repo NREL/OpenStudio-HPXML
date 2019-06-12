@@ -53,6 +53,8 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
+    'invalid_files/desuperheater_1_speed_invalid_relatedHVAC.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/desuperheater_1_speed_repeated_relatedHVAC.xml' => 'base-hvac-central-ac-only-1-speed.xml',
 
     'base-addenda-exclude-g.xml' => 'base.xml',
     'base-addenda-exclude-g-e.xml' => 'base.xml',
@@ -2212,6 +2214,15 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "crawlspace - vented"
   elsif ['invalid_files/water-heater-location-other.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "unconditioned space"
+  elsif ['invalid_files/desuperheater_1_speed_invalid_relatedHVAC.xml'].include? hpxml_file
+    water_heating_systems_values[0][:has_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem_bad"
+  elsif ['invalid_files/desuperheater_1_speed_repeated_relatedHVAC.xml'].include? hpxml_file
+    water_heating_systems_values[0][:fraction_dhw_load_served] = 0.5
+    water_heating_systems_values[0][:has_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+    water_heating_systems_values << water_heating_systems_values[0].dup
+    water_heating_systems_values[1][:id] = "WaterHeater2"
   elsif ['base-enclosure-garage.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "garage"
   elsif ['base-dhw-none.xml'].include? hpxml_file
