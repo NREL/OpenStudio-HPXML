@@ -8,7 +8,7 @@ require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
-                 cfa, cfa_ag, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
+                 cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
       return false
@@ -50,7 +50,7 @@ class Airflow
       end
     end
     building.cfa = cfa
-    building.ag_cfa = cfa_ag
+    building.infilvolume = infilvolume
     building.nbeds = nbeds
     building.nbaths = nbaths
     building.ncfl = ncfl
@@ -370,14 +370,11 @@ class Airflow
       # Pressure Exponent
       n_i = 0.65
 
-      # Calculate SLA for above-grade portion of the building
-      building.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.living_ach50, n_i, building.ag_cfa, building.above_grade_volume)
+      # Calculate SLA
+      building.living.SLA = Airflow.get_infiltration_SLA_from_ACH50(infil.living_ach50, n_i, building.cfa, building.infilvolume)
 
       # Effective Leakage Area (ft^2)
-      a_o = building.SLA * building.ag_cfa
-
-      # Calculate SLA
-      building.living.SLA = a_o / building.ag_cfa
+      a_o = building.living.SLA * building.cfa
 
       # Flow Coefficient (cfm/inH2O^n) (based on ASHRAE HoF)
       c_i = a_o * (2.0 / outside_air_density)**0.5 * delta_pref**(0.5 - n_i) * inf_conv_factor
@@ -556,35 +553,6 @@ class Airflow
         runner.registerError("A CFIS ventilation system has been specified but the building does not have central, forced air equipment.")
         return false
       end
-    end
-
-    if not mech_vent.frac_62_2.nil?
-      # Get ASHRAE 62.2 required ventilation rate (excluding infiltration credit)
-      ashrae_mv_without_infil_credit = Airflow.get_mech_vent_whole_house_cfm(1, building.nbeds, building.cfa, mech_vent.ashrae_std)
-
-      # Determine mechanical ventilation infiltration credit (per ASHRAE 62.2)
-      rate_credit = 0 # default to no credit
-      if mech_vent.infil_credit
-        if mech_vent.ashrae_std == '2010' and infil.is_existing_home
-          # ASHRAE Standard 62.2 2010
-          # Only applies to existing buildings
-          # 2 cfm per 100ft^2 of occupiable floor area
-          default_rate = 2.0 * building.cfa / 100.0 # cfm
-          # Half the excess infiltration rate above the default rate is credited toward mech vent:
-          rate_credit = [(building.living.inf_flow - default_rate) / 2.0, 0].max
-        elsif mech_vent.ashrae_std == '2013'
-          # ASHRAE Standard 62.2 2013
-          nl = 1000.0 * infil.a_o / building.living.area * (building.living.height / 8.2)**0.4 # Normalized leakage, eq. 4.4
-          qinf = nl * weather.data.WSF * building.living.area / 7.3 # Effective annual average infiltration rate, cfm, eq. 4.5a
-          rate_credit = [(2.0 / 3.0) * ashrae_mv_without_infil_credit, qinf].min
-        end
-      end
-
-      # Apply infiltration credit (if any)
-      ashrae_vent_rate = [ashrae_mv_without_infil_credit - rate_credit, 0.0].max # cfm
-
-      # Apply fraction of ASHRAE value
-      mech_vent.whole_house_cfm = mech_vent.frac_62_2 * ashrae_vent_rate # cfm
     end
 
     # Spot Ventilation
@@ -1695,10 +1663,6 @@ class Airflow
     end
 
     if mech_vent.type == Constants.VentTypeCFIS
-      cfis_outdoor_airflow = 0.0
-      if mech_vent.cfis_open_time > 0.0
-        cfis_outdoor_airflow = mech_vent.whole_house_cfm * (60.0 / mech_vent.cfis_open_time)
-      end
 
       infil_program.addLine("Set fan_rtf = #{mech_vent.cfis_fan_rtf_sensor}")
       if mech_vent.fan_power_w.nil?
@@ -1717,7 +1681,7 @@ class Airflow
       infil_program.addLine("EndIf")
 
       infil_program.addLine("Set CFIS_t_min_hr_open = #{mech_vent.cfis_open_time}") # minutes per hour the CFIS damper is open
-      infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(cfis_outdoor_airflow, 'cfm', 'm^3/s')}")
+      infil_program.addLine("Set CFIS_Q_duct = #{UnitConversions.convert(mech_vent.whole_house_cfm, 'cfm', 'm^3/s')}")
       infil_program.addLine("Set #{mech_vent.cfis_f_damper_open_var.name} = 0") # fraction of the timestep the CFIS damper is open
 
       infil_program.addLine("If #{mech_vent.cfis_t_sum_open_var.name} < CFIS_t_min_hr_open")
@@ -1866,18 +1830,18 @@ class Airflow
     end
   end
 
-  def self.get_infiltration_ACH_from_SLA(sla, numStories, weather)
+  def self.get_infiltration_ACH_from_SLA(sla, numStoriesAboveGrade, weather)
     # Returns the infiltration annual average ACH given a SLA.
-    # Equation from ASHRAE 119-1998 (using numStories for simplification)
-    norm_leakage = 1000.0 * sla * numStories**0.3
+    # Equation from RESNET 380-2019 Equation 9
+    norm_leakage = 1000.0 * sla * numStoriesAboveGrade**0.4
 
     # Equation from ASHRAE 136-1993
     return norm_leakage * weather.data.WSF
   end
 
-  def self.get_infiltration_SLA_from_ACH(ach, numStories, weather)
+  def self.get_infiltration_SLA_from_ACH(ach, numStoriesAboveGrade, weather)
     # Returns the infiltration SLA given an annual average ACH.
-    return ach / (weather.data.WSF * 1000 * numStories**0.3)
+    return ach / (weather.data.WSF * 1000 * numStoriesAboveGrade**0.4)
   end
 
   def self.get_infiltration_SLA_from_ACH50(ach50, n_i, conditionedFloorArea, conditionedVolume, pressure_difference_Pa = 50)
@@ -1939,7 +1903,7 @@ end
 
 class Infiltration
   def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla, vented_attic_sla, unvented_attic_sla,
-                 vented_attic_const_ach, unconditioned_basement_ach, conditioned_basement_ach, has_flue_chimney, is_existing_home, terrain)
+                 vented_attic_const_ach, unconditioned_basement_ach, conditioned_basement_ach, has_flue_chimney, terrain)
     @living_ach50 = living_ach50
     @living_constant_ach = living_constant_ach
     @shelter_coef = shelter_coef
@@ -1952,11 +1916,10 @@ class Infiltration
     @unconditioned_basement_ach = unconditioned_basement_ach
     @conditioned_basement_ach = conditioned_basement_ach
     @has_flue_chimney = has_flue_chimney
-    @is_existing_home = is_existing_home
     @terrain = terrain
   end
   attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :vented_crawl_sla, :unvented_crawl_sla, :vented_attic_sla, :unvented_attic_sla, :vented_attic_const_ach,
-                :unconditioned_basement_ach, :conditioned_basement_ach, :has_flue_chimney, :is_existing_home, :terrain, :a_o, :c_i, :n_i, :stack_coef, :wind_coef, :y_i, :s_wflue)
+                :unconditioned_basement_ach, :conditioned_basement_ach, :has_flue_chimney, :terrain, :a_o, :c_i, :n_i, :stack_coef, :wind_coef, :y_i, :s_wflue)
 end
 
 class NaturalVentilation
@@ -1978,17 +1941,14 @@ class NaturalVentilation
 end
 
 class MechanicalVentilation
-  def initialize(type, infil_credit, total_efficiency, frac_62_2, whole_house_cfm, fan_power_w, sensible_efficiency, ashrae_std,
+  def initialize(type, total_efficiency, whole_house_cfm, fan_power_w, sensible_efficiency,
                  dryer_exhaust, range_exhaust, range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                  cfis_open_time, cfis_airflow_frac, cfis_air_loop)
     @type = type
-    @infil_credit = infil_credit
     @total_efficiency = total_efficiency
-    @frac_62_2 = frac_62_2
     @whole_house_cfm = whole_house_cfm
     @fan_power_w = fan_power_w
     @sensible_efficiency = sensible_efficiency
-    @ashrae_std = ashrae_std
     @dryer_exhaust = dryer_exhaust
     @range_exhaust = range_exhaust
     @range_exhaust_hour = range_exhaust_hour
@@ -1998,7 +1958,7 @@ class MechanicalVentilation
     @cfis_airflow_frac = cfis_airflow_frac
     @cfis_air_loop = cfis_air_loop
   end
-  attr_accessor(:type, :infil_credit, :total_efficiency, :frac_62_2, :whole_house_cfm, :fan_power_w, :sensible_efficiency, :ashrae_std,
+  attr_accessor(:type, :total_efficiency, :whole_house_cfm, :fan_power_w, :sensible_efficiency,
                 :dryer_exhaust, :range_exhaust, :range_exhaust_hour, :bathroom_exhaust, :bathroom_exhaust_hour,
                 :cfis_open_time, :cfis_airflow_frac, :cfis_air_loop, :cfis_t_sum_open_var, :cfis_on_for_hour_var,
                 :cfis_f_damper_open_var, :cfis_fan_mfr_max_var, :cfis_fan_rtf_sensor, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
@@ -2028,5 +1988,5 @@ end
 class Building
   def initialize
   end
-  attr_accessor(:cfa, :ag_cfa, :nbeds, :nbaths, :ncfl, :ncfl_ag, :window_area, :height, :stories, :above_grade_volume, :SLA, :living, :conditioned_basement, :garage, :unconditioned_basement, :vented_crawlspace, :unvented_crawlspace, :vented_attic, :unvented_attic)
+  attr_accessor(:cfa, :infilvolume, :nbeds, :nbaths, :ncfl, :ncfl_ag, :window_area, :height, :stories, :above_grade_volume, :SLA, :living, :conditioned_basement, :garage, :unconditioned_basement, :vented_crawlspace, :unvented_crawlspace, :vented_attic, :unvented_attic)
 end
