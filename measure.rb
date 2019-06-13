@@ -94,7 +94,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = "2.8.0"
+    os_version = "2.8.1"
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -293,11 +293,6 @@ class OSModel
     slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
     @control_slave_zones_hash = { control_zone => slave_zones }
 
-    # FIXME: Temporarily adding ideal air systems first to work around E+ bug
-    # https://github.com/NREL/EnergyPlus/issues/7264
-    success = add_residual_hvac(runner, model, building)
-    return false if not success
-
     success = add_cooling_system(runner, model, building)
     return false if not success
 
@@ -305,6 +300,9 @@ class OSModel
     return false if not success
 
     success = add_heat_pump(runner, model, building, weather)
+    return false if not success
+
+    success = add_residual_hvac(runner, model, building)
     return false if not success
 
     success = add_setpoints(runner, model, building, weather, spaces)
@@ -1912,24 +1910,9 @@ class OSModel
         elsif wh_type == "heat pump water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
-          e_cap = 4.5 # FIXME
-          min_temp = 45.0 # FIXME
-          max_temp = 120.0 # FIXME
-          cap = 0.5 # FIXME
-          cop = 2.8 # FIXME
-          shr = 0.88 # FIXME
-          airflow_rate = 181.0 # FIXME
-          fan_power = 0.0462 # FIXME
-          parasitics = 3.0 # FIXME
-          tank_ua = 3.9 # FIXME
-          int_factor = 1.0 # FIXME
-          temp_depress = 0.0 # FIXME
-          # FIXME: Use ef, ec_adj
-          success = Waterheater.apply_heatpump(model, runner, space, weather,
-                                               e_cap, tank_vol, setpoint_temp, min_temp, max_temp,
-                                               cap, cop, shr, airflow_rate, fan_power,
-                                               parasitics, tank_ua, int_factor, temp_depress,
+          success = Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
                                                @nbeds, @dhw_map, sys_id)
+
           return false if not success
 
         else
@@ -2363,29 +2346,27 @@ class OSModel
       return true
     end
 
-    # Residual heating
-    htg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed)"]
-    htg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed)"]
-    residual_heat_load_served = 1.0 - htg_load_frac
-
-    # Residual cooling
-    clg_load_frac = building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed)"]
-    clg_load_frac += building.elements["sum(BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed)"]
-    residual_cool_load_served = 1.0 - clg_load_frac
-
-    # Don't add ideal air if no heating system
-    residual_heat_load_served = 0 if residual_heat_load_served >= 1.0
-
-    # Don't add ideal air if no cooling system
-    residual_cool_load_served = 0 if residual_cool_load_served >= 1.0
-
-    @total_frac_remaining_heat_load_served -= residual_heat_load_served
-    @total_frac_remaining_cool_load_served -= residual_cool_load_served
+    @total_frac_remaining_cool_load_served = 0 if @total_frac_remaining_cool_load_served >= 0.99
+    @total_frac_remaining_heat_load_served = 0 if @total_frac_remaining_heat_load_served >= 0.99
 
     # Only add ideal air if heating/cooling system doesn't meet entire load
-    if residual_heat_load_served > 0.02 or residual_cool_load_served > 0.02
-      success = HVAC.apply_ideal_air_loads(model, runner, residual_cool_load_served, residual_heat_load_served,
-                                           residual_cool_load_served, residual_heat_load_served,
+    if @total_frac_remaining_heat_load_served > 0.01 or @total_frac_remaining_cool_load_served > 0.01
+      if @total_frac_remaining_cool_load_served > 0.01
+        sequential_cool_load_frac = 1
+      else
+        sequential_cool_load_frac = 0
+      end
+
+      if @total_frac_remaining_heat_load_served > 0.01
+        sequential_heat_load_frac = 1
+      else
+        sequential_heat_load_frac = 0
+      end
+      success = HVAC.apply_ideal_air_loads(model, runner,
+                                           @total_frac_remaining_cool_load_served,
+                                           @total_frac_remaining_heat_load_served,
+                                           sequential_cool_load_frac,
+                                           sequential_heat_load_frac,
                                            @control_slave_zones_hash)
       return false if not success
     end
@@ -2620,13 +2601,13 @@ class OSModel
 
   def self.add_airflow(runner, model, building, spaces)
     # Infiltration
-    infil_volume = nil
+    infilvolume = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
       air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
-      infil_volume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
+      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
     end
-    if infil_volume.nil?
-      infil_volume = @cvolume
+    if infilvolume.nil?
+      infilvolume = @cvolume
     end
 
     infil_ach50 = nil
@@ -2636,7 +2617,7 @@ class OSModel
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
       elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
-        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infil_volume # Convert CFM50 to ACH50
+        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
       end
@@ -2657,23 +2638,17 @@ class OSModel
       vented_attic_sla = 0.0
     end
 
-    crawl_sla = nil
-    vented_crawl_ach = nil
+    vented_crawl_sla = nil
     if @has_vented_crawl
       building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
         vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
-        crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
-        vented_crawl_ach = vented_crawl_values[:vented_crawlspace_constant_ach]
+        vented_crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
       end
-      if crawl_sla.nil? and vented_crawl_ach.nil?
-        crawl_sla = Airflow.get_default_vented_crawl_sla()
+      if vented_crawl_sla.nil?
+        vented_crawl_sla = Airflow.get_default_vented_crawl_sla()
       end
     else
-      vented_crawl_ach = 0.0
-    end
-    if vented_crawl_ach.nil? and not crawl_sla.nil? # FIXME: TEMPORARY
-      vented_crawl_ach = crawl_sla
-      crawl_sla = nil
+      vented_crawl_sla = 0.0
     end
 
     living_ach50 = infil_ach50
@@ -2681,7 +2656,7 @@ class OSModel
     garage_ach50 = infil_ach50
     conditioned_basement_ach = 0
     unconditioned_basement_ach = 0.1
-    unvented_crawl_ach = 0.1
+    unvented_crawl_sla = 0
     unvented_attic_sla = 0
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
@@ -2689,11 +2664,10 @@ class OSModel
       shelter_coef = Airflow.get_default_shelter_coefficient()
     end
     has_flue_chimney = false
-    is_existing_home = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_ach, unvented_crawl_ach,
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
-                             conditioned_basement_ach, has_flue_chimney, is_existing_home, terrain)
+                             conditioned_basement_ach, has_flue_chimney, terrain)
 
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
@@ -2788,9 +2762,9 @@ class OSModel
       end
     end
 
-    mech_vent = MechanicalVentilation.new(mech_vent_type, nil, mech_vent_total_efficiency,
-                                          nil, mech_vent_cfm, mech_vent_fan_w, mech_vent_sensible_efficiency,
-                                          nil, clothes_dryer_exhaust, range_exhaust,
+    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_efficiency, mech_vent_cfm,
+                                          mech_vent_fan_w, mech_vent_sensible_efficiency,
+                                          clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
 
@@ -2909,7 +2883,7 @@ class OSModel
     end
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
-                            @cfa, @cfa_ag, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
+                            @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
                             @min_neighbor_distance)
     return false if not success
 

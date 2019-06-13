@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T11:46:53-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-05-03T11:46:54-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -202,25 +202,24 @@
           <HVACPlant>
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatPumpType>air-to-air</HeatPumpType>
+              <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
+              <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>60000.0</BackupHeatingCapacity>
-              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <BackupHeatingCapacity>40000.0</BackupHeatingCapacity>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Value>19.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
                 <Units>HSPF</Units>
-                <Value>7.7</Value>
+                <Value>10.0</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
@@ -228,14 +227,6 @@
             <SystemIdentifier id='HVACControl'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
-          <HVACDistribution>
-            <SystemIdentifier id='HVACDistribution'/>
-            <DistributionSystemType>
-              <Other>DSE</Other>
-            </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
-          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
