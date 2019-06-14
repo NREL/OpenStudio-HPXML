@@ -78,8 +78,10 @@ def create_hpxmls
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
+    'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
@@ -2291,7 +2293,9 @@ def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
 end
 
 def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
-  if ['base-dhw-solar-indirect-flat-plate.xml'].include? hpxml_file
+  if ['base-dhw-solar-indirect-flat-plate.xml',
+      'base-dhw-tank-heat-pump-with-solar.xml',
+      'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
     solar_thermal_system_values = { :id => "SolarThermalSystem",
                                     :system_type => "hot water",
                                     :collector_area => 40,
