@@ -472,19 +472,19 @@ class EnergyPlusValidator
         "[WaterFixtureType='shower head' or WaterFixtureType='faucet']" => one, # Required by HPXML schema
         "LowFlow" => one,
       },
-      
+
       # [SolarThermal]
       "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[SystemType='hot water']" => one,
         "CollectorArea" => one,
-        "[CollectorLoopType='FIXME']" => one,
+        "[CollectorLoopType='liquid indirect']" => one,
         "CollectorAzimuth" => one,
         "CollectorTilt" => one,
-        "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see SRCC directory
-        "CollectorRatedThermalLosses" => one, # FRUL (slope); see SRCC directory
-        "CollectorRatedIncidentAngleModifier" => one, # See SRCC directory
+        "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
+        "CollectorRatedThermalLosses" => one, # FRUL (slope); see Directory of SRCC Certified Solar Collector Ratings
         "StorageVolume" => one,
+        "ConnectedTo" => one, # WaterHeatingSystem
       },
 
       # [PVSystem]

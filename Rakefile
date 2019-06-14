@@ -75,6 +75,7 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
+    'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
@@ -372,6 +373,7 @@ def create_hpxmls
       water_heating_systems_values = []
       hot_water_distribution_values = {}
       water_fixtures_values = []
+      solar_thermal_system_values = {}
       pv_systems_values = []
       clothes_washer_values = {}
       clothes_dryer_values = {}
@@ -413,6 +415,7 @@ def create_hpxmls
         water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems_values)
         hot_water_distribution_values = get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribution_values)
         water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
+        solar_thermal_system_values = get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
         pv_systems_values = get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
         clothes_washer_values = get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
         clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
@@ -504,6 +507,7 @@ def create_hpxmls
       water_fixtures_values.each do |water_fixture_values|
         HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
       end
+      HPXML.add_solar_thermal_system(hpxml: hpxml, **solar_thermal_system_values) unless solar_thermal_system_values.empty?
       pv_systems_values.each do |pv_system_values|
         HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
       end
@@ -2284,6 +2288,22 @@ def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
     water_fixtures_values = []
   end
   return water_fixtures_values
+end
+
+def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
+  if ['base-dhw-solar-indirect-flat-plate.xml'].include? hpxml_file
+    solar_thermal_system_values = { :id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :collector_area => 40,
+                                    :collector_loop_type => "liquid indirect",
+                                    :collector_azimuth => 180,
+                                    :collector_tilt => 20,
+                                    :collector_frta => 0.77,
+                                    :collector_frul => 0.793,
+                                    :storage_volume => 60,
+                                    :water_heating_system_idref => "WaterHeater" }
+  end
+  return solar_thermal_system_values
 end
 
 def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)

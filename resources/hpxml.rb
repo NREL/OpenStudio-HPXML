@@ -1315,7 +1315,7 @@ class HPXML
              :water_fixture_type => XMLHelper.get_value(water_fixture, "WaterFixtureType"),
              :low_flow => to_bool_or_nil(XMLHelper.get_value(water_fixture, "LowFlow")) }
   end
-  
+
   def self.add_solar_thermal_system(hpxml:,
                                     id:,
                                     system_type:,
@@ -1325,10 +1325,10 @@ class HPXML
                                     collector_tilt:,
                                     collector_frta:,
                                     collector_frul:,
-                                    collector_iam:,
                                     storage_volume:,
+                                    water_heating_system_idref:,
                                     **remainder)
-  
+
     solar_thermal = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "SolarThermal"])
     solar_thermal_system = XMLHelper.add_element(solar_thermal, "SolarThermalSystem")
     sys_id = XMLHelper.add_element(solar_thermal_system, "SystemIdentifier")
@@ -1340,13 +1340,14 @@ class HPXML
     XMLHelper.add_element(solar_thermal_system, "CollectorTilt", Float(collector_tilt))
     XMLHelper.add_element(solar_thermal_system, "CollectorRatedOpticalEfficiency", Float(collector_frta))
     XMLHelper.add_element(solar_thermal_system, "CollectorRatedThermalLosses", Float(collector_frul))
-    XMLHelper.add_element(solar_thermal_system, "CollectorRatedIncidentAngleModifier", Float(collector_iam))
     XMLHelper.add_element(solar_thermal_system, "StorageVolume", Float(storage_volume))
-    
+    connected_to = XMLHelper.add_element(solar_thermal_system, "ConnectedTo")
+    XMLHelper.add_attribute(connected_to, "idref", water_heating_system_idref)
+
     return solar_thermal_system
   end
-  
-  def self.get_solar_thermal_system(solar_thermal_system:)
+
+  def self.get_solar_thermal_system_values(solar_thermal_system:)
     return nil if solar_thermal_system.nil?
 
     return { :id => HPXML.get_id(solar_thermal_system),
@@ -1357,8 +1358,8 @@ class HPXML
              :collector_tilt => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorTilt")),
              :collector_frta => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedOpticalEfficiency")),
              :collector_frul => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedThermalLosses")),
-             :collector_iam => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedIncidentAngleModifier")),
-             :storage_volume => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume")) }
+             :storage_volume => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume")),
+             :water_heating_system_idref => HPXML.get_idref(solar_thermal_system, "ConnectedTo") }
   end
 
   def self.add_pv_system(hpxml:,

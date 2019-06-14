@@ -65,15 +65,7 @@ class Waterheater
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
-    storage_tank = get_shw_storage_tank(model)
-
-    if storage_tank.nil?
-      loop.addSupplyBranchForComponent(new_heater)
-    else
-      storage_tank.setHeater1SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      storage_tank.setHeater2SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-    end
+    loop.addSupplyBranchForComponent(new_heater)
 
     return true
   end
@@ -130,15 +122,7 @@ class Waterheater
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
-    storage_tank = get_shw_storage_tank(model)
-
-    if storage_tank.nil?
-      loop.addSupplyBranchForComponent(new_heater)
-    else
-      storage_tank.setHeater1SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      storage_tank.setHeater2SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-    end
+    loop.addSupplyBranchForComponent(new_heater)
 
     return true
   end
@@ -648,15 +632,191 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_ducting_program)
 
-    storage_tank = get_shw_storage_tank(model)
+    loop.addSupplyBranchForComponent(tank)
 
-    if storage_tank.nil?
-      loop.addSupplyBranchForComponent(tank)
-    else
-      storage_tank.setHeater1SetpointTemperatureSchedule(tank.heater1SetpointTemperatureSchedule)
-      storage_tank.setHeater2SetpointTemperatureSchedule(tank.heater2SetpointTemperatureSchedule)
-      tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
+    return true
+  end
+
+  def self.apply_solar_thermal(model, runner, collector_area, frta, frul,
+                               iam, storage_vol, tank_r, fluid_type,
+                               heat_ex_eff, pump_power, azimuth, tilt,
+                               dhw_loop)
+
+    obj_name = Constants.ObjectNameSolarHotWater
+
+    test_flow = 55.0 / UnitConversions.convert(1.0, "lbm/min", "kg/hr") / Liquid.H2O_l.rho * UnitConversions.convert(1.0, "ft^2", "m^2") # cfm/ft^2
+    coll_flow = test_flow * collector_area # cfm
+    storage_diam = (4.0 * storage_vol / 3 / Math::PI)**(1.0 / 3.0) # ft
+    storage_ht = 3.0 * storage_diam # ft
+    tank_a = storage_ht * Math::PI * storage_diam + 2.0 * Math::PI * storage_diam**2.0 / 4.0 # ft^2
+    storage_Uvalue = 1.0 / tank_r # Btu/hr-ft^2-R
+
+    # Get water heater and setpoint temperature schedules from loop
+    water_heater = nil
+    setpoint_schedule_one = nil
+    setpoint_schedule_two = nil
+    dhw_loop.supplyComponents.each do |supply_component|
+      if supply_component.to_WaterHeaterMixed.is_initialized
+        water_heater = supply_component.to_WaterHeaterMixed.get
+        setpoint_schedule_one = water_heater.setpointTemperatureSchedule.get
+        setpoint_schedule_two = water_heater.setpointTemperatureSchedule.get
+      elsif supply_component.to_WaterHeaterStratified.is_initialized
+        water_heater = supply_component.to_WaterHeaterStratified.get
+        setpoint_schedule_one = water_heater.heater1SetpointTemperatureSchedule
+        setpoint_schedule_two = water_heater.heater2SetpointTemperatureSchedule
+      end
     end
+
+    dhw_setpoint_manager = nil
+    dhw_loop.supplyOutletNode.setpointManagers.each do |setpoint_manager|
+      if setpoint_manager.to_SetpointManagerScheduled.is_initialized
+        dhw_setpoint_manager = setpoint_manager.to_SetpointManagerScheduled.get
+      end
+    end
+
+    plant_loop = OpenStudio::Model::PlantLoop.new(model)
+    plant_loop.setName(Constants.PlantLoopSolarHotWater)
+    if fluid_type == Constants.FluidWater
+      plant_loop.setFluidType('Water')
+    else
+      plant_loop.setFluidType('PropyleneGlycol')
+      plant_loop.setGlycolConcentration(50)
+    end
+    plant_loop.setMaximumLoopTemperature(100)
+    plant_loop.setMinimumLoopTemperature(0)
+    plant_loop.setMinimumLoopFlowRate(0)
+    plant_loop.setLoadDistributionScheme('Optimal')
+    plant_loop.setPlantEquipmentOperationHeatingLoadSchedule(model.alwaysOnDiscreteSchedule)
+
+    sizing_plant = plant_loop.sizingPlant
+    sizing_plant.setLoopType('Heating')
+    sizing_plant.setDesignLoopExitTemperature(dhw_loop.sizingPlant.designLoopExitTemperature)
+    sizing_plant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, "R", "K"))
+
+    setpoint_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, dhw_setpoint_manager.schedule)
+    setpoint_manager.setName(obj_name + " setpoint mgr")
+    setpoint_manager.setControlVariable('Temperature')
+
+    pump = OpenStudio::Model::PumpConstantSpeed.new(model)
+    pump.setName(obj_name + " pump")
+    pump.setRatedPumpHead(90000)
+    pump.setRatedPowerConsumption(pump_power)
+    pump.setMotorEfficiency(0.3)
+    pump.setFractionofMotorInefficienciestoFluidStream(0.2)
+    pump.setPumpControlType('Intermittent')
+    pump.setRatedFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+    pump.addToNode(plant_loop.supplyInletNode)
+
+    panel_length = UnitConversions.convert(collector_area, "ft^2", "m^2")**0.5
+    run = Math::cos(tilt * Math::PI / 180) * panel_length
+
+    vertices = OpenStudio::Point3dVector.new
+    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m"), UnitConversions.convert(100.0, "ft", "m"), 0)
+    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m") + panel_length, UnitConversions.convert(100.0, "ft", "m"), 0)
+    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m") + panel_length, UnitConversions.convert(100.0, "ft", "m") + run, (panel_length**2 - run**2)**0.5)
+    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m"), UnitConversions.convert(100.0, "ft", "m") + run, (panel_length**2 - run**2)**0.5)
+
+    m = OpenStudio::Matrix.new(4, 4, 0)
+    m[0, 0] = Math::cos(-azimuth * Math::PI / 180)
+    m[1, 1] = Math::cos(-azimuth * Math::PI / 180)
+    m[0, 1] = -Math::sin(-azimuth * Math::PI / 180)
+    m[1, 0] = Math::sin(-azimuth * Math::PI / 180)
+    m[2, 2] = 1
+    m[3, 3] = 1
+    transformation = OpenStudio::Transformation.new(m)
+    vertices = transformation * vertices
+
+    shading_surface_group = OpenStudio::Model::ShadingSurfaceGroup.new(model)
+    shading_surface_group.setName(obj_name + " shading group")
+
+    shading_surface = OpenStudio::Model::ShadingSurface.new(vertices, model)
+    shading_surface.setName(obj_name + " shading surface")
+    shading_surface.setShadingSurfaceGroup(shading_surface_group)
+
+    collector_plate = OpenStudio::Model::SolarCollectorFlatPlateWater.new(model)
+    collector_plate.setName(obj_name + " coll plate")
+    collector_plate.setSurface(shading_surface)
+    collector_plate.setMaximumFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+    collector_performance = collector_plate.solarCollectorPerformance
+    collector_performance.setName(obj_name + " coll perf")
+    collector_performance.setGrossArea(UnitConversions.convert(collector_area, "ft^2", "m^2"))
+    collector_performance.setTestFluid('Water')
+    collector_performance.setTestFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+    collector_performance.setTestCorrelationType('Inlet')
+    collector_performance.setCoefficient1ofEfficiencyEquation(frta)
+    collector_performance.setCoefficient2ofEfficiencyEquation(-UnitConversions.convert(frul, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
+    collector_performance.setCoefficient2ofIncidentAngleModifier(-iam)
+
+    plant_loop.addSupplyBranchForComponent(collector_plate)
+    runner.registerInfo("Added '#{collector_plate.name}' to supply branch of '#{plant_loop.name}'.")
+
+    pipe_supply_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_supply_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_bypass = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_inlet = OpenStudio::Model::PipeAdiabatic.new(model)
+    pipe_demand_outlet = OpenStudio::Model::PipeAdiabatic.new(model)
+
+    plant_loop.addSupplyBranchForComponent(pipe_supply_bypass)
+    pump.addToNode(plant_loop.supplyInletNode)
+    pipe_supply_outlet.addToNode(plant_loop.supplyOutletNode)
+    setpoint_manager.addToNode(plant_loop.supplyOutletNode)
+    plant_loop.addDemandBranchForComponent(pipe_demand_bypass)
+    pipe_demand_inlet.addToNode(plant_loop.demandInletNode)
+    pipe_demand_outlet.addToNode(plant_loop.demandOutletNode)
+
+    storage_tank = OpenStudio::Model::WaterHeaterStratified.new(model)
+    storage_tank.setName(obj_name + " storage tank")
+    storage_tank.setTankVolume(UnitConversions.convert(storage_vol, "ft^3", "m^3"))
+    storage_tank.setTankHeight(UnitConversions.convert(storage_ht, "in", "m"))
+    storage_tank.setTankShape('VerticalCylinder')
+    storage_tank.setTankPerimeter(Math::PI * UnitConversions.convert(storage_diam, "in", "m"))
+    storage_tank.setMaximumTemperatureLimit(99)
+    storage_tank.heater1SetpointTemperatureSchedule.remove
+    storage_tank.setHeater1SetpointTemperatureSchedule(setpoint_schedule_one)
+    storage_tank.setHeater1Capacity(0)
+    storage_tank.setHeater1Height(0)
+    storage_tank.heater2SetpointTemperatureSchedule.remove
+    storage_tank.setHeater2SetpointTemperatureSchedule(setpoint_schedule_two)
+    storage_tank.setHeater2Capacity(0)
+    storage_tank.setHeater2Height(0)
+    storage_tank.setHeaterFuelType('Electricity')
+    storage_tank.setHeaterThermalEfficiency(1)
+    storage_tank.ambientTemperatureSchedule.get.remove
+    storage_tank.setAmbientTemperatureThermalZone(water_heater.ambientTemperatureThermalZone.get)
+    storage_tank.setAmbientTemperatureIndicator('ThermalZone')
+    storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(UnitConversions.convert(storage_Uvalue, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
+    storage_tank.setSkinLossFractiontoZone(1)
+    storage_tank.setOffCycleFlueLossFractiontoZone(1)
+    storage_tank.setUseSideEffectiveness(1)
+    storage_tank.setUseSideInletHeight(0)
+    storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, "in", "m"))
+    storage_tank.setSourceSideEffectiveness(heat_ex_eff)
+    storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, "in", "m") / 3.0)
+    storage_tank.setSourceSideOutletHeight(0)
+    storage_tank.setInletMode('Fixed')
+    storage_tank.setIndirectWaterHeatingRecoveryTime(1.5)
+    storage_tank.setNumberofNodes(8)
+    storage_tank.setAdditionalDestratificationConductivity(0)
+    storage_tank.setNode1AdditionalLossCoefficient(0)
+    storage_tank.setNode6AdditionalLossCoefficient(0)
+    storage_tank.setSourceSideDesignFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+
+    plant_loop.addDemandBranchForComponent(storage_tank)
+    runner.registerInfo("Added '#{storage_tank.name}' to demand branch of '#{plant_loop.name}'.")
+
+    dhw_loop.addSupplyBranchForComponent(storage_tank)
+    runner.registerInfo("Added '#{storage_tank.name}' to supply branch of '#{dhw_loop.name}'.")
+
+    water_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
+    runner.registerInfo("Moved '#{water_heater.name}' to supply outlet node of '#{storage_tank.name}'.")
+
+    availability_manager = OpenStudio::Model::AvailabilityManagerDifferentialThermostat.new(model)
+    availability_manager.setName(obj_name + " useful energy")
+    availability_manager.setHotNode(collector_plate.outletModelObject.get.to_Node.get)
+    availability_manager.setColdNode(storage_tank.demandOutletModelObject.get.to_Node.get)
+    availability_manager.setTemperatureDifferenceOnLimit(0)
+    availability_manager.setTemperatureDifferenceOffLimit(0)
+    plant_loop.setAvailabilityManager(availability_manager)
 
     return true
   end
@@ -771,19 +931,6 @@ class Waterheater
   end
 
   private
-
-  def self.get_shw_storage_tank(model)
-    model.getPlantLoops.each do |plant_loop|
-      next unless plant_loop.name.to_s == Constants.PlantLoopSolarHotWater
-
-      (plant_loop.supplyComponents + plant_loop.demandComponents).each do |component|
-        if component.to_WaterHeaterStratified.is_initialized
-          return component.to_WaterHeaterStratified.get
-        end
-      end
-    end
-    return nil
-  end
 
   def self.deadband(wh_type)
     if wh_type == Constants.WaterHeaterTypeTank

@@ -1,6 +1,3 @@
-# This file, which has 301 calculations, will eventually replace appliances.rb,
-# which has Building America calculations.
-
 require_relative "constants"
 
 class HotWaterAndAppliances
