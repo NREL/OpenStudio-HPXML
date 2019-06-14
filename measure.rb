@@ -1966,7 +1966,7 @@ class OSModel
     success = Waterheater.apply_solar_thermal(model, runner, collector_area, frta, frul,
                                               iam, storage_vol, tank_r, fluid_type,
                                               heat_ex_eff, pump_power, azimuth, tilt,
-                                              dhw_loop)
+                                              dhw_loop, @dhw_map, dhw_system_idref)
     return false if not success
 
     return true
@@ -2970,6 +2970,7 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
+                       OutputVars.WaterHeatingElectricitySolarThermalPump,
                        OutputVars.WaterHeatingFuel,
                        OutputVars.WaterHeatingLoad]
 
@@ -3820,6 +3821,10 @@ class OutputVars
     return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
              'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
              'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'] }
+  end
+
+  def self.WaterHeatingElectricitySolarThermalPump
+    return { 'OpenStudio::Model::PumpConstantSpeed' => ['Pump Electric Energy'] }
   end
 
   def self.WaterHeatingElectricityRecircPump

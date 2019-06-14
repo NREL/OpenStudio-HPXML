@@ -640,7 +640,7 @@ class Waterheater
   def self.apply_solar_thermal(model, runner, collector_area, frta, frul,
                                iam, storage_vol, tank_r, fluid_type,
                                heat_ex_eff, pump_power, azimuth, tilt,
-                               dhw_loop)
+                               dhw_loop, dhw_map, sys_id)
 
     obj_name = Constants.ObjectNameSolarHotWater
 
@@ -648,7 +648,6 @@ class Waterheater
     coll_flow = test_flow * collector_area # cfm
     storage_diam = (4.0 * storage_vol / 3 / Math::PI)**(1.0 / 3.0) # ft
     storage_ht = 3.0 * storage_diam # ft
-    tank_a = storage_ht * Math::PI * storage_diam + 2.0 * Math::PI * storage_diam**2.0 / 4.0 # ft^2
     storage_Uvalue = 1.0 / tank_r # Btu/hr-ft^2-R
 
     # Get water heater and setpoint temperature schedules from loop
@@ -706,6 +705,7 @@ class Waterheater
     pump.setPumpControlType('Intermittent')
     pump.setRatedFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
     pump.addToNode(plant_loop.supplyInletNode)
+    dhw_map[sys_id] << pump
 
     panel_length = UnitConversions.convert(collector_area, "ft^2", "m^2")**0.5
     run = Math::cos(tilt * Math::PI / 180) * panel_length
@@ -800,6 +800,8 @@ class Waterheater
     storage_tank.setNode1AdditionalLossCoefficient(0)
     storage_tank.setNode6AdditionalLossCoefficient(0)
     storage_tank.setSourceSideDesignFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+    storage_tank.setOnCycleParasiticFuelConsumptionRate(0)
+    storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
 
     plant_loop.addDemandBranchForComponent(storage_tank)
     runner.registerInfo("Added '#{storage_tank.name}' to demand branch of '#{plant_loop.name}'.")
