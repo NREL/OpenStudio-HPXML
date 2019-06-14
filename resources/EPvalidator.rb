@@ -75,7 +75,7 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem" => zero_or_more, # See [WaterHeatingSystem]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture" => zero_or_more, # See [WaterFixture]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution" => zero_or_one, # See [HotWaterDistribution]
-        "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => zero_or_one, # See [SolarThermal]
+        "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => zero_or_one, # See [SolarThermalSystem]
         "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem" => zero_or_more, # See [PVSystem]
 
         "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher" => zero_or_one, # See [ClothesWasher]
@@ -473,7 +473,7 @@ class EnergyPlusValidator
         "LowFlow" => one,
       },
 
-      # [SolarThermal]
+      # [SolarThermalSystem]
       "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[SystemType='hot water']" => one,
