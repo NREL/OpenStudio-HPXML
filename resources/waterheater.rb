@@ -637,8 +637,8 @@ class Waterheater
     return true
   end
 
-  def self.apply_solar_thermal(model, runner, collector_area, frta, frul,
-                               iam, storage_vol, tank_r, fluid_type,
+  def self.apply_solar_thermal(model, runner, space, collector_area, frta,
+                               frul, iam, storage_vol, tank_r, fluid_type,
                                heat_ex_eff, pump_power, azimuth, tilt,
                                dhw_loop, dhw_map, sys_id)
 
@@ -782,7 +782,7 @@ class Waterheater
     storage_tank.setHeaterFuelType('Electricity')
     storage_tank.setHeaterThermalEfficiency(1)
     storage_tank.ambientTemperatureSchedule.get.remove
-    storage_tank.setAmbientTemperatureThermalZone(water_heater.ambientTemperatureThermalZone.get)
+    storage_tank.setAmbientTemperatureThermalZone(space.thermalZone.get)
     storage_tank.setAmbientTemperatureIndicator('ThermalZone')
     storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(UnitConversions.convert(storage_Uvalue, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
     storage_tank.setSkinLossFractiontoZone(1)
