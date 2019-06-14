@@ -710,17 +710,19 @@ class Waterheater
     panel_length = UnitConversions.convert(collector_area, "ft^2", "m^2")**0.5
     run = Math::cos(tilt * Math::PI / 180) * panel_length
 
+    offset = 1000.0 # prevent shading
+
     vertices = OpenStudio::Point3dVector.new
-    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m"), UnitConversions.convert(100.0, "ft", "m"), 0)
-    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m") + panel_length, UnitConversions.convert(100.0, "ft", "m"), 0)
-    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m") + panel_length, UnitConversions.convert(100.0, "ft", "m") + run, (panel_length**2 - run**2)**0.5)
-    vertices << OpenStudio::Point3d.new(UnitConversions.convert(100.0, "ft", "m"), UnitConversions.convert(100.0, "ft", "m") + run, (panel_length**2 - run**2)**0.5)
+    vertices << OpenStudio::Point3d.new(offset, offset, 0)
+    vertices << OpenStudio::Point3d.new(offset + panel_length, offset, 0)
+    vertices << OpenStudio::Point3d.new(offset + panel_length, offset + run, (panel_length**2 - run**2)**0.5)
+    vertices << OpenStudio::Point3d.new(offset, offset + run, (panel_length**2 - run**2)**0.5)
 
     m = OpenStudio::Matrix.new(4, 4, 0)
-    m[0, 0] = Math::cos(-azimuth * Math::PI / 180)
-    m[1, 1] = Math::cos(-azimuth * Math::PI / 180)
-    m[0, 1] = -Math::sin(-azimuth * Math::PI / 180)
-    m[1, 0] = Math::sin(-azimuth * Math::PI / 180)
+    m[0, 0] = Math::cos((180 - azimuth) * Math::PI / 180)
+    m[1, 1] = Math::cos((180 - azimuth) * Math::PI / 180)
+    m[0, 1] = -Math::sin((180 - azimuth) * Math::PI / 180)
+    m[1, 0] = Math::sin((180 - azimuth) * Math::PI / 180)
     m[2, 2] = 1
     m[3, 3] = 1
     transformation = OpenStudio::Transformation.new(m)
