@@ -9,7 +9,7 @@ require_relative "psychrometrics"
 
 class Waterheater
   def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
-                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, has_desuperhater, related_clg_coil)
+                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, has_desuperheater, related_clg_coil)
 
     # Validate inputs
     if vol <= 0
@@ -75,14 +75,14 @@ class Waterheater
       new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
     end
 
-    if has_desuperhater
+    if has_desuperheater
       add_desuperheater(model, t_set, new_heater, related_clg_coil, Constants.WaterHeaterTypeTank)
     end
     return true
   end
 
   def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
-                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
+                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, has_desuperheater, related_clg_coil)
 
     # Validate inputs
     if ef > 1 or ef <= 0
@@ -142,6 +142,10 @@ class Waterheater
       storage_tank.setHeater2SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
       new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
     end
+
+    if has_desuperheater
+      add_desuperheater(model, t_set, new_heater, related_clg_coil, Constants.WaterHeaterTypeTankless)
+      end
 
     return true
   end

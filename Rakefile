@@ -53,8 +53,8 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
-    'invalid_files/desuperheater_1_speed_invalid_relatedHVAC.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'invalid_files/desuperheater_1_speed_repeated_relatedHVAC.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/desuperheater-1-speed-invalid-relatedHVAC.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/desuperheater-1-speed-repeated-relatedHVAC.xml' => 'base-hvac-central-ac-only-1-speed.xml',
 
     'base-addenda-exclude-g.xml' => 'base.xml',
     'base-addenda-exclude-g-e.xml' => 'base.xml',
@@ -87,6 +87,7 @@ def create_hpxmls
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-desuperheater-singlespeed.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-dhw-desuperheater-singlespeed-tankless.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
@@ -2196,6 +2197,13 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
   elsif ['base-dhw-desuperheater-singlespeed.xml'].include? hpxml_file
+    water_heating_systems_values[0][:has_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-singlespeed-tankless.xml'].include? hpxml_file
+    water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
+    water_heating_systems_values[0][:tank_volume] = nil
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 0.99
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file

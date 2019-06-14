@@ -266,8 +266,6 @@ class OSModel
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
 
-    @related_hvac_list = [] # list of hvac systems refered in water heating system "RelatedHvac" element
-
     @use_only_ideal_air = false
     if not construction_values[:use_only_ideal_air_system].nil?
       @use_only_ideal_air = construction_values[:use_only_ideal_air_system]
@@ -1723,6 +1721,7 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, building, weather, spaces)
+    related_hvac_list = [] # list of hvac systems refered in water heating system "RelatedHvac" element
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1878,12 +1877,12 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           if has_desuperheater
-            if not @related_hvac_list.include? relatedhvac
-              @related_hvac_list << relatedhvac
+            if not related_hvac_list.include? relatedhvac
+              related_hvac_list << relatedhvac
               coil_object = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
             else
               fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
-          end
+            end
           end
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
@@ -1901,10 +1900,19 @@ class OSModel
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
+
+          if has_desuperheater
+            if not related_hvac_list.include? relatedhvac
+              related_hvac_list << relatedhvac
+              coil_object = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
+            else
+              fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
+            end
+          end
           success = Waterheater.apply_tankless(model, runner, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                               @nbeds, @dhw_map, sys_id)
+                                               @nbeds, @dhw_map, sys_id, has_desuperheater, coil_object)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -1948,7 +1956,6 @@ class OSModel
   def self.get_desuperheatercoil(hvac_map, relatedhvac, wh_id)
     # search for the related cooling coil object for desuperheater
 
-    coil_found = false
     # Supported cooling coil options
     clg_coil_supported = [OpenStudio::Model::CoilCoolingDXSingleSpeed, OpenStudio::Model::CoilCoolingDXMultiSpeed, OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit]
     if hvac_map.keys.include? relatedhvac
@@ -1957,13 +1964,10 @@ class OSModel
         clg_coil_supported.each do |coiltype|
           if comp.is_a? coiltype
             return comp
-            coil_found = true
            end
         end
       end
-      if coil_found == false
-        fail "The Related HVAC system '#{relatedhvac}' for WaterHeatingSystem '#{wh_id}' is not currently supported for desuperheater simulation"
-      end
+      fail "The Related HVAC system '#{relatedhvac}' for WaterHeatingSystem '#{wh_id}' is not currently supported for desuperheater simulation"
     else
       fail "RelatedHVACSystem '#{relatedhvac}' not found for water heating system '#{wh_id}'."
     end
