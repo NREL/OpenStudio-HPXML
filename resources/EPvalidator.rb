@@ -481,10 +481,10 @@ class EnergyPlusValidator
         "[CollectorLoopType='FIXME']" => one,
         "CollectorAzimuth" => one,
         "CollectorTilt" => one,
+        "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see SRCC directory
+        "CollectorRatedThermalLosses" => one, # FRUL (slope); see SRCC directory
+        "CollectorRatedIncidentAngleModifier" => one, # See SRCC directory
         "StorageVolume" => one,
-        "RatedCollectorOpticalEfficiency" => one, # FRTA (y-intercept); see SRCC directory
-        "RatedCollectorThermalLosses" => one, # FRUL (slope); see SRCC directory
-        "RatedIncidentAngleModifier" => one, # See SRCC directory
       },
 
       # [PVSystem]
