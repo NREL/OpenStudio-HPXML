@@ -88,6 +88,9 @@ def create_hpxmls
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-desuperheater-singlespeed.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-dhw-desuperheater-singlespeed-tankless.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-dhw-desuperheater-2-speed.xml.skip' => 'base-hvac-central-ac-only-2-speed.xml',
+    'base-dhw-desuperheater-var-speed.xml.skip' => 'base-hvac-central-ac-only-var-speed.xml',
+    'base-dhw-desuperheater-gshp.xml.skip' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
@@ -2206,6 +2209,15 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:energy_factor] = 0.99
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-2-speed.xml.skip'].include? hpxml_file
+    water_heating_systems_values[0][:has_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-var-speed.xml.skip'].include? hpxml_file
+    water_heating_systems_values[0][:has_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-gshp.xml.skip'].include? hpxml_file
+    water_heating_systems_values[0][:has_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "HeatPump"
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
@@ -2222,10 +2234,10 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "crawlspace - vented"
   elsif ['invalid_files/water-heater-location-other.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "unconditioned space"
-  elsif ['invalid_files/desuperheater_1_speed_invalid_relatedHVAC.xml'].include? hpxml_file
+  elsif ['invalid_files/desuperheater-1-speed-invalid-relatedHVAC.xml'].include? hpxml_file
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "CoolingSystem_bad"
-  elsif ['invalid_files/desuperheater_1_speed_repeated_relatedHVAC.xml'].include? hpxml_file
+  elsif ['invalid_files/desuperheater-1-speed-repeated-relatedHVAC.xml'].include? hpxml_file
     water_heating_systems_values[0][:fraction_dhw_load_served] = 0.5
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "CoolingSystem"

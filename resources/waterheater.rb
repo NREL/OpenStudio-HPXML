@@ -9,7 +9,7 @@ require_relative "psychrometrics"
 
 class Waterheater
   def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
-                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, has_desuperheater, related_clg_coil)
+                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil)
 
     # Validate inputs
     if vol <= 0
@@ -75,14 +75,14 @@ class Waterheater
       new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
     end
 
-    if has_desuperheater
-      add_desuperheater(model, t_set, new_heater, related_clg_coil, Constants.WaterHeaterTypeTank)
+    if not desuperheater_clg_coil.nil?
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank)
     end
     return true
   end
 
   def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
-                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, has_desuperheater, related_clg_coil)
+                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil)
 
     # Validate inputs
     if ef > 1 or ef <= 0
@@ -143,10 +143,9 @@ class Waterheater
       new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
     end
 
-    if has_desuperheater
-      add_desuperheater(model, t_set, new_heater, related_clg_coil, Constants.WaterHeaterTypeTankless)
-      end
-
+    if not desuperheater_clg_coil.nil?
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTankless)
+    end
     return true
   end
 
@@ -668,7 +667,7 @@ class Waterheater
     return true
   end
 
-  def self.add_desuperheater(model, t_set, tank, related_clg_coil, wh_type)
+  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type)
     # Create a schedule for desuperheater control (schedule value - desuperheater deadband = a little bit over tank stp would be good)
     new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
     new_schedule.setName("#{tank.name} desuperheater setpoint schedule")
@@ -682,7 +681,7 @@ class Waterheater
     desuperheater.setWaterPumpPower(0)
 
     # attach to the clg coil source
-    desuperheater.setHeatingSource(related_clg_coil)
+    desuperheater.setHeatingSource(desuperheater_clg_coil)
   end
 
   def self.get_location_hierarchy(ba_cz_name)

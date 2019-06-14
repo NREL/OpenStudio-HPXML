@@ -1842,6 +1842,9 @@ class OSModel
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
 
+        sys_id = water_heating_system_values[:id]
+        @dhw_map[sys_id] = []
+
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
@@ -1849,6 +1852,15 @@ class OSModel
 
         has_desuperheater = water_heating_system_values[:has_desuperheater]
         relatedhvac = water_heating_system_values[:related_hvac]
+
+        if has_desuperheater
+          if not related_hvac_list.include? relatedhvac
+            related_hvac_list << relatedhvac
+            desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
+          else
+            fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
+          end
+        end
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1862,9 +1874,6 @@ class OSModel
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
-        sys_id = water_heating_system_values[:id]
-        @dhw_map[sys_id] = []
-
         if wh_type == "storage water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
@@ -1876,18 +1885,10 @@ class OSModel
           capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          if has_desuperheater
-            if not related_hvac_list.include? relatedhvac
-              related_hvac_list << relatedhvac
-              coil_object = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
-            else
-              fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
-            end
-          end
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj,
-                                           @nbeds, @dhw_map, sys_id, has_desuperheater, coil_object)
+                                           @nbeds, @dhw_map, sys_id, desuperheater_clg_coil)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1900,19 +1901,10 @@ class OSModel
           capacity_kbtuh = 100000000.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-
-          if has_desuperheater
-            if not related_hvac_list.include? relatedhvac
-              related_hvac_list << relatedhvac
-              coil_object = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
-            else
-              fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
-            end
-          end
           success = Waterheater.apply_tankless(model, runner, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                               @nbeds, @dhw_map, sys_id, has_desuperheater, coil_object)
+                                               @nbeds, @dhw_map, sys_id, desuperheater_clg_coil)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -1959,12 +1951,11 @@ class OSModel
     # Supported cooling coil options
     clg_coil_supported = [OpenStudio::Model::CoilCoolingDXSingleSpeed, OpenStudio::Model::CoilCoolingDXMultiSpeed, OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit]
     if hvac_map.keys.include? relatedhvac
-      target_hvac = hvac_map[relatedhvac]
-      target_hvac.each do |comp|
+      hvac_map[relatedhvac].each do |comp|
         clg_coil_supported.each do |coiltype|
           if comp.is_a? coiltype
             return comp
-           end
+          end
         end
       end
       fail "The Related HVAC system '#{relatedhvac}' for WaterHeatingSystem '#{wh_id}' is not currently supported for desuperheater simulation"
