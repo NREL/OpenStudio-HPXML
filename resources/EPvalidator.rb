@@ -411,7 +411,7 @@ class EnergyPlusValidator
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented']" => one,
         "FractionDHWLoadServed" => one,
         "[EnergyFactor | UniformEnergyFactor]" => one,
-        "HasDesuperheater" => zero_or_one, # See [Have desuperheater]
+        "HasDesuperheater" => zero_or_one, # See [Desuperheater]
       },
 
       ## [WHType=Tank]
@@ -438,9 +438,9 @@ class EnergyPlusValidator
         "TankVolume" => one,
       },
 
-      ## [Have desuperheater]
+      ## [Desuperheater]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[HasDesuperheater='true']" => {
-        "RelatedHVACSystem" => one,
+        "RelatedHVACSystem" => one, # HeatPump (ground-to-air, air-to-air) or CoolingSystem (central air conditioner)
       },
 
       # [HotWaterDistribution]
