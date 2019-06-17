@@ -37,11 +37,11 @@ def create_hpxmls
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-other.xml' => 'base.xml',
-    'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
-    'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/missing-surfaces.xml' => 'base.xml',
+    'invalid_files/multiple-attached-hvac-distribution-cooling.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/multiple-attached-hvac-distribution-heating.xml' => 'base-hvac-multiple.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
@@ -50,6 +50,7 @@ def create_hpxmls
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
+    'invalid_files/unattached-solar-thermal-system.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
@@ -2306,6 +2307,8 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
                                     :collector_frul => 0.793,
                                     :storage_volume => 60,
                                     :water_heating_system_idref => "WaterHeater" }
+  elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
+    solar_thermal_system_values[:water_heating_system_idref] = "foobar"
   end
   return solar_thermal_system_values
 end
