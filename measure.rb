@@ -1956,7 +1956,7 @@ class OSModel
           dhw_loop = dhw_object
         end
       else
-        fail "ConnectedTo '#{dhw_system_idref}' not found for solar thermal system '#{solar_thermal_values[:id]}'."
+        fail "Attached water heating system '#{dhw_system_idref}' not found for solar thermal system '#{solar_thermal_values[:id]}'."
       end
 
       success = Waterheater.apply_solar_thermal(model, runner, space, collector_area, frta,
