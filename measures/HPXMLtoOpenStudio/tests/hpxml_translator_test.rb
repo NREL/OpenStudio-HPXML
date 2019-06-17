@@ -113,6 +113,98 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
+  def test_generalized_hvac
+    # single-speed air conditioner
+    seer_to_expected_eer = { 13 => 11.2, 14 => 12.1, 15 => 13.0, 16 => 13.6 }
+    seer_to_expected_eer.each do |seer, expected_eer|
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eer = HVAC.calc_EER_cooling_1spd(seer, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC)
+      assert_in_epsilon(expected_eer, actual_eer, 0.01)
+    end
+
+    # single-speed air source heat pump
+    hspf_to_seer = { 7.7 => 13, 8.2 => 14, 8.5 => 15 }
+    seer_to_expected_eer = { 13 => 11.31, 14 => 12.21, 15 => 13.12 }
+    seer_to_expected_eer.each do |seer, expected_eer|
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eer = HVAC.calc_EER_cooling_1spd(seer, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_ASHP)
+      assert_in_epsilon(expected_eer, actual_eer, 0.01)
+    end
+    hspf_to_expected_cop = { 7.7 => 3.09, 8.2 => 3.35, 8.5 => 3.51 }
+    hspf_to_expected_cop.each do |hspf, expected_cop|
+      fan_power_rated = HVAC.get_fan_power_rated(hspf_to_seer[hspf])
+      actual_cop = HVAC.calc_COP_heating_1spd(hspf, HVAC.get_c_d_heating(1, hspf), fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP, HVAC.hEAT_CAP_FT_SPEC_ASHP)
+      assert_in_epsilon(expected_cop, actual_cop, 0.01)
+    end
+
+    # two-speed air conditioner
+    seer_to_expected_eers = { 16 => [13.8, 12.7], 17 => [14.7, 13.6], 18 => [15.5, 14.5], 21 => [18.2, 17.2] }
+    seer_to_expected_eers.each do |seer, expected_eers|
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eers = HVAC.calc_EERs_cooling_2spd(nil, seer, HVAC.get_c_d_cooling(2, seer), HVAC.two_speed_capacity_ratios, HVAC.two_speed_fan_speed_ratios_cooling, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC(2), HVAC.cOOL_CAP_FT_SPEC_AC(2))
+      expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
+        assert_in_epsilon(expected_eer, actual_eer, 0.01)
+      end
+    end
+
+    # two-speed air source heat pump
+    hspf_to_seer = { 8.6 => 16, 8.7 => 17, 9.3 => 18, 9.5 => 19 }
+    seer_to_expected_eers = { 16 => [13.2, 12.2], 17 => [14.1, 13.0], 18 => [14.9, 13.9], 19 => [15.7, 14.7] }
+    seer_to_expected_eers.each do |seer, expected_eers|
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eers = HVAC.calc_EERs_cooling_2spd(nil, seer, HVAC.get_c_d_cooling(2, seer), HVAC.two_speed_capacity_ratios, HVAC.two_speed_fan_speed_ratios_cooling, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_ASHP(2), HVAC.cOOL_CAP_FT_SPEC_ASHP(2))
+      expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
+        assert_in_epsilon(expected_eer, actual_eer, 0.01)
+      end
+    end
+    hspf_to_expected_cops = { 8.6 => [3.85, 3.34], 8.7 => [3.90, 3.41], 9.3 => [4.24, 3.83], 9.5 => [4.35, 3.98] }
+    hspf_to_expected_cops.each do |hspf, expected_cops|
+      fan_power_rated = HVAC.get_fan_power_rated(hspf_to_seer[hspf])
+      actual_cops = HVAC.calc_COPs_heating_2spd(hspf, HVAC.get_c_d_heating(2, hspf), HVAC.two_speed_capacity_ratios, HVAC.two_speed_fan_speed_ratios_heating, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(2), HVAC.hEAT_CAP_FT_SPEC_ASHP(2))
+      expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
+        assert_in_epsilon(expected_cop, actual_cop, 0.01)
+      end
+    end
+
+    # variable-speed air conditioner
+    capacity_ratios = HVAC.variable_speed_capacity_ratios_cooling
+    fan_speed_ratios = HVAC.variable_speed_fan_speed_ratios_cooling
+    cap_ratio_seer = [capacity_ratios[0], capacity_ratios[1], capacity_ratios[3]]
+    fan_speed_seer = [fan_speed_ratios[0], fan_speed_ratios[1], fan_speed_ratios[3]]
+    seer_to_expected_eers = { 24.5 => [19.5, 20.2, 19.7, 18.3] }
+    seer_to_expected_eers.each do |seer, expected_eers|
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eers = HVAC.calc_EERs_cooling_4spd(nil, seer, HVAC.get_c_d_cooling(4, seer), cap_ratio_seer, fan_speed_seer, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_AC([0, 1, 4]), HVAC.cOOL_CAP_FT_SPEC_AC([0, 1, 4]))
+      expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
+        assert_in_epsilon(expected_eer, actual_eer, 0.01)
+      end
+    end
+
+    # variable-speed air source heat pump
+    capacity_ratios = HVAC.variable_speed_capacity_ratios_cooling
+    fan_speed_ratios = HVAC.variable_speed_fan_speed_ratios_cooling
+    cap_ratio_seer = [capacity_ratios[0], capacity_ratios[1], capacity_ratios[3]]
+    fan_speed_seer = [fan_speed_ratios[0], fan_speed_ratios[1], fan_speed_ratios[3]]
+    seer_to_expected_eers = { 22.0 => [17.49, 18.09, 17.64, 16.43], 24.5 => [19.5, 20.2, 19.7, 18.3] }
+    seer_to_expected_eers.each do |seer, expected_eers|
+      fan_power_rated = HVAC.get_fan_power_rated(seer)
+      actual_eers = HVAC.calc_EERs_cooling_4spd(nil, seer, HVAC.get_c_d_cooling(4, seer), cap_ratio_seer, fan_speed_seer, fan_power_rated, HVAC.cOOL_EIR_FT_SPEC_ASHP([0, 1, 4]), HVAC.cOOL_CAP_FT_SPEC_ASHP([0, 1, 4]))
+      expected_eers.zip(actual_eers).each do |expected_eer, actual_eer|
+        assert_in_epsilon(expected_eer, actual_eer, 0.01)
+      end
+    end
+    capacity_ratios = HVAC.variable_speed_capacity_ratios_heating
+    fan_speed_ratios = HVAC.variable_speed_fan_speed_ratios_heating
+    hspf_to_expected_cops = { 10.0 => [5.18, 4.48, 3.83, 3.67] }
+    hspf_to_expected_cops.each do |hspf, expected_cops|
+      fan_power_rated = 0.14
+      actual_cops = HVAC.calc_COPs_heating_4spd(nil, hspf, HVAC.get_c_d_heating(4, hspf), capacity_ratios, fan_speed_ratios, fan_power_rated, HVAC.hEAT_EIR_FT_SPEC_ASHP(4), HVAC.hEAT_CAP_FT_SPEC_ASHP(4))
+      expected_cops.zip(actual_cops).each do |expected_cop, actual_cop|
+        assert_in_epsilon(expected_cop, actual_cop, 0.01)
+      end
+    end
+  end
+
   def _run_xml(xml, this_dir, args, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, "run")
@@ -631,12 +723,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         if clg_sys_cap > 0 and num_clg_sys == 1
           hpxml_value = clg_sys_cap
           sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-          if clg_sys_type == "central air conditioning" and get_ac_num_speeds(clg_sys_seer) == "Variable-Speed"
-            cap_adj = 1.16 # TODO: Generalize this
-          else
-            cap_adj = 1.0
-          end
-          assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
+          assert_in_epsilon(hpxml_value, sql_value, 0.01)
         end
 
       end
@@ -685,10 +772,9 @@ class HPXMLTranslatorTest < MiniTest::Test
         if hp_cap > 0 and num_hp == 1
           hpxml_value = hp_cap
           sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-          if hp_type == "mini-split" or (hp_type == "air-to-air" and get_ashp_num_speeds_by_seer(hp_seer) == "Variable-Speed")
+          cap_adj = 1.0
+          if hp_type == "mini-split"
             cap_adj = 1.20 # TODO: Generalize this
-          else
-            cap_adj = 1.0
           end
           assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
         end
@@ -735,7 +821,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_delta(hpxml_value, sql_value, 0.001)
 
         # Flow rate
-        hpxml_value = Float(XMLHelper.get_value(mv, "RatedFlowRate"))
+        hpxml_value = Float(XMLHelper.get_value(mv, "RatedFlowRate")) * Float(XMLHelper.get_value(mv, "HoursInOperation")) / 24.0
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_flow_rate_output_var.variableName}')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.001)
@@ -861,6 +947,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
     # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
+    puts "DSE test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_dse_dir
       next if not xml.include? "-dse-0.8"
@@ -873,7 +960,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if results_dse100.nil?
 
       # Compare results
-      puts "\nResults for #{File.basename(xml)}:"
       results_dse80.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
         next if not ["General"].include? k[2] # Exclude crankcase/defrost
@@ -888,15 +974,16 @@ class HPXMLTranslatorTest < MiniTest::Test
         if File.basename(xml) == "base-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
           dse_expect = 1.0 # TODO: Generalize this
         end
-        puts "dse: #{dse_actual.round(2)} #{k}"
+
+        _display_result_epsilon(xml, dse_expect, dse_actual, k)
         assert_in_epsilon(dse_expect, dse_actual, 0.03)
       end
-      puts "\n"
     end
   end
 
   def _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     # Compare end use results for three of an HVAC system to results for one HVAC system.
+    puts "Multiple HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
 
@@ -908,7 +995,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if results_x1.nil?
 
       # Compare results
-      puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
         next if not ["General"].include? k[2] # Exclude crankcase/defrost
@@ -917,16 +1003,15 @@ class HPXMLTranslatorTest < MiniTest::Test
         result_x3 = results_x3[k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
 
-        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
-
-        assert_in_epsilon(result_x1, result_x3, 0.15)
+        _display_result_epsilon(xml, result_x1, result_x3, k)
+        assert_in_epsilon(result_x1, result_x3, 0.12)
       end
-      puts "\n"
     end
   end
 
   def _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     # Compare end use results for three tankless water heaters to results for one tankless water heater.
+    puts "Multiple water heater test results:"
     xmls.sort.each do |xml|
       next if not xml.include? water_heating_multiple_dir
 
@@ -938,7 +1023,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       next if results_x1.nil?
 
       # Compare results
-      puts "\nResults for #{xml}:"
       results_x3.keys.each do |k|
         next if [@simulation_runtime_key, @workflow_runtime_key].include? k
 
@@ -946,42 +1030,48 @@ class HPXMLTranslatorTest < MiniTest::Test
         result_x3 = results_x3[k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
 
-        puts "x1, x3: #{result_x1.round(2)}, #{result_x3.round(2)} #{k}"
-
-        assert_in_delta(result_x1, result_x3, 0.2)
+        _display_result_delta(xml, result_x1, result_x3, k)
+        assert_in_delta(result_x1, result_x3, 0.1)
       end
-      puts "\n"
     end
   end
 
   def _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     # Compare end use results for a partial HVAC system to a full HVAC system.
+    puts "Partial HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
 
-      xml_50 = File.absolute_path(xml)
-      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-50percent.xml", "-base.xml"))
+      xml_33 = File.absolute_path(xml)
+      xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-33percent.xml", "-base.xml"))
 
-      results_50 = all_results[xml_50]
+      results_33 = all_results[xml_33]
       results_100 = all_results[xml_100]
       next if results_100.nil?
 
       # Compare results
-      puts "\nResults for #{xml}:"
-      results_50.keys.each do |k|
+      results_33.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
         next if not ["General"].include? k[2] # Exclude crankcase/defrost
 
-        result_50 = results_50[k].to_f
+        result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f
-        next if result_50 == 0.0 and result_100 == 0.0
+        next if result_33 == 0.0 and result_100 == 0.0
 
-        puts "50%, 100%: #{result_50.round(2)}, #{result_100.round(2)} #{k}"
-
-        assert_in_epsilon(result_50, result_100 / 2.0, 0.05)
+        _display_result_epsilon(xml, result_33, result_100 / 3.0, k)
+        assert_in_epsilon(result_33, result_100 / 3.0, 0.05)
       end
-      puts "\n"
     end
+  end
+
+  def _display_result_epsilon(xml, result1, result2, key)
+    epsilon = (result1 - result2).abs / [result1, result2].min
+    puts "#{xml}: epsilon=#{epsilon.round(5)} [#{key}]"
+  end
+
+  def _display_result_delta(xml, result1, result2, key)
+    delta = (result1 - result2).abs
+    puts "#{xml}: delta=#{delta.round(5)} [#{key}]"
   end
 
   def _rm_path(path)
