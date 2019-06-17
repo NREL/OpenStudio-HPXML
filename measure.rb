@@ -266,6 +266,8 @@ class OSModel
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
 
+    related_htg_list = [] # list of heating systems refered in water heating system "RelatedHeatingSystem" element
+
     @use_only_ideal_air = false
     if not construction_values[:use_only_ideal_air_system].nil?
       @use_only_ideal_air = construction_values[:use_only_ideal_air_system]
@@ -280,11 +282,6 @@ class OSModel
     # Bedrooms, Occupants
 
     success = add_num_occupants(model, building, runner)
-    return false if not success
-
-    # Hot Water
-
-    success = add_hot_water_and_appliances(runner, model, building, weather, spaces)
     return false if not success
 
     # HVAC
@@ -312,6 +309,11 @@ class OSModel
     return false if not success
 
     success = add_ceiling_fans(runner, model, building, spaces)
+    return false if not success
+
+    # Hot Water
+
+    success = add_hot_water_and_appliances(runner, model, building, weather, spaces, @dhw_map, @hvac_map, related_htg_list)
     return false if not success
 
     # Plug Loads & Lighting
@@ -1720,7 +1722,7 @@ class OSModel
     return true
   end
 
-  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces)
+  def self.add_hot_water_and_appliances(runner, model, building, weather, spaces, loop_dhws, loop_hvacs, related_htg_list)
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1849,7 +1851,10 @@ class OSModel
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
           uef = water_heating_system_values[:uniform_energy_factor]
-          ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
+          # allow systems not requiring ef and not specifying fuel type,  eg.indirect water heater
+          if not uef.nil?
+            ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
+          end
         end
 
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
@@ -1902,6 +1907,25 @@ class OSModel
 
           return false if not success
 
+        elsif wh_type == "space-heating boiler with storage tank"
+          tank_vol = water_heating_system_values[:tank_volume]
+          fuel_type = Constants.FuelTypeElectric # FIX ME: Fuel type is only being set for purposes of defaulting a tank UA. Need to review
+          ef = 0.95 # FIXME
+          heating_source_id = water_heating_system_values[:related_htg_sys_idref]
+          if not related_htg_list.include? heating_source_id
+            related_htg_list << heating_source_id
+            boiler_plant_loop = get_boiler_loop(loop_hvacs, heating_source_id, water_heating_system_values)
+          else
+            fail "RelatedHeatingSystem '#{heating_source_id}' for water heating system '#{water_heating_system_values[:id]}' is already attached to another water heating system."
+          end
+          capacity_kbtuh = 0.0
+          oncycle_power = 0.0
+          offcycle_power = 0.0
+          success = Waterheater.apply_indirect(model, runner, fuel_type, nil, space, capacity_kbtuh,
+                                               tank_vol, ef, re, setpoint_temp, oncycle_power,
+                                               offcycle_power, ec_adj, @nbeds, boiler_plant_loop, @dhw_map, sys_id)
+          return false if not success
+
         else
 
           fail "Unhandled water heater (#{wh_type})."
@@ -1911,7 +1935,6 @@ class OSModel
         dhw_loop_fracs[sys_id] = dhw_load_frac
       end
     end
-
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
     living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
     success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
@@ -2469,6 +2492,20 @@ class OSModel
     dse_cool = annual_cooling_dse
     dse_heat = annual_heating_dse
     return dse_heat, dse_cool, true
+  end
+
+  def self.get_boiler_loop(loop_hvacs, heating_source_id, wh)
+    # Search for the right boiler OS object
+    if loop_hvacs.keys.include? heating_source_id
+      combined_hvac = loop_hvacs[heating_source_id]
+      combined_hvac.each do |comp|
+        if comp.is_a? OpenStudio::Model::PlantLoop
+          return comp
+        end
+      end
+    else
+      fail "RelatedHeatingSystem '#{heating_source_id}' not found for water heating system '#{wh[:id]}'."
+    end
   end
 
   def self.add_mels(runner, model, building, spaces)
