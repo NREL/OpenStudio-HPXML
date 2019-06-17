@@ -1199,6 +1199,8 @@ class HPXML
                                     energy_factor: nil,
                                     uniform_energy_factor: nil,
                                     recovery_efficiency: nil,
+                                    has_desuperheater: nil,
+                                    related_hvac: nil,
                                     **remainder)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
@@ -1214,6 +1216,9 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "EnergyFactor", Float(energy_factor)) unless energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "UniformEnergyFactor", Float(uniform_energy_factor)) unless uniform_energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", Float(recovery_efficiency)) unless recovery_efficiency.nil?
+    XMLHelper.add_element(water_heating_system, "HasDesuperheater", Boolean(has_desuperheater)) unless has_desuperheater.nil?
+    related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem") unless related_hvac.nil?
+    XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac) unless related_hvac.nil?
 
     return water_heating_system
   end
@@ -1232,7 +1237,9 @@ class HPXML
              :heating_capacity => to_float_or_nil(XMLHelper.get_value(water_heating_system, "HeatingCapacity")),
              :energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
-             :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")) }
+             :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
+             :has_desuperheater => to_bool_or_nil(XMLHelper.get_value(water_heating_system, "HasDesuperheater")),
+             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem") }
   end
 
   def self.add_hot_water_distribution(hpxml:,
