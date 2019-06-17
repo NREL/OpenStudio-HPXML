@@ -202,18 +202,25 @@
           <HVACPlant>
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
-              <HeatPumpType>mini-split</HeatPumpType>
+              <DistributionSystem idref='HVACDistribution'/>
+              <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
-              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
-              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <CoolingCapacity>16000.0</CoolingCapacity>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </BackupAnnualHeatingEfficiency>
+              <BackupHeatingCapacity>40000.0</BackupHeatingCapacity>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>19.0</Value>
+                <Units>EER</Units>
+                <Value>16.6</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>HSPF</Units>
-                <Value>10.0</Value>
+                <Units>COP</Units>
+                <Value>3.6</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
@@ -221,6 +228,14 @@
             <SystemIdentifier id='HVACControl'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution'/>
+            <DistributionSystemType>
+              <Other>DSE</Other>
+            </DistributionSystemType>
+            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
+            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
+          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>

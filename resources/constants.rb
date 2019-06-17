@@ -888,8 +888,12 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SpaceTypeCrawl
-    return 'crawlspace'
+  def self.SpaceTypeVentedCrawl
+    return 'vented crawlspace'
+  end
+
+  def self.SpaceTypeUnventedCrawl
+    return 'unvented crawlspace'
   end
 
   def self.SpaceTypeConditionedBasement
@@ -904,12 +908,12 @@ class Constants
     return 'living'
   end
 
-  def self.SpaceTypePierBeam
-    return 'pier and beam'
+  def self.SpaceTypeVentedAttic
+    return 'vented attic'
   end
 
-  def self.SpaceTypeUnconditionedAttic
-    return 'unconditioned attic'
+  def self.SpaceTypeUnventedAttic
+    return 'unvented attic'
   end
 
   def self.SpaceTypeUnconditionedBasement
