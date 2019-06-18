@@ -1494,7 +1494,28 @@
 												</xs:sequence>
 												</xs:complexType>
 												</xs:element>
-											</xs:sequence>
+												<xs:element minOccurs="0" name="TankWall">
+												<xs:annotation>
+												<xs:documentation>Refers to the insulation in the tank wall itself. This information is sometimes vailable on the water heater's name plate or the units specification sheet, or can be estimated by removing the water heater's access plate.</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+												<xs:sequence>
+												<xs:element minOccurs="0"
+												name="InsulationMaterial"
+												type="InsulationMaterial"/>
+												<xs:element name="TankWallRValue" type="RValue"
+												minOccurs="0"/>
+												<xs:element minOccurs="0" name="Thickness"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[in]</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" ref="extension"/>
+												</xs:sequence>
+												</xs:complexType>
+												</xs:element>
+                      </xs:sequence>
 										</xs:complexType>
 									</xs:element>
 									<xs:element name="MeetsACCA5QIHVACSpecification"
@@ -1505,10 +1526,10 @@
 											<xs:documentation>[deg F]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="HasGeothermalDesuperheater"
+									<xs:element minOccurs="0" name="HasDesuperheater"
 										type="xs:boolean">
 										<xs:annotation>
-											<xs:documentation>Indicates whether this water heater has a geothermal desuperheater. The attached heat pump can be referenced in the RelatedHeatingSystem element.</xs:documentation>
+											<xs:documentation>Indicates whether this water heater has a desuperheater. The attached heat pump or air conditioner can be referenced in the RelatedHVACSystem element.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="HasSharedCombustionVentilation"
@@ -1522,8 +1543,12 @@
 									<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
 									<xs:element minOccurs="0" name="IntermittentIgnitionDevice"
 										type="xs:boolean"/>
-									<xs:element name="RelatedHeatingSystem" type="LocalReference"
-										minOccurs="0"/>
+									<xs:element name="RelatedHVACSystem" type="LocalReference"
+										minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>Reference a HeatingSystem, HeatPump, or CoolingSystem.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 									<xs:element minOccurs="0" name="Installation">
 										<xs:complexType>
 											<xs:sequence>
