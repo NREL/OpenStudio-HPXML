@@ -87,6 +87,7 @@ def create_hpxmls
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
@@ -2149,7 +2150,7 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :location => "living space",
                                       :tank_volume => 50,
                                       :fraction_dhw_load_served => 0.1,
-                                      :related_htg_sys_idref => "HeatingSystem" }
+                                      :related_hvac => "HeatingSystem" }
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     water_heating_systems_values[0][:fraction_dhw_load_served] += 0.15
   elsif ['base-dhw-tank-gas.xml'].include? hpxml_file
@@ -2207,7 +2208,10 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:fuel_type] = nil
-    water_heating_systems_values[0][:related_htg_sys_idref] = "HeatingSystem"
+    water_heating_systems_values[0][:related_hvac] = "HeatingSystem"
+  elsif ['base-dhw-combi-tankless.xml'].include? hpxml_file
+    water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with tankless coil"
+    water_heating_systems_values[0][:tank_volume] = nil
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
@@ -2225,7 +2229,7 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['invalid_files/water-heater-location-other.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "unconditioned space"
   elsif ['invalid_files/invalid-idref-dhw-indirect.xml'].include? hpxml_file
-    water_heating_systems_values[0][:related_htg_sys_idref] = "HeatingSystem-bad"
+    water_heating_systems_values[0][:related_hvac] = "HeatingSystem-bad"
   elsif ['invalid_files/two-repeating-idref-dhw-indirect.xml'].include? hpxml_file
     water_heating_systems_values[0][:fraction_dhw_load_served] = 0.5
     water_heating_systems_values << water_heating_systems_values[0].dup
