@@ -2445,14 +2445,14 @@ end
 def get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
   if ['base.xml'].include? hpxml_file
     dishwasher_values = { :id => "Dishwasher",
-                          :rated_annual_kwh => 100,
+                          :rated_annual_kwh => 200,
                           :place_setting_capacity => 12 }
   elsif ['base-appliances-none.xml'].include? hpxml_file
     dishwasher_values = {}
   elsif ['base-appliances-dishwasher-ef.xml'].include? hpxml_file
     dishwasher_values = { :id => "Dishwasher",
-                          :energy_factor => 0.5,
-                          :place_setting_capacity => 8 }
+                          :energy_factor => 1.1,
+                          :place_setting_capacity => 12 }
   end
   return dishwasher_values
 end

@@ -354,8 +354,8 @@
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <EnergyFactor>0.5</EnergyFactor>
-          <PlaceSettingCapacity>8</PlaceSettingCapacity>
+          <EnergyFactor>1.1</EnergyFactor>
+          <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
