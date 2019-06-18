@@ -267,7 +267,7 @@
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
-            <RelatedHeatingSystem idref='HeatingSystem'/>
+            <RelatedHVACSystem idref='HeatingSystem'/>
           </WaterHeatingSystem>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater2'/>
@@ -275,7 +275,7 @@
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
-            <RelatedHeatingSystem idref='HeatingSystem'/>
+            <RelatedHVACSystem idref='HeatingSystem'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>
