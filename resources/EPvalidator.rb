@@ -477,14 +477,18 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[SystemType='hot water']" => one,
-        "CollectorArea" => one,
+        "[CollectorArea | SolarFraction]" => one, # See [SolarThermal=Detailed] if CollectorArea provided
+        "ConnectedTo" => one, # WaterHeatingSystem
+      },
+
+      ## [SolarThermal=Detailed]
+      "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[CollectorArea]" => {
         "[CollectorLoopType='liquid indirect']" => one,
         "CollectorAzimuth" => one,
         "CollectorTilt" => one,
         "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
         "CollectorRatedThermalLosses" => one, # FRUL (slope); see Directory of SRCC Certified Solar Collector Ratings
         "StorageVolume" => one,
-        "ConnectedTo" => one, # WaterHeatingSystem
       },
 
       # [PVSystem]
