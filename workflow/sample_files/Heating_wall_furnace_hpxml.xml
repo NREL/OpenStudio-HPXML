@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-06-18T12:41:22-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-06-18T17:58:25-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2292">
+    <BuildingID id="bid-2449">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -190,10 +190,10 @@
         </Walls>
         <Slabs>
           <Slab>
-            <SystemIdentifier id="slab1"/>
+            <SystemIdentifier id="floor1_slab"/>
             <Area>1000</Area>
             <PerimeterInsulation>
-              <SystemIdentifier id="foundation1"/>
+              <SystemIdentifier id="slab1_insulation"/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>0</NominalRValue>
