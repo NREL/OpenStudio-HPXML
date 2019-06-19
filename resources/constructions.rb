@@ -873,7 +873,7 @@ class Constructions
   end
 
   def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
-                                 wall_rigid_ins_height, wall_cavity_r, wall_install_grade,
+                                 wall_rigid_ins_offset, wall_rigid_ins_height, wall_cavity_r, wall_install_grade,
                                  wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                                  wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                                  wall_height, wall_height_above_grade, foundation = nil)
@@ -894,9 +894,9 @@ class Constructions
 
     if foundation.nil?
       # Create Kiva foundation
-      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_rvalue, wall_height,
-                                                            wall_rigid_r, wall_rigid_ins_height,
-                                                            wall_height_above_grade)
+      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_rvalue, wall_height, wall_rigid_r,
+                                                            wall_rigid_ins_offset, wall_rigid_ins_height,
+                                                            wall_height_above_grade, wall_concrete_thick_in)
     end
 
     # Define materials
@@ -1449,8 +1449,8 @@ class Constructions
   end
 
   def self.create_kiva_crawl_or_basement_foundation(model, int_vert_r, int_vert_depth,
-                                                    ext_vert_r, ext_vert_depth,
-                                                    wall_height_above_grade)
+                                                    ext_vert_r, ext_vert_offset, ext_vert_depth,
+                                                    wall_height_above_grade, wall_concrete_thick_in)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1465,8 +1465,15 @@ class Constructions
     # Exterior vertical insulation
     if ext_vert_r > 0 and ext_vert_depth > 0
       ext_vert_mat = create_insulation_material(model, "FoundationExtVertIns", ext_vert_r)
-      foundation.setExteriorVerticalInsulationMaterial(ext_vert_mat)
-      foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
+      if ext_vert_offset == 0
+        foundation.setExteriorVerticalInsulationMaterial(ext_vert_mat)
+        foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
+      else
+        foundation.addCustomBlock(material,
+                                  UnitConversions.convert(ext_vert_depth, "ft", "m"),
+                                  UnitConversions.convert(wall_concrete_thick_in, "in", "m"),
+                                  UnitConversions.convert(ext_vert_offset, "ft", "m"))
+      end
     end
 
     foundation.setWallHeightAboveGrade(UnitConversions.convert(wall_height_above_grade, "ft", "m"))

@@ -1217,7 +1217,8 @@ class OSModel
               rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
             end
           else
-            rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
+            rigid_offset = fnd_wall_values[:insulation_distance_to_top]
+            rigid_height = (fnd_wall_values[:insulation_distance_to_bottom] - rigid_offset)
             rigid_r = fnd_wall_values[:insulation_r_value]
           end
 
@@ -1225,7 +1226,7 @@ class OSModel
 
           # TODO: Currently assumes all walls have the same height, insulation height, etc.
           success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
-                                                        rigid_height, cavity_r, install_grade,
+                                                        rigid_offset, rigid_height, cavity_r, install_grade,
                                                         cavity_depth_in, filled_cavity, framing_factor,
                                                         rigid_r, drywall_thick_in, concrete_thick_in,
                                                         height, height_ag, foundation)

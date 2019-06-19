@@ -933,7 +933,7 @@ class HVACSizing
 
     # Foundation walls
     Geometry.get_spaces_below_grade_exterior_walls(thermal_zone.spaces).each do |wall|
-      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, wall)
+      wall_ins_rvalue, wall_ins_offset, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, wall)
       if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
         return nil
       end
@@ -941,16 +941,15 @@ class HVACSizing
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
       ins_wall_ufactor = 1.0 / (wall_constr_rvalue + wall_ins_rvalue + Material.AirFilmVertical.rvalue)
       unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)
-      above_grade_height = Geometry.get_height_of_spaces([wall.space.get]) - Geometry.surface_height(wall)
 
       # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
       u_value_mj8 = 0.0
       wall_height_ft = Geometry.get_surface_height(wall).round
       for d in 1..wall_height_ft
         r_soil = (Math::PI * d / 2.0) / k_soil
-        if d <= above_grade_height
+        if d <= wall_ins_offset
           r_wall = 1.0 / ins_wall_ufactor + AirFilms.OutsideR
-        elsif d <= wall_ins_height
+        elsif d <= wall_ins_offset + wall_ins_height
           r_wall = 1.0 / ins_wall_ufactor
         else
           r_wall = 1.0 / unins_wall_ufactor
@@ -3017,7 +3016,7 @@ class HVACSizing
       if obc == "foundation"
         # FIXME: Original approach used Winkelmann U-factors...
         if surface.surfaceType.downcase == "wall"
-          wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, surface)
+          wall_ins_rvalue, wall_ins_offset, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, surface)
           if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
             return nil
           end
@@ -3583,7 +3582,7 @@ class HVACSizing
       next if surface.surfaceType.downcase != "wall"
       next if not surface.adjacentFoundation.is_initialized
 
-      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, surface)
+      wall_ins_rvalue, wall_ins_offset, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, surface)
       if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
         return nil
       end
@@ -3630,6 +3629,7 @@ class HVACSizing
 
     wall_ins_rvalue = 0.0
     wall_ins_height = 0.0
+    wall_ins_offset = 0.0
     if foundation.interiorVerticalInsulationMaterial.is_initialized
       int_mat = foundation.interiorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
       k = UnitConversions.convert(int_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
@@ -3644,10 +3644,19 @@ class HVACSizing
       wall_ins_rvalue += thick / k
       wall_ins_height = UnitConversions.convert(foundation.exteriorVerticalInsulationDepth.get, "m", "ft").round
     end
+    # Vertical insulation that is offset is defined in custom blocks
+    foundation.customBlocks.each do |custom_block|
+      ext_mat = custom_block.material.to_StandardOpaqueMaterial.get
+      k = UnitConversions.convert(ext_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
+      thick = UnitConversions.convert(ext_mat.thickness, "m", "ft")
+      wall_ins_rvalue += thick / k
+      wall_ins_height = UnitConversions.convert(custom_block.depth, "m", "ft").round
+      wall_ins_offset = UnitConversions.convert(custom_block.zPosition, "m", "ft").round
+    end
 
     wall_constr_rvalue = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
 
-    return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
+    return wall_ins_rvalue, wall_ins_offset, wall_ins_height, wall_constr_rvalue
   end
 
   def self.get_feature(runner, obj, feature, datatype, register_error = true)

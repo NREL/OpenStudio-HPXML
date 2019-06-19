@@ -528,6 +528,7 @@ class HPXML
                                azimuth: nil,
                                thickness:,
                                depth_below_grade:,
+                               insulation_distance_to_top: nil,
                                insulation_distance_to_bottom: nil,
                                insulation_id: nil,
                                insulation_r_value: nil,
@@ -549,6 +550,7 @@ class HPXML
                               id: insulation_id,
                               assembly_r_value: Float(insulation_assembly_r_value))
     else
+      XMLHelper.add_element(foundation_wall, "DistanceToTopOfInsulation", Float(insulation_distance_to_top))
       XMLHelper.add_element(foundation_wall, "DistanceToBottomOfInsulation", Float(insulation_distance_to_bottom))
       add_layer_insulation(parent: foundation_wall,
                            element_name: "Insulation",
@@ -573,6 +575,7 @@ class HPXML
              :azimuth => to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth")),
              :thickness => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness")),
              :depth_below_grade => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
+             :insulation_distance_to_top => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DistanceToTopOfInsulation")),
              :insulation_distance_to_bottom => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DistanceToBottomOfInsulation")),
              :insulation_id => insulation_layer_values[:id],
              :insulation_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]),

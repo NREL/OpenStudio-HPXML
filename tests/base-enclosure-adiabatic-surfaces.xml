@@ -124,6 +124,7 @@
             <Area>300.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
+            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
@@ -141,6 +142,7 @@
             <Area>900.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
+            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallAdiabaticInsulation'/>
