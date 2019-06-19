@@ -1858,12 +1858,14 @@ class OSModel
 
         # Check if simple solar water heater attached
         solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"])
-        solar_fraction = solar_thermal_values[:solar_fraction]
-        if sys_id == solar_thermal_values[:water_heating_system_idref] and not solar_fraction.nil?
-          # Calculate Solar Energy Factor from Solar Fraction and Energy Factor
-          soler_energy_factor = ef / (1.0 - solar_fraction)
-          # Replace water heater EF w/ SEF
-          ef = soler_energy_factor
+        if not solar_thermal_values.nil?
+          solar_fraction = solar_thermal_values[:solar_fraction]
+          if sys_id == solar_thermal_values[:water_heating_system_idref] and not solar_fraction.nil? # Simple solar water heater (solar fraction)
+            # Calculate Solar Energy Factor from Solar Fraction and Energy Factor
+            soler_energy_factor = ef / (1.0 - solar_fraction)
+            # Replace water heater EF w/ SEF
+            ef = soler_energy_factor
+          end
         end
 
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
@@ -1943,38 +1945,39 @@ class OSModel
     return false if not success
 
     solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"])
-    collector_area = solar_thermal_values[:collector_area]
-    if not solar_thermal_values.nil? and not collector_area.nil?
-      # Detailed solar water heater
-      frta = solar_thermal_values[:collector_frta]
-      frul = solar_thermal_values[:collector_frul]
-      iam = 0.1 # TODO: Review. Incident angle modifier coefficient
-      storage_vol = solar_thermal_values[:storage_volume]
-      tank_r = 10.0 # TODO: Review
-      fluid_type = Constants.FluidPropyleneGlycol # TODO: Review
-      heat_ex_eff = 0.7 # TODO: Review
-      pump_power = 0.8 * collector_area # TODO: Review
-      azimuth = Float(solar_thermal_values[:collector_azimuth]) # FIXME: Test
-      tilt = solar_thermal_values[:collector_tilt] # FIXME: Test
-      dhw_system_idref = solar_thermal_values[:water_heating_system_idref]
-      space = water_heater_spaces[dhw_system_idref]
+    if not solar_thermal_values.nil?
+      collector_area = solar_thermal_values[:collector_area]
+      if not collector_area.nil? # Detailed solar water heater
+        frta = solar_thermal_values[:collector_frta]
+        frul = solar_thermal_values[:collector_frul]
+        iam = 0.1 # TODO: Review. Incident angle modifier coefficient
+        storage_vol = solar_thermal_values[:storage_volume]
+        tank_r = 10.0 # TODO: Review
+        fluid_type = Constants.FluidPropyleneGlycol # TODO: Review
+        heat_ex_eff = 0.7 # TODO: Review
+        pump_power = 0.8 * collector_area # TODO: Review
+        azimuth = Float(solar_thermal_values[:collector_azimuth])
+        tilt = solar_thermal_values[:collector_tilt]
+        dhw_system_idref = solar_thermal_values[:water_heating_system_idref]
+        space = water_heater_spaces[dhw_system_idref]
 
-      dhw_loop = nil
-      if @dhw_map.keys.include? dhw_system_idref
-        @dhw_map[dhw_system_idref].each do |dhw_object|
-          next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
+        dhw_loop = nil
+        if @dhw_map.keys.include? dhw_system_idref
+          @dhw_map[dhw_system_idref].each do |dhw_object|
+            next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
 
-          dhw_loop = dhw_object
+            dhw_loop = dhw_object
+          end
+        else
+          fail "Attached water heating system '#{dhw_system_idref}' not found for solar thermal system '#{solar_thermal_values[:id]}'."
         end
-      else
-        fail "Attached water heating system '#{dhw_system_idref}' not found for solar thermal system '#{solar_thermal_values[:id]}'."
-      end
 
-      success = Waterheater.apply_solar_thermal(model, runner, space, collector_area, frta,
-                                                frul, iam, storage_vol, tank_r, fluid_type,
-                                                heat_ex_eff, pump_power, azimuth, tilt,
-                                                dhw_loop, @dhw_map, dhw_system_idref)
-      return false if not success
+        success = Waterheater.apply_solar_thermal(model, runner, space, collector_area, frta,
+                                                  frul, iam, storage_vol, tank_r, fluid_type,
+                                                  heat_ex_eff, pump_power, azimuth, tilt,
+                                                  dhw_loop, @dhw_map, dhw_system_idref)
+        return false if not success
+      end
     end
 
     return true
