@@ -1906,7 +1906,7 @@ class OSModel
 
           return false if not success
 
-        elsif wh_type == "space-heating boiler with storage tank" || wh_type == "space-heating boiler with tankless coil"
+        elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
           if wh_type == "space-heating boiler with storage tank"
             tank_vol = water_heating_system_values[:tank_volume]
           else
