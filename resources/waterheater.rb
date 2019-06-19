@@ -11,40 +11,10 @@ class Waterheater
   def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
                       re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
 
-    # Validate inputs
-    if vol <= 0
-      runner.registerError("Storage tank volume must be greater than 0.")
-      return false
-    end
-    if ef >= 1 or ef <= 0
-      runner.registerError("Rated energy factor must be greater than 0 and less than 1.")
-      return false
-    end
-    if t_set <= 0 or t_set >= 212
-      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
-      return false
-    end
-    if cap <= 0
-      runner.registerError("Nominal capacity must be greater than 0.")
-      return false
-    end
     if fuel_type == Constants.FuelTypeElectric
       re = 0.98 # recovery efficiency set by fiat
       oncycle_p = 0
       offcycle_p = 0
-    else
-      if re < 0 or re > 1
-        runner.registerError("Recovery efficiency must be at least 0 and at most 1.")
-        return false
-      end
-      if oncycle_p < 0
-        runner.registerError("Forced draft fan power must be greater than 0.")
-        return false
-      end
-      if offcycle_p < 0
-        runner.registerError("Parasitic electricity power must be greater than 0.")
-        return false
-      end
     end
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
@@ -74,34 +44,9 @@ class Waterheater
                           cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
 
     # Validate inputs
-    if ef > 1 or ef <= 0
-      runner.registerError("Rated energy factor must be greater than 0 and less than or equal to 1.")
-      return false
-    end
-    if t_set <= 0 or t_set >= 212
-      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
-      return false
-    end
-    if cap <= 0
-      runner.registerError("Nominal capacity must be greater than 0.")
-      return false
-    end
-    if cd < 0 or cd > 1
-      runner.registerError("Cycling derate must be at least 0 and at most 1.")
-      return false
-    end
     if fuel_type == Constants.FuelTypeElectric
       oncycle_p = 0
       offcycle_p = 0
-    else
-      if oncycle_p < 0
-        runner.registerError("Forced draft fan power must be greater than 0.")
-        return false
-      end
-      if offcycle_p < 0
-        runner.registerError("Parasitic electricity power must be greater than 0.")
-        return false
-      end
     end
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
@@ -154,60 +99,6 @@ class Waterheater
     airflow_rate = 181.0 # cfm
     fan_power = 0.0462 # FIXME
     parasitics = 3.0 # W
-
-    # Validate inputs
-    if vol <= 0.0
-      runner.registerError("Storage tank volume must be greater than 0.")
-      return false
-    end
-    if t_set <= 0.0 or t_set >= 212.0
-      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
-      return false
-    end
-    if e_cap < 0.0
-      runner.registerError("Element capacity must be greater than 0.")
-      return false
-    end
-    if min_temp >= 80.0
-      runner.registerError("Minimum temperature will prevent HPWH from running, double check inputs.")
-      return false
-    end
-    if max_temp <= 0.0
-      runner.registerError("Maximum temperature will prevent HPWH from running, double check inputs.")
-      return false
-    end
-    if cap <= 0.0
-      runner.registerError("Rated capacity must be greater than 0.")
-      return false
-    end
-    if shr < 0.0 or shr > 1.0
-      runner.registerError("Rated sensible heat ratio must be between 0 and 1.")
-      return false
-    end
-    if airflow_rate <= 0.0
-      runner.registerError("Airflow rate must be greater than 0.")
-      return false
-    end
-    if fan_power <= 0.0
-      runner.registerError("Fan power must be greater than 0.")
-      return false
-    end
-    if parasitics < 0.0
-      runner.registerError("Parasitics must be greater than 0.")
-      return false
-    end
-    if tank_ua <= 0.0
-      runner.registerError("Tank UA must be greater than 0.")
-      return false
-    end
-    if int_factor < 0.0 or int_factor > 1.0
-      runner.registerError("Interaction factor must be between 0 and 1.")
-      return false
-    end
-    if temp_depress < 0.0
-      runner.registerError("Temperature depression must be greater than 0.")
-      return false
-    end
 
     # Calculate the COP based on EF
     uef = (0.60522 + ef) / 1.2101

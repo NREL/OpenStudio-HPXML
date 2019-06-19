@@ -1319,14 +1319,15 @@ class HPXML
   def self.add_solar_thermal_system(hpxml:,
                                     id:,
                                     system_type:,
-                                    collector_area:,
-                                    collector_loop_type:,
-                                    collector_azimuth:,
-                                    collector_tilt:,
-                                    collector_frta:,
-                                    collector_frul:,
-                                    storage_volume:,
+                                    collector_area: nil,
+                                    collector_loop_type: nil,
+                                    collector_azimuth: nil,
+                                    collector_tilt: nil,
+                                    collector_frta: nil,
+                                    collector_frul: nil,
+                                    storage_volume: nil,
                                     water_heating_system_idref:,
+                                    solar_fraction: nil,
                                     **remainder)
 
     solar_thermal = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "SolarThermal"])
@@ -1334,15 +1335,16 @@ class HPXML
     sys_id = XMLHelper.add_element(solar_thermal_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(solar_thermal_system, "SystemType", system_type)
-    XMLHelper.add_element(solar_thermal_system, "CollectorArea", Float(collector_area))
-    XMLHelper.add_element(solar_thermal_system, "CollectorLoopType", collector_loop_type)
-    XMLHelper.add_element(solar_thermal_system, "CollectorAzimuth", Integer(collector_azimuth))
-    XMLHelper.add_element(solar_thermal_system, "CollectorTilt", Float(collector_tilt))
-    XMLHelper.add_element(solar_thermal_system, "CollectorRatedOpticalEfficiency", Float(collector_frta))
-    XMLHelper.add_element(solar_thermal_system, "CollectorRatedThermalLosses", Float(collector_frul))
-    XMLHelper.add_element(solar_thermal_system, "StorageVolume", Float(storage_volume))
+    XMLHelper.add_element(solar_thermal_system, "CollectorArea", Float(collector_area)) unless collector_area.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorLoopType", collector_loop_type) unless collector_loop_type.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorAzimuth", Integer(collector_azimuth)) unless collector_azimuth.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorTilt", Float(collector_tilt)) unless collector_tilt.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorRatedOpticalEfficiency", Float(collector_frta)) unless collector_frta.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorRatedThermalLosses", Float(collector_frul)) unless collector_frul.nil?
+    XMLHelper.add_element(solar_thermal_system, "StorageVolume", Float(storage_volume)) unless storage_volume.nil?
     connected_to = XMLHelper.add_element(solar_thermal_system, "ConnectedTo")
     XMLHelper.add_attribute(connected_to, "idref", water_heating_system_idref)
+    XMLHelper.add_element(solar_thermal_system, "SolarFraction", Float(solar_fraction)) unless solar_fraction.nil?
 
     return solar_thermal_system
   end
@@ -1359,7 +1361,8 @@ class HPXML
              :collector_frta => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedOpticalEfficiency")),
              :collector_frul => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedThermalLosses")),
              :storage_volume => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume")),
-             :water_heating_system_idref => HPXML.get_idref(solar_thermal_system, "ConnectedTo") }
+             :water_heating_system_idref => HPXML.get_idref(solar_thermal_system, "ConnectedTo"),
+             :solar_fraction => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "SolarFraction")) }
   end
 
   def self.add_pv_system(hpxml:,

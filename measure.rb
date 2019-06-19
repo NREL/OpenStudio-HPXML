@@ -1856,6 +1856,16 @@ class OSModel
           ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
         end
 
+        # Check if simple solar water heater attached
+        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"])
+        solar_fraction = solar_thermal_values[:solar_fraction]
+        if sys_id == solar_thermal_values[:water_heating_system_idref] and not solar_fraction.nil?
+          # Calculate Solar Energy Factor from Solar Fraction and Energy Factor
+          soler_energy_factor = ef / (1.0 - solar_fraction)
+          # Replace water heater EF w/ SEF
+          ef = soler_energy_factor
+        end
+
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
@@ -1933,8 +1943,9 @@ class OSModel
     return false if not success
 
     solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"])
-    if not solar_thermal_values.nil?
-      collector_area = solar_thermal_values[:collector_area]
+    collector_area = solar_thermal_values[:collector_area]
+    if not solar_thermal_values.nil? and not collector_area.nil?
+      # Detailed solar water heater
       frta = solar_thermal_values[:collector_frta]
       frul = solar_thermal_values[:collector_frul]
       iam = 0.1 # TODO: Review. Incident angle modifier coefficient

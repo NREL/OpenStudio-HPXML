@@ -76,6 +76,7 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
+    'base-dhw-solar-fraction.xml' => 'base.xml',
     'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
@@ -1734,9 +1735,9 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 0.2,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
-  elsif ['invalid_files/hvac-distribution-multiple-attached-heating.xml'].include? hpxml_file
+  elsif ['invalid_files/multiple-attached-hvac-distribution-heating.xml'].include? hpxml_file
     heat_pumps_values[0][:distribution_system_idref] = "HVACDistribution3"
-  elsif ['invalid_files/hvac-distribution-multiple-attached-cooling.xml'].include? hpxml_file
+  elsif ['invalid_files/multiple-attached-hvac-distribution-cooling.xml'].include? hpxml_file
     heat_pumps_values[0][:distribution_system_idref] = "HVACDistribution4"
   elsif hpxml_file.include? 'hvac_autosizing' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] = -1
@@ -2294,9 +2295,14 @@ def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
 end
 
 def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
-  if ['base-dhw-solar-indirect-flat-plate.xml',
-      'base-dhw-tank-heat-pump-with-solar.xml',
-      'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
+  if ['base-dhw-solar-fraction.xml'].include? hpxml_file
+    solar_thermal_system_values = { :id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :water_heating_system_idref => "WaterHeater",
+                                    :solar_fraction => 0.65 }
+  elsif ['base-dhw-solar-indirect-flat-plate.xml',
+         'base-dhw-tank-heat-pump-with-solar.xml',
+         'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
     solar_thermal_system_values = { :id => "SolarThermalSystem",
                                     :system_type => "hot water",
                                     :collector_area => 40,
