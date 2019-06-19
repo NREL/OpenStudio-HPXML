@@ -646,7 +646,7 @@ class HEScoreRuleset
         fuel_type = wh_sys_values[:fuel_type]
       end
       wh_tank_volume = nil
-      if wh_sys_values[:water_heater_type] != "instantaneous water heater"
+      if wh_sys_values[:water_heater_type] != "instantaneous water heater" and wh_sys_values[:water_heater_type] != "space-heating boiler with tankless coil"
         wh_tank_volume = get_default_water_heater_volume(fuel_type)
       end
       HPXML.add_water_heating_system(hpxml: hpxml,
@@ -660,7 +660,7 @@ class HEScoreRuleset
                                      energy_factor: wh_sys_values[:energy_factor],
                                      uniform_energy_factor: wh_sys_values[:uniform_energy_factor],
                                      recovery_efficiency: wh_recovery_efficiency,
-                                     related_htg_sys_idref: wh_sys_values[:related_htg_sys_idref])
+                                     related_hvac: wh_sys_values[:related_hvac])
     end
   end
 

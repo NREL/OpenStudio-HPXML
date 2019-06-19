@@ -314,6 +314,7 @@
           <WaterHeatingSystem>
             <SystemIdentifier id='water_heater1'/>
             <WaterHeaterType>space-heating boiler with tankless coil</WaterHeaterType>
+            <RelatedHVACSystem idref='hvac1_heat'/>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>
