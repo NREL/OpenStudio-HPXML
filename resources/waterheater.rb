@@ -661,7 +661,7 @@ class Waterheater
     return true
   end
 
-  def self.apply_indirect(model, runner, fuel_type, loop, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id)
+  def self.apply_indirect(model, runner, fuel_type, loop, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
     obj_name_indirect = Constants.ObjectNameWaterHeater.gsub("|", "_")
     # Validate inputs
     if vol <= 0
@@ -673,10 +673,18 @@ class Waterheater
       return false
     end
 
+    if wh_type == "space-heating boiler with storage tank"
+      tank_type = Constants.WaterHeaterTypeTank
+      recovery_time = 0.2
+    else
+      tank_type = Constants.WaterHeaterTypeTankless
+      recovery_time = 0.005
+    end
+
     if loop.nil?
       runner.registerInfo("A new plant loop for DHW will be added to the model")
       runner.registerInitialCondition("No water heater model currently exists")
-      loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
+      loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
     end
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
@@ -685,13 +693,13 @@ class Waterheater
     end
 
     if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
+      new_manager = create_new_schedule_manager(t_set, model, tank_type)
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
     # Create an initial simple tank model by calling create_new_heater
-    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
-    new_tank.setIndirectWaterHeatingRecoveryTime(0.2) # used for autosizing source side mass flow rate properly
+    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+    new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
     # Create alternate setpoint schedule for source side flow control
@@ -714,7 +722,7 @@ class Waterheater
 
     # Create loop for source side
     temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
-    source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), Constants.WaterHeaterTypeTank)
+    source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), tank_type)
 
     # Create heat exchanger
     indirect_hx = create_new_hx(model, Constants.ObjectNameTankHX)

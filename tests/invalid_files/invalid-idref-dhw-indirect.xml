@@ -267,7 +267,7 @@
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <RelatedHeatingSystem idref='HeatingSystem-bad'/>
+            <RelatedHVACSystem idref='HeatingSystem-bad'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>
