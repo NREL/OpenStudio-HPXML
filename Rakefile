@@ -2252,7 +2252,7 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribut
   if ['base.xml'].include? hpxml_file
     hot_water_distribution_values = { :id => "HotWaterDstribution",
                                       :system_type => "Standard",
-                                      :standard_piping_length => 30,
+                                      :standard_piping_length => 90,
                                       :pipe_r_value => 0.0 }
   elsif ['base-dhw-dwhr.xml'].include? hpxml_file
     hot_water_distribution_values[:dwhr_facilities_connected] = "all"
@@ -2261,34 +2261,34 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribut
   elsif ['base-dhw-recirc-demand.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "presence sensor demand control"
-    hot_water_distribution_values[:recirculation_piping_length] = 30
-    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_piping_length] = 50
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 50
     hot_water_distribution_values[:recirculation_pump_power] = 50
     hot_water_distribution_values[:pipe_r_value] = 3
   elsif ['base-dhw-recirc-manual.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "manual demand control"
-    hot_water_distribution_values[:recirculation_piping_length] = 30
-    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_piping_length] = 50
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 50
     hot_water_distribution_values[:recirculation_pump_power] = 50
     hot_water_distribution_values[:pipe_r_value] = 3
   elsif ['base-dhw-recirc-nocontrol.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "no control"
-    hot_water_distribution_values[:recirculation_piping_length] = 30
-    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_piping_length] = 50
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 50
     hot_water_distribution_values[:recirculation_pump_power] = 50
   elsif ['base-dhw-recirc-temperature.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "temperature"
-    hot_water_distribution_values[:recirculation_piping_length] = 30
-    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_piping_length] = 50
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 50
     hot_water_distribution_values[:recirculation_pump_power] = 50
   elsif ['base-dhw-recirc-timer.xml'].include? hpxml_file
     hot_water_distribution_values[:system_type] = "Recirculation"
     hot_water_distribution_values[:recirculation_control_type] = "timer"
-    hot_water_distribution_values[:recirculation_piping_length] = 30
-    hot_water_distribution_values[:recirculation_branch_piping_length] = 30
+    hot_water_distribution_values[:recirculation_piping_length] = 50
+    hot_water_distribution_values[:recirculation_branch_piping_length] = 50
     hot_water_distribution_values[:recirculation_pump_power] = 50
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hot_water_distribution_values = {}
@@ -2410,12 +2410,12 @@ def get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
   if ['base.xml'].include? hpxml_file
     clothes_washer_values = { :id => "ClothesWasher",
                               :location => "living space",
-                              :modified_energy_factor => 1.2,
-                              :rated_annual_kwh => 387.0,
-                              :label_electric_rate => 0.127,
-                              :label_gas_rate => 1.003,
-                              :label_annual_gas_cost => 24.0,
-                              :capacity => 3.5 }
+                              :modified_energy_factor => 0.8,
+                              :rated_annual_kwh => 700.0,
+                              :label_electric_rate => 0.10,
+                              :label_gas_rate => 0.60,
+                              :label_annual_gas_cost => 25.0,
+                              :capacity => 3.0 }
   elsif ['base-appliances-none.xml'].include? hpxml_file
     clothes_washer_values = {}
   elsif ['base-appliances-washer-imef.xml'].include? hpxml_file
@@ -2439,7 +2439,7 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
     clothes_dryer_values = { :id => "ClothesDryer",
                              :location => "living space",
                              :fuel_type => "electricity",
-                             :energy_factor => 3.01,
+                             :energy_factor => 2.95,
                              :control_type => "timer" }
   elsif ['base-appliances-none.xml'].include? hpxml_file
     clothes_dryer_values = {}
@@ -2471,14 +2471,14 @@ end
 def get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
   if ['base.xml'].include? hpxml_file
     dishwasher_values = { :id => "Dishwasher",
-                          :rated_annual_kwh => 100,
+                          :rated_annual_kwh => 450,
                           :place_setting_capacity => 12 }
   elsif ['base-appliances-none.xml'].include? hpxml_file
     dishwasher_values = {}
   elsif ['base-appliances-dishwasher-ef.xml'].include? hpxml_file
     dishwasher_values = { :id => "Dishwasher",
                           :energy_factor => 0.5,
-                          :place_setting_capacity => 8 }
+                          :place_setting_capacity => 12 }
   end
   return dishwasher_values
 end
@@ -2487,7 +2487,7 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
   if ['base.xml'].include? hpxml_file
     refrigerator_values = { :id => "Refrigerator",
                             :location => "living space",
-                            :rated_annual_kwh => 609 }
+                            :rated_annual_kwh => 650 }
   elsif ['base-appliances-none.xml'].include? hpxml_file
     refrigerator_values = {}
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
@@ -2507,7 +2507,7 @@ def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
   if ['base.xml'].include? hpxml_file
     cooking_range_values = { :id => "Range",
                              :fuel_type => "electricity",
-                             :is_induction => true }
+                             :is_induction => false }
   elsif ['base-appliances-none.xml'].include? hpxml_file
     cooking_range_values = {}
   elsif ['base-appliances-gas.xml'].include? hpxml_file
@@ -2520,7 +2520,7 @@ end
 def get_hpxml_file_oven_values(hpxml_file, oven_values)
   if ['base.xml'].include? hpxml_file
     oven_values = { :id => "Oven",
-                    :is_convection => true }
+                    :is_convection => false }
   elsif ['base-appliances-none.xml'].include? hpxml_file
     oven_values = {}
   end
