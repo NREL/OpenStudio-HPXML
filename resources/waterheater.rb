@@ -23,15 +23,11 @@ class Waterheater
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
     dhw_map[sys_id] << loop
 
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
+    new_pump = create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     new_heater = create_new_heater(model, runner, nbeds, Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, solar_fraction)
     dhw_map[sys_id] << new_heater
@@ -56,15 +52,11 @@ class Waterheater
     loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTankless)
     dhw_map[sys_id] << loop
 
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
+    new_pump = create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     new_heater = create_new_heater(model, runner, nbeds, Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, solar_fraction)
     dhw_map[sys_id] << new_heater
