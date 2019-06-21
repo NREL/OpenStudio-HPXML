@@ -536,7 +536,7 @@ class WeatherProcess
       epwHasDesignData = true
       epw_design_conditions = epw_design_conditions[0]
       @design.HeatingDrybulb = UnitConversions.convert(epw_design_conditions.heatingDryBulb99, "C", "F")
-      @design.HeatingWindspeed = epw_design_conditions.heatingColdestMonthWindSpeed1 # TODO: This field is consistent with BEopt, but should be heatingMeanCoincidentWindSpeed99pt6 instead?
+      @design.HeatingWindspeed = epw_design_conditions.heatingColdestMonthWindSpeed1
       @design.CoolingDrybulb = UnitConversions.convert(epw_design_conditions.coolingDryBulb1, "C", "F")
       @design.CoolingWetbulb = UnitConversions.convert(epw_design_conditions.coolingMeanCoincidentWetBulb1, "C", "F")
       @design.CoolingWindspeed = epw_design_conditions.coolingMeanCoincidentWindSpeed0pt4

@@ -22,4 +22,15 @@ class PV
 
     return true
   end
+
+  def self.calc_module_power_from_year(year_modules_manufactured)
+    return 13.3 * year_modules_manufactured - 26494.0 # W/panel
+  end
+
+  def self.calc_losses_fraction_from_year(year_modules_manufactured)
+    age = Time.new.year - year_modules_manufactured
+    age_losses = 1.0 - 0.995**Float(age)
+    losses_fraction = 1.0 - (1.0 - 0.14) * (1.0 - age_losses)
+    return losses_fraction
+  end
 end

@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T11:46:54-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-06-06T12:21:11-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -115,37 +115,17 @@
               <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
-        </FrameFloors>
-        <Slabs>
-          <Slab>
-            <SystemIdentifier id='Slab'/>
+          <FrameFloor>
+            <SystemIdentifier id='FloorAboveAmbient'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1350.0</Area>
-            <Thickness>4.0</Thickness>
-            <ExposedPerimeter>150.0</ExposedPerimeter>
-            <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-            <UnderSlabInsulationSpansEntireSlab>true</UnderSlabInsulationSpansEntireSlab>
-            <DepthBelowGrade>0.0</DepthBelowGrade>
-            <PerimeterInsulation>
-              <SystemIdentifier id='SlabPerimeterInsulation'/>
-              <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
-            </PerimeterInsulation>
-            <UnderSlabInsulation>
-              <SystemIdentifier id='SlabUnderSlabInsulation'/>
-              <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>5.0</NominalRValue>
-              </Layer>
-            </UnderSlabInsulation>
-            <extension>
-              <CarpetFraction>1.0</CarpetFraction>
-              <CarpetRValue>2.5</CarpetRValue>
-            </extension>
-          </Slab>
-        </Slabs>
+            <Insulation>
+              <SystemIdentifier id='FloorAboveAmbientInsulation'/>
+              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
+            </Insulation>
+          </FrameFloor>
+        </FrameFloors>
         <Windows>
           <Window>
             <SystemIdentifier id='WindowNorth'/>
@@ -207,22 +187,23 @@
                 <Furnace/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>32000.0</HeatingCapacity>
+              <HeatingCapacity>64000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>0.5</FractionHeatLoadServed>
+              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
-              <CoolingSystemType>room air conditioner</CoolingSystemType>
+              <DistributionSystem idref='HVACDistribution'/>
+              <CoolingSystemType>central air conditioning</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>24000.0</CoolingCapacity>
-              <FractionCoolLoadServed>0.5</FractionCoolLoadServed>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>8.5</Value>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -233,10 +214,37 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>75.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>25.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -254,7 +262,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>30.0</PipingLength>
+                <PipingLength>90.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>
@@ -277,38 +285,38 @@
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
           <Location>living space</Location>
-          <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
-          <RatedAnnualkWh>387.0</RatedAnnualkWh>
-          <LabelElectricRate>0.127</LabelElectricRate>
-          <LabelGasRate>1.003</LabelGasRate>
-          <LabelAnnualGasCost>24.0</LabelAnnualGasCost>
-          <Capacity>3.5</Capacity>
+          <ModifiedEnergyFactor>0.8</ModifiedEnergyFactor>
+          <RatedAnnualkWh>700.0</RatedAnnualkWh>
+          <LabelElectricRate>0.1</LabelElectricRate>
+          <LabelGasRate>0.6</LabelGasRate>
+          <LabelAnnualGasCost>25.0</LabelAnnualGasCost>
+          <Capacity>3.0</Capacity>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
-          <EnergyFactor>3.01</EnergyFactor>
+          <EnergyFactor>2.95</EnergyFactor>
           <ControlType>timer</ControlType>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <RatedAnnualkWh>100.0</RatedAnnualkWh>
+          <RatedAnnualkWh>450.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
-          <RatedAnnualkWh>609.0</RatedAnnualkWh>
+          <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <FuelType>electricity</FuelType>
-          <IsInduction>true</IsInduction>
+          <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven'/>
-          <IsConvection>true</IsConvection>
+          <IsConvection>false</IsConvection>
         </Oven>
       </Appliances>
       <Lighting>
