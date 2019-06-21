@@ -2295,7 +2295,8 @@ def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
 end
 
 def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
-  if ['base-dhw-solar-fraction.xml'].include? hpxml_file
+  if ['base-dhw-solar-fraction.xml',
+      'base-dhw-multiple.xml'].include? hpxml_file
     solar_thermal_system_values = { :id => "SolarThermalSystem",
                                     :system_type => "hot water",
                                     :water_heating_system_idref => "WaterHeater",

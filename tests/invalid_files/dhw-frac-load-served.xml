@@ -369,6 +369,14 @@
             <LowFlow>false</LowFlow>
           </WaterFixture>
         </WaterHeating>
+        <SolarThermal>
+          <SolarThermalSystem>
+            <SystemIdentifier id='SolarThermalSystem'/>
+            <SystemType>hot water</SystemType>
+            <ConnectedTo idref='WaterHeater'/>
+            <SolarFraction>0.65</SolarFraction>
+          </SolarThermalSystem>
+        </SolarThermal>
       </Systems>
       <Appliances>
         <ClothesWasher>
