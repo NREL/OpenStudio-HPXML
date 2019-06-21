@@ -9,7 +9,8 @@ require_relative "psychrometrics"
 
 class Waterheater
   def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
-                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
+                      re, t_set, oncycle_p, offcycle_p, ec_adj,
+                      solar_fraction, nbeds, dhw_map, sys_id)
 
     if fuel_type == Constants.FuelTypeElectric
       re = 0.98 # recovery efficiency set by fiat
@@ -32,7 +33,7 @@ class Waterheater
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    new_heater = create_new_heater(model, runner, nbeds, Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, solar_fraction)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -41,7 +42,8 @@ class Waterheater
   end
 
   def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
-                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
+                          cd, t_set, oncycle_p, offcycle_p, ec_adj,
+                          solar_fraction, nbeds, dhw_map, sys_id)
 
     # Validate inputs
     if fuel_type == Constants.FuelTypeElectric
@@ -64,7 +66,7 @@ class Waterheater
       new_manager.addToNode(loop.supplyOutletNode)
     end
 
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    new_heater = create_new_heater(model, runner, nbeds, Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, solar_fraction)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -73,7 +75,7 @@ class Waterheater
   end
 
   def self.apply_heatpump(model, runner, space, weather, t_set, vol, ef,
-                          ec_adj, nbeds, dhw_map, sys_id)
+                          ec_adj, solar_fraction, nbeds, dhw_map, sys_id)
 
     # FIXME: Use ec_adj
 
@@ -127,7 +129,7 @@ class Waterheater
     pi = Math::PI
     r_tank = (UnitConversions.convert(v_actual, "gal", "m^3") / (pi * h_tank))**0.5
     a_tank = 2 * pi * r_tank * (r_tank + h_tank)
-    u_tank = (5.678 * tank_ua) / UnitConversions.convert(a_tank, "m^2", "ft^2")
+    u_tank = (5.678 * tank_ua) / UnitConversions.convert(a_tank, "m^2", "ft^2") * (1.0 - solar_fraction)
 
     h_UE = (1 - (3.5 / 12)) * h_tank # in the 3rd node of the tank (counting from top)
     h_LE = (1 - (9.5 / 12)) * h_tank # in the 10th node of the tank (counting from top)
@@ -849,7 +851,7 @@ class Waterheater
     return act_vol
   end
 
-  def self.calc_tank_UA(vol, fuel, ef, re, pow, wh_type, cyc_derate)
+  def self.calc_tank_UA(vol, fuel, ef, re, pow, wh_type, cyc_derate, solar_fraction)
     # Calculates the U value, UA of the tank and conversion efficiency (eta_c)
     # based on the Energy Factor and recovery efficiency of the tank
     # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
@@ -879,6 +881,7 @@ class Waterheater
         eta_c = 1.0
       end
     end
+    ua *= (1.0 - solar_fraction)
     u = ua / surface_area # Btu/hr-ft^2-F
     return u, ua, eta_c
   end
@@ -906,11 +909,11 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name, cap, fuel, vol, ef, re, t_set, thermal_zone, oncycle_p, offcycle_p, ec_adj, wh_type, cyc_derate, nbeds, model, runner)
+  def self.create_new_heater(model, runner, nbeds, name, cap, fuel, vol, ef, re, t_set, thermal_zone, oncycle_p, offcycle_p, ec_adj, wh_type, cyc_derate, solar_fraction)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
     act_vol = calc_actual_tankvol(vol, fuel, wh_type)
-    u, ua, eta_c = calc_tank_UA(act_vol, fuel, ef, re, cap, wh_type, cyc_derate)
+    u, ua, eta_c = calc_tank_UA(act_vol, fuel, ef, re, cap, wh_type, cyc_derate, solar_fraction)
     configure_setpoint_schedule(new_heater, t_set, wh_type, model)
     new_heater.setMaximumTemperatureLimit(99.0)
     if wh_type == Constants.WaterHeaterTypeTankless

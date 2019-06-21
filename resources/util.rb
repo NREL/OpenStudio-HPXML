@@ -1,4 +1,3 @@
-# Add classes or functions here than can be used across a variety of our python classes and modules.
 require_relative "constants"
 require_relative "unit_conversions"
 
@@ -32,18 +31,6 @@ class HelperMethods
       return Constants.FuelTypeWood
     elsif fuel == "OtherFuel2"
       return Constants.FuelTypeWoodPellets
-    end
-  end
-
-  def self.reverse_openstudio_fuel_map(fuel)
-    if fuel == "Electricity"
-      return Constants.FuelTypeElectric
-    elsif fuel == "Gas"
-      return Constants.FuelTypeGas
-    elsif fuel == "FuelOil#1"
-      return Constants.FuelTypeOil
-    elsif fuel == "Propane"
-      return Constants.FuelTypePropane
     end
   end
 
