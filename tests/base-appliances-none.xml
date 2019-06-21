@@ -315,7 +315,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>30.0</PipingLength>
+                <PipingLength>90.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>

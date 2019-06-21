@@ -135,7 +135,7 @@ class HotWaterAndAppliances
       fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
 
-      disaggregate_sinks_showers_baths = true
+      disaggregate_sinks_showers_baths = false
       if disaggregate_sinks_showers_baths
         fx_names = [Constants.ObjectNameShower,
                     Constants.ObjectNameSink,
@@ -375,7 +375,7 @@ class HotWaterAndAppliances
     ew_fact = get_dist_energy_waste_factor(dist_type, recirc_control_type, pipe_r)
     o_frac = 0.25 # fraction of hot water waste from standard operating conditions
     oew_fact = ew_fact * o_frac # standard operating condition portion of hot water energy waste
-    ocd_eff = 0.0 # TODO: Need an HPXML input for this?
+    ocd_eff = 0.0
     sew_fact = ew_fact - oew_fact
     ref_pipe_l = get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl)
     if dist_type == "standard"
