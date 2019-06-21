@@ -442,13 +442,13 @@ class EnergyPlusValidator
 
       ## [WHType=Indirect]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with storage tank']" => {
-        "RelatedHVACSystem" => one,
+        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
         "TankVolume" => one,
       },
 
       ## [WHType=CombiTankless]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with tankless coil']" => {
-        "RelatedHVACSystem" => one,
+        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
       },
 
       # [HotWaterDistribution]
