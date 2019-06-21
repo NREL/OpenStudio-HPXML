@@ -12,8 +12,7 @@ class HotWaterAndAppliances
                  recirc_branch_length, recirc_control_type,
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
-                 dwhr_efficiency, dhw_loop_fracs, water_heater_solar_fractions,
-                 eri_version, dhw_map)
+                 dwhr_efficiency, dhw_loop_fracs, eri_version, dhw_map)
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
@@ -72,8 +71,7 @@ class HotWaterAndAppliances
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
-        solar_frac = water_heater_solar_fractions[sys_id]
-        add_water_use_equipment(model, cw_name, cw_peak_flow * dhw_load_frac * (1.0 - solar_frac), cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+        add_water_use_equipment(model, cw_name, cw_peak_flow * dhw_load_frac, cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
 
@@ -100,8 +98,7 @@ class HotWaterAndAppliances
       add_electric_equipment(model, dw_name, living_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
-        solar_frac = water_heater_solar_fractions[sys_id]
-        add_water_use_equipment(model, dw_name, dw_peak_flow * dhw_load_frac * (1.0 - solar_frac), dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+        add_water_use_equipment(model, dw_name, dw_peak_flow * dhw_load_frac, dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
 
@@ -167,8 +164,7 @@ class HotWaterAndAppliances
 
         dhw_loop_fracs.each do |sys_id, dhw_load_frac|
           dhw_loop = dhw_loops[sys_id]
-          solar_frac = water_heater_solar_fractions[sys_id]
-          add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac * (1.0 - solar_frac), fx_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+          add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac, fx_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
         end
         add_other_equipment(model, fx_name_sens, living_space, fx_design_level_sens, 1.0, 0.0, fx_schedule.schedule, nil)
         add_other_equipment(model, fx_name_lat, living_space, fx_design_level_lat, 0.0, 1.0, fx_schedule.schedule, nil)

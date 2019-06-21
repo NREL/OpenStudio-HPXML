@@ -1785,6 +1785,7 @@ class OSModel
     end
 
     wh = building.elements["BuildingDetails/Systems/WaterHeating"]
+    sts = building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"]
 
     # Fixtures
     has_low_flow_fixtures = false
@@ -1838,7 +1839,6 @@ class OSModel
     # Water Heater
     dhw_loop_fracs = {}
     water_heater_spaces = {}
-    water_heater_solar_fractions = {}
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
@@ -1857,22 +1857,21 @@ class OSModel
           ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
         end
 
-        # Check if simple solar water heater (defined by Solar Fraction) attached
-        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"])
+        # Check if simple solar water heater (defined by Solar Fraction) attached.
+        # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
+        # the portion of the total conventional hot water heating load (delivered energy + tank losses).
+        solar_fraction = nil
+        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts)
         if not solar_thermal_values.nil?
-          # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
-          # the portion of the total conventional hot water heating load (delivered energy + tank losses).
           solar_fraction = solar_thermal_values[:solar_fraction]
-        else
-          solar_fraction = 0.0
         end
-        water_heater_solar_fractions[sys_id] = solar_fraction
+        solar_fraction = 0.0 if solar_fraction.nil?
 
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
-        dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
+        dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served] * (1.0 - solar_fraction)
 
         @dhw_map[sys_id] = []
 
@@ -1923,12 +1922,6 @@ class OSModel
 
         end
 
-        if water_heater_solar_fractions[sys_id] > 0
-          # FIXME: Add ideal water heating system to cover solar hot water use specified by Solar Fraction.
-          # This ensures the total water heating load (e.g., for ERI) is preserved.
-
-        end
-
         dhw_loop_fracs[sys_id] = dhw_load_frac
       end
     end
@@ -1946,11 +1939,10 @@ class OSModel
                                           recirc_branch_length, recirc_control_type,
                                           recirc_pump_power, dwhr_present,
                                           dwhr_facilities_connected, dwhr_is_equal_flow,
-                                          dwhr_efficiency, dhw_loop_fracs, water_heater_solar_fractions,
-                                          @eri_version, @dhw_map)
+                                          dwhr_efficiency, dhw_loop_fracs, @eri_version, @dhw_map)
     return false if not success
 
-    solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"])
+    solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts)
     if not solar_thermal_values.nil?
       collector_area = solar_thermal_values[:collector_area]
       if not collector_area.nil? # Detailed solar water heater
