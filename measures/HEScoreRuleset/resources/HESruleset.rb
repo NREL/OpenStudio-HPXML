@@ -507,8 +507,10 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatPump") do |orig_hp|
       hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
       hp_values[:heat_pump_fuel] = "electricity"
-      hp_values[:heating_capacity] = -1 # Use Manual J auto-sizing
       hp_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
+      hp_values[:backup_heating_fuel] = "electricity"
+      hp_values[:backup_heating_capacity] = -1 # Use Manual J auto-sizing
+      hp_values[:backup_heating_efficiency_percent] = 1.0
 
       if hp_values[:heat_pump_type] == "air-to-air"
         if not hp_values[:year_installed].nil?
