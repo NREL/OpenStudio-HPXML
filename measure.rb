@@ -1907,13 +1907,14 @@ class OSModel
           return false if not success
 
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
-          if wh_type == "space-heating boiler with storage tank"
-            tank_vol = water_heating_system_values[:tank_volume]
+          # Check tank type to default tank volume for tankless coil
+          if wh_type == "space-heating boiler with tankless coil"
+            tank_vol = 1.0
           else
-            tank_vol = 1
+            tank_vol = water_heating_system_values[:tank_volume]
           end
-          fuel_type = Constants.FuelTypeElectric # FIX ME: Fuel type is only being set for purposes of defaulting a tank UA. Need to review
-          ef = 0.95 # FIXME
+          fuel_type = Constants.FuelTypeElectric
+          ef = 0.95
           heating_source_id = water_heating_system_values[:related_hvac]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
@@ -1924,7 +1925,7 @@ class OSModel
           capacity_kbtuh = 0.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_indirect(model, runner, fuel_type, nil, space, capacity_kbtuh,
+          success = Waterheater.apply_indirect(model, runner, fuel_type, space, capacity_kbtuh,
                                                tank_vol, ef, re, setpoint_temp, oncycle_power,
                                                offcycle_power, ec_adj, @nbeds, boiler_plant_loop, @dhw_map, sys_id, wh_type)
           return false if not success

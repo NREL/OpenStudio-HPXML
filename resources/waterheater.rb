@@ -661,8 +661,8 @@ class Waterheater
     return true
   end
 
-  def self.apply_indirect(model, runner, fuel_type, loop, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
-    obj_name_indirect = Constants.ObjectNameWaterHeater.gsub("|", "_")
+  def self.apply_indirect(model, runner, fuel_type, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
+    obj_name_indirect = Constants.ObjectNameWaterHeater
     # Validate inputs
     if vol <= 0
       runner.registerError("Indirect tank volume must be greater than 0.")
@@ -676,16 +676,14 @@ class Waterheater
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
       recovery_time = 0.2
+    # This variable is used for E+ autosizing source heat transfer. Default value 0.2 works well for indirect systems even tested with more spiky draw profile.
     else
       tank_type = Constants.WaterHeaterTypeTankless
       recovery_time = 0.005
+      # This variable is used for E+ autosizing source heat transfer. Default value 0.05 works well for combi tankless systems even tested with more spiky draw profile. The recovery time must be smaller for tankless system because of higher sensitivity to load caused by smaller volume.
     end
 
-    if loop.nil?
-      runner.registerInfo("A new plant loop for DHW will be added to the model")
-      runner.registerInitialCondition("No water heater model currently exists")
-      loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
-    end
+    loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
 
     if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
       new_pump = create_new_pump(model)
