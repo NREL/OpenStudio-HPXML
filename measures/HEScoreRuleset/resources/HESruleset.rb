@@ -830,8 +830,6 @@ end
 
 def get_default_water_heater_volume(fuel)
   # Water Heater Tank Volume by fuel
-  # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
   val = { "electricity" => 50,
           "natural gas" => 40,
           "propane" => 40,
@@ -843,8 +841,6 @@ end
 
 def get_default_water_heater_re(fuel)
   # Water Heater Recovery Efficiency by fuel
-  # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
   val = { "electricity" => 0.98,
           "natural gas" => 0.76,
           "propane" => 0.76,
@@ -856,12 +852,10 @@ end
 
 def get_default_water_heater_capacity(fuel)
   # Water Heater Rated Input Capacity by fuel
-  # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
-  val = { "electricity" => UnitConversions.convert(4.5, "kwh", "btu"),
+  val = { "electricity" => 15400,
           "natural gas" => 38000,
           "propane" => 38000,
-          "fuel oil" => UnitConversions.convert(0.65, "gal", "btu", Constants.FuelTypeOil) }[fuel]
+          "fuel oil" => 90000 }[fuel]
   return val if not val.nil?
 
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
