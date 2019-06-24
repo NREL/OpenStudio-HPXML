@@ -1359,7 +1359,8 @@ class HPXML
              :max_power_output => to_float_or_nil(XMLHelper.get_value(pv_system, "MaxPowerOutput")),
              :inverter_efficiency => to_float_or_nil(XMLHelper.get_value(pv_system, "InverterEfficiency")),
              :system_losses_fraction => to_float_or_nil(XMLHelper.get_value(pv_system, "SystemLossesFraction")),
-             :number_of_panels => to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels")) }
+             :number_of_panels => to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels")),
+             :year_modules_manufactured => to_integer_or_nil(XMLHelper.get_value(pv_system, "YearModulesManufactured")) }
   end
 
   def self.add_clothes_washer(hpxml:,

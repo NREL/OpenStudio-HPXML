@@ -1913,6 +1913,7 @@ class OSModel
           else
             tank_vol = water_heating_system_values[:tank_volume]
           end
+          # Fuel type and EF are only used to estimate indirect tank losses
           fuel_type = Constants.FuelTypeElectric
           ef = 0.95
           heating_source_id = water_heating_system_values[:related_hvac]
