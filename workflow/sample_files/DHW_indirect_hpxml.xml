@@ -314,11 +314,7 @@
           <WaterHeatingSystem>
             <SystemIdentifier id="water_heater1"/>
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
-<<<<<<< HEAD:workflow/sample_files/DHW_indirect_hpxml.xml
-			<RelatedHVACSystem idref='hvac1_heat'/>
-=======
             <RelatedHVACSystem idref="hvac1_heat"/>
->>>>>>> 6e61bfdf559b3c5c9b66d2545ad633b5e56acf31:workflow/sample_files/DHW_indirect_hpxml.xml.skip
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>
