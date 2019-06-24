@@ -5,6 +5,7 @@ require_relative "../../HPXMLtoOpenStudio/resources/geometry"
 require_relative "../../HPXMLtoOpenStudio/resources/hotwater_appliances"
 require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
 require_relative "../../HPXMLtoOpenStudio/resources/lighting"
+require_relative "../../HPXMLtoOpenStudio/resources/pv"
 
 class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
@@ -681,23 +682,28 @@ class HEScoreRuleset
   end
 
   def self.set_systems_photovoltaics(orig_details, hpxml)
-    pv_system_values = HPXML.get_pv_system_values(pv_system: orig_details.elements["Systems/Photovoltaics/PVSystem"])
-    return if pv_system_values.nil?
+    pv_values = HPXML.get_pv_system_values(pv_system: orig_details.elements["Systems/Photovoltaics/PVSystem"])
+    return if pv_values.nil?
 
-    if pv_system_values[:max_power_output].nil?
-      pv_system_values[:max_power_output] = pv_system_values[:number_of_panels] * 300.0 # FIXME: Hard-coded
+    if pv_values[:max_power_output].nil?
+      # Estimate from year and # modules
+      module_power = PV.calc_module_power_from_year(pv_values[:year_modules_manufactured]) # W/panel
+      pv_values[:max_power_output] = pv_values[:number_of_panels] * module_power
     end
+
+    # Estimate PV panel losses from year
+    losses_fraction = PV.calc_losses_fraction_from_year(pv_values[:year_modules_manufactured])
 
     HPXML.add_pv_system(hpxml: hpxml,
                         id: "PVSystem",
-                        location: "roof", # FIXME: Verify. HEScore was using "fixed open rack"??
+                        location: "roof",
                         module_type: "standard", # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                         tracking: "fixed",
-                        array_azimuth: orientation_to_azimuth(pv_system_values[:array_orientation]),
+                        array_azimuth: orientation_to_azimuth(pv_values[:array_orientation]),
                         array_tilt: @roof_angle,
-                        max_power_output: pv_system_values[:max_power_output],
+                        max_power_output: pv_values[:max_power_output],
                         inverter_efficiency: 0.96, # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                        system_losses_fraction: 0.14) # FIXME: Needs to be calculated
+                        system_losses_fraction: losses_fraction)
   end
 
   def self.set_appliances_clothes_washer(hpxml)
@@ -836,8 +842,6 @@ end
 
 def get_default_water_heater_volume(fuel)
   # Water Heater Tank Volume by fuel
-  # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
   val = { "electricity" => 50,
           "natural gas" => 40,
           "propane" => 40,
@@ -849,8 +853,6 @@ end
 
 def get_default_water_heater_re(fuel)
   # Water Heater Recovery Efficiency by fuel
-  # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
   val = { "electricity" => 0.98,
           "natural gas" => 0.76,
           "propane" => 0.76,
@@ -862,12 +864,10 @@ end
 
 def get_default_water_heater_capacity(fuel)
   # Water Heater Rated Input Capacity by fuel
-  # FIXME: Verify
-  # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/water-heater-energy-consumption/user-inputs-to-the-water-heater-model
-  val = { "electricity" => UnitConversions.convert(4.5, "kwh", "btu"),
+  val = { "electricity" => 15400,
           "natural gas" => 38000,
           "propane" => 38000,
-          "fuel oil" => UnitConversions.convert(0.65, "gal", "btu", Constants.FuelTypeOil) }[fuel]
+          "fuel oil" => 90000 }[fuel]
   return val if not val.nil?
 
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
