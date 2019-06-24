@@ -357,7 +357,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>30.0</PipingLength>
+                <PipingLength>90.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>
@@ -380,38 +380,38 @@
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
           <Location>basement - unconditioned</Location>
-          <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
-          <RatedAnnualkWh>387.0</RatedAnnualkWh>
-          <LabelElectricRate>0.127</LabelElectricRate>
-          <LabelGasRate>1.003</LabelGasRate>
-          <LabelAnnualGasCost>24.0</LabelAnnualGasCost>
-          <Capacity>3.5</Capacity>
+          <ModifiedEnergyFactor>0.8</ModifiedEnergyFactor>
+          <RatedAnnualkWh>700.0</RatedAnnualkWh>
+          <LabelElectricRate>0.1</LabelElectricRate>
+          <LabelGasRate>0.6</LabelGasRate>
+          <LabelAnnualGasCost>25.0</LabelAnnualGasCost>
+          <Capacity>3.0</Capacity>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
           <Location>basement - unconditioned</Location>
           <FuelType>electricity</FuelType>
-          <EnergyFactor>3.01</EnergyFactor>
+          <EnergyFactor>2.95</EnergyFactor>
           <ControlType>timer</ControlType>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <RatedAnnualkWh>100.0</RatedAnnualkWh>
+          <RatedAnnualkWh>450.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>basement - unconditioned</Location>
-          <RatedAnnualkWh>609.0</RatedAnnualkWh>
+          <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <FuelType>electricity</FuelType>
-          <IsInduction>true</IsInduction>
+          <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven'/>
-          <IsConvection>true</IsConvection>
+          <IsConvection>false</IsConvection>
         </Oven>
       </Appliances>
       <Lighting>

@@ -5,6 +5,7 @@ require_relative "../../HPXMLtoOpenStudio/resources/geometry"
 require_relative "../../HPXMLtoOpenStudio/resources/hotwater_appliances"
 require_relative "../../HPXMLtoOpenStudio/resources/hpxml"
 require_relative "../../HPXMLtoOpenStudio/resources/lighting"
+require_relative "../../HPXMLtoOpenStudio/resources/pv"
 
 class HEScoreRuleset
   def self.apply_ruleset(hpxml_doc)
@@ -507,8 +508,10 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatPump") do |orig_hp|
       hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
       hp_values[:heat_pump_fuel] = "electricity"
-      hp_values[:heating_capacity] = -1 # Use Manual J auto-sizing
       hp_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
+      hp_values[:backup_heating_fuel] = "electricity"
+      hp_values[:backup_heating_capacity] = -1 # Use Manual J auto-sizing
+      hp_values[:backup_heating_efficiency_percent] = 1.0
 
       if hp_values[:heat_pump_type] == "air-to-air"
         if not hp_values[:year_installed].nil?
@@ -675,23 +678,28 @@ class HEScoreRuleset
   end
 
   def self.set_systems_photovoltaics(orig_details, hpxml)
-    pv_system_values = HPXML.get_pv_system_values(pv_system: orig_details.elements["Systems/Photovoltaics/PVSystem"])
-    return if pv_system_values.nil?
+    pv_values = HPXML.get_pv_system_values(pv_system: orig_details.elements["Systems/Photovoltaics/PVSystem"])
+    return if pv_values.nil?
 
-    if pv_system_values[:max_power_output].nil?
-      pv_system_values[:max_power_output] = pv_system_values[:number_of_panels] * 300.0 # FIXME: Hard-coded
+    if pv_values[:max_power_output].nil?
+      # Estimate from year and # modules
+      module_power = PV.calc_module_power_from_year(pv_values[:year_modules_manufactured]) # W/panel
+      pv_values[:max_power_output] = pv_values[:number_of_panels] * module_power
     end
+
+    # Estimate PV panel losses from year
+    losses_fraction = PV.calc_losses_fraction_from_year(pv_values[:year_modules_manufactured])
 
     HPXML.add_pv_system(hpxml: hpxml,
                         id: "PVSystem",
-                        location: "roof", # FIXME: Verify. HEScore was using "fixed open rack"??
+                        location: "roof",
                         module_type: "standard", # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
                         tracking: "fixed",
-                        array_azimuth: orientation_to_azimuth(pv_system_values[:array_orientation]),
+                        array_azimuth: orientation_to_azimuth(pv_values[:array_orientation]),
                         array_tilt: @roof_angle,
-                        max_power_output: pv_system_values[:max_power_output],
+                        max_power_output: pv_values[:max_power_output],
                         inverter_efficiency: 0.96, # From https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI
-                        system_losses_fraction: 0.14) # FIXME: Needs to be calculated
+                        system_losses_fraction: losses_fraction)
   end
 
   def self.set_appliances_clothes_washer(hpxml)
