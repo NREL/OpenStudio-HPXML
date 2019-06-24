@@ -976,7 +976,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         end
 
         _display_result_epsilon(xml, dse_expect, dse_actual, k)
-        assert_in_epsilon(dse_expect, dse_actual, 0.03)
+        assert_in_epsilon(dse_expect, dse_actual, 0.05)
       end
     end
   end

@@ -52,28 +52,16 @@ class Waterheater
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
     dhw_map[sys_id] << loop
 
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
+    new_pump = create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
-    storage_tank = get_shw_storage_tank(model)
-
-    if storage_tank.nil?
-      loop.addSupplyBranchForComponent(new_heater)
-    else
-      storage_tank.setHeater1SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      storage_tank.setHeater2SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-    end
+    loop.addSupplyBranchForComponent(new_heater)
 
     return true
   end
@@ -117,28 +105,16 @@ class Waterheater
     loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTankless)
     dhw_map[sys_id] << loop
 
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
+    new_pump = create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
-    storage_tank = get_shw_storage_tank(model)
-
-    if storage_tank.nil?
-      loop.addSupplyBranchForComponent(new_heater)
-    else
-      storage_tank.setHeater1SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      storage_tank.setHeater2SetpointTemperatureSchedule(new_heater.setpointTemperatureSchedule.get)
-      new_heater.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-    end
+    loop.addSupplyBranchForComponent(new_heater)
 
     return true
   end
@@ -648,15 +624,7 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ctrl_program)
     program_calling_manager.addProgram(hpwh_ducting_program)
 
-    storage_tank = get_shw_storage_tank(model)
-
-    if storage_tank.nil?
-      loop.addSupplyBranchForComponent(tank)
-    else
-      storage_tank.setHeater1SetpointTemperatureSchedule(tank.heater1SetpointTemperatureSchedule)
-      storage_tank.setHeater2SetpointTemperatureSchedule(tank.heater2SetpointTemperatureSchedule)
-      tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-    end
+    loop.addSupplyBranchForComponent(tank)
 
     return true
   end
@@ -675,25 +643,19 @@ class Waterheater
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
-      recovery_time = 0.2
-    # This variable is used for E+ autosizing source heat transfer. Default value 0.2 works well for indirect systems even tested with more spiky draw profile.
+      recovery_time = 0.2 # This variable is used for E+ autosizing source heat transfer. Default value 0.2 works well for indirect systems even tested with more spiky draw profile.
     else
       tank_type = Constants.WaterHeaterTypeTankless
-      recovery_time = 0.005
-      # This variable is used for E+ autosizing source heat transfer. Default value 0.05 works well for combi tankless systems even tested with more spiky draw profile. The recovery time must be smaller for tankless system because of higher sensitivity to load caused by smaller volume.
+      recovery_time = 0.005 # This variable is used for E+ autosizing source heat transfer. Default value 0.05 works well for combi tankless systems even tested with more spiky draw profile. The recovery time must be smaller for tankless system because of higher sensitivity to load caused by smaller volume.
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
 
-    if loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = create_new_pump(model)
-      new_pump.addToNode(loop.supplyInletNode)
-    end
+    new_pump = create_new_pump(model)
+    new_pump.addToNode(loop.supplyInletNode)
 
-    if loop.supplyOutletNode.setpointManagers.empty?
-      new_manager = create_new_schedule_manager(t_set, model, tank_type)
-      new_manager.addToNode(loop.supplyOutletNode)
-    end
+    new_manager = create_new_schedule_manager(t_set, model, tank_type)
+    new_manager.addToNode(loop.supplyOutletNode)
 
     # Create an initial simple tank model by calling create_new_heater
     new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
@@ -733,28 +695,19 @@ class Waterheater
 
     # Add components to the tank source side plant loop
     source_loop.addSupplyBranchForComponent(indirect_hx)
-    if source_loop.components(OpenStudio::Model::PumpVariableSpeed::iddObjectType).empty?
-      new_pump = create_new_pump(model)
-      new_pump.addToNode(source_loop.supplyInletNode)
-    end
-    if source_loop.supplyOutletNode.setpointManagers.empty?
-      new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
-      new_source_manager.addToNode(source_loop.supplyOutletNode)
-    end
+
+    new_pump = create_new_pump(model)
+    new_pump.addToNode(source_loop.supplyInletNode)
+
+    new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
+    new_source_manager.addToNode(source_loop.supplyOutletNode)
+
     source_loop.addDemandBranchForComponent(new_tank)
 
     # Add heat exchanger to boiler loop
     boiler_plant_loop.addDemandBranchForComponent(indirect_hx)
 
-    storage_tank = Waterheater.get_shw_storage_tank(model)
-
-    if storage_tank.nil?
-      loop.addSupplyBranchForComponent(new_tank)
-    else
-      storage_tank.setHeater1SetpointTemperatureSchedule(new_tank.heater1SetpointTemperatureSchedule)
-      storage_tank.setHeater2SetpointTemperatureSchedule(new_tank.heater2SetpointTemperatureSchedule)
-      new_tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-    end
+    loop.addSupplyBranchForComponent(new_tank)
 
     # EMS for offsetting reaction lag and recover tank temperature
     # Sensors
@@ -918,19 +871,6 @@ class Waterheater
   end
 
   private
-
-  def self.get_shw_storage_tank(model)
-    model.getPlantLoops.each do |plant_loop|
-      next unless plant_loop.name.to_s == Constants.PlantLoopSolarHotWater
-
-      (plant_loop.supplyComponents + plant_loop.demandComponents).each do |component|
-        if component.to_WaterHeaterStratified.is_initialized
-          return component.to_WaterHeaterStratified.get
-        end
-      end
-    end
-    return nil
-  end
 
   def self.deadband(wh_type)
     if wh_type == Constants.WaterHeaterTypeTank
