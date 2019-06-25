@@ -644,7 +644,10 @@ class HEScoreRuleset
         wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type])
       end
       wh_tank_volume = nil
-      if wh_sys_values[:water_heater_type] != "instantaneous water heater"
+      if wh_sys_values[:water_heater_type] == "space-heating boiler with storage tank"
+        wh_tank_volume = get_default_water_heater_volume("electricity")
+      # Set default fuel_type to call function : get_default_water_heater_volume, not passing this input to EP-HPXML
+      elsif wh_sys_values[:water_heater_type] != "instantaneous water heater" and wh_sys_values[:water_heater_type] != "space-heating boiler with tankless coil"
         wh_tank_volume = get_default_water_heater_volume(wh_sys_values[:fuel_type])
       end
       HPXML.add_water_heating_system(hpxml: hpxml,
@@ -657,7 +660,8 @@ class HEScoreRuleset
                                      heating_capacity: wh_capacity,
                                      energy_factor: wh_sys_values[:energy_factor],
                                      uniform_energy_factor: wh_sys_values[:uniform_energy_factor],
-                                     recovery_efficiency: wh_recovery_efficiency)
+                                     recovery_efficiency: wh_recovery_efficiency,
+                                     related_hvac: wh_sys_values[:related_hvac])
     end
   end
 
