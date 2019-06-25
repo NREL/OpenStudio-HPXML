@@ -70,14 +70,17 @@ class HEScoreRuleset
     @year_built = orig_building_construction_values[:year_built]
     @nbeds = orig_building_construction_values[:number_of_bedrooms]
     @cfa = orig_building_construction_values[:conditioned_floor_area] # ft^2
-    fnd_types, @cfa_basement = get_foundation_details(orig_details)
+    @fnd_types = get_foundation_details(orig_details)
+    @ducts = get_ducts_details(orig_details)
+    @cfa_basement = @fnd_types["basement - conditioned"]
+    @cfa_basement = 0 if @cfa_basement.nil?
     @ncfl_ag = orig_building_construction_values[:number_of_conditioned_floors_above_grade]
     @ceil_height = orig_building_construction_values[:average_ceiling_height] # ft
 
     # Calculate geometry
     # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope
-    @has_cond_bsmnt = fnd_types.include?("basement - conditioned")
-    @has_uncond_bsmnt = fnd_types.include?("basement - unconditioned")
+    @has_cond_bsmnt = @fnd_types.keys.include?("basement - conditioned")
+    @has_uncond_bsmnt = @fnd_types.keys.include?("basement - unconditioned")
     @ncfl = @ncfl_ag + (@has_cond_bsmnt ? 1 : 0)
     @nfl = @ncfl + (@has_uncond_bsmnt ? 1 : 0)
     @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2 FIXME: Verify. Does this change for shape=townhouse? Maybe ridge changes to front-back instead of left-right
@@ -85,7 +88,6 @@ class HEScoreRuleset
     @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
     @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
     @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
-    @height = @ceil_height * @ncfl_ag # ft FIXME: Verify. Used for infiltration.
     @roof_angle = 30.0 # deg
 
     HPXML.add_site(hpxml: hpxml,
@@ -128,7 +130,7 @@ class HEScoreRuleset
     if not cfm50.nil?
       ach50 = cfm50 * 60.0 / @cvolume
     else
-      ach50 = calc_ach50(@ncfl_ag, @cfa, @height, @cvolume, desc, @year_built, @iecc_zone, orig_details)
+      ach50 = calc_ach50(@ncfl_ag, @cfa, @ceil_height, @cvolume, desc, @year_built, @iecc_zone, @fnd_types, @ducts)
     end
 
     HPXML.add_air_infiltration_measurement(hpxml: hpxml,
@@ -1111,90 +1113,103 @@ def get_roof_solar_absorptance(roof_color)
   fail "Could not get roof absorptance for color '#{roof_color}'"
 end
 
-def calc_ach50(ncfl_ag, cfa, height, cvolume, desc, year_built, iecc_cz, orig_details)
-  # FIXME: Verify
+def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/infiltration/infiltration
-  c_floor_area = -2.08E-03
-  c_height = 6.38E-02
 
+  # Constants
+  c_floor_area = -0.002078
+  c_height = 0.06375
+
+  # Vintage
   c_vintage = nil
   if year_built < 1960
-    c_vintage = -2.50E-01
+    c_vintage = -0.2498
   elsif year_built <= 1969
-    c_vintage = -4.33E-01
+    c_vintage = -0.4327
   elsif year_built <= 1979
-    c_vintage = -4.52E-01
+    c_vintage = -0.4521
   elsif year_built <= 1989
-    c_vintage = -6.54E-01
+    c_vintage = -0.6536
   elsif year_built <= 1999
-    c_vintage = -9.15E-01
+    c_vintage = -0.9152
   elsif year_built >= 2000
-    c_vintage = -1.06E+00
+    c_vintage = -1.058
+  else
+    fail "Unexpected vintage: #{year_built}"
   end
-  fail "Could not look up infiltration c_vintage." if c_vintage.nil?
 
-  # FIXME: A-7 vs AK-7?
+  # Climate zone
   c_iecc = nil
   if iecc_cz == "1A" or iecc_cz == "2A"
-    c_iecc = 4.73E-01
+    c_iecc = 0.4727
   elsif iecc_cz == "3A"
-    c_iecc = 2.53E-01
+    c_iecc = 0.2529
   elsif iecc_cz == "4A"
-    c_iecc = 3.26E-01
+    c_iecc = 0.3261
   elsif iecc_cz == "5A"
-    c_iecc = 1.12E-01
+    c_iecc = 0.1118
   elsif iecc_cz == "6A" or iecc_cz == "7"
     c_iecc = 0.0
   elsif iecc_cz == "2B" or iecc_cz == "3B"
-    c_iecc = -3.76E-02
+    c_iecc = -0.03755
   elsif iecc_cz == "4B" or iecc_cz == "5B"
-    c_iecc = -8.77E-03
+    c_iecc = -0.008774
   elsif iecc_cz == "6B"
-    c_iecc = 1.94E-02
+    c_iecc = 0.01944
   elsif iecc_cz == "3C"
-    c_iecc = 4.83E-02
+    c_iecc = 0.04827
   elsif iecc_cz == "4C"
-    c_iecc = 2.58E-01
+    c_iecc = 0.2584
   elsif iecc_cz == "8"
-    c_iecc = -5.12E-01
+    c_iecc = -0.5119
+  else
+    fail "Unexpected IECC climate zone: #{c_iecc}"
   end
-  fail "Could not look up infiltration c_iecc." if c_iecc.nil?
 
-  # FIXME: How to handle multiple foundations?
-  c_foundation = nil
-  foundation_adjacent = "living space" # FIXME: Connect to input
-  if foundation_adjacent == "living space"
-    c_foundation = -0.036992
-  elsif foundation_adjacent == "basement - conditioned" or foundation_adjacent == "crawlspace - unvented"
-    c_foundation = 0.108713
-  elsif foundation_adjacent == "basement - unconditioned" or foundation_adjacent == "crawlspace - vented"
-    c_foundation = 0.180352
+  # Foundation type (weight by area)
+  c_foundation = 0.0
+  sum_fnd_area = 0.0
+  fnd_types.each do |fnd_type, area|
+    sum_fnd_area += area
+    if fnd_type == "living space"
+      c_foundation += -0.036992 * area
+    elsif fnd_type == "basement - conditioned" or fnd_type == "crawlspace - unvented"
+      c_foundation += 0.108713 * area
+    elsif fnd_type == "basement - unconditioned" or fnd_type == "crawlspace - vented"
+      c_foundation += 0.180352 * area
+    else
+      fail "Unexpected foundation type: #{fnd_type}"
+    end
   end
-  fail "Could not look up infiltration c_foundation." if c_foundation.nil?
+  c_foundation /= sum_fnd_area
 
-  # FIXME: How to handle no ducts or multiple duct locations?
-  # FIXME: How to handle ducts in unvented crawlspace?
-  c_duct = nil
-  duct_location = "living space" # FIXME: Connect to input
-  if duct_location == "living space"
-    c_duct = -0.12381
-  elsif duct_location == "attic - unconditioned" or duct_location == "basement - unconditioned"
-    c_duct = 0.07126
-  elsif duct_location == "crawlspace - vented"
-    c_duct = 0.18072
+  # Ducts (weighted by duct fraction and hvac fraction)
+  c_duct = 0.0
+  ducts.each do |hvac_frac, duct_frac, duct_location|
+    if duct_location == "living space"
+      c_duct += -0.12381 * duct_frac * hvac_frac
+    elsif duct_location == "attic - unconditioned" or duct_location == "basement - unconditioned"
+      c_duct += 0.07126 * duct_frac * hvac_frac
+    elsif duct_location == "crawlspace - vented"
+      c_duct += 0.18072 * duct_frac * hvac_frac
+    elsif duct_location == "crawlspace - unvented"
+      c_duct += 0.07126 * duct_frac * hvac_frac
+    else
+      fail "Unexpected duct location: #{duct_location}"
+    end
   end
-  fail "Could not look up infiltration c_duct." if c_duct.nil?
 
   c_sealed = nil
   if desc == "tight"
-    c_sealed = -0.384 # FIXME: Hard-coded. Not included in Table 1
+    c_sealed = -0.288
   elsif desc == "average"
     c_sealed = 0.0
+  else
+    fail "Unexpected air leakage description: #{desc}"
   end
-  fail "Could not look up infiltration c_sealed." if c_sealed.nil?
 
   floor_area_m2 = UnitConversions.convert(cfa, "ft^2", "m^2")
-  height_m = UnitConversions.convert(height, "ft", "m")
+  height_m = UnitConversions.convert(ncfl_ag * ceil_height, "ft", "m") + 0.5
 
   # Normalized leakage
   nl = Math.exp(floor_area_m2 * c_floor_area +
@@ -1202,7 +1217,7 @@ def calc_ach50(ncfl_ag, cfa, height, cvolume, desc, year_built, iecc_cz, orig_de
                 c_sealed + c_vintage + c_iecc + c_foundation + c_duct)
 
   # Specific Leakage Area
-  sla = nl / 1000.0 * ncfl_ag**0.3
+  sla = nl / (1000.0 * ncfl_ag**0.3)
 
   ach50 = Airflow.get_infiltration_ACH50_from_SLA(sla, 0.65, cfa, cvolume)
 
@@ -1255,19 +1270,61 @@ def hpxml_to_hescore_fuel(fuel_type)
 end
 
 def get_foundation_details(orig_details)
-  fnd_adjacents = []
-  fnd_cfa = 0.0
+  # Returns a hash of foundation_type => area
+  fnd_types = {}
   orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
     fnd_adjacent = get_foundation_adjacent(orig_foundation)
-    fnd_adjacents << fnd_adjacent
-    if fnd_adjacent == "basement - conditioned"
-      framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
+    framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
+    if not framefloor_id.nil?
       framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
       framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-      fnd_cfa += framefloor_values[:area]
+      fnd_area = framefloor_values[:area]
+    else
+      slab_id = HPXML.get_idref(orig_foundation, "AttachedToSlab")
+      slab = orig_details.elements["Enclosure/Slabs/Slab[SystemIdentifier[@id='#{slab_id}']]"]
+      slab_values = HPXML.get_slab_values(slab: slab)
+      fnd_area = slab_values[:area]
+    end
+    fnd_types[fnd_adjacent] = fnd_area
+  end
+  return fnd_types
+end
+
+def get_ducts_details(orig_details)
+  # Returns a list of [hvac_frac, duct_frac, duct_location]
+  ducts = []
+  orig_details.elements.each("Systems/HVAC/HVACDistribution") do |orig_dist|
+    dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: orig_dist)
+    hvac_frac = get_hvac_fraction(orig_details, dist_values[:id])
+
+    orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
+      duct_values = HPXML.get_ducts_values(ducts: orig_duct)
+      ducts << [hvac_frac, duct_values[:duct_fraction_area], duct_values[:duct_location]]
     end
   end
-  return fnd_adjacents, fnd_cfa
+  return ducts
+end
+
+def get_hvac_fraction(orig_details, dist_id)
+  orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |orig_heating|
+    heating_values = HPXML.get_heating_system_values(heating_system: orig_heating)
+    next unless heating_values[:distribution_system_idref] == dist_id
+
+    return heating_values[:fraction_heat_load_served]
+  end
+  orig_details.elements.each("Systems/HVAC/HVACPlant/CoolingSystem") do |orig_cooling|
+    cooling_values = HPXML.get_cooling_system_values(cooling_system: orig_cooling)
+    next unless cooling_values[:distribution_system_idref] == dist_id
+
+    return cooling_values[:fraction_cool_load_served]
+  end
+  orig_details.elements.each("Systems/HVAC/HVACPlant/HeatPump") do |orig_hp|
+    hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
+    next unless hp_values[:distribution_system_idref] == dist_id
+
+    return hp_values[:fraction_cool_load_served]
+  end
+  return nil
 end
 
 def get_attic_adjacent(attic)
