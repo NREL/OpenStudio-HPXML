@@ -1552,7 +1552,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
   if ['base.xml'].include? hpxml_file
     cooling_systems_values = [{ :id => "CoolingSystem",
                                 :distribution_system_idref => "HVACDistribution",
-                                :cooling_system_type => "central air conditioning",
+                                :cooling_system_type => "central air conditioner",
                                 :cooling_system_fuel => "electricity",
                                 :cooling_capacity => 48000,
                                 :fraction_cool_load_served => 1,

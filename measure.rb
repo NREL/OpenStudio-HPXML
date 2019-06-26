@@ -1982,7 +1982,7 @@ class OSModel
       sys_id = cooling_system_values[:id]
       @hvac_map[sys_id] = []
 
-      if clg_type == "central air conditioning"
+      if clg_type == "central air conditioner"
 
         # FIXME: Generalize
         seer = cooling_system_values[:cooling_efficiency_seer]
