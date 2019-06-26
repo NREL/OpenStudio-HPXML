@@ -146,7 +146,7 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-no-backup.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
-    'base-hvac-multiple-ducts.xml' => 'base.xml',
+    'base-hvac-ducts-multiple.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-none-no-fuel-access.xml' => 'base-hvac-none.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
@@ -1995,14 +1995,22 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]
-  elsif ['base-hvac-multiple-ducts.xml'].include? hpxml_file
+  elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
     ducts_values[0] << { :duct_type => "supply",
                          :duct_insulation_r_value => 8,
                          :duct_location => "attic - unvented",
                          :duct_surface_area => 300 }
+    ducts_values[0] << { :duct_type => "supply",
+                         :duct_insulation_r_value => 8,
+                         :duct_location => "outside",
+                         :duct_surface_area => 300 }
     ducts_values[0] << { :duct_type => "return",
                          :duct_insulation_r_value => 4,
                          :duct_location => "attic - unvented",
+                         :duct_surface_area => 100 }
+    ducts_values[0] << { :duct_type => "return",
+                         :duct_insulation_r_value => 4,
+                         :duct_location => "outside",
                          :duct_surface_area => 100 }
   elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
          'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',

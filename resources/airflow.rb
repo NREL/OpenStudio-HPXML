@@ -1279,7 +1279,7 @@ class Airflow
         leakage_cfm25s = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
         ua_values = { Constants.DuctSideSupply => 0, Constants.DuctSideReturn => 0 }
         ducts.each do |duct|
-          next unless duct.zone == duct_zone
+          next unless (duct_zone.nil? and duct.zone.nil?) or (!duct_zone.nil? and !duct.zone.nil? and duct.zone.name.to_s == duct_zone.name.to_s)
 
           if not duct.leakage_frac.nil?
             leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
