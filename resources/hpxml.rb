@@ -1221,10 +1221,10 @@ class HPXML
       jaket = XMLHelper.add_element(water_heater_insulation, "Jacket")
       XMLHelper.add_element(jaket, "JacketRValue", jacket_r_value)
     end
-	unless related_hvac.nil?
+    unless related_hvac.nil?
       related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
       XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac)
-	end
+    end
     return water_heating_system
   end
 
@@ -1243,7 +1243,7 @@ class HPXML
              :energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
              :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
-             :jacket_r_value => to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")) }
+             :jacket_r_value => to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")),
              :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem") }
   end
 

@@ -86,7 +86,8 @@ def create_hpxmls
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
-    'base-dhw-jacket.xml' => 'base.xml',
+    'base-dhw-jacket-electric.xml' => 'base.xml',
+    'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
@@ -2203,8 +2204,10 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
-  elsif ['base-dhw-jacket.xml'].include? hpxml_file
-    water_heating_systems_values[0][:jacket_r_value] = 1.0
+  elsif ['base-dhw-jacket-electric.xml'].include? hpxml_file
+    water_heating_systems_values[0][:jacket_r_value] = 10.0
+  elsif ['base-dhw-jacket-gas.xml'].include? hpxml_file
+    water_heating_systems_values[0][:jacket_r_value] = 10.0
   elsif ['base-dhw-indirect.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with storage tank"
     water_heating_systems_values[0][:tank_volume] = 50
