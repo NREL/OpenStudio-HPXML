@@ -203,7 +203,7 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
@@ -215,7 +215,7 @@
             <CoolingSystem>
               <SystemIdentifier id='SpaceCool_ID2'/>
               <DistributionSystem idref='HVACDistribution2'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
@@ -227,7 +227,7 @@
             <CoolingSystem>
               <SystemIdentifier id='SpaceCool_ID3'/>
               <DistributionSystem idref='HVACDistribution3'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
