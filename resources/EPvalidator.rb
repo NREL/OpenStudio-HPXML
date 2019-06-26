@@ -411,6 +411,7 @@ class EnergyPlusValidator
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented']" => one,
         "FractionDHWLoadServed" => one,
         "[EnergyFactor | UniformEnergyFactor]" => one,
+		"WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
       },
 
       ## [WHType=Tank]
