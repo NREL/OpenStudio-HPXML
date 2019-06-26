@@ -931,7 +931,7 @@
 	<!--Cooling System Information Below-->
 	<xs:simpleType name="CoolingSystemType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="central air conditioning"/>
+			<xs:enumeration value="central air conditioner"/>
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="room air conditioner"/>
 			<xs:enumeration value="evaporative cooler"/>

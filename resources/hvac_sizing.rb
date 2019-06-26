@@ -1860,9 +1860,7 @@ class HVACSizing
         hvac_final_values.Cool_Airflow = 0
       end
     end
-    if not hvac.FixedSuppHeatingCapacity.nil?
-      hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "ton", "Btu/hr")
-    elsif not hvac.FixedHeatingCapacity.nil?
+    if not hvac.FixedHeatingCapacity.nil?
       hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
     end
 
@@ -2091,6 +2089,10 @@ class HVACSizing
     else
       hvac_final_values.Heat_Capacity = 0
       hvac_final_values.Heat_Airflow = 0
+    end
+
+    if not hvac.FixedSuppHeatingCapacity.nil?
+      hvac_final_values.Heat_Capacity_Supp = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "ton", "Btu/hr")
     end
 
     return hvac_final_values
