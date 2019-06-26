@@ -424,8 +424,6 @@ class EnergyPlusValidator
       ## [WHType=FuelTank]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='storage water heater' and FuelType!='electricity']" => {
         "RecoveryEfficiency" => one,
-        "[EnergyFactor | UniformEnergyFactor]" => one,
-        "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
       },
 
       ## [WHType=Tankless]
