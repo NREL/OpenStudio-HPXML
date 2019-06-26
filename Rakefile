@@ -130,6 +130,7 @@ def create_hpxmls
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
+    'base-hvac-ducts-outside.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -1942,6 +1943,9 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
          'base-atticroof-conditioned.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "living space"
     ducts_values[0][1][:duct_location] = "living space"
+  elsif ['base-hvac-ducts-outside.xml'].include? hpxml_file
+    ducts_values[0][0][:duct_location] = "outside"
+    ducts_values[0][1][:duct_location] = "outside"
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     ducts_values[0] = []
     ducts_values << [{ :duct_type => "supply",
