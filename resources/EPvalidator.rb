@@ -281,14 +281,14 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
-        "[CoolingSystemType='central air conditioning' or CoolingSystemType='room air conditioner']" => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC]
+        "[CoolingSystemType='central air conditioner' or CoolingSystemType='room air conditioner']" => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC]
         "[CoolingSystemFuel='electricity']" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
 
       ## [CoolingType=CentralAC]
-      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioning']" => {
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioner']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
@@ -372,7 +372,7 @@ class EnergyPlusValidator
       ## [HVACDuct]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return']" => {
         "DuctInsulationRValue" => one,
-        "[DuctLocation='living space' or DuctLocation='basement - conditioned' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - vented' or DuctLocation='crawlspace - unvented' or DuctLocation='attic - vented' or DuctLocation='attic - unvented' or DuctLocation='garage']" => one,
+        "[DuctLocation='living space' or DuctLocation='basement - conditioned' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - vented' or DuctLocation='crawlspace - unvented' or DuctLocation='attic - vented' or DuctLocation='attic - unvented' or DuctLocation='garage' or DuctLocation='outside']" => one,
         "DuctSurfaceArea" => one,
       },
 
@@ -407,10 +407,9 @@ class EnergyPlusValidator
         "../HotWaterDistribution" => one, # See [HotWaterDistribution]
         "../WaterFixture" => one_or_more, # See [WaterFixture]
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump]
+        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater' or WaterHeaterType='space-heating boiler with storage tank' or WaterHeaterType='space-heating boiler with tankless coil']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented']" => one,
         "FractionDHWLoadServed" => one,
-        "[EnergyFactor | UniformEnergyFactor]" => one,
       },
 
       ## [WHType=Tank]
@@ -418,23 +417,38 @@ class EnergyPlusValidator
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one, # If not electricity, see [WHType=FuelTank]
         "TankVolume" => one,
         "HeatingCapacity" => one,
+        "[EnergyFactor | UniformEnergyFactor]" => one,
       },
 
       ## [WHType=FuelTank]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='storage water heater' and FuelType!='electricity']" => {
         "RecoveryEfficiency" => one,
+        "[EnergyFactor | UniformEnergyFactor]" => one,
       },
 
       ## [WHType=Tankless]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='instantaneous water heater']" => {
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one,
         "PerformanceAdjustment" => zero_or_one, # Uses ERI assumption for tankless cycling derate if not provided
+        "[EnergyFactor | UniformEnergyFactor]" => one,
       },
 
       ## [WHType=HeatPump]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='heat pump water heater']" => {
         "[FuelType='electricity']" => one,
         "TankVolume" => one,
+        "[EnergyFactor | UniformEnergyFactor]" => one,
+      },
+
+      ## [WHType=Indirect]
+      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with storage tank']" => {
+        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
+        "TankVolume" => one,
+      },
+
+      ## [WHType=CombiTankless]
+      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with tankless coil']" => {
+        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
       },
 
       # [HotWaterDistribution]

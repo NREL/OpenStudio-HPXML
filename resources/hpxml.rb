@@ -1189,7 +1189,7 @@ class HPXML
 
   def self.add_water_heating_system(hpxml:,
                                     id:,
-                                    fuel_type:,
+                                    fuel_type: nil,
                                     water_heater_type:,
                                     location:,
                                     performance_adjustment: nil,
@@ -1199,12 +1199,13 @@ class HPXML
                                     energy_factor: nil,
                                     uniform_energy_factor: nil,
                                     recovery_efficiency: nil,
+                                    related_hvac: nil,
                                     **remainder)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
     sys_id = XMLHelper.add_element(water_heating_system, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(water_heating_system, "FuelType", fuel_type)
+    XMLHelper.add_element(water_heating_system, "FuelType", fuel_type) unless fuel_type.nil?
     XMLHelper.add_element(water_heating_system, "WaterHeaterType", water_heater_type)
     XMLHelper.add_element(water_heating_system, "Location", location)
     XMLHelper.add_element(water_heating_system, "PerformanceAdjustment", Float(performance_adjustment)) unless performance_adjustment.nil?
@@ -1214,7 +1215,8 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "EnergyFactor", Float(energy_factor)) unless energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "UniformEnergyFactor", Float(uniform_energy_factor)) unless uniform_energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", Float(recovery_efficiency)) unless recovery_efficiency.nil?
-
+    related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem") unless related_hvac.nil?
+    XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac) unless related_hvac.nil?
     return water_heating_system
   end
 
@@ -1232,7 +1234,8 @@ class HPXML
              :heating_capacity => to_float_or_nil(XMLHelper.get_value(water_heating_system, "HeatingCapacity")),
              :energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
-             :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")) }
+             :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
+             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem") }
   end
 
   def self.add_hot_water_distribution(hpxml:,
@@ -1356,7 +1359,8 @@ class HPXML
              :max_power_output => to_float_or_nil(XMLHelper.get_value(pv_system, "MaxPowerOutput")),
              :inverter_efficiency => to_float_or_nil(XMLHelper.get_value(pv_system, "InverterEfficiency")),
              :system_losses_fraction => to_float_or_nil(XMLHelper.get_value(pv_system, "SystemLossesFraction")),
-             :number_of_panels => to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels")) }
+             :number_of_panels => to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels")),
+             :year_modules_manufactured => to_integer_or_nil(XMLHelper.get_value(pv_system, "YearModulesManufactured")) }
   end
 
   def self.add_clothes_washer(hpxml:,
