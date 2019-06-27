@@ -106,8 +106,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
@@ -117,8 +115,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, sequential_cool_load_frac.round(5))
@@ -239,8 +235,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
@@ -250,8 +244,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, sequential_cool_load_frac.round(5))
@@ -378,8 +370,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
@@ -389,8 +379,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, sequential_cool_load_frac.round(5))
@@ -555,8 +543,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialHeatingFraction(air_terminal_living, sequential_heat_load_frac.round(5))
@@ -566,8 +552,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, sequential_heat_load_frac.round(5))
@@ -736,8 +720,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialHeatingFraction(air_terminal_living, sequential_heat_load_frac.round(5))
@@ -747,8 +729,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, sequential_heat_load_frac.round(5))
@@ -922,8 +902,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialHeatingFraction(air_terminal_living, sequential_heat_load_frac.round(5))
@@ -933,8 +911,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, sequential_heat_load_frac.round(5))
@@ -1144,8 +1120,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialHeatingFraction(air_terminal_living, sequential_heat_load_frac.round(5))
@@ -1155,8 +1129,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, sequential_heat_load_frac.round(5))
@@ -1474,8 +1446,6 @@ class HVAC
       air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
       air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
       air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-      air_loop.multiAddBranchForZone(control_zone)
       runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
       control_zone.setSequentialHeatingFraction(air_terminal_living, sequential_heat_load_frac.round(5))
@@ -1485,8 +1455,6 @@ class HVAC
         air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
         air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-        air_loop.multiAddBranchForZone(slave_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
         slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, sequential_heat_load_frac.round(5))
@@ -1683,8 +1651,6 @@ class HVAC
         air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
         air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
         air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
-
-        air_loop.multiAddBranchForZone(control_zone)
         runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
 
         control_zone.setSequentialHeatingFraction(air_terminal_living, sequential_heat_load_frac.round(5))
@@ -1694,8 +1660,6 @@ class HVAC
           air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
           air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
           air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
-
-          air_loop.multiAddBranchForZone(slave_zone)
           runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
 
           slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, sequential_heat_load_frac.round(5))
