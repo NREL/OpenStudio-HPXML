@@ -8,9 +8,8 @@ require_relative "schedules"
 class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse, frac_cool_load_served,
-                                   sequential_cool_load_frac, control_slave_zones_hash,
-                                   hvac_map, sys_id)
+                                   capacity, frac_cool_load_served, sequential_cool_load_frac,
+                                   control_slave_zones_hash, hvac_map, sys_id)
 
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
@@ -30,7 +29,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC, cOOL_EIR_FT_SPEC_AC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC, cOOL_EIR_FFLOW_SPEC_AC, dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC, cOOL_EIR_FT_SPEC_AC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC, cOOL_EIR_FFLOW_SPEC_AC)
 
       # _processSystemCoolingCoil
 
@@ -41,7 +40,7 @@ class HVAC
         clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       clg_coil.setRatedSensibleHeatRatio(shrs_rated_gross[0])
-      clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(dse / cooling_eirs[0]))
+      clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(1.0 / cooling_eirs[0]))
       clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s")))
       clg_coil.setNominalTimeForCondensateRemovalToBegin(OpenStudio::OptionalDouble.new(1000.0))
       clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(OpenStudio::OptionalDouble.new(1.5))
@@ -59,7 +58,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, nil, clg_coil)
@@ -132,9 +131,8 @@ class HVAC
 
   def self.apply_central_ac_2speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse, frac_cool_load_served,
-                                   sequential_cool_load_frac, control_slave_zones_hash,
-                                   hvac_map, sys_id)
+                                   capacity, frac_cool_load_served, sequential_cool_load_frac,
+                                   control_slave_zones_hash, hvac_map, sys_id)
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
@@ -154,7 +152,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC(2), cOOL_EIR_FT_SPEC_AC(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(2), cOOL_EIR_FFLOW_SPEC_AC(2), dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC(2), cOOL_EIR_FT_SPEC_AC(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(2), cOOL_EIR_FFLOW_SPEC_AC(2))
 
       # _processSystemCoolingCoil
 
@@ -180,7 +178,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, nil, clg_coil)
@@ -262,9 +260,8 @@ class HVAC
 
   def self.apply_central_ac_4speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse, frac_cool_load_served,
-                                   sequential_cool_load_frac, control_slave_zones_hash,
-                                   hvac_map, sys_id)
+                                   capacity, frac_cool_load_served, sequential_cool_load_frac,
+                                   control_slave_zones_hash, hvac_map, sys_id)
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
@@ -289,7 +286,7 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       # _processCurvesDXCooling
 
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_AC([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(4), cOOL_EIR_FFLOW_SPEC_AC(4), dse)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_AC([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_AC([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_AC(4), cOOL_EIR_FFLOW_SPEC_AC(4))
 
       # _processSystemCoolingCoil
 
@@ -315,7 +312,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, nil, clg_coil)
@@ -398,8 +395,7 @@ class HVAC
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
-                                     supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served,
+                                     supplemental_capacity, frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id)
 
@@ -435,8 +431,8 @@ class HVAC
 
       # _processCurvesDX
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP, hEAT_EIR_FT_SPEC_ASHP, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP, hEAT_EIR_FFLOW_SPEC_ASHP, dse)
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP, cOOL_EIR_FT_SPEC_ASHP, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP, cOOL_EIR_FFLOW_SPEC_ASHP, dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP, hEAT_EIR_FT_SPEC_ASHP, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP, hEAT_EIR_FFLOW_SPEC_ASHP)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP, cOOL_EIR_FT_SPEC_ASHP, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP, cOOL_EIR_FFLOW_SPEC_ASHP)
 
       # _processSystemCoil
 
@@ -446,7 +442,7 @@ class HVAC
       if heat_pump_capacity != Constants.SizingAuto and heat_pump_capacity != Constants.SizingAutoMaxLoad
         htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
-      htg_coil.setRatedCOP(dse / heating_eirs[0])
+      htg_coil.setRatedCOP(1.0 / heating_eirs[0])
       htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s"))
       htg_coil.setDefrostEnergyInputRatioFunctionofTemperatureCurve(defrost_eir_curve)
       htg_coil.setMinimumOutdoorDryBulbTemperatureforCompressorOperation(UnitConversions.convert(min_temp, "F", "C"))
@@ -463,7 +459,7 @@ class HVAC
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
       htg_supp_coil.setName(obj_name + " supp htg coil")
-      htg_supp_coil.setEfficiency(dse * supplemental_efficiency)
+      htg_supp_coil.setEfficiency(supplemental_efficiency)
       if supplemental_capacity != Constants.SizingAuto
         htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
@@ -476,7 +472,7 @@ class HVAC
         clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       clg_coil.setRatedSensibleHeatRatio(shrs_rated_gross[0])
-      clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(dse / cooling_eirs[0]))
+      clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(1.0 / cooling_eirs[0]))
       clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s")))
       clg_coil.setNominalTimeForCondensateRemovalToBegin(OpenStudio::OptionalDouble.new(1000.0))
       clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(OpenStudio::OptionalDouble.new(1.5))
@@ -492,7 +488,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, htg_coil, clg_coil)
@@ -574,8 +570,7 @@ class HVAC
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
-                                     supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served,
+                                     supplemental_capacity, frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id)
 
@@ -608,8 +603,8 @@ class HVAC
 
       # _processCurvesDX
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(2), hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(2), hEAT_EIR_FFLOW_SPEC_ASHP(2), dse)
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP(2), cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(2), cOOL_EIR_FFLOW_SPEC_ASHP(2), dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(2), hEAT_EIR_FT_SPEC_ASHP(2), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(2), hEAT_EIR_FFLOW_SPEC_ASHP(2))
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP(2), cOOL_EIR_FT_SPEC_ASHP(2), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(2), cOOL_EIR_FFLOW_SPEC_ASHP(2))
 
       # _processSystemCoil
 
@@ -635,7 +630,7 @@ class HVAC
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
       htg_supp_coil.setName(obj_name + " supp htg coil")
-      htg_supp_coil.setEfficiency(dse * supplemental_efficiency)
+      htg_supp_coil.setEfficiency(supplemental_efficiency)
       if supplemental_capacity != Constants.SizingAuto
         htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
@@ -661,7 +656,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, htg_coil, clg_coil)
@@ -753,8 +748,7 @@ class HVAC
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
-                                     supplemental_capacity, dse,
-                                     frac_heat_load_served, frac_cool_load_served,
+                                     supplemental_capacity, frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id)
 
@@ -791,8 +785,8 @@ class HVAC
 
       # _processCurvesDX
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(4), hEAT_EIR_FFLOW_SPEC_ASHP(4), dse)
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(4), cOOL_EIR_FFLOW_SPEC_ASHP(4), dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, (0...num_speeds).to_a, heating_eirs, hEAT_CAP_FT_SPEC_ASHP(4), hEAT_EIR_FT_SPEC_ASHP(4), hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC_ASHP(4), hEAT_EIR_FFLOW_SPEC_ASHP(4))
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, (0...num_speeds).to_a, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_EIR_FT_SPEC_ASHP([0, 1, 2, 4]), cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC_ASHP(4), cOOL_EIR_FFLOW_SPEC_ASHP(4))
 
       # _processSystemCoil
 
@@ -818,7 +812,7 @@ class HVAC
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
       htg_supp_coil.setName(obj_name + " supp htg coil")
-      htg_supp_coil.setEfficiency(dse * supplemental_efficiency)
+      htg_supp_coil.setEfficiency(supplemental_efficiency)
       if supplemental_capacity != Constants.SizingAuto
         htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
@@ -843,7 +837,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, htg_coil, clg_coil)
@@ -940,7 +934,7 @@ class HVAC
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
                       heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
-                      dse, frac_heat_load_served, frac_cool_load_served,
+                      frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_slave_zones_hash, hvac_map, sys_id)
 
@@ -1010,8 +1004,8 @@ class HVAC
 
       # _processCurvesDX
 
-      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, mshp_indices, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, dse)
-      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, mshp_indices, cooling_eirs, shrs_rated, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, dse)
+      htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, mshp_indices, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC)
+      clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, mshp_indices, cooling_eirs, shrs_rated, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC)
 
       # _processSystemCoil
 
@@ -1032,7 +1026,7 @@ class HVAC
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
       htg_supp_coil.setName(obj_name + " supp htg coil")
-      htg_supp_coil.setEfficiency(dse * supplemental_efficiency)
+      htg_supp_coil.setEfficiency(supplemental_efficiency)
       if supplemental_capacity != Constants.SizingAuto
         htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
@@ -1059,7 +1053,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, htg_coil, clg_coil)
@@ -1227,8 +1221,7 @@ class HVAC
                       design_delta_t, pump_head,
                       u_tube_leg_spacing, u_tube_spacing_type,
                       fan_power, heat_pump_capacity, supplemental_efficiency,
-                      supplemental_capacity, dse,
-                      frac_heat_load_served, frac_cool_load_served,
+                      supplemental_capacity, frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_slave_zones_hash, hvac_map, sys_id)
 
@@ -1317,7 +1310,7 @@ class HVAC
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + " pump")
     pump.setRatedPumpHead(pump_head)
-    pump.setMotorEfficiency(dse * 0.77 * 0.6)
+    pump.setMotorEfficiency(0.77 * 0.6)
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
@@ -1347,7 +1340,7 @@ class HVAC
       if heat_pump_capacity != Constants.SizingAuto
         htg_coil.setRatedHeatingCapacity(OpenStudio::OptionalDouble.new(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W"))) # Used by HVACSizing measure
       end
-      htg_coil.setRatedHeatingCoefficientofPerformance(dse / heatingEIR)
+      htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / heatingEIR)
       htg_coil.setHeatingCapacityCoefficient1(gshp_HEAT_CAP_fT_coeff[0])
       htg_coil.setHeatingCapacityCoefficient2(gshp_HEAT_CAP_fT_coeff[1])
       htg_coil.setHeatingCapacityCoefficient3(gshp_HEAT_CAP_fT_coeff[2])
@@ -1362,7 +1355,7 @@ class HVAC
 
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
       htg_supp_coil.setName(obj_name + " supp htg coil")
-      htg_supp_coil.setEfficiency(dse * supplemental_efficiency)
+      htg_supp_coil.setEfficiency(supplemental_efficiency)
       if supplemental_capacity != Constants.SizingAuto
         htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
@@ -1373,7 +1366,7 @@ class HVAC
       if heat_pump_capacity != Constants.SizingAuto
         clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
-      clg_coil.setRatedCoolingCoefficientofPerformance(dse / coolingEIR)
+      clg_coil.setRatedCoolingCoefficientofPerformance(1.0 / coolingEIR)
       clg_coil.setTotalCoolingCapacityCoefficient1(gshp_COOL_CAP_fT_coeff[0])
       clg_coil.setTotalCoolingCapacityCoefficient2(gshp_COOL_CAP_fT_coeff[1])
       clg_coil.setTotalCoolingCapacityCoefficient3(gshp_COOL_CAP_fT_coeff[2])
@@ -1402,7 +1395,7 @@ class HVAC
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(fan_eff)
-      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power / dse))
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, htg_coil, clg_coil)
@@ -1561,7 +1554,7 @@ class HVAC
   end
 
   def self.apply_furnace(model, runner, fuel_type, afue,
-                         capacity, fan_power_installed, dse,
+                         capacity, fan_power_installed,
                          frac_heat_load_served, sequential_heat_load_frac,
                          attached_cooling_system, control_slave_zones_hash,
                          hvac_map, sys_id)
@@ -1582,10 +1575,10 @@ class HVAC
 
       if fuel_type == Constants.FuelTypeElectric
         htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
-        htg_coil.setEfficiency(dse * afue)
+        htg_coil.setEfficiency(afue)
       else
         htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
-        htg_coil.setGasBurnerEfficiency(dse * afue)
+        htg_coil.setGasBurnerEfficiency(afue)
         htg_coil.setParasiticElectricLoad(aux_elec)
         htg_coil.setParasiticGasLoad(0)
         htg_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
@@ -1604,7 +1597,7 @@ class HVAC
         fan.setName(obj_name + " supply fan")
         fan.setEndUseSubcategory("supply fan")
         fan.setFanEfficiency(fan_eff)
-        fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed / dse))
+        fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
         fan.setMotorEfficiency(1.0)
         fan.setMotorInAirstreamFraction(1.0)
         hvac_map[sys_id] += self.disaggregate_fan(model, fan, htg_coil, nil)
@@ -1741,7 +1734,7 @@ class HVAC
 
   def self.apply_boiler(model, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                        capacity, design_temp, dse, frac_heat_load_served,
+                        capacity, design_temp, frac_heat_load_served,
                         sequential_heat_load_frac, control_slave_zones_hash,
                         hvac_map, sys_id)
 
@@ -1792,7 +1785,7 @@ class HVAC
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
     pump.setName(obj_name + " hydronic pump")
     pump.setRatedPumpHead(20000)
-    pump.setMotorEfficiency(dse * 0.9)
+    pump.setMotorEfficiency(0.9)
     pump.setFractionofMotorInefficienciestoFluidStream(0)
     pump.setCoefficient1ofthePartLoadPerformanceCurve(0)
     pump.setCoefficient2ofthePartLoadPerformanceCurve(1)
@@ -1817,10 +1810,10 @@ class HVAC
       condBlr_TE_Coeff = [1.058343061, 0.052650153, 0.0087272, 0.001742217, 0.00000333715, 0.000513723]
       boilerEff_Norm = afue / (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Rated - condBlr_TE_Coeff[2] * plr_Rated**2 - condBlr_TE_Coeff[3] * boiler_RatedHWRT + condBlr_TE_Coeff[4] * boiler_RatedHWRT**2 + condBlr_TE_Coeff[5] * boiler_RatedHWRT * plr_Rated)
       boilerEff_Design = boilerEff_Norm * (condBlr_TE_Coeff[0] - condBlr_TE_Coeff[1] * plr_Design - condBlr_TE_Coeff[2] * plr_Design**2 - condBlr_TE_Coeff[3] * boiler_DesignHWRT + condBlr_TE_Coeff[4] * boiler_DesignHWRT**2 + condBlr_TE_Coeff[5] * boiler_DesignHWRT * plr_Design)
-      boiler.setNominalThermalEfficiency(dse * boilerEff_Design)
+      boiler.setNominalThermalEfficiency(boilerEff_Design)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable("EnteringBoiler")
     else
-      boiler.setNominalThermalEfficiency(dse * afue)
+      boiler.setNominalThermalEfficiency(afue)
       boiler.setEfficiencyCurveTemperatureEvaluationVariable("LeavingBoiler")
     end
     boiler.setNormalizedBoilerEfficiencyCurve(boiler_eff_curve)
@@ -2617,7 +2610,7 @@ class HVAC
     return nbeds + 1
   end
 
-  def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, dse, load_frac, htg_type)
+  def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
     # Applies Electric Auxiliary Energy (EAE) for fuel heating equipment to fan power.
 
     if htg_type == 'Boiler'
@@ -2640,8 +2633,8 @@ class HVAC
             pump_eff = 0.9
             pump_gpm = UnitConversions.convert(pump.ratedFlowRate.get, "m^3/s", "gal/min")
             pump_w_gpm = elec_power / pump_gpm # W/gpm
-            pump.setRatedPowerConsumption(elec_power / dse)
-            pump.setRatedPumpHead(calculate_pump_head(pump_eff, pump_w_gpm / dse))
+            pump.setRatedPowerConsumption(elec_power)
+            pump.setRatedPumpHead(calculate_pump_head(pump_eff, pump_w_gpm))
             pump.setMotorEfficiency(1.0)
           end
         end
@@ -2676,7 +2669,7 @@ class HVAC
           fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
           fan_w_cfm = elec_power / htg_cfm # W/cfm
           fan.setFanEfficiency(fan_eff)
-          fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_w_cfm / dse))
+          fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_w_cfm))
         else
           fan.setFanEfficiency(1)
           fan.setPressureRise(0)
@@ -3917,7 +3910,7 @@ class HVAC
     return curve
   end
 
-  def self.calc_coil_stage_data_cooling(model, outputCapacity, speeds, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC, distributionSystemEfficiency)
+  def self.calc_coil_stage_data_cooling(model, outputCapacity, speeds, cooling_eirs, shrs_rated_gross, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC)
     const_biquadratic = create_curve_biquadratic_constant(model)
 
     clg_coil_stage_data = []
@@ -3941,7 +3934,7 @@ class HVAC
         stage_data.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(outputCapacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       stage_data.setGrossRatedSensibleHeatRatio(shrs_rated_gross[speed])
-      stage_data.setGrossRatedCoolingCOP(distributionSystemEfficiency / cooling_eirs[speed])
+      stage_data.setGrossRatedCoolingCOP(1.0 / cooling_eirs[speed])
       stage_data.setNominalTimeforCondensateRemovaltoBegin(1000)
       stage_data.setRatioofInitialMoistureEvaporationRateandSteadyStateLatentCapacity(1.5)
       stage_data.setMaximumCyclingRate(3)
@@ -3952,7 +3945,7 @@ class HVAC
     return clg_coil_stage_data
   end
 
-  def self.calc_coil_stage_data_heating(model, outputCapacity, speeds, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC, distributionSystemEfficiency)
+  def self.calc_coil_stage_data_heating(model, outputCapacity, speeds, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC)
     const_biquadratic = create_curve_biquadratic_constant(model)
 
     htg_coil_stage_data = []
@@ -3976,7 +3969,7 @@ class HVAC
       if outputCapacity != Constants.SizingAuto and outputCapacity != Constants.SizingAutoMaxLoad
         stage_data.setGrossRatedHeatingCapacity(UnitConversions.convert(outputCapacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
-      stage_data.setGrossRatedHeatingCOP(distributionSystemEfficiency / heating_eirs[speed])
+      stage_data.setGrossRatedHeatingCOP(1.0 / heating_eirs[speed])
       stage_data.setRatedWasteHeatFractionofPowerInput(0.2)
       htg_coil_stage_data[i] = stage_data
     end

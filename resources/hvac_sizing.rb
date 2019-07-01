@@ -1494,9 +1494,15 @@ class HVACSizing
     return nil if hvac_final_values.nil?
 
     if init_heat_load == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
-      hvac_final_values.Heat_Load = init_heat_load
       hvac_final_values.Heat_Load_Ducts = 0
+      hvac_final_values.Heat_Load = init_heat_load
     else
+      if hvac.Ducts.size == 1 and not hvac.Ducts[0].DSE.nil?
+        hvac_final_values.Heat_Load_Ducts = init_heat_load / hvac.Ducts[0].DSE - init_heat_load
+        hvac_final_values.Heat_Load = init_heat_load + hvac_final_values.Heat_Load_Ducts
+        return hvac_final_values
+      end
+
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
 
@@ -1557,12 +1563,24 @@ class HVACSizing
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
     if init_cool_load_sens == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
-      hvac_final_values.Cool_Load_Lat = init_cool_load_lat
       hvac_final_values.Cool_Load_Sens = init_cool_load_sens
+      hvac_final_values.Cool_Load_Lat = init_cool_load_lat
       hvac_final_values.Cool_Load_Tot = hvac_final_values.Cool_Load_Sens + hvac_final_values.Cool_Load_Lat
       hvac_final_values.Cool_Load_Ducts_Sens = 0
+      hvac_final_values.Cool_Load_Ducts_Lat = 0
       hvac_final_values.Cool_Load_Ducts_Tot = 0
     else
+      if hvac.Ducts.size == 1 and not hvac.Ducts[0].DSE.nil?
+        hvac_final_values.Cool_Load_Ducts_Sens = init_cool_load_sens / hvac.Ducts[0].DSE - init_cool_load_sens
+        hvac_final_values.Cool_Load_Ducts_Lat = init_cool_load_lat / hvac.Ducts[0].DSE - init_cool_load_lat
+        hvac_final_values.Cool_Load_Ducts_Tot = hvac_final_values.Cool_Load_Ducts_Sens + hvac_final_values.Cool_Load_Ducts_Lat
+        hvac_final_values.Cool_Load_Sens = init_cool_load_sens + hvac_final_values.Cool_Load_Ducts_Sens
+        hvac_final_values.Cool_Load_Lat = init_cool_load_lat + hvac_final_values.Cool_Load_Ducts_Lat
+        hvac_final_values.Cool_Load_Tot = hvac_final_values.Cool_Load_Sens + hvac_final_values.Cool_Load_Lat
+        hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+        return hvac_final_values
+      end
+
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
 
@@ -2444,6 +2462,12 @@ class HVACSizing
 
     rvalues = rvalues.split(",").map(&:to_f)
 
+    # DSEs
+    dses = get_feature(runner, air_loop, Constants.SizingInfoDuctDSEs, 'string')
+    return nil if dses.nil?
+
+    dses = dses.split(",").map(&:to_f)
+
     # Locations
     locations = get_feature(runner, air_loop, Constants.SizingInfoDuctLocationZones, 'string')
     return nil if locations.nil?
@@ -2485,6 +2509,7 @@ class HVACSizing
       d.Area = areas[index]
       d.Rvalue = rvalues[index]
       d.Side = sides[index]
+      d.DSE = dses[index]
       ducts << d
     end
 
@@ -4126,7 +4151,7 @@ class DuctInfo
   # Model info for a duct
   def initial
   end
-  attr_accessor(:LeakageFrac, :LeakageCFM25, :Area, :Rvalue, :LocationSpace, :Side)
+  attr_accessor(:LeakageFrac, :LeakageCFM25, :Area, :Rvalue, :LocationSpace, :Side, :DSE)
 end
 
 class Numeric
