@@ -1025,7 +1025,7 @@ class Airflow
   def self.create_ducts_objects(model, runner, building, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loop, duct_programs, duct_lks, air_loop_objects)
     return true if ducts.size == 0 # No ducts
 
-    duct_zones = ducts.map { |duct| duct.zone }.uniq!
+    duct_zones = ducts.map { |duct| duct.zone }.uniq
     living_space = building.living.zone.spaces[0]
 
     # All duct zones are in living space?

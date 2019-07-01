@@ -2833,7 +2833,7 @@ class OSModel
         duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
                             duct_area / total_duct_area[duct_side])
 
-        air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+        air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value], nil)
       end
 
       # Connect AirLoopHVACs to ducts
@@ -2872,6 +2872,7 @@ class OSModel
         dse_duct = [Duct.new(nil, nil, nil, nil, nil, nil, dse_heat)]
         @hvac_map[sys_id].each do |loop|
           next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+          next if duct_systems[dse_duct] == loop # already assigned
 
           duct_systems[dse_duct] = loop
         end
