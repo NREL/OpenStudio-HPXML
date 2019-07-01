@@ -1977,6 +1977,8 @@ class OSModel
       sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac
 
+      dse_heat, dse_cool, has_dse = get_dse(building, cooling_system_values)
+
       sys_id = cooling_system_values[:id]
       @hvac_map[sys_id] = []
 
@@ -1994,8 +1996,9 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, load_frac, sequential_load_frac,
-                                                 @control_slave_zones_hash, @hvac_map, sys_id)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2004,8 +2007,9 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, load_frac, sequential_load_frac,
-                                                 @control_slave_zones_hash, @hvac_map, sys_id)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2014,8 +2018,9 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, load_frac, sequential_load_frac,
-                                                 @control_slave_zones_hash, @hvac_map, sys_id)
+                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 @hvac_map, sys_id)
           return false if not success
 
         else
@@ -2053,7 +2058,10 @@ class OSModel
 
         htg_type = heating_system_values[:heating_system_type]
 
-        attached_clg_system = get_attached_system(heating_system_values, building, "CoolingSystem")
+        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
+
+        attached_clg_system = get_attached_system(heating_system_values, building,
+                                                  "CoolingSystem", has_dse)
 
         if only_furnaces_attached_to_cooling
           next unless htg_type == "Furnace" and not attached_clg_system.nil?
@@ -2080,7 +2088,7 @@ class OSModel
           afue = heating_system_values[:heating_efficiency_afue]
           fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
           success = HVAC.apply_furnace(model, runner, fuel, afue,
-                                       heat_capacity_btuh, fan_power,
+                                       heat_capacity_btuh, fan_power, dse_heat,
                                        load_frac, sequential_load_frac,
                                        attached_clg_system, @control_slave_zones_hash,
                                        @hvac_map, sys_id)
@@ -2110,7 +2118,7 @@ class OSModel
           design_temp = 180.0
           success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                       oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                      heat_capacity_btuh, design_temp, load_frac,
+                                      heat_capacity_btuh, design_temp, dse_heat, load_frac,
                                       sequential_load_frac, @control_slave_zones_hash,
                                       @hvac_map, sys_id)
           return false if not success
@@ -2176,6 +2184,12 @@ class OSModel
         backup_heat_efficiency = 1.0
       end
 
+      dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
+      if dse_heat != dse_cool
+        # FUTURE: Remove this when available in E+
+        fail "Cannot handle different distribution system efficiency (DSE) values for heating and cooling."
+      end
+
       sys_id = heat_pump_values[:id]
       @hvac_map[sys_id] = []
 
@@ -2201,7 +2215,8 @@ class OSModel
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, load_frac_heat, load_frac_cool,
+                                                   backup_heat_capacity_btuh, dse_heat,
+                                                   load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
           return false if not success
@@ -2213,7 +2228,8 @@ class OSModel
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, load_frac_heat, load_frac_cool,
+                                                   backup_heat_capacity_btuh, dse_heat,
+                                                   load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
           return false if not success
@@ -2225,7 +2241,8 @@ class OSModel
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, load_frac_heat, load_frac_cool,
+                                                   backup_heat_capacity_btuh, dse_heat,
+                                                   load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
           return false if not success
@@ -2265,7 +2282,7 @@ class OSModel
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
-                                  load_frac_heat, load_frac_cool,
+                                  dse_heat, load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success
@@ -2300,7 +2317,8 @@ class OSModel
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
                                   fan_power, cool_capacity_btuh, backup_heat_efficiency,
-                                  backup_heat_capacity_btuh, load_frac_heat, load_frac_cool,
+                                  backup_heat_capacity_btuh, dse_heat,
+                                  load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success
@@ -2445,8 +2463,9 @@ class OSModel
     return true
   end
 
-  def self.get_dse(building, sys_id, distribution_system_idref)
-    if distribution_system_idref.nil? # No distribution system
+  def self.get_dse(building, system_values)
+    dist_id = system_values[:distribution_system_idref]
+    if dist_id.nil? # No distribution system
       return 1.0, 1.0, false
     end
 
@@ -2457,7 +2476,7 @@ class OSModel
     annual_heating_dse = nil
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
-      next if distribution_system_idref != hvac_distribution_values[:id]
+      next if dist_id != hvac_distribution_values[:id]
 
       found_attached_dist = true
       next if hvac_distribution_values[:distribution_system_type] != 'DSE'
@@ -2468,7 +2487,7 @@ class OSModel
     end
 
     if not found_attached_dist
-      fail "Attached HVAC distribution system '#{distribution_system_idref}' cannot be found for HVAC system '#{sys_id}'."
+      fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_values[:id]}'."
     end
 
     if attached_dist.nil? # No attached DSEs for system
@@ -2861,23 +2880,6 @@ class OSModel
       fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
     end
 
-    # Distribution system efficiency
-    ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
-        sys_id = HPXML.get_id(sys)
-        distribution_system_idref = HPXML.get_idref(sys, "DistributionSystem")
-        dse_heat, dse_cool, has_dse = get_dse(building, sys_id, distribution_system_idref)
-        next unless has_dse
-
-        dse_duct = [Duct.new(nil, nil, nil, nil, nil, nil, dse_heat)]
-        @hvac_map[sys_id].each do |loop|
-          next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-
-          duct_systems[dse_duct] = loop
-        end
-      end
-    end
-
     window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
@@ -2913,9 +2915,10 @@ class OSModel
 
       fuel_eae = heating_system_values[:electric_auxiliary_energy]
       load_frac = heating_system_values[:fraction_heat_load_served]
+      dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
       sys_id = heating_system_values[:id]
 
-      success = HVAC.apply_eae_to_heating_fan(runner, @hvac_map[sys_id], fuel_eae, fuel, load_frac, htg_type)
+      success = HVAC.apply_eae_to_heating_fan(runner, @hvac_map[sys_id], fuel_eae, fuel, dse_heat, load_frac, htg_type)
       return false if not success
     end
 
@@ -3432,10 +3435,8 @@ class OSModel
     end
   end
 
-  def self.get_attached_system(system_values, building, system_to_search)
+  def self.get_attached_system(system_values, building, system_to_search, has_dse)
     return nil if system_values[:distribution_system_idref].nil?
-
-    dse_heat, dse_cool, has_dse = get_dse(building, system_values[:id], system_values[:distribution_system_idref])
     return nil if has_dse
 
     # Finds the OpenStudio object of the heating (or cooling) system attached (i.e., on the same

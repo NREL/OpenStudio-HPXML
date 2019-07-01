@@ -709,6 +709,30 @@ class Airflow
   end
 
   def self.process_ducts(model, runner, ducts, building, air_loop)
+    # Validate Inputs
+    ducts.each do |duct|
+      if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
+        runner.registerError("Ducts: Must provide either leakage fraction or cfm25, but not both.")
+        return false
+      end
+      if not duct.leakage_frac.nil? and (duct.leakage_frac < 0 or duct.leakage_frac > 1)
+        runner.registerError("Ducts: Leakage Fraction must be greater than or equal to 0 and less than or equal to 1.")
+        return false
+      end
+      if not duct.leakage_cfm25.nil? and duct.leakage_cfm25 < 0
+        runner.registerError("Ducts: Leakage CFM25 must be greater than or equal to 0.")
+        return false
+      end
+      if duct.rvalue < 0
+        runner.registerError("Ducts: Insulation Nominal R-Value must be greater than or equal to 0.")
+        return false
+      end
+      if duct.area < 0
+        runner.registerError("Ducts: Surface Area must be greater than or equal to 0.")
+        return false
+      end
+    end
+
     has_ducted_hvac = HVAC.has_ducted_equipment(model, runner, air_loop)
     if ducts.size > 0 and not has_ducted_hvac
       runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
@@ -718,18 +742,13 @@ class Airflow
     end
 
     ducts.each do |duct|
-      if not duct.dse.nil?
+      duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
+      if duct.space.nil? # Outside
         duct.zone = nil
         duct.zone_handle = "outside"
       else
-        duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
-        if duct.space.nil? # Outside
-          duct.zone = nil
-          duct.zone_handle = "outside"
-        else
-          duct.zone = duct.space.thermalZone.get
-          duct.zone_handle = duct.zone.handle.to_s
-        end
+        duct.zone = duct.space.thermalZone.get
+        duct.zone_handle = duct.zone.handle.to_s
       end
     end
 
@@ -742,7 +761,6 @@ class Airflow
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(","))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(","))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctRvalues, ducts.map { |duct| duct.rvalue.to_f }.join(","))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctDSEs, ducts.map { |duct| duct.dse.to_f }.join(","))
     end
 
     return true
@@ -1260,24 +1278,17 @@ class Airflow
         leakage_fracs = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
         leakage_cfm25s = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
         ua_values = { Constants.DuctSideSupply => 0, Constants.DuctSideReturn => 0 }
-        dse_value = nil
         ducts.each do |duct|
           next unless (duct_zone.nil? and duct.zone.nil?) or (!duct_zone.nil? and !duct.zone.nil? and duct.zone.name.to_s == duct_zone.name.to_s)
 
-          if not duct.dse.nil?
-            leakage_fracs[Constants.DuctSideSupply] = 0
-            leakage_fracs[Constants.DuctSideReturn] = 0
-            dse_value = duct.dse
-          else
-            if not duct.leakage_frac.nil?
-              leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
-              leakage_fracs[duct.side] += duct.leakage_frac
-            elsif not duct.leakage_cfm25.nil?
-              leakage_cfm25s[duct.side] = 0 if leakage_cfm25s[duct.side].nil?
-              leakage_cfm25s[duct.side] += duct.leakage_cfm25
-            end
-            ua_values[duct.side] += duct.area / duct.rvalue
+          if not duct.leakage_frac.nil?
+            leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
+            leakage_fracs[duct.side] += duct.leakage_frac
+          elsif not duct.leakage_cfm25.nil?
+            leakage_cfm25s[duct.side] = 0 if leakage_cfm25s[duct.side].nil?
+            leakage_cfm25s[duct.side] += duct.leakage_cfm25
           end
+          ua_values[duct.side] += duct.area / duct.rvalue
         end
 
         # Calculate fraction of outside air specific to this duct location
@@ -1330,18 +1341,12 @@ class Airflow
         duct_subroutine.addLine("  Set SupSensLkToLv = SupTotLkToLiv-SupLatLkToLv") # W
 
         # Supply conduction
-        if not dse_value.nil?
-          # Model DSE as supply conduction to outside
-          duct_subroutine.addLine("  Set SupCondToLv = AH_MFR*(h_RA - h_SA)*(1.0-#{dse_value})") # W
-          duct_subroutine.addLine("  Set SupCondToDZ = 0-SupCondToLv") # W
-        else
-          supply_ua = UnitConversions.convert(ua_values[Constants.DuctSideSupply], "Btu/(hr*F)", "W/K")
-          duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{supply_ua.round(3)}")
-          duct_subroutine.addLine("  Set eTm = 0-eTm")
-          duct_subroutine.addLine("  Set t_sup = DZ_T+((AH_Tout-DZ_T)*(@Exp eTm))") # deg-C
-          duct_subroutine.addLine("  Set SupCondToLv = AH_MFR*air_cp*(t_sup-AH_Tout)") # W
-          duct_subroutine.addLine("  Set SupCondToDZ = 0-SupCondToLv") # W
-        end
+        supply_ua = UnitConversions.convert(ua_values[Constants.DuctSideSupply], "Btu/(hr*F)", "W/K")
+        duct_subroutine.addLine("  Set eTm = (Fan_RTF/(AH_MFR*air_cp))*#{supply_ua.round(3)}")
+        duct_subroutine.addLine("  Set eTm = 0-eTm")
+        duct_subroutine.addLine("  Set t_sup = DZ_T+((AH_Tout-DZ_T)*(@Exp eTm))") # deg-C
+        duct_subroutine.addLine("  Set SupCondToLv = AH_MFR*air_cp*(t_sup-AH_Tout)") # W
+        duct_subroutine.addLine("  Set SupCondToDZ = 0-SupCondToLv") # W
 
         # Return conduction
         return_ua = UnitConversions.convert(ua_values[Constants.DuctSideReturn], "Btu/(hr*F)", "W/K")
@@ -1955,18 +1960,15 @@ class Airflow
 end
 
 class Duct
-  # If DSE is not nil, all other values should be nil
-  # If DSE is nil, either leakage_frac or leakage_cfm25 should be provided but not both
-  def initialize(side, space, leakage_frac, leakage_cfm25, area, rvalue, dse)
+  def initialize(side, space, leakage_frac, leakage_cfm25, area, rvalue)
     @side = side
     @space = space
     @leakage_frac = leakage_frac
     @leakage_cfm25 = leakage_cfm25
     @area = area
     @rvalue = rvalue
-    @dse = dse
   end
-  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :dse, :zone, :zone_handle)
+  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :zone_handle)
 end
 
 class Infiltration
