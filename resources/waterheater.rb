@@ -927,7 +927,7 @@ class Waterheater
         eta_c = 1.0
         u_pre_skin = 1 / 10.8 # hr-ft^2-F/Btu
       end
-      ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * (a_side + a_top) unless jacket_r.nil?
+      ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side unless jacket_r.nil?
     end
     u = ua / surface_area # Btu/hr-ft^2-F
     return u, ua, eta_c
