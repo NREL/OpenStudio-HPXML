@@ -2255,7 +2255,6 @@ class OSModel
         cap_retention_temp = -5.0
         pan_heater_power = 0.0
         fan_power = 0.07
-        is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
         success = HVAC.apply_mshp(model, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
                                   min_cooling_airflow_rate, max_cooling_airflow_rate,
@@ -2263,9 +2262,8 @@ class OSModel
                                   min_heating_airflow_rate, max_heating_airflow_rate,
                                   heating_capacity_offset, cap_retention_frac,
                                   cap_retention_temp, pan_heater_power, fan_power,
-                                  is_ducted, cool_capacity_btuh,
-                                  backup_heat_efficiency, backup_heat_capacity_btuh,
-                                  load_frac_heat, load_frac_cool,
+                                  cool_capacity_btuh, backup_heat_efficiency,
+                                  backup_heat_capacity_btuh, load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success

@@ -548,13 +548,6 @@ class Airflow
   end
 
   def self.process_mech_vent(model, runner, mech_vent, building, weather, infil)
-    if mech_vent.type == Constants.VentTypeCFIS
-      if not HVAC.has_ducted_equipment(model, runner, mech_vent.cfis_air_loop)
-        runner.registerError("A CFIS ventilation system has been specified but the building does not have central, forced air equipment.")
-        return false
-      end
-    end
-
     # Spot Ventilation
     spot_fan_w_per_cfm = 0.3 # W/cfm/fan, per HSP
     bath_exhaust_sch_operation = 60.0 # min/day, per HSP
@@ -709,14 +702,6 @@ class Airflow
   end
 
   def self.process_ducts(model, runner, ducts, building, air_loop)
-    has_ducted_hvac = HVAC.has_ducted_equipment(model, runner, air_loop)
-    if ducts.size > 0 and not has_ducted_hvac
-      runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
-      ducts.clear
-    elsif ducts.size == 0 and has_ducted_hvac
-      runner.registerWarning("Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.")
-    end
-
     ducts.each do |duct|
       if not duct.dse.nil?
         duct.zone = nil

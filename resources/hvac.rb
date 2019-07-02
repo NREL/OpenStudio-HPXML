@@ -932,8 +932,8 @@ class HVAC
                       min_heating_capacity, max_heating_capacity,
                       min_heating_airflow_rate, max_heating_airflow_rate,
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
-                      pan_heater_power, fan_power, is_ducted,
-                      heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
+                      pan_heater_power, fan_power, heat_pump_capacity,
+                      supplemental_efficiency, supplemental_capacity,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_slave_zones_hash, hvac_map, sys_id)
@@ -1196,7 +1196,6 @@ class HVAC
         cfms_cooling_4 << cfms_cooling[mshp_index]
         shrs_rated_4 << shrs_rated[mshp_index]
       end
-      air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating_4.join(","))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling_4.join(","))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, cfms_heating_4.join(","))
@@ -4351,30 +4350,6 @@ class HVAC
       return ideal_air
     end
     return nil
-  end
-
-  def self.has_ducted_equipment(model, runner, air_loop)
-    system = get_unitary_system_from_air_loop_hvac(air_loop)
-
-    hvac_type_cool = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType)
-    hvac_type_cool = hvac_type_cool.get if hvac_type_cool.is_initialized
-    hvac_type_heat = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType)
-    hvac_type_heat = hvac_type_heat.get if hvac_type_heat.is_initialized
-
-    if [Constants.ObjectNameCentralAirConditioner,
-        Constants.ObjectNameAirSourceHeatPump,
-        Constants.ObjectNameGroundSourceHeatPump].include? hvac_type_cool
-      return true
-    elsif Constants.ObjectNameFurnace == hvac_type_heat
-      return true
-    elsif hvac_type_cool == Constants.ObjectNameMiniSplitHeatPump
-      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPump).get
-      if is_ducted
-        return true
-      end
-    end
-
-    return false
   end
 
   def self.calc_heating_and_cooling_seasons(model, weather, runner = nil)

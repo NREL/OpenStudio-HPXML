@@ -227,10 +227,6 @@ class Constants
     return 'supply'
   end
 
-  def self.DuctedInfoMiniSplitHeatPump
-    return __method__.to_s
-  end
-
   def self.FacadeFront
     return 'front'
   end
