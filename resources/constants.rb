@@ -684,6 +684,10 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoHVACDSE
+    return __method__.to_s
+  end
+
   def self.SizingInfoDuctExist
     return __method__.to_s
   end
