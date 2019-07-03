@@ -3510,7 +3510,12 @@ class OSModel
     end
   end
 
+  # Returns an OS:Space, or nil if the location is outside the building
   def self.get_space_from_location(location, object_name, model, spaces)
+    if location == 'other exterior' or location == 'outside'
+      return nil
+    end
+
     num_orig_spaces = spaces.size
 
     space = nil

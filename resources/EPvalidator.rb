@@ -372,7 +372,7 @@ class EnergyPlusValidator
       ## [HVACDuct]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return']" => {
         "DuctInsulationRValue" => one,
-        "[DuctLocation='living space' or DuctLocation='basement - conditioned' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - vented' or DuctLocation='crawlspace - unvented' or DuctLocation='attic - vented' or DuctLocation='attic - unvented' or DuctLocation='garage']" => one,
+        "[DuctLocation='living space' or DuctLocation='basement - conditioned' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - vented' or DuctLocation='crawlspace - unvented' or DuctLocation='attic - vented' or DuctLocation='attic - unvented' or DuctLocation='garage' or DuctLocation='outside']" => one,
         "DuctSurfaceArea" => one,
       },
 
