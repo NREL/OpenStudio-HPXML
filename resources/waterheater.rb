@@ -960,26 +960,7 @@ class Waterheater
 
     if thermal_zone.nil? # Located outside
       # Set ambient temperature schedule (actuated via EMS to equal the outdoor drybulb temperature)
-      new_heater.setAmbientTemperatureIndicator("Schedule")
-
-      schedule = OpenStudio::Model::ScheduleConstant.new(model)
-      new_heater.setAmbientTemperatureSchedule(schedule)
-
-      tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Drybulb Temperature")
-      tout_sensor.setName("#{name} s")
-      tout_sensor.setKeyName("Environment")
-
-      sch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(schedule, "Schedule:Constant", "Schedule Value")
-      sch_actuator.setName("#{name} act")
-
-      sch_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      sch_program.setName(name + " program")
-      sch_program.addLine("Set #{sch_actuator.name} = #{tout_sensor.name}")
-
-      program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      program_calling_manager.setName(name + " program calling manager")
-      program_calling_manager.setCallingPoint("BeginZoneTimestepBeforeInitHeatBalance")
-      program_calling_manager.addProgram(sch_program)
+      new_heater.setAmbientTemperatureIndicator("Outdoors")
     else
       new_heater.setAmbientTemperatureIndicator("ThermalZone")
       new_heater.setAmbientTemperatureThermalZone(thermal_zone)
