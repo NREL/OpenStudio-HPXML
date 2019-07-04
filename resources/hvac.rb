@@ -8,7 +8,7 @@ require_relative "schedules"
 class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse, frac_cool_load_served,
+                                   capacity, dse_cool, frac_cool_load_served,
                                    sequential_cool_load_frac, control_slave_zones_hash,
                                    hvac_map, sys_id)
 
@@ -84,7 +84,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -126,7 +126,7 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(","))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
     end # control_zone
 
     return true
@@ -134,7 +134,7 @@ class HVAC
 
   def self.apply_central_ac_2speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse, frac_cool_load_served,
+                                   capacity, dse_cool, frac_cool_load_served,
                                    sequential_cool_load_frac, control_slave_zones_hash,
                                    hvac_map, sys_id)
 
@@ -215,7 +215,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -258,7 +258,7 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(","))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
     end # control_zone
 
     return true
@@ -266,7 +266,7 @@ class HVAC
 
   def self.apply_central_ac_4speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse, frac_cool_load_served,
+                                   capacity, dse_cool, frac_cool_load_served,
                                    sequential_cool_load_frac, control_slave_zones_hash,
                                    hvac_map, sys_id)
 
@@ -352,7 +352,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -395,7 +395,7 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(","))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
     end # control_zone
 
     return true
@@ -404,7 +404,7 @@ class HVAC
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
-                                     supplemental_capacity, dse,
+                                     supplemental_capacity, dse_heat, dse_cool,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id)
@@ -525,7 +525,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -573,7 +573,8 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
     end # control_zone
 
     return true
@@ -582,7 +583,7 @@ class HVAC
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
-                                     supplemental_capacity, dse,
+                                     supplemental_capacity, dse_heat, dse_cool,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id)
@@ -704,7 +705,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -754,7 +755,8 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
     end # control_zone
 
     return true
@@ -763,7 +765,7 @@ class HVAC
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
-                                     supplemental_capacity, dse,
+                                     supplemental_capacity, dse_heat, dse_cool,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id)
@@ -888,7 +890,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -938,7 +940,8 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
     end # control_zone
 
     return true
@@ -952,7 +955,7 @@ class HVAC
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
                       heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
-                      dse, frac_heat_load_served, frac_cool_load_served,
+                      dse_heat, dse_cool, frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_slave_zones_hash, hvac_map, sys_id)
 
@@ -1108,7 +1111,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -1227,7 +1230,8 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, shrs_rated_4.join(","))
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
     end # control_zone
 
     return true
@@ -1241,7 +1245,7 @@ class HVAC
                       design_delta_t, pump_head,
                       u_tube_leg_spacing, u_tube_spacing_type,
                       fan_power, heat_pump_capacity, supplemental_efficiency,
-                      supplemental_capacity, dse,
+                      supplemental_capacity, dse_heat, dse_cool,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_slave_zones_hash, hvac_map, sys_id)
@@ -1441,7 +1445,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse)
+      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -1489,7 +1493,8 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPUTubeSpacingType, u_tube_spacing_type)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
     end # control_zone
 
     return true
@@ -1577,7 +1582,7 @@ class HVAC
   end
 
   def self.apply_furnace(model, runner, fuel_type, afue,
-                         capacity, fan_power_installed, dse,
+                         capacity, fan_power_installed, dse_heat,
                          frac_heat_load_served, sequential_heat_load_frac,
                          attached_cooling_system, control_slave_zones_hash,
                          hvac_map, sys_id)
@@ -1645,7 +1650,7 @@ class HVAC
         air_supply_outlet_node = air_loop.supplyOutletNode
         air_demand_inlet_node = air_loop.demandInletNode
         air_demand_outlet_node = air_loop.demandOutletNode
-        apply_dse(model, air_loop, control_zone, dse)
+        apply_dse(model, air_loop, control_zone, 1.0, dse_heat)
         hvac_map[sys_id] << air_loop
 
         air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -1685,7 +1690,7 @@ class HVAC
 
         air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
         air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
       else
         # Attach to existing cooling unitary system
         obj_name = Constants.ObjectNameCentralAirConditionerAndFurnace
@@ -1751,6 +1756,7 @@ class HVAC
 
         attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
         attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
+        attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
       end
     end
 
@@ -1759,7 +1765,7 @@ class HVAC
 
   def self.apply_boiler(model, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                        capacity, design_temp, dse, frac_heat_load_served,
+                        capacity, design_temp, dse_heat, frac_heat_load_served,
                         sequential_heat_load_frac, control_slave_zones_hash,
                         hvac_map, sys_id)
 
@@ -1800,7 +1806,7 @@ class HVAC
     plant_loop.setMinimumLoopFlowRate(0)
     plant_loop.autocalculatePlantLoopVolume()
     runner.registerInfo("Added '#{plant_loop.name}' to model.")
-    apply_dse(model, plant_loop, control_slave_zones_hash.keys[0], dse)
+    apply_dse(model, plant_loop, control_slave_zones_hash.keys[0], 1.0, dse_heat)
     hvac_map[sys_id] << plant_loop
 
     loop_sizing = plant_loop.sizingPlant
@@ -1911,7 +1917,7 @@ class HVAC
         # Store info for HVAC Sizing measure
         baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
         baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameBoiler)
-        baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACDSE, dse)
+        baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
         if not other_baseboard.nil?
           other_baseboard.additionalProperties.setFeature(Constants.SizingInfoHVACOtherZoneObject, baseboard_heater.handle.to_s)
         end
@@ -3937,10 +3943,10 @@ class HVAC
     return curve
   end
 
-  def self.apply_dse(model, air_or_plant_loop, living_zone, dse)
-    return if dse >= 1
-
+  def self.apply_dse(model, air_or_plant_loop, living_zone, dse_cool, dse_heat)
     if air_or_plant_loop.is_a? OpenStudio::Model::AirLoopHVAC
+      return if dse_cool >= 1 and dse_heat >= 1
+
       air_loop = air_or_plant_loop
 
       # Air handler mass flow rate sensor
@@ -3980,7 +3986,6 @@ class HVAC
       actuator.setName("#{other_equip.name} act")
 
       # EMS program
-      # TODO: Allow dse_heat vs dse_cool
       dse_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       dse_program.setName("#{air_loop.name} dse program")
       dse_program.addLine("Set AH_MFR = #{ah_mfr_sensor.name}")
@@ -3990,7 +3995,11 @@ class HVAC
       dse_program.addLine("Set RA_W = #{ra_w_sensor.name}")
       dse_program.addLine("Set h_SA = (@HFnTdbW AH_Tout AH_Wout)") # J/kg
       dse_program.addLine("Set h_RA = (@HFnTdbW RA_T RA_W)") # J/kg
-      dse_program.addLine("Set #{actuator.name} = AH_MFR*(h_RA - h_SA)*(1.0-#{dse})") # W
+      dse_program.addLine("If h_RA > h_SA")
+      dse_program.addLine("  Set #{actuator.name} = AH_MFR*(h_RA - h_SA)*(1.0-#{dse_cool})") # W
+      dse_program.addLine("Else")
+      dse_program.addLine("  Set #{actuator.name} = AH_MFR*(h_RA - h_SA)*(1.0-#{dse_heat})") # W
+      dse_program.addLine("EndIf")
 
       # EMS program calling manager
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -3999,6 +4008,11 @@ class HVAC
       program_calling_manager.addProgram(dse_program)
 
     elsif air_or_plant_loop.is_a? OpenStudio::Model::PlantLoop
+      if dse_cool < 1
+        fail "Unhandled dse_cool for plant loop."
+      end
+      return if dse_heat >= 1
+
       plant_loop = air_or_plant_loop
 
       # Plant loop supply side sensor
@@ -4020,7 +4034,7 @@ class HVAC
       # EMS program
       dse_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       dse_program.setName("#{plant_loop.name} dse program")
-      dse_program.addLine("Set #{actuator.name} = -1*#{qheat_sensor.name}*(1.0-#{dse})") # W
+      dse_program.addLine("Set #{actuator.name} = -1*#{qheat_sensor.name}*(1.0-#{dse_heat})") # W
 
       # EMS program calling manager
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)

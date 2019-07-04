@@ -2185,10 +2185,6 @@ class OSModel
       end
 
       dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
-      if dse_heat != dse_cool
-        # FUTURE: Remove this when available in E+
-        fail "Cannot handle different distribution system efficiency (DSE) values for heating and cooling."
-      end
 
       sys_id = heat_pump_values[:id]
       @hvac_map[sys_id] = []
@@ -2215,7 +2211,7 @@ class OSModel
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat,
+                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2228,7 +2224,7 @@ class OSModel
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat,
+                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2241,7 +2237,7 @@ class OSModel
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat,
+                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2282,7 +2278,7 @@ class OSModel
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
-                                  dse_heat, load_frac_heat, load_frac_cool,
+                                  dse_heat, dse_cool, load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success
@@ -2317,7 +2313,7 @@ class OSModel
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
                                   fan_power, cool_capacity_btuh, backup_heat_efficiency,
-                                  backup_heat_capacity_btuh, dse_heat,
+                                  backup_heat_capacity_btuh, dse_heat, dse_cool,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)

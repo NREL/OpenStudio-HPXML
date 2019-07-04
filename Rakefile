@@ -1824,8 +1824,8 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
   elsif ['base-hvac-dse.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
-    hvac_distributions_values[0][:annual_heating_dse] = 0.75
-    hvac_distributions_values[0][:annual_cooling_dse] = 0.75
+    hvac_distributions_values[0][:annual_heating_dse] = 0.8
+    hvac_distributions_values[0][:annual_cooling_dse] = 0.7
   elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-0.8.xml'
     hvac_distributions_values = [{ :id => "HVACDistribution",
                                    :distribution_system_type => "DSE",
