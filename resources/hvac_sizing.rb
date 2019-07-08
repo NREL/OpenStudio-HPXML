@@ -156,6 +156,10 @@ class HVACSizing
     @cool_design_temps = {}
     @heat_design_temps = {}
 
+    # Outside
+    @cool_design_temps[nil] = weather.design.CoolingDrybulb
+    @heat_design_temps[nil] = weather.design.HeatingDrybulb
+
     # Initialize Manual J buffer space temperatures using current design temperatures
     @model_spaces.each do |space|
       @cool_design_temps[space] = process_design_temp_cooling(runner, weather, space)
@@ -1403,7 +1407,10 @@ class HVACSizing
 
     dse_Fregain = nil
 
-    if Geometry.is_unconditioned_basement(duct.LocationSpace) or Geometry.is_conditioned_basement(duct.LocationSpace)
+    if duct.LocationSpace.nil? # Outside
+      dse_Fregain = 0.0
+
+    elsif Geometry.is_unconditioned_basement(duct.LocationSpace) or Geometry.is_conditioned_basement(duct.LocationSpace)
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
@@ -1860,9 +1867,7 @@ class HVACSizing
         hvac_final_values.Cool_Airflow = 0
       end
     end
-    if not hvac.FixedSuppHeatingCapacity.nil?
-      hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "ton", "Btu/hr")
-    elsif not hvac.FixedHeatingCapacity.nil?
+    if not hvac.FixedHeatingCapacity.nil?
       hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
     end
 
@@ -2091,6 +2096,10 @@ class HVACSizing
     else
       hvac_final_values.Heat_Capacity = 0
       hvac_final_values.Heat_Airflow = 0
+    end
+
+    if not hvac.FixedSuppHeatingCapacity.nil?
+      hvac_final_values.Heat_Capacity_Supp = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "ton", "Btu/hr")
     end
 
     return hvac_final_values
@@ -2443,6 +2452,11 @@ class HVACSizing
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
     locations.each do |location|
+      if location == "outside"
+        location_spaces << nil
+        next
+      end
+
       location_space = nil
       thermal_zones.each do |zone|
         next if not zone.handle.to_s.start_with?(location)
@@ -2481,7 +2495,6 @@ class HVACSizing
     '''
     Calculate area-weighted average values for unconditioned duct(s)
     '''
-
     uncond_area = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)

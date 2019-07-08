@@ -743,14 +743,20 @@ class Airflow
 
     ducts.each do |duct|
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
-      duct.zone = duct.space.thermalZone.get
+      if duct.space.nil? # Outside
+        duct.zone = nil
+        duct.zone_handle = "outside"
+      else
+        duct.zone = duct.space.thermalZone.get
+        duct.zone_handle = duct.zone.handle.to_s
+      end
     end
 
     if ducts.size > 0 and building.living.zone.airLoopHVACs.include? air_loop
       # Store info for HVAC Sizing measure
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(","))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationZones, ducts.map { |duct| duct.zone.handle.to_s }.join(","))
+      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationZones, ducts.map { |duct| duct.zone_handle.to_s }.join(","))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(","))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(","))
       air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(","))
@@ -1049,7 +1055,7 @@ class Airflow
     end
     return true if all_ducts_conditioned
 
-    def self.create_duct_actuator(model, name, space)
+    def self.create_duct_actuator(model, name, space, is_outside = false)
       var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
       other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
       other_equip_def.setName("#{var.name} equip")
@@ -1058,6 +1064,9 @@ class Airflow
       other_equip.setFuelType("None")
       other_equip.setSchedule(model.alwaysOnDiscreteSchedule)
       other_equip.setSpace(space)
+      if is_outside
+        other_equip_def.setFractionLost(1.0)
+      end
       actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, "OtherEquipment", "Power Level")
       actuator.setName("#{other_equip.name} act")
       return var, actuator
@@ -1153,8 +1162,7 @@ class Airflow
       # Create one duct program for each duct location zone
 
       duct_zones.each_with_index do |duct_zone, i|
-        duct_zone_name = duct_zone.name.to_s
-        next if duct_zone_name == building.living.zone.name.to_s
+        next if not duct_zone.nil? and duct_zone.name.to_s == building.living.zone.name.to_s
 
         air_loop_name_idx = air_loop.name.to_s
         if i > 0
@@ -1165,15 +1173,25 @@ class Airflow
 
         # Duct zone temperature
         dz_t_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} DZ T".gsub(" ", "_"))
-        dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
+        if duct_zone.nil? # Outside
+          dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Drybulb Temperature")
+          dz_t_sensor.setKeyName("Environment")
+        else
+          dz_t_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
+          dz_t_sensor.setKeyName(duct_zone.name.to_s)
+        end
         dz_t_sensor.setName("#{dz_t_var.name} s")
-        dz_t_sensor.setKeyName(duct_zone_name)
 
         # Duct zone humidity ratio
         dz_w_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} DZ W".gsub(" ", "_"))
-        dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Humidity Ratio")
+        if duct_zone.nil? # Outside
+          dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Humidity Ratio")
+          dz_w_sensor.setKeyName("Environment")
+        else
+          dz_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Humidity Ratio")
+          dz_w_sensor.setKeyName(duct_zone.name.to_s)
+        end
         dz_w_sensor.setName("#{dz_w_var.name} s")
-        dz_w_sensor.setKeyName(duct_zone_name)
 
         # -- Actuators --
 
@@ -1194,35 +1212,61 @@ class Airflow
         return_lat_lk_to_rp_var, return_lat_lk_to_rp_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetLatLkToRP", ra_duct_zone.spaces[0])
 
         # Supply duct conduction impact on the duct zone
-        supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupCondToDZ", duct_zone.spaces[0])
+        if duct_zone.nil? # Outside
+          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupCondToDZ", living_space, true)
+        else
+          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupCondToDZ", duct_zone.spaces[0])
+        end
 
         # Return duct conduction impact on the duct zone
-        return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetCondToDZ", duct_zone.spaces[0])
+        if duct_zone.nil? # Outside
+          return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetCondToDZ", living_space, true)
+        else
+          return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetCondToDZ", duct_zone.spaces[0])
+        end
 
         # Supply duct sensible leakage impact on the duct zone
-        supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupSensLkToDZ", duct_zone.spaces[0])
+        if duct_zone.nil? # Outside
+          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupSensLkToDZ", living_space, true)
+        else
+          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupSensLkToDZ", duct_zone.spaces[0])
+        end
 
         # Supply duct latent leakage impact on the duct zone
-        supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupLatLkToDZ", duct_zone.spaces[0])
+        if duct_zone.nil? # Outside
+          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupLatLkToDZ", living_space, true)
+        else
+          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupLatLkToDZ", duct_zone.spaces[0])
+        end
 
         # Two objects are required to model the air exchange between the duct zone and the living space since
         # ZoneMixing objects can not account for direction of air flow (both are controlled by EMS)
 
         # Accounts for leaks from the duct zone to the living zone
-        dz_to_liv_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} ZoneMixDZToLv".gsub(" ", "_"))
-        zone_mixing = OpenStudio::Model::ZoneMixing.new(building.living.zone)
-        zone_mixing.setName("#{dz_to_liv_flow_rate_var.name} mix")
-        zone_mixing.setSourceZone(duct_zone)
-        dz_to_liv_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
-        dz_to_liv_flow_rate_actuator.setName("#{zone_mixing.name} act")
+        if duct_zone.nil? # Outside
+          dz_to_liv_flow_rate_var = nil
+          dz_to_liv_flow_rate_actuator = nil
+        else
+          dz_to_liv_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} ZoneMixDZToLv".gsub(" ", "_"))
+          zone_mixing = OpenStudio::Model::ZoneMixing.new(building.living.zone)
+          zone_mixing.setName("#{dz_to_liv_flow_rate_var.name} mix")
+          zone_mixing.setSourceZone(duct_zone)
+          dz_to_liv_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
+          dz_to_liv_flow_rate_actuator.setName("#{zone_mixing.name} act")
+        end
 
         # Accounts for leaks from the living zone to the duct zone
-        liv_to_dz_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} ZoneMixLvToDZ".gsub(" ", "_"))
-        zone_mixing = OpenStudio::Model::ZoneMixing.new(duct_zone)
-        zone_mixing.setName("#{liv_to_dz_flow_rate_var.name} mix")
-        zone_mixing.setSourceZone(building.living.zone)
-        liv_to_dz_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
-        liv_to_dz_flow_rate_actuator.setName("#{zone_mixing.name} act")
+        if duct_zone.nil? # Outside
+          liv_to_dz_flow_rate_var = nil
+          liv_to_dz_flow_rate_actuator = nil
+        else
+          liv_to_dz_flow_rate_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop_name_idx} ZoneMixLvToDZ".gsub(" ", "_"))
+          zone_mixing = OpenStudio::Model::ZoneMixing.new(duct_zone)
+          zone_mixing.setName("#{liv_to_dz_flow_rate_var.name} mix")
+          zone_mixing.setSourceZone(building.living.zone)
+          liv_to_dz_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
+          liv_to_dz_flow_rate_actuator.setName("#{zone_mixing.name} act")
+        end
 
         # -- Global Variables --
 
@@ -1235,7 +1279,7 @@ class Airflow
         leakage_cfm25s = { Constants.DuctSideSupply => nil, Constants.DuctSideReturn => nil }
         ua_values = { Constants.DuctSideSupply => 0, Constants.DuctSideReturn => 0 }
         ducts.each do |duct|
-          next unless duct.zone.name.to_s == duct_zone_name
+          next unless (duct_zone.nil? and duct.zone.nil?) or (!duct_zone.nil? and !duct.zone.nil? and duct.zone.name.to_s == duct_zone.name.to_s)
 
           if not duct.leakage_frac.nil?
             leakage_fracs[duct.side] = 0 if leakage_fracs[duct.side].nil?
@@ -1249,13 +1293,15 @@ class Airflow
 
         # Calculate fraction of outside air specific to this duct location
         f_oa = 1.0
-        if not building.conditioned_basement.nil? and building.conditioned_basement.zone.name.to_s == duct_zone_name
+        if duct_zone.nil? # Outside
+          # nop
+        elsif not building.conditioned_basement.nil? and building.conditioned_basement.zone.name.to_s == duct_zone.name.to_s
           f_oa = 0.0
-        elsif not building.unconditioned_basement.nil? and building.unconditioned_basement.zone.name.to_s == duct_zone_name
+        elsif not building.unconditioned_basement.nil? and building.unconditioned_basement.zone.name.to_s == duct_zone.name.to_s
           f_oa = 0.0
-        elsif not building.unvented_crawlspace.nil? and building.unvented_crawlspace.zone.name.to_s == duct_zone_name
+        elsif not building.unvented_crawlspace.nil? and building.unvented_crawlspace.zone.name.to_s == duct_zone.name.to_s
           f_oa = 0.0
-        elsif not building.unvented_attic.nil? and building.unvented_attic.zone.name.to_s == duct_zone_name
+        elsif not building.unvented_attic.nil? and building.unvented_attic.zone.name.to_s == duct_zone.name.to_s
           f_oa = 0.0
         end
 
@@ -1368,8 +1414,12 @@ class Airflow
         duct_subroutine.addLine("Set #{supply_cond_to_dz_var.name} = SupCondToDZ")
         duct_subroutine.addLine("Set #{supply_lat_lk_to_dz_var.name} = SupLatLkToDZ")
         duct_subroutine.addLine("Set #{supply_sens_lk_to_dz_var.name} = SupSensLkToDZ")
-        duct_subroutine.addLine("Set #{liv_to_dz_flow_rate_var.name} = ZoneMixLvToDZ")
-        duct_subroutine.addLine("Set #{dz_to_liv_flow_rate_var.name} = ZoneMixDZToLv")
+        if not liv_to_dz_flow_rate_actuator.nil?
+          duct_subroutine.addLine("Set #{liv_to_dz_flow_rate_var.name} = ZoneMixLvToDZ")
+        end
+        if not dz_to_liv_flow_rate_actuator.nil?
+          duct_subroutine.addLine("Set #{dz_to_liv_flow_rate_var.name} = ZoneMixDZToLv")
+        end
         duct_subroutine.addLine("Set #{duct_lk_supply_fan_equiv_var.name} = LkSupFanEquiv")
         duct_subroutine.addLine("Set #{duct_lk_exhaust_fan_equiv_var.name} = LkExhFanEquiv")
 
@@ -1402,8 +1452,12 @@ class Airflow
           duct_program.addLine("Set dl_8 = #{supply_cond_to_dz_var.name}")
           duct_program.addLine("Set dl_9 = #{supply_sens_lk_to_dz_var.name}")
           duct_program.addLine("Set dl_10 = #{supply_lat_lk_to_dz_var.name}")
-          duct_program.addLine("Set dl_11 = #{dz_to_liv_flow_rate_var.name}")
-          duct_program.addLine("Set dl_12 = #{liv_to_dz_flow_rate_var.name}")
+          if not dz_to_liv_flow_rate_actuator.nil?
+            duct_program.addLine("Set dl_11 = #{dz_to_liv_flow_rate_var.name}")
+          end
+          if not liv_to_dz_flow_rate_actuator.nil?
+            duct_program.addLine("Set dl_12 = #{liv_to_dz_flow_rate_var.name}")
+          end
 
           duct_program.addLine("If #{mech_vent.cfis_on_for_hour_var.name}")
 
@@ -1427,8 +1481,12 @@ class Airflow
           duct_program.addLine("  Set #{supply_cond_to_dz_actuator.name} = #{supply_cond_to_dz_var.name} + dl_8")
           duct_program.addLine("  Set #{supply_sens_lk_to_dz_actuator.name} = #{supply_sens_lk_to_dz_var.name} + dl_9")
           duct_program.addLine("  Set #{supply_lat_lk_to_dz_actuator.name} = #{supply_lat_lk_to_dz_var.name} + dl_10")
-          duct_program.addLine("  Set #{dz_to_liv_flow_rate_actuator.name} = #{dz_to_liv_flow_rate_var.name} + dl_11")
-          duct_program.addLine("  Set #{liv_to_dz_flow_rate_actuator.name} = #{liv_to_dz_flow_rate_var.name} + dl_12")
+          if not dz_to_liv_flow_rate_actuator.nil?
+            duct_program.addLine("  Set #{dz_to_liv_flow_rate_actuator.name} = #{dz_to_liv_flow_rate_var.name} + dl_11")
+          end
+          if not liv_to_dz_flow_rate_actuator.nil?
+            duct_program.addLine("  Set #{liv_to_dz_flow_rate_actuator.name} = #{liv_to_dz_flow_rate_var.name} + dl_12")
+          end
 
           duct_program.addLine("Else")
 
@@ -1442,8 +1500,12 @@ class Airflow
           duct_program.addLine("  Set #{supply_cond_to_dz_actuator.name} = dl_8")
           duct_program.addLine("  Set #{supply_sens_lk_to_dz_actuator.name} = dl_9")
           duct_program.addLine("  Set #{supply_lat_lk_to_dz_actuator.name} = dl_10")
-          duct_program.addLine("  Set #{dz_to_liv_flow_rate_actuator.name} = dl_11")
-          duct_program.addLine("  Set #{liv_to_dz_flow_rate_actuator.name} = dl_12")
+          if not dz_to_liv_flow_rate_actuator.nil?
+            duct_program.addLine("  Set #{dz_to_liv_flow_rate_actuator.name} = dl_11")
+          end
+          if not liv_to_dz_flow_rate_actuator.nil?
+            duct_program.addLine("  Set #{liv_to_dz_flow_rate_actuator.name} = dl_12")
+          end
 
           duct_program.addLine("EndIf")
 
@@ -1459,14 +1521,22 @@ class Airflow
           duct_program.addLine("Set #{supply_cond_to_dz_actuator.name} = #{supply_cond_to_dz_var.name}")
           duct_program.addLine("Set #{supply_sens_lk_to_dz_actuator.name} = #{supply_sens_lk_to_dz_var.name}")
           duct_program.addLine("Set #{supply_lat_lk_to_dz_actuator.name} = #{supply_lat_lk_to_dz_var.name}")
-          duct_program.addLine("Set #{dz_to_liv_flow_rate_actuator.name} = #{dz_to_liv_flow_rate_var.name}")
-          duct_program.addLine("Set #{liv_to_dz_flow_rate_actuator.name} = #{liv_to_dz_flow_rate_var.name}")
+          if not dz_to_liv_flow_rate_actuator.nil?
+            duct_program.addLine("Set #{dz_to_liv_flow_rate_actuator.name} = #{dz_to_liv_flow_rate_var.name}")
+          end
+          if not liv_to_dz_flow_rate_actuator.nil?
+            duct_program.addLine("Set #{liv_to_dz_flow_rate_actuator.name} = #{liv_to_dz_flow_rate_var.name}")
+          end
 
         end
 
         duct_programs[air_loop_name_idx] = duct_program
 
-        runner.registerInfo("Created ducts for #{air_loop.name} and zone #{duct_zone_name}.")
+        if duct_zone.nil? # Outside
+          runner.registerInfo("Created outside ducts for #{air_loop.name}.")
+        else
+          runner.registerInfo("Created ducts for #{air_loop.name} and zone #{duct_zone.name.to_s}.")
+        end
       end
     end
 
@@ -1898,7 +1968,7 @@ class Duct
     @area = area
     @rvalue = rvalue
   end
-  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone)
+  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :zone_handle)
 end
 
 class Infiltration
