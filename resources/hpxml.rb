@@ -1144,7 +1144,7 @@ class HPXML
              :duct_fraction_area => to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea")),
              :duct_surface_area => to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea")) }
   end
-
+#TODO: update this for the rake file to generate test XMLs
   def self.add_ventilation_fan(hpxml:,
                                id:,
                                fan_type:,
