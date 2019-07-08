@@ -623,7 +623,10 @@ class Waterheater
         hpwh_ducting_program.addLine("Set T_hpwh_inlet = #{amb_temp_sensor.name}")
       end
     end
-    if not space.nil? # If not located outside
+    if space.nil? # If located outside
+      hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
+      hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}")
+    else
       # Sensible/latent heat gain to the space
       if ducting == "none"
         hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = T_hpwh_inlet")
@@ -669,10 +672,6 @@ class Waterheater
 
     hpwh_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     hpwh_ctrl_program.setName("#{obj_name_hpwh} Control")
-    if space.nil? #if outside, still actuate T&RH
-      hpwh_ctrl_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
-      hpwh_ctrl_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}")
-    end
     if ducting == Constants.VentTypeSupply or ducting == Constants.VentTypeBalanced
       hpwh_ctrl_program.addLine("If (HPWH_out_temp < #{UnitConversions.convert(min_temp, "F", "C")}) || (HPWH_out_temp > #{UnitConversions.convert(max_temp, "F", "C")})")
     else
