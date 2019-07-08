@@ -1053,9 +1053,9 @@ class Waterheater
     else
       new_heater.setAmbientTemperatureIndicator("ThermalZone")
       new_heater.setAmbientTemperatureThermalZone(thermal_zone)
-      if new_heater.ambientTemperatureSchedule.is_initialized
-        new_heater.ambientTemperatureSchedule.get.remove
-      end
+    end
+    if new_heater.ambientTemperatureSchedule.is_initialized
+      new_heater.ambientTemperatureSchedule.get.remove
     end
     ua_w_k = UnitConversions.convert(ua, "Btu/(hr*F)", "W/K")
     new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
