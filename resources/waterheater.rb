@@ -601,7 +601,7 @@ class Waterheater
     end
     if space.nil? # If located outside
       hpwh_ducting_program.addLine("Set #{tamb_act_actuator.name} = #{amb_temp_sensor.name}")
-      hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}")
+      hpwh_ducting_program.addLine("Set #{rhamb_act_actuator.name} = #{amb_rh_sensor.name}/100")
     else
       # Sensible/latent heat gain to the space
       if ducting == "none"
