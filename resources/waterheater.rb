@@ -963,7 +963,6 @@ class Waterheater
     new_heater.setOnCycleLossFractiontoThermalZone(1.0)
 
     if thermal_zone.nil? # Located outside
-      # Set ambient temperature schedule (actuated via EMS to equal the outdoor drybulb temperature)
       new_heater.setAmbientTemperatureIndicator("Outdoors")
     else
       new_heater.setAmbientTemperatureIndicator("ThermalZone")
