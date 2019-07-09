@@ -84,7 +84,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -215,7 +215,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -352,7 +352,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, 1.0)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -525,7 +525,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -705,7 +705,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -890,7 +890,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -1111,7 +1111,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -1445,7 +1445,7 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
-      apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
+      self.apply_dse(model, air_loop, control_zone, dse_cool, dse_heat)
       hvac_map[sys_id] << air_loop
 
       air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -1650,7 +1650,7 @@ class HVAC
         air_supply_outlet_node = air_loop.supplyOutletNode
         air_demand_inlet_node = air_loop.demandInletNode
         air_demand_outlet_node = air_loop.demandOutletNode
-        apply_dse(model, air_loop, control_zone, 1.0, dse_heat)
+        self.apply_dse(model, air_loop, control_zone, 1.0, dse_heat)
         hvac_map[sys_id] << air_loop
 
         air_loop_unitary.addToNode(air_supply_inlet_node)
@@ -1728,6 +1728,7 @@ class HVAC
 
         air_loop = attached_cooling_system.airLoopHVAC.get
         air_loop.setName(obj_name + " airloop")
+        self.apply_dse(model, air_loop, control_zone, 1.0, dse_heat) # only need to apply heating, cooling already applied
         hvac_map[sys_id] << air_loop
 
         runner.registerInfo("Added '#{htg_coil.name}' to '#{attached_cooling_system.name}'")
@@ -1806,7 +1807,7 @@ class HVAC
     plant_loop.setMinimumLoopFlowRate(0)
     plant_loop.autocalculatePlantLoopVolume()
     runner.registerInfo("Added '#{plant_loop.name}' to model.")
-    apply_dse(model, plant_loop, control_slave_zones_hash.keys[0], 1.0, dse_heat)
+    self.apply_dse(model, plant_loop, control_slave_zones_hash.keys[0], 1.0, dse_heat)
     hvac_map[sys_id] << plant_loop
 
     loop_sizing = plant_loop.sizingPlant
