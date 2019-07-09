@@ -624,12 +624,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
       htg_sys_fuel = to_beopt_fuel(XMLHelper.get_value(htg_sys, 'HeatingSystemFuel'))
       htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
-      htg_dse = XMLHelper.get_value(bldg_details, 'Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency')
-      if htg_dse.nil?
-        htg_dse = 1.0
-      else
-        htg_dse = Float(htg_dse)
-      end
       htg_load_frac = Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
 
       if htg_load_frac <= 0
@@ -658,7 +652,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         # For now, skip if multiple equipment
         if num_htg_sys == 1 and ['Furnace', 'Boiler', 'WallFurnace', 'Stove'].include? htg_sys_type and htg_sys_fuel != Constants.FuelTypeElectric
           if XMLHelper.has_element(htg_sys, 'ElectricAuxiliaryEnergy')
-            hpxml_value = Float(XMLHelper.get_value(htg_sys, 'ElectricAuxiliaryEnergy')) / (2.08 * htg_dse)
+            hpxml_value = Float(XMLHelper.get_value(htg_sys, 'ElectricAuxiliaryEnergy')) / 2.08
           else
             furnace_capacity_kbtuh = nil
             if htg_sys_type == 'Furnace'
@@ -666,7 +660,7 @@ class HPXMLTranslatorTest < MiniTest::Test
               furnace_capacity_kbtuh = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W', 'kBtu/hr')
             end
             frac_load_served = Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
-            hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, frac_load_served, furnace_capacity_kbtuh) / (2.08 * htg_dse)
+            hpxml_value = HVAC.get_default_eae(htg_sys_type, htg_sys_fuel, frac_load_served, furnace_capacity_kbtuh) / 2.08
           end
 
           if htg_sys_type == 'Boiler'

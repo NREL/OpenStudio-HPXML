@@ -1363,20 +1363,6 @@
 												<xs:documentation>The net sensible energy recovered by the supply airstream as adjusted by electric consumption, case heat loss or heat gain, air leakage, airflow mass imbalance between the two airstreams and the energy used for defrost (when running the Very Low Temperature Test), as a percent of the potential sensible energy that could be recovered plus the exhaust fan energy. Values for some products can be found at the Home Ventilating Institute (hvi.org).</xs:documentation>
 												</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0"
-												name="AdjustedTotalRecoveryEfficiency"
-												type="Fraction">
-												<xs:annotation>
-												<xs:documentation>The net total energy (sensible plus latent, also called enthalpy) recovered by the supply airstream adjusted by case heat loss or heat gain, air leakage and airflow mass imbalance between the two airstreams, as a percent of the potential total energy that could be recovered. This value is used to predict and compare Cooling Season Performance for the HRV/ERV unit. This value should be used for energy modeling when wattage for air movement is separately accounted for in the energy model. Values for some products can be found at the Home Ventilating Institute (hvi.org).</xs:documentation>
-												</xs:annotation>
-												</xs:element>
-												<xs:element minOccurs="0"
-												name="AdjustedSensibleRecoveryEfficiency"
-												type="Fraction">
-												<xs:annotation>
-												<xs:documentation>The net sensible energy recovered by the supply airstream as adjusted by case heat loss or heat gain, air leakage, airflow mass imbalance between the two airstreams and the energy used for defrost (when running the Very Low Temperature Test), as a percent of the potential sensible energy that could be recovered. This value should be used for energy modeling when wattage for air movement is separately accounted for in the energy model. Values for some products can be found at the Home Ventilating Institute (hvi.org).</xs:documentation>
-												</xs:annotation>
-												</xs:element>
 												<xs:element minOccurs="0" name="FanPower"
 												type="xs:double">
 												<xs:annotation>
@@ -1540,10 +1526,10 @@
 											<xs:documentation>[deg F]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="UsesDesuperheater"
+									<xs:element minOccurs="0" name="HasDesuperheater"
 										type="xs:boolean">
 										<xs:annotation>
-											<xs:documentation>Indicates whether this water heater uses a desuperheater. The attached heat pump or air conditioner can be referenced in the RelatedHVACSystem element.</xs:documentation>
+											<xs:documentation>Indicates whether this water heater has a desuperheater. The attached heat pump or air conditioner can be referenced in the RelatedHVACSystem element.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="HasSharedCombustionVentilation"
@@ -2058,6 +2044,36 @@
 						<xs:element name="NumberofLightingControls"
 							type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
 						<xs:element name="Location" type="LightingLocation" minOccurs="0"> </xs:element>
+						<xs:element ref="extension" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="LightingFractions">
+				<xs:annotation>
+					<xs:documentation>DEPRECATED - Please use LightingGroup/FractionofUnitInLocation</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="FractionIncandescent" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>Fraction of lights that are incandescent.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="FractionCFL" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>Fraction of the lights that are compact fluorescent.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="FractionLFL" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>Fraction of the lights that are linear fluorescent.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="FractionLED" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>Fraction of lights that are LED.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
@@ -3219,7 +3235,7 @@ http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:docum
 					<xs:element name="GeothermalLoop" type="GeothermalLoop" minOccurs="0"/>
 					<xs:element minOccurs="0" name="BackupType">
 						<xs:annotation>
-							<xs:documentation>Whether the heat pump backup is integrated into the unit (describe in BackupSystemFuel, BackupAnnualHeatingEfficiency, BackupHeatingCapacity), or a separate heating system (add reference in BackupSystem).</xs:documentation>
+							<xs:documentation>Whether the heat pump backup is integrated into the unit (describe in BackupSystemFuel, BackupAFUE, BackupHeatingCapacity), or a separate heating system (add reference in BackupSystem).</xs:documentation>
 						</xs:annotation>
 						<xs:simpleType>
 							<xs:restriction base="xs:string">

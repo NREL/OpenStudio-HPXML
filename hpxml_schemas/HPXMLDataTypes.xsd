@@ -1065,7 +1065,6 @@
 			<xs:enumeration value="interstitial space"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="outside"/>
-			<xs:enumeration value="roof deck"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
 	</xs:simpleType>
