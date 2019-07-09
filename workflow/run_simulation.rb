@@ -1,5 +1,6 @@
 start_time = Time.now
 
+require 'fileutils'
 require 'optparse'
 require 'json'
 require 'pathname'
