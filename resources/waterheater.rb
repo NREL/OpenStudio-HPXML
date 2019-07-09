@@ -58,13 +58,7 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    if space.nil? # Located outside
-      water_heater_tz = nil
-    else
-      water_heater_tz = space.thermalZone.get
-    end
-
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, water_heater_tz, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -117,13 +111,7 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    if space.nil? # Located outside
-      water_heater_tz = nil
-    else
-      water_heater_tz = space.thermalZone.get
-    end
-
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, water_heater_tz, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -699,7 +687,7 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create an initial simple tank model by calling create_new_heater
-    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
     new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
@@ -992,7 +980,7 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name, cap, fuel, vol, ef, re, t_set, thermal_zone, oncycle_p, offcycle_p, ec_adj, wh_type, cyc_derate, nbeds, model, runner)
+  def self.create_new_heater(name, cap, fuel, vol, ef, re, t_set, space, oncycle_p, offcycle_p, ec_adj, wh_type, cyc_derate, nbeds, model, runner)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
     act_vol = calc_actual_tankvol(vol, fuel, wh_type)
@@ -1048,11 +1036,11 @@ class Waterheater
     new_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
     new_heater.setOnCycleLossFractiontoThermalZone(1.0)
 
-    if thermal_zone.nil? # Located outside
+    if space.nil? # Located outside
       new_heater.setAmbientTemperatureIndicator("Outdoors")
     else
       new_heater.setAmbientTemperatureIndicator("ThermalZone")
-      new_heater.setAmbientTemperatureThermalZone(thermal_zone)
+      new_heater.setAmbientTemperatureThermalZone(space.thermalZone.get)
     end
     if new_heater.ambientTemperatureSchedule.is_initialized
       new_heater.ambientTemperatureSchedule.get.remove

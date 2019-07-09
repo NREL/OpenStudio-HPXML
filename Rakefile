@@ -68,7 +68,11 @@ def create_hpxmls
     'base-atticroof-conditioned.xml' => 'base.xml',
     'base-atticroof-flat.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
+    'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
+    'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
@@ -89,8 +93,6 @@ def create_hpxmls
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
-    'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
-    'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
@@ -2229,16 +2231,24 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
-  elsif ['base-dhw-indirect.xml'].include? hpxml_file
+  elsif ['base-dhw-indirect.xml',
+         'base-dhw-indirect-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with storage tank"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:fuel_type] = nil
     water_heating_systems_values[0][:related_hvac] = "HeatingSystem"
-  elsif ['base-dhw-combi-tankless.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-indirect-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
+  elsif ['base-dhw-combi-tankless.xml',
+         'base-dhw-combi-tankless-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with tankless coil"
     water_heating_systems_values[0][:tank_volume] = nil
+    if hpxml_file == 'base-dhw-combi-tankless-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
