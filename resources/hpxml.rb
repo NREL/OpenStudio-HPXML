@@ -1186,7 +1186,9 @@ class HPXML
              :rated_flow_rate => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "RatedFlowRate")),
              :hours_in_operation => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "HoursInOperation")),
              :total_recovery_efficiency => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency")),
+             :total_recovery_efficiency_adjusted => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedTotalRecoveryEfficiency")),
              :sensible_recovery_efficiency => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency")),
+             :sensible_recovery_efficiency_adjusted => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedSensibleRecoveryEfficiency")),
              :fan_power => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "FanPower")),
              :distribution_system_idref => HPXML.get_idref(ventilation_fan, "AttachedToHVACDistributionSystem") }
   end
