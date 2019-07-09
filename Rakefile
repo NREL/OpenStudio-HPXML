@@ -78,8 +78,11 @@ def create_hpxmls
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
+    'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
+    'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
@@ -2165,22 +2168,34 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :related_hvac => "HeatingSystem" }
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     water_heating_systems_values[0][:fraction_dhw_load_served] += 0.15
-  elsif ['base-dhw-tank-gas.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-gas.xml',
+         'base-dhw-tank-gas-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = 4500
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
-  elsif ['base-dhw-tank-heat-pump.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-tank-gas-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
+  elsif ['base-dhw-tank-heat-pump.xml',
+         'base-dhw-tank-heat-pump-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "heat pump water heater"
     water_heating_systems_values[0][:tank_volume] = 80
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 2.3
-  elsif ['base-dhw-tankless-electric.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-tank-heat-pump-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
+  elsif ['base-dhw-tankless-electric.xml',
+         'base-dhw-tankless-electric-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
     water_heating_systems_values[0][:tank_volume] = nil
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 0.99
+    if hpxml_file == 'base-dhw-tankless-electric-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
   elsif ['base-dhw-tankless-gas.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
