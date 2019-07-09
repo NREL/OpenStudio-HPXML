@@ -393,8 +393,8 @@ class EnergyPlusValidator
 
       ## [MechVentType=ERV]
       "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true'][FanType='energy recovery ventilator']" => {
-        "TotalRecoveryEfficiency" => one,
-        "SensibleRecoveryEfficiency" => one,
+        "[TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency" => one,
+        "[SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency]" => one,
       },
 
       ## [MechVentType=CFIS]
