@@ -2706,12 +2706,14 @@ class OSModel
           mech_vent_sensible_efficiency = whole_house_fan_values[:sensible_recovery_efficiency]
         else
           mech_vent_sensible_efficiency_adjusted = whole_house_fan_values[:sensible_recovery_efficiency_adjusted]
+        end
       end
       if fan_type == "energy recovery ventilator"
         if whole_house_fan_values[:total_recovery_efficiency_adjusted].nil?
           mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
         else
           mech_vent_total_efficiency_adjusted = whole_house_fan_values[:total_recovery_efficiency_adjusted]
+        end
       end
       mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
       mech_vent_fan_w = whole_house_fan_values[:fan_power]
