@@ -979,4 +979,8 @@ class Constants
   def self.WaterHeaterTypeHeatPump
     return 'heatpump'
   end
+
+  def self.CombiWaterHeaters
+    return ['space-heating boiler with tankless coil', 'space-heating boiler with storage tank']
+  end
 end
