@@ -687,8 +687,8 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create an initial simple tank model by calling create_new_heater
-	assumed_ef = get_indirect_assumed_ef()
-    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, assumed_ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+    assumed_ef = get_indirect_assumed_ef()
+    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, assumed_ef, 0, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
     new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
@@ -974,7 +974,7 @@ class Waterheater
     # Calculates the energy factor based on UA of the tank and conversion efficiency (eta_c)
     # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
     if wh_type == Constants.WaterHeaterTypeTankless
-	  ef = eta_c
+      ef = eta_c
     else
       pi = Math::PI
       volume_drawn = 64.3 # gal/day
@@ -985,12 +985,12 @@ class Waterheater
       t_in = 58 # F
       t_env = 67.5 # F
       q_load = draw_mass * cp * (t - t_in) # Btu/day
-      
-	  ef = q_load / ((ua * (t - t_env) * 24 + q_load ) / eta_c)
+
+      ef = q_load / ((ua * (t - t_env) * 24 + q_load) / eta_c)
     end
     return ef
   end
-  
+
   def self.create_new_pump(model)
     # Add a pump to the new DHW loop
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
