@@ -13,7 +13,7 @@ require_relative "resources/constructions"
 require_relative "resources/geometry"
 require_relative "resources/hotwater_appliances"
 require_relative "resources/hvac"
-require_relative "resources/hvac_sizing"
+require_relative "resources/sizing"
 require_relative "resources/lighting"
 require_relative "resources/location"
 require_relative "resources/misc_loads"
@@ -327,7 +327,10 @@ class OSModel
     success = add_airflow(runner, model, building, spaces)
     return false if not success
 
-    success = add_hvac_sizing(runner, model, weather)
+    # success = add_hvac_sizing(runner, model, weather)
+    # return false if not success
+
+    success = add_sizing(runner, model, building, weather)
     return false if not success
 
     success = add_fuel_heating_eae(runner, model, building)
@@ -2894,8 +2897,25 @@ class OSModel
     return true
   end
 
-  def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, @min_neighbor_distance, false)
+  # def self.add_hvac_sizing(runner, model, building, weather)
+  #   success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, @min_neighbor_distance, false)
+  #   return false if not success
+
+  #   return true
+  # end
+
+  def self.add_sizing(runner, model, building, weather)
+    return true if @use_only_ideal_air
+
+    success = HVACSizing.apply(model: model,
+                               runner: runner,
+                               building: building,
+                               weather: weather,
+                               cfa: @cfa,
+                               nbeds: @nbeds,
+                               min_neighbor_distance: @min_neighbor_distance, 
+                               ncfl_ag: @ncfl_ag)
+
     return false if not success
 
     return true
