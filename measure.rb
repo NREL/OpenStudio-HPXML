@@ -1915,6 +1915,7 @@ class OSModel
           end
           # Fuel type and EF are only used to estimate indirect tank losses
           fuel_type = Constants.FuelTypeElectric
+          ef = 0.95
           heating_source_id = water_heating_system_values[:related_hvac]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
@@ -1926,7 +1927,7 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, fuel_type, space, capacity_kbtuh,
-                                               tank_vol, setpoint_temp, oncycle_power,
+                                               tank_vol, ef, re, setpoint_temp, oncycle_power,
                                                offcycle_power, ec_adj, @nbeds, boiler_plant_loop, @dhw_map, sys_id, wh_type)
           return false if not success
 
