@@ -629,7 +629,7 @@ class Waterheater
     return true
   end
 
-  def self.apply_indirect(model, runner, fuel_type, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
+  def self.apply_indirect(model, runner, fuel_type, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
     obj_name_indirect = Constants.ObjectNameWaterHeater
     # Validate inputs
     if vol <= 0
@@ -658,7 +658,8 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create an initial simple tank model by calling create_new_heater
-    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+	assumed_ef = get_indirect_assumed_ef()
+    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, assumed_ef, 0, t_set, space.thermalZone.get, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
     new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
@@ -866,6 +867,18 @@ class Waterheater
     return 120.0
   end
 
+  def self.get_indirect_assumed_ef()
+    return 0.95
+  end
+
+  def self.get_combi_system_fuel(idref, orig_details)
+    orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+      next unless HPXML.get_id(heating_system) == idref
+
+      return XMLHelper.get_value(heating_system, "HeatingSystemFuel")
+    end
+  end
+
   def self.get_tankless_cycling_derate()
     return 0.08
   end
@@ -927,7 +940,28 @@ class Waterheater
     u = ua / surface_area # Btu/hr-ft^2-F
     return u, ua, eta_c
   end
-
+  
+  def self.calc_tank_EF(wh_type, ua, eta_c)
+    # Calculates the energy factor based on UA of the tank and conversion efficiency (eta_c)
+    # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
+    if wh_type == Constants.WaterHeaterTypeTankless
+	  ef = eta_c
+    else
+      pi = Math::PI
+      volume_drawn = 64.3 # gal/day
+      density = 8.2938 # lb/gal
+      draw_mass = volume_drawn * density # lb
+      cp = 1.0007 # Btu/lb-F
+      t = 135 # F
+      t_in = 58 # F
+      t_env = 67.5 # F
+      q_load = draw_mass * cp * (t - t_in) # Btu/day
+      
+	  ef = q_load / ((ua * (t - t_env) * 24 + q_load ) / eta_c)
+    end
+    return ef
+  end
+  
   def self.create_new_pump(model)
     # Add a pump to the new DHW loop
     pump = OpenStudio::Model::PumpVariableSpeed.new(model)
