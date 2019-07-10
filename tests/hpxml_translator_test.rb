@@ -676,7 +676,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     # HVAC Capacities
     htg_cap = 0.0
     clg_cap = 0.0
-    hp_type = nil
     has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
@@ -688,30 +687,26 @@ class HPXMLTranslatorTest < MiniTest::Test
       clg_cap += clg_sys_cap if clg_sys_cap > 0
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
-      hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
-      supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
+      hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      if hp_type == "mini-split"
+        hp_cap *= 1.20 # TODO: Generalize this
+      end
+      supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
       clg_cap += hp_cap if hp_cap > 0
       htg_cap += hp_cap if hp_cap > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
-      seer = XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f
-      hspf = XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f
-      if seer > 15 or hspf > 8.5
+      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 8.5
         has_multispeed_dx_heating_coil = true
       end
       if hp_type == "ground-to-air"
         has_gshp_coil = true
       end
-      puts "has_multispeed_dx_heating_coil #{has_multispeed_dx_heating_coil}"
     end
     if clg_cap > 0
       hpxml_value = clg_cap
       sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-      cap_adj = 1.0
-      if hp_type == "mini-split"
-        cap_adj = 1.20 # TODO: Generalize this
-      end
-      assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
     if htg_cap > 0 and not (has_multispeed_dx_heating_coil or has_gshp_coil)
       hpxml_value = htg_cap
