@@ -620,10 +620,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     # HVAC Heating Systems
     num_htg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatingSystem)']
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
-      htg_sys_id = htg_sys.elements["SystemIdentifier"].attributes["id"].upcase
       htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
       htg_sys_fuel = to_beopt_fuel(XMLHelper.get_value(htg_sys, 'HeatingSystemFuel'))
-      htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
       htg_dse = XMLHelper.get_value(bldg_details, 'Systems/HVAC/HVACDistribution/AnnualHeatingDistributionSystemEfficiency')
       if htg_dse.nil?
         htg_dse = 1.0
@@ -632,27 +630,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
       htg_load_frac = Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
 
-      if htg_load_frac <= 0
-
-        # Heating Load Fraction
-        # Check for zero heating energy
-        found_htg_energy = false
-        results.keys.each do |k|
-          next unless k[1] == 'Heating' and k[0] != 'Capacity'
-
-          found_htg_energy = true
-        end
-        assert_equal(false, found_htg_energy)
-
-      else
-
-        # Heating Capacity
-        # For now, skip if multiple equipment
-        if htg_sys_cap > 0 and num_htg_sys == 1
-          hpxml_value = htg_sys_cap
-          sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
-          assert_in_epsilon(hpxml_value, sql_value, 0.01)
-        end
+      if htg_load_frac > 0
 
         # Electric Auxiliary Energy
         # For now, skip if multiple equipment
@@ -695,91 +673,77 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # HVAC Cooling Systems
-    num_clg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/CoolingSystem)']
-    bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
-      clg_sys_type = XMLHelper.get_value(clg_sys, "CoolingSystemType")
-      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
-      clg_sys_seer = XMLHelper.get_value(clg_sys, "AnnualCoolingEfficiency[Units='SEER']/Value")
-      clg_sys_seer = Float(clg_sys_seer) if not clg_sys_seer.nil?
-      clg_load_frac = Float(XMLHelper.get_value(clg_sys, "FractionCoolLoadServed"))
-
-      if clg_load_frac <= 0
-
-        # Cooling Load Fraction
-        # Check for zero cooling energy
-        found_clg_energy = false
-        results.keys.each do |k|
-          next unless k[1] == 'Cooling' and k[0] != 'Capacity'
-
-          found_clg_energy = true
-        end
-        assert_equal(false, found_clg_energy)
-
-      else
-
-        # Cooling Capacity
-        # For now, skip if multiple equipment
-        if clg_sys_cap > 0 and num_clg_sys == 1
-          hpxml_value = clg_sys_cap
-          sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-          assert_in_epsilon(hpxml_value, sql_value, 0.01)
-        end
-
-      end
+    # HVAC Capacities
+    htg_cap = 0.0
+    clg_cap = 0.0
+    has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
+    has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+      htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
+      htg_cap += htg_sys_cap if htg_sys_cap > 0
     end
-
-    # HVAC Heat Pumps
-    num_hp = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatPump)']
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
+      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
+      clg_cap += clg_sys_cap if clg_sys_cap > 0
+    end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
-      hp_seer = XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value")
-      hp_seer = Float(hp_seer) if not hp_seer.nil?
-      hp_htg_load_frac = Float(XMLHelper.get_value(hp, "FractionHeatLoadServed"))
-      hp_clg_load_frac = Float(XMLHelper.get_value(hp, "FractionCoolLoadServed"))
-
-      if hp_htg_load_frac <= 0
-
-        # Heating Load Fraction
-        # Check for zero heating energy
-        found_htg_energy = false
-        results.keys.each do |k|
-          next unless k[1] == 'Heating' and k[0] != 'Capacity'
-
-          found_htg_energy = true
-        end
-        assert_equal(false, found_htg_energy)
-
+      if hp_type == "mini-split"
+        hp_cap *= 1.20 # TODO: Generalize this
       end
-
-      if hp_clg_load_frac <= 0
-
-        # Cooling Load Fraction
-        # Check for zero cooling energy
-        found_clg_energy = false
-        results.keys.each do |k|
-          next unless k[1] == 'Cooling' and k[0] != 'Capacity'
-
-          found_clg_energy = true
-        end
-        assert_equal(false, found_clg_energy)
-
-      else
-
-        # Cooling Capacity
-        # For now, skip if multiple equipment
-        if hp_cap > 0 and num_hp == 1
-          hpxml_value = hp_cap
-          sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-          cap_adj = 1.0
-          if hp_type == "mini-split"
-            cap_adj = 1.20 # TODO: Generalize this
-          end
-          assert_in_epsilon(hpxml_value * cap_adj, sql_value, 0.01)
-        end
-
+      supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
+      clg_cap += hp_cap if hp_cap > 0
+      htg_cap += hp_cap if hp_cap > 0
+      htg_cap += supp_hp_cap if supp_hp_cap > 0
+      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 8.5
+        has_multispeed_dx_heating_coil = true
       end
+      if hp_type == "ground-to-air"
+        has_gshp_coil = true
+      end
+    end
+    if clg_cap > 0
+      hpxml_value = clg_cap
+      sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
+    if htg_cap > 0 and not (has_multispeed_dx_heating_coil or has_gshp_coil)
+      hpxml_value = htg_cap
+      sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+    end
+
+    # HVAC Load Fractions
+    htg_load_frac = 0.0
+    clg_load_frac = 0.0
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+      htg_load_frac += Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
+    end
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
+      clg_load_frac += Float(XMLHelper.get_value(clg_sys, "FractionCoolLoadServed"))
+    end
+    bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
+      htg_load_frac += Float(XMLHelper.get_value(hp, "FractionHeatLoadServed"))
+      clg_load_frac += Float(XMLHelper.get_value(hp, "FractionCoolLoadServed"))
+    end
+    if htg_load_frac == 0
+      found_htg_energy = false
+      results.keys.each do |k|
+        next unless k[1] == 'Heating' and k[0] != 'Capacity'
+
+        found_htg_energy = true
+      end
+      assert_equal(false, found_htg_energy)
+    end
+    if clg_load_frac == 0
+      found_clg_energy = false
+      results.keys.each do |k|
+        next unless k[1] == 'Cooling' and k[0] != 'Capacity'
+
+        found_clg_energy = true
+      end
+      assert_equal(false, found_clg_energy)
     end
 
     # Water Heater
