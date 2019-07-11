@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:27:24-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-07-11T16:20:52-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -308,8 +308,8 @@
               <RatedFlowRate>110.0</RatedFlowRate>
               <HoursInOperation>24.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <SensibleRecoveryEfficiency>0.72</SensibleRecoveryEfficiency>
-              <AdjustedTotalRecoveryEfficiency>0.526</AdjustedTotalRecoveryEfficiency>
+              <TotalRecoveryEfficiency>0.48</TotalRecoveryEfficiency>
+              <AdjustedSensibleRecoveryEfficiency>0.79</AdjustedSensibleRecoveryEfficiency>
               <FanPower>60.0</FanPower>
             </VentilationFan>
           </VentilationFans>
