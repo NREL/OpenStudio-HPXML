@@ -45,7 +45,7 @@ class HVACSizing
     assumed_inside_temp = 73.5 # F
     @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (assumed_inside_temp + 460.0))
 
-    unless process_site_calcs_and_design_temps(runner: runner, weather: weather)
+    unless process_site_calcs_and_design_temps(runner: runner, building: building, weather: weather)
       return false
     end
 
@@ -116,6 +116,7 @@ class HVACSizing
   private
 
   def self.process_site_calcs_and_design_temps(runner:,
+                                               building:,
                                                weather:)
     '''
     Site Calculations and Design Temperatures
@@ -171,49 +172,49 @@ class HVACSizing
     @cool_design_temps[nil] = weather.design.CoolingDrybulb
     @heat_design_temps[nil] = weather.design.HeatingDrybulb
 
-    # Initialize Manual J buffer space temperatures using current design temperatures
-    @model_spaces.each do |space|
-      @cool_design_temps[space] = process_design_temp_cooling(runner: runner,
-                                                              weather: weather,
-                                                              space: space)
-      return false if @cool_design_temps[space].nil?
+    # Initialize Manual J buffer zone temperatures using current design temperatures
+    Geometry.get_thermal_zones(building: building).each do |thermal_zone|
+      @cool_design_temps[thermal_zone] = process_design_temp_cooling(runner: runner,
+                                                                     building: building,
+                                                                     weather: weather,
+                                                                     thermal_zone: thermal_zone)
+      return false if @cool_design_temps[thermal_zone].nil?
 
-      @heat_design_temps[space] = process_design_temp_heating(runner: runner,
-                                                              weather: weather,
-                                                              space: space,
-                                                              design_db: weather.design.HeatingDrybulb)
-      return false if @heat_design_temps[space].nil?
+      @heat_design_temps[thermal_zone] = process_design_temp_heating(runner: runner,
+                                                                     building: building,
+                                                                     weather: weather,
+                                                                     thermal_zone: thermal_zone,
+                                                                     design_db: weather.design.HeatingDrybulb)
+      return false if @heat_design_temps[thermal_zone].nil?
     end
 
     return true
   end
 
   def self.process_design_temp_heating(runner:,
+                                       building:,
                                        weather:,
-                                       space:,
+                                       thermal_zone:,
                                        design_db:)
-    if Geometry.space_is_conditioned(space: space)
+    if Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
       # Living space, conditioned attic, conditioned basement
       heat_temp = @conditioned_heat_design_temp
 
-    elsif Geometry.is_garage(space_or_zone: space)
+    elsif thermal_zone.include? "garage" # TODO
       # Garage
       heat_temp = design_db + 13
 
-    elsif Geometry.is_vented_attic(space_or_zone: space) or Geometry.is_unvented_attic(space_or_zone: space)
+    elsif thermal_zone.include? "attic" # TODO
 
-      is_vented = Geometry.is_vented_attic(space_or_zone: space)
+      is_vented = false
+      if thermal_zone == "attic - vented"
+        is_vented = true
+      end
 
-      attic_floor_r = self.get_space_r_value(runner: runner,
-                                             space: space,
-                                             surface_type: "floor",
-                                             register_error: true)
+      attic_floor_r = self.get_thermal_zone_r_value(runner: runner, building: building, thermal_zone: thermal_zone, surface_type: "floor")
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = self.get_space_r_value(runner: runner,
-                                            space: space,
-                                            surface_type: "roofceiling",
-                                            register_error: true)
+      attic_roof_r = self.get_thermal_zone_r_value(runner: runner, building: building, thermal_zone: thermal_zone, surface_type: "roofceiling")
       return nil if attic_roof_r.nil?
 
       # Unconditioned attic
@@ -254,13 +255,14 @@ class HVACSizing
   end
 
   def self.process_design_temp_cooling(runner:,
+                                       building:,
                                        weather:,
-                                       space:)
-    if Geometry.space_is_conditioned(space: space)
+                                       thermal_zone:)
+    if Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
       # Living space, conditioned attic, conditioned basement
       cool_temp = @conditioned_cool_design_temp
 
-    elsif Geometry.is_garage(space_or_zone: space)
+    elsif thermal_zone.include? "garage" # TODO
       # Garage
       # Calculate the cooling design temperature for the garage
 
@@ -295,20 +297,17 @@ class HVACSizing
                      (12 * (1 - garage_frac_under_conditioned)))
       end
 
-    elsif Geometry.is_vented_attic(space_or_zone: space) or Geometry.is_unvented_attic(space_or_zone: space)
+    elsif thermal_zone.include? "attic" # TODO
 
-      is_vented = Geometry.is_vented_attic(space_or_zone: space)
+      is_vented = false
+      if thermal_zone == "attic - vented"
+        is_vented = true
+      end
 
-      attic_floor_r = self.get_space_r_value(runner: runner,
-                                             space: space,
-                                             surface_type: "floor",
-                                             register_error: true)
+      attic_floor_r = self.get_thermal_zone_r_value(runner: runner, building: building, thermal_zone: thermal_zone, surface_type: "floor")
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = self.get_space_r_value(runner: runner,
-                                            space: space,
-                                            surface_type: "roofceiling",
-                                            register_error: true)
+      attic_roof_r = self.get_thermal_zone_r_value(runner: runner, building: building, thermal_zone: thermal_zone, surface_type: "roofceiling")
       return nil if attic_roof_r.nil?
 
       # Unconditioned attic
@@ -336,33 +335,21 @@ class HVACSizing
         tot_roof_area = 0
         cool_temp = 0
 
-        space.surfaces.each do |surface|
-          next if surface.surfaceType.downcase != "roofceiling"
+        building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+          roof_values = HPXML.get_roof_values(roof: roof)
 
-          tot_roof_area += surface.netArea
+          next if roof_values[:interior_adjacent_to] != thermal_zone
 
-          roof_color = get_feature(runner: runner,
-                                   obj: surface,
-                                   feature: Constants.SizingInfoRoofColor,
-                                   datatype: 'string')
-          roof_material = get_feature(runner: runner,
-                                      obj: surface,
-                                      feature: Constants.SizingInfoRoofMaterial,
-                                      datatype: 'string')
-          return nil if roof_color.nil? or roof_material.nil?
-
-          has_radiant_barrier = get_feature(runner: runner,
-                                            obj: surface,
-                                            feature: Constants.SizingInfoRoofHasRadiantBarrier,
-                                            datatype: 'boolean',
-                                            register_error: false)
-          has_radiant_barrier = false if has_radiant_barrier.nil?
+          tot_roof_area += roof_values[:area]
+          roof_color = "medium" # TODO
+          roof_material = "asphalt shingles" # TODO
+          has_radiant_barrier = roof_values[:radiant_barrier]
 
           if not is_vented
             if not has_radiant_barrier
-              cool_temp += (150 + (weather.design.CoolingDrybulb - 95) + @daily_range_temp_adjust[@daily_range_num]) * surface.netArea
+              cool_temp += (150 + (weather.design.CoolingDrybulb - 95) + @daily_range_temp_adjust[@daily_range_num]) * roof_values[:area]
             else
-              cool_temp += (130 + (weather.design.CoolingDrybulb - 95) + @daily_range_temp_adjust[@daily_range_num]) * surface.netArea
+              cool_temp += (130 + (weather.design.CoolingDrybulb - 95) + @daily_range_temp_adjust[@daily_range_num]) * roof_values[:area]
             end
 
           else # is_vented
@@ -464,20 +451,17 @@ class HVACSizing
                               model:,
                               building:,
                               weather:)
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(spaces: @model_spaces)
-    # thermal_zones = Geometry.get_thermal_zones(building)
 
     # Constant loads (no variation throughout day)
     zones_loads = {}
 
-    thermal_zones.each do |thermal_zone|
-      next if not Geometry.zone_is_conditioned(zone: thermal_zone)
-      # next if not Geometry.is_conditioned_space_type(thermal_zone)
+    Geometry.get_thermal_zones(building: building).each do |thermal_zone|
+      next unless Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
 
       zone_loads = ZoneLoads.new
-      zone_loads = process_load_windows_skylights(runner: runner, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
-      zone_loads = process_load_doors(runner: runner, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
-      zone_loads = process_load_walls(runner: runner, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_load_windows_skylights(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_load_doors(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_load_walls(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_load_roofs(runner: runner, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_load_floors(runner: runner, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_infiltration_ventilation(runner: runner, model: model, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
@@ -521,6 +505,7 @@ class HVACSizing
   end
 
   def self.process_load_windows_skylights(runner:,
+                                          building:,
                                           thermal_zone:,
                                           zone_loads:,
                                           weather:)
@@ -661,48 +646,45 @@ class HVACSizing
     alp_load = 0 # Average Load Procedure (ALP) Load
     afl_hr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
-    Geometry.get_spaces_above_grade_exterior_walls(spaces: thermal_zone.spaces).each do |wall|
-    # Geometry.get_spaces_above_grade_exterior_walls(building).each do |wall_values|
-      wall_true_azimuth = true_azimuth(surface: wall)
+    Geometry.get_thermal_zone_above_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |wall_values|
+      wall_true_azimuth = 0.0 # TODO
+      unless wall_values[:azimuth].nil?
+        wall_true_azimuth = wall_values[:azimuth]
+      end
       cnt225 = (wall_true_azimuth / 22.5).round.to_i
 
-      wall.subSurfaces.each do |window|
-        next if not window.subSurfaceType.downcase.include?("window")
+      building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
+        window_values = HPXML.get_window_values(window: window)
+        next if window_values[:wall_idref] != wall_values[:id]
 
         # U-factor
-        u_window = self.get_surface_ufactor(runner: runner,
-                                            surface: window,
-                                            surface_type: window.subSurfaceType,
-                                            register_error: true)
+        u_window = window_values[:ufactor]
         return nil if u_window.nil?
 
-        zone_loads.Heat_Windows += u_window * UnitConversions.convert(window.grossArea, "m^2", "ft^2") * @htd
+        zone_loads.Heat_Windows += u_window * window_values[:area] * @htd
 
         # SHGC & Internal Shading
-        shgc_with_interior_shade_cool, shgc_with_interior_shade_heat = get_fenestration_shgc(runner: runner,
-                                                                                             surface: window)
-        return nil if shgc_with_interior_shade_cool.nil? or shgc_with_interior_shade_heat.nil?
+        interior_shading_factor_summer = 1.0
+        unless window_values[:interior_shading_factor_summer].nil?
+          interior_shading_factor_summer = window_values[:interior_shading_factor_summer]
+        end
+        interior_shading_factor_winter = 1.0
+        unless window_values[:interior_shading_factor_winter].nil?
+          interior_shading_factor_winter = windows_values[:interior_shading_factor_winter]
+        end
+        return nil if window_values[:shgc].nil?
+        shgc_with_interior_shade_cool = window_values[:shgc] * interior_shading_factor_summer
+        shgc_with_interior_shade_heat = window_values[:shgc] * interior_shading_factor_winter        
 
-        windowHeight = Geometry.surface_height(surface: window)
-        windowHasIntShading = window.shadingControl.is_initialized
+        windowHeight = 4.0 # ft, default
+        windowHasIntShading = true # TODO
 
         # Determine window overhang properties
         windowHasOverhang = false
-        windowOverhangDepth = nil
-        windowOverhangOffset = nil
-        window.shadingSurfaceGroups.each do |ssg|
-          ssg.shadingSurfaces.each do |ss|
-            windowHasOverhang = true
-            windowOverhangDepth = get_feature(runner: runner,
-                                              obj: window,
-                                              feature: Constants.SizingInfoWindowOverhangDepth,
-                                              datatype: 'double')
-            windowOverhangOffset = get_feature(runner: runner,
-                                               obj: window,
-                                               feature: Constants.SizingInfoWindowOverhangOffset,
-                                               datatype: 'double')
-            return nil if windowOverhangDepth.nil? or windowOverhangOffset.nil?
-          end
+        windowOverhangDepth = window_values[:overhangs_depth]
+        windowOverhangOffset = window_values[:overhangs_distance_to_top_of_window]
+        if not windowOverhangDepth.nil? and not windowOverhangOffset.nil?
+          windowHasOverhang = true
         end
 
         for hr in -1..12
@@ -801,9 +783,9 @@ class HVACSizing
           end
 
           if hr == -1
-            alp_load += htm * UnitConversions.convert(window.grossArea, "m^2", "ft^2")
+            alp_load += htm * window_values[:area]
           else
-            afl_hr[hr] += htm * UnitConversions.convert(window.grossArea, "m^2", "ft^2")
+            afl_hr[hr] += htm * window_values[:area]
           end
         end
       end # window
@@ -829,28 +811,28 @@ class HVACSizing
     alp_load = 0 # Average Load Procedure (ALP) Load
     afl_hr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
-    Geometry.get_spaces_above_grade_exterior_roofs(spaces: thermal_zone.spaces).each do |roof|
-      roof_true_azimuth = true_azimuth(surface: roof)
+    Geometry.get_thermal_zone_above_grade_exterior_roofs(building: building, thermal_zone: thermal_zone).each do |roof_values|
+      roof_true_azimth = 0.0 # TODO
       cnt225 = (roof_true_azimuth / 22.5).round.to_i
-      inclination_angle = Geometry.get_roof_pitch(surfaces: [roof])
+      inclination_angle = roof_values[:pitch]
 
-      roof.subSurfaces.each do |skylight|
-        next if not skylight.subSurfaceType.downcase.include?("skylight")
+      building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
+        skylight_values = HPXML.get_skylight_values(skylight: skylight)
+        next if skylight_values[:roof_idref] != roof_values[:id]
 
-        # U-factor
-        u_skylight = self.get_surface_ufactor(runner: runner,
-                                              surface: skylight,
-                                              surface_type: skylight.subSurfaceType,
-                                              register_error: true)
+        u_skylight = skylight_values[:ufactor]
         return nil if u_skylight.nil?
 
-        zone_loads.Heat_Skylights += u_skylight * UnitConversions.convert(skylight.grossArea, "m^2", "ft^2") * @htd
+        zone_loads.Heat_Skylights += u_skylight * skylight_values[:area] * @htd
 
         # SHGC & Internal Shading
-        shgc_with_interior_shade_cool, shgc_with_interior_shade_heat = get_fenestration_shgc(runner, skylight)
-        return nil if shgc_with_interior_shade_cool.nil? or shgc_with_interior_shade_heat.nil?
+        interior_shading_factor_summer = 1.0
+        interior_shading_factor_winter = 1.0
+        return nil if skylight_values[:shgc].nil?
+        shgc_with_interior_shade_cool = skylight_values[:shgc] * interior_shading_factor_summer
+        shgc_with_interior_shade_heat = skylight_values[:shgc] * interior_shading_factor_winter  
 
-        skylightHasIntShading = skylight.shadingControl.is_initialized
+        skylightHasIntShading = true # TODO
 
         for hr in -1..12
 
@@ -893,9 +875,9 @@ class HVACSizing
           htm = (sol_h + sol_v) * (shgc_with_interior_shade_cool / 0.87) + u_eff_skylight * (ctd_adj + 15)
 
           if hr == -1
-            alp_load += htm * UnitConversions.convert(skylight.grossArea, "m^2", "ft^2")
+            alp_load += htm * skylight_values[:area]
           else
-            afl_hr[hr] += htm * UnitConversions.convert(skylight.grossArea, "m^2", "ft^2")
+            afl_hr[hr] += htm * skylight_values[:area]
           end
         end
       end # skylight
@@ -920,6 +902,7 @@ class HVACSizing
   end
 
   def self.process_load_doors(runner:,
+                              building:,
                               thermal_zone:,
                               zone_loads:,
                               weather:)
@@ -940,18 +923,17 @@ class HVACSizing
     zone_loads.Heat_Doors = 0
     zone_loads.Cool_Doors = 0
 
-    Geometry.get_spaces_above_grade_exterior_walls(spaces: thermal_zone.spaces).each do |wall|
-      wall.subSurfaces.each do |door|
-        next if not door.subSurfaceType.downcase.include?("door")
+    Geometry.get_thermal_zone_above_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |wall_values|
+      building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
+        door_values = HPXML.get_door_values(door: door)
+        next if door_values[:wall_idref] != wall_values[:id]
 
-        door_ufactor = self.get_surface_ufactor(runner: runner,
-                                                surface: door,
-                                                surface_type: door.subSurfaceType,
-                                                register_error: true)
-        return nil if door_ufactor.nil?
+        door_rvalue = door_values[:r_value]
+        return nil if door_rvalue.nil?
+        door_ufactor = 1.0 / door_rvalue # TODO
 
-        zone_loads.Heat_Doors += door_ufactor * UnitConversions.convert(door.grossArea, "m^2", "ft^2") * @htd
-        zone_loads.Cool_Doors += door_ufactor * UnitConversions.convert(door.grossArea, "m^2", "ft^2") * cltd
+        zone_loads.Heat_Doors += door_ufactor * door_values[:area] * @htd
+        zone_loads.Cool_Doors += door_ufactor * door_values[:area] * cltd
       end
     end
 
@@ -959,6 +941,7 @@ class HVACSizing
   end
 
   def self.process_load_walls(runner:,
+                              building:,
                               thermal_zone:,
                               zone_loads:,
                               weather:)
@@ -972,16 +955,15 @@ class HVACSizing
     zone_loads.Cool_Walls = 0
 
     # Above-Grade Exterior Walls
-    Geometry.get_spaces_above_grade_exterior_walls(spaces: thermal_zone.spaces).each do |wall|
+    Geometry.get_thermal_zone_above_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |wall_values|
       wallGroup = get_wallgroup(runner: runner,
-                                wall: wall)
+                                wall_values: wall_values)
       return nil if wallGroup.nil?
 
       # Adjust base Cooling Load Temperature Difference (CLTD)
       # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
 
-      absorptivity = wall.construction.get.to_LayeredConstruction.get.getLayer(0).to_StandardOpaqueMaterial.get.solarAbsorptance
-      absorptivity = 
+      absorptivity = wall_values[:solar_absorptance]
 
       if absorptivity <= 0.5
         colorMultiplier = 0.65      # MJ8 Table 4B Notes, pg 348
@@ -991,7 +973,10 @@ class HVACSizing
         colorMultiplier = 1.0
       end
 
-      wall_true_azimuth = true_azimuth(surface: wall)
+      wall_true_azimuth = 0.0 # TODO
+      unless wall_values[:azimuth].nil?
+        wall_true_azimuth = wall_values[:azimuth]
+      end
 
       # Base Cooling Load Temperature Differences (CLTD's) for dark colored sunlit and shaded walls
       # with 95 degF outside temperature taken from MJ8 Figure A12-8 (intermediate wall groups were
@@ -1016,33 +1001,27 @@ class HVACSizing
         cltd = [cltd + cltd_corr, 0].max # Assume zero cooling load for negative CLTD's
       end
 
-      wall_ufactor = self.get_surface_ufactor(runner: runner,
-                                              surface: wall,
-                                              surface_type: wall.surfaceType,
-                                              register_error: true)
+      wall_ufactor = 1.0 / wall_values[:insulation_assembly_r_value] # TODO
       return nil if wall_ufactor.nil?
 
-      zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * cltd
-      zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      zone_loads.Cool_Walls += wall_ufactor * wall_values[:area] * cltd
+      zone_loads.Heat_Walls += wall_ufactor * wall_values[:area] * @htd
     end
 
     # Interzonal Walls
-    Geometry.get_spaces_interzonal_walls(spaces: thermal_zone.spaces).each do |wall|
-      wall_ufactor = self.get_surface_ufactor(runner: runner,
-                                              surface: wall,
-                                              surface_type: wall.surfaceType,
-                                              register_error: true)
+    Geometry.get_thermal_zone_interzonal_walls(building: building, thermal_zone: thermal_zone).each do |wall_values|
+      wall_ufactor = 1.0 / wall_values[:insulation_assembly_r_value] # TODO
       return nil if wall_ufactor.nil?
 
-      adjacent_space = wall.adjacentSurface.get.space.get
-      zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-      zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      adjacent_space = wall.adjacentSurface.get.space.get # TODO
+      zone_loads.Cool_Walls += wall_ufactor * wall_values[:area] * (@cool_design_temps[adjacent_space] - @cool_setpoint)
+      zone_loads.Heat_Walls += wall_ufactor * wall_values[:area] * (@heat_setpoint - @heat_design_temps[adjacent_space])
     end
 
     # Foundation walls
-    Geometry.get_spaces_below_grade_exterior_walls(spaces: thermal_zone.spaces).each do |wall|
-      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner: runner,
-                                                                                                  surface: wall)
+    Geometry.get_thermal_zone_below_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |foundation_wall_values|
+      puts foundation_wall_values
+      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner: runner, foundation_wall_values: foundation_wall_values)
       if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
         return nil
       end
@@ -1050,11 +1029,12 @@ class HVACSizing
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
       ins_wall_ufactor = 1.0 / (wall_constr_rvalue + wall_ins_rvalue + Material.AirFilmVertical.rvalue)
       unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)
-      above_grade_height = Geometry.get_height_of_spaces(spaces: [wall.space.get]) - Geometry.surface_height(surface: wall)
+      height_of_spaces = 8.0 # TODO
+      above_grade_height = height_of_spaces - foundation_wall_values[:height]
 
       # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
       u_value_mj8 = 0.0
-      wall_height_ft = Geometry.get_surface_height(surface: wall).round
+      wall_height_ft = foundation_wall_values[:height].round
       for d in 1..wall_height_ft
         r_soil = (Math::PI * d / 2.0) / k_soil
         if d <= above_grade_height
@@ -1068,7 +1048,7 @@ class HVACSizing
       end
       u_value_mj8 = (u_value_mj8 / wall_height_ft) * 0.85
 
-      zone_loads.Heat_Walls += u_value_mj8 * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      zone_loads.Heat_Walls += u_value_mj8 * foundation_wall_values[:area] * @htd
     end
 
     return zone_loads
@@ -3594,13 +3574,13 @@ class HVACSizing
   end
 
   def self.get_wallgroup(runner:,
-                         wall:)
-    exteriorFinishDensity = UnitConversions.convert(wall.construction.get.to_LayeredConstruction.get.getLayer(0).to_StandardOpaqueMaterial.get.density, "kg/m^3", "lbm/ft^3")
+                         wall_values:)
+    exteriorFinishDensity = 5.0 # TODO
 
-    wall_type = get_feature(runner: runner, obj: wall, feature: Constants.SizingInfoWallType, datatype: 'string')
+    wall_type = wall_values[:wall_type]
     return nil if wall_type.nil?
 
-    rigid_r = get_feature(runner: runner, obj: wall, feature: Constants.SizingInfoWallRigidInsRvalue, datatype: 'double', register_error: false)
+    rigid_r = wall_values[:insulation_continuous_r_value]
     rigid_r = 0 if rigid_r.nil?
 
     # Determine the wall Group Number (A - K = 1 - 11) for exterior walls (ie. all walls except basement walls)
@@ -3609,7 +3589,8 @@ class HVACSizing
     # The following correlations were estimated by analyzing MJ8 construction tables. This is likely a better
     # approach than including the Group Number.
     if ['WoodStud', 'SteelStud'].include?(wall_type)
-      cavity_r = get_feature(runner: runner, obj: wall, feature: Constants.SizingInfoStudWallCavityRvalue, datatype: 'double')
+      # cavity_r = wall_values[:insulation_cavity_r_value]
+      cavity_r = 20.0 # TODO
       return nil if cavity_r.nil?
 
       wallGroup = get_wallgroup_wood_or_steel_stud(cavity_ins_r_value: cavity_r)
@@ -3645,10 +3626,12 @@ class HVACSizing
       end
 
     elsif wall_type == 'SIP'
-      rigid_thick_in = get_feature(runner: runner, obj: wall, feature: Constants.SizingInfoWallRigidInsThickness, datatype: 'double', register_error: false)
+      rigid_thick_in = wall_values[:insulation_continuous_r_value] / 5.0 # TODO
       rigid_thick_in = 0 if rigid_thick_in.nil?
 
-      sip_ins_thick_in = get_feature(runner: runner, obj: wall, feature: Constants.SizingInfoSIPWallInsThickness, datatype: 'double')
+      sip_thick_in = 5.0 # TODO
+      spline_thick_in = 0.5
+      sip_ins_thick_in = sip_thick_in - (2.0 * spline_thick_in) # in
       return nil if sip_ins_thick_in.nil?
 
       # Manual J refers to SIPs as Structural Foam Panel (SFP)
@@ -3664,7 +3647,7 @@ class HVACSizing
       end
 
     elsif wall_type == 'CMU'
-      cmu_furring_ins_r = get_feature(runner: runner, obj: wall, feature: Constants.SizingInfoCMUWallFurringInsRvalue, datatype: 'double', register_error: false)
+      cmu_furring_ins_r = 0 # TODO
       cmu_furring_ins_r = 0 if cmu_furring_ins_r.nil?
 
       # Manual J uses the same wall group for filled or hollow block
@@ -4117,40 +4100,10 @@ class HVACSizing
   end
 
   def self.get_foundation_wall_insulation_props(runner:,
-                                                surface:)
-    if surface.surfaceType.downcase != "wall"
-      return nil
-    end
-
-    # Get wall insulation R-value/height from Kiva:Foundation object
-    if not surface.adjacentFoundation.is_initialized
-      runner.registerError("Could not get foundation object for wall '#{surface.name.to_s}'.")
-      return nil
-    end
-    foundation = surface.adjacentFoundation.get
-
-    wall_ins_rvalue = 0.0
-    wall_ins_height = 0.0
-    if foundation.interiorVerticalInsulationMaterial.is_initialized
-      int_mat = foundation.interiorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
-      k = UnitConversions.convert(int_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
-      thick = UnitConversions.convert(int_mat.thickness, "m", "ft")
-      wall_ins_rvalue += thick / k
-      wall_ins_height = UnitConversions.convert(foundation.interiorVerticalInsulationDepth.get, "m", "ft").round
-    end
-    if foundation.exteriorVerticalInsulationMaterial.is_initialized
-      ext_mat = foundation.exteriorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
-      k = UnitConversions.convert(ext_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
-      thick = UnitConversions.convert(ext_mat.thickness, "m", "ft")
-      wall_ins_rvalue += thick / k
-      wall_ins_height = UnitConversions.convert(foundation.exteriorVerticalInsulationDepth.get, "m", "ft").round
-    end
-
-    wall_constr_rvalue = self.get_surface_ufactor(runner: runner,
-                                                  surface: surface,
-                                                  surface_type: surface.surfaceType,
-                                                  register_error: true)
-
+                                                foundation_wall_values:)
+    wall_ins_rvalue = foundation_wall_values[:insulation_r_value]
+    wall_ins_height = foundation_wall_values[:insulation_distance_to_bottom]
+    wall_constr_rvalue = foundation_wall_values[:insulation_r_value] # TODO
     return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
   end
 
@@ -4479,6 +4432,45 @@ class HVACSizing
     return total_area / sum_surface_ua
   end
 
+  def self.get_thermal_zone_r_value(runner:,
+                                    building:,
+                                    thermal_zone:,
+                                    surface_type:)
+    # Get area-weighted space r-value
+    sum_surface_ua = 0.0
+    total_area = 0.0
+    if surface_type == "floor"
+      building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+
+        next if framefloor_values[:exterior_adjacent_to] != thermal_zone
+
+        surf_area = framefloor_values[:area]
+        ufactor = 1.0 / framefloor_values[:insulation_assembly_r_value] # TODO
+        next if ufactor.nil?
+
+        sum_surface_ua += surf_area * ufactor
+        total_area += surf_area
+      end
+    elsif surface_type == "roofceiling"
+      building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+        roof_values = HPXML.get_roof_values(roof: roof)
+
+        next if roof_values[:interior_adjacent_to] != thermal_zone
+
+        surf_area = roof_values[:area]
+        ufactor = 1.0 / roof_values[:insulation_assembly_r_value] # TODO
+        next if ufactor.nil?
+
+        sum_surface_ua += surf_area * ufactor
+        total_area += surf_area
+      end
+    end
+    return nil if sum_surface_ua == 0
+
+    return total_area / sum_surface_ua
+  end
+
   def self.get_surface_ufactor(runner:,
                                surface:,
                                surface_type:,
@@ -4538,10 +4530,10 @@ class HVACSizing
   end
 
   def self.display_zone_loads(runner:,
-                              zone_loads:)
+                              zones_loads:)
 
-    zone_loads.keys.each do |thermal_zone|
-      loads = zone_loads[thermal_zone]
+    zones_loads.keys.each do |thermal_zone|
+      loads = zones_loads[thermal_zone]
       s = "Zone Loads for #{thermal_zone.name.to_s}:"
       properties = [
         :Heat_Windows, :Heat_Skylights,

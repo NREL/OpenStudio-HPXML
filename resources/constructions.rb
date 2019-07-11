@@ -67,12 +67,6 @@ class Constructions
       return false
     end
 
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
-    end
-
     return true
   end
 
@@ -145,11 +139,6 @@ class Constructions
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
       return false
-    end
-
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "DoubleWoodStud")
     end
 
     return true
@@ -225,12 +214,6 @@ class Constructions
       return false
     end
 
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "CMU")
-      surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, Float(furring_r))
-    end
-
     return true
   end
 
@@ -284,11 +267,6 @@ class Constructions
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
       return false
-    end
-
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "ICF")
     end
 
     return true
@@ -360,12 +338,6 @@ class Constructions
       return false
     end
 
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SIP")
-      surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
-    end
-
     return true
   end
 
@@ -429,12 +401,6 @@ class Constructions
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
       return false
-    end
-
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SteelStud")
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
     end
 
     return true
@@ -534,11 +500,6 @@ class Constructions
       return false
     end
 
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "Generic")
-    end
-
     return true
   end
 
@@ -599,12 +560,6 @@ class Constructions
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
       return false
-    end
-
-    # Store info for HVAC Sizing measure
-    (surfaces).each do |surface|
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
-      surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
     end
 
     return true

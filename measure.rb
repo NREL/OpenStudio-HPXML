@@ -1553,9 +1553,6 @@ class OSModel
       if not overhang_depth.nil?
         overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, "ft", "m"), UnitConversions.convert(overhang_distance_to_top, "ft", "m"))
         overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
-
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangDepth, overhang_depth)
-        sub_surface.additionalProperties.setFeature(Constants.SizingInfoWindowOverhangOffset, overhang_distance_to_top)
       end
 
       # Apply construction
@@ -2906,6 +2903,8 @@ class OSModel
   def self.add_sizing(runner, model, building, weather)
     return true if @use_only_ideal_air
 
+    show_debug_info = false
+
     success = HVACSizing.apply(model: model,
                                runner: runner,
                                building: building,
@@ -2913,7 +2912,8 @@ class OSModel
                                cfa: @cfa,
                                nbeds: @nbeds,
                                min_neighbor_distance: @min_neighbor_distance, 
-                               ncfl_ag: @ncfl_ag)
+                               ncfl_ag: @ncfl_ag,
+                               show_debug_info: show_debug_info)
 
     return false if not success
 

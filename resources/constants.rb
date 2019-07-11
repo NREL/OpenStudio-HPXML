@@ -680,10 +680,6 @@ class Constants
     return 'autosize for max load'
   end
 
-  def self.SizingInfoCMUWallFurringInsRvalue
-    return __method__.to_s
-  end
-
   def self.SizingInfoDuctExist
     return __method__.to_s
   end
@@ -844,27 +840,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoSIPWallInsThickness
-    return __method__.to_s
-  end
-
   def self.SizingInfoSlabRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoStudWallCavityRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWallType
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWallRigidInsRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWallRigidInsThickness
     return __method__.to_s
   end
 
