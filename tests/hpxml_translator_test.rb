@@ -947,54 +947,27 @@ class HPXMLTranslatorTest < MiniTest::Test
   end
 
   def _test_hrv_erv_inputs(test_dir, all_results)
-    # Compare HRV and ERV resutls that use different inputs
+    # Compare HRV and ERV results that use different inputs
+    ["hrv", "erv"].each do |mv_type|
+      puts "#{mv_type} test results:"
+      
+      base_xml = "#{test_dir}/base-mechvent-#{mv_type}.xml"
+      results_base = all_results[base_xml]
+      next if results_base.nil?
 
-    puts "HRV test results:"
-    hrv_xmls = Dir["#{test_dir}/base-mechvent-hrv*.xml"]
-    assert(hrv_xmls.length == 2, "Two HRV test files expected. Found %s" % hrv_xmls.length)
+      Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
+        results = all_results[xml]
 
-    results_hrv_1 = all_results[hrv_xmls[0]]
-    results_hrv_2 = all_results[hrv_xmls[1]]
+        # Compare results
+        results_base.keys.each do |k|
+          next if [@simulation_runtime_key, @workflow_runtime_key].include? k
 
-    # Compare HRV results
-    unless results_hrv_1.nil? and results_hrv_2.nil?
-      results_hrv_1.keys.each do |k|
-        next if not ["Heating", "Cooling", "Interior Equipment"].include? k[1]
-        next if not ["General", "mech vent house fan"].include? k[2] # Exclude crankcase/defrost
-        next if k[0] == 'Capacity'
+          result_base = results_base[k].to_f
+          result = results[k].to_f
+          next if result_base == 0.0 and result == 0.0
 
-        result_hrv_1 = results_hrv_1[k].to_f
-        result_hrv_2 = results_hrv_2[k].to_f
-        next if result_hrv_1 == 0.0 and result_hrv_2 == 0.0
-
-        _display_result_epsilon(hrv_xmls, result_hrv_1, result_hrv_2, k)
-        assert_in_epsilon(result_hrv_1, result_hrv_2, 0.01)
-      end
-    end
-
-    puts "ERV test results:"
-    erv_base_xml = "#{test_dir}/base-mechvent-erv.xml"
-    results_erv_base = all_results[erv_base_xml]
-
-    erv_xmls = Dir["#{test_dir}/base-mechvent-erv-*.xml"]
-
-    unless results_erv_base.nil?
-
-      erv_xmls.sort.each do |xml|
-        results_erv = all_results[xml]
-
-        # Compare HRV results
-        results_erv_base.keys.each do |k|
-          next if not ["Heating", "Cooling", "Interior Equipment"].include? k[1]
-          next if not ["General", "mech vent house fan"].include? k[2] # Exclude crankcase/defrost
-          next if k[0] == 'Capacity'
-
-          result_erv_base = results_erv_base[k].to_f
-          result_erv = results_erv[k].to_f
-          next if result_erv_base == 0.0 and result_erv == 0.0
-
-          _display_result_epsilon(xml, result_erv_base, result_erv, k)
-          assert_in_epsilon(result_erv_base, result_erv, 0.01)
+          _display_result_epsilon(xml, result_base, result, k)
+          assert_in_epsilon(result_base, result, 0.01)
         end
       end
     end
