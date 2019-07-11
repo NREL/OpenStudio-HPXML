@@ -68,7 +68,11 @@ def create_hpxmls
     'base-atticroof-conditioned.xml' => 'base.xml',
     'base-atticroof-flat.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
+    'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
+    'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
@@ -78,16 +82,17 @@ def create_hpxmls
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
+    'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
+    'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
+    'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
-    'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
-    'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
@@ -128,6 +133,7 @@ def create_hpxmls
     'base-hvac-central-ac-only-1-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
@@ -211,6 +217,7 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-central-ac-only-1-speed-autosize.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'hvac_autosizing/base-hvac-central-ac-only-2-speed-autosize.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_autosizing/base-hvac-central-ac-only-var-speed-autosize.xml' => 'base-hvac-central-ac-only-var-speed.xml',
+    'hvac_autosizing/base-hvac-central-ac-plus-air-to-air-heat-pump-heating-autosize.xml' => 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml',
     'hvac_autosizing/base-hvac-elec-resistance-only-autosize.xml' => 'base-hvac-elec-resistance-only.xml',
     'hvac_autosizing/base-hvac-furnace-elec-only-autosize.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-2-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -1631,7 +1638,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
 end
 
 def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
-  if ['base-hvac-air-to-air-heat-pump-1-speed.xml'].include? hpxml_file
+  if ['base-hvac-air-to-air-heat-pump-1-speed.xml',
+      'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "air-to-air",
@@ -1644,6 +1652,9 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 7.7,
                            :cooling_efficiency_seer => 13 }
+    if hpxml_file == 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml'
+      heat_pumps_values[0][:fraction_cool_load_served] = 0
+    end
   elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution",
@@ -2200,22 +2211,34 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :related_hvac => "HeatingSystem" }
   elsif ['invalid_files/dhw-frac-load-served.xml'].include? hpxml_file
     water_heating_systems_values[0][:fraction_dhw_load_served] += 0.15
-  elsif ['base-dhw-tank-gas.xml'].include? hpxml_file
+  elsif ['base-dhw-tank-gas.xml',
+         'base-dhw-tank-gas-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = 4500
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
-  elsif ['base-dhw-tank-heat-pump.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-tank-gas-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
+  elsif ['base-dhw-tank-heat-pump.xml',
+         'base-dhw-tank-heat-pump-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "heat pump water heater"
     water_heating_systems_values[0][:tank_volume] = 80
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 2.3
-  elsif ['base-dhw-tankless-electric.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-tank-heat-pump-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
+  elsif ['base-dhw-tankless-electric.xml',
+         'base-dhw-tankless-electric-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
     water_heating_systems_values[0][:tank_volume] = nil
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = 0.99
+    if hpxml_file == 'base-dhw-tankless-electric-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
   elsif ['base-dhw-tankless-gas.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
@@ -2249,16 +2272,24 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
-  elsif ['base-dhw-indirect.xml'].include? hpxml_file
+  elsif ['base-dhw-indirect.xml',
+         'base-dhw-indirect-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with storage tank"
     water_heating_systems_values[0][:tank_volume] = 50
     water_heating_systems_values[0][:heating_capacity] = nil
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:fuel_type] = nil
     water_heating_systems_values[0][:related_hvac] = "HeatingSystem"
-  elsif ['base-dhw-combi-tankless.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-indirect-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
+  elsif ['base-dhw-combi-tankless.xml',
+         'base-dhw-combi-tankless-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with tankless coil"
     water_heating_systems_values[0][:tank_volume] = nil
+    if hpxml_file == 'base-dhw-combi-tankless-outside.xml'
+      water_heating_systems_values[0][:location] = "other exterior"
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "basement - unconditioned"
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
