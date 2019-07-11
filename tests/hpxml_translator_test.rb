@@ -67,6 +67,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
+    _test_hrv_erv_inputs(this_dir, all_results)
   end
 
   def test_invalid
@@ -943,6 +944,60 @@ class HPXMLTranslatorTest < MiniTest::Test
       puts "#{xml}: #{errors.to_s}"
     end
     assert_equal(0, errors.size)
+  end
+
+  def _test_hrv_erv_inputs(test_dir, all_results)
+    # Compare HRV and ERV resutls that use different inputs
+
+    puts "HRV test results:"
+    hrv_xmls = Dir["#{test_dir}/base-mechvent-hrv*.xml"]
+    assert(hrv_xmls.length == 2, "Two HRV test files expected. Found %s" % hrv_xmls.length)
+
+    results_hrv_1 = all_results[hrv_xmls[0]]
+    results_hrv_2 = all_results[hrv_xmls[1]]
+
+    # Compare HRV results
+    unless results_hrv_1.nil? and results_hrv_2.nil?
+      results_hrv_1.keys.each do |k|
+        next if not ["Heating", "Cooling", "Interior Equipment"].include? k[1]
+        next if not ["General", "mech vent house fan"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == 'Capacity'
+
+        result_hrv_1 = results_hrv_1[k].to_f
+        result_hrv_2 = results_hrv_2[k].to_f
+        next if result_hrv_1 == 0.0 and result_hrv_2 == 0.0
+
+        _display_result_epsilon(hrv_xmls, result_hrv_1, result_hrv_2, k)
+        assert_in_epsilon(result_hrv_1, result_hrv_2, 0.01)
+      end
+    end
+
+    puts "ERV test results:"
+    erv_base_xml = "#{test_dir}/base-mechvent-erv.xml"
+    results_erv_base = all_results[erv_base_xml]
+
+    erv_xmls = Dir["#{test_dir}/base-mechvent-erv-*.xml"]
+
+    unless results_erv_base.nil?
+
+      erv_xmls.sort.each do |xml|
+        results_erv = all_results[xml]
+
+        # Compare HRV results
+        results_erv_base.keys.each do |k|
+          next if not ["Heating", "Cooling", "Interior Equipment"].include? k[1]
+          next if not ["General", "mech vent house fan"].include? k[2] # Exclude crankcase/defrost
+          next if k[0] == 'Capacity'
+
+          result_erv_base = results_erv_base[k].to_f
+          result_erv = results_erv[k].to_f
+          next if result_erv_base == 0.0 and result_erv == 0.0
+
+          _display_result_epsilon(xml, result_erv_base, result_erv, k)
+          assert_in_epsilon(result_erv_base, result_erv, 0.01)
+        end
+      end
+    end
   end
 
   def _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
