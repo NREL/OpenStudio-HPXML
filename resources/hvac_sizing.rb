@@ -70,6 +70,9 @@ class HVACSizing
       hvac_init_loads = apply_hvac_load_fractions(init_loads, hvac)
       return false if hvac_init_loads.nil?
 
+      hvac_init_loads = apply_hp_sizing_logic(hvac_init_loads, hvac)
+      return false if hvac_init_loads.nil?
+
       hvac_final_values = FinalValues.new
 
       # Calculate heating ducts load
@@ -1401,6 +1404,30 @@ class HVACSizing
     return hvac_init_loads
   end
 
+  def self.apply_hp_sizing_logic(hvac_init_loads, hvac)
+    # If true, uses the larger of heating and cooling loads for heat pump capacity sizing (required for ERI).
+    # Otherwise, uses standard Manual S oversize allowances.
+    hp_use_max_load = true
+
+    if hvac.has_type([Constants.ObjectNameAirSourceHeatPump,
+                      Constants.ObjectNameMiniSplitHeatPump,
+                      Constants.ObjectNameGroundSourceHeatPump])
+      if hp_use_max_load
+        max_load = [hvac_init_loads.Heat, hvac_init_loads.Cool_Tot].max
+        hvac_init_loads.Heat = max_load
+        hvac_init_loads.Cool_Sens *= max_load / hvac_init_loads.Cool_Tot
+        hvac_init_loads.Cool_Lat *= max_load / hvac_init_loads.Cool_Tot
+        hvac_init_loads.Cool_Tot = max_load
+
+        # Override Manual S oversize allowances:
+        hvac.OverSizeLimit = 1.0
+        hvac.OverSizeDelta = 0.0
+      end
+    end
+
+    return hvac_init_loads
+  end
+
   def self.get_duct_regain_factor(runner, duct)
     # dse_Fregain values comes from MJ8 pg 204 and Walker (1998) "Technical background for default
     # values used for forced air systems in proposed ASHRAE Std. 152"
@@ -1725,7 +1752,7 @@ class HVACSizing
           # The SHR of the equipment at the design condition
           sHR_design = cool_Load_SensCap_Design / cool_Capacity_Design
 
-          # If the adjusted equipment size is negative (occurs at altitude), oversize by 15% (the adjustment
+          # If the adjusted equipment size is negative (occurs at altitude), use oversize limit (the adjustment
           # almost always hits the oversize limit in this case, making this a safe assumption)
           if cool_Capacity_Design < 0 or cool_Load_SensCap_Design < 0
             cool_Capacity_Design = hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot
@@ -1835,12 +1862,12 @@ class HVACSizing
         cool_Load_LatCap_Design = [cool_Load_LatCap_Design, hvac_final_values.Cool_Load_Lat].max
         cool_Capacity_Design = cool_Load_SensCap_Design + cool_Load_LatCap_Design
 
-        # Limit total capacity to 15% oversizing
+        # Limit total capacity via oversizing limit
         cool_Capacity_Design = [cool_Capacity_Design, hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot].min
         hvac_final_values.Cool_Capacity = cool_Capacity_Design / hvac_final_values.TotalCap_CurveValue
         hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
 
-        # Recalculate the air flow rate in case the 15% oversizing rule has been used
+        # Recalculate the air flow rate in case the oversizing limit has been used
         cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
                                    (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *
                                    (80 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
@@ -2157,7 +2184,7 @@ class HVACSizing
           hvac_final_values.Cool_Capacity = [(hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
         else
           # Cold winter and no latent cooling load (add a ton rule applies)
-          hvac_final_values.Cool_Capacity = [(hvac_final_values.Cool_Load_Tot + 15000) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
+          hvac_final_values.Cool_Capacity = [(hvac_final_values.Cool_Load_Tot + hvac.OverSizeDelta) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
         end
         if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
           hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
@@ -4110,6 +4137,7 @@ class HVACInfo
     self.CapacityRatioCooling = [1.0]
     self.CapacityRatioHeating = [1.0]
     self.OverSizeLimit = 1.15
+    self.OverSizeDelta = 15000.0
     self.HPSizedForMaxLoad = false
     self.FanspeedRatioCooling = [1.0]
     self.DSECool = 1.0
@@ -4133,7 +4161,7 @@ class HVACInfo
                 :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
-                :HeatingCapacityOffset, :OverSizeLimit, :HPSizedForMaxLoad,
+                :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :HPSizedForMaxLoad,
                 :FanspeedRatioCooling, :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR,
                 :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
