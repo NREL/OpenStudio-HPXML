@@ -2698,12 +2698,22 @@ class OSModel
         num_fans = 2.0
       end
       mech_vent_total_efficiency = 0.0
+      mech_vent_total_efficiency_adjusted = 0.0
       mech_vent_sensible_efficiency = 0.0
+      mech_vent_sensible_efficiency_adjusted = 0.0
       if fan_type == "energy recovery ventilator" or fan_type == "heat recovery ventilator"
-        mech_vent_sensible_efficiency = whole_house_fan_values[:sensible_recovery_efficiency]
+        if whole_house_fan_values[:sensible_recovery_efficiency_adjusted].nil?
+          mech_vent_sensible_efficiency = whole_house_fan_values[:sensible_recovery_efficiency]
+        else
+          mech_vent_sensible_efficiency_adjusted = whole_house_fan_values[:sensible_recovery_efficiency_adjusted]
+        end
       end
       if fan_type == "energy recovery ventilator"
-        mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
+        if whole_house_fan_values[:total_recovery_efficiency_adjusted].nil?
+          mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
+        else
+          mech_vent_total_efficiency_adjusted = whole_house_fan_values[:total_recovery_efficiency_adjusted]
+        end
       end
       mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
       mech_vent_fan_w = whole_house_fan_values[:fan_power]
@@ -2766,8 +2776,8 @@ class OSModel
       end
     end
 
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_efficiency, mech_vent_cfm,
-                                          mech_vent_fan_w, mech_vent_sensible_efficiency,
+    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_efficiency, mech_vent_total_efficiency_adjusted, mech_vent_cfm,
+                                          mech_vent_fan_w, mech_vent_sensible_efficiency, mech_vent_sensible_efficiency_adjusted,
                                           clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
