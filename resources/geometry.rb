@@ -3,7 +3,7 @@ require_relative "unit_conversions"
 require_relative "util"
 
 class Geometry
-  def self.initialize_transformation_matrix(m)
+  def self.initialize_transformation_matrix(m:)
     m[0, 0] = 1
     m[1, 1] = 1
     m[2, 2] = 1
@@ -19,7 +19,8 @@ class Geometry
     return p
   end
 
-  def self.get_zone_volume(zone, runner = nil)
+  def self.get_zone_volume(zone:,
+                           runner: nil)
     if zone.isVolumeAutocalculated or not zone.volume.is_initialized
       # Calculate volume from spaces
       volume = 0
@@ -36,12 +37,13 @@ class Geometry
     return volume
   end
 
-  def self.get_above_grade_conditioned_volume(model, runner = nil)
+  def self.get_above_grade_conditioned_volume(model:,
+                                              runner: nil)
     volume = 0
     model.getThermalZones.each do |zone|
-      next if not (self.zone_is_conditioned(zone) and self.zone_is_above_grade(zone))
+      next if not (self.zone_is_conditioned(zone: zone) and self.zone_is_above_grade(zone: zone))
 
-      volume += self.get_zone_volume(zone, runner)
+      volume += self.get_zone_volume(zone: zone, runner: runner)
     end
     if volume == 0 and not runner.nil?
       runner.registerError("Could not find any above-grade conditioned volume.")
@@ -51,11 +53,11 @@ class Geometry
   end
 
   # Calculates space heights as the max z coordinate minus the min z coordinate
-  def self.get_height_of_spaces(spaces)
+  def self.get_height_of_spaces(spaces:)
     minzs = []
     maxzs = []
     spaces.each do |space|
-      zvalues = self.getSurfaceZValues(space.surfaces)
+      zvalues = self.getSurfaceZValues(surfaceArray: space.surfaces)
       minzs << zvalues.min + UnitConversions.convert(space.zOrigin, "m", "ft")
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, "m", "ft")
     end
@@ -63,26 +65,26 @@ class Geometry
   end
 
   # Calculates the surface height as the max z coordinate minus the min z coordinate
-  def self.surface_height(surface)
-    zvalues = self.getSurfaceZValues([surface])
+  def self.surface_height(surface:)
+    zvalues = self.getSurfaceZValues(surfaceArray: [surface])
     minz = zvalues.min
     maxz = zvalues.max
     return maxz - minz
   end
 
-  def self.zone_is_conditioned(zone)
+  def self.zone_is_conditioned(zone:)
     zone.spaces.each do |space|
-      unless self.space_is_conditioned(space)
+      unless self.space_is_conditioned(space: space)
         return false
       end
     end
   end
 
   # Returns true if all spaces in zone are fully above grade
-  def self.zone_is_above_grade(zone)
+  def self.zone_is_above_grade(zone:)
     spaces_are_above_grade = []
     zone.spaces.each do |space|
-      spaces_are_above_grade << self.space_is_above_grade(space)
+      spaces_are_above_grade << self.space_is_above_grade(space: space)
     end
     if spaces_are_above_grade.all?
       return true
@@ -92,26 +94,26 @@ class Geometry
   end
 
   # Returns true if all spaces in zone are either fully or partially below grade
-  def self.zone_is_below_grade(zone)
-    return !self.zone_is_above_grade(zone)
+  def self.zone_is_below_grade(zone:)
+    return !self.zone_is_above_grade(zone: zone)
   end
 
-  def self.get_conditioned_above_and_below_grade_zones(thermal_zones)
+  def self.get_conditioned_above_and_below_grade_zones(thermal_zones:)
     conditioned_living_zones = []
     conditioned_basement_zones = []
     thermal_zones.each do |thermal_zone|
-      next unless self.zone_is_conditioned(thermal_zone)
+      next unless self.zone_is_conditioned(zone: thermal_zone)
 
-      if self.zone_is_above_grade(thermal_zone)
+      if self.zone_is_above_grade(zone: thermal_zone)
         conditioned_living_zones << thermal_zone
-      elsif self.zone_is_below_grade(thermal_zone)
+      elsif self.zone_is_below_grade(zone: thermal_zone)
         conditioned_basement_zones << thermal_zone
       end
     end
     return conditioned_living_zones, conditioned_basement_zones
   end
 
-  def self.get_thermal_zones_from_spaces(spaces)
+  def self.get_thermal_zones_from_spaces(spaces:)
     thermal_zones = []
     spaces.each do |space|
       next unless space.thermalZone.is_initialized
@@ -123,7 +125,7 @@ class Geometry
     return thermal_zones
   end
 
-  def self.get_thermal_zones(building)
+  def self.get_thermal_zones(building:)
     thermal_zones = []
     building.elements.each("BuildingDetails/Enclosure/WallsWall") do |wall|
       wall_values = HPXML.get_wall_values(wall: wall)
@@ -153,22 +155,22 @@ class Geometry
     return thermal_zones
   end
 
-  def self.space_is_unconditioned(space)
-    return !self.space_is_conditioned(space)
+  def self.space_is_unconditioned(space:)
+    return !self.space_is_conditioned(space: space)
   end
 
-  def self.space_is_conditioned(space)
+  def self.space_is_conditioned(space:)
     unless space.isPlenum
       if space.spaceType.is_initialized
         if space.spaceType.get.standardsSpaceType.is_initialized
-          return self.is_conditioned_space_type(space.spaceType.get.standardsSpaceType.get)
+          return self.is_conditioned_space_type(space_type: space.spaceType.get.standardsSpaceType.get)
         end
       end
     end
     return false
   end
 
-  def self.is_conditioned_space_type(space_type)
+  def self.is_conditioned_space_type(space_type:)
     if [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement].include? space_type
       return true
     end
@@ -176,12 +178,12 @@ class Geometry
   end
 
   # Returns true if space is fully above grade
-  def self.space_is_above_grade(space)
-    return !self.space_is_below_grade(space)
+  def self.space_is_above_grade(space:)
+    return !self.space_is_below_grade(space: space)
   end
 
   # Returns true if space is either fully or partially below grade
-  def self.space_is_below_grade(space)
+  def self.space_is_below_grade(space:)
     space.surfaces.each do |surface|
       next if surface.surfaceType.downcase != "wall"
       if surface.outsideBoundaryCondition.downcase == "foundation"
@@ -191,11 +193,13 @@ class Geometry
     return false
   end
 
-  def self.get_space_from_location(model, location, location_hierarchy)
+  def self.get_space_from_location(model:,
+                                   location:,
+                                   location_hierarchy:)
     if location == Constants.Auto
       location_hierarchy.each do |space_type|
         model.getSpaces.each do |space|
-          next if not self.space_is_of_type(space, space_type)
+          next if not self.space_is_of_type(space: space, space_type: space_type)
 
           return space
         end
@@ -213,7 +217,7 @@ class Geometry
   end
 
   # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceXValues(surfaceArray)
+  def self.getSurfaceXValues(surfaceArray:)
     xValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
@@ -224,7 +228,7 @@ class Geometry
   end
 
   # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceYValues(surfaceArray)
+  def self.getSurfaceYValues(surfaceArray:)
     yValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
@@ -235,7 +239,7 @@ class Geometry
   end
 
   # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceZValues(surfaceArray)
+  def self.getSurfaceZValues(surfaceArray:)
     zValueArray = []
     surfaceArray.each do |surface|
       surface.vertices.each do |vertex|
@@ -245,7 +249,7 @@ class Geometry
     return zValueArray
   end
 
-  def self.get_z_origin_for_zone(zone)
+  def self.get_z_origin_for_zone(zone:)
     z_origins = []
     zone.spaces.each do |space|
       z_origins << UnitConversions.convert(space.zOrigin, "m", "ft")
@@ -253,7 +257,7 @@ class Geometry
     return z_origins.min
   end
 
-  def self.calculate_above_grade_wall_area(building)
+  def self.calculate_above_grade_wall_area(building:)
     wall_area = 0
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
       wall_values = HPXML.get_wall_values(wall: wall)
@@ -277,7 +281,7 @@ class Geometry
     return wall_area
   end
 
-  def self.calculate_above_grade_exterior_wall_area(building)
+  def self.calculate_above_grade_exterior_wall_area(building:)
     wall_area = 0
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
       wall_values = HPXML.get_wall_values(wall: wall)
@@ -313,7 +317,7 @@ class Geometry
     return wall_area
   end
 
-  def self.get_roof_pitch(surfaces)
+  def self.get_roof_pitch(surfaces:)
     tilts = []
     surfaces.each do |surface|
       next if surface.surfaceType.downcase != "roofceiling"
@@ -325,7 +329,7 @@ class Geometry
   end
 
   # Checks if the surface is between conditioned and unconditioned space
-  def self.is_interzonal_surface(surface)
+  def self.is_interzonal_surface(surface:)
     if surface.outsideBoundaryCondition.downcase != "surface" or not surface.space.is_initialized or not surface.adjacentSurface.is_initialized
       return false
     end
@@ -334,54 +338,56 @@ class Geometry
     if not adjacent_surface.space.is_initialized
       return false
     end
-    if self.space_is_conditioned(surface.space.get) == self.space_is_conditioned(adjacent_surface.space.get)
+    if self.space_is_conditioned(space: surface.space.get) == self.space_is_conditioned(space: adjacent_surface.space.get)
       return false
     end
 
     return true
   end
 
-  def self.is_living(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeLiving)
+  def self.is_living(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeLiving)
   end
 
-  def self.is_vented_crawl(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeVentedCrawl)
+  def self.is_vented_crawl(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeVentedCrawl)
   end
 
-  def self.is_unvented_crawl(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedCrawl)
+  def self.is_unvented_crawl(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeUnventedCrawl)
   end
 
-  def self.is_conditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeConditionedBasement)
+  def self.is_conditioned_basement(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeConditionedBasement)
   end
 
-  def self.is_unconditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedBasement)
+  def self.is_unconditioned_basement(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeUnconditionedBasement)
   end
 
-  def self.is_vented_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeVentedAttic)
+  def self.is_vented_attic(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeVentedAttic)
   end
 
-  def self.is_unvented_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedAttic)
+  def self.is_unvented_attic(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeUnventedAttic)
   end
 
-  def self.is_garage(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeGarage)
+  def self.is_garage(space_or_zone:)
+    return self.space_or_zone_is_of_type(space_or_zone: space_or_zone, space_type: Constants.SpaceTypeGarage)
   end
 
-  def self.space_or_zone_is_of_type(space_or_zone, space_type)
+  def self.space_or_zone_is_of_type(space_or_zone:,
+                                    space_type:)
     if space_or_zone.is_a? OpenStudio::Model::Space
-      return self.space_is_of_type(space_or_zone, space_type)
+      return self.space_is_of_type(space: space_or_zone, space_type: space_type)
     elsif space_or_zone.is_a? OpenStudio::Model::ThermalZone
-      return self.zone_is_of_type(space_or_zone, space_type)
+      return self.zone_is_of_type(zone: space_or_zone, space_type: space_type)
     end
   end
 
-  def self.space_is_of_type(space, space_type)
+  def self.space_is_of_type(space:,
+                            space_type:)
     unless space.isPlenum
       if space.spaceType.is_initialized
         if space.spaceType.get.standardsSpaceType.is_initialized
@@ -392,43 +398,44 @@ class Geometry
     return false
   end
 
-  def self.zone_is_of_type(zone, space_type)
+  def self.zone_is_of_type(zone:,
+                           space_type:)
     zone.spaces.each do |space|
-      return self.space_is_of_type(space, space_type)
+      return self.space_is_of_type(space: space, space_type: space_type)
     end
   end
 
-  def self.get_conditioned_spaces(spaces)
+  def self.get_conditioned_spaces(spaces:)
     conditioned_spaces = []
     spaces.each do |space|
-      next if self.space_is_unconditioned(space)
+      next if self.space_is_unconditioned(space: space)
 
       conditioned_spaces << space
     end
     return conditioned_spaces
   end
 
-  def self.get_unconditioned_basement_spaces(spaces)
+  def self.get_unconditioned_basement_spaces(spaces:)
     unconditioned_basement_spaces = []
     spaces.each do |space|
-      next if not self.is_unconditioned_basement(space)
+      next if not self.is_unconditioned_basement(space_or_zone: space)
 
       unconditioned_basement_spaces << space
     end
     return unconditioned_basement_spaces
   end
 
-  def self.get_garage_spaces(spaces)
+  def self.get_garage_spaces(spaces:)
     garage_spaces = []
     spaces.each do |space|
-      next if not self.is_garage(space)
+      next if not self.is_garage(space_or_zone: space)
 
       garage_spaces << space
     end
     return garage_spaces
   end
 
-  def self.get_facade_for_surface(surface)
+  def self.get_facade_for_surface(surface:)
     tol = 0.001
     n = surface.outwardNormal
     facade = nil
@@ -456,9 +463,9 @@ class Geometry
     return facade
   end
 
-  def self.get_surface_length(surface)
-    xvalues = self.getSurfaceXValues([surface])
-    yvalues = self.getSurfaceYValues([surface])
+  def self.get_surface_length(surface:)
+    xvalues = self.getSurfaceXValues(surfaceArray: [surface])
+    yvalues = self.getSurfaceYValues(surfaceArray: [surface])
     xrange = xvalues.max - xvalues.min
     yrange = yvalues.max - yvalues.min
     if xrange > yrange
@@ -468,17 +475,17 @@ class Geometry
     return yrange
   end
 
-  def self.get_surface_height(surface)
-    zvalues = self.getSurfaceZValues([surface])
+  def self.get_surface_height(surface:)
+    zvalues = self.getSurfaceZValues(surfaceArray: [surface])
     zrange = zvalues.max - zvalues.min
     return zrange
   end
 
-  def self.get_spaces_above_grade_exterior_walls(spaces)
+  def self.get_spaces_above_grade_exterior_walls(spaces:)
     above_grade_exterior_walls = []
     spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
+      next if not self.space_is_conditioned(space: space)
+      next if not self.space_is_above_grade(space: space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_walls.include?(surface)
@@ -504,11 +511,11 @@ class Geometry
   #   return above_grade_exterior_walls
   # end
 
-  def self.get_spaces_above_grade_exterior_floors(spaces)
+  def self.get_spaces_above_grade_exterior_floors(spaces:)
     above_grade_exterior_floors = []
     spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
+      next if not self.space_is_conditioned(space: space)
+      next if not self.space_is_above_grade(space: space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_floors.include?(surface)
@@ -521,11 +528,11 @@ class Geometry
     return above_grade_exterior_floors
   end
 
-  def self.get_spaces_above_grade_ground_floors(spaces)
+  def self.get_spaces_above_grade_ground_floors(spaces:)
     above_grade_ground_floors = []
     spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
+      next if not self.space_is_conditioned(space: space)
+      next if not self.space_is_above_grade(space: space)
 
       space.surfaces.each do |surface|
         next if above_grade_ground_floors.include?(surface)
@@ -538,11 +545,11 @@ class Geometry
     return above_grade_ground_floors
   end
 
-  def self.get_spaces_above_grade_exterior_roofs(spaces)
+  def self.get_spaces_above_grade_exterior_roofs(spaces:)
     above_grade_exterior_roofs = []
     spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
+      next if not self.space_is_conditioned(space: space)
+      next if not self.space_is_above_grade(space: space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_roofs.include?(surface)
@@ -568,13 +575,13 @@ class Geometry
   #   return above_grade_exterior_roofs
   # end
 
-  def self.get_spaces_interzonal_walls(spaces)
+  def self.get_spaces_interzonal_walls(spaces:)
     interzonal_walls = []
     spaces.each do |space|
       space.surfaces.each do |surface|
         next if interzonal_walls.include?(surface)
         next if surface.surfaceType.downcase != "wall"
-        next if not self.is_interzonal_surface(surface)
+        next if not self.is_interzonal_surface(surface: surface)
 
         interzonal_walls << surface
       end
@@ -582,13 +589,13 @@ class Geometry
     return interzonal_walls
   end
 
-  def self.get_spaces_interzonal_floors_and_ceilings(spaces)
+  def self.get_spaces_interzonal_floors_and_ceilings(spaces:)
     interzonal_floors = []
     spaces.each do |space|
       space.surfaces.each do |surface|
         next if interzonal_floors.include?(surface)
         next if surface.surfaceType.downcase != "floor" and surface.surfaceType.downcase != "roofceiling"
-        next if not self.is_interzonal_surface(surface)
+        next if not self.is_interzonal_surface(surface: surface)
 
         interzonal_floors << surface
       end
@@ -596,11 +603,11 @@ class Geometry
     return interzonal_floors
   end
 
-  def self.get_spaces_below_grade_exterior_walls(spaces)
+  def self.get_spaces_below_grade_exterior_walls(spaces:)
     below_grade_exterior_walls = []
     spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
+      next if not self.space_is_conditioned(space: space)
+      next if not self.space_is_below_grade(space: space)
 
       space.surfaces.each do |surface|
         next if below_grade_exterior_walls.include?(surface)
@@ -613,11 +620,11 @@ class Geometry
     return below_grade_exterior_walls
   end
 
-  def self.get_spaces_below_grade_exterior_floors(spaces)
+  def self.get_spaces_below_grade_exterior_floors(spaces:)
     below_grade_exterior_floors = []
     spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
+      next if not self.space_is_conditioned(space: space)
+      next if not self.space_is_below_grade(space: space)
 
       space.surfaces.each do |surface|
         next if below_grade_exterior_floors.include?(surface)
@@ -630,8 +637,17 @@ class Geometry
     return below_grade_exterior_floors
   end
 
-  def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             cfa, nbeds)
+  def self.process_occupants(model:,
+                             runner:,
+                             num_occ:,
+                             occ_gain:,
+                             sens_frac:,
+                             lat_frac:,
+                             weekday_sch:,
+                             weekend_sch:,
+                             monthly_sch:,
+                             cfa:,
+                             nbeds:)
 
     # Error checking
     if num_occ < 0
@@ -670,7 +686,7 @@ class Geometry
     activity_sch = nil
 
     # Get spaces
-    ffa_spaces = self.get_conditioned_spaces(model.getSpaces)
+    ffa_spaces = self.get_conditioned_spaces(spaces: model.getSpaces)
 
     ffa_spaces.each do |space|
       space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
@@ -715,11 +731,11 @@ class Geometry
     return true
   end
 
-  def self.get_occupancy_default_num(nbeds)
+  def self.get_occupancy_default_num(nbeds:)
     return Float(nbeds)
   end
 
-  def self.get_occupancy_default_values()
+  def self.get_occupancy_default_values
     # Table 4.2.2(3). Internal Gains for Reference Homes
     hrs_per_day = 16.5 # hrs/day
     sens_gains = 3716.0 # Btu/person/day

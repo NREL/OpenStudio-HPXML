@@ -24,29 +24,29 @@ class Airflow
     building = Building.new
     spaces = []
     model_spaces.each do |space|
-      next if Geometry.space_is_below_grade(space)
+      next if Geometry.space_is_below_grade(space: space)
 
       spaces << space
     end
-    building.height = Geometry.get_height_of_spaces(spaces)
-    building.above_grade_volume = Geometry.get_above_grade_conditioned_volume(model)
+    building.height = Geometry.get_height_of_spaces(spaces: spaces)
+    building.above_grade_volume = Geometry.get_above_grade_conditioned_volume(model: model)
     model.getThermalZones.each do |thermal_zone|
-      if Geometry.is_conditioned_basement(thermal_zone)
-        building.conditioned_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.conditioned_basement_ach, nil)
-      elsif Geometry.is_living(thermal_zone)
-        building.living = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, nil)
-      elsif Geometry.is_garage(thermal_zone)
-        building.garage = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, nil)
-      elsif Geometry.is_unconditioned_basement(thermal_zone)
-        building.unconditioned_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.unconditioned_basement_ach, nil)
-      elsif Geometry.is_vented_crawl(thermal_zone)
-        building.vented_crawlspace = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, infil.vented_crawl_sla)
-      elsif Geometry.is_unvented_crawl(thermal_zone)
-        building.unvented_crawlspace = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, infil.unvented_crawl_sla)
-      elsif Geometry.is_vented_attic(thermal_zone)
-        building.vented_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), infil.vented_attic_const_ach, infil.vented_attic_sla)
-      elsif Geometry.is_unvented_attic(thermal_zone)
-        building.unvented_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, infil.unvented_attic_sla)
+      if Geometry.is_conditioned_basement(space_or_zone: thermal_zone)
+        building.conditioned_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), infil.conditioned_basement_ach, nil)
+      elsif Geometry.is_living(space_or_zone: thermal_zone)
+        building.living = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), nil, nil)
+      elsif Geometry.is_garage(space_or_zone: thermal_zone)
+        building.garage = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), nil, nil)
+      elsif Geometry.is_unconditioned_basement(space_or_zone: thermal_zone)
+        building.unconditioned_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), infil.unconditioned_basement_ach, nil)
+      elsif Geometry.is_vented_crawl(space_or_zone: thermal_zone)
+        building.vented_crawlspace = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), nil, infil.vented_crawl_sla)
+      elsif Geometry.is_unvented_crawl(space_or_zone: thermal_zone)
+        building.unvented_crawlspace = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), nil, infil.unvented_crawl_sla)
+      elsif Geometry.is_vented_attic(space_or_zone: thermal_zone)
+        building.vented_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), infil.vented_attic_const_ach, infil.vented_attic_sla)
+      elsif Geometry.is_unvented_attic(space_or_zone: thermal_zone)
+        building.unvented_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(spaces: thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(zone: thermal_zone, runner: runner), Geometry.get_z_origin_for_zone(zone: thermal_zone), nil, infil.unvented_attic_sla)
       end
     end
     building.cfa = cfa
@@ -519,7 +519,7 @@ class Airflow
       end
 
       space.zone.spaces.each do |s|
-        next if Geometry.is_living(s)
+        next if Geometry.is_living(space_or_zone: s)
 
         obj_name = "#{Constants.ObjectNameInfiltration}|#{s.name}"
         if space.inf_method == @infMethodConstantCFM and space.ACH.to_f > 0
@@ -1049,7 +1049,7 @@ class Airflow
     # All duct zones are in living space?
     all_ducts_conditioned = true
     duct_zones.each do |duct_zone|
-      next if Geometry.is_living(duct_zone)
+      next if Geometry.is_living(space_or_zone: duct_zone)
 
       all_ducts_conditioned = false
     end

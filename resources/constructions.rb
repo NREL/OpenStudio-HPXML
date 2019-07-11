@@ -672,7 +672,7 @@ class Constructions
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
     end
-    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces: surfaces)))
 
     # Create and assign construction to roof surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
@@ -743,7 +743,7 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces: surfaces)))
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
@@ -1026,7 +1026,7 @@ class Constructions
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
                                  drywall_thick_in, frac_of_ffa)
 
-    spaces = Geometry.get_conditioned_spaces(model.getSpaces)
+    spaces = Geometry.get_conditioned_spaces(spaces: model.getSpaces)
 
     return true if spaces.empty?
 
@@ -1071,9 +1071,9 @@ class Constructions
 
     model_spaces = model.getSpaces
 
-    conditioned_spaces = Geometry.get_conditioned_spaces(model_spaces)
-    unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
-    garage_spaces = Geometry.get_garage_spaces(model_spaces)
+    conditioned_spaces = Geometry.get_conditioned_spaces(spaces: model_spaces)
+    unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(spaces: model_spaces)
+    garage_spaces = Geometry.get_garage_spaces(spaces: model_spaces)
 
     # Add user-specified furniture mass
     model_spaces.each do |space|

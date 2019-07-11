@@ -1158,7 +1158,7 @@ class HVAC
         tout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Outdoor Air Drybulb Temperature")
         tout_sensor.setName("#{obj_name} tout sensor")
         thermal_zones.each do |thermal_zone|
-          if Geometry.is_living(thermal_zone)
+          if Geometry.is_living(space_or_zone: thermal_zone)
             tout_sensor.setKeyName(thermal_zone.name.to_s)
             break
           end
@@ -4102,7 +4102,7 @@ class HVAC
 
   def self.get_control_and_slave_zones(thermal_zones)
     control_slave_zones_hash = {}
-    conditioned_above_grade_zones, conditioned_below_grade_zones = Geometry.get_conditioned_above_and_below_grade_zones(thermal_zones)
+    conditioned_above_grade_zones, conditioned_below_grade_zones = Geometry.get_conditioned_above_and_below_grade_zones(thermal_zones: thermal_zones)
     control_zone = nil
     slave_zones = []
     [conditioned_above_grade_zones, conditioned_below_grade_zones].each do |conditioned_zones| # Preference to above-grade zone as control zone

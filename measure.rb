@@ -431,8 +431,7 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_unvented_crawl(thermal_zone) or
-         Geometry.is_vented_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
+      if Geometry.is_conditioned_basement(space_or_zone: thermal_zone) or Geometry.is_unconditioned_basement(space_or_zone: thermal_zone) or Geometry.is_unvented_crawl(space_or_zone: thermal_zone) or Geometry.is_vented_crawl(space_or_zone: thermal_zone) or Geometry.is_garage(space_or_zone: thermal_zone)
         zones_updated += 1
 
         zone_floor_area = 0.0
@@ -444,14 +443,14 @@ class OSModel
           end
         end
 
-        zone_volume = Geometry.get_height_of_spaces(thermal_zone.spaces) * zone_floor_area
+        zone_volume = Geometry.get_height_of_spaces(spaces: thermal_zone.spaces) * zone_floor_area
         if zone_volume <= 0
           fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
         end
 
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
 
-        if Geometry.is_conditioned_basement(thermal_zone)
+        if Geometry.is_conditioned_basement(space_or_zone: thermal_zone)
           living_volume = @cvolume - zone_volume
         end
 
@@ -460,7 +459,7 @@ class OSModel
 
     # Conditioned living
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_living(thermal_zone)
+      if Geometry.is_living(space_or_zone: thermal_zone)
         zones_updated += 1
 
         if living_volume <= 0
@@ -473,7 +472,7 @@ class OSModel
 
     # Attic
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_vented_attic(thermal_zone) or Geometry.is_unvented_attic(thermal_zone)
+      if Geometry.is_vented_attic(space_or_zone: thermal_zone) or Geometry.is_unvented_attic(space_or_zone: thermal_zone)
         zones_updated += 1
 
         zone_surfaces = []
@@ -489,7 +488,7 @@ class OSModel
 
         # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
         zone_length = zone_floor_area**0.5
-        zone_height = Math.tan(UnitConversions.convert(Geometry.get_roof_pitch(zone_surfaces), "deg", "rad")) * zone_length / 2.0
+        zone_height = Math.tan(UnitConversions.convert(Geometry.get_roof_pitch(surfaces: zone_surfaces), "deg", "rad")) * zone_length / 2.0
         zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
       end
@@ -812,14 +811,14 @@ class OSModel
     building_occupancy_values = HPXML.get_building_occupancy_values(building_occupancy: building.elements["BuildingDetails/BuildingSummary/BuildingOccupancy"])
 
     # Occupants
-    num_occ = Geometry.get_occupancy_default_num(@nbeds)
+    num_occ = Geometry.get_occupancy_default_num(nbeds: @nbeds)
     unless building_occupancy_values.nil?
       unless building_occupancy_values[:number_of_residents].nil?
         num_occ = building_occupancy_values[:number_of_residents]
       end
     end
     if num_occ > 0
-      occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
+      occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
       weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject { |sum, n| sum + n }
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
@@ -828,7 +827,7 @@ class OSModel
       end
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
+      success = Geometry.process_occupants(model: model, runner: runner, num_occ: num_occ, occ_gain: occ_gain, sens_frac: sens_frac, lat_frac: lat_frac, weekday_sch: weekday_sch, weekend_sch: weekend_sch, monthly_sch: monthly_sch, cfa: @cfa, nbeds: @nbeds)
       return false if not success
     end
 
@@ -912,7 +911,7 @@ class OSModel
       else
         drywall_thick_in = 0.0
       end
-      film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surface])).rvalue
+      film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces: [surface])).rvalue
       mat_roofing = Material.RoofingAsphaltShinglesDark
       solar_abs = roof_values[:solar_absorptance]
       emitt = roof_values[:emittance]
@@ -1368,7 +1367,7 @@ class OSModel
     cfa = @cfa.round(1)
 
     model.getThermalZones.each do |zone|
-      next if not Geometry.is_conditioned_basement(zone)
+      next if not Geometry.is_conditioned_basement(space_or_zone: zone)
 
       floor_area = 0.0
       ceiling_area = 0.0
@@ -1410,7 +1409,7 @@ class OSModel
     # Calculate cfa already added to model
     model_cfa = 0.0
     model.getSpaces.each do |space|
-      next unless Geometry.space_is_conditioned(space)
+      next unless Geometry.space_is_conditioned(space: space)
 
       space.surfaces.each do |surface|
         next unless surface.surfaceType.downcase.to_s == "floor"
