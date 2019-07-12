@@ -790,32 +790,6 @@ class Waterheater
     return hx
   end
 
-  def self.get_location_hierarchy(ba_cz_name)
-    if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
-      return [Constants.SpaceTypeGarage,
-              Constants.SpaceTypeLiving,
-              Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnventedCrawl,
-              Constants.SpaceTypeVentedCrawl,
-              Constants.SpaceTypeUnventedAttic,
-              Constants.SpaceTypeVentedAttic]
-
-    elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-      return [Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnconditionedBasement,
-              Constants.SpaceTypeLiving,
-              Constants.SpaceTypeUnventedCrawl,
-              Constants.SpaceTypeVentedCrawl,
-              Constants.SpaceTypeUnventedAttic,
-              Constants.SpaceTypeVentedAttic]
-    elsif ba_cz_name.nil?
-      return [Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnconditionedBasement,
-              Constants.SpaceTypeGarage,
-              Constants.SpaceTypeLiving]
-    end
-  end
-
   def self.calc_water_heater_capacity(fuel, num_beds, num_baths = nil)
     # Calculate the capacity of the water heater based on the fuel type and number of bedrooms and bathrooms in a home
     # returns the capacity in kBtu/hr
