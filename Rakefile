@@ -1,3 +1,4 @@
+require_relative 'tests/minitest_helper'
 require 'rake'
 require 'rake/testtask'
 require 'ci/reporter/rake/minitest'
