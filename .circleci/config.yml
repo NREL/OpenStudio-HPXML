@@ -12,11 +12,11 @@ jobs:
       - run:
           name: Update measure
           command: |
-            rake update_measures
+            openstudio update_measures.rb
       - run: 
           name: Run tests
           command: |
-            ruby tests/hpxml_translator_test.rb
+            openstudio tests/hpxml_translator_test.rb
       - store_artifacts:
           path: tests/results
           destination: results
