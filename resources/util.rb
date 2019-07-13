@@ -18,34 +18,6 @@ class HelperMethods
       return "OtherFuel2"
     end
   end
-
-  def self.reverse_eplus_fuel_map(fuel)
-    if fuel == "Electricity"
-      return Constants.FuelTypeElectric
-    elsif fuel == "NaturalGas"
-      return Constants.FuelTypeGas
-    elsif fuel == "FuelOil#1"
-      return Constants.FuelTypeOil
-    elsif fuel == "PropaneGas"
-      return Constants.FuelTypePropane
-    elsif fuel == "OtherFuel1"
-      return Constants.FuelTypeWood
-    elsif fuel == "OtherFuel2"
-      return Constants.FuelTypeWoodPellets
-    end
-  end
-
-  def self.reverse_openstudio_fuel_map(fuel)
-    if fuel == "Electricity"
-      return Constants.FuelTypeElectric
-    elsif fuel == "Gas"
-      return Constants.FuelTypeGas
-    elsif fuel == "FuelOil#1"
-      return Constants.FuelTypeOil
-    elsif fuel == "Propane"
-      return Constants.FuelTypePropane
-    end
-  end
 end
 
 class MathTools
