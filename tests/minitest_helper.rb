@@ -23,7 +23,8 @@ if not called_from_cli # cli can't load codecov gem
 
   require 'minitest/autorun'
   require 'minitest/reporters'
-  require 'ci/reporter/rake/minitest'
 
   Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new # spec-like progress
+  
+  require 'ci/reporter/rake/minitest'
 end
