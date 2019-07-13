@@ -1,11 +1,9 @@
-require_relative 'tests/minitest_helper'
-require 'rake'
-require 'rake/testtask'
-require 'ci/reporter/rake/minitest'
-require_relative "resources/hpxml"
+# Call from the OpenStudio CLI
 
-desc 'update all measures'
-task :update_measures do
+def update_measures
+  require_relative 'tests/minitest_helper'
+  require_relative "resources/hpxml"
+
   # Prevent NREL error regarding U: drive when not VPNed in
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? and ENV['HOME'].start_with? 'U:'
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? and ENV['HOMEDRIVE'].start_with? 'U:'
@@ -2616,3 +2614,5 @@ def get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_valu
   end
   return misc_load_schedule_values
 end
+
+update_measures

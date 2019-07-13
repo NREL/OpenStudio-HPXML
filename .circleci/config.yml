@@ -8,7 +8,7 @@ jobs:
       - run: 
           name: Install gems
           command: |
-            rm -f Gemfile.lock && bundle install
+            gem install nokogiri && gem install codecov
       - run:
           name: Update measure
           command: |
