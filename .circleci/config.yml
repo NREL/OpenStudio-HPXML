@@ -8,7 +8,7 @@ jobs:
       - run: 
           name: Install gems
           command: |
-            gem install nokogiri -v 1.6.8.1 && gem install codecov
+            rm -f Gemfile.lock && bundle install
       - run:
           name: Update measure
           command: |
@@ -16,7 +16,7 @@ jobs:
       - run: 
           name: Run tests
           command: |
-            openstudio tests/hpxml_translator_test.rb
+            ruby tests/hpxml_translator_test.rb
       - store_artifacts:
           path: tests/results
           destination: results
