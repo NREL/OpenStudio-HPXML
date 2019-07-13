@@ -199,6 +199,7 @@ class Waterheater
     hpwh.setControlSensor1HeightInStratifiedTank(h_hpctrl_up)
     hpwh.setControlSensor1Weight(0.75)
     hpwh.setControlSensor2HeightInStratifiedTank(h_hpctrl_low)
+    dhw_map[sys_id] << hpwh
 
     # Curves
     hpwh_cap = OpenStudio::Model::CurveBiquadratic.new(model)
