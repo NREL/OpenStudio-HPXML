@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Update measure
           command: |
-            openstudio update_measures.rb
+            ruby update_measures.rb
       - run: 
           name: Run tests
           command: |
