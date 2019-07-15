@@ -67,6 +67,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
+    _test_hrv_erv_inputs(this_dir, all_results)
   end
 
   def test_invalid
@@ -901,6 +902,33 @@ class HPXMLTranslatorTest < MiniTest::Test
       puts "#{xml}: #{errors.to_s}"
     end
     assert_equal(0, errors.size)
+  end
+
+  def _test_hrv_erv_inputs(test_dir, all_results)
+    # Compare HRV and ERV results that use different inputs
+    ["hrv", "erv"].each do |mv_type|
+      puts "#{mv_type} test results:"
+
+      base_xml = "#{test_dir}/base-mechvent-#{mv_type}.xml"
+      results_base = all_results[base_xml]
+      next if results_base.nil?
+
+      Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
+        results = all_results[xml]
+
+        # Compare results
+        results_base.keys.each do |k|
+          next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+
+          result_base = results_base[k].to_f
+          result = results[k].to_f
+          next if result_base == 0.0 and result == 0.0
+
+          _display_result_epsilon(xml, result_base, result, k)
+          assert_in_epsilon(result_base, result, 0.01)
+        end
+      end
+    end
   end
 
   def _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
