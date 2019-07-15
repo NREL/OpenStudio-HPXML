@@ -1520,9 +1520,12 @@ class HVACSizing
     '''
     return nil if hvac_final_values.nil?
 
-    if init_heat_load == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
-      hvac_final_values.Heat_Load = init_heat_load
+    if hvac.DSEHeat < 1
+      hvac_final_values.Heat_Load_Ducts = init_heat_load / hvac.DSEHeat - init_heat_load
+      hvac_final_values.Heat_Load = init_heat_load + hvac_final_values.Heat_Load_Ducts
+    elsif init_heat_load == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
       hvac_final_values.Heat_Load_Ducts = 0
+      hvac_final_values.Heat_Load = init_heat_load
     else
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
@@ -1583,12 +1586,19 @@ class HVACSizing
     return nil if hvac_final_values.nil?
 
     # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
-    if init_cool_load_sens == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
-      hvac_final_values.Cool_Load_Lat = init_cool_load_lat
-      hvac_final_values.Cool_Load_Sens = init_cool_load_sens
+    if hvac.DSECool < 1
+      hvac_final_values.Cool_Load_Ducts_Sens = init_cool_load_sens / hvac.DSECool - init_cool_load_sens
+      hvac_final_values.Cool_Load_Ducts_Tot = (init_cool_load_sens + init_cool_load_lat) / hvac.DSECool - (init_cool_load_sens + init_cool_load_lat)
+      hvac_final_values.Cool_Load_Sens = init_cool_load_sens + hvac_final_values.Cool_Load_Ducts_Sens
+      hvac_final_values.Cool_Load_Lat = init_cool_load_lat + (hvac_final_values.Cool_Load_Ducts_Tot - hvac_final_values.Cool_Load_Ducts_Sens)
       hvac_final_values.Cool_Load_Tot = hvac_final_values.Cool_Load_Sens + hvac_final_values.Cool_Load_Lat
+      hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+    elsif init_cool_load_sens == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
       hvac_final_values.Cool_Load_Ducts_Sens = 0
       hvac_final_values.Cool_Load_Ducts_Tot = 0
+      hvac_final_values.Cool_Load_Sens = init_cool_load_sens
+      hvac_final_values.Cool_Load_Lat = init_cool_load_lat
+      hvac_final_values.Cool_Load_Tot = hvac_final_values.Cool_Load_Sens + hvac_final_values.Cool_Load_Lat
     else
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
@@ -2647,6 +2657,12 @@ class HVACSizing
           return nil if hvac.Ducts.nil?
         end
       end
+
+      # Retrieve DSE if available
+      dse_cool = get_feature(runner, equip, Constants.SizingInfoHVACDSECool, 'double', false)
+      hvac.DSECool = dse_cool unless dse_cool.nil?
+      dse_heat = get_feature(runner, equip, Constants.SizingInfoHVACDSEHeat, 'double', false)
+      hvac.DSEHeat = dse_heat unless dse_heat.nil?
 
       if not clg_coil.nil?
         ratedCFMperTonCooling = get_feature(runner, equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string', false)
@@ -4124,6 +4140,8 @@ class HVACInfo
     self.OverSizeDelta = 15000.0
     self.HPSizedForMaxLoad = false
     self.FanspeedRatioCooling = [1.0]
+    self.DSECool = 1.0
+    self.DSEHeat = 1.0
   end
 
   def has_type(name_or_names)
@@ -4147,7 +4165,8 @@ class HVACInfo
                 :FanspeedRatioCooling, :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR,
                 :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
-                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp)
+                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
+                :DSECool, :DSEHeat)
 end
 
 class DuctInfo

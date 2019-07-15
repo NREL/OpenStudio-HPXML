@@ -197,7 +197,7 @@ def create_hpxmls
     'cfis/base-hvac-central-ac-only-1-speed-cfis.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'cfis/base-hvac-central-ac-only-2-speed-cfis.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'cfis/base-hvac-central-ac-only-var-speed-cfis.xml' => 'base-hvac-central-ac-only-var-speed.xml',
-    'cfis/base-hvac-dse-cfis.xml.skip' => 'base-hvac-dse.xml',
+    'cfis/base-hvac-dse-cfis.xml' => 'base-hvac-dse.xml',
     'cfis/base-hvac-ducts-in-conditioned-space-cfis.xml' => 'base-hvac-ducts-in-conditioned-space.xml',
     'cfis/base-hvac-furnace-elec-only-cfis.xml' => 'base-hvac-furnace-elec-only.xml',
     'cfis/base-hvac-furnace-gas-central-ac-2-speed-cfis.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -1556,6 +1556,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_capacity] /= 3.0
     heating_systems_values[0][:fraction_heat_load_served] = 0.333
     heating_systems_values[0][:electric_auxiliary_energy] /= 3.0 unless heating_systems_values[0][:electric_auxiliary_energy].nil?
+  elsif hpxml_file.include? 'hvac_dse' and not heating_systems_values.nil? and heating_systems_values.size > 0
+    heating_systems_values[0][:heating_capacity] /= 0.8
   end
   return heating_systems_values
 end
@@ -1633,6 +1635,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
   elsif hpxml_file.include? 'hvac_partial' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] /= 3.0
     cooling_systems_values[0][:fraction_cool_load_served] = 0.333
+  elsif hpxml_file.include? 'hvac_dse' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
+    cooling_systems_values[0][:cooling_capacity] /= 0.8
   end
   return cooling_systems_values
 end
@@ -1777,6 +1781,9 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:backup_heating_capacity] /= 3.0
     heat_pumps_values[0][:fraction_heat_load_served] = 0.333
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
+  elsif hpxml_file.include? 'hvac_dse' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
+    heat_pumps_values[0][:cooling_capacity] /= 0.8
+    heat_pumps_values[0][:backup_heating_capacity] /= 0.8
   end
   return heat_pumps_values
 end
@@ -1832,8 +1839,8 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
   elsif ['base-hvac-dse.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
-    hvac_distributions_values[0][:annual_heating_dse] = 0.75
-    hvac_distributions_values[0][:annual_cooling_dse] = 0.75
+    hvac_distributions_values[0][:annual_heating_dse] = 0.8
+    hvac_distributions_values[0][:annual_cooling_dse] = 0.7
   elsif hpxml_file.include? 'hvac_dse' and hpxml_file.include? 'dse-0.8.xml'
     hvac_distributions_values = [{ :id => "HVACDistribution",
                                    :distribution_system_type => "DSE",
@@ -2076,7 +2083,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
          'cfis/base-hvac-central-ac-only-1-speed-cfis.xml',
          'cfis/base-hvac-central-ac-only-2-speed-cfis.xml',
          'cfis/base-hvac-central-ac-only-var-speed-cfis.xml',
-         'cfis/base-hvac-dse-cfis.xml.skip',
+         'cfis/base-hvac-dse-cfis.xml',
          'cfis/base-hvac-ducts-in-conditioned-space-cfis.xml',
          'cfis/base-hvac-furnace-elec-only-cfis.xml',
          'cfis/base-hvac-furnace-gas-central-ac-2-speed-cfis.xml',

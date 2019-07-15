@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T11:46:43-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-07-09T15:49:58-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -269,8 +269,8 @@
             <DistributionSystemType>
               <Other>DSE</Other>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>0.75</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>0.75</AnnualCoolingDistributionSystemEfficiency>
+            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
+            <AnnualCoolingDistributionSystemEfficiency>0.7</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <MechanicalVentilation>
