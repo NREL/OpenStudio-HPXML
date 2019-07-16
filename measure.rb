@@ -1918,16 +1918,17 @@ class OSModel
           heating_source_id = water_heating_system_values[:related_hvac]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
-            boiler_plant_loop = get_boiler_loop(@hvac_map, heating_source_id, sys_id)
+            boiler_sys = get_boiler_and_boiler_loop(@hvac_map, heating_source_id, sys_id)
           else
             fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end
+          @dhw_map[sys_id] << boiler_sys['boiler']
           capacity_kbtuh = 0.0
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, fuel_type, space, capacity_kbtuh,
                                                tank_vol, setpoint_temp, oncycle_power,
-                                               offcycle_power, ec_adj, @nbeds, boiler_plant_loop, @dhw_map, sys_id, wh_type)
+                                               offcycle_power, ec_adj, @nbeds, boiler_sys['plant_loop'], @dhw_map, sys_id, wh_type)
           return false if not success
 
         else
@@ -2493,14 +2494,18 @@ class OSModel
     return dse_heat, dse_cool, true
   end
 
-  def self.get_boiler_loop(loop_hvacs, heating_source_id, sys_id)
+  def self.get_boiler_and_boiler_loop(loop_hvacs, heating_source_id, sys_id)
     # Search for the right boiler OS object
+    related_boiler_sys = {}
     if loop_hvacs.keys.include? heating_source_id
       loop_hvacs[heating_source_id].each do |comp|
         if comp.is_a? OpenStudio::Model::PlantLoop
-          return comp
+          related_boiler_sys['plant_loop'] = comp
+        elsif comp.is_a? OpenStudio::Model::BoilerHotWater
+          related_boiler_sys['boiler'] = comp
         end
       end
+      return related_boiler_sys
     else
       fail "RelatedHVACSystem '#{heating_source_id}' not found for water heating system '#{sys_id}'."
     end
@@ -2974,6 +2979,8 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
+                       OutputVars.WaterHeatingHeatExchanger,
+                       OutputVars.WaterHeatingIndirectBoiler,
                        OutputVars.WaterHeatingFuel,
                        OutputVars.WaterHeatingLoad]
 
@@ -3833,6 +3840,14 @@ class OutputVars
 
   def self.WaterHeatingElectricityRecircPump
     return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
+  end
+
+  def self.WaterHeatingHeatExchanger
+    return { 'OpenStudio::Model::HeatExchangerFluidToFluid' => ['Fluid Heat Exchanger Heat Transfer Energy'] }
+  end
+
+  def self.WaterHeatingIndirectBoiler
+    return { 'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
   end
 
   def self.WaterHeatingFuel
