@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Update measure
           command: |
-            ruby update_measures.rb
+            rake update_measures
       - run: 
           name: Run tests
           command: |
