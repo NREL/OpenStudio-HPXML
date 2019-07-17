@@ -56,9 +56,10 @@ def create_hpxmls
     'invalid_files/invalid-idref-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/two-repeating-idref-dhw-indirect.xml' => 'base-dhw-indirect.xml',
 
-    'base-addenda-exclude-g.xml' => 'base.xml',
-    'base-addenda-exclude-g-e.xml' => 'base.xml',
-    'base-addenda-exclude-g-e-a.xml' => 'base.xml',
+    'base-version-2014.xml' => 'base.xml',
+    'base-version-2014a.xml' => 'base.xml',
+    'base-version-2014ae.xml' => 'base.xml',
+    'base-version-2014aeg.xml' => 'base.xml',
     'base-appliances-dishwasher-ef.xml' => 'base.xml',
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
@@ -587,15 +588,17 @@ def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
                      :transaction => "create",
                      :software_program_used => nil,
                      :software_program_version => nil,
-                     :eri_calculation_version => "2014AEG",
+                     :eri_calculation_version => "2019",
                      :building_id => "MyBuilding",
                      :event_type => "proposed workscope" }
-  elsif ['base-addenda-exclude-g.xml'].include? hpxml_file
-    hpxml_values[:eri_calculation_version] = "2014AE"
-  elsif ['base-addenda-exclude-g-e.xml'].include? hpxml_file
-    hpxml_values[:eri_calculation_version] = "2014A"
-  elsif ['base-addenda-exclude-g-e-a.xml'].include? hpxml_file
+  elsif ['base-version-2014.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = "2014"
+  elsif ['base-version-2014a.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014A"
+  elsif ['base-version-2014ae.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014AE"
+  elsif ['base-version-2014aeg.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014AEG"
   end
   return hpxml_values
 end

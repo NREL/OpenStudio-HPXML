@@ -888,7 +888,7 @@ class Waterheater
   end
 
   def self.get_default_hot_water_temperature(eri_version)
-    if eri_version.include? "A"
+    if eri_version.include? "2014A" or eri_version.include? "2019"
       return 125.0
     end
 
