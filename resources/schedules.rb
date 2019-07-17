@@ -683,43 +683,6 @@ class Schedule
     return 'weekend'
   end
 
-  # find the maximum profile value for a schedule
-  def self.getMinMaxAnnualProfileValue(model, schedule)
-    if not schedule.to_ScheduleRuleset.is_initialized
-      return nil
-    end
-
-    schedule = schedule.to_ScheduleRuleset.get
-
-    # gather profiles
-    profiles = []
-    defaultProfile = schedule.to_ScheduleRuleset.get.defaultDaySchedule
-    profiles << defaultProfile
-    rules = schedule.scheduleRules
-    rules.each do |rule|
-      profiles << rule.daySchedule
-    end
-
-    # test profiles
-    min = nil
-    max = nil
-    profiles.each do |profile|
-      profile.values.each do |value|
-        if min.nil?
-          min = value
-        else
-          if min > value then min = value end
-        end
-        if max.nil?
-          max = value
-        else
-          if max < value then max = value end
-        end
-      end
-    end
-    return { 'min' => min, 'max' => max } # this doesn't include summer and winter design day
-  end
-
   # return [Double] The total number of full load hours for this schedule.
   def self.annual_equivalent_full_load_hrs(modelYear, schedule)
     if schedule.to_ScheduleInterval.is_initialized
