@@ -1591,7 +1591,8 @@ class HVAC
     furnaceParasiticElecDict = { Constants.FuelTypeGas => 76.0, # W during operation
                                  Constants.FuelTypePropane => 76.0,
                                  Constants.FuelTypeOil => 220.0,
-                                 Constants.FuelTypeElectric => 0.0 }
+                                 Constants.FuelTypeElectric => 0.0,
+                                 Constants.FuelTypeWood => 76.0 }
     aux_elec = furnaceParasiticElecDict[fuel_type]
 
     # _processAirSystem
@@ -1788,7 +1789,8 @@ class HVAC
     boilerParasiticElecDict = { Constants.FuelTypeGas => 76.0, # W during operation
                                 Constants.FuelTypePropane => 76.0,
                                 Constants.FuelTypeOil => 220.0,
-                                Constants.FuelTypeElectric => 0.0 }
+                                Constants.FuelTypeElectric => 0.0,
+                                Constants.FuelTypeWood => 76.0 }
     boiler_aux = boilerParasiticElecDict[fuel_type]
 
     # _processCurvesBoiler
@@ -2725,12 +2727,16 @@ class HVAC
         eae = 170.0 * load_frac # kWh/yr
       elsif fuel == Constants.FuelTypeOil
         eae = 330.0 * load_frac # kWh/yr
+      elsif fuel == Constants.FuelTypeWood
+        eae = 0.0
       end
     elsif htg_type == 'Furnace'
       if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
         eae = (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       elsif fuel == Constants.FuelTypeOil
         eae = (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+      elsif fuel == Constants.FuelTypeWood
+        eae = 0.0
       end
     else
       eae = 0.0 # FIXME: Is this right?
