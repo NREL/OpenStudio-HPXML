@@ -138,6 +138,8 @@ def create_hpxmls
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
+    'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
+    'base-hvac-evap-cooler-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-var-speed.xml' => 'base.xml',
@@ -219,6 +221,8 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-central-ac-only-var-speed-autosize.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_autosizing/base-hvac-central-ac-plus-air-to-air-heat-pump-heating-autosize.xml' => 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml',
     'hvac_autosizing/base-hvac-elec-resistance-only-autosize.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml' => 'base-hvac-evap-cooler-furnace-gas.xml',
+    'hvac_autosizing/base-hvac-evap-cooler-only-autosize.xml' => 'base-hvac-evap-cooler-only.xml',
     'hvac_autosizing/base-hvac-furnace-elec-only-autosize.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-2-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-var-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -243,6 +247,7 @@ def create_hpxmls
     'hvac_base/base-hvac-central-ac-only-2-speed-base.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_base/base-hvac-central-ac-only-var-speed-base.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_base/base-hvac-elec-resistance-only-base.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_base/base-hvac-evap-cooler-only-base.xml' => 'base-hvac-evap-cooler-only.xml',
     'hvac_base/base-hvac-furnace-elec-only-base.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_base/base-hvac-furnace-gas-central-ac-2-speed-base.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_base/base-hvac-furnace-gas-central-ac-var-speed-base.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -301,6 +306,7 @@ def create_hpxmls
     'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_multiple/base-hvac-elec-resistance-only-x3.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_multiple/base-hvac-evap-cooler-only-x3.xml' => 'base-hvac-evap-cooler-only.xml',
     'hvac_multiple/base-hvac-furnace-elec-only-x3.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_multiple/base-hvac-furnace-gas-only-x3.xml' => 'base-hvac-furnace-gas-only.xml',
     'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
@@ -321,6 +327,7 @@ def create_hpxmls
     'hvac_partial/base-hvac-central-ac-only-2-speed-33percent.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_partial/base-hvac-central-ac-only-var-speed-33percent.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_partial/base-hvac-elec-resistance-only-33percent.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_partial/base-hvac-evap-cooler-only-33percent.xml' => 'base-hvac-evap-cooler-only.xml',
     'hvac_partial/base-hvac-furnace-elec-only-33percent.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-33percent.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-33percent.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -1424,6 +1431,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'base-hvac-central-ac-only-1-speed.xml',
          'base-hvac-central-ac-only-2-speed.xml',
          'base-hvac-central-ac-only-var-speed.xml',
+         'base-hvac-evap-cooler-only.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
@@ -1607,6 +1615,12 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[0][:cooling_system_type] = "room air conditioner"
     cooling_systems_values[0][:cooling_efficiency_seer] = nil
     cooling_systems_values[0][:cooling_efficiency_eer] = 8.5
+  elsif ['base-hvac-evap-cooler-furnace-gas.xml',
+         'base-hvac-evap-cooler-only.xml'].include? hpxml_file
+    cooling_systems_values[0][:distribution_system_idref] = nil
+    cooling_systems_values[0][:cooling_system_type] = "evaporative cooler"
+    cooling_systems_values[0][:cooling_efficiency_seer] = nil
+    cooling_systems_values[0][:cooling_efficiency_eer] = nil
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution4"
     cooling_systems_values[0][:fraction_cool_load_served] = 0.2
@@ -1818,6 +1832,7 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
   elsif ['base-hvac-none.xml',
          'base-hvac-elec-resistance-only.xml',
+         'base-hvac-evap-cooler-only.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-room-ac-only.xml',

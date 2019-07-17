@@ -401,6 +401,78 @@ class HVAC
     return true
   end
 
+  def self.apply_evaporative_cooler(model, runner, capacity, frac_cool_load_served,
+                                    sequential_cool_load_frac, control_slave_zones_hash,
+                                    hvac_map, sys_id)
+
+    cooler_effectiveness = 0.75
+    obj_name = Constants.ObjectNameEvaporativeCooler
+
+    control_slave_zones_hash.each do |control_zone, slave_zones|
+      evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
+      evap_cooler.setName(obj_name)
+      evap_cooler.setCoolerEffectiveness(cooler_effectiveness)
+      hvac_map[sys_id] << evap_cooler
+
+      # See https://github.com/NREL/openstudio-standards/blob/49626ee957db63129bb74cfe08b48abd571de759/lib/openstudio-standards/prototypes/common/objects/Prototype.hvac_systems.rb#L3764
+      # See 1ZoneEvapCooler.idf
+
+      # FIXME: Needs outside air system?
+
+      # FIXME: Fan power is currently zeroed out, is this correct?
+      fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
+      fan.setName(obj_name + " supply fan")
+      fan.setEndUseSubcategory("supply fan")
+      fan.setFanEfficiency(1)
+      fan.setPressureRise(0)
+      fan.setMotorEfficiency(1)
+      fan.setMotorInAirstreamFraction(0)
+      hvac_map[sys_id] += self.disaggregate_fan(model, fan, nil, evap_cooler)
+
+      air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
+      air_loop.setName(obj_name + " airloop")
+      air_supply_inlet_node = air_loop.supplyInletNode
+      air_supply_outlet_node = air_loop.supplyOutletNode
+      air_demand_inlet_node = air_loop.demandInletNode
+      air_demand_outlet_node = air_loop.demandOutletNode
+      hvac_map[sys_id] << air_loop
+
+      fan.addToNode(air_supply_inlet_node) # FIXME: This isn't right
+      evap_cooler.addToNode(air_supply_inlet_node)
+
+      # Supply Air
+      zone_splitter = air_loop.zoneSplitter
+      zone_splitter.setName(obj_name + " zone splitter")
+
+      zone_mixer = air_loop.zoneMixer
+      zone_mixer.setName(obj_name + " zone mixer")
+
+      air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
+      air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
+      air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
+      runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
+
+      control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
+      control_zone.setSequentialHeatingFraction(air_terminal_living, 0)
+
+      slave_zones.each do |slave_zone|
+        air_terminal_fbsmt = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
+        air_terminal_fbsmt.setName(obj_name + " #{slave_zone.name} terminal")
+        air_loop.multiAddBranchForZone(slave_zone, air_terminal_fbsmt)
+        runner.registerInfo("Added '#{air_loop.name}' to '#{slave_zone.name}'")
+
+        slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, sequential_cool_load_frac.round(5))
+        slave_zone.setSequentialHeatingFraction(air_terminal_fbsmt, 0)
+      end # slave_zone
+
+      # Store info for HVAC Sizing measure
+      evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
+      evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
+    end # control_zone
+
+    return true
+  end
+
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
@@ -2101,7 +2173,12 @@ class HVAC
     hvac_objects << fan_sensor
 
     if not clg_coil.nil?
-      clg_coil_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling Coil Electric Energy")
+      if clg_coil.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+        var = "Evaporative Cooler Electric Energy"
+      else
+        var = "Cooling Coil Electric Energy"
+      end
+      clg_coil_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       clg_coil_sensor.setName("#{clg_coil.name} s")
       clg_coil_sensor.setKeyName(clg_coil.name.to_s)
       hvac_objects << clg_coil_sensor
@@ -4274,6 +4351,12 @@ class HVAC
       hvac_types << ptac.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
     end
 
+    evap_coolers = self.get_evap_coolers(model, runner, thermal_zone)
+    evap_coolers.each do |evap_cooler|
+      equipment << evap_cooler
+      hvac_types << evap_cooler.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
+    end
+
     baseboards = self.get_baseboard_waters(model, runner, thermal_zone)
     baseboards.each do |baseboard|
       equipment << baseboard
@@ -4323,6 +4406,8 @@ class HVAC
         runner.registerInfo("Found boiler serving #{thermal_zone.name}.")
       elsif hvac_type == Constants.ObjectNameUnitHeater
         runner.registerInfo("Found unit heater in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameEvaporativeCooler
+        runner.registerInfo("Found evaporative cooler in #{thermal_zone.name}.")
       end
     end
 
@@ -4396,6 +4481,16 @@ class HVAC
     return nil
   end
 
+  def self.get_evap_cooler_from_air_loop_hvac(air_loop)
+    # Returns the evap cooler or nil
+    air_loop.supplyComponents.each do |comp|
+      next unless comp.to_EvaporativeCoolerDirectResearchSpecial.is_initialized
+
+      return comp.to_EvaporativeCoolerDirectResearchSpecial.get
+    end
+    return nil
+  end
+
   def self.get_unitary_system_air_loops(model, runner, thermal_zone)
     # Returns the unitary system(s), cooling coil(s), heating coil(s), and air loops(s) if available
     unitary_system_air_loops = []
@@ -4445,6 +4540,18 @@ class HVAC
       ptacs << ptac
     end
     return ptacs
+  end
+
+  def self.get_evap_coolers(model, runner, thermal_zone)
+    # Returns the evaporative cooler if available
+    evap_coolers = []
+    thermal_zone.airLoopHVACs.each do |air_loop|
+      evap_cooler = get_evap_cooler_from_air_loop_hvac(air_loop)
+      next if evap_cooler.nil?
+
+      evap_coolers << evap_cooler
+    end
+    return evap_coolers
   end
 
   def self.get_baseboard_waters(model, runner, thermal_zone)

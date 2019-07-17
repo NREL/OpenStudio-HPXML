@@ -2040,6 +2040,13 @@ class OSModel
                                      @hvac_map, sys_id)
         return false if not success
 
+      elsif clg_type == "evaporative cooler"
+
+        success = HVAC.apply_evaporative_cooler(model, runner, cool_capacity_btuh, load_frac,
+                                                sequential_load_frac, @control_slave_zones_hash,
+                                                @hvac_map, sys_id)
+        return false if not success
+
       end
     end
 

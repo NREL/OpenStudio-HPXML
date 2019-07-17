@@ -1879,6 +1879,11 @@ class HVACSizing
 
       end
 
+    elsif hvac.has_type(Constants.ObjectNameEvaporativeCooler)
+      hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot
+      hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Load_Sens
+      hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+
     else
       hvac_final_values.Cool_Capacity = 0
       hvac_final_values.Cool_Capacity_Sens = 0
@@ -2670,6 +2675,11 @@ class HVACSizing
           hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(",").map(&:to_f)
         end
 
+        hvac.CoolingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
+        return nil if hvac.CoolingLoadFraction.nil?
+      end
+
+      if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         hvac.CoolingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
         return nil if hvac.CoolingLoadFraction.nil?
       end
@@ -3838,6 +3848,25 @@ class HVACSizing
 
         # Coils
         setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
+
+      elsif object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+
+        ## Evaporative Cooler ##
+
+        # Air Loop
+        air_loop = object.airLoopHVAC.get
+        air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
+
+        thermal_zones.each do |thermal_zone|
+          thermal_zone.airLoopHVACTerminals.each do |aterm|
+            next if air_loop != aterm.airLoopHVAC.get
+            next unless aterm.to_AirTerminalSingleDuctUncontrolled.is_initialized
+
+            # Air Terminal
+            aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
+            aterm.setMaximumAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s") * zone_ratios[thermal_zone])
+          end
+        end
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
 

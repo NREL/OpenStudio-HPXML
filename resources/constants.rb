@@ -434,6 +434,10 @@ class Constants
     return "baseboard"
   end
 
+  def self.ObjectNameEvaporativeCooler
+    return "evap cooler"
+  end
+
   def self.ObjectNameFixtures
     return "dhw fixtures"
   end

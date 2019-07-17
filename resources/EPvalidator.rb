@@ -281,7 +281,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
-        "[CoolingSystemType='central air conditioner' or CoolingSystemType='room air conditioner']" => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC]
+        "[CoolingSystemType='central air conditioner' or CoolingSystemType='room air conditioner' or CoolingSystemType='evaporative cooler']" => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler]
         "[CoolingSystemFuel='electricity']" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
@@ -298,6 +298,11 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='room air conditioner']" => {
         "DistributionSystem" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
+      },
+
+      ## [CoolingType=EvapCooler]
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='evaporative cooler']" => {
+        "DistributionSystem" => zero,
       },
 
       # [HeatPump]

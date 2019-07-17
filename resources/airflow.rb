@@ -321,10 +321,14 @@ class Airflow
     air_loops.each_with_index do |air_loop, air_loop_index|
       next unless building.living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this
 
+      # FIXME: Allow evap cooler to be ducted
+      unitary_system = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
+      next if unitary_system.nil? # skip for, e.g., evaporative cooler
+
       # Get the supply fan
       supply_fan = nil
       if air_loop.to_AirLoopHVAC.is_initialized
-        supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(air_loop).supplyFan.get
+        supply_fan = unitary_system.supplyFan.get
       end
 
       # Supply fan runtime fraction
