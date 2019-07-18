@@ -412,7 +412,7 @@ class OSModel
     success = check_for_errors(runner, model)
     return false if not success
 
-    success = set_zone_volumes(runner, model, building)
+    success = set_zone_volumes(runner: runner, building: building)
     return false if not success
 
     success = explode_surfaces(runner, model, building)
@@ -421,9 +421,9 @@ class OSModel
     return true
   end
 
-  def self.set_zone_volumes(runner, model, building)
-    # TODO: Use HPXML values not Model values
-    thermal_zones = model.getThermalZones
+  def self.set_zone_volumes(runner:,
+                            building:)
+    thermal_zones = Geometry.get_thermal_zones(building: building)
 
     # Init
     living_volume = @cvolume
@@ -431,66 +431,46 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_conditioned_basement(space_or_zone: thermal_zone) or Geometry.is_unconditioned_basement(space_or_zone: thermal_zone) or Geometry.is_unvented_crawl(space_or_zone: thermal_zone) or Geometry.is_vented_crawl(space_or_zone: thermal_zone) or Geometry.is_garage(space_or_zone: thermal_zone)
+      if thermal_zone.include? "basement" or thermal_zone.include? "crawlspace" or thermal_zone.include? "garage"
         zones_updated += 1
 
-        zone_floor_area = 0.0
-        thermal_zone.spaces.each do |space|
-          space.surfaces.each do |surface|
-            if surface.surfaceType.downcase == "floor"
-              zone_floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
-            end
-          end
-        end
+        zone_floor_area = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: thermal_zone)
 
-        zone_volume = Geometry.get_height_of_spaces(spaces: thermal_zone.spaces) * zone_floor_area
+        zone_volume = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone) * zone_floor_area
         if zone_volume <= 0
           fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
         end
 
-        thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
-
-        if Geometry.is_conditioned_basement(space_or_zone: thermal_zone)
+        if thermal_zone == "basement - conditioned"
           living_volume = @cvolume - zone_volume
         end
-
       end
     end
 
     # Conditioned living
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_living(space_or_zone: thermal_zone)
-        zones_updated += 1
+      next if thermal_zone != "living space"
 
-        if living_volume <= 0
-          fail "Calculated volume for living zone (#{living_volume}) is not greater than zero."
-        end
+      zones_updated += 1
 
-        thermal_zone.setVolume(UnitConversions.convert(living_volume, "ft^3", "m^3"))
+      if living_volume <= 0
+        fail "Calculated volume for living zone (#{living_volume}) is not greater than zero."
       end
     end
 
     # Attic
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_vented_attic(space_or_zone: thermal_zone) or Geometry.is_unvented_attic(space_or_zone: thermal_zone)
+      if thermal_zone.include? "attic"
         zones_updated += 1
 
-        zone_surfaces = []
-        zone_floor_area = 0.0
-        thermal_zone.spaces.each do |space|
-          space.surfaces.each do |surface|
-            zone_surfaces << surface
-            if surface.surfaceType.downcase == "floor"
-              zone_floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2")
-            end
-          end
-        end
+        zone_floor_area = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: thermal_zone)
 
         # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-        zone_length = zone_floor_area**0.5
-        zone_height = Math.tan(UnitConversions.convert(Geometry.get_roof_pitch(surfaces: zone_surfaces), "deg", "rad")) * zone_length / 2.0
+        zone_length = zone_floor_area ** 0.5
+
+        roof_pitch = Geometry.get_thermal_zone_roof_pitch(building: building, thermal_zone: thermal_zone)
+        zone_height = roof_pitch * (zone_length / 2.0) / 12.0
         zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
-        thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
       end
     end
 
@@ -2923,6 +2903,8 @@ class OSModel
                                nbeds: @nbeds,
                                min_neighbor_distance: @min_neighbor_distance, 
                                ncfl_ag: @ncfl_ag,
+                               cvolume: @cvolume,
+                               eri_version: @eri_version,
                                show_debug_info: show_debug_info)
 
     return false if not success
