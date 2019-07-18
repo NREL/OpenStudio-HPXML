@@ -188,6 +188,19 @@ class Airflow
     return 1.0 / 150.0 # Table 4.2.2(1) - Crawlspaces
   end
 
+  def self.get_default_mech_vent_fan_power(fan_type)
+    # 301-2019: Table 4.2.2(1b)
+    if fan_type == 'supply only' or fan_type == 'exhaust only'
+      return 0.35 # W/cfm
+    elsif fan_type == 'balanced'
+      return 0.70 # W/cfm
+    elsif fan_type == 'energy recovery ventilator' or fan_type == 'heat recovery ventilator'
+      return 1.00 # W/cfm
+    elsif fan_type == 'central fan integrated supply'
+      return 0.50 # W/cfm
+    end
+  end
+
   private
 
   def self.process_wind_speed_correction(terrain, shelter_coef, min_neighbor_distance, building_height)
