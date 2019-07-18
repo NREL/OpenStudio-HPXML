@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:27:28-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-07-17T10:27:23-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -27,11 +27,11 @@
           </FuelTypesAvailable>
         </Site>
         <BuildingConstruction>
-          <NumberofConditionedFloors>1</NumberofConditionedFloors>
+          <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
-          <ConditionedFloorArea>1350.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>10800.0</ConditionedBuildingVolume>
+          <ConditionedFloorArea>2700.0</ConditionedFloorArea>
+          <ConditionedBuildingVolume>32400.0</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -54,13 +54,13 @@
               <UnitofMeasure>ACH</UnitofMeasure>
               <AirLeakage>3.0</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>10800.0</InfiltrationVolume>
+            <InfiltrationVolume>32400.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Roofs>
           <Roof>
             <SystemIdentifier id='Roof'/>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>1510.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
@@ -68,10 +68,24 @@
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='RoofInsulation'/>
-              <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>25.8</AssemblyEffectiveRValue>
             </Insulation>
           </Roof>
         </Roofs>
+        <RimJoists>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistFoundation'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>116.0</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+        </RimJoists>
         <Walls>
           <Wall>
             <SystemIdentifier id='Wall'/>
@@ -91,7 +105,7 @@
           <Wall>
             <SystemIdentifier id='WallAtticGable'/>
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>attic - unvented</InteriorAdjacentTo>
+            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
               <WoodStud/>
             </WallType>
@@ -100,32 +114,39 @@
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallAtticGableInsulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='FloorBelowAttic'/>
-            <ExteriorAdjacentTo>attic - unvented</ExteriorAdjacentTo>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
-            <Area>1350.0</Area>
+        <FoundationWalls>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>8.0</Height>
+            <Area>1200.0</Area>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
-              <SystemIdentifier id='FloorBelowAtticInsulation'/>
-              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
+              <SystemIdentifier id='FoundationWallInsulation'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+              </Layer>
             </Insulation>
-          </FrameFloor>
-        </FrameFloors>
+          </FoundationWall>
+        </FoundationWalls>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab'/>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Thickness>4.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-            <UnderSlabInsulationSpansEntireSlab>true</UnderSlabInsulationSpansEntireSlab>
-            <DepthBelowGrade>0.0</DepthBelowGrade>
+            <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
@@ -137,12 +158,12 @@
               <SystemIdentifier id='SlabUnderSlabInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
-                <NominalRValue>5.0</NominalRValue>
+                <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
             <extension>
-              <CarpetFraction>1.0</CarpetFraction>
-              <CarpetRValue>2.5</CarpetRValue>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
             </extension>
           </Slab>
         </Slabs>
@@ -165,7 +186,7 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast'/>
-            <Area>36.0</Area>
+            <Area>54.0</Area>
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
@@ -173,11 +194,27 @@
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest'/>
-            <Area>36.0</Area>
+            <Area>54.0</Area>
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
             <AttachedToWall idref='Wall'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='AtticGableWindowEast'/>
+            <Area>12.0</Area>
+            <Azimuth>90</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <AttachedToWall idref='WallAtticGable'/>
+          </Window>
+          <Window>
+            <SystemIdentifier id='AtticGableWindowWest'/>
+            <Area>12.0</Area>
+            <Azimuth>270</Azimuth>
+            <UFactor>0.33</UFactor>
+            <SHGC>0.45</SHGC>
+            <AttachedToWall idref='WallAtticGable'/>
           </Window>
         </Windows>
         <Doors>
@@ -200,16 +237,30 @@
       <Systems>
         <HVAC>
           <HVACPlant>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>-1.0</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>60000.0</CoolingCapacity>
+              <CoolingCapacity>-1.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>18.0</Value>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -220,10 +271,37 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>75.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>25.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>living space</DuctLocation>
+                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>living space</DuctLocation>
+                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>0.8</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
