@@ -2719,8 +2719,9 @@ class OSModel
         # CFIS: Specify minimum open time in minutes
         cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
       else
-        # Other: Adjust CFM based on hours/day of operation
+        # Other: Adjust constant CFM/power based on hours per day of operation
         mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
+        mech_vent_fan_w *= (whole_house_fan_values[:hours_in_operation] / 24.0)
       end
     end
     cfis_airflow_frac = 1.0
