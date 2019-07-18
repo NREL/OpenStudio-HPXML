@@ -250,7 +250,7 @@ class HotWaterAndAppliances
     frac_sens = gains_sens / tot_btu
     frac_lat = gains_lat / tot_btu
 
-    if eri_version.include? "2014A" or eri_version.include? "2019" # 2014 w/ Addendum A or 2019
+    if eri_version != "2014" # 2014 w/ Addendum A or newer
       gpd = dwcpy * (4.6415 * (1.0 / ef) - 1.9295) / 365.0 # Eq. 4.2-11 (DWgpd)
     else
       gpd = ((88.4 + 34.9 * nbeds) * 8.16 - (88.4 + 34.9 * nbeds) * 12.0 / cap * (4.6415 * (1.0 / ef) - 1.9295)) / 365.0 # Eq 4.2-8b
@@ -342,7 +342,7 @@ class HotWaterAndAppliances
   def self.calc_clothes_washer_energy_gpd(eri_version, nbeds, ler, elec_rate, gas_rate, agc, cap)
     # Eq 4.2-9a
     ncy = (3.0 / 2.847) * (164 + nbeds * 45.6)
-    if eri_version.include? "2014A" or eri_version.include? "2019" # 2014 w/ Addendum A or 2019
+    if eri_version != "2014" # 2014 w/ Addendum A or newer
       ncy = (3.0 / 2.847) * (164 + nbeds * 46.5)
     end
     acy = ncy * ((3.0 * 2.08 + 1.59) / (cap * 2.08 + 1.59)) # Adjusted Cycles per Year

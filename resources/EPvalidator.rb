@@ -32,7 +32,7 @@ class EnergyPlusValidator
         "/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/Transaction" => one, # Required by HPXML schema
-        "/HPXML/SoftwareInfo/extension/ERICalculation[Version='2014' or Version='2014A' or Version='2014AE' or Version='2014AEG' or Version='2019']" => one, # Choose version of 301 standard and addenda
+        "/HPXML/SoftwareInfo/extension/ERICalculation[Version='2019' or Version='2014AEG' or Version='2014AE' or Version='2014A' or Version='2014']" => one, # Choose version of 301 standard and addenda
 
         "/HPXML/Building" => one,
         "/HPXML/Building/BuildingID" => one, # Required by HPXML schema
