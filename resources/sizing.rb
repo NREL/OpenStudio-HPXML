@@ -14,12 +14,16 @@ class HVACSizing
                  nbeds:,
                  min_neighbor_distance:,
                  ncfl_ag:,
+                 cvolume:,
+                 eri_version:,
                  show_debug_info: false)
 
     @model_spaces = model.getSpaces
     @cfa = cfa
     @nbeds = nbeds
     @ncfl_ag = ncfl_ag
+    @cvolume = cvolume
+    @eri_version = eri_version
 
     @model_year = model.yearDescription.get.assumedYear # TODO: get from HPXML
     @north_axis = model.getBuilding.northAxis # TODO: get from HPXML
@@ -70,7 +74,8 @@ class HVACSizing
     return false if zone_ratios.nil?
 
     # Get HVAC system info
-    hvacs = get_hvacs(runner: runner, model: model, building: building)
+    hvacs = get_hvacs(runner: runner, building: building)
+    puts hvacs
     return false if hvacs.nil?
 
     hvacs.each do |hvac|
@@ -451,20 +456,20 @@ class HVACSizing
                               model:,
                               building:,
                               weather:)
+    thermal_zones = Geometry.get_thermal_zones(building: building)
 
     # Constant loads (no variation throughout day)
     zones_loads = {}
-
-    Geometry.get_thermal_zones(building: building).each do |thermal_zone|
+    thermal_zones.each do |thermal_zone|
       next unless Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
 
       zone_loads = ZoneLoads.new
       zone_loads = process_load_windows_skylights(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_load_doors(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_load_walls(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
-      zone_loads = process_load_roofs(runner: runner, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
-      zone_loads = process_load_floors(runner: runner, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
-      zone_loads = process_infiltration_ventilation(runner: runner, model: model, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_load_roofs(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_load_floors(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_infiltration_ventilation(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       return nil if zone_loads.nil?
 
       zones_loads[thermal_zone] = zone_loads
@@ -475,9 +480,9 @@ class HVACSizing
     zones_sens = {}
     zones_lat = {}
     thermal_zones.each do |thermal_zone|
-      next if not Geometry.zone_is_conditioned(zone: thermal_zone)
+      next if not Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
 
-      zones_sens[thermal_zone], zones_lat[thermal_zone] = process_internal_gains(runner: runner, thermal_zone: thermal_zone, weather: weather)
+      zones_sens[thermal_zone], zones_lat[thermal_zone] = process_internal_gains(runner: runner, building: building, thermal_zone: thermal_zone, weather: weather)
       return nil if zones_sens[thermal_zone].nil? or zones_lat[thermal_zone].nil?
     end
     # Find hour of the maximum total & latent loads
@@ -1020,7 +1025,6 @@ class HVACSizing
 
     # Foundation walls
     Geometry.get_thermal_zone_below_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |foundation_wall_values|
-      puts foundation_wall_values
       wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner: runner, foundation_wall_values: foundation_wall_values)
       if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
         return nil
@@ -1055,6 +1059,7 @@ class HVACSizing
   end
 
   def self.process_load_roofs(runner:,
+                              building:,
                               thermal_zone:,
                               zone_loads:,
                               weather:)
@@ -1070,30 +1075,12 @@ class HVACSizing
     zone_loads.Cool_Roofs = 0
 
     # Roofs
-    Geometry.get_spaces_above_grade_exterior_roofs(spaces: thermal_zone.spaces).each do |roof|
-      roof_color = get_feature(runner: runner,
-                               obj: roof,
-                               feature: Constants.SizingInfoRoofColor,
-                               datatype: 'string')
-      return nil if roof_color.nil?
+    Geometry.get_thermal_zone_above_grade_exterior_roofs(building: building, thermal_zone: thermal_zone).each do |roof_values|
+      roof_color = Constructions.get_roofing_material_manual_j_color(Material.RoofingAsphaltShinglesMed.name)
+      roof_material = Construction.get_roofing_material_manual_j_material(Material.RoofingAsphaltShinglesMed.name)
+      cavity_r = 0 # TODO
+      rigid_r = 999 # TODO
 
-      roof_material = get_feature(runner: runner,
-                                  obj: roof,
-                                  feature: Constants.SizingInfoRoofMaterial,
-                                  datatype: 'string')
-      return nil if roof_material.nil?
-
-      cavity_r = get_feature(runner: runner,
-                             obj: roof,
-                             feature: Constants.SizingInfoRoofCavityRvalue,
-                             datatype: 'double')
-      return nil if cavity_r.nil?
-
-      rigid_r = get_feature(runner: runner,
-                            obj: roof,
-                            feature: Constants.SizingInfoRoofRigidInsRvalue,
-                            datatype: 'double',
-                            register_error: false)
       rigid_r = 0 if rigid_r.nil?
 
       total_r = cavity_r + rigid_r
@@ -1135,10 +1122,8 @@ class HVACSizing
       # Adjust base CLTD for different CTD or DR
       cltd += (weather.design.CoolingDrybulb - 95) + @daily_range_temp_adjust[@daily_range_num]
 
-      roof_ufactor = self.get_surface_ufactor(runner: runner,
-                                              surface: roof,
-                                              surface_type: roof.surfaceType,
-                                              register_error: true)
+      roof_ufactor = 1.0 / roof_values[:insulation_assembly_r_value] # TODO
+
       return nil if roof_ufactor.nil?
 
       zone_loads.Cool_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * cltd
@@ -1149,6 +1134,7 @@ class HVACSizing
   end
 
   def self.process_load_floors(runner:,
+                               building:,
                                thermal_zone:,
                                zone_loads:,
                                weather:)
@@ -1162,7 +1148,7 @@ class HVACSizing
     zone_loads.Cool_Floors = 0
 
     # Exterior Floors
-    Geometry.get_spaces_above_grade_exterior_floors(spaces: thermal_zone.spaces).each do |floor|
+    Geometry.get_thermal_zone_above_grade_exterior_floors(building: building, thermal_zone: thermal_zone).each do |framefloor_values|
       floor_ufactor = self.get_surface_ufactor(runner: runner,
                                                surface: floor,
                                                surface_type: floor.surfaceType,
@@ -1174,32 +1160,31 @@ class HVACSizing
     end
 
     # Interzonal Floors
-    Geometry.get_spaces_interzonal_floors_and_ceilings(spaces: thermal_zone.spaces).each do |floor|
-      floor_ufactor = self.get_surface_ufactor(runner: runner,
-                                               surface: floor,
-                                               surface_type: floor.surfaceType,
-                                               register_error: true)
+    Geometry.get_thermal_zone_interzonal_floors_and_ceilings(building: building, thermal_zone: thermal_zone).each do |framefloor_values|
+      floor_ufactor = 1.0 / framefloor_values[:insulation_assembly_r_value] # TODO
+
       return nil if floor_ufactor.nil?
 
-      adjacent_space = floor.adjacentSurface.get.space.get
-      zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-      zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      adjacent_thermal_zone = framefloor_values[:exterior_adjacent_to]
+      zone_loads.Cool_Floors += floor_ufactor * framefloor_values[:area] * (@cool_design_temps[adjacent_thermal_zone] - @cool_setpoint)
+      zone_loads.Heat_Floors += floor_ufactor * framefloor_values[:area] * (@heat_setpoint - @heat_design_temps[adjacent_thermal_zone])
     end
 
     # Foundation Floors
-    Geometry.get_spaces_below_grade_exterior_floors(spaces: thermal_zone.spaces).each do |floor|
+    Geometry.get_thermal_zone_below_grade_exterior_floors(building: building, thermal_zone: thermal_zone).each do |slab_values|
       # Conditioned basement floor combinations based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
+
       r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
-      z_f = -1 * (Geometry.getSurfaceZValues(surfaceArray: [floor]).min + UnitConversions.convert(floor.space.get.zOrigin, "m", "ft"))
-      w_b = [Geometry.getSurfaceXValues(surfaceArray: [floor]).max - Geometry.getSurfaceXValues(surfaceArray: [floor]).min, Geometry.getSurfaceYValues(surfaceArray: [floor]).max - Geometry.getSurfaceYValues(surfaceArray: [floor]).min].min
+      z_f = slab_values[:depth_below_grade]
+      w_b = 30.0 # TODO: this is min thickness of house?
       u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
       u_value_mj8 = 0.85 * u_avg_bf
-      zone_loads.Heat_Floors += u_value_mj8 * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * @htd
+      zone_loads.Heat_Floors += u_value_mj8 * slab_values[:area] * @htd
     end
 
     # Ground Floors (Slab)
-    Geometry.get_spaces_above_grade_ground_floors(spaces: thermal_zone.spaces).each do |floor|
+    Geometry.get_thermal_zone_above_grade_ground_floors(building: building, thermal_zone: thermal_zone).each do |slab_values|
       # Get stored u-factor since the surface u-factor is fictional
       # TODO: Revert this some day.
       # floor_ufactor = get_surface_ufactor(runner, floor, floor.surfaceType, true)
@@ -1218,7 +1203,7 @@ class HVACSizing
   end
 
   def self.process_infiltration_ventilation(runner:,
-                                            model:,
+                                            building:,
                                             thermal_zone:,
                                             zone_loads:,
                                             weather:)
@@ -1228,7 +1213,7 @@ class HVACSizing
 
     return nil if zone_loads.nil?
 
-    if Geometry.zone_is_below_grade(zone: thermal_zone)
+    if Geometry.thermal_zone_is_below_grade(building: building, thermal_zone: thermal_zone)
       zone_loads.Heat_Infil = 0 # TODO: Calculate using actual basement infiltration?
       zone_loads.Cool_Infil_Sens = 0
       zone_loads.Cool_Infil_Lat = 0
@@ -1238,7 +1223,7 @@ class HVACSizing
     # Stack Coefficient (Cs) for infiltration calculation taken from Table 5D
     # Wind Coefficient (Cw) for Shielding Classes 1-5 for infiltration calculation taken from Table 5D
     # Coefficients converted to regression equations to allow for more than 3 stories
-    zone_conditioned_top = Geometry.get_height_of_spaces(spaces: Geometry.get_conditioned_spaces(spaces: thermal_zone.spaces))
+    zone_conditioned_top = 8.0 * @ncfl_ag # TODO
     zone_top_story = (zone_conditioned_top / 8.0).round
     c_s = 0.015 * zone_top_story
     if @shelter_class == 1
@@ -1256,12 +1241,28 @@ class HVACSizing
       return nil
     end
 
-    ela = get_feature(runner: runner,
-                      obj: thermal_zone,
-                      feature: Constants.SizingInfoZoneInfiltrationELA,
-                      datatype: 'double',
-                      register_error: false)
-    ela = 0 if ela.nil?
+    infilvolume = nil
+    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
+      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
+      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
+    end
+    if infilvolume.nil?
+      infilvolume = @cvolume
+    end
+
+    infil_ach50 = nil
+    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
+      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
+      if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
+        infil_ach50 = air_infiltration_measurement_values[:air_leakage]
+      elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
+        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
+      end
+    end
+
+    n_i = 0.65
+    sla = Airflow.get_infiltration_SLA_from_ACH50(infil_ach50, n_i, @cfa, infilvolume)
+    ela = sla * @cfa # TODO
 
     ela_in2 = UnitConversions.convert(ela, "ft^2", "in^2")
     windspeed_cooling_mph = UnitConversions.convert(@windspeed_cooling, "m/s", "mph")
@@ -1270,8 +1271,7 @@ class HVACSizing
     icfm_Cooling = ela_in2 * (c_s * @ctd.abs + c_w * windspeed_cooling_mph**2)**0.5
     icfm_Heating = ela_in2 * (c_s * @htd.abs + c_w * windspeed_heating_mph**2)**0.5
 
-    q_unb, q_bal_Sens, q_bal_Lat = get_ventilation_rates(runner: runner,
-                                                         model: model)
+    q_unb, q_bal_Sens, q_bal_Lat = get_ventilation_rates(runner: runner, building: building)
     return nil if q_unb.nil? or q_bal_Sens.nil? or q_bal_Lat.nil?
 
     cfm_Heating = q_bal_Sens + (icfm_Heating**2 + q_unb**2)**0.5
@@ -1288,140 +1288,33 @@ class HVACSizing
   end
 
   def self.process_internal_gains(runner:,
+                                  building:,
                                   thermal_zone:,
                                   weather:)
     '''
     Cooling Load: Internal Gains
     '''
 
-    int_Tot_Max = 0
-    int_Lat_Max = 0
-
-    # Plug loads, appliances, showers/sinks/baths, occupants, ceiling fans
-    gains = []
-    thermal_zone.spaces.each do |space|
-      gains.push(*space.electricEquipment)
-      gains.push(*space.gasEquipment)
-      gains.push(*space.otherEquipment)
-    end
-
     july_1 = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('July'), 1, @model_year)
 
     int_Sens_Hr = [0] * 24
     int_Lat_Hr = [0] * 24
 
-    gains.each do |gain|
-      # TODO: The lines below are for equivalence with BEopt
-      next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterRecircPump)
+    # Plug loads, appliances, showers/sinks/baths, occupants, ceiling fans
 
-      sched = nil
-      sensible_frac = nil
-      latent_frac = nil
-      design_level = nil
+    clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
+    if not clothes_washer_values.nil?
+      annual_energy, sensible_frac, latent_frac, _ = HotWaterAndAppliances.calc_clothes_washer_energy_gpd(@eri_version, @nbeds, clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:label_electric_rate], clothes_washer_values[:label_gas_rate], clothes_washer_values[:label_annual_gas_cost], clothes_washer_values[:capacity])
+      sched_values = [0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017]
+      max_mult = 1.15 * 1.04
 
-      # Get design level
-      if gain.is_a? OpenStudio::Model::OtherEquipment
-        design_level_obj = gain.otherEquipmentDefinition
-      else
-        design_level_obj = gain
-      end
-      if not design_level_obj.designLevel.is_initialized
-        runner.registerWarning("DesignLevel not provided for object '#{gain.name.to_s}'. Skipping...")
-        next
-      end
-      design_level_w = design_level_obj.designLevel.get
-      design_level = UnitConversions.convert(design_level_w, "W", "Btu/hr") # Btu/hr
-      next if design_level == 0
-
-      # Get sensible/latent fractions
-      if gain.is_a? OpenStudio::Model::ElectricEquipment
-        sensible_frac = 1.0 - gain.electricEquipmentDefinition.fractionLost - gain.electricEquipmentDefinition.fractionLatent
-        latent_frac = gain.electricEquipmentDefinition.fractionLatent
-      elsif gain.is_a? OpenStudio::Model::GasEquipment
-        sensible_frac = 1.0 - gain.gasEquipmentDefinition.fractionLost - gain.gasEquipmentDefinition.fractionLatent
-        latent_frac = gain.gasEquipmentDefinition.fractionLatent
-      elsif gain.is_a? OpenStudio::Model::OtherEquipment
-        sensible_frac = 1.0 - gain.otherEquipmentDefinition.fractionLost - gain.otherEquipmentDefinition.fractionLatent
-        latent_frac = gain.otherEquipmentDefinition.fractionLatent
-      else
-        runner.registerError("Unexpected type for object '#{gain.name.to_s}' in process_internal_gains.")
-        return nil
-      end
-      next if sensible_frac.nil? or latent_frac.nil? or (sensible_frac == 0 and latent_frac == 0)
-
-      # Get schedule
-      if not gain.schedule.is_initialized
-        runner.registerError("Schedule not provided for object '#{gain.name.to_s}'. Skipping...")
-        next
-      end
-      sched_base = gain.schedule.get
-      if sched_base.to_ScheduleRuleset.is_initialized
-        sched = sched_base.to_ScheduleRuleset.get
-      elsif sched_base.to_ScheduleFixedInterval.is_initialized
-        sched = sched_base.to_ScheduleFixedInterval.get
-      elsif sched_base.to_ScheduleConstant.is_initialized
-        sched = sched_base.to_ScheduleConstant.get
-      else
-        runner.registerWarning("Expected type for object '#{gain.name.to_s}'. Skipping...")
-        next
-      end
-      next if sched.nil?
-
-      # Get schedule hourly values
-      if sched.is_a? OpenStudio::Model::ScheduleRuleset or sched.is_a? OpenStudio::Model::ScheduleFixedInterval
-        # Override any hot water schedules with smoothed schedules; TODO: Is there a better approach?
-        max_mult = nil
-        if gain.name.to_s.start_with?(Constants.ObjectNameShower)
-          sched_values = [0.011, 0.005, 0.003, 0.005, 0.014, 0.052, 0.118, 0.117, 0.095, 0.074, 0.060, 0.047, 0.034, 0.029, 0.026, 0.025, 0.030, 0.039, 0.042, 0.042, 0.042, 0.041, 0.029, 0.021]
-          max_mult = 1.05 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameSink) or gain.name.to_s.start_with?(Constants.ObjectNameFixtures)
-          sched_values = [0.014, 0.007, 0.005, 0.005, 0.007, 0.018, 0.042, 0.062, 0.066, 0.062, 0.054, 0.050, 0.049, 0.045, 0.043, 0.041, 0.048, 0.065, 0.075, 0.069, 0.057, 0.048, 0.040, 0.027]
-          max_mult = 1.04 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameBath)
-          sched_values = [0.008, 0.004, 0.004, 0.004, 0.008, 0.019, 0.046, 0.058, 0.066, 0.058, 0.046, 0.035, 0.031, 0.023, 0.023, 0.023, 0.039, 0.046, 0.077, 0.100, 0.100, 0.077, 0.066, 0.039]
-          max_mult = 1.26 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
-          sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
-          max_mult = 1.05 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameClothesWasher)
-          sched_values = [0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017]
-          max_mult = 1.15 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameClothesDryer)
-          sched_values = [0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024]
-          max_mult = 1.15 * 1.04
-        else
-          day_sched = sched.getDaySchedules(july_1, july_1)[0]
-          # Convert to 24 hour values
-          sched_values = []
-          previous_time_decimal = 0
-          day_sched.times.each_with_index do |time, i|
-            time_decimal = (time.days * 24.0) + time.hours + (time.minutes / 60.0) + (time.seconds / 3600.0)
-            # Back-fill in hourly values
-            for hr in sched_values.size + 1..time_decimal.floor
-              sched_values[hr - 1] = day_sched.values[i]
-            end
-          end
-        end
-        if not max_mult.nil?
-          # Calculate daily load
-          annual_energy = Schedule.annual_equivalent_full_load_hrs(@model_year, sched) * design_level_w * gain.multiplier # Wh
-          daily_load = UnitConversions.convert(annual_energy, "Wh", "Btu") / 365.0 # Btu/day
-          # Calculate design level in Btu/hr
-          design_level = sched_values.max * daily_load * max_mult # Btu/hr
-          # Normalize schedule values to be max=1 from sum=1
-          sched_values_max = sched_values.max
-          sched_values = sched_values.collect { |n| n / sched_values_max }
-        end
-      elsif sched.is_a? OpenStudio::Model::ScheduleConstant
-        sched_values = [sched.value] * 24
-      else
-        runner.registerError("Unexpected type for object '#{sched.name.to_s}' in process_internal_gains.")
-        return nil
-      end
-      if sched_values.size != 24
-        runner.registerError("Expected 24 schedule values for object '#{gain.name.to_s}' but found #{sched_values.size} values.")
-        return nil
-      end
+      # Calculate daily load
+      daily_load = UnitConversions.convert(annual_energy, "Wh", "Btu") / 365.0 # Btu/day
+      # Calculate design level in Btu/hr
+      design_level = sched_values.max * daily_load * max_mult # Btu/hr
+      # Normalize schedule values to be max=1 from sum=1
+      sched_values_max = sched_values.max
+      sched_values = sched_values.collect { |n| n / sched_values_max }
 
       for hr in 0..23
         int_Sens_Hr[hr] += sched_values[hr] * design_level * sensible_frac
@@ -1429,15 +1322,61 @@ class HVACSizing
       end
     end
 
+    clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
+    if not clothes_dryer_values.nil?
+      annual_energy, cd_annual_therm, sensible_frac, latent_frac = HotWaterAndAppliances.calc_clothes_dryer_energy(@nbeds, clothes_dryer_values[:fuel_type], clothes_dryer_values[:energy_factor], clothes_dryer_values[:control_type], clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:capacity], clothes_washer_values[:modified_energy_factor])
+      sched_values = [0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024]
+      max_mult = 1.15 * 1.04
+
+      # Calculate daily load
+      daily_load = UnitConversions.convert(annual_energy, "Wh", "Btu") / 365.0 # Btu/day
+      # Calculate design level in Btu/hr
+      design_level = sched_values.max * daily_load * max_mult # Btu/hr
+      # Normalize schedule values to be max=1 from sum=1
+      sched_values_max = sched_values.max
+      sched_values = sched_values.collect { |n| n / sched_values_max }
+
+      for hr in 0..23
+        int_Sens_Hr[hr] += sched_values[hr] * design_level * sensible_frac
+        int_Lat_Hr[hr] += sched_values[hr] * design_level * latent_frac
+      end
+    end
+
+    dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
+    if not dishwasher_values.nil?
+      # TODO
+    end
+
+    refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
+    if refrigerator_values.nil?
+      # TODO
+    end
+
+    cooking_range_values = HPXML.get_cooking_range_values(cooking_range: building.elements["BuildingDetails/Appliances/CookingRange"])
+    if not cooking_range_values.nil?
+      # TODO
+    end
+
+    oven_values = HPXML.get_oven_values(oven: building.elements["BuildingDetails/Appliances/Oven"])
+    if not oven_values.nil?
+      # TODO
+    end
+
+    # TODO: more?
+
     # Process occupants
     n_occupants = @nbeds + 1 # Number of occupants based on Section 22-3
     occ_sched = [1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189,
                  0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000]
-    thermal_zone.spaces.each do |space|
-      for hr in 0..23
-        int_Sens_Hr[hr] += occ_sched[hr] * 230 * n_occupants * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
-        int_Lat_Hr[hr] += occ_sched[hr] * 200 * n_occupants * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
-      end
+    area = 0
+    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+      slab_values = HPXML.get_slab_values(slab: slab)
+      area += slab_values[:area]
+    end # TODO
+
+    for hr in 0..23
+      int_Sens_Hr[hr] += occ_sched[hr] * 230 * n_occupants * area / @cfa
+      int_Lat_Hr[hr] += occ_sched[hr] * 200 * n_occupants * area / @cfa
     end
 
     return int_Sens_Hr, int_Lat_Hr
@@ -2487,15 +2426,24 @@ class HVACSizing
   end
 
   def self.get_ventilation_rates(runner:,
-                                 model:)
-    mechVentType = get_feature(runner: runner,
-                               obj: model.getBuilding,
-                               feature: Constants.SizingInfoMechVentType,
-                               datatype: 'string')
-    mechVentWholeHouseRate = get_feature(runner: runner,
-                                         obj: model.getBuilding,
-                                         feature: Constants.SizingInfoMechVentWholeHouseRate,
-                                         datatype: 'double')
+                                 building:)
+    whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
+    whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
+    mechVentType = Constants.VentTypeNone
+    mechVentWholeHouseRate = 0.0
+    if not whole_house_fan_values.nil?
+      fan_type = whole_house_fan_values[:fan_type]
+      if fan_type == "supply only"
+        mechVentType = Constants.VentTypeSupply
+      elsif fan_type == "exhaust only"
+        mechVentType = Constants.VentTypeExhaust
+      elsif fan_type == "central fan integrated supply"
+        mechVentType = Constants.VentTypeCFIS
+      elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
+        mechVentType = Constants.VentTypeBalanced
+      end
+      mechVentWholeHouseRate = whole_house_fan_values[:rated_flow_rate]
+    end
     return nil if mechVentType.nil? or mechVentWholeHouseRate.nil?
 
     q_unb = 0
@@ -2861,6 +2809,38 @@ class HVACSizing
     return ducts
   end
 
+  def self.get_ducts_for_equip(building:,
+                               equip:)
+    ductss = []
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
+      next if hvac_distribution_values[:id] != equip[:distribution_system_idref]
+
+      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
+      air_distribution.elements.each("Ducts") do |ducts|
+        ducts_values = HPXML.get_ducts_values(ducts: ducts)
+        ductss << ducts_values
+      end
+    end
+    return ductss
+  end
+
+  def self.get_duct_leakage_measurements_for_equip(building:,
+                                                   equip:)
+    duct_leakage_measurements = []
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
+      next if hvac_distribution_values[:id] != equip[:distribution_system_idref]
+
+      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
+      air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
+        duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
+        duct_leakage_measurements << duct_leakage_measurement_values
+      end
+    end
+    return duct_leakage_measurements
+  end
+
   def self.calc_ducts_area_weighted_average(ducts:,
                                             values:)
     '''
@@ -2941,22 +2921,37 @@ class HVACSizing
   end
 
   def self.get_hvacs(runner:,
-                     model:,
                      building:)
     hvacs = []
 
     # Get unique set of HVAC equipment
     equips = {}
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(spaces: @model_spaces)
-    control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
+    thermal_zones = Geometry.get_thermal_zones(building: building)
+    control_slave_zones_hash = HVAC.get_control_and_slave_thermal_zones(building: building, thermal_zones: thermal_zones)
 
     control_slave_zones_hash.keys.each do |control_zone|
-      HVAC.existing_equipment(model, runner, control_zone).each do |equip|
-        next if equips.keys.include? equip
-        next if equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
-
-        equips[equip] = control_zone
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+        heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
+        equips[heating_system_values] = control_zone
+        hvac = HVACInfo.new
+        hvac.HeatType = heating_system_values[:heating_system_type]
+        hvacs << hvac
+      end
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+        cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
+        equips[cooling_system_values] = control_zone
+        hvac = HVACInfo.new
+        hvac.CoolType = cooling_system_values[:cooling_system_type]
+        hvacs << hvac
+      end
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
+        heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
+        equips[heat_pump_values] = control_zone
+        hvac = HVACInfo.new
+        hvac.HeatType = heat_pump_values[:heat_pump_type]
+        hvac.CoolType = heat_pump_values[:heat_pump_type]
+        hvacs << hvac
       end
     end
 
@@ -2967,51 +2962,9 @@ class HVACSizing
 
       hvac.Objects = [equip]
 
-      clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
-
-      # Get type of heating/cooling system
-      hvac.CoolType = get_feature(runner: runner,
-                                  obj: equip,
-                                  feature: Constants.SizingInfoHVACCoolType,
-                                  datatype: 'string',
-                                  register_error: false)
-      if hvac.CoolType.nil? and not clg_coil.nil?
-        hvac.CoolType = get_feature(runner: runner,
-                                    obj: clg_coil,
-                                    feature: Constants.SizingInfoHVACCoolType,
-                                    datatype: 'string',
-                                    register_error: false)
-      end
-      hvac.HeatType = get_feature(runner: runner,
-                                  obj: equip,
-                                  feature: Constants.SizingInfoHVACHeatType,
-                                  datatype: 'string',
-                                  register_error: false)
-      if hvac.HeatType.nil? and not htg_coil.nil?
-        hvac.HeatType = get_feature(runner: runner,
-                                    obj: htg_coil,
-                                    feature: Constants.SizingInfoHVACHeatType,
-                                    datatype: 'string',
-                                    register_error: false)
-      end
-
       # Retrieve ducts if they exist
-      if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
-        air_loop = nil
-        control_zone.airLoopHVACs.each do |loop|
-          loop.supplyComponents.each do |supply_component|
-            next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
-            next unless supply_component.to_AirLoopHVACUnitarySystem.get.handle == equip.handle
-
-            air_loop = loop
-          end
-        end
-        if not air_loop.nil?
-          hvac.Ducts = get_ducts_for_air_loop(runner: runner,
-                                              air_loop: air_loop)
-          return nil if hvac.Ducts.nil?
-        end
-      end
+      hvac.Ducts = get_ducts_for_equip(building: building, equip: equip)
+      hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: equip)
 
       if not clg_coil.nil?
         ratedCFMperTonCooling = get_feature(runner: runner,
@@ -4637,7 +4590,8 @@ class HVACInfo
     return false
   end
 
-  attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
+  attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :DuctLeakageMeasurements,
+                :NumSpeedsCooling, :NumSpeedsHeating,
                 :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity,
                 :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
