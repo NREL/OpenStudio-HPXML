@@ -292,6 +292,7 @@ class EnergyPlusValidator
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
+        "SensibleHeatFraction" => zero_or_one,
       },
 
       ## [CoolingType=RoomAC]
@@ -318,6 +319,7 @@ class EnergyPlusValidator
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
+        "CoolingSensibleHeatFraction" => zero_or_one
       },
 
       ## [HeatPumpType=MSHP]

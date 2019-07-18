@@ -131,8 +131,11 @@ def create_hpxmls
     'base-hvac-boiler-oil-only.xml' => 'base.xml',
     'base-hvac-boiler-propane-only.xml' => 'base.xml',
     'base-hvac-central-ac-only-1-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-only-1-speed_shr.xml' => 'base.xml',
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-only-2-speed_shr.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-only-var-speed_shr.xml' => 'base.xml',
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
@@ -1444,8 +1447,11 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-air-to-air-heat-pump-var-speed.xml',
          'base-hvac-central-ac-only-1-speed.xml',
+         'base-hvac-central-ac-only-1-speed_shr.xml',
          'base-hvac-central-ac-only-2-speed.xml',
+         'base-hvac-central-ac-only-2-speed_shr.xml',
          'base-hvac-central-ac-only-var-speed.xml',
+         'base-hvac-central-ac-only-var-speed_shr.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
@@ -1614,14 +1620,24 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-wall-furnace-elec-only.xml',
          'base-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
     cooling_systems_values = []
+  elsif ['base-hvac-central-ac-only-1-speed_shr.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.73
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
   elsif ['base-hvac-furnace-gas-central-ac-2-speed.xml',
-         'base-hvac-central-ac-only-2-speed.xml'].include? hpxml_file
+         'base-hvac-central-ac-only-2-speed.xml',
+         'base-hvac-central-ac-only-2-speed_shr.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_efficiency_seer] = 18
+    if ['base-hvac-central-ac-only-2-speed_shr.xml'].include? hpxml_file
+      cooling_systems_values[0][:cooling_shr] = 0.73
+    end
   elsif ['base-hvac-furnace-gas-central-ac-var-speed.xml',
-         'base-hvac-central-ac-only-var-speed.xml'].include? hpxml_file
+         'base-hvac-central-ac-only-var-speed.xml',
+         'base-hvac-central-ac-only-var-speed_shr.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_efficiency_seer] = 24
+    if ['base-hvac-central-ac-only-var-speed_shr.xml'].include? hpxml_file
+      cooling_systems_values[0][:cooling_shr] = 0.78
+    end
   elsif ['base-hvac-furnace-gas-room-ac.xml',
          'base-hvac-room-ac-furnace-gas.xml',
          'base-hvac-room-ac-only.xml'].include? hpxml_file
