@@ -1224,8 +1224,8 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", Float(recovery_efficiency)) unless recovery_efficiency.nil?
     unless jacket_r_value.nil?
       water_heater_insulation = XMLHelper.add_element(water_heating_system, "WaterHeaterInsulation")
-      jaket = XMLHelper.add_element(water_heater_insulation, "Jacket")
-      XMLHelper.add_element(jaket, "JacketRValue", jacket_r_value)
+      jacket = XMLHelper.add_element(water_heater_insulation, "Jacket")
+      XMLHelper.add_element(jacket, "JacketRValue", jacket_r_value)
     end
     unless related_hvac.nil?
       related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
