@@ -100,9 +100,6 @@ class Airflow
     return false if not success
 
     if mech_vent.type == Constants.VentTypeCFIS
-      success = process_cfis(model, runner, mech_vent)
-      return false if not success
-
       cfis_program = create_cfis_objects(model, runner, building, mech_vent)
       return false if cfis_program.nil?
     end
@@ -609,7 +606,7 @@ class Airflow
     sensible_effectiveness = 0.0
     latent_effectiveness = 0.0
 
-    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_efficiency > 0 and mech_vent.whole_house_cfm > 0
+    if mech_vent.type == Constants.VentTypeBalanced and (mech_vent.sensible_efficiency > 0 or mech_vent.sensible_efficiency_adjusted > 0) and mech_vent.whole_house_cfm > 0
       # Must assume an operating condition (HVI seems to use CSA 439)
       t_sup_in = 0
       w_sup_in = 0.0028
@@ -620,12 +617,21 @@ class Airflow
 
       m_fan = UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s") * 16.02 * Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, "C", "F"), w_sup_in, 14.7) # kg/s
 
-      # The following is derived from (taken from CSA 439):
-      #    E_SHR = (m_sup,fan * Cp * (Tsup,out - Tsup,in) - P_sup,fan) / (m_exh,fan * Cp * (Texh,in - Tsup,in) + P_exh,fan)
-      t_sup_out = t_sup_in + (mech_vent.sensible_efficiency * (m_fan * cp_a * (t_exh_in - t_sup_in) + p_fan) + p_fan) / (m_fan * cp_a)
+      if mech_vent.sensible_efficiency > 0
+        # The following is derived from CSA 439, Clause 9.3.3.1, Eq. 12:
+        #    E_SHR = (m_sup,fan * Cp * (Tsup,out - Tsup,in) - P_sup,fan) / (m_exh,fan * Cp * (Texh,in - Tsup,in) + P_exh,fan)
+        t_sup_out = t_sup_in + (mech_vent.sensible_efficiency * (m_fan * cp_a * (t_exh_in - t_sup_in) + p_fan) + p_fan) / (m_fan * cp_a)
 
-      # Calculate the apparent sensible effectiveness
-      apparent_sensible_effectiveness = (t_sup_out - t_sup_in) / (t_exh_in - t_sup_in)
+        # Calculate the apparent sensible effectiveness
+        apparent_sensible_effectiveness = (t_sup_out - t_sup_in) / (t_exh_in - t_sup_in)
+
+      else
+        # The following is derived from (taken from CSA 439, Clause 9.2.1, Eq. 7):
+        t_sup_out = t_sup_in + (mech_vent.sensible_efficiency_adjusted * (t_exh_in - t_sup_in))
+
+        apparent_sensible_effectiveness = mech_vent.sensible_efficiency_adjusted
+
+      end
 
       # Calculate the supply temperature before the fan
       t_sup_out_gross = t_sup_out - p_fan / (m_fan * cp_a)
@@ -639,7 +645,7 @@ class Airflow
       end
 
       # Use summer test condition to determine the latent effectiveness since TRE is generally specified under the summer condition
-      if mech_vent.total_efficiency > 0
+      if (mech_vent.total_efficiency > 0 or mech_vent.total_efficiency_adjusted > 0)
 
         t_sup_in = 35.0
         w_sup_in = 0.0178
@@ -653,7 +659,15 @@ class Airflow
 
         h_sup_in = Psychrometrics.h_fT_w_SI(t_sup_in, w_sup_in)
         h_exh_in = Psychrometrics.h_fT_w_SI(t_exh_in, w_exh_in)
-        h_sup_out = h_sup_in - (mech_vent.total_efficiency * (m_fan * (h_sup_in - h_exh_in) + p_fan) + p_fan) / m_fan
+
+        if mech_vent.total_efficiency > 0
+          # The following is derived from CSA 439, Clause 9.3.3.2, Eq. 13:
+          #    E_THR = (m_sup,fan * Cp * (h_sup,out - h_sup,in) - P_sup,fan) / (m_exh,fan * Cp * (h_exh,in - h_sup,in) + P_exh,fan)
+          h_sup_out = h_sup_in - (mech_vent.total_efficiency * (m_fan * (h_sup_in - h_exh_in) + p_fan) + p_fan) / m_fan
+        else
+          # The following is derived from (taken from CSA 439, Clause 9.2.1, Eq. 7):
+          h_sup_out = h_sup_in - (mech_vent.total_efficiency_adjusted * (h_sup_in - h_exh_in))
+        end
 
         w_sup_out = Psychrometrics.w_fT_h_SI(t_sup_out, h_sup_out)
         latent_effectiveness = [0.0, (w_sup_out - w_sup_in) / (w_exh_in - w_sup_in)].max
@@ -690,20 +704,6 @@ class Airflow
     mech_vent.sensible_effectiveness = sensible_effectiveness
     mech_vent.dryer_exhaust_day_shift = dryer_exhaust_day_shift
     mech_vent.has_dryer = has_dryer
-
-    return true
-  end
-
-  def self.process_cfis(model, runner, mech_vent)
-    # Validate Inputs
-    if mech_vent.cfis_open_time < 0
-      runner.registerError("Mechanical Ventilation: CFIS minimum damper open time must be greater than or equal to 0.")
-      return false
-    end
-    if mech_vent.cfis_airflow_frac < 0 or mech_vent.cfis_airflow_frac > 1
-      runner.registerError("Mechanical Ventilation: CFIS blower airflow rate must be greater than or equal to 0 and less than or equal to 1.")
-      return false
-    end
 
     return true
   end
@@ -1544,6 +1544,11 @@ class Airflow
   end
 
   def self.create_cfis_objects(model, runner, building, mech_vent)
+    if mech_vent.cfis_airflow_frac < 0 or mech_vent.cfis_airflow_frac > 1
+      runner.registerError("Mechanical Ventilation: CFIS blower airflow rate must be greater than or equal to 0 and less than or equal to 1.")
+      return nil
+    end
+
     mech_vent.cfis_t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
     mech_vent.cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
     mech_vent.cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_f_damper_open") # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
@@ -2011,14 +2016,16 @@ class NaturalVentilation
 end
 
 class MechanicalVentilation
-  def initialize(type, total_efficiency, whole_house_cfm, fan_power_w, sensible_efficiency,
+  def initialize(type, total_efficiency, total_efficiency_adjusted, whole_house_cfm, fan_power_w, sensible_efficiency, sensible_efficiency_adjusted,
                  dryer_exhaust, range_exhaust, range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                  cfis_open_time, cfis_airflow_frac, cfis_air_loop)
     @type = type
     @total_efficiency = total_efficiency
+    @total_efficiency_adjusted = total_efficiency_adjusted
     @whole_house_cfm = whole_house_cfm
     @fan_power_w = fan_power_w
     @sensible_efficiency = sensible_efficiency
+    @sensible_efficiency_adjusted = sensible_efficiency_adjusted
     @dryer_exhaust = dryer_exhaust
     @range_exhaust = range_exhaust
     @range_exhaust_hour = range_exhaust_hour
@@ -2028,7 +2035,7 @@ class MechanicalVentilation
     @cfis_airflow_frac = cfis_airflow_frac
     @cfis_air_loop = cfis_air_loop
   end
-  attr_accessor(:type, :total_efficiency, :whole_house_cfm, :fan_power_w, :sensible_efficiency,
+  attr_accessor(:type, :total_efficiency, :total_efficiency_adjusted, :whole_house_cfm, :fan_power_w, :sensible_efficiency, :sensible_efficiency_adjusted,
                 :dryer_exhaust, :range_exhaust, :range_exhaust_hour, :bathroom_exhaust, :bathroom_exhaust_hour,
                 :cfis_open_time, :cfis_airflow_frac, :cfis_air_loop, :cfis_t_sum_open_var, :cfis_on_for_hour_var,
                 :cfis_f_damper_open_var, :cfis_fan_mfr_max_var, :cfis_fan_rtf_sensor, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
