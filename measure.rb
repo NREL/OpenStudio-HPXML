@@ -2219,7 +2219,12 @@ class OSModel
 
         if num_speeds == "1-Speed"
 
-          shrs = [0.73]
+          if heat_pump_values[:cooling_shr].nil?
+            shrs = [0.73]
+          else
+            shrs = [heat_pump_values[:cooling_shr]]
+          end
+
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
@@ -2232,7 +2237,12 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          shrs = [0.71, 0.724]
+          if heat_pump_values[:cooling_shr].nil?
+            shrs = [0.71, 0.724]
+          else
+            # FIXME: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages?
+            shrs = [heat_pump_values[:cooling_shr] - 0.014, heat_pump_values[:cooling_shr]]
+          end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
@@ -2245,7 +2255,12 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          shrs = [0.87, 0.80, 0.79, 0.78]
+          if heat_pump_values[:cooling_shr].nil?
+            shrs = [0.87, 0.80, 0.79, 0.78]
+          else
+            var_sp_shr_mult = [1.115, 1.026, 1.013, 1.0]
+            shrs = var_sp_shr_mult.map { |m| heat_pump_values[:cooling_shr] * m }
+          end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
