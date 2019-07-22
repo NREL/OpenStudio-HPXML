@@ -19,6 +19,69 @@ class Geometry
     return p
   end
 
+  def self.get_thermal_zones(building:)
+    thermal_zones = []
+    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
+      wall_values = HPXML.get_wall_values(wall: wall)
+      thermal_zones << wall_values[:interior_adjacent_to]
+    end
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
+      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
+      thermal_zones << foundation_wall_values[:interior_adjacent_to]
+    end
+    building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+      roof_values = HPXML.get_roof_values(roof: roof)
+      thermal_zones << roof_values[:interior_adjacent_to]
+    end
+    building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
+      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
+      thermal_zones << rim_joist_values[:interior_adjacent_to]
+    end
+    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+      thermal_zones << framefloor_values[:interior_adjacent_to]
+    end
+    building.elements.each("BuildingDetails/Enclosure/Slabs/S;an") do |slab|
+      slab_values = HPXML.get_slab_values(slab: slab)
+      thermal_zones << slab_values[:interior_adjacent_to]
+    end
+    return thermal_zones.uniq
+  end
+  
+  def self.get_model_thermal_zone(model:,
+                                  thermal_zone:)
+    model.getThermalZones.each do |zone|
+      if ( thermal_zone == "living space" and Geometry.is_living(zone) ) or
+         ( thermal_zone == "basement - conditioned" and Geometry.is_conditioned_basement(zone) ) or
+         ( thermal_zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(zone) ) or
+         ( thermal_zone == "crawlspace - vented" and Geometry.is_vented_crawl(zone) ) or
+         ( thermal_zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(zone) ) or
+         ( thermal_zone == "garage" and Geometry.is_garage(zone) ) or
+         ( thermal_zone == "attic - vented" and Geometry.is_vented_attic(zone) ) or
+         ( thermal_zone == "attic - unvented" and Geometry.is_unvented_attic(zone) )
+        return zone
+      end      
+    end
+  end
+  
+  def self.get_thermal_zone_floor_area(building:,
+                                       thermal_zone:)
+    floor_area = 0
+    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+      next if framefloor_values[:exterior_adjacent_to] != thermal_zone
+
+      floor_area += framefloor_values[:area]
+    end
+    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+      slab_values = HPXML.get_slab_values(slab: slab)
+      next if slab_values[:interior_adjacent_to] != thermal_zone
+
+      floor_area += slab_values[:area]
+    end
+    return floor_area
+  end
+
   def self.get_zone_volume(zone, runner = nil)
     if zone.isVolumeAutocalculated or not zone.volume.is_initialized
       # Calculate volume from spaces
@@ -60,6 +123,24 @@ class Geometry
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, "m", "ft")
     end
     return maxzs.max - minzs.min
+  end
+  
+  def self.get_height_of_thermal_zone(building:,
+                                      thermal_zone:)
+    heights = []
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
+      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
+      next if foundation_wall_values[:interior_adjacent_to] != thermal_zone
+
+      heights << foundation_wall_values[:height]
+    end
+    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
+      wall_values = HPXML.get_wall_values(wall: wall)
+      next if wall_values[:interior_adjacent_to] != thermal_zone
+
+      heights << 8
+    end
+    return heights.max
   end
 
   # Calculates the surface height as the max z coordinate minus the min z coordinate
@@ -262,6 +343,18 @@ class Geometry
       tilts << surface.tilt
     end
     return UnitConversions.convert(tilts.max, "rad", "deg")
+  end
+
+  def self.get_thermal_zone_roof_pitch(building:,
+                                       thermal_zone:)
+    pitches = []
+    building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+      roof_values = HPXML.get_roof_values(roof: roof)
+      next if roof_values[:interior_adjacent_to] != thermal_zone
+
+      pitches << roof_values[:pitch]
+    end
+    return pitches.max
   end
 
   # Checks if the surface is between conditioned and unconditioned space
