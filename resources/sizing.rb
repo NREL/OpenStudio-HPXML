@@ -18,7 +18,7 @@ class HVACSizing
                  eri_version:,
                  show_debug_info: false)
 
-    @model_spaces = model.getSpaces
+    # @model_spaces = model.getSpaces
     @cfa = cfa
     @nbeds = nbeds
     @ncfl_ag = ncfl_ag
@@ -1344,7 +1344,27 @@ class HVACSizing
 
     dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
     if not dishwasher_values.nil?
-      # TODO
+      dw_ef = dishwasher_values[:energy_factor]
+      if dishwasher_values[:energy_factor].nil?
+        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
+      end
+
+      annual_energy, sensible_frac, letent_frac, _ = HotWaterAndAppliances.calc_dishwasher_energy_gpd(@eri_version, @nbeds, dw_ef, dishwasher_values[:place_setting_capacity])
+      sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
+      max_mult = 1.05 * 1.04
+
+      # Calculate daily load
+      daily_load = UnitConversions.convert(annual_energy, "Wh", "Btu") / 365.0 # Btu/day
+      # Calculate design level in Btu/hr
+      design_level = sched_values.max * daily_load * max_mult # Btu/hr
+      # Normalize schedule values to be max=1 from sum=1
+      sched_values_max = sched_values.max
+      sched_values = sched_values.collect { |n| n / sched_values_max }
+
+      for hr in 0..23
+        int_Sens_Hr[hr] += sched_values[hr] * design_level * sensible_frac
+        int_Lat_Hr[hr] += sched_values[hr] * design_level * latent_frac
+      end
     end
 
     refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
@@ -1354,7 +1374,8 @@ class HVACSizing
 
     cooking_range_values = HPXML.get_cooking_range_values(cooking_range: building.elements["BuildingDetails/Appliances/CookingRange"])
     if not cooking_range_values.nil?
-      # TODO
+      # cook_annual_kwh, cook_annual_therm, cook_frac_sens, cook_frac_lat = self.calc_range_oven_energy(nbeds, cook_fuel_type, cook_is_induction, oven_is_convection)
+      # sched_values = [0.007, 0.007, 0.004, 0.004, 0.007, 0.011, 0.025, 0.042, 0.046, 0.048, 0.042, 0.050, 0.057, 0.046, 0.057, 0.044, 0.092, 0.150, 0.117, 0.060, 0.035, 0.025, 0.016, 0.011]
     end
 
     oven_values = HPXML.get_oven_values(oven: building.elements["BuildingDetails/Appliances/Oven"])
@@ -2965,6 +2986,8 @@ class HVACSizing
       # Retrieve ducts if they exist
       hvac.Ducts = get_ducts_for_equip(building: building, equip: equip)
       hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: equip)
+
+      # TODO
 
       if not clg_coil.nil?
         ratedCFMperTonCooling = get_feature(runner: runner,

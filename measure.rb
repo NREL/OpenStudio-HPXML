@@ -1977,7 +1977,7 @@ class OSModel
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
-                                                 @hvac_map, sys_id)
+                                                 @hvac_map, sys_id, clgsys) # set "additional properties" on hpxml clgsys (extension elements); allows us to avoid too much refactoring
           return false if not success
 
         elsif num_speeds == "2-Speed"

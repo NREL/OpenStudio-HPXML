@@ -4250,6 +4250,27 @@ class HVAC
     return control_slave_zones_hash
   end
 
+  def self.get_control_and_slave_thermal_zones(building:,
+                                               thermal_zones:)
+    control_slave_zones_hash = {}
+    conditioned_above_grade_zones, conditioned_below_grade_zones = Geometry.get_conditioned_above_and_below_grade_thermal_zones(building: building, thermal_zones: thermal_zones)
+    control_zone = nil
+    slave_zones = []
+    [conditioned_above_grade_zones, conditioned_below_grade_zones].each do |conditioned_zones| # Preference to above-grade zone as control zone
+      conditioned_zones.each do |conditioned_zone|
+        if control_zone.nil?
+          control_zone = conditioned_zone
+        else
+          slave_zones << conditioned_zone
+        end
+      end
+    end
+    unless control_zone.nil?
+      control_slave_zones_hash[control_zone] = slave_zones
+    end
+    return control_slave_zones_hash
+  end
+
   def self.existing_equipment(model, runner, thermal_zone)
     # Returns a list of equipment objects
 
