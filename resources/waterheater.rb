@@ -120,7 +120,7 @@ class Waterheater
   end
 
   def self.apply_heatpump(model, runner, space, weather, t_set, vol, ef,
-                          ec_adj, nbeds, dhw_map, sys_id)
+                          ec_adj, nbeds, dhw_map, sys_id, jacket_r)
 
     # FIXME: Use ec_adj
 
@@ -228,6 +228,17 @@ class Waterheater
     pi = Math::PI
     r_tank = (UnitConversions.convert(v_actual, "gal", "m^3") / (pi * h_tank))**0.5
     a_tank = 2 * pi * r_tank * (r_tank + h_tank)
+
+    # water heater wrap calculation based on:
+    # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
+    # Authors:  Ben Polly and Jay Burch (NREL)
+    if not jacket_r.nil?
+      a_side = 2 * pi * UnitConversions.convert(r_tank, "m", "ft") * UnitConversions.convert(h_tank, "m", "ft") # sqft
+      skin_insulation_t = 2.0 # inch
+      skin_insulation_R = 5.0 # R5
+      u_pre_skin = 1 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
+      tank_ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side
+    end
     u_tank = (5.678 * tank_ua) / UnitConversions.convert(a_tank, "m^2", "ft^2")
 
     h_UE = (1 - (3.5 / 12)) * h_tank # in the 3rd node of the tank (counting from top)
@@ -917,16 +928,24 @@ class Waterheater
       a_top = pi * (diameter / 12)**2 / 4 # sqft
       a_side = pi * (diameter / 12) * (height / 12) # sqft
       surface_area = 2 * a_top + a_side # sqft
-
+      skin_insulation_R = 5.0 # R5
       if fuel != Constants.FuelTypeElectric
         ua = (re / ef - 1) / ((t - t_env) * (24 / q_load - 1 / (1000 * (pow) * ef))) # Btu/hr-F
         eta_c = (re + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
-        u_pre_skin = 1 / 5.8 # Btu/hr-ft^2-F
+        if ef < 0.7
+          skin_insulation_t = 1.0 # inch
+        else
+          skin_insulation_t = 2.0 # inch
+        end
       else # is Electric
         ua = q_load * (1 / ef - 1) / ((t - t_env) * 24)
         eta_c = 1.0
-        u_pre_skin = 1 / 10.8 # hr-ft^2-F/Btu
+        skin_insulation_t = 2.0 # inch
       end
+      # water heater wrap calculation based on:
+      # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
+      # Authors:  Ben Polly and Jay Burch (NREL)
+      u_pre_skin = 1 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
       ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side unless jacket_r.nil?
     end
     u = ua / surface_area # Btu/hr-ft^2-F
