@@ -658,7 +658,7 @@ class Waterheater
     return true
   end
 
-  def self.apply_indirect(model, runner, fuel_type, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
+  def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
     obj_name_indirect = Constants.ObjectNameWaterHeater
     # Validate inputs
     if vol <= 0
@@ -687,8 +687,9 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create an initial simple tank model by calling create_new_heater
-    assumed_ef = get_indirect_assumed_ef()
-    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, assumed_ef, 0, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+    assumed_ef = get_indirect_assumed_ef_for_tank_losses()
+    assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
+    new_tank = create_new_heater(obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
     new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
@@ -897,8 +898,14 @@ class Waterheater
     return 120.0
   end
 
-  def self.get_indirect_assumed_ef()
+  def self.get_indirect_assumed_ef_for_tank_losses()
+    # assumed ef used only for ua calculation
     return 0.95
+  end
+
+  def self.get_indirect_assumed_fuel_for_tank_losses()
+    # assumed fuel type used only for ua calculation
+    return Constants.FuelTypeElectric
   end
 
   def self.get_combi_system_fuel(idref, orig_details)

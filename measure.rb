@@ -1913,8 +1913,6 @@ class OSModel
           else
             tank_vol = water_heating_system_values[:tank_volume]
           end
-          # Fuel type and EF are only used to estimate indirect tank losses
-          fuel_type = Constants.FuelTypeElectric
           heating_source_id = water_heating_system_values[:related_hvac]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
@@ -1926,7 +1924,7 @@ class OSModel
           capacity_kbtuh = 0.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_indirect(model, runner, fuel_type, space, capacity_kbtuh,
+          success = Waterheater.apply_indirect(model, runner, space, capacity_kbtuh,
                                                tank_vol, setpoint_temp, oncycle_power,
                                                offcycle_power, ec_adj, @nbeds, boiler_sys['plant_loop'], @dhw_map, sys_id, wh_type)
           return false if not success
@@ -3842,11 +3840,11 @@ class OutputVars
     return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
   end
 
-  def self.WaterHeatingHeatExchanger
+  def self.WaterHeatingCombiBoilerHeatExchanger
     return { 'OpenStudio::Model::HeatExchangerFluidToFluid' => ['Fluid Heat Exchanger Heat Transfer Energy'] }
   end
 
-  def self.WaterHeatingIndirectBoiler
+  def self.WaterHeatingCombiBoiler
     return { 'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
   end
 
