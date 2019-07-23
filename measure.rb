@@ -327,7 +327,7 @@ class OSModel
     success = add_airflow(runner, model, building, spaces)
     return false if not success
 
-    success = add_hvac_sizing(runner, model, weather)
+    success = add_hvac_sizing(runner, model, building, weather)
     return false if not success
 
     success = add_fuel_heating_eae(runner, model, building)
@@ -1984,7 +1984,7 @@ class OSModel
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
-                                                 @hvac_map, sys_id)
+                                                 @hvac_map, sys_id, clgsys)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -1995,7 +1995,7 @@ class OSModel
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
-                                                 @hvac_map, sys_id)
+                                                 @hvac_map, sys_id, clgsys)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2006,7 +2006,7 @@ class OSModel
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, dse_cool, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
-                                                 @hvac_map, sys_id)
+                                                 @hvac_map, sys_id, clgsys)
           return false if not success
 
         else
@@ -2023,7 +2023,7 @@ class OSModel
         success = HVAC.apply_room_ac(model, runner, eer, shr,
                                      airflow_rate, cool_capacity_btuh, load_frac,
                                      sequential_load_frac, @control_slave_zones_hash,
-                                     @hvac_map, sys_id)
+                                     @hvac_map, sys_id, clgsys)
         return false if not success
 
       end
@@ -2076,7 +2076,7 @@ class OSModel
                                        heat_capacity_btuh, fan_power, dse_heat,
                                        load_frac, sequential_load_frac,
                                        attached_clg_system, @control_slave_zones_hash,
-                                       @hvac_map, sys_id)
+                                       @hvac_map, sys_id, htgsys)
           return false if not success
 
         elsif htg_type == "WallFurnace"
@@ -2199,7 +2199,7 @@ class OSModel
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_slave_zones_hash, @hvac_map, sys_id)
+                                                   @control_slave_zones_hash, @hvac_map, sys_id, hp)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2212,7 +2212,7 @@ class OSModel
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_slave_zones_hash, @hvac_map, sys_id)
+                                                   @control_slave_zones_hash, @hvac_map, sys_id, hp)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2225,7 +2225,7 @@ class OSModel
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_slave_zones_hash, @hvac_map, sys_id)
+                                                   @control_slave_zones_hash, @hvac_map, sys_id, hp)
           return false if not success
 
         else
@@ -2885,8 +2885,12 @@ class OSModel
     return true
   end
 
-  def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, @min_neighbor_distance, false)
+  def self.add_hvac_sizing(runner, model, building, weather)
+    return true if @use_only_ideal_air
+
+    show_debug_info = false
+
+    success = HVACSizing.apply(model: model, runner: runner, building: building, weather: weather, cfa: @cfa, nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag, cvolume: @cvolume, azimuth: @default_azimuth, eri_version: @eri_version, show_debug_info: show_debug_info)
     return false if not success
 
     return true
