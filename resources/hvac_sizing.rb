@@ -2723,10 +2723,10 @@ class HVACSizing
         hvac.HeatingLoadFraction = heating_system_values[:fraction_heat_load_served]
         return nil if hvac.HeatingLoadFraction.nil?
         hvac.FixedHeatingCapacity = UnitConversions.convert(heating_system_values[:heating_capacity], "Btu/hr", "ton")
-        hvac.NumSpeedsHeating = heating_system.elements["extension/NumSpeedsHeating"].text.to_f
+        hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text)
         hvac.Ducts = get_ducts_for_equip(building: building, equip: heating_system_values)
         hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: heating_system_values)
-        hvac.DSEHeat = heating_system.elements["extension/DSEHeat"].text.to_f unless heating_system.elements["extension/DSEHeat"].nil?
+        hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)
         
         hvacs << hvac
       end
@@ -2740,10 +2740,10 @@ class HVACSizing
         return nil if hvac.CoolingLoadFraction.nil?
         hvac.CoolingCFMs = cooling_system.elements["extension/CoolingCFMs"].split(",").map(&:to_f) unless cooling_system.elements["extension/CoolingCFMs"].nil?
         hvac.COOL_CAP_FT_SPEC = [[1, 1, 1, 1, 1, 1]] # TODO
-        hvac.SHRRated = [cooling_system.elements["extension/SHRRated"].text.to_f] unless cooling_system.elements["extension/SHRRated"].nil?
+        hvac.SHRRated = [Float(cooling_system.elements["extension/SHRRated"].text)] unless cooling_system.elements["extension/SHRRated"].nil?
         # hvac.FanspeedRatioCooling # TODO
         hvac.FixedCoolingCapacity = UnitConversions.convert(cooling_system_values[:cooling_capacity], "Btu/hr", "ton")
-        hvac.NumSpeedsCooling = cooling_system.elements["extension/NumSpeedsCooling"].text.to_f
+        hvac.NumSpeedsCooling = Float(cooling_system.elements["extension/NumSpeedsCooling"].text)
         if hvac.NumSpeedsCooling == 2
           hvac.OverSizeLimit = 1.2
         else
@@ -2752,7 +2752,7 @@ class HVACSizing
         hvac.CapacityRatioCooling = cooling_system.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CapacityRatioCooling"].nil?
         hvac.Ducts = get_ducts_for_equip(building: building, equip: cooling_system_values)
         hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: cooling_system_values)
-        hvac.DSECool = cooling_system.elements["extension/DSECool"].text.to_f unless cooling_system.elements["extension/DSECool"].nil?
+        dse_heat, hvac.DSECool, has_dse = OSModel.get_dse(building, cooling_system_values)
 
         hvacs << hvac
       end
@@ -2784,12 +2784,11 @@ class HVACSizing
         # hvac.HPSizedForMaxLoad
         hvac.FixedHeatingCapacity = UnitConversions.convert(heat_pump_values[:heating_capacity], "Btu/hr", "ton")
         hvac.FixedCoolingCapacity = UnitConversions.convert(heat_pump_values[:cooling_capacity], "Btu/hr", "ton")
-        hvac.NumSpeedsHeating = heat_pump.elements["extension/NumSpeedsHeating"].text.to_f
-        hvac.NumSpeedsCooling = heat_pump.elements["extension/NumSpeedsCooling"].text.to_f
+        hvac.NumSpeedsHeating = Float(heat_pump.elements["extension/NumSpeedsHeating"].text)
+        hvac.NumSpeedsCooling = Float(heat_pump.elements["extension/NumSpeedsCooling"].text)
         hvac.Ducts = get_ducts_for_equip(building: building, equip: heat_pump_values)
         hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: heat_pump_values)
-        hvac.DSEHeat = heat_pump.elements["extension/DSEHeat"].text.to_f unless heat_pump.elements["extension/DSEHeat"].nil?
-        hvac.DSECool = heat_pump.elements["extension/DSECool"].text.to_f unless heat_pump.elements["extension/DSECool"].nil?
+        hvac.DSEHeat, hvac.DSECool, has_dse = get_dse(building, heat_pump_values)
 
         hvacs << hvac
       end

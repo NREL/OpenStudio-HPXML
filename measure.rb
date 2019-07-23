@@ -2105,7 +2105,7 @@ class OSModel
                                       oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                                       heat_capacity_btuh, design_temp, dse_heat, load_frac,
                                       sequential_load_frac, @control_slave_zones_hash,
-                                      @hvac_map, sys_id)
+                                      @hvac_map, sys_id, htgsys)
           return false if not success
 
         elsif htg_type == "ElectricResistance"
@@ -2114,7 +2114,7 @@ class OSModel
           success = HVAC.apply_electric_baseboard(model, runner, efficiency,
                                                   heat_capacity_btuh, load_frac,
                                                   sequential_load_frac, @control_slave_zones_hash,
-                                                  @hvac_map, sys_id)
+                                                  @hvac_map, sys_id, htgsys)
           return false if not success
 
         elsif htg_type == "Stove"
@@ -2126,7 +2126,7 @@ class OSModel
                                            efficiency, heat_capacity_btuh, fan_power,
                                            airflow_rate, load_frac,
                                            sequential_load_frac, @control_slave_zones_hash,
-                                           @hvac_map, sys_id)
+                                           @hvac_map, sys_id, htgsys)
           return false if not success
 
         end
