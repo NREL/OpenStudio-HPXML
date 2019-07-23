@@ -10,14 +10,6 @@ class MiscLoads
     return true if misc_kwh + tv_kwh == 0
 
     # check for valid inputs
-    if misc_kwh < 0
-      runner.registerError("Misc annual energy use must be greater than or equal to 0.")
-      return false
-    end
-    if tv_kwh < 0
-      runner.registerError("TV annual energy use must be greater than or equal to 0.")
-      return false
-    end
     if sens_frac < 0 or sens_frac > 1
       runner.registerError("Sensible fraction must be greater than or equal to 0 and less than or equal to 1.")
       return false

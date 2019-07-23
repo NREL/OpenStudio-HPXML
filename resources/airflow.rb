@@ -100,9 +100,6 @@ class Airflow
     return false if not success
 
     if mech_vent.type == Constants.VentTypeCFIS
-      success = process_cfis(model, runner, mech_vent)
-      return false if not success
-
       cfis_program = create_cfis_objects(model, runner, building, mech_vent)
       return false if cfis_program.nil?
     end
@@ -707,20 +704,6 @@ class Airflow
     mech_vent.sensible_effectiveness = sensible_effectiveness
     mech_vent.dryer_exhaust_day_shift = dryer_exhaust_day_shift
     mech_vent.has_dryer = has_dryer
-
-    return true
-  end
-
-  def self.process_cfis(model, runner, mech_vent)
-    # Validate Inputs
-    if mech_vent.cfis_open_time < 0
-      runner.registerError("Mechanical Ventilation: CFIS minimum damper open time must be greater than or equal to 0.")
-      return false
-    end
-    if mech_vent.cfis_airflow_frac < 0 or mech_vent.cfis_airflow_frac > 1
-      runner.registerError("Mechanical Ventilation: CFIS blower airflow rate must be greater than or equal to 0 and less than or equal to 1.")
-      return false
-    end
 
     return true
   end
@@ -1561,6 +1544,11 @@ class Airflow
   end
 
   def self.create_cfis_objects(model, runner, building, mech_vent)
+    if mech_vent.cfis_airflow_frac < 0 or mech_vent.cfis_airflow_frac > 1
+      runner.registerError("Mechanical Ventilation: CFIS blower airflow rate must be greater than or equal to 0 and less than or equal to 1.")
+      return nil
+    end
+
     mech_vent.cfis_t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
     mech_vent.cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
     mech_vent.cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_f_damper_open") # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
