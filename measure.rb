@@ -2977,8 +2977,8 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
-                       OutputVars.WaterHeatingHeatExchanger,
-                       OutputVars.WaterHeatingIndirectBoiler,
+                       OutputVars.WaterHeatingCombiBoilerHeatExchanger,
+                       OutputVars.WaterHeatingCombiBoiler,
                        OutputVars.WaterHeatingFuel,
                        OutputVars.WaterHeatingLoad]
 
