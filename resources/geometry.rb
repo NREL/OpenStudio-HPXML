@@ -132,13 +132,17 @@ class Geometry
       foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
       next if foundation_wall_values[:interior_adjacent_to] != thermal_zone
 
-      heights << foundation_wall_values[:height]
+      height = foundation_wall_values[:height]
+      if building.elements["BuildingDetails/Enclosure/RimJoists/RimJoist"]
+        height += 1.0
+      end
+      heights << height
     end
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
       wall_values = HPXML.get_wall_values(wall: wall)
       next if wall_values[:interior_adjacent_to] != thermal_zone
 
-      heights << 8
+      heights << 8.0
     end
     return heights.max
   end
