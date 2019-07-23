@@ -9,14 +9,6 @@ class Constants
     return 76.0
   end
 
-  def self.DefaultFramingFactorCeiling
-    return 0.11
-  end
-
-  def self.DefaultFramingFactorFloor
-    return 0.13
-  end
-
   def self.DefaultFramingFactorInterior
     return 0.16
   end
@@ -69,46 +61,6 @@ class Constants
 
   def self.ColorDark
     return 'dark'
-  end
-
-  def self.CoordRelative
-    return 'relative'
-  end
-
-  def self.CoordAbsolute
-    return 'absolute'
-  end
-
-  def self.BAZoneCold
-    return 'Cold'
-  end
-
-  def self.BAZoneHotDry
-    return 'Hot-Dry'
-  end
-
-  def self.BAZoneSubarctic
-    return 'Subarctic'
-  end
-
-  def self.BAZoneHotHumid
-    return 'Hot-Humid'
-  end
-
-  def self.BAZoneMixedHumid
-    return 'Mixed-Humid'
-  end
-
-  def self.BAZoneMixedDry
-    return 'Mixed-Dry'
-  end
-
-  def self.BAZoneMarine
-    return 'Marine'
-  end
-
-  def self.BAZoneVeryCold
-    return 'Very Cold'
   end
 
   def self.BoilerTypeCondensing
@@ -179,46 +131,6 @@ class Constants
     return 'Standard'
   end
 
-  def self.CeilingFanControlTypical
-    return 'typical'
-  end
-
-  def self.CeilingFanControlSmart
-    return 'smart'
-  end
-
-  def self.ClothesDryerCEF
-    return __method__.to_s
-  end
-
-  def self.ClothesDryerMult
-    return __method__.to_s
-  end
-
-  def self.ClothesDryerFuelType
-    return __method__.to_s
-  end
-
-  def self.ClothesDryerFuelSplit
-    return __method__.to_s
-  end
-
-  def self.ClothesWasherDrumVolume
-    return __method__.to_s
-  end
-
-  def self.ClothesWasherIMEF
-    return __method__.to_s
-  end
-
-  def self.ClothesWasherRatedAnnualEnergy
-    return __method__.to_s
-  end
-
-  def self.ClothesWasherDayShift
-    return __method__.to_s
-  end
-
   def self.DuctSideReturn
     return 'return'
   end
@@ -245,10 +157,6 @@ class Constants
 
   def self.FacadeRight
     return 'right'
-  end
-
-  def self.FacadeNone
-    return 'none'
   end
 
   def self.FluidWater
@@ -287,18 +195,6 @@ class Constants
     return 'pellets'
   end
 
-  def self.LocationInterior
-    return 'interior'
-  end
-
-  def self.LocationExterior
-    return 'exterior'
-  end
-
-  def self.MaterialCopper
-    return 'copper'
-  end
-
   def self.MaterialGypcrete
     return 'crete'
   end
@@ -309,10 +205,6 @@ class Constants
 
   def self.MaterialOSB
     return 'osb'
-  end
-
-  def self.MaterialPEX
-    return 'pex'
   end
 
   def self.MonthNames
@@ -349,22 +241,6 @@ class Constants
 
   def self.PVModuleTypeThinFilm
     return 'ThinFilm'
-  end
-
-  def self.PVNetMeteringExcessRetailElectricityCost
-    return 'retail electricity cost'
-  end
-
-  def self.PVNetMeteringExcessUserSpecified
-    return 'user-specified'
-  end
-
-  def self.PVTypeFeedInTariff
-    return 'Feed-In Tariff'
-  end
-
-  def self.PVTypeNetMetering
-    return 'Net Metering'
   end
 
   def self.ObjectNameAirflow
@@ -421,13 +297,6 @@ class Constants
 
   def self.ObjectNameDishwasher
     return "dishwasher"
-  end
-
-  def self.ObjectNameEaves(facade = "")
-    if facade != ""
-      facade = " #{facade}"
-    end
-    return "eaves#{facade}"
   end
 
   def self.ObjectNameElectricBaseboard
@@ -494,26 +363,16 @@ class Constants
     return "natural vent"
   end
 
-  def self.ObjectNameNeighbors(facade = "")
-    if facade != ""
-      facade = " #{facade}"
-    end
-    return "neighbors#{facade}"
+  def self.ObjectNameNeighbors
+    return "neighbors"
   end
 
   def self.ObjectNameOccupants
     return "occupants"
   end
 
-  def self.ObjectNameOverhangs(facade = "")
-    if facade != ""
-      facade = " #{facade}"
-    end
-    return "overhangs#{facade}"
-  end
-
-  def self.ObjectNamePhotovoltaics
-    return "photovoltaics"
+  def self.ObjectNameOverhangs
+    return "overhangs"
   end
 
   def self.ObjectNameRefrigerator
@@ -550,30 +409,6 @@ class Constants
 
   def self.ObjectNameTankHX
     return "dhw source hx"
-  end
-
-  def self.OptionTypeLightingFractions
-    return 'Lamp Fractions'
-  end
-
-  def self.OptionTypeLightingEnergyUses
-    return 'Annual Energy Uses'
-  end
-
-  def self.OptionTypePlugLoadsMultiplier
-    return 'Multiplier'
-  end
-
-  def self.OptionTypePlugLoadsEnergyUse
-    return 'Annual Energy Use'
-  end
-
-  def self.PipeTypeTrunkBranch
-    return 'trunk and branch'
-  end
-
-  def self.PipeTypeHomeRun
-    return 'home run'
   end
 
   def self.PlantLoopDomesticWater
@@ -624,26 +459,6 @@ class Constants
     return 'wood shakes'
   end
 
-  def self.RoofStructureRafter
-    return 'rafter'
-  end
-
-  def self.RoofStructureTrussCantilever
-    return 'truss, cantilever'
-  end
-
-  def self.RoofTypeFlat
-    return 'flat'
-  end
-
-  def self.RoofTypeGable
-    return 'gable'
-  end
-
-  def self.RoofTypeHip
-    return 'hip'
-  end
-
   def self.ScheduleTypeLimitsFraction
     return 'Fractional'
   end
@@ -681,6 +496,14 @@ class Constants
   end
 
   def self.SizingInfoCMUWallFurringInsRvalue
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACDSECool
+    return __method__.to_s
+  end
+
+  def self.SizingInfoHVACDSEHeat
     return __method__.to_s
   end
 
@@ -761,14 +584,6 @@ class Constants
   end
 
   def self.SizingInfoHPSizedForMaxLoad
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACCapacityDerateFactorCOP
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACCapacityDerateFactorEER
     return __method__.to_s
   end
 
@@ -868,10 +683,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoWindowHasOverhang
-    return __method__.to_s
-  end
-
   def self.SizingInfoWindowOverhangDepth
     return __method__.to_s
   end
@@ -938,14 +749,6 @@ class Constants
 
   def self.TerrainCity
     return 'city'
-  end
-
-  def self.TiltPitch
-    return 'pitch'
-  end
-
-  def self.TiltLatitude
-    return 'latitude'
   end
 
   def self.VentTypeExhaust

@@ -269,8 +269,8 @@
             <DistributionSystemType>
               <Other>DSE</Other>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>0.75</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>0.75</AnnualCoolingDistributionSystemEfficiency>
+            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
+            <AnnualCoolingDistributionSystemEfficiency>0.7</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

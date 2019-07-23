@@ -11,40 +11,10 @@ class Waterheater
   def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
                       re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
 
-    # Validate inputs
-    if vol <= 0
-      runner.registerError("Storage tank volume must be greater than 0.")
-      return false
-    end
-    if ef >= 1 or ef <= 0
-      runner.registerError("Rated energy factor must be greater than 0 and less than 1.")
-      return false
-    end
-    if t_set <= 0 or t_set >= 212
-      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
-      return false
-    end
-    if cap <= 0
-      runner.registerError("Nominal capacity must be greater than 0.")
-      return false
-    end
     if fuel_type == Constants.FuelTypeElectric
       re = 0.98 # recovery efficiency set by fiat
       oncycle_p = 0
       offcycle_p = 0
-    else
-      if re < 0 or re > 1
-        runner.registerError("Recovery efficiency must be at least 0 and at most 1.")
-        return false
-      end
-      if oncycle_p < 0
-        runner.registerError("Forced draft fan power must be greater than 0.")
-        return false
-      end
-      if offcycle_p < 0
-        runner.registerError("Parasitic electricity power must be greater than 0.")
-        return false
-      end
     end
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
@@ -69,19 +39,6 @@ class Waterheater
   def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
                           cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
 
-    # Validate inputs
-    if ef > 1 or ef <= 0
-      runner.registerError("Rated energy factor must be greater than 0 and less than or equal to 1.")
-      return false
-    end
-    if t_set <= 0 or t_set >= 212
-      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
-      return false
-    end
-    if cap <= 0
-      runner.registerError("Nominal capacity must be greater than 0.")
-      return false
-    end
     if cd < 0 or cd > 1
       runner.registerError("Cycling derate must be at least 0 and at most 1.")
       return false
@@ -89,15 +46,6 @@ class Waterheater
     if fuel_type == Constants.FuelTypeElectric
       oncycle_p = 0
       offcycle_p = 0
-    else
-      if oncycle_p < 0
-        runner.registerError("Forced draft fan power must be greater than 0.")
-        return false
-      end
-      if offcycle_p < 0
-        runner.registerError("Parasitic electricity power must be greater than 0.")
-        return false
-      end
     end
 
     runner.registerInfo("A new plant loop for DHW will be added to the model")
@@ -146,60 +94,6 @@ class Waterheater
     airflow_rate = 181.0 # cfm
     fan_power = 0.0462 # FIXME
     parasitics = 3.0 # W
-
-    # Validate inputs
-    if vol <= 0.0
-      runner.registerError("Storage tank volume must be greater than 0.")
-      return false
-    end
-    if t_set <= 0.0 or t_set >= 212.0
-      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
-      return false
-    end
-    if e_cap < 0.0
-      runner.registerError("Element capacity must be greater than 0.")
-      return false
-    end
-    if min_temp >= 80.0
-      runner.registerError("Minimum temperature will prevent HPWH from running, double check inputs.")
-      return false
-    end
-    if max_temp <= 0.0
-      runner.registerError("Maximum temperature will prevent HPWH from running, double check inputs.")
-      return false
-    end
-    if cap <= 0.0
-      runner.registerError("Rated capacity must be greater than 0.")
-      return false
-    end
-    if shr < 0.0 or shr > 1.0
-      runner.registerError("Rated sensible heat ratio must be between 0 and 1.")
-      return false
-    end
-    if airflow_rate <= 0.0
-      runner.registerError("Airflow rate must be greater than 0.")
-      return false
-    end
-    if fan_power <= 0.0
-      runner.registerError("Fan power must be greater than 0.")
-      return false
-    end
-    if parasitics < 0.0
-      runner.registerError("Parasitics must be greater than 0.")
-      return false
-    end
-    if tank_ua <= 0.0
-      runner.registerError("Tank UA must be greater than 0.")
-      return false
-    end
-    if int_factor < 0.0 or int_factor > 1.0
-      runner.registerError("Interaction factor must be between 0 and 1.")
-      return false
-    end
-    if temp_depress < 0.0
-      runner.registerError("Temperature depression must be greater than 0.")
-      return false
-    end
 
     # Calculate the COP based on EF
     uef = (0.60522 + ef) / 1.2101
@@ -305,6 +199,7 @@ class Waterheater
     hpwh.setControlSensor1HeightInStratifiedTank(h_hpctrl_up)
     hpwh.setControlSensor1Weight(0.75)
     hpwh.setControlSensor2HeightInStratifiedTank(h_hpctrl_low)
+    dhw_map[sys_id] << hpwh
 
     # Curves
     hpwh_cap = OpenStudio::Model::CurveBiquadratic.new(model)
@@ -660,15 +555,6 @@ class Waterheater
 
   def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type)
     obj_name_indirect = Constants.ObjectNameWaterHeater
-    # Validate inputs
-    if vol <= 0
-      runner.registerError("Indirect tank volume must be greater than 0.")
-      return false
-    end
-    if t_set <= 0 or t_set >= 212
-      runner.registerError("Hot water temperature must be greater than 0 and less than 212.")
-      return false
-    end
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
@@ -791,32 +677,6 @@ class Waterheater
     hx.setControlType("OperationSchemeModulated")
 
     return hx
-  end
-
-  def self.get_location_hierarchy(ba_cz_name)
-    if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
-      return [Constants.SpaceTypeGarage,
-              Constants.SpaceTypeLiving,
-              Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnventedCrawl,
-              Constants.SpaceTypeVentedCrawl,
-              Constants.SpaceTypeUnventedAttic,
-              Constants.SpaceTypeVentedAttic]
-
-    elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-      return [Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnconditionedBasement,
-              Constants.SpaceTypeLiving,
-              Constants.SpaceTypeUnventedCrawl,
-              Constants.SpaceTypeVentedCrawl,
-              Constants.SpaceTypeUnventedAttic,
-              Constants.SpaceTypeVentedAttic]
-    elsif ba_cz_name.nil?
-      return [Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnconditionedBasement,
-              Constants.SpaceTypeGarage,
-              Constants.SpaceTypeLiving]
-    end
   end
 
   def self.calc_water_heater_capacity(fuel, num_beds, num_baths = nil)
@@ -1121,60 +981,5 @@ class Waterheater
     out_pipe.addToNode(loop.supplyOutletNode)
 
     return loop
-  end
-
-  def self.get_water_heater(model, plant_loop, runner)
-    plant_loop.supplyComponents.each do |wh|
-      if wh.to_WaterHeaterMixed.is_initialized
-        return wh.to_WaterHeaterMixed.get
-      elsif wh.to_WaterHeaterStratified.is_initialized
-        waterHeater = wh.to_WaterHeaterStratified.get
-        # Look for attached HPWH
-        model.getWaterHeaterHeatPumpWrappedCondensers.each do |hpwh|
-          next if not hpwh.tank.to_WaterHeaterStratified.is_initialized
-          next if hpwh.tank.to_WaterHeaterStratified.get != waterHeater
-
-          return hpwh
-        end
-      end
-    end
-    runner.registerError("No water heater found; add a residential water heater first.")
-    return nil
-  end
-
-  def self.get_water_heater_setpoint(model, plant_loop, runner)
-    waterHeater = get_water_heater(model, plant_loop, runner)
-    if waterHeater.is_a? OpenStudio::Model::WaterHeaterMixed
-      if waterHeater.setpointTemperatureSchedule.nil?
-        runner.registerError("Water heater found without a setpoint temperature schedule.")
-        return nil
-      end
-      return UnitConversions.convert(waterHeater.setpointTemperatureSchedule.get.to_ScheduleConstant.get.value - waterHeater.deadbandTemperatureDifference / 2.0, "C", "F")
-    elsif waterHeater.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
-      if waterHeater.compressorSetpointTemperatureSchedule.nil?
-        runner.registerError("Heat pump water heater found without a setpoint temperature schedule.")
-        return nil
-      end
-      return UnitConversions.convert(waterHeater.compressorSetpointTemperatureSchedule.to_ScheduleConstant.get.value, "C", "F")
-    end
-    return nil
-  end
-
-  def self.get_water_heater_setpoint_schedule(model, plant_loop, runner)
-    waterHeater = get_water_heater(model, plant_loop, runner)
-    if waterHeater.is_a? OpenStudio::Model::WaterHeaterMixed
-      if waterHeater.setpointTemperatureSchedule.nil?
-        runner.registerError("Water heater found without a setpoint temperature schedule.")
-        return nil
-      end
-      return waterHeater.setpointTemperatureSchedule.get
-    elsif waterHeater.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
-      if waterHeater.compressorSetpointTemperatureSchedule.nil?
-        runner.registerError("Heat pump water heater found without a setpoint temperature schedule.")
-        return nil
-      end
-      return waterHeater.compressorSetpointTemperatureSchedule
-    end
-    return nil
   end
 end
