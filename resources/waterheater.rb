@@ -688,7 +688,7 @@ class Waterheater
 
     # Create an initial simple tank model by calling create_new_heater
     assumed_ef = get_indirect_assumed_ef_for_tank_losses()
-	assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
+    assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
     new_tank = create_new_heater(obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
     new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
@@ -902,7 +902,7 @@ class Waterheater
     # assumed ef used only for ua calculation
     return 0.95
   end
-  
+
   def self.get_indirect_assumed_fuel_for_tank_losses()
     # assumed fuel type used only for ua calculation
     return Constants.FuelTypeElectric

@@ -3836,11 +3836,11 @@ class OutputVars
     return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
   end
 
-  def self.WaterHeatingHeatExchanger
+  def self.WaterHeatingCombiBoilerHeatExchanger
     return { 'OpenStudio::Model::HeatExchangerFluidToFluid' => ['Fluid Heat Exchanger Heat Transfer Energy'] }
   end
 
-  def self.WaterHeatingIndirectBoiler
+  def self.WaterHeatingCombiBoiler
     return { 'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
   end
 
