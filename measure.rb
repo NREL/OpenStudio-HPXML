@@ -2088,7 +2088,7 @@ class OSModel
                                            afue, heat_capacity_btuh, fan_power,
                                            airflow_rate, load_frac,
                                            sequential_load_frac, @control_slave_zones_hash,
-                                           @hvac_map, sys_id)
+                                           @hvac_map, sys_id, htgsys)
           return false if not success
 
         elsif htg_type == "Boiler"
@@ -2265,7 +2265,7 @@ class OSModel
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
                                   dse_heat, dse_cool, load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
-                                  @control_slave_zones_hash, @hvac_map, sys_id)
+                                  @control_slave_zones_hash, @hvac_map, sys_id, hp)
         return false if not success
 
       elsif hp_type == "ground-to-air"
@@ -2301,7 +2301,7 @@ class OSModel
                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
-                                  @control_slave_zones_hash, @hvac_map, sys_id)
+                                  @control_slave_zones_hash, @hvac_map, sys_id, hp)
         return false if not success
 
       end
@@ -2888,7 +2888,7 @@ class OSModel
   def self.add_hvac_sizing(runner, model, building, weather)
     return true if @use_only_ideal_air
 
-    show_debug_info = false
+    show_debug_info = true
 
     success = HVACSizing.apply(model: model, runner: runner, building: building, weather: weather, cfa: @cfa, nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag, cvolume: @cvolume, azimuth: @default_azimuth, eri_version: @eri_version, show_debug_info: show_debug_info)
     return false if not success

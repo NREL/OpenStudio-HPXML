@@ -127,8 +127,11 @@ class HVAC
       HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
+      HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameCentralAirConditioner})
       HPXML.add_extension(parent: clgsys, extensions: {"NumSpeedsCooling": 1})
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      HPXML.add_extension(parent: clgsys, extensions: {"DSECool": dse_cool})
+      HPXML.add_extension(parent: clgsys, extensions: {"SHRRated": clg_coil.ratedSensibleHeatRatio.get})
     end # control_zone
 
     return true
@@ -256,13 +259,16 @@ class HVAC
       end # slave_zone
 
       # Store info for HVAC Sizing measure
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      HPXML.add_extension(parent: clgsys, extension: {"CapacityRatioCooling": capacity_ratios.join(",")})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(","))
       HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
+      HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameCentralAirConditioner})
       HPXML.add_extension(parent: clgsys, extensions: {"NumSpeedsCooling": 2})
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      HPXML.add_extension(parent: clgsys, extensions: {"DSECool": dse_cool})
     end # control_zone
 
     return true
@@ -395,13 +401,16 @@ class HVAC
       end # slave_zone
 
       # Store info for HVAC Sizing measure
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      HPXML.add_extension(parent: clgsys, extensions: {"CapacityRatioCooling": capacity_ratios.join(",")})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated.join(","))
       HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
+      HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameCentralAirConditioner})
       HPXML.add_extension(parent: clgsys, extensions: {"NumSpeedsCooling": 4})
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      HPXML.add_extension(parent: clgsys, extensions: {"DSECool": dse_cool})
     end # control_zone
 
     return true
@@ -582,10 +591,14 @@ class HVAC
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
+      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameAirSourceHeatPump})
+      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameAirSourceHeatPump})
       HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHeating": 1})
       HPXML.add_extension(parent: hp, extensions: {"NumSpeedsCooling": 1})
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      HPXML.add_extension(parent: hp, extensions: {"DSECool": dse_cool})
+      HPXML.add_extension(parent: hp, extensions: {"DSEHeat": dse_heat})
     end # control_zone
 
     return true
@@ -597,7 +610,7 @@ class HVAC
                                      supplemental_capacity, dse_heat, dse_cool,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
-                                     control_slave_zones_hash, hvac_map, sys_id)
+                                     control_slave_zones_hash, hvac_map, sys_id, hp)
 
     num_speeds = 2
     fan_power_rated = get_fan_power_rated(seer)
@@ -757,8 +770,10 @@ class HVAC
       end # slave_zone
 
       # Store info for HVAC Sizing measure
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios.join(","))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios.join(","))
+      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioHeating": capacity_ratios.join(",")})
+      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioCooling": capacity_ratios.join(",")})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, cfms_ton_rated_heating.join(","))
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated_cooling.join(","))
       HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonHeating": cfms_ton_rated_heating.join(",")})
@@ -769,10 +784,14 @@ class HVAC
       HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
+      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameAirSourceHeatPump})
+      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameAirSourceHeatPump})
       HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHeating": 2})
       HPXML.add_extension(parent: hp, extensions: {"NumSpeedsCooling": 2})
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      HPXML.add_extension(parent: hp, extensions: {"DSECool": dse_cool})
+      HPXML.add_extension(parent: hp, extensions: {"DSEHeat": dse_heat})
     end # control_zone
 
     return true
@@ -784,7 +803,7 @@ class HVAC
                                      supplemental_capacity, dse_heat, dse_cool,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
-                                     control_slave_zones_hash, hvac_map, sys_id)
+                                     control_slave_zones_hash, hvac_map, sys_id, hp)
 
     num_speeds = 4
     fan_power_rated = get_fan_power_rated(seer)
@@ -947,8 +966,10 @@ class HVAC
       end # slave_zone
 
       # Store info for HVAC Sizing measure
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating.join(","))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling.join(","))
+      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioHeating": capacity_ratios_heating.join(",")})
+      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioCooling": capacity_ratios_cooling.join(",")})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, cfms_ton_rated_heating.join(","))
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated_cooling.join(","))
       HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonHeating": cfms_ton_rated_heating.join(",")})
@@ -958,11 +979,14 @@ class HVAC
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
       HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
       # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
-      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHetaing": 4})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameAirSourceHeatPump})
+      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameAirSourceHeatPump})
+      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHeating": 4})
       HPXML.add_extension(parent: hp, extensions: {"NumSpeedsCooling": 4})
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      HPXML.add_extension(parent: hp, extensions: {"DSECool": dse_cool})
+      HPXML.add_extension(parent: hp, extensions: {"DSEHeat": dse_heat})
     end # control_zone
 
     return true
@@ -978,7 +1002,7 @@ class HVAC
                       heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
                       dse_heat, dse_cool, frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
-                      control_slave_zones_hash, hvac_map, sys_id)
+                      control_slave_zones_hash, hvac_map, sys_id, hp)
 
     num_speeds = 10
 
@@ -1240,19 +1264,30 @@ class HVAC
         shrs_rated_4 << shrs_rated[mshp_index]
       end
       air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating_4.join(","))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling_4.join(","))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, cfms_heating_4.join(","))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, cfms_cooling_4.join(","))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCapacityOffset, heating_capacity_offset)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, shrs_rated_4.join(","))
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating_4.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling_4.join(","))
+      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioHeating": capacity_ratios_heating_4.join(",")})
+      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioCooling": capacity_ratios_cooling_4.join(",")})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, cfms_heating_4.join(","))
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, cfms_cooling_4.join(","))
+      HPXML.add_extension(parent: hp, extensions: {"HeatingCFMs": cfms_heating_4.join(",")})
+      HPXML.add_extension(parent: hp, extensions: {"CoolingCFMs": cfms_cooling_4.join(",")})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCapacityOffset, heating_capacity_offset)
+      HPXML.add_extension(parent: hp, extensions: {"HeatingCapacityOffset": heating_capacity_offset})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
+      HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, shrs_rated_4.join(","))
+      HPXML.add_extension(parent: hp, extensions: {"SHRRated": shrs_rated_4.join(",")})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
+      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameMiniSplitHeatPump})
+      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameMiniSplitHeatPump})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      HPXML.add_extension(parent: hp, extensions: {"DSECool": dse_cool})
+      HPXML.add_extension(parent: hp, extensions: {"DSEHeat": dse_heat})
     end # control_zone
 
     return true
@@ -1269,7 +1304,7 @@ class HVAC
                       supplemental_capacity, dse_heat, dse_cool,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
-                      control_slave_zones_hash, hvac_map, sys_id)
+                      control_slave_zones_hash, hvac_map, sys_id, hp)
 
     if frac_glycol == 0
       fluid_type = Constants.FluidWater
@@ -1512,10 +1547,14 @@ class HVAC
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPBoreDepth, bore_depth)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPBoreConfig, bore_config)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPUTubeSpacingType, u_tube_spacing_type)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
+      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameGroundSourceHeatPump})
+      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameGroundSourceHeatPump})
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSECool, dse_cool)
+      # air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+      HPXML.add_extension(parent: hp, extensions: {"DSECool": dse_cool})
+      HPXML.add_extension(parent: hp, extensions: {"DSEHeat": dse_heat})
     end # control_zone
 
     return true
@@ -1593,6 +1632,7 @@ class HVAC
         HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
         # ptac.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
         # ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
+        HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameRoomAirConditioner})
         if not other_ptac.nil?
           other_ptac.additionalProperties.setFeature(Constants.SizingInfoHVACOtherZoneObject, ptac.handle.to_s)
         end
@@ -1780,8 +1820,10 @@ class HVAC
 
         # attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
         # attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
+        HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameFurnace})
         HPXML.add_extension(parent: htgsys, extensions: {"NumSpeedsHeating": 1})
-        attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+        # attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACDSEHeat, dse_heat)
+        HPXML.add_extension(parent: htgsys, extensions: {"DSEHeat": dse_heat})
       end
     end
 
@@ -1996,7 +2038,7 @@ class HVAC
                              efficiency, capacity, fan_power,
                              airflow_rate, frac_heat_load_served,
                              sequential_heat_load_frac, control_slave_zones_hash,
-                             hvac_map, sys_id)
+                             hvac_map, sys_id, htgsys)
 
     if fan_power > 0 and airflow_rate == 0
       runner.registerError("If Fan Power > 0, then Airflow Rate cannot be zero.")
@@ -2067,9 +2109,10 @@ class HVAC
 
         # Store info for HVAC Sizing measure
         # unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, airflow_rate.to_s)
-        HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonHeating": airflow_rate.to_s})
+        HPXML.add_extension(parent: htgsys, extensions: {"RatedCFMperTonHeating": airflow_rate.to_s})
         # unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
         # unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameUnitHeater)
+        HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameUnitHeater})
         if not other_system.nil?
           other_system.additionalProperties.setFeature(Constants.SizingInfoHVACOtherZoneObject, unitary_system.handle.to_s)
         end

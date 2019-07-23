@@ -631,7 +631,7 @@ class HVACSizing
     afl_hr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     Geometry.get_thermal_zone_above_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |wall_values|
-      wall_true_azimuth = 0.0 # TODO
+      wall_true_azimuth = @north_axis
       unless wall_values[:azimuth].nil?
         wall_true_azimuth = wall_values[:azimuth]
       end
@@ -2716,47 +2716,52 @@ class HVACSizing
     control_slave_zones_hash.keys.each do |control_zone|
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
         heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
+
         hvac = HVACInfo.new
-        hvac.HeatType = heating_system_values[:heating_system_type]
-        unless heating_system.elements["extension/RatedCFMperTonHeating"].nil?
-          hvac.RatedCFMperTonHeating = heating_system.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f)
-        end
+        hvac.HeatType = heating_system.elements["extension/HeatType"].text
+        hvac.RatedCFMperTonHeating = heating_system.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f) unless heating_system.elements["extension/RatedCFMperTonHeating"].nil?
         hvac.HeatingLoadFraction = heating_system_values[:fraction_heat_load_served]
         return nil if hvac.HeatingLoadFraction.nil?
-        hvac.FixedHeatingCapacity = UnitConversions.convert(heating_system_values[:heating_capacity], "W", "ton")
-        hvac.NumSpeedsHeating = heating_system.elements["extension/NumSpeedsHeating"].text
+        hvac.FixedHeatingCapacity = UnitConversions.convert(heating_system_values[:heating_capacity], "Btu/hr", "ton")
+        hvac.NumSpeedsHeating = heating_system.elements["extension/NumSpeedsHeating"].text.to_f
         hvac.Ducts = get_ducts_for_equip(building: building, equip: heating_system_values)
         hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: heating_system_values)
+        hvac.DSEHeat = heating_system.elements["extension/DSEHeat"].text.to_f unless heating_system.elements["extension/DSEHeat"].nil?
+        
         hvacs << hvac
       end
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
         cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
+
         hvac = HVACInfo.new
-        hvac.CoolType = cooling_system_values[:cooling_system_type]
-        unless cooling_system.elements["extension/RatedCFMperTonCooling"].nil?
-          hvac.RatedCFMperTonCooling = cooling_system.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f)
-        end
+        hvac.CoolType = cooling_system.elements["extension/CoolType"].text
+        hvac.RatedCFMperTonCooling = cooling_system.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/RatedCFMperTonCooling"].nil?
         hvac.CoolingLoadFraction = cooling_system_values[:fraction_cool_load_served]
         return nil if hvac.CoolingLoadFraction.nil?
-        unless cooling_system.elements["extension/CoolingCFMs"].nil?
-          hvac.CoolingCFMs = cooling_system.elements["extension/CoolingCFMs"].split(",").map(&:to_f)
-        end
-        hvac.FixedCoolingCapacity = UnitConversions.convert(cooling_system_values[:cooling_capacity], "W", "ton")
-        hvac.NumSpeedsCooling = cooling_system.elements["extension/NumSpeedsCooling"].text
+        hvac.CoolingCFMs = cooling_system.elements["extension/CoolingCFMs"].split(",").map(&:to_f) unless cooling_system.elements["extension/CoolingCFMs"].nil?
+        hvac.COOL_CAP_FT_SPEC = [[1, 1, 1, 1, 1, 1]] # TODO
+        hvac.SHRRated = [cooling_system.elements["extension/SHRRated"].text.to_f] unless cooling_system.elements["extension/SHRRated"].nil?
+        # hvac.FanspeedRatioCooling # TODO
+        hvac.FixedCoolingCapacity = UnitConversions.convert(cooling_system_values[:cooling_capacity], "Btu/hr", "ton")
+        hvac.NumSpeedsCooling = cooling_system.elements["extension/NumSpeedsCooling"].text.to_f
         if hvac.NumSpeedsCooling == 2
           hvac.OverSizeLimit = 1.2
         else
           hvac.OverSizeLimit = 1.3
         end
+        hvac.CapacityRatioCooling = cooling_system.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CapacityRatioCooling"].nil?
         hvac.Ducts = get_ducts_for_equip(building: building, equip: cooling_system_values)
         hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: cooling_system_values)
+        hvac.DSECool = cooling_system.elements["extension/DSECool"].text.to_f unless cooling_system.elements["extension/DSECool"].nil?
+
         hvacs << hvac
       end
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
         heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
+
         hvac = HVACInfo.new
-        hvac.HeatType = heat_pump_values[:heat_pump_type]
-        hvac.CoolType = heat_pump_values[:heat_pump_type]
+        hvac.HeatType = heat_pump.elements["extension/HeatType"].text
+        hvac.CoolType = heat_pump.elements["extension/CoolType"].text
         unless heat_pump.elements["extension/RatedCFMperTonCooling"].nil?
           hvac.RatedCFMperTonCooling = heat_pump.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f)
         end
@@ -2767,16 +2772,30 @@ class HVACSizing
         return nil if hvac.CoolingLoadFraction.nil?
         hvac.HeatingLoadFraction = heat_pump_values[:fraction_heat_load_served]
         return nil if hvac.HeatingLoadFraction.nil?
-        hvac.FixedHeatingCapacity = UnitConversions.convert(heat_pump_values[:heating_capacity], "W", "ton")
-        hvac.FixedCoolingCapacity = UnitConversions.convert(heat_pump_values[:cooling_capacity], "W", "ton")
-        hvac.NumSpeedsHeating = heat_pump.elements["extension/NumSpeedsHeating"].text
-        hvac.NumSpeedsCooling = heat_pump.elements["extension/NumSpeedsCooling"].text
+        hvac.HeatingCFMs = heat_pump.elements["extension/HeatingCFMs"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/HeatingCFMs"].nil?
+        # hvac.COIL_BF_FT_SPEC
+        # hvac.CoilBF
+        # hvac.CoolingEIR
+        # hvac.GSHP_BoreSpacing
+        # hvac.GSHP_BoreHoles
+        # hvac.GSHP_BoreDepth
+        # hvac.GSHP_BoreConfig
+        # hvac.GSHP_SpacingType
+        # hvac.HPSizedForMaxLoad
+        hvac.FixedHeatingCapacity = UnitConversions.convert(heat_pump_values[:heating_capacity], "Btu/hr", "ton")
+        hvac.FixedCoolingCapacity = UnitConversions.convert(heat_pump_values[:cooling_capacity], "Btu/hr", "ton")
+        hvac.NumSpeedsHeating = heat_pump.elements["extension/NumSpeedsHeating"].text.to_f
+        hvac.NumSpeedsCooling = heat_pump.elements["extension/NumSpeedsCooling"].text.to_f
         hvac.Ducts = get_ducts_for_equip(building: building, equip: heat_pump_values)
         hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: heat_pump_values)
+        hvac.DSEHeat = heat_pump.elements["extension/DSEHeat"].text.to_f unless heat_pump.elements["extension/DSEHeat"].nil?
+        hvac.DSECool = heat_pump.elements["extension/DSECool"].text.to_f unless heat_pump.elements["extension/DSECool"].nil?
+
         hvacs << hvac
       end
     end
 
+    # TODO: not sure how to handle the following
     # Populate other zone objects (e.g., in a conditioned basement) related to a given HVAC object
     # hvacs.each do |hvac|
     #   hvac.Objects.each do |object|
@@ -3862,7 +3881,7 @@ class HVACSizing
   def self.display_zone_loads(runner, zone_loads)
     zone_loads.keys.each do |thermal_zone|
       loads = zone_loads[thermal_zone]
-      s = "Zone Loads for #{thermal_zone.name.to_s}:"
+      s = "Zone Loads for #{thermal_zone}:"
       properties = [
         :Heat_Windows, :Heat_Skylights,
         :Heat_Doors, :Heat_Walls,
@@ -3877,7 +3896,8 @@ class HVACSizing
       properties.each do |property|
         s += "\n#{property.to_s.gsub("_", " ")} = #{loads.send(property).round(0).to_s} Btu/hr"
       end
-      runner.registerInfo("#{s}\n")
+      # runner.registerInfo("#{s}\n")
+      puts "#{s}\n"
     end
   end
 
@@ -3904,7 +3924,8 @@ class HVACSizing
     airflows.each do |airflow|
       s += "\n#{airflow.to_s.gsub("_", " ")} = #{hvac_final_values.send(airflow).round(0).to_s} cfm"
     end
-    runner.registerInfo("#{s}\n")
+    # runner.registerInfo("#{s}\n")
+    puts "#{s}\n"
   end
 end
 
