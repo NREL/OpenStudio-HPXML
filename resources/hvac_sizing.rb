@@ -75,7 +75,7 @@ class HVACSizing
     return false if init_loads.nil?
 
     # For airloop systems serving multiple zones, calculate air flow ratio to slave zones
-    zone_ratios = process_slave_zone_flow_ratios(runner, zones_loads)
+    zone_ratios = process_slave_zone_flow_ratios(runner, model, zones_loads)
     return false if zone_ratios.nil?
 
     # Get HVAC system info
@@ -2230,7 +2230,7 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_slave_zone_flow_ratios(runner, zones_loads)
+  def self.process_slave_zone_flow_ratios(runner, model, zones_loads)
     '''
     Flow Ratios for Slave Zones
     '''
@@ -2254,7 +2254,8 @@ class HVACSizing
     zone_ratios = {}
     total = 0.0
     zones_loads.each do |thermal_zone, zone_loads|
-      next if Geometry.is_living(thermal_zone)
+      model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
+      next if Geometry.is_living(model_zone)
 
       zone_ratios[thermal_zone] = zone_heat_loads[thermal_zone] / sum_heat_loads
       # Use a minimum flow ratio of 1%. (Low flow ratios can be calculated, e.g., for buildings
@@ -2264,7 +2265,8 @@ class HVACSizing
     end
 
     zones_loads.each do |thermal_zone, zone_loads|
-      next if not Geometry.is_living(thermal_zone)
+      model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
+      next if not Geometry.is_living(model_zone)
 
       zone_ratios[thermal_zone] = 1.0 - total
       total += zone_ratios[thermal_zone]
@@ -2711,7 +2713,8 @@ class HVACSizing
     hvac.HeatType = heating_system.elements["extension/HeatType"].text
     hvac.RatedCFMperTonHeating = heating_system.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f) unless heating_system.elements["extension/RatedCFMperTonHeating"].nil?
     hvac.HeatingLoadFraction = heating_system_values[:fraction_heat_load_served]
-    hvac.FixedHeatingCapacity = UnitConversions.convert(heating_system_values[:heating_capacity], "Btu/hr", "ton")
+    hvac.FixedHeatingCapacity = heating_system_values[:heating_capacity]
+    hvac.FixedHeatingCapacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "Btu/hr", "ton") unless hvac.FixedHeatingCapacity.nil?
     hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text) unless heating_system.elements["extension/NumSpeedsHeating"].nil?
     hvac.BoilerDesignTemp = Float(heating_system.elements["extension/BoilerDesignTemp"].text) unless heating_system.elements["extension/BoilerDesignTemp"].nil?
     hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)    
@@ -2733,11 +2736,15 @@ class HVACSizing
     hvac.CoolType = cooling_system.elements["extension/CoolType"].text
     hvac.RatedCFMperTonCooling = cooling_system.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/RatedCFMperTonCooling"].nil?
     hvac.CoolingLoadFraction = cooling_system_values[:fraction_cool_load_served]
-    hvac.CoolingCFMs = cooling_system.elements["extension/CoolingCFMs"].split(",").map(&:to_f) unless cooling_system.elements["extension/CoolingCFMs"].nil?
-    hvac.COOL_CAP_FT_SPEC = [[1, 1, 1, 1, 1, 1]] # TODO
-    hvac.SHRRated = [Float(cooling_system.elements["extension/SHRRated"].text)] unless cooling_system.elements["extension/SHRRated"].nil?
-    hvac.FanspeedRatioCooling = cooling_system.elements["extension/FanspeedRatioCooling"].split(",").map(&:to_f) unless cooling_system.elements["extension/FanspeedRatioCooling"].nil?
-    hvac.FixedCoolingCapacity = UnitConversions.convert(cooling_system_values[:cooling_capacity], "Btu/hr", "ton")
+    hvac.CoolingCFMs = cooling_system.elements["extension/CoolingCFMs"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CoolingCFMs"].nil?
+    hvac.COOL_CAP_FT_SPEC = cooling_system.elements["extension/COOL_CAP_FT_SPEC"].text.split(";") unless cooling_system.elements["extension/COOL_CAP_FT_SPEC"].nil?
+    hvac.COOL_CAP_FT_SPEC.each_with_index do |curve, i|
+      hvac.COOL_CAP_FT_SPEC[i] = hvac.COOL_CAP_FT_SPEC[i].split(",").map(&:to_f)
+    end
+    hvac.SHRRated = cooling_system.elements["extension/SHRRated"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/SHRRated"].nil?
+    hvac.FanspeedRatioCooling = cooling_system.elements["extension/FanspeedRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/FanspeedRatioCooling"].nil?
+    hvac.FixedCoolingCapacity = cooling_system_values[:cooling_capacity]
+    hvac.FixedCoolingCapacity = UnitConversions.convert(hvac.FixedCoolingCapacity, "Btu/hr", "ton") unless hvac.FixedCoolingCapacity.nil?
     hvac.NumSpeedsCooling = Float(cooling_system.elements["extension/NumSpeedsCooling"].text) unless cooling_system.elements["extension/NumSpeedsCooling"].nil?
     if hvac.NumSpeedsCooling == 2
       hvac.OverSizeLimit = 1.2
@@ -2768,7 +2775,14 @@ class HVACSizing
     hvac.CoolingLoadFraction = heat_pump_values[:fraction_cool_load_served]
     hvac.HeatingLoadFraction = heat_pump_values[:fraction_heat_load_served]
     hvac.HeatingCFMs = heat_pump.elements["extension/HeatingCFMs"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/HeatingCFMs"].nil?    
-    hvac.COOL_CAP_FT_SPEC = [heat_pump.elements["extension/COOL_CAP_FT_SPEC"].text.split(",").map(&:to_f)] unless heat_pump.elements["extension/COOL_CAP_FT_SPEC"].nil?
+    hvac.HEAT_CAP_FT_SPEC = heat_pump.elements["extension/HEAT_CAP_FT_SPEC"].text.split(";") unless heat_pump.elements["extension/HEAT_CAP_FT_SPEC"].nil?
+    hvac.HEAT_CAP_FT_SPEC.each_with_index do |curve, i|
+      hvac.HEAT_CAP_FT_SPEC[i] = hvac.HEAT_CAP_FT_SPEC[i].split(",").map(&:to_f)
+    end
+    hvac.COOL_CAP_FT_SPEC = heat_pump.elements["extension/COOL_CAP_FT_SPEC"].text.split(";") unless heat_pump.elements["extension/COOL_CAP_FT_SPEC"].nil?
+    hvac.COOL_CAP_FT_SPEC.each_with_index do |curve, i|
+      hvac.COOL_CAP_FT_SPEC[i] = hvac.COOL_CAP_FT_SPEC[i].split(",").map(&:to_f)
+    end
     hvac.COOL_SH_FT_SPEC = [heat_pump.elements["extension/COOL_SH_FT_SPEC"].text.split(",").map(&:to_f)] unless heat_pump.elements["extension/COOL_SH_FT_SPEC"].nil?
     hvac.COIL_BF_FT_SPEC = [heat_pump.elements["extension/COIL_BF_FT_SPEC"].text.split(",").map(&:to_f)] unless heat_pump.elements["extension/COIL_BF_FT_SPEC"].nil?
     hvac.SHRRated = heat_pump.elements["extension/SHRRated"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/SHRRated"].nil?
@@ -2795,6 +2809,8 @@ class HVACSizing
     hvac.FixedCoolingCapacity = UnitConversions.convert(hvac.FixedCoolingCapacity, "Btu/hr", "ton") unless hvac.FixedCoolingCapacity.nil?
     hvac.NumSpeedsHeating = Float(heat_pump.elements["extension/NumSpeedsHeating"].text) unless heat_pump.elements["extension/NumSpeedsHeating"].nil?
     hvac.NumSpeedsCooling = Float(heat_pump.elements["extension/NumSpeedsCooling"].text) unless heat_pump.elements["extension/NumSpeedsCooling"].nil?
+    hvac.CapacityRatioCooling = heat_pump.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/CapacityRatioCooling"].nil?
+    hvac.CapacityRatioHeating = heat_pump.elements["extension/CapacityRatioHeating"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/CapacityRatioHeating"].nil?
     hvac.DSEHeat, hvac.DSECool, has_dse = OSModel.get_dse(building, heat_pump_values)
   end
 
@@ -3662,27 +3678,28 @@ class HVACSizing
         ## Zone HVAC Unitary System ##
 
         thermal_zone = object.thermalZone.get
+        hpxml_thermal_zone = Geometry.get_hpxml_thermal_zone(building: building, thermal_zone: thermal_zone)
 
         # Unitary System
         object.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
         if object.coolingCoil.is_initialized
-          object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+          object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[hpxml_thermal_zone], "cfm", "m^3/s"))
         else
           object.setSupplyAirFlowRateDuringCoolingOperation(0.0)
         end
         object.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
         if object.heatingCoil.is_initialized
-          object.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(hvac_final_values.Heat_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+          object.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(hvac_final_values.Heat_Airflow * zone_ratios[hpxml_thermal_zone], "cfm", "m^3/s"))
         else
           object.setSupplyAirFlowRateDuringHeatingOperation(0.0)
         end
 
         # Fan
         fanonoff = object.supplyFan.get.to_FanOnOff.get
-        fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, "cfm", "m^3/s") * zone_ratios[thermal_zone])
+        fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, "cfm", "m^3/s") * zone_ratios[hpxml_thermal_zone])
 
         # Coils
-        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[hpxml_thermal_zone])
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
 
@@ -3718,18 +3735,20 @@ class HVACSizing
         ## Electric Baseboard ##
 
         thermal_zone = object.thermalZone.get
+        hpxml_thermal_zone = Geometry.get_hpxml_thermal_zone(building: building, thermal_zone: thermal_zone)
 
         # Baseboard
-        object.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity * zone_ratios[thermal_zone], "Btu/hr", "W"))
+        object.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity * zone_ratios[hpxml_thermal_zone], "Btu/hr", "W"))
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
 
         ## Window AC ##
 
         thermal_zone = object.thermalZone.get
+        hpxml_thermal_zone = Geometry.get_hpxml_thermal_zone(building: building, thermal_zone: thermal_zone)
 
         # PTAC
-        object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+        object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[hpxml_thermal_zone], "cfm", "m^3/s"))
         object.setSupplyAirFlowRateDuringHeatingOperation(0.00001)
         object.setSupplyAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
         object.setOutdoorAirFlowRateDuringCoolingOperation(0.0)
@@ -3738,10 +3757,10 @@ class HVACSizing
 
         # Fan
         fanonoff = object.supplyAirFan.to_FanOnOff.get
-        fanonoff.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+        fanonoff.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[hpxml_thermal_zone], "cfm", "m^3/s"))
 
         # Coils
-        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[hpxml_thermal_zone])
 
         # Heating Coil override
         ptac_htg_coil = object.heatingCoil.to_CoilHeatingElectric.get
