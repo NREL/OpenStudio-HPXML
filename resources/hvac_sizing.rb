@@ -2584,12 +2584,10 @@ class HVACSizing
     return ducts
   end
 
-  def self.get_ducts_for_equip(building:,
-                               equip:)
+  def self.get_ducts_for_equip(building:)
     ductss = []
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
-      next if hvac_distribution_values[:id] != equip[:distribution_system_idref]
 
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       air_distribution.elements.each("Ducts") do |ducts|
@@ -2597,27 +2595,22 @@ class HVACSizing
         ductss << ducts_values
 
         if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
-
           duct_side = side_map[ducts_values[:duct_type]]
           duct_area = ducts_values[:duct_surface_area]
           duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
           # Apportion leakage to individual ducts by surface area
-          duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
-                              duct_area / total_duct_area[duct_side])
+          duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] * duct_area / total_duct_area[duct_side])
           ducts_values[:leakage_cfm_25] = duct_leakage_cfm
         end
-
       end
     end
     return ductss
   end
 
-  def self.get_duct_leakage_measurements_for_equip(building:,
-                                                   equip:)
+  def self.get_duct_leakage_measurements_for_equip(building:)
     duct_leakage_measurements = []
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
-      next if hvac_distribution_values[:id] != equip[:distribution_system_idref]
 
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
@@ -2714,26 +2707,22 @@ class HVACSizing
     control_slave_zones_hash = HVAC.get_control_and_slave_thermal_zones(building: building, thermal_zones: thermal_zones)
 
     control_slave_zones_hash.keys.each do |control_zone|
+      hvac = HVACInfo.new
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
         heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
 
-        hvac = HVACInfo.new
         hvac.HeatType = heating_system.elements["extension/HeatType"].text
         hvac.RatedCFMperTonHeating = heating_system.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f) unless heating_system.elements["extension/RatedCFMperTonHeating"].nil?
         hvac.HeatingLoadFraction = heating_system_values[:fraction_heat_load_served]
         return nil if hvac.HeatingLoadFraction.nil?
         hvac.FixedHeatingCapacity = UnitConversions.convert(heating_system_values[:heating_capacity], "Btu/hr", "ton")
         hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text)
-        hvac.Ducts = get_ducts_for_equip(building: building, equip: heating_system_values)
-        hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: heating_system_values)
         hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)
         
-        hvacs << hvac
       end
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
         cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
 
-        hvac = HVACInfo.new
         hvac.CoolType = cooling_system.elements["extension/CoolType"].text
         hvac.RatedCFMperTonCooling = cooling_system.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/RatedCFMperTonCooling"].nil?
         hvac.CoolingLoadFraction = cooling_system_values[:fraction_cool_load_served]
@@ -2750,16 +2739,12 @@ class HVACSizing
           hvac.OverSizeLimit = 1.3
         end
         hvac.CapacityRatioCooling = cooling_system.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CapacityRatioCooling"].nil?
-        hvac.Ducts = get_ducts_for_equip(building: building, equip: cooling_system_values)
-        hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: cooling_system_values)
         dse_heat, hvac.DSECool, has_dse = OSModel.get_dse(building, cooling_system_values)
 
-        hvacs << hvac
       end
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
         heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
 
-        hvac = HVACInfo.new
         hvac.HeatType = heat_pump.elements["extension/HeatType"].text
         hvac.CoolType = heat_pump.elements["extension/CoolType"].text
         unless heat_pump.elements["extension/RatedCFMperTonCooling"].nil?
@@ -2786,12 +2771,14 @@ class HVACSizing
         hvac.FixedCoolingCapacity = UnitConversions.convert(heat_pump_values[:cooling_capacity], "Btu/hr", "ton")
         hvac.NumSpeedsHeating = Float(heat_pump.elements["extension/NumSpeedsHeating"].text)
         hvac.NumSpeedsCooling = Float(heat_pump.elements["extension/NumSpeedsCooling"].text)
-        hvac.Ducts = get_ducts_for_equip(building: building, equip: heat_pump_values)
-        hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building, equip: heat_pump_values)
         hvac.DSEHeat, hvac.DSECool, has_dse = get_dse(building, heat_pump_values)
 
-        hvacs << hvac
       end
+
+      hvac.Ducts = get_ducts_for_equip(building: building)
+      hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building)
+
+      hvacs << hvac
     end
 
     # TODO: not sure how to handle the following
