@@ -2697,87 +2697,139 @@ class HVACSizing
     return 1.0 / supply_u, 1.0 / return_u
   end
 
+  def self.assign_heating_system(building:,
+                                 hvac:,
+                                 heating_system:)
+    heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
+
+    hvac.HeatType = heating_system.elements["extension/HeatType"].text
+    hvac.RatedCFMperTonHeating = heating_system.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f) unless heating_system.elements["extension/RatedCFMperTonHeating"].nil?
+    hvac.HeatingLoadFraction = heating_system_values[:fraction_heat_load_served]
+    return nil if hvac.HeatingLoadFraction.nil?
+    hvac.FixedHeatingCapacity = UnitConversions.convert(heating_system_values[:heating_capacity], "Btu/hr", "ton")
+    hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text)
+    hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)    
+  end
+
+  def self.assign_cooling_system(building:,
+                                 hvac:,
+                                 cooling_system:)
+    cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
+
+    hvac.CoolType = cooling_system.elements["extension/CoolType"].text
+    hvac.RatedCFMperTonCooling = cooling_system.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/RatedCFMperTonCooling"].nil?
+    hvac.CoolingLoadFraction = cooling_system_values[:fraction_cool_load_served]
+    return nil if hvac.CoolingLoadFraction.nil?
+    hvac.CoolingCFMs = cooling_system.elements["extension/CoolingCFMs"].split(",").map(&:to_f) unless cooling_system.elements["extension/CoolingCFMs"].nil?
+    hvac.COOL_CAP_FT_SPEC = [[1, 1, 1, 1, 1, 1]] # TODO
+    hvac.SHRRated = [Float(cooling_system.elements["extension/SHRRated"].text)] unless cooling_system.elements["extension/SHRRated"].nil?
+    # hvac.FanspeedRatioCooling # TODO
+    hvac.FixedCoolingCapacity = UnitConversions.convert(cooling_system_values[:cooling_capacity], "Btu/hr", "ton")
+    hvac.NumSpeedsCooling = Float(cooling_system.elements["extension/NumSpeedsCooling"].text)
+    if hvac.NumSpeedsCooling == 2
+      hvac.OverSizeLimit = 1.2
+    else
+      hvac.OverSizeLimit = 1.3
+    end
+    hvac.CapacityRatioCooling = cooling_system.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CapacityRatioCooling"].nil?
+    dse_heat, hvac.DSECool, has_dse = OSModel.get_dse(building, cooling_system_values)
+  end
+
+  def self.assign_heat_pump(building:,
+                            hvac:,
+                            heat_pump:)
+    heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
+
+    hvac.HeatType = heat_pump.elements["extension/HeatType"].text
+    hvac.CoolType = heat_pump.elements["extension/CoolType"].text
+    unless heat_pump.elements["extension/RatedCFMperTonCooling"].nil?
+      hvac.RatedCFMperTonCooling = heat_pump.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f)
+    end
+    unless heat_pump.elements["extension/RatedCFMperTonHeating"].nil?
+      hvac.RatedCFMperTonHeating = heat_pump.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f)
+    end
+    hvac.CoolingLoadFraction = heat_pump_values[:fraction_cool_load_served]
+    return nil if hvac.CoolingLoadFraction.nil?
+    hvac.HeatingLoadFraction = heat_pump_values[:fraction_heat_load_served]
+    return nil if hvac.HeatingLoadFraction.nil?
+    hvac.HeatingCFMs = heat_pump.elements["extension/HeatingCFMs"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/HeatingCFMs"].nil?
+    # hvac.COIL_BF_FT_SPEC # TODO
+    # hvac.CoilBF # TODO
+    # hvac.CoolingEIR # TODO
+    # hvac.GSHP_BoreSpacing # TODO
+    # hvac.GSHP_BoreHoles # TODO
+    # hvac.GSHP_BoreDepth # TODO
+    # hvac.GSHP_BoreConfig # TODO
+    # hvac.GSHP_SpacingType # TODO
+    # hvac.HPSizedForMaxLoad # TODO
+    hvac.FixedHeatingCapacity = UnitConversions.convert(heat_pump_values[:heating_capacity], "Btu/hr", "ton")
+    hvac.FixedCoolingCapacity = UnitConversions.convert(heat_pump_values[:cooling_capacity], "Btu/hr", "ton")
+    hvac.NumSpeedsHeating = Float(heat_pump.elements["extension/NumSpeedsHeating"].text)
+    hvac.NumSpeedsCooling = Float(heat_pump.elements["extension/NumSpeedsCooling"].text)
+    hvac.DSEHeat, hvac.DSECool, has_dse = get_dse(building, heat_pump_values)
+  end
+
   def self.get_hvacs(runner:,
                      model:,
                      building:)
     # Get unique set of HVAC equipment
     hvacs = []
 
-    thermal_zones = Geometry.get_thermal_zones(building: building)
-    control_slave_zones_hash = HVAC.get_control_and_slave_thermal_zones(building: building, thermal_zones: thermal_zones)
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
 
-    control_slave_zones_hash.keys.each do |control_zone|
       hvac = HVACInfo.new
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-        heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
-
-        hvac.HeatType = heating_system.elements["extension/HeatType"].text
-        hvac.RatedCFMperTonHeating = heating_system.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f) unless heating_system.elements["extension/RatedCFMperTonHeating"].nil?
-        hvac.HeatingLoadFraction = heating_system_values[:fraction_heat_load_served]
-        return nil if hvac.HeatingLoadFraction.nil?
-        hvac.FixedHeatingCapacity = UnitConversions.convert(heating_system_values[:heating_capacity], "Btu/hr", "ton")
-        hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text)
-        hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)
-        
-      end
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
-        cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
-
-        hvac.CoolType = cooling_system.elements["extension/CoolType"].text
-        hvac.RatedCFMperTonCooling = cooling_system.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/RatedCFMperTonCooling"].nil?
-        hvac.CoolingLoadFraction = cooling_system_values[:fraction_cool_load_served]
-        return nil if hvac.CoolingLoadFraction.nil?
-        hvac.CoolingCFMs = cooling_system.elements["extension/CoolingCFMs"].split(",").map(&:to_f) unless cooling_system.elements["extension/CoolingCFMs"].nil?
-        hvac.COOL_CAP_FT_SPEC = [[1, 1, 1, 1, 1, 1]] # TODO
-        hvac.SHRRated = [Float(cooling_system.elements["extension/SHRRated"].text)] unless cooling_system.elements["extension/SHRRated"].nil?
-        # hvac.FanspeedRatioCooling # TODO
-        hvac.FixedCoolingCapacity = UnitConversions.convert(cooling_system_values[:cooling_capacity], "Btu/hr", "ton")
-        hvac.NumSpeedsCooling = Float(cooling_system.elements["extension/NumSpeedsCooling"].text)
-        if hvac.NumSpeedsCooling == 2
-          hvac.OverSizeLimit = 1.2
-        else
-          hvac.OverSizeLimit = 1.3
-        end
-        hvac.CapacityRatioCooling = cooling_system.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CapacityRatioCooling"].nil?
-        dse_heat, hvac.DSECool, has_dse = OSModel.get_dse(building, cooling_system_values)
-
-      end
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
-        heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
-
-        hvac.HeatType = heat_pump.elements["extension/HeatType"].text
-        hvac.CoolType = heat_pump.elements["extension/CoolType"].text
-        unless heat_pump.elements["extension/RatedCFMperTonCooling"].nil?
-          hvac.RatedCFMperTonCooling = heat_pump.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f)
-        end
-        unless heat_pump.elements["extension/RatedCFMperTonHeating"].nil?
-          hvac.RatedCFMperTonHeating = heat_pump.elements["extension/RatedCFMperTonHeating"].text.split(",").map(&:to_f)
-        end
-        hvac.CoolingLoadFraction = heat_pump_values[:fraction_cool_load_served]
-        return nil if hvac.CoolingLoadFraction.nil?
-        hvac.HeatingLoadFraction = heat_pump_values[:fraction_heat_load_served]
-        return nil if hvac.HeatingLoadFraction.nil?
-        hvac.HeatingCFMs = heat_pump.elements["extension/HeatingCFMs"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/HeatingCFMs"].nil?
-        # hvac.COIL_BF_FT_SPEC
-        # hvac.CoilBF
-        # hvac.CoolingEIR
-        # hvac.GSHP_BoreSpacing
-        # hvac.GSHP_BoreHoles
-        # hvac.GSHP_BoreDepth
-        # hvac.GSHP_BoreConfig
-        # hvac.GSHP_SpacingType
-        # hvac.HPSizedForMaxLoad
-        hvac.FixedHeatingCapacity = UnitConversions.convert(heat_pump_values[:heating_capacity], "Btu/hr", "ton")
-        hvac.FixedCoolingCapacity = UnitConversions.convert(heat_pump_values[:cooling_capacity], "Btu/hr", "ton")
-        hvac.NumSpeedsHeating = Float(heat_pump.elements["extension/NumSpeedsHeating"].text)
-        hvac.NumSpeedsCooling = Float(heat_pump.elements["extension/NumSpeedsCooling"].text)
-        hvac.DSEHeat, hvac.DSECool, has_dse = get_dse(building, heat_pump_values)
-
-      end
-
       hvac.Ducts = get_ducts_for_equip(building: building)
       hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(building: building)
 
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+        heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
+        next if heating_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
+
+        assign_heating_system(building: building, hvac: hvac, heating_system: heating_system)
+      end
+
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+        cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
+        next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
+
+        assign_cooling_system(building: building, hvac: hvac, cooling_system: cooling_system)
+      end
+
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
+        heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
+        next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
+
+        assign_heat_pump(building: building, hvac: hvac, heat_pump: heat_pump)
+      end
+
+      hvacs << hvac
+    end
+
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
+      next unless heating_system_values[:distribution_system_idref].nil?
+
+      hvac = HVACInfo.new
+      assign_heating_system(building: building, hvac: hvac, heating_system: heating_system)
+      hvacs << hvac
+    end
+
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+      cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
+      next unless cooling_system_values[:distribution_system_idref].nil?
+
+      hvac = HVACInfo.new
+      assign_cooling_system(building: building, hvac: hvac, cooling_system: cooling_system)
+      hvacs << hvac
+    end
+
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
+      heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
+      next unless heat_pump_values[:distribution_system_idref].nil?
+
+      hvac = HVACInfo.new
+      assign_heat_pump(building: building, hvac: hvac, heat_pump: heat_pump)
       hvacs << hvac
     end
 
