@@ -1155,7 +1155,7 @@ class HPXML
                                total_recovery_efficiency_adjusted: nil,
                                sensible_recovery_efficiency: nil,
                                sensible_recovery_efficiency_adjusted: nil,
-                               fan_power:,
+                               fan_power: nil,
                                distribution_system_idref: nil,
                                **remainder)
     ventilation_fans = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "MechanicalVentilation", "VentilationFans"])
@@ -1171,7 +1171,7 @@ class HPXML
     XMLHelper.add_element(ventilation_fan, "SensibleRecoveryEfficiency", Float(sensible_recovery_efficiency)) unless sensible_recovery_efficiency.nil?
     XMLHelper.add_element(ventilation_fan, "AdjustedTotalRecoveryEfficiency", Float(total_recovery_efficiency_adjusted)) unless total_recovery_efficiency_adjusted.nil?
     XMLHelper.add_element(ventilation_fan, "AdjustedSensibleRecoveryEfficiency", Float(sensible_recovery_efficiency_adjusted)) unless sensible_recovery_efficiency_adjusted.nil?
-    XMLHelper.add_element(ventilation_fan, "FanPower", Float(fan_power))
+    XMLHelper.add_element(ventilation_fan, "FanPower", Float(fan_power)) unless fan_power.nil?
     unless distribution_system_idref.nil?
       attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, "AttachedToHVACDistributionSystem")
       XMLHelper.add_attribute(attached_to_hvac_distribution_system, "idref", distribution_system_idref)
