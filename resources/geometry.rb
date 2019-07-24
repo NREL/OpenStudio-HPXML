@@ -63,6 +63,22 @@ class Geometry
       end      
     end
   end
+
+  def self.get_hpxml_thermal_zone(building:,
+                                  thermal_zone:)
+    Geometry.get_thermal_zones(building: building).each do |zone|
+      if ( zone == "living space" and Geometry.is_living(thermal_zone) ) or
+         ( zone == "basement - conditioned" and Geometry.is_conditioned_basement(thermal_zone) ) or
+         ( zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(thermal_zone) ) or
+         ( zone == "crawlspace - vented" and Geometry.is_vented_crawl(thermal_zone) ) or
+         ( zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(thermal_zone) ) or
+         ( zone == "garage" and Geometry.is_garage(thermal_zone) ) or
+         ( zone == "attic - vented" and Geometry.is_vented_attic(thermal_zone) ) or
+         ( zone == "attic - unvented" and Geometry.is_unvented_attic(thermal_zone) )
+        return zone
+      end  
+    end
+  end
   
   def self.get_thermal_zone_floor_area(building:,
                                        thermal_zone:)
