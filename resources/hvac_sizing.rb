@@ -95,11 +95,11 @@ class HVACSizing
       hvac_final_values = FinalValues.new
 
       # Calculate heating ducts load
-      hvac_final_values = process_duct_loads_heating(runner, hvac_final_values, weather, hvac, hvac_init_loads.Heat)
+      hvac_final_values = process_duct_loads_heating(runner: runner, model: model, building: building, hvac_final_values: hvac_final_values, weather: weather, hvac: hvac, init_heat_load: hvac_init_loads.Heat)
       return false if hvac_final_values.nil?
 
       # Calculate cooling ducts load
-      hvac_final_values = process_duct_loads_cooling(runner, hvac_final_values, weather, hvac, hvac_init_loads.Cool_Sens, hvac_init_loads.Cool_Lat)
+      hvac_final_values = process_duct_loads_cooling(runner: runner, model: model, building: building, hvac_final_values: hvac_final_values, weather: weather, hvac: hvac, init_cool_load_sens: hvac_init_loads.Cool_Sens, init_cool_load_lat: hvac_init_loads.Cool_Lat)
       return false if hvac_final_values.nil?
 
       hvac_final_values = process_cooling_equipment_adjustments(runner, hvac_final_values, weather, hvac)
@@ -349,69 +349,69 @@ class HVACSizing
             if not has_radiant_barrier
               if [Constants.RoofMaterialAsphaltShingles, Constants.RoofMaterialTarGravel].include?(roof_material)
                 if roof_color == Constants.ColorDark
-                  cool_temp += 130 * surface.netArea
+                  cool_temp += 130 * roof_values[:area]
                 else
-                  cool_temp += 120 * surface.netArea
+                  cool_temp += 120 * roof_values[:area]
                 end
 
               elsif [Constants.RoofMaterialWoodShakes].include?(roof_material)
-                cool_temp += 120 * surface.netArea
+                cool_temp += 120 * roof_values[:area]
 
               elsif [Constants.RoofMaterialMetal, Constants.RoofMaterialMembrane].include?(roof_material)
                 if roof_color == Constants.ColorDark
-                  cool_temp += 130 * surface.netArea
+                  cool_temp += 130 * roof_values[:area]
                 elsif roof_color == Constants.ColorWhite
-                  cool_temp += 95 * surface.netArea
+                  cool_temp += 95 * roof_values[:area]
                 else
-                  cool_temp += 120 * surface.netArea
+                  cool_temp += 120 * roof_values[:area]
                 end
 
               elsif [Constants.RoofMaterialTile].include?(roof_material)
                 if roof_color == Constants.ColorDark
-                  cool_temp += 110 * surface.netArea
+                  cool_temp += 110 * roof_values[:area]
                 elsif roof_color == Constants.ColorWhite
-                  cool_temp += 95 * surface.netArea
+                  cool_temp += 95 * roof_values[:area]
                 else
-                  cool_temp += 105 * surface.netArea
+                  cool_temp += 105 * roof_values[:area]
                 end
 
               else
                 runner.registerWarning("Specified roofing material (#{roof_material}) is not supported. Assuming dark asphalt shingles")
-                cool_temp += 130 * surface.netArea
+                cool_temp += 130 * roof_values[:area]
               end
 
             else # with a radiant barrier
               if [Constants.RoofMaterialAsphaltShingles, Constants.RoofMaterialTarGravel].include?(roof_material)
                 if roof_color == Constants.ColorDark
-                  cool_temp += 120 * surface.netArea
+                  cool_temp += 120 * roof_values[:area]
                 else
-                  cool_temp += 110 * surface.netArea
+                  cool_temp += 110 * roof_values[:area]
                 end
 
               elsif [Constants.RoofMaterialWoodShakes].include?(roof_material)
-                cool_temp += 110 * surface.netArea
+                cool_temp += 110 * roof_values[:area]
 
               elsif [Constants.RoofMaterialMetal, Constants.RoofMaterialMembrane].include?(roof_material)
                 if roof_color == Constants.ColorDark
-                  cool_temp += 120 * surface.netArea
+                  cool_temp += 120 * roof_values[:area]
                 elsif roof_color == Constants.ColorWhite
-                  cool_temp += 95 * surface.netArea
+                  cool_temp += 95 * roof_values[:area]
                 else
-                  cool_temp += 110 * surface.netArea
+                  cool_temp += 110 * roof_values[:area]
                 end
 
               elsif [Constants.RoofMaterialTile].include?(roof_material)
                 if roof_color == Constants.ColorDark
-                  cool_temp += 105 * surface.netArea
+                  cool_temp += 105 * roof_values[:area]
                 elsif roof_color == Constants.ColorWhite
-                  cool_temp += 95 * surface.netArea
+                  cool_temp += 95 * roof_values[:area]
                 else
-                  cool_temp += 105 * surface.netArea
+                  cool_temp += 105 * roof_values[:area]
                 end
 
               else
                 runner.registerWarning("Specified roofing material (#{roof_material}) is not supported. Assuming dark asphalt shingles")
-                cool_temp += 120 * surface.netArea
+                cool_temp += 120 * roof_values[:area]
 
               end
             end
@@ -797,7 +797,7 @@ class HVACSizing
     afl_hr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     Geometry.get_thermal_zone_above_grade_exterior_roofs(building: building, thermal_zone: thermal_zone).each do |roof_values|
-      roof_true_azimth = 0.0 # TODO
+      roof_true_azimuth = 0.0 # TODO
       cnt225 = (roof_true_azimuth / 22.5).round.to_i
       inclination_angle = roof_values[:pitch]
 
@@ -998,9 +998,8 @@ class HVACSizing
       wall_ufactor = 1.0 / wall_values[:insulation_assembly_r_value] # TODO
       return nil if wall_ufactor.nil?
 
-      adjacent_space = wall.adjacentSurface.get.space.get # TODO
-      zone_loads.Cool_Walls += wall_ufactor * wall_values[:area] * (@cool_design_temps[adjacent_space] - @cool_setpoint)
-      zone_loads.Heat_Walls += wall_ufactor * wall_values[:area] * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      zone_loads.Cool_Walls += wall_ufactor * wall_values[:area] * (@cool_design_temps[wall_values[:exterior_adjacent_to]] - @cool_setpoint)
+      zone_loads.Heat_Walls += wall_ufactor * wall_values[:area] * (@heat_setpoint - @heat_design_temps[wall_values[:exterior_adjacent_to]])
     end
 
     # Foundation walls
@@ -1106,8 +1105,8 @@ class HVACSizing
 
       return nil if roof_ufactor.nil?
 
-      zone_loads.Cool_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * cltd
-      zone_loads.Heat_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * @htd
+      zone_loads.Cool_Roofs += roof_ufactor * roof_values[:area] * cltd
+      zone_loads.Heat_Roofs += roof_ufactor * roof_values[:area] * @htd
     end
 
     return zone_loads
@@ -1129,10 +1128,7 @@ class HVACSizing
 
     # Exterior Floors
     Geometry.get_thermal_zone_above_grade_exterior_floors(building: building, thermal_zone: thermal_zone).each do |framefloor_values|
-      floor_ufactor = self.get_surface_ufactor(runner: runner,
-                                               surface: floor,
-                                               surface_type: floor.surfaceType,
-                                               register_error: true)
+      floor_ufactor = self.get_surface_ufactor(runner, floor, floor.surfaceType, true)
       return nil if floor_ufactor.nil?
 
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@ctd - 5 + @daily_range_temp_adjust[@daily_range_num])
@@ -1305,6 +1301,10 @@ class HVACSizing
 
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
+      cw_mef = clothes_washer_values[:modified_energy_factor]
+      if cw_mef.nil?
+        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
+      end
       annual_energy, sensible_frac, latent_frac, _ = HotWaterAndAppliances.calc_clothes_washer_energy_gpd(@eri_version, @nbeds, clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:label_electric_rate], clothes_washer_values[:label_gas_rate], clothes_washer_values[:label_annual_gas_cost], clothes_washer_values[:capacity])
       sched_values = [0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017]
       max_mult = 1.15 * 1.04
@@ -1314,7 +1314,11 @@ class HVACSizing
 
     clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
     if not clothes_dryer_values.nil?
-      annual_energy, cd_annual_therm, sensible_frac, latent_frac = HotWaterAndAppliances.calc_clothes_dryer_energy(@nbeds, clothes_dryer_values[:fuel_type], clothes_dryer_values[:energy_factor], clothes_dryer_values[:control_type], clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:capacity], clothes_washer_values[:modified_energy_factor])
+      cd_ef = clothes_dryer_values[:energy_factor]
+      if cd_ef.nil?
+        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
+      end
+      annual_energy, cd_annual_therm, sensible_frac, latent_frac = HotWaterAndAppliances.calc_clothes_dryer_energy(@nbeds, clothes_dryer_values[:fuel_type], cd_ef, clothes_dryer_values[:control_type], clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:capacity], cw_mef)
       sched_values = [0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024]
       max_mult = 1.15 * 1.04
 
@@ -1459,7 +1463,10 @@ class HVACSizing
     return hvac_init_loads
   end
 
-  def self.get_duct_regain_factor(runner, duct)
+  def self.get_duct_regain_factor(runner:,
+                                  model:,
+                                  building:,
+                                  duct:)
     # dse_Fregain values comes from MJ8 pg 204 and Walker (1998) "Technical background for default
     # values used for forced air systems in proposed ASHRAE Std. 152"
 
@@ -1468,12 +1475,13 @@ class HVACSizing
     if duct[:duct_location].nil? # Outside
       dse_Fregain = 0.0
 
-    elsif Geometry.is_unconditioned_basement(duct[:duct_location]) or Geometry.is_conditioned_basement(duct[:duct_location])
+    elsif duct[:duct_location] == "basement - unconditioned" or duct[:duct_location] == "basement - conditioned"
 
-      walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct[:duct_location])
+      walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner: runner, building: building, thermal_zone: duct[:duct_location])
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
-      infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
+      thermal_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: duct[:duct_location])
+      infiltration_cfm = get_feature(runner, thermal_zone, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
       infiltration_cfm = 0 if infiltration_cfm.nil?
 
       if not ceiling_insulated
@@ -1504,7 +1512,7 @@ class HVACSizing
 
     elsif duct[:duct_location] == "crawlspace - vented" or duct[:duct_location] == "crawlspace - unvented"
 
-      walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct[:duct_location])
+      walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner: runner, building: building, thermal_zone: duct[:duct_location])
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
       infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
@@ -1545,7 +1553,13 @@ class HVACSizing
     return dse_Fregain
   end
 
-  def self.process_duct_loads_heating(runner, hvac_final_values, weather, hvac, init_heat_load)
+  def self.process_duct_loads_heating(runner:,
+                                      model:,
+                                      building:,
+                                      hvac_final_values:,
+                                      weather:,
+                                      hvac:,
+                                      init_heat_load:)
     '''
     Heating Duct Loads
     '''
@@ -1569,9 +1583,9 @@ class HVACSizing
       # in each space. Fregain shall be calculated separately for supply and return locations.
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
-        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner, duct)
+        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner: runner, model: model, building: building, duct: duct)
         if dse_Fregains[duct[:duct_location]].nil?
-          runner.registerError("Unexpected duct location '#{duct[:duct_location]}'.")
+          runner.registerError("Unexpected duct location: #{duct[:duct_location]}.")
           return nil
         end
       end
@@ -1609,7 +1623,14 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_duct_loads_cooling(runner, hvac_final_values, weather, hvac, init_cool_load_sens, init_cool_load_lat)
+  def self.process_duct_loads_cooling(runner:,
+                                      model:,
+                                      building:,
+                                      hvac_final_values:,
+                                      weather:,
+                                      hvac:,
+                                      init_cool_load_sens:,
+                                      init_cool_load_lat:)
     '''
     Cooling Duct Loads
     '''
@@ -1642,7 +1663,7 @@ class HVACSizing
       # in each space. Fregain shall be calculated separately for supply and return locations.
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
-        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner, duct)
+        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner: runner, model: model, building: building, duct: duct)
         return nil if dse_Fregains[duct[:duct_location]].nil?
       end
       fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
@@ -2588,37 +2609,22 @@ class HVACSizing
     return ducts
   end
 
-  def self.get_ducts_for_equip(hvac_distribution:)
+  def self.get_ducts_for_hvac(hvac_distribution:)
     ductss = []
-    hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
-
     air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
     air_distribution.elements.each("Ducts") do |ducts|
       ducts_values = HPXML.get_ducts_values(ducts: ducts)
-      ductss << ducts_values
 
-      if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
-        duct_side = side_map[ducts_values[:duct_type]]
-        duct_area = ducts_values[:duct_surface_area]
-        duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
-        # Apportion leakage to individual ducts by surface area
-        duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] * duct_area / total_duct_area[duct_side])
-        ducts_values[:leakage_cfm_25] = duct_leakage_cfm
+      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
+      air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
+        duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
+        next if duct_leakage_measurement_values[:duct_type] != ducts_values[:duct_type]
+
+        ducts_values.merge! duct_leakage_measurement_values
       end
+      ductss << ducts_values
     end
     return ductss
-  end
-
-  def self.get_duct_leakage_measurements_for_equip(hvac_distribution:)
-    duct_leakage_measurements = []
-    hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
-
-    air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
-    air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
-      duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
-      duct_leakage_measurements << duct_leakage_measurement_values
-    end
-    return duct_leakage_measurements
   end
 
   def self.calc_ducts_area_weighted_average(ducts, values)
@@ -2826,8 +2832,7 @@ class HVACSizing
       hvac = HVACInfo.new
 
       if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
-        hvac.Ducts = get_ducts_for_equip(hvac_distribution: hvac_distribution)
-        hvac.DuctLeakageMeasurements = get_duct_leakage_measurements_for_equip(hvac_distribution: hvac_distribution)
+        hvac.Ducts = get_ducts_for_hvac(hvac_distribution: hvac_distribution)
       end
 
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
@@ -2944,7 +2949,7 @@ class HVACSizing
       if obc == "foundation"
         # FIXME: Original approach used Winkelmann U-factors...
         if surface.surfaceType.downcase == "wall"
-          wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, surface)
+          wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner: runner, foundation_wall_values: foundation_wall_values)
           if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
             return nil
           end
@@ -3513,14 +3518,15 @@ class HVACSizing
     return gfnc_coeff
   end
 
-  def self.get_foundation_walls_ceilings_insulated(runner, space)
+  def self.get_foundation_walls_ceilings_insulated(runner:,
+                                                   building:,
+                                                   thermal_zone:)
     # Check if walls insulated via Kiva:Foundation object
     walls_insulated = false
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != "wall"
-      next if not surface.adjacentFoundation.is_initialized
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
+      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
 
-      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner, surface)
+      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner: runner, foundation_wall_values: foundation_wall_values)
       if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
         return nil
       end
@@ -3535,17 +3541,19 @@ class HVACSizing
     # Check if ceilings insulated
     ceilings_insulated = false
     ceiling_ufactor = nil
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != "roofceiling"
-
-      ceiling_ufactor = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
+    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+      
+      ceiling_ufactor = 1.0 / framefloor_values[:insulation_r_value] # TODO
     end
+    ceiling_ufactor = 1 # TODO: there is no frame floor for ceiling above conditioned basement
+
     if ceiling_ufactor.nil?
       runner.registerError("Unable to identify the foundation ceiling.")
       return nil
     end
 
-    ceiling_rvalue = 1.0 / UnitConversions.convert(ceiling_ufactor, 'm^2*k/w', 'hr*ft^2*f/btu')
+    ceiling_rvalue = 1.0 / ceiling_ufactor
     if ceiling_rvalue >= 3.0
       ceilings_insulated = true
     end
@@ -4059,13 +4067,6 @@ class HVACInfo
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
                 :DSECool, :DSEHeat)
-end
-
-class DuctInfo
-  # Model info for a duct
-  def initial
-  end
-  attr_accessor(:LeakageFrac, :LeakageCFM25, :Area, :Rvalue, :LocationSpace, :Side)
 end
 
 class Numeric
