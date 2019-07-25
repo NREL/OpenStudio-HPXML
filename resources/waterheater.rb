@@ -564,7 +564,7 @@ class Waterheater
     return true
   end
 
-  def self.apply_indirect(model, runner, fuel_type, space, cap, vol, ef, re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type, jacket_r)
+  def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type, jacket_r)
     obj_name_indirect = Constants.ObjectNameWaterHeater
 
     if wh_type == "space-heating boiler with storage tank"
@@ -584,7 +584,9 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create an initial simple tank model by calling create_new_heater
-    new_tank = create_new_heater(obj_name_indirect, cap, fuel_type, vol, ef, re, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+    assumed_ef = get_indirect_assumed_ef_for_tank_losses()
+    assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
+    new_tank = create_new_heater(obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
     new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
@@ -609,6 +611,7 @@ class Waterheater
     # Create loop for source side
     temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
     source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), tank_type)
+    source_loop.setPlantLoopVolume(0.0) # After checking node temperatures and energy results, set plant volume to be zero delivers water system load better to boiler through heat exchanger. Might need to discuss whether an issue should be raised up in E+ repo
 
     # Create heat exchanger
     indirect_hx = create_new_hx(model, Constants.ObjectNameTankHX)
@@ -766,6 +769,24 @@ class Waterheater
     return 120.0
   end
 
+  def self.get_indirect_assumed_ef_for_tank_losses()
+    # assumed ef used only for ua calculation
+    return 0.95
+  end
+
+  def self.get_indirect_assumed_fuel_for_tank_losses()
+    # assumed fuel type used only for ua calculation
+    return Constants.FuelTypeElectric
+  end
+
+  def self.get_combi_system_fuel(idref, orig_details)
+    orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+      next unless HPXML.get_id(heating_system) == idref
+
+      return XMLHelper.get_value(heating_system, "HeatingSystemFuel")
+    end
+  end
+
   def self.get_tankless_cycling_derate()
     return 0.08
   end
@@ -839,6 +860,27 @@ class Waterheater
     end
     u = ua / surface_area # Btu/hr-ft^2-F
     return u, ua, eta_c
+  end
+
+  def self.calc_tank_EF(wh_type, ua, eta_c)
+    # Calculates the energy factor based on UA of the tank and conversion efficiency (eta_c)
+    # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
+    if wh_type == Constants.WaterHeaterTypeTankless
+      ef = eta_c
+    else
+      pi = Math::PI
+      volume_drawn = 64.3 # gal/day
+      density = 8.2938 # lb/gal
+      draw_mass = volume_drawn * density # lb
+      cp = 1.0007 # Btu/lb-F
+      t = 135 # F
+      t_in = 58 # F
+      t_env = 67.5 # F
+      q_load = draw_mass * cp * (t - t_in) # Btu/day
+
+      ef = q_load / ((ua * (t - t_env) * 24 + q_load) / eta_c)
+    end
+    return ef
   end
 
   def self.create_new_pump(model)
