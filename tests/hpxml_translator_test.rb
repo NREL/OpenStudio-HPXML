@@ -907,7 +907,7 @@ class HPXMLTranslatorTest < MiniTest::Test
   def _test_hrv_erv_inputs(test_dir, all_results)
     # Compare HRV and ERV results that use different inputs
     ["hrv", "erv"].each do |mv_type|
-      puts "#{mv_type} test results:"
+      puts "#{mv_type.upcase} test results:"
 
       base_xml = "#{test_dir}/base-mechvent-#{mv_type}.xml"
       results_base = all_results[base_xml]
