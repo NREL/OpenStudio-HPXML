@@ -1846,6 +1846,7 @@ class OSModel
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
+        jacket_r = water_heating_system_values[:jacket_r_value]
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1879,7 +1880,7 @@ class OSModel
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj,
-                                           @nbeds, @dhw_map, sys_id)
+                                           @nbeds, @dhw_map, sys_id, jacket_r)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1902,7 +1903,7 @@ class OSModel
 
           tank_vol = water_heating_system_values[:tank_volume]
           success = Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
-                                               @nbeds, @dhw_map, sys_id)
+                                               @nbeds, @dhw_map, sys_id, jacket_r)
 
           return false if not success
 
@@ -1928,7 +1929,7 @@ class OSModel
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, fuel_type, space, capacity_kbtuh,
                                                tank_vol, ef, re, setpoint_temp, oncycle_power,
-                                               offcycle_power, ec_adj, @nbeds, boiler_plant_loop, @dhw_map, sys_id, wh_type)
+                                               offcycle_power, ec_adj, @nbeds, boiler_plant_loop, @dhw_map, sys_id, wh_type, jacket_r)
           return false if not success
 
         else
