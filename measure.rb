@@ -2672,16 +2672,16 @@ class OSModel
                              conditioned_basement_ach, has_flue_chimney, terrain)
 
     # Mechanical Ventilation
-    whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
-    whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
+    mech_vent_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
+    mech_vent_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: mech_vent_fan)
     mech_vent_type = Constants.VentTypeNone
     mech_vent_total_efficiency = 0.0
     mech_vent_sensible_efficiency = 0.0
     mech_vent_fan_w = 0.0
     mech_vent_cfm = 0.0
     cfis_open_time = 0.0
-    if not whole_house_fan_values.nil?
-      fan_type = whole_house_fan_values[:fan_type]
+    if not mech_vent_fan_values.nil?
+      fan_type = mech_vent_fan_values[:fan_type]
       if fan_type == "supply only"
         mech_vent_type = Constants.VentTypeSupply
         num_fans = 1.0
@@ -2700,27 +2700,27 @@ class OSModel
       mech_vent_sensible_efficiency = 0.0
       mech_vent_sensible_efficiency_adjusted = 0.0
       if fan_type == "energy recovery ventilator" or fan_type == "heat recovery ventilator"
-        if whole_house_fan_values[:sensible_recovery_efficiency_adjusted].nil?
-          mech_vent_sensible_efficiency = whole_house_fan_values[:sensible_recovery_efficiency]
+        if mech_vent_fan_values[:sensible_recovery_efficiency_adjusted].nil?
+          mech_vent_sensible_efficiency = mech_vent_fan_values[:sensible_recovery_efficiency]
         else
-          mech_vent_sensible_efficiency_adjusted = whole_house_fan_values[:sensible_recovery_efficiency_adjusted]
+          mech_vent_sensible_efficiency_adjusted = mech_vent_fan_values[:sensible_recovery_efficiency_adjusted]
         end
       end
       if fan_type == "energy recovery ventilator"
-        if whole_house_fan_values[:total_recovery_efficiency_adjusted].nil?
-          mech_vent_total_efficiency = whole_house_fan_values[:total_recovery_efficiency]
+        if mech_vent_fan_values[:total_recovery_efficiency_adjusted].nil?
+          mech_vent_total_efficiency = mech_vent_fan_values[:total_recovery_efficiency]
         else
-          mech_vent_total_efficiency_adjusted = whole_house_fan_values[:total_recovery_efficiency_adjusted]
+          mech_vent_total_efficiency_adjusted = mech_vent_fan_values[:total_recovery_efficiency_adjusted]
         end
       end
-      mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
-      mech_vent_fan_w = whole_house_fan_values[:fan_power]
+      mech_vent_cfm = mech_vent_fan_values[:rated_flow_rate]
+      mech_vent_fan_w = mech_vent_fan_values[:fan_power]
       if mech_vent_type == Constants.VentTypeCFIS
         # CFIS: Specify minimum open time in minutes
-        cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
+        cfis_open_time = mech_vent_fan_values[:hours_in_operation] / 24.0 * 60.0
       else
         # Other: Adjust CFM based on hours/day of operation
-        mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
+        mech_vent_cfm *= (mech_vent_fan_values[:hours_in_operation] / 24.0)
       end
     end
     cfis_airflow_frac = 1.0
@@ -2736,17 +2736,17 @@ class OSModel
       # Get HVAC distribution system CFIS is attached to
       cfis_hvac_dist = nil
       building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_dist|
-        next unless hvac_dist.elements["SystemIdentifier"].attributes["id"] == whole_house_fan.elements["AttachedToHVACDistributionSystem"].attributes["idref"]
+        next unless hvac_dist.elements["SystemIdentifier"].attributes["id"] == mech_vent_fan.elements["AttachedToHVACDistributionSystem"].attributes["idref"]
 
         cfis_hvac_dist = hvac_dist
       end
       if cfis_hvac_dist.nil?
-        fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
+        fail "Attached HVAC distribution system '#{mech_vent_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{mech_vent_fan.elements["SystemIdentifier"].attributes["id"]}'."
       end
 
       cfis_hvac_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: cfis_hvac_dist)
       if cfis_hvac_dist_values[:distribution_system_type] == 'HydronicDistribution'
-        fail "Attached HVAC distribution system '#{whole_house_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' cannot be hydronic for mechanical ventilation '#{whole_house_fan.elements["SystemIdentifier"].attributes["id"]}'."
+        fail "Attached HVAC distribution system '#{mech_vent_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' cannot be hydronic for mechanical ventilation '#{mech_vent_fan.elements["SystemIdentifier"].attributes["id"]}'."
       end
 
       # Get HVAC systems attached to this distribution system
@@ -2774,42 +2774,46 @@ class OSModel
       end
     end
 
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_efficiency, mech_vent_total_efficiency_adjusted, mech_vent_cfm,
-                                          mech_vent_fan_w, mech_vent_sensible_efficiency, mech_vent_sensible_efficiency_adjusted,
+    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_cfm, mech_vent_fan_w,
+                                          mech_vent_total_efficiency, mech_vent_total_efficiency_adjusted,
+                                          mech_vent_sensible_efficiency, mech_vent_sensible_efficiency_adjusted,
                                           clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
+
+    # Whole house fan
+    whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction='true']"]
+    whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
+    if not whole_house_fan_values.nil?
+      whole_house_fan_w = whole_house_fan_values[:fan_power]
+      whole_house_fan_cfm = whole_house_fan_values[:rated_flow_rate]
+    else
+      whole_house_fan_w = 0.0
+      whole_house_fan_cfm = 0.0
+    end
+    whf = WholeHouseFan.new(whole_house_fan_cfm, whole_house_fan_w)
 
     # Natural Ventilation
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     disable_nat_vent = site_values[:disable_natural_ventilation]
     if not disable_nat_vent.nil? and disable_nat_vent
-      nat_vent_htg_offset = 0
-      nat_vent_clg_offset = 0
-      nat_vent_ovlp_offset = 0
       nat_vent_htg_season = false
       nat_vent_clg_season = false
       nat_vent_ovlp_season = false
-      nat_vent_num_weekdays = 0
-      nat_vent_num_weekends = 0
-      nat_vent_frac_windows_open = 0
-      nat_vent_frac_window_area_openable = 0
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
     else
-      nat_vent_htg_offset = 1.0
-      nat_vent_clg_offset = 1.0
-      nat_vent_ovlp_offset = 1.0
       nat_vent_htg_season = true
       nat_vent_clg_season = true
       nat_vent_ovlp_season = true
-      nat_vent_num_weekdays = 5
-      nat_vent_num_weekends = 2
-      nat_vent_frac_windows_open = 0.33
-      nat_vent_frac_window_area_openable = 0.2
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
     end
+    nat_vent_htg_offset = 1.0
+    nat_vent_clg_offset = 1.0
+    nat_vent_ovlp_offset = 1.0
+    nat_vent_num_weekdays = 5
+    nat_vent_num_weekends = 2
+    nat_vent_frac_windows_open = 0.33
+    nat_vent_frac_window_area_openable = 0.2
+    nat_vent_max_oa_hr = 0.0115
+    nat_vent_max_oa_rh = 0.7
     nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
                                       nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
                                       nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
@@ -2894,7 +2898,7 @@ class OSModel
       window_area += window_values[:area]
     end
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, whf, duct_systems,
                             @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
                             @min_neighbor_distance)
     return false if not success
