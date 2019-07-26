@@ -627,7 +627,7 @@ class Geometry
       next if wall_values[:interior_adjacent_to] != thermal_zone
       next if wall_values[:exterior_adjacent_to] != "outside"
 
-      above_grade_exterior_walls << wall_values
+      above_grade_exterior_walls << wall
     end
     return above_grade_exterior_walls
   end
@@ -686,6 +686,7 @@ class Geometry
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
       slab_values = HPXML.get_slab_values(slab: slab)
 
+      next if slab_values[:interior_adjacent_to] != thermal_zone
       next if slab_values[:depth_below_grade] != 0
 
       above_grade_ground_floors << slab_values
@@ -737,6 +738,20 @@ class Geometry
     return interzonal_walls
   end
 
+  def self.get_thermal_zone_interzonal_walls(building:,
+                                             thermal_zone:)
+    interzonal_walls = []
+    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
+      wall_values = HPXML.get_wall_values(wall: wall)
+
+      next if wall_values[:interior_adjacent_to] != thermal_zone
+      next unless self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to])
+
+      interzonal_walls << wall_values
+    end
+    return interzonal_walls
+  end
+
   def self.get_spaces_interzonal_floors_and_ceilings(spaces)
     interzonal_floors = []
     spaces.each do |space|
@@ -758,24 +773,11 @@ class Geometry
       framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
 
       next if framefloor_values[:interior_adjacent_to] != thermal_zone
-      next if framefloor_values[:exterior_adjacent_to] == "outside"
+      next unless self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to])
 
       interzonal_floors << framefloor_values
     end
     return interzonal_floors
-  end
-  
-  def self.get_thermal_zone_interzonal_walls(building:,
-                                             thermal_zone:)
-    interzonal_walls = []
-    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)
-
-      next if wall_values[:exterior_adjacent_to] == "outside"
-
-      interzonal_walls << wall_values
-    end
-    return interzonal_walls
   end
 
   def self.get_spaces_below_grade_exterior_walls(spaces)
@@ -791,6 +793,19 @@ class Geometry
 
         below_grade_exterior_walls << surface
       end
+    end
+    return below_grade_exterior_walls
+  end
+
+  def self.get_thermal_zone_below_grade_exterior_walls(building:,
+                                                       thermal_zone:)
+    below_grade_exterior_walls = []
+    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
+      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
+
+      next if ( foundation_wall_values[:height] - foundation_wall_values[:depth_below_grade] ) > 0
+
+      below_grade_exterior_walls << foundation_wall_values
     end
     return below_grade_exterior_walls
   end
@@ -823,17 +838,6 @@ class Geometry
       below_grade_exterior_floors << slab_values
     end
     return below_grade_exterior_floors
-  end
-
-  def self.get_thermal_zone_below_grade_exterior_walls(building:,
-                                                       thermal_zone:)
-    below_grade_exterior_walls = []
-    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
-
-      below_grade_exterior_walls << foundation_wall_values
-    end
-    return below_grade_exterior_walls
   end
 
   def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,

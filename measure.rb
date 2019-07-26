@@ -974,7 +974,7 @@ class OSModel
         mat_ext_finish = nil
       end
 
-      success = apply_wall_construction(runner, model, surface, wall_values[:id], wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
+      success = apply_wall_construction(runner, model, surface, wall, wall_values[:id], wall_values[:wall_type], wall_values[:insulation_assembly_r_value],
                                         drywall_thick_in, film_r, mat_ext_finish, wall_values[:solar_absorptance], wall_values[:emittance])
       return false if not success
     end
@@ -1338,7 +1338,7 @@ class OSModel
         end
         mat_ext_finish = nil
 
-        success = apply_wall_construction(runner, model, surface, fnd_wall_values[:id], wall_type, assembly_r,
+        success = apply_wall_construction(runner, model, surface, fnd_wall, fnd_wall_values[:id], wall_type, assembly_r,
                                           drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance)
         return false if not success
       end
@@ -3063,8 +3063,9 @@ class OSModel
     return non_cavity_r
   end
 
-  def self.apply_wall_construction(runner, model, surface, wall_id, wall_type, assembly_r,
+  def self.apply_wall_construction(runner, model, surface, wall, wall_id, wall_type, assembly_r,
                                    drywall_thick_in, film_r, mat_ext_finish, solar_abs, emitt)
+
     if wall_type == "WoodStud"
       install_grade = 1
       cavity_filled = true
@@ -3077,6 +3078,8 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                          # Fallback
       ]
       constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, wall_id)
+
+      HPXML.add_extension(parent: wall, extensions:{"cavity_r": cavity_r})
 
       success = Constructions.apply_wood_stud_wall(runner, model, [surface], "#{wall_id} construction",
                                                    cavity_r, install_grade, constr_set.stud.thick_in,
@@ -3098,6 +3101,8 @@ class OSModel
         SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, 0.0, nil),                                  # Fallback
       ]
       constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      HPXML.add_extension(parent: wall, extensions:{"cavity_r": cavity_r})
 
       success = Constructions.apply_steel_stud_wall(runner, model, [surface], "WallConstruction",
                                                     cavity_r, install_grade, constr_set.cavity_thick_in,
@@ -3155,6 +3160,8 @@ class OSModel
         SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, 0.0, nil),                          # Fallback
       ]
       constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+
+      HPXML.add_extension(parent: wall, extensions:{"sip_ins_thick_in": constr_set.thick_in})
 
       success = Constructions.apply_sip_wall(runner, model, [surface], "WallConstruction",
                                              cavity_r, constr_set.thick_in, constr_set.framing_factor,
