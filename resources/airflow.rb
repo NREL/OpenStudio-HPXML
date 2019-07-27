@@ -954,6 +954,13 @@ class Airflow
       end
     end
 
+    whf_zone = nil
+    if not building.vented_attic.nil?
+      whf_zone = building.vented_attic.zone
+    elsif not building.unvented_attic.nil?
+      whf_zone = building.unvented_attic.zone
+    end
+
     # Sensors
 
     nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
@@ -981,6 +988,15 @@ class Airflow
     whf_flow.setSpace(living_space)
     whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, "Zone Infiltration", "Air Exchange Flow Rate")
     whf_flow_actuator.setName("#{whf_flow.name} act")
+
+    if not whf_zone.nil?
+      # Air from living to WHF zone (attic)
+      zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
+      zone_mixing.setName("#{Constants.ObjectNameWholeHouseFan} mix")
+      zone_mixing.setSourceZone(building.living.zone)
+      liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
+      liv_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
+    end
 
     # Electric Equipment (for whole house fan electricity consumption)
 
@@ -1018,11 +1034,12 @@ class Airflow
     whf_and_nv_program.addLine("Set Vwind = #{vwind_sensor.name}")
     whf_and_nv_program.addLine("Set NV_SG = (NVAvail*NVArea)*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
     whf_and_nv_program.addLine("Set SP = #{sp_sensor.name}")
-    whf_and_nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>SP) && (Tin>Tout)")
+    whf_and_nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>SP) && (Tin>Tout) && (Tout>SP)")
     whf_and_nv_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf.cfm, "cfm", "m^3/s")}")
     whf_and_nv_program.addLine("  If (WHF_Flow>0)") # prioritize WHF over natural ventilation if available
     whf_and_nv_program.addLine("    Set #{nv_flow_actuator.name} = 0")
     whf_and_nv_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow")
+    whf_and_nv_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow") unless whf_zone.nil?
     whf_and_nv_program.addLine("    Set #{whf_elec_actuator.name} = #{whf.fan_power_w}")
     whf_and_nv_program.addLine("  Else")
     whf_and_nv_program.addLine("    Set NVadj1 = (Tin-SP)/(Tin-Tout)")
@@ -1031,11 +1048,13 @@ class Airflow
     whf_and_nv_program.addLine("    Set NVadj = NV_SG*NVadj3")
     whf_and_nv_program.addLine("    Set #{nv_flow_actuator.name} = (@Min NVadj MaxNV)")
     whf_and_nv_program.addLine("    Set #{whf_flow_actuator.name} = 0")
+    whf_and_nv_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
     whf_and_nv_program.addLine("    Set #{whf_elec_actuator.name} = 0")
     whf_and_nv_program.addLine("  EndIf")
     whf_and_nv_program.addLine("Else")
     whf_and_nv_program.addLine("  Set #{nv_flow_actuator.name} = 0")
     whf_and_nv_program.addLine("  Set #{whf_flow_actuator.name} = 0")
+    whf_and_nv_program.addLine("  Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
     whf_and_nv_program.addLine("  Set #{whf_elec_actuator.name} = 0")
     whf_and_nv_program.addLine("EndIf")
 
