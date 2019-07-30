@@ -1205,6 +1205,7 @@ class HPXML
                                     energy_factor: nil,
                                     uniform_energy_factor: nil,
                                     recovery_efficiency: nil,
+                                    jacket_r_value: nil,
                                     related_hvac: nil,
                                     **remainder)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
@@ -1221,8 +1222,15 @@ class HPXML
     XMLHelper.add_element(water_heating_system, "EnergyFactor", Float(energy_factor)) unless energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "UniformEnergyFactor", Float(uniform_energy_factor)) unless uniform_energy_factor.nil?
     XMLHelper.add_element(water_heating_system, "RecoveryEfficiency", Float(recovery_efficiency)) unless recovery_efficiency.nil?
-    related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem") unless related_hvac.nil?
-    XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac) unless related_hvac.nil?
+    unless jacket_r_value.nil?
+      water_heater_insulation = XMLHelper.add_element(water_heating_system, "WaterHeaterInsulation")
+      jacket = XMLHelper.add_element(water_heater_insulation, "Jacket")
+      XMLHelper.add_element(jacket, "JacketRValue", jacket_r_value)
+    end
+    unless related_hvac.nil?
+      related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
+      XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac)
+    end
     return water_heating_system
   end
 
@@ -1241,6 +1249,7 @@ class HPXML
              :energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
              :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
+             :jacket_r_value => to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")),
              :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem") }
   end
 
