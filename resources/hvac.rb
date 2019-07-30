@@ -1339,15 +1339,24 @@ class HVAC
       perf.supplyAirflowRatioFields.each do |airflowRatioField|
         fanspeedRatioCooling << airflowRatioField.coolingRatio.get
       end
-      HPXML.add_extension(parent: hp, extensions: {"COOL_CAP_FT_SPEC": HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 4).join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"HeatingCapacityOffset": heating_capacity_offset})
-      HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
-      HPXML.add_extension(parent: hp, extensions: {"SHRRated": shrs_rated_4.join(",")})
+      cOOL_CAP_FT_SPEC = HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 4)
+      cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
+        cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
+      end
+      HPXML.add_extension(parent: hp, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
       curves = []
       htg_coil.stages.each_with_index do |stage, speed|
         curves << stage.heatingCapacityFunctionofTemperatureCurve
       end
-      HPXML.add_extension(parent: hp, extensions: {"HEAT_CAP_FT_SPEC ": HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 4).join(",")})
+      hEAT_CAP_FT_SPEC = HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 4)
+      hEAT_CAP_FT_SPEC.each_with_index do |curve, i|
+        hEAT_CAP_FT_SPEC[i] = hEAT_CAP_FT_SPEC[i].join(",")
+      end
+      HPXML.add_extension(parent: hp, extensions: {"HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";")})
+      HPXML.add_extension(parent: hp, extensions: {"HeatingCapacityOffset": heating_capacity_offset})
+      HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
+      HPXML.add_extension(parent: hp, extensions: {"FanspeedRatioCooling": fanspeedRatioCooling.join(",")})
+      HPXML.add_extension(parent: hp, extensions: {"SHRRated": shrs_rated_4.join(",")})
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
       HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameMiniSplitHeatPump})
@@ -1823,6 +1832,7 @@ class HVAC
           slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, 0)
         end
 
+        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
         HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameFurnace})
         HPXML.add_extension(parent: htgsys, extensions: {"NumSpeedsHeating": 1})
       else
@@ -1889,6 +1899,8 @@ class HVAC
           end
         end
 
+        # Store info for HVAC Sizing measure
+        attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
         HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameFurnace})
         HPXML.add_extension(parent: htgsys, extensions: {"NumSpeedsHeating": 1})
       end
@@ -2195,8 +2207,6 @@ class HVAC
         zone.setSequentialHeatingFraction(ideal_air, sequential_heat_load_frac.round(5))
 
         # Store info for HVAC Sizing measure
-        ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
-        ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
         ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameIdealAirSystem)
         ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameIdealAirSystem)
       end
