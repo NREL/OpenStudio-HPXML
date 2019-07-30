@@ -2713,14 +2713,18 @@ class OSModel
           mech_vent_total_efficiency_adjusted = whole_house_fan_values[:total_recovery_efficiency_adjusted]
         end
       end
-      mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
+      mech_vent_cfm = whole_house_fan_values[:tested_flow_rate]
+      if mech_vent_cfm.nil?
+        mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
+      end
       mech_vent_fan_w = whole_house_fan_values[:fan_power]
       if mech_vent_type == Constants.VentTypeCFIS
         # CFIS: Specify minimum open time in minutes
         cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
       else
-        # Other: Adjust CFM based on hours/day of operation
+        # Other: Adjust constant CFM/power based on hours per day of operation
         mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
+        mech_vent_fan_w *= (whole_house_fan_values[:hours_in_operation] / 24.0)
       end
     end
     cfis_airflow_frac = 1.0
