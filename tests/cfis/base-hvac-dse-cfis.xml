@@ -278,7 +278,7 @@
             <VentilationFan>
               <SystemIdentifier id='MechanicalVentilation'/>
               <FanType>central fan integrated supply</FanType>
-              <RatedFlowRate>330.0</RatedFlowRate>
+              <TestedFlowRate>330.0</TestedFlowRate>
               <HoursInOperation>8.0</HoursInOperation>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
               <FanPower>300.0</FanPower>
