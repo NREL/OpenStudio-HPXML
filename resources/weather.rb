@@ -453,23 +453,23 @@ class WeatherProcess
     c_s = 0.069     # (Pa/K)^n, stack coefficient, 1-story with flue, enhanced model
     c_w = 0.142     # (Pa*s^2/m^2)^n, wind coefficient, bsmt slab 1-story with flue, enhanced model
     roe = 1.2       # kg/m^3, air density (assumed at sea level)
-    
-    c = c_d * ela * (2/roe)**0.5 * delta_p**(0.5 - n) # m^3/(s*Pa^n), flow coefficient
-    
+
+    c = c_d * ela * (2 / roe)**0.5 * delta_p**(0.5 - n) # m^3/(s*Pa^n), flow coefficient
+
     taus = []
     prev_tau = 0.0
-    for hr in 0..rowdata.size-1
+    for hr in 0..rowdata.size - 1
       q_s = c * c_s * (t_indoor - rowdata[hr]['db']).abs**n
-      q_w = c * c_w * (s * g * [rowdata[hr]['ws'], u_min].max)**(2*n)
+      q_w = c * c_w * (s * g * [rowdata[hr]['ws'], u_min].max)**(2 * n)
       q_tot = (q_s**2 + q_w**2)**0.5
-      ach = 3600.0 * q_tot/(h * cfa)
-      taus << (1 - Math.exp(-ach))/ach + prev_tau * Math.exp(-ach)
+      ach = 3600.0 * q_tot / (h * cfa)
+      taus << (1 - Math.exp(-ach)) / ach + prev_tau * Math.exp(-ach)
       prev_tau = taus[-1]
     end
-    
+
     tau = taus.inject { |sum, n| sum + n } / taus.size.to_f # Mean annual turnover time (hours)
-    wsf = (cfa/ela)/(1000.0*tau)
-    
+    wsf = (cfa / ela) / (1000.0 * tau)
+
     return wsf.round(2)
   end
 
