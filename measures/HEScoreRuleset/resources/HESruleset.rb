@@ -363,20 +363,19 @@ class HEScoreRuleset
         # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
       end
 
-      # Add one HPXML window per story (for this facade) to accommodate different overhang distances
-      window_height = @ceil_height  # FIXME: It doesn't look like this is used anywhere, remove?
-      for story in 1..@ncfl_ag
-        HPXML.add_window(hpxml: hpxml,
-                         id: "#{window_values[:id]}_story#{story}",
-                         area: window_values[:area] / @ncfl_ag,
-                         azimuth: orientation_to_azimuth(window_values[:orientation]),
-                         ufactor: window_values[:ufactor],
-                         shgc: window_values[:shgc],
-                         overhangs_depth: 1.0,
-                         overhangs_distance_to_top_of_window: @ceil_height * (@ncfl_ag - story),
-                         overhangs_distance_to_bottom_of_window: @ceil_height * (@ncfl_ag - story + 1),
-                         wall_idref: window_values[:wall_idref])
-      end
+      # Add one HPXML window per side of the house with only the overhangs from the roof.
+      HPXML.add_window(
+        hpxml: hpxml,
+        id: window_values[:id],
+        area: window_values[:area],
+        azimuth: orientation_to_azimuth(window_values[:orientation]),
+        ufactor: window_values[:ufactor],
+        shgc: window_values[:shgc],
+        overhangs_depth: 1.0,
+        overhangs_distance_to_top_of_window: 0.0,
+        overhangs_distance_to_bottom_of_window: @ceil_height * @ncfl_ag,
+        wall_idref: window_values[:wall_idref]
+      )
       # Uses ERI Reference Home for interior shading
     end
   end
