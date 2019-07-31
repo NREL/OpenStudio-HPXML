@@ -98,10 +98,12 @@ class HEScoreRuleset
     # FIXME: Verify. What about townhouses?
     HPXML.add_site_neighbor(hpxml: hpxml,
                             azimuth: sanitize_azimuth(@bldg_azimuth + 90.0),
-                            distance: 20.0)
+                            distance: 20.0,
+                            height: 12.0)
     HPXML.add_site_neighbor(hpxml: hpxml,
                             azimuth: sanitize_azimuth(@bldg_azimuth - 90.0),
-                            distance: 20.0)
+                            distance: 20.0,
+                            height: 12.0)
 
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
