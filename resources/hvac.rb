@@ -418,13 +418,23 @@ class HVAC
       # See 1ZoneEvapCooler.idf
 
       # FIXME: Needs outside air system?
+      # adjusted design temperatures for evap cooler
+      dsgn_temps = {}
+      dsgn_temps['clg_dsgn_sup_air_temp_f'] = 70.0
+      dsgn_temps['clg_dsgn_sup_air_temp_c'] = UnitConversions.convert(dsgn_temps['clg_dsgn_sup_air_temp_f'], "f", "c")
+      dsgn_temps['max_clg_dsgn_sup_air_temp_f'] = 78.0
+      dsgn_temps['max_clg_dsgn_sup_air_temp_c'] = UnitConversions.convert(dsgn_temps['max_clg_dsgn_sup_air_temp_f'], "f", "c")
+      dsgn_temps['approach_r'] = 3.0 # wetbulb approach temperature
+      dsgn_temps['approach_k'] = UnitConversions.convert(dsgn_temps['approach_r'], "f", "c")
 
       # FIXME: Fan power is currently zeroed out, is this correct?
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
       fan.setName(obj_name + " supply fan")
       fan.setEndUseSubcategory("supply fan")
       fan.setFanEfficiency(1)
-      fan.setPressureRise(0)
+      fan_eff = 0.75  # Overall Efficiency of the Fan, Motor and Drive
+      fan_power = 0.0 # FIXME: Need to have assumption for fan?
+      fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
       fan.setMotorEfficiency(1)
       fan.setMotorInAirstreamFraction(0)
       hvac_map[sys_id] += self.disaggregate_fan(model, fan, nil, evap_cooler)
@@ -435,10 +445,85 @@ class HVAC
       air_supply_outlet_node = air_loop.supplyOutletNode
       air_demand_inlet_node = air_loop.demandInletNode
       air_demand_outlet_node = air_loop.demandOutletNode
+      evap_cooler.addToNode(air_supply_inlet_node)
       hvac_map[sys_id] << air_loop
 
-      fan.addToNode(air_supply_inlet_node) # FIXME: This isn't right
-      evap_cooler.addToNode(air_supply_inlet_node)
+      # Dummy zero-capacity cooling coil
+      dummy_clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
+      dummy_clg_coil.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+      unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
+      unitary_system.setName("Evap Cooler Cycling Fan")
+      unitary_system.setSupplyFan(fan)
+      unitary_system.setCoolingCoil(dummy_clg_coil)
+      unitary_system.setControllingZoneorThermostatLocation(control_zone)
+      unitary_system.setFanPlacement('BlowThrough')
+      unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
+      unitary_system.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
+      unitary_system.setSupplyAirFlowRateMethodWhenNoCoolingorHeatingisRequired('SupplyAirFlowRate')
+      unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
+      unitary_system.addToNode(air_loop.supplyInletNode)
+
+      # Outdoor air intake system
+      oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
+      oa_intake_controller.setName("#{air_loop.name} OA Controller")
+      oa_intake_controller.setMinimumLimitType('FixedMinimum')
+      oa_intake_controller.autosizeMinimumOutdoorAirFlowRate
+      oa_intake_controller.resetEconomizerMinimumLimitDryBulbTemperature
+      oa_intake_controller.setMinimumFractionofOutdoorAirSchedule(model.alwaysOnDiscreteSchedule)
+      controller_mv = oa_intake_controller.controllerMechanicalVentilation
+      controller_mv.setName("#{air_loop.name} Vent Controller")
+      controller_mv.setSystemOutdoorAirMethod('ZoneSum')
+
+      oa_intake = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_intake_controller)
+      oa_intake.setName("#{air_loop.name} OA System")
+      oa_intake.addToNode(air_loop.supplyInletNode)
+
+      # EMS programs
+
+      # air handler controls
+      # setpoint follows OAT WetBulb
+      evap_stpt_manager = OpenStudio::Model::SetpointManagerFollowOutdoorAirTemperature.new(model)
+      evap_stpt_manager.setName("#{dsgn_temps['approach_r']} F above OATwb")
+      evap_stpt_manager.setReferenceTemperatureType('OutdoorAirWetBulb')
+      evap_stpt_manager.setMaximumSetpointTemperature(dsgn_temps['max_clg_dsgn_sup_air_temp_c'])
+      evap_stpt_manager.setMinimumSetpointTemperature(dsgn_temps['clg_dsgn_sup_air_temp_c'])
+      evap_stpt_manager.setOffsetTemperatureDifference(dsgn_temps['approach_k'])
+      evap_stpt_manager.addToNode(air_loop.supplyOutletNode)
+
+      # Schedule to control the airloop availability
+      air_loop_avail_sch = OpenStudio::Model::ScheduleConstant.new(model)
+      air_loop_avail_sch.setName("#{air_loop.name} Availability Sch")
+      air_loop_avail_sch.setValue(1)
+      air_loop.setAvailabilitySchedule(air_loop_avail_sch)
+
+      # EMS to turn on Evap Cooler if there is a cooling load in the target zone.
+      # Without this EMS, the airloop runs 24/7-365 even when there is no load in the zone.
+
+      # Create a sensor to read the zone load
+      zn_load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model,
+                                                                           'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate')
+      zn_load_sensor.setName("Clg Load Sensor")
+      zn_load_sensor.setKeyName(control_zone.handle.to_s)
+
+      # Create an actuator to set the airloop availability
+      air_loop_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_avail_sch,
+                                                                                      'Schedule:Constant',
+                                                                                      'Schedule Value')
+      air_loop_avail_actuator.setName("#{air_loop.name.to_s.gsub(/[ +-.]/, '_')} Availability Actuator")
+
+      # Create a program to turn on Evap Cooler if
+      # there is a cooling load in the target zone.
+      # Load < 0.0 is a cooling load.
+      avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+      avail_program.setName("#{air_loop.name.to_s.gsub(/[ +-.]/, '_')} Availability Control")
+      avail_program_body = <<-EMS
+        IF #{zn_load_sensor.handle} < 0.0
+          SET #{air_loop_avail_actuator.handle} = 1
+        ELSE
+          SET #{air_loop_avail_actuator.handle} = 0
+        ENDIF
+      EMS
+      avail_program.setBody(avail_program_body)
 
       # Supply Air
       zone_splitter = air_loop.zoneSplitter
