@@ -1148,13 +1148,14 @@ class HPXML
   def self.add_ventilation_fan(hpxml:,
                                id:,
                                fan_type:,
-                               rated_flow_rate:,
+                               rated_flow_rate: nil,
+                               tested_flow_rate: nil,
                                hours_in_operation:,
                                total_recovery_efficiency: nil,
                                total_recovery_efficiency_adjusted: nil,
                                sensible_recovery_efficiency: nil,
                                sensible_recovery_efficiency_adjusted: nil,
-                               fan_power:,
+                               fan_power: nil,
                                distribution_system_idref: nil,
                                **remainder)
     ventilation_fans = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "MechanicalVentilation", "VentilationFans"])
@@ -1162,14 +1163,15 @@ class HPXML
     sys_id = XMLHelper.add_element(ventilation_fan, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(ventilation_fan, "FanType", fan_type)
-    XMLHelper.add_element(ventilation_fan, "RatedFlowRate", Float(rated_flow_rate))
+    XMLHelper.add_element(ventilation_fan, "RatedFlowRate", Float(rated_flow_rate)) unless rated_flow_rate.nil?
+    XMLHelper.add_element(ventilation_fan, "TestedFlowRate", Float(tested_flow_rate)) unless tested_flow_rate.nil?
     XMLHelper.add_element(ventilation_fan, "HoursInOperation", Float(hours_in_operation))
     XMLHelper.add_element(ventilation_fan, "UsedForWholeBuildingVentilation", true)
     XMLHelper.add_element(ventilation_fan, "TotalRecoveryEfficiency", Float(total_recovery_efficiency)) unless total_recovery_efficiency.nil?
     XMLHelper.add_element(ventilation_fan, "SensibleRecoveryEfficiency", Float(sensible_recovery_efficiency)) unless sensible_recovery_efficiency.nil?
     XMLHelper.add_element(ventilation_fan, "AdjustedTotalRecoveryEfficiency", Float(total_recovery_efficiency_adjusted)) unless total_recovery_efficiency_adjusted.nil?
     XMLHelper.add_element(ventilation_fan, "AdjustedSensibleRecoveryEfficiency", Float(sensible_recovery_efficiency_adjusted)) unless sensible_recovery_efficiency_adjusted.nil?
-    XMLHelper.add_element(ventilation_fan, "FanPower", Float(fan_power))
+    XMLHelper.add_element(ventilation_fan, "FanPower", Float(fan_power)) unless fan_power.nil?
     unless distribution_system_idref.nil?
       attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, "AttachedToHVACDistributionSystem")
       XMLHelper.add_attribute(attached_to_hvac_distribution_system, "idref", distribution_system_idref)
@@ -1184,6 +1186,7 @@ class HPXML
     return { :id => HPXML.get_id(ventilation_fan),
              :fan_type => XMLHelper.get_value(ventilation_fan, "FanType"),
              :rated_flow_rate => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "RatedFlowRate")),
+             :tested_flow_rate => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TestedFlowRate")),
              :hours_in_operation => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "HoursInOperation")),
              :total_recovery_efficiency => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency")),
              :total_recovery_efficiency_adjusted => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedTotalRecoveryEfficiency")),

@@ -176,6 +176,7 @@ def create_hpxmls
     'base-mechvent-erv-asre.xml' => 'base.xml',
     'base-mechvent-erv-atre-asre.xml' => 'base.xml',
     'base-mechvent-exhaust.xml' => 'base.xml',
+    'base-mechvent-exhaust-rated-flow-rate.xml' => 'base.xml',
     'base-mechvent-hrv.xml' => 'base.xml',
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-supply.xml' => 'base.xml',
@@ -2096,7 +2097,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   if ['base-mechvent-balanced.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "balanced",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :fan_power => 60 }
   elsif ['invalid_files/unattached-cfis.xml',
@@ -2120,7 +2121,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
          'cfis/base-hvac-room-ac-furnace-gas-cfis.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "central fan integrated supply",
-                                 :rated_flow_rate => 330,
+                                 :tested_flow_rate => 330,
                                  :hours_in_operation => 8,
                                  :fan_power => 300,
                                  :distribution_system_idref => "HVACDistribution" }
@@ -2130,7 +2131,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency => 0.48,
                                  :sensible_recovery_efficiency => 0.72,
@@ -2138,7 +2139,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv-atre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency_adjusted => 0.526,
                                  :sensible_recovery_efficiency => 0.72,
@@ -2146,7 +2147,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency => 0.48,
                                  :sensible_recovery_efficiency_adjusted => 0.79,
@@ -2154,12 +2155,18 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv-atre-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency_adjusted => 0.526,
                                  :sensible_recovery_efficiency_adjusted => 0.79,
                                  :fan_power => 60 }
   elsif ['base-mechvent-exhaust.xml'].include? hpxml_file
+    ventilation_fans_values << { :id => "MechanicalVentilation",
+                                 :fan_type => "exhaust only",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 30 }
+  elsif ['base-mechvent-exhaust-rated-flow-rate.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "exhaust only",
                                  :rated_flow_rate => 110,
@@ -2168,27 +2175,27 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-hrv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "heat recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :sensible_recovery_efficiency => 0.72,
                                  :fan_power => 60 }
   elsif ['base-mechvent-hrv-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "heat recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :sensible_recovery_efficiency_adjusted => 0.790,
                                  :fan_power => 60 }
   elsif ['base-mechvent-supply.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "supply only",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :fan_power => 30 }
   elsif ['cfis/base-hvac-boiler-gas-central-ac-1-speed-cfis.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "central fan integrated supply",
-                                 :rated_flow_rate => 330,
+                                 :tested_flow_rate => 330,
                                  :hours_in_operation => 8,
                                  :fan_power => 300,
                                  :distribution_system_idref => "HVACDistribution2" }
