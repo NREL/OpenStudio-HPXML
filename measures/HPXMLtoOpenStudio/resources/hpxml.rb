@@ -91,9 +91,7 @@ class HPXML
     neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
     XMLHelper.add_element(neighbor_building, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(neighbor_building, "Distance", Float(distance))
-    if not height.nil?
-      XMLHelper.add_element(neighbor_building, "Height", Float(height))
-    end
+    XMLHelper.add_element(neighbor_building, "Height", Float(height)) unless height.nil?
 
     return neighbor_building
   end
