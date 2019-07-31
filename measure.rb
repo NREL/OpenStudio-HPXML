@@ -432,7 +432,7 @@ class OSModel
 
         zone_floor_area = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: thermal_zone)
 
-        zone_volume = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone) * zone_floor_area
+        zone_volume = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone, number_of_conditioned_floors_above_grade: @ncfl_ag) * zone_floor_area
         if zone_volume <= 0
           fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
         end
@@ -936,7 +936,7 @@ class OSModel
       wall_values = HPXML.get_wall_values(wall: wall)
 
       net_area = net_surface_area(wall_values[:area], wall_values[:id], "Wall")
-      height = 8.0 * @ncfl_ag
+      height = Constants.WallHeight * @ncfl_ag
       length = net_area / height
       z_origin = @foundation_top
       azimuth = @default_azimuth
@@ -986,7 +986,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
       rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
 
-      height = 1.0
+      height = Constants.RimJoistHeight
       length = rim_joist_values[:area] / height
       z_origin = @foundation_top
       azimuth = @default_azimuth
@@ -1414,7 +1414,7 @@ class OSModel
 
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
-    z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
+    z_origin = @foundation_top + Constants.WallHeight * (@ncfl_ag - 1)
 
     surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
@@ -3732,7 +3732,7 @@ def get_foundation_and_walls_top(building)
     top = -1 * fnd_wall_values[:depth_below_grade] + fnd_wall_values[:height]
     foundation_top = top if top > foundation_top
   end
-  walls_top = foundation_top + 8.0 * @ncfl_ag
+  walls_top = foundation_top + Constants.WallHeight * @ncfl_ag
   return foundation_top, walls_top
 end
 
