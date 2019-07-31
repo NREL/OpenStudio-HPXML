@@ -60,55 +60,6 @@ class WeatherProcess
     return @epw_path
   end
 
-  def add_design_days_for_autosizing
-    heating_design_day = OpenStudio::Model::DesignDay.new(@model)
-    heating_design_day.setName("Ann Htg 99% Condns DB")
-    heating_design_day.setMaximumDryBulbTemperature(UnitConversions.convert(@design.HeatingDrybulb, "F", "C"))
-    heating_design_day.setHumidityIndicatingConditionsAtMaximumDryBulb(UnitConversions.convert(@design.HeatingDrybulb, "F", "C"))
-    heating_design_day.setBarometricPressure(UnitConversions.convert(Psychrometrics.Pstd_fZ(@header.Altitude), "psi", "pa"))
-    heating_design_day.setWindSpeed(@design.HeatingWindspeed)
-    heating_design_day.setDayOfMonth(21)
-    heating_design_day.setMonth(1)
-    heating_design_day.setDayType("WinterDesignDay")
-    heating_design_day.setHumidityIndicatingType("Wetbulb")
-    heating_design_day.setDryBulbTemperatureRangeModifierType("DefaultMultipliers")
-    heating_design_day.setSolarModelIndicator("ASHRAEClearSky")
-
-    cooling_design_day = OpenStudio::Model::DesignDay.new(@model)
-    cooling_design_day.setName("Ann Clg 1% Condns DB=>MWB")
-    cooling_design_day.setMaximumDryBulbTemperature(UnitConversions.convert(@design.CoolingDrybulb, "F", "C"))
-    cooling_design_day.setDailyDryBulbTemperatureRange(UnitConversions.convert(@design.DailyTemperatureRange, "R", "K"))
-    cooling_design_day.setHumidityIndicatingConditionsAtMaximumDryBulb(UnitConversions.convert(@design.CoolingWetbulb, "F", "C"))
-    cooling_design_day.setBarometricPressure(UnitConversions.convert(Psychrometrics.Pstd_fZ(@header.Altitude), "psi", "pa"))
-    cooling_design_day.setWindSpeed(@design.CoolingWindspeed)
-    cooling_design_day.setDayOfMonth(21)
-    cooling_design_day.setMonth(7)
-    cooling_design_day.setDayType("SummerDesignDay")
-    cooling_design_day.setHumidityIndicatingType("Wetbulb")
-    cooling_design_day.setDryBulbTemperatureRangeModifierType("DefaultMultipliers")
-    cooling_design_day.setSolarModelIndicator("ASHRAEClearSky")
-  end
-
-  def actual_year_timestamps
-    timestamps = []
-    if @epw_file.startDateActualYear.is_initialized
-
-      run_period = @model.getRunPeriod
-      begin_time = Time.new(@epw_file.startDateActualYear.get, run_period.getBeginMonth, run_period.getBeginDayOfMonth)
-      end_time = Time.new(@epw_file.startDateActualYear.get, run_period.getEndMonth, run_period.getEndDayOfMonth, 23)
-
-      @epw_file.data.each do |epw_data_row|
-        epw_time = Time.new(epw_data_row.year, epw_data_row.month, epw_data_row.day, epw_data_row.hour, epw_data_row.minute)
-
-        if epw_time >= begin_time and epw_time <= (end_time + 60 * 60)
-          epw_time = epw_time.strftime("%Y/%m/%d %H:%M:00")
-          timestamps << epw_time
-        end
-      end
-    end
-    return timestamps
-  end
-
   def error?
     return @error
   end

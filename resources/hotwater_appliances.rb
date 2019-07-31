@@ -45,7 +45,13 @@ class HotWaterAndAppliances
         dhw_loop.addDemandBranchForComponent(water_use_connections[dhw_loop])
 
         # Get water heater setpoint schedule
-        setpoint_scheds[dhw_loop] = Waterheater.get_water_heater_setpoint_schedule(model, dhw_loop, runner)
+        dhw_map[sys_id].each do |dhw_object|
+          if dhw_object.is_a? OpenStudio::Model::WaterHeaterMixed
+            setpoint_scheds[dhw_loop] = dhw_object.setpointTemperatureSchedule.get
+          elsif dhw_object.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
+            setpoint_scheds[dhw_loop] = dhw_object.compressorSetpointTemperatureSchedule
+          end
+        end
         if setpoint_scheds[dhw_loop].nil?
           return false
         end
