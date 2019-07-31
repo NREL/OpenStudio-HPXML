@@ -50,6 +50,8 @@ class Geometry
     end
     thermal_zones.delete("outside")
     thermal_zones.delete("ground")
+    thermal_zones.delete("other")
+    thermal_zones.delete("other housing unit")
     return thermal_zones.uniq
   end
   
