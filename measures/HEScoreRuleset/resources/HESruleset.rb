@@ -364,7 +364,7 @@ class HEScoreRuleset
       end
 
       # Add one HPXML window per story (for this facade) to accommodate different overhang distances
-      window_height = 4.0 # FIXME: Hard-coded
+      window_height = @ceil_height  # FIXME: It doesn't look like this is used anywhere, remove?
       for story in 1..@ncfl_ag
         HPXML.add_window(hpxml: hpxml,
                          id: "#{window_values[:id]}_story#{story}",
@@ -372,9 +372,9 @@ class HEScoreRuleset
                          azimuth: orientation_to_azimuth(window_values[:orientation]),
                          ufactor: window_values[:ufactor],
                          shgc: window_values[:shgc],
-                         overhangs_depth: 1.0, # FIXME: Verify
-                         overhangs_distance_to_top_of_window: 2.0, # FIXME: Hard-coded
-                         overhangs_distance_to_bottom_of_window: 6.0, # FIXME: Hard-coded
+                         overhangs_depth: 1.0,
+                         overhangs_distance_to_top_of_window: @ceil_height * (@ncfl_ag - story),
+                         overhangs_distance_to_bottom_of_window: @ceil_height * (@ncfl_ag - story + 1),
                          wall_idref: window_values[:wall_idref])
       end
       # Uses ERI Reference Home for interior shading
