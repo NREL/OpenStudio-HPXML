@@ -199,16 +199,21 @@ class Geometry
   
   def self.thermal_zone_is_above_grade(building:,
                                        thermal_zone:)
-    building.elements.each("BuildingDetails/Enclosures/Slabs/Slab") do |slab|
-      slab_values = HPXML.get_slab_values(slab: slab)
+    return true if thermal_zone == "living space"
+    return true if thermal_zone.include? "attic"
+    return false if thermal_zone.include? "basement"
+    return false if thermal_zone.include? "crawlspace"
+    if thermal_zone.include? "garage"
+      building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+        slab_values = HPXML.get_slab_values(slab: slab)
 
-      next if slab_values[:interior_adjacent_to] != thermal_zone
+        next if slab_values[:interior_adjacent_to] != thermal_zone
 
-      if slab_values[:depth_below_grade] >= 0
-        return true
+        return true if slab_values[:depth_below_grade] == 0
+        return false
       end
-      return false
     end
+    return true
   end
 
   # Returns true if all spaces in zone are either fully or partially below grade
@@ -632,6 +637,20 @@ class Geometry
     return above_grade_exterior_walls
   end
 
+  def self.get_thermal_zone_above_grade_exterior_rim_joists(building:,
+                                                            thermal_zone:)
+    above_grade_exterior_rim_joists = []
+    building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
+      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
+
+      next if rim_joist_values[:interior_adjacent_to] != thermal_zone
+      next if rim_joist_values[:exterior_adjacent_to] != "outside"
+
+      above_grade_exterior_rim_joists << rim_joist
+    end
+    return above_grade_exterior_rim_joists
+  end
+
   def self.get_spaces_above_grade_exterior_floors(spaces)
     above_grade_exterior_floors = []
     spaces.each do |space|
@@ -658,7 +677,7 @@ class Geometry
       next if framefloor_values[:interior_adjacent_to] != thermal_zone
       next if framefloor_values[:exterior_adjacent_to] != "outside"
 
-      above_grade_exterior_floors << framefloor_values
+      above_grade_exterior_floors << framefloor
     end
     return above_grade_exterior_floors
   end
@@ -689,7 +708,7 @@ class Geometry
       next if slab_values[:interior_adjacent_to] != thermal_zone
       next if slab_values[:depth_below_grade] != 0
 
-      above_grade_ground_floors << slab_values
+      above_grade_ground_floors << slab
     end
     return above_grade_ground_floors
   end
@@ -773,9 +792,9 @@ class Geometry
       framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
 
       next if framefloor_values[:interior_adjacent_to] != thermal_zone
-      next unless self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to])
+      next if self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to])
 
-      interzonal_floors << framefloor_values
+      interzonal_floors << framefloor
     end
     return interzonal_floors
   end
@@ -803,9 +822,10 @@ class Geometry
     building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
       foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
 
-      next if ( foundation_wall_values[:height] - foundation_wall_values[:depth_below_grade] ) > 0
+      next if foundation_wall_values[:interior_adjacent_to] != thermal_zone
+      next if foundation_wall_values[:depth_below_grade] == 0
 
-      below_grade_exterior_walls << foundation_wall_values
+      below_grade_exterior_walls << foundation_wall
     end
     return below_grade_exterior_walls
   end
@@ -833,9 +853,10 @@ class Geometry
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
       slab_values = HPXML.get_slab_values(slab: slab)
 
+      next if slab_values[:interior_adjacent_to] != thermal_zone
       next if slab_values[:depth_below_grade] == 0
 
-      below_grade_exterior_floors << slab_values
+      below_grade_exterior_floors << slab
     end
     return below_grade_exterior_floors
   end

@@ -622,17 +622,15 @@ class HVACSizing
     afl_hr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     Geometry.get_thermal_zone_above_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)
-
-      wall_true_azimuth = @north_axis
-      unless wall_values[:azimuth].nil?
-        wall_true_azimuth = wall_values[:azimuth]
-      end
-      cnt225 = (wall_true_azimuth / 22.5).round.to_i
+      wall_values = HPXML.get_wall_values(wall: wall)  
 
       building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
         window_values = HPXML.get_window_values(window: window)
         next if window_values[:wall_idref] != wall_values[:id]
+
+        # Azimuth
+        wall_true_azimuth = window_values[:azimuth]
+        cnt225 = (wall_true_azimuth / 22.5).round.to_i
 
         # U-factor
         u_window = window_values[:ufactor]
@@ -641,17 +639,18 @@ class HVACSizing
         zone_loads.Heat_Windows += u_window * window_values[:area] * @htd
 
         # SHGC & Internal Shading
-        interior_shading_factor_summer = 1.0
+        default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors()
+        interior_shading_factor_summer = default_shade_summer
         unless window_values[:interior_shading_factor_summer].nil?
           interior_shading_factor_summer = window_values[:interior_shading_factor_summer]
         end
-        interior_shading_factor_winter = 1.0
+        interior_shading_factor_winter = default_shade_winter
         unless window_values[:interior_shading_factor_winter].nil?
           interior_shading_factor_winter = window_values[:interior_shading_factor_winter]
         end
         return nil if window_values[:shgc].nil?
         shgc_with_interior_shade_cool = window_values[:shgc] * interior_shading_factor_summer
-        shgc_with_interior_shade_heat = window_values[:shgc] * interior_shading_factor_winter        
+        shgc_with_interior_shade_heat = window_values[:shgc] * interior_shading_factor_winter
 
         windowHeight = 4.0 # ft, default
         windowHasIntShading = true # TODO
@@ -953,7 +952,7 @@ class HVACSizing
         colorMultiplier = 1.0
       end
 
-      wall_true_azimuth = 0.0 # TODO
+      wall_true_azimuth = 180.0 # TODO
       unless wall_values[:azimuth].nil?
         wall_true_azimuth = wall_values[:azimuth]
       end
@@ -984,8 +983,65 @@ class HVACSizing
       wall_ufactor = 1.0 / wall_values[:insulation_assembly_r_value] # TODO
       return nil if wall_ufactor.nil?
 
-      zone_loads.Cool_Walls += wall_ufactor * wall_values[:area] * cltd
-      zone_loads.Heat_Walls += wall_ufactor * wall_values[:area] * @htd
+      net_area = OSModel.net_surface_area(wall_values[:area], wall_values[:id], "Wall")
+
+      zone_loads.Cool_Walls += wall_ufactor * net_area * cltd
+      zone_loads.Heat_Walls += wall_ufactor * net_area * @htd
+    end
+
+    # Above-Grade Exterior Rim Joists
+    Geometry.get_thermal_zone_above_grade_exterior_rim_joists(building: building, thermal_zone: thermal_zone).each do |rim_joist|
+      wallGroup = 2 # TODO
+      return nil if wallGroup.nil?
+
+      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
+
+      # Adjust base Cooling Load Temperature Difference (CLTD)
+      # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
+
+      absorptivity = rim_joist_values[:solar_absorptance]
+
+      if absorptivity <= 0.5
+        colorMultiplier = 0.65      # MJ8 Table 4B Notes, pg 348
+      elsif absorptivity <= 0.75
+        colorMultiplier = 0.83      # MJ8 Appendix 12, pg 519
+      else
+        colorMultiplier = 1.0
+      end
+
+      wall_true_azimuth = 180.0 # TODO
+      unless rim_joist_values[:azimuth].nil?
+        wall_true_azimuth = rim_joist_values[:azimuth]
+      end
+
+      # Base Cooling Load Temperature Differences (CLTD's) for dark colored sunlit and shaded walls
+      # with 95 degF outside temperature taken from MJ8 Figure A12-8 (intermediate wall groups were
+      # determined using linear interpolation). Shaded walls apply to north facing and partition walls only.
+      cltd_base_sun = [38, 34.95, 31.9, 29.45, 27, 24.5, 22, 21.25, 20.5, 19.65, 18.8]
+      cltd_base_shade = [25, 22.5, 20, 18.45, 16.9, 15.45, 14, 13.55, 13.1, 12.85, 12.6]
+
+      if wall_true_azimuth >= 157.5 and wall_true_azimuth <= 202.5
+        cltd = cltd_base_shade[wallGroup - 1] * colorMultiplier
+      else
+        cltd = cltd_base_sun[wallGroup - 1] * colorMultiplier
+      end
+
+      if @ctd >= 10
+        # Adjust the CLTD for different cooling design temperatures
+        cltd += (weather.design.CoolingDrybulb - 95)
+        # Adjust the CLTD for daily temperature range
+        cltd += @daily_range_temp_adjust[@daily_range_num]
+      else
+        # Handling cases ctd < 10 is based on A12-18 in MJ8
+        cltd_corr = @ctd - 20 - @daily_range_temp_adjust[@daily_range_num]
+        cltd = [cltd + cltd_corr, 0].max # Assume zero cooling load for negative CLTD's
+      end
+
+      wall_ufactor = 1.0 / rim_joist_values[:insulation_assembly_r_value] # TODO
+      return nil if wall_ufactor.nil?
+
+      zone_loads.Cool_Walls += wall_ufactor * rim_joist_values[:area] * cltd
+      zone_loads.Heat_Walls += wall_ufactor * rim_joist_values[:area] * @htd
     end
 
     # Interzonal Walls
@@ -998,7 +1054,9 @@ class HVACSizing
     end
 
     # Foundation walls
-    Geometry.get_thermal_zone_below_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |foundation_wall_values|
+    Geometry.get_thermal_zone_below_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |foundation_wall|
+      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
+
       wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(runner: runner, foundation_wall_values: foundation_wall_values)
       if wall_ins_rvalue.nil? or wall_ins_height.nil? or wall_constr_rvalue.nil?
         return nil
@@ -1122,7 +1180,9 @@ class HVACSizing
     zone_loads.Cool_Floors = 0
 
     # Exterior Floors
-    Geometry.get_thermal_zone_above_grade_exterior_floors(building: building, thermal_zone: thermal_zone).each do |framefloor_values|
+    Geometry.get_thermal_zone_above_grade_exterior_floors(building: building, thermal_zone: thermal_zone).each do |framefloor|
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+
       floor_ufactor = 1.0 / framefloor_values[:insulation_assembly_r_value] # TODO
 
       zone_loads.Cool_Floors += floor_ufactor * framefloor_values[:area] * (@ctd - 5 + @daily_range_temp_adjust[@daily_range_num])
@@ -1130,7 +1190,9 @@ class HVACSizing
     end
 
     # Interzonal Floors
-    Geometry.get_thermal_zone_interzonal_floors_and_ceilings(building: building, thermal_zone: thermal_zone).each do |framefloor_values|
+    Geometry.get_thermal_zone_interzonal_floors_and_ceilings(building: building, thermal_zone: thermal_zone).each do |framefloor|
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+
       floor_ufactor = 1.0 / framefloor_values[:insulation_assembly_r_value] # TODO
       return nil if floor_ufactor.nil?
 
@@ -1140,7 +1202,9 @@ class HVACSizing
     end
 
     # Foundation Floors
-    Geometry.get_thermal_zone_below_grade_exterior_floors(building: building, thermal_zone: thermal_zone).each do |slab_values|
+    Geometry.get_thermal_zone_below_grade_exterior_floors(building: building, thermal_zone: thermal_zone).each do |slab|
+      slab_values = HPXML.get_slab_values(slab: slab)
+
       # Conditioned basement floor combinations based on MJ 8th Ed. A12-7 and ASHRAE HoF 2013 pg 18.31 Eq 40
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
 
@@ -1153,7 +1217,9 @@ class HVACSizing
     end
 
     # Ground Floors (Slab)
-    Geometry.get_thermal_zone_above_grade_ground_floors(building: building, thermal_zone: thermal_zone).each do |slab_values|
+    Geometry.get_thermal_zone_above_grade_ground_floors(building: building, thermal_zone: thermal_zone).each do |slab|
+      slab_values = HPXML.get_slab_values(slab: slab)
+
       # Get stored u-factor since the surface u-factor is fictional
       # TODO: Revert this some day.
       # floor_ufactor = get_surface_ufactor(runner, floor, floor.surfaceType, true)
@@ -1218,6 +1284,7 @@ class HVACSizing
     end
 
     infil_ach50 = nil
+    infil_const_ach = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
       air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
@@ -1225,15 +1292,14 @@ class HVACSizing
       elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
       else
-        infil_ach50 = air_infiltration_measurement_values[:constant_ach_natural] # TODO
+        infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
       end
     end
 
-    n_i = 0.65
-    sla = Airflow.get_infiltration_SLA_from_ACH50(infil_ach50, n_i, @cfa, infilvolume)
+    sla = Airflow.get_infiltration_SLA_from_ACH50(infil_ach50, 0.65, @cfa, infilvolume)
     ela = sla * @cfa # TODO
 
-    ela_in2 = UnitConversions.convert(ela, "ft^2", "in^2")
+    ela_in2 = UnitConversions.convert(ela, "ft^2", "in^2") # TODO: this is off
     windspeed_cooling_mph = UnitConversions.convert(@windspeed_cooling, "m/s", "mph")
     windspeed_heating_mph = UnitConversions.convert(@windspeed_heating, "m/s", "mph")
 
@@ -3524,7 +3590,7 @@ class HVACSizing
     unless foundation_wall_values[:insulation_distance_to_bottom].nil?
       wall_ins_height = foundation_wall_values[:insulation_distance_to_bottom]
     end
-    wall_constr_rvalue = wall_ins_rvalue
+    wall_constr_rvalue = 1.0 / wall_ins_rvalue # TODO: appears to be a bug in master
     return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
   end
 
