@@ -11,6 +11,7 @@ class HVACSizing
                  building:,
                  weather:,
                  cfa:,
+                 cfa_ag:,
                  nbeds:,
                  min_neighbor_distance:,
                  ncfl_ag:,
@@ -22,6 +23,7 @@ class HVACSizing
 
     @model_spaces = model.getSpaces
     @cfa = cfa
+    @cfa_ag = cfa_ag
     @nbeds = nbeds
     @ncfl_ag = ncfl_ag
     @cvolume = cvolume
@@ -1298,8 +1300,12 @@ class HVACSizing
       end
     end
 
-    sla = Airflow.get_infiltration_SLA_from_ACH50(infil_ach50, 0.65, @cfa, infilvolume)
-    ela = sla * @cfa # TODO
+    ela = 0
+    unless infil_ach50.nil?
+      sla = Airflow.get_infiltration_SLA_from_ACH50(infil_ach50, 0.65, @cfa, infilvolume)
+      ach = Airflow.get_infiltration_ACH_from_SLA(sla, @ncfl_ag, weather)
+      ela = sla * @cfa_ag
+    end
 
     ela_in2 = UnitConversions.convert(ela, "ft^2", "in^2") # TODO: this is off
     windspeed_cooling_mph = UnitConversions.convert(@windspeed_cooling, "m/s", "mph")

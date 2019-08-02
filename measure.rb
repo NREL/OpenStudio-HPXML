@@ -2897,7 +2897,7 @@ class OSModel
 
     show_debug_info = false
 
-    success = HVACSizing.apply(model: model, runner: runner, building: building, weather: weather, cfa: @cfa, nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag, cvolume: @cvolume, azimuth: @default_azimuth, eri_version: @eri_version, hvac_map: @hvac_map, show_debug_info: show_debug_info)
+    success = HVACSizing.apply(model: model, runner: runner, building: building, weather: weather, cfa: @cfa, cfa_ag: @cfa_ag, nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag, cvolume: @cvolume, azimuth: @default_azimuth, eri_version: @eri_version, hvac_map: @hvac_map, show_debug_info: show_debug_info)
     return false if not success
 
     return true
