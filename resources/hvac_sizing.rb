@@ -1045,7 +1045,9 @@ class HVACSizing
     end
 
     # Interzonal Walls
-    Geometry.get_thermal_zone_interzonal_walls(building: building, thermal_zone: thermal_zone).each do |wall_values|
+    Geometry.get_thermal_zone_interzonal_walls(building: building, thermal_zone: thermal_zone).each do |wall|
+      wall_values = HPXML.get_wall_values(wall: wall)
+
       wall_ufactor = 1.0 / wall_values[:insulation_assembly_r_value] # TODO
       return nil if wall_ufactor.nil?
 

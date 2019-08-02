@@ -180,7 +180,7 @@ class Geometry
   end
   
   def self.thermal_zone_is_conditioned(thermal_zone:)
-    return true if thermal_zone == "living space" or thermal_zone.include? "conditioned"
+    return true if thermal_zone == "living space" or thermal_zone.include? "conditioned" or thermal_zone == "other housing unit"
     return false
   end
 
@@ -764,9 +764,9 @@ class Geometry
       wall_values = HPXML.get_wall_values(wall: wall)
 
       next if wall_values[:interior_adjacent_to] != thermal_zone
-      next unless self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to])
+      next if self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to])
 
-      interzonal_walls << wall_values
+      interzonal_walls << wall
     end
     return interzonal_walls
   end
