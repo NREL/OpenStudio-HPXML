@@ -130,7 +130,6 @@ class HVAC
       end
       HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
       HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
       HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
       HPXML.add_extension(parent: clgsys, extensions: { "NumSpeedsCooling": 1 })
       HPXML.add_extension(parent: clgsys, extensions: { "SHRRated": clg_coil.ratedSensibleHeatRatio.get })
@@ -278,7 +277,6 @@ class HVAC
       HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
       HPXML.add_extension(parent: clgsys, extensions: { "CapacityRatioCooling": capacity_ratios.join(",") })
       HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
       HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
       HPXML.add_extension(parent: clgsys, extensions: { "NumSpeedsCooling": 2 })
       HPXML.add_extension(parent: clgsys, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
@@ -432,7 +430,6 @@ class HVAC
       HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
       HPXML.add_extension(parent: clgsys, extensions: { "CapacityRatioCooling": capacity_ratios.join(",") })
       HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
       HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
       HPXML.add_extension(parent: clgsys, extensions: { "NumSpeedsCooling": 4 })
       HPXML.add_extension(parent: clgsys, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
@@ -622,8 +619,6 @@ class HVAC
       HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
       HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonHeating": cfms_ton_rated_heating.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",") })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
       HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameAirSourceHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameAirSourceHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 1 })
@@ -829,8 +824,6 @@ class HVAC
       HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonHeating": cfms_ton_rated_heating.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
       HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameAirSourceHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameAirSourceHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 2 })
@@ -1040,8 +1033,6 @@ class HVAC
       HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonHeating": cfms_ton_rated_heating.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
       HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameAirSourceHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameAirSourceHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 4 })
@@ -1324,7 +1315,6 @@ class HVAC
         cfms_cooling_4 << cfms_cooling[mshp_index]
         shrs_rated_4 << shrs_rated[mshp_index]
       end
-      air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
       HPXML.add_extension(parent: hp, extensions: { "CapacityRatioHeating": capacity_ratios_heating_4.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "CapacityRatioCooling": capacity_ratios_cooling_4.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "HeatingCFMs": cfms_heating_4.join(",") })
@@ -1357,8 +1347,6 @@ class HVAC
       HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
       HPXML.add_extension(parent: hp, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
       HPXML.add_extension(parent: hp, extensions: { "SHRRated": shrs_rated_4.join(",") })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
       HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameMiniSplitHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameMiniSplitHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 4 })
@@ -1638,8 +1626,6 @@ class HVAC
       HPXML.add_extension(parent: hp, extensions: { "GSHP_HXDTDesign": plant_loop.sizingPlant.loopDesignTemperatureDifference })
       HPXML.add_extension(parent: hp, extensions: { "GSHP_HXCHWDesign": plant_loop.sizingPlant.designLoopExitTemperature })
       HPXML.add_extension(parent: hp, extensions: { "GSHP_HXHWDesign": plant_loop.minimumLoopTemperature })
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
-      air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
       HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameGroundSourceHeatPump })
       HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameGroundSourceHeatPump })
     end # control_zone
@@ -1727,7 +1713,6 @@ class HVAC
         HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 1).join(",") })
         HPXML.add_extension(parent: clgsys, extensions: { "CoolingCFMs ": airflow_rate.to_s })
         HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
-        ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
         HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameRoomAirConditioner })
         HPXML.add_extension(parent: clgsys, extensions: { "SHRRated": clg_coil.ratedSensibleHeatRatio.get })
       end # zone
@@ -1843,7 +1828,6 @@ class HVAC
           slave_zone.setSequentialCoolingFraction(air_terminal_fbsmt, 0)
         end
 
-        air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
         HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameFurnace })
         HPXML.add_extension(parent: htgsys, extensions: { "NumSpeedsHeating": 1 })
       else
@@ -1911,7 +1895,6 @@ class HVAC
         end
 
         # Store info for HVAC Sizing measure
-        attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
         HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameFurnace })
         HPXML.add_extension(parent: htgsys, extensions: { "NumSpeedsHeating": 1 })
       end
@@ -2071,7 +2054,6 @@ class HVAC
         zone.setSequentialCoolingFraction(baseboard_heater, 0)
 
         # Store info for HVAC Sizing measure
-        baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameBoiler)
         HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameBoiler })
         HPXML.add_extension(parent: htgsys, extensions: { "NumSpeedsHeating": 1 })
         HPXML.add_extension(parent: htgsys, extensions: { "BoilerDesignTemp": UnitConversions.convert(boiler.designWaterOutletTemperature.get, "C", "F") })
@@ -2224,10 +2206,6 @@ class HVAC
 
         zone.setSequentialCoolingFraction(ideal_air, sequential_cool_load_frac.round(5))
         zone.setSequentialHeatingFraction(ideal_air, sequential_heat_load_frac.round(5))
-
-        # Store info for HVAC Sizing measure
-        ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameIdealAirSystem)
-        ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameIdealAirSystem)
       end
     end
 
@@ -4407,85 +4385,6 @@ class HVAC
     return control_slave_zones_hash
   end
 
-  def self.existing_equipment(model, runner, thermal_zone)
-    # Returns a list of equipment objects
-
-    equipment = []
-    hvac_types = []
-
-    unitary_system_air_loops = self.get_unitary_system_air_loops(model, runner, thermal_zone)
-    unitary_system_air_loops.each do |unitary_system_air_loop|
-      system, clg_coil, htg_coil, air_loop = unitary_system_air_loop
-      equipment << system
-
-      hvac_type_cool = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType)
-      hvac_types << hvac_type_cool.get if hvac_type_cool.is_initialized
-
-      hvac_type_heat = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType)
-      hvac_types << hvac_type_heat.get if hvac_type_heat.is_initialized
-    end
-
-    ptacs = self.get_ptacs(model, runner, thermal_zone)
-    ptacs.each do |ptac|
-      equipment << ptac
-      hvac_types << ptac.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
-    end
-
-    baseboards = self.get_baseboard_waters(model, runner, thermal_zone)
-    baseboards.each do |baseboard|
-      equipment << baseboard
-      hvac_types << baseboard.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    baseboards = self.get_baseboard_electrics(model, runner, thermal_zone)
-    baseboards.each do |baseboard|
-      equipment << baseboard
-      hvac_types << baseboard.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    unitary_system_hvac_map = self.get_unitary_system_hvac_map(model, runner, thermal_zone)
-    unitary_system_hvac_map.each do |unitary_system_zone_hvac|
-      system, clg_coil, htg_coil = unitary_system_zone_hvac
-      next if htg_coil.nil?
-
-      equipment << system
-      hvac_types << system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    ideal_air = self.get_ideal_air(model, runner, thermal_zone)
-    if not ideal_air.nil?
-      equipment << ideal_air
-      hvac_types << ideal_air.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
-      hvac_types << ideal_air.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType).get
-    end
-
-    hvac_types.uniq.each do |hvac_type|
-      if hvac_type == Constants.ObjectNameCentralAirConditioner
-        runner.registerInfo("Found central air conditioner in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameAirSourceHeatPump
-        runner.registerInfo("Found air source heat pump in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameGroundSourceHeatPump
-        runner.registerInfo("Found ground source heat pump in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameMiniSplitHeatPump
-        runner.registerInfo("Found mini split heat pump in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameRoomAirConditioner
-        runner.registerInfo("Found room air conditioner in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameIdealAirSystem
-        runner.registerInfo("Found ideal air system in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameFurnace
-        runner.registerInfo("Found furnace in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameElectricBaseboard
-        runner.registerInfo("Found electric baseboard in #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameBoiler
-        runner.registerInfo("Found boiler serving #{thermal_zone.name}.")
-      elsif hvac_type == Constants.ObjectNameUnitHeater
-        runner.registerInfo("Found unit heater in #{thermal_zone.name}.")
-      end
-    end
-
-    return equipment
-  end
-
   def self.get_coils_from_hvac_equip(model, hvac_equip)
     # Returns the clg coil, htg coil, and supp htg coil as applicable
     clg_coil = nil
@@ -4647,27 +4546,32 @@ class HVAC
     return nil
   end
 
-  def self.has_ducted_equipment(model, runner, air_loop)
-    system = get_unitary_system_from_air_loop_hvac(air_loop)
+  def self.has_ducted_equipment(model, runner, systems)
+    systems.elements.each("HVAC/HVACDistribution") do |hvac_distribution|
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
+      next unless hvac_distribution_values[:distribution_system_type] == "AirDistribution" or hvac_distribution_values[:distribution_system_type] == "DSE"
 
-    hvac_type_cool = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType)
-    hvac_type_cool = hvac_type_cool.get if hvac_type_cool.is_initialized
-    hvac_type_heat = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACHeatType)
-    hvac_type_heat = hvac_type_heat.get if hvac_type_heat.is_initialized
+      systems.elements.each("HVAC/HVACPlant/HeatingSystem") do |heating_system|
+        heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
+        next if heating_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
-    if [Constants.ObjectNameCentralAirConditioner,
-        Constants.ObjectNameAirSourceHeatPump,
-        Constants.ObjectNameGroundSourceHeatPump].include? hvac_type_cool
-      return true
-    elsif Constants.ObjectNameFurnace == hvac_type_heat
-      return true
-    elsif hvac_type_cool == Constants.ObjectNameMiniSplitHeatPump
-      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPump).get
-      if is_ducted
+        return true
+      end
+
+      systems.elements.each("HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+        cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
+        next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
+
+        return true
+      end
+
+      systems.elements.each("HVAC/HVACPlant/HeatPump") do |heat_pump|
+        heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
+        next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
+
         return true
       end
     end
-
     return false
   end
 

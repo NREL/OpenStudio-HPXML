@@ -7,7 +7,7 @@ require_relative "psychrometrics"
 require_relative "hvac"
 
 class Airflow
-  def self.apply(model, runner, air_infiltration_measurement, ventilation_fan, infil, mech_vent, nat_vent, duct_systems,
+  def self.apply(model, runner, air_infiltration_measurement, systems, infil, mech_vent, nat_vent, duct_systems,
                  cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
@@ -96,7 +96,7 @@ class Airflow
     success = process_infiltration_for_conditioned_zones(model, runner, infil, wind_speed, building, weather)
     return false if not success
 
-    success = process_mech_vent(model, runner, ventilation_fan, mech_vent, building, weather, infil)
+    success = process_mech_vent(model, runner, systems, mech_vent, building, weather, infil)
     return false if not success
 
     if mech_vent.type == Constants.VentTypeCFIS
@@ -110,7 +110,7 @@ class Airflow
     duct_programs = {}
     duct_lks = {}
     duct_systems.each do |ducts, air_loop|
-      success = process_ducts(model, runner, ducts, building, air_loop)
+      success = process_ducts(model, runner, ducts, systems)
       return false if not success
 
       success = create_ducts_objects(model, runner, building, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loop, duct_programs, duct_lks, air_loop_objects)
@@ -536,9 +536,9 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent(model, runner, ventilation_fan, mech_vent, building, weather, infil)
+  def self.process_mech_vent(model, runner, systems, mech_vent, building, weather, infil)
     if mech_vent.type == Constants.VentTypeCFIS
-      if not HVAC.has_ducted_equipment(model, runner, mech_vent.cfis_air_loop)
+      if not mech_vent.cfis_air_loop.nil? and not HVAC.has_ducted_equipment(model, runner, systems)
         runner.registerError("A CFIS ventilation system has been specified but the building does not have central, forced air equipment.")
         return false
       end
@@ -681,6 +681,7 @@ class Airflow
     end
 
     # Store info for HVAC Sizing measure
+    ventilation_fan = systems.elements["MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     unless ventilation_fan.nil?
       HPXML.add_extension(parent: ventilation_fan, extensions: { "Type": mech_vent.type })
       HPXML.add_extension(parent: ventilation_fan, extensions: { "TotalEfficiency": mech_vent.total_efficiency })
@@ -702,7 +703,7 @@ class Airflow
     return true
   end
 
-  def self.process_ducts(model, runner, ducts, building, air_loop)
+  def self.process_ducts(model, runner, ducts, systems)
     # Validate Inputs
     ducts.each do |duct|
       if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
@@ -727,7 +728,7 @@ class Airflow
       end
     end
 
-    has_ducted_hvac = HVAC.has_ducted_equipment(model, runner, air_loop)
+    has_ducted_hvac = HVAC.has_ducted_equipment(model, runner, systems)
     if ducts.size > 0 and not has_ducted_hvac
       runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
       ducts.clear

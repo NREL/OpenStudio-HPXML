@@ -3935,9 +3935,9 @@ end
   end
 
   def self.display_zone_loads(runner:,
-                              zone_loads:)
-    zone_loads.keys.each do |thermal_zone|
-      loads = zone_loads[thermal_zone]
+                              zones_loads:)
+    zones_loads.keys.each do |thermal_zone|
+      loads = zones_loads[thermal_zone]
       s = "Zone Loads for #{thermal_zone}:"
       properties = [
         :Heat_Windows, :Heat_Skylights,

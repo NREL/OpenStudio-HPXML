@@ -2881,8 +2881,8 @@ class OSModel
     end
 
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
-    ventilation_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
-    success = Airflow.apply(model, runner, air_infiltration_measurement, ventilation_fan, infil, mech_vent, nat_vent, duct_systems,
+    systems = building.elements["BuildingDetails/Systems"]
+    success = Airflow.apply(model, runner, air_infiltration_measurement, systems, infil, mech_vent, nat_vent, duct_systems,
                             @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area, @min_neighbor_distance)
     return false if not success
 
