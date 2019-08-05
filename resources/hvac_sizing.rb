@@ -1277,7 +1277,7 @@ class HVACSizing
     end
 
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
-    ela_in2 = UnitConversions.convert(Float(air_infiltration_measurement.elements["extension/ELA"].text), "ft^2", "in^2")
+    ela_in2 = UnitConversions.convert(Float(air_infiltration_measurement.elements["extension/LivingSpaceELA"].text), "ft^2", "in^2")
     windspeed_cooling_mph = UnitConversions.convert(@windspeed_cooling, "m/s", "mph")
     windspeed_heating_mph = UnitConversions.convert(@windspeed_heating, "m/s", "mph")
 
@@ -1507,6 +1507,8 @@ class HVACSizing
     # values used for forced air systems in proposed ASHRAE Std. 152"
 
     dse_Fregain = nil
+    thermal_zones = {"living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented"}
+    air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
 
     if duct[:duct_location] == "outside" # Outside
       dse_Fregain = 0.0
@@ -1515,10 +1517,11 @@ class HVACSizing
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner: runner, building: building, thermal_zone: duct[:duct_location])
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
-
-      thermal_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: duct[:duct_location])
-      infiltration_cfm = get_feature(runner: runner, obj: thermal_zone, feature: Constants.SizingInfoZoneInfiltrationCFM, datatype: 'double', register_error: false)
-      infiltration_cfm = 0 if infiltration_cfm.nil?
+      
+      infiltration_cfm = 0
+      unless air_infiltration_measurement.elements["extension/#{thermal_zones[duct[:duct_location]]}CFM"].nil?
+        infiltration_cfm = Float(air_infiltration_measurement.elements["extension/#{thermal_zones[duct[:duct_location]]}CFM"].text)
+      end
 
       if not ceiling_insulated
         if not walls_insulated
@@ -1551,9 +1554,10 @@ class HVACSizing
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner: runner, building: building, thermal_zone: duct[:duct_location])
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
-      thermal_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: duct[:duct_location])
-      infiltration_cfm = get_feature(runner: runner, obj: thermal_zone, feature: Constants.SizingInfoZoneInfiltrationCFM, datatype: 'double', register_error: false)
-      infiltration_cfm = 0 if infiltration_cfm.nil?
+      infiltration_cfm = 0
+      unless air_infiltration_measurement.elements["extension/#{thermal_zones[duct[:duct_location]]}CFM"].nil?
+        infiltration_cfm = Float(air_infiltration_measurement.elements["extension/#{thermal_zones[duct[:duct_location]]}CFM"].text)
+      end
 
       if infiltration_cfm > 0
         if ceiling_insulated
@@ -2313,8 +2317,7 @@ class HVACSizing
     zone_ratios = {}
     total = 0.0
     zones_loads.each do |thermal_zone, zone_loads|
-      model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
-      next if Geometry.is_living(model_zone)
+      next if thermal_zone == "living space"
 
       zone_ratios[thermal_zone] = zone_heat_loads[thermal_zone] / sum_heat_loads
       # Use a minimum flow ratio of 1%. (Low flow ratios can be calculated, e.g., for buildings
@@ -2324,8 +2327,7 @@ class HVACSizing
     end
 
     zones_loads.each do |thermal_zone, zone_loads|
-      model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
-      next if not Geometry.is_living(model_zone)
+      next unless thermal_zone == "living space"
 
       zone_ratios[thermal_zone] = 1.0 - total
       total += zone_ratios[thermal_zone]
@@ -2961,7 +2963,13 @@ class HVACSizing
     end
 
     # Infiltration UA
-    infiltration_cfm = get_feature(runner: runner, obj: thermal_zone, feature: Constants.SizingInfoZoneInfiltrationCFM, datatype: 'double', register_error: false)
+    thermal_zones = {"living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented"}
+    air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
+    
+    infiltration_cfm = 0
+    unless air_infiltration_measurement.elements["extension/#{thermal_zones[thermal_zone]}CFM"].nil?
+      infiltration_cfm = Float(air_infiltration_measurement.elements["extension/#{thermal_zones[thermal_zone]}CFM"].text)
+    end
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     thermal_zone_UAs["infil"] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, "hr", "min")
 
@@ -3564,28 +3572,6 @@ class HVACSizing
     end
     wall_constr_rvalue = 1.0 / wall_ins_rvalue # TODO: appears to be a bug in master
     return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
-  end
-
-  def self.get_feature(runner:,
-                       obj:,
-                       feature:,
-                       datatype:,
-                       register_error: true)
-    val = nil
-    if datatype == 'string'
-      val = obj.additionalProperties.getFeatureAsString(feature)
-    elsif datatype == 'double'
-      val = obj.additionalProperties.getFeatureAsDouble(feature)
-    elsif datatype == 'boolean'
-      val = obj.additionalProperties.getFeatureAsBoolean(feature)
-    end
-    if not val.is_initialized
-      if register_error
-        runner.registerError("Could not find additionalProperties value for '#{feature}' with datatype #{datatype} on object #{obj.name}.")
-      end
-      return nil
-    end
-    return val.get
   end
 
   def self.set_object_values(runner:,

@@ -124,29 +124,29 @@ class Airflow
 
     # Store info for HVAC Sizing measure
     if not building.living.ELA.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"ELA": building.living.ELA})
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"InfFlow": building.living.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceELA": building.living.ELA})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceCFM": building.living.inf_flow})
     else
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"ELA": 0})
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"InfFlow": 0})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceELA": 0})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceCFM": 0})
     end
     unless building.conditioned_basement.nil?
-      building.conditioned_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.conditioned_basement.inf_flow)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"BasementConditionedCFM": building.conditioned_basement.inf_flow})
     end
     unless building.vented_crawlspace.nil?
-      building.vented_crawlspace.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.vented_crawlspace.inf_flow.to_f)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow})
     end
     unless building.unvented_crawlspace.nil?
-      building.unvented_crawlspace.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unvented_crawlspace.inf_flow.to_f)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"CrawlspaceUnventedCFM": building.unvented_crawlspace.inf_flow})
     end
     unless building.unconditioned_basement.nil?
-      building.unconditioned_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unconditioned_basement.inf_flow.to_f)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"BasementUnconditionedCFM": building.unconditioned_basement.inf_flow})
     end
     unless building.vented_attic.nil?
-      building.vented_attic.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.vented_attic.inf_flow)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"AtticVentedCFM": building.vented_attic.inf_flow})
     end
     unless building.unvented_attic.nil?
-      building.unvented_attic.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unvented_attic.inf_flow)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"AtticUnventedCFM": building.unvented_attic.inf_flow})
     end
 
     terrain = { Constants.TerrainOcean => "Ocean",      # Ocean, Bayou flat country
