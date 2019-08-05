@@ -274,11 +274,11 @@ class HotWaterAndAppliances
     return annual_kwh
   end
 
-  def self.get_clothes_dryer_reference_ef(fuel_type)
+  def self.get_clothes_dryer_reference_cef(fuel_type)
     if fuel_type == Constants.FuelTypeElectric
-      return 3.01 # lb/kWh
+      return 2.62
     else
-      return 2.67 # lb/kWh
+      return 2.32
     end
   end
 
@@ -321,8 +321,8 @@ class HotWaterAndAppliances
     return cef * 1.15 # Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF
   end
 
-  def self.get_clothes_washer_reference_mef()
-    return 0.817
+  def self.get_clothes_washer_reference_imef()
+    return 0.331
   end
 
   def self.get_clothes_washer_reference_ler()
@@ -330,7 +330,7 @@ class HotWaterAndAppliances
   end
 
   def self.get_clothes_washer_reference_elec_rate()
-    return 0.08 # $/kWh
+    return 0.0803 # $/kWh
   end
 
   def self.get_clothes_washer_reference_gas_rate()
