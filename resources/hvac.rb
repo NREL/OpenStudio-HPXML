@@ -128,12 +128,12 @@ class HVAC
       cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
         cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: clgsys, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
-      HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
+      HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
+      HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
-      HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameCentralAirConditioner})
-      HPXML.add_extension(parent: clgsys, extensions: {"NumSpeedsCooling": 1})
-      HPXML.add_extension(parent: clgsys, extensions: {"SHRRated": clg_coil.ratedSensibleHeatRatio.get})
+      HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
+      HPXML.add_extension(parent: clgsys, extensions: { "NumSpeedsCooling": 1 })
+      HPXML.add_extension(parent: clgsys, extensions: { "SHRRated": clg_coil.ratedSensibleHeatRatio.get })
     end # control_zone
 
     return true
@@ -275,14 +275,14 @@ class HVAC
       cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
         cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: clgsys, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
-      HPXML.add_extension(parent: clgsys, extensions: {"CapacityRatioCooling": capacity_ratios.join(",")})
-      HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
+      HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
+      HPXML.add_extension(parent: clgsys, extensions: { "CapacityRatioCooling": capacity_ratios.join(",") })
+      HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
-      HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameCentralAirConditioner})
-      HPXML.add_extension(parent: clgsys, extensions: {"NumSpeedsCooling": 2})
-      HPXML.add_extension(parent: clgsys, extensions: {"FanspeedRatioCooling": fanspeedRatioCooling.join(",")})
-      HPXML.add_extension(parent: clgsys, extensions: {"SHRRated": shrrated.join(",")})
+      HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
+      HPXML.add_extension(parent: clgsys, extensions: { "NumSpeedsCooling": 2 })
+      HPXML.add_extension(parent: clgsys, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
+      HPXML.add_extension(parent: clgsys, extensions: { "SHRRated": shrrated.join(",") })
     end # control_zone
 
     return true
@@ -429,14 +429,14 @@ class HVAC
       cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
         cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: clgsys, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
-      HPXML.add_extension(parent: clgsys, extensions: {"CapacityRatioCooling": capacity_ratios.join(",")})
-      HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
+      HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
+      HPXML.add_extension(parent: clgsys, extensions: { "CapacityRatioCooling": capacity_ratios.join(",") })
+      HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameCentralAirConditioner)
-      HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameCentralAirConditioner})
-      HPXML.add_extension(parent: clgsys, extensions: {"NumSpeedsCooling": 4})
-      HPXML.add_extension(parent: clgsys, extensions: {"FanspeedRatioCooling": fanspeedRatioCooling.join(",")})
-      HPXML.add_extension(parent: clgsys, extensions: {"SHRRated": shrrated.join(",")})
+      HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
+      HPXML.add_extension(parent: clgsys, extensions: { "NumSpeedsCooling": 4 })
+      HPXML.add_extension(parent: clgsys, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
+      HPXML.add_extension(parent: clgsys, extensions: { "SHRRated": shrrated.join(",") })
     end # control_zone
 
     return true
@@ -612,23 +612,23 @@ class HVAC
       cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
         cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
+      HPXML.add_extension(parent: hp, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
       curves = [htg_coil.totalHeatingCapacityFunctionofTemperatureCurve]
       hEAT_CAP_FT_SPEC = HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 1)
       hEAT_CAP_FT_SPEC.each_with_index do |curve, i|
         hEAT_CAP_FT_SPEC[i] = hEAT_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"HEAT_CAP_FT_SPEC": hEAT_CAP_FT_SPEC.join(";")})
-      HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
-      HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonHeating": cfms_ton_rated_heating.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",")})
+      HPXML.add_extension(parent: hp, extensions: { "HEAT_CAP_FT_SPEC": hEAT_CAP_FT_SPEC.join(";") })
+      HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
+      HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonHeating": cfms_ton_rated_heating.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",") })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameAirSourceHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameAirSourceHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHeating": 1})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsCooling": 1})
-      HPXML.add_extension(parent: hp, extensions: {"SHRRated": clg_coil.ratedSensibleHeatRatio.get})
+      HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameAirSourceHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameAirSourceHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 1 })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsCooling": 1 })
+      HPXML.add_extension(parent: hp, extensions: { "SHRRated": clg_coil.ratedSensibleHeatRatio.get })
     end # control_zone
 
     return true
@@ -814,7 +814,7 @@ class HVAC
       cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
         cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
+      HPXML.add_extension(parent: hp, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
       curves = []
       htg_coil.stages.each_with_index do |stage, speed|
         curves << stage.heatingCapacityFunctionofTemperatureCurve
@@ -823,20 +823,20 @@ class HVAC
       hEAT_CAP_FT_SPEC.each_with_index do |curve, i|
         hEAT_CAP_FT_SPEC[i] = hEAT_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";")})
-      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioHeating": capacity_ratios.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioCooling": capacity_ratios.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonHeating": cfms_ton_rated_heating.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
+      HPXML.add_extension(parent: hp, extensions: { "HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";") })
+      HPXML.add_extension(parent: hp, extensions: { "CapacityRatioHeating": capacity_ratios.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "CapacityRatioCooling": capacity_ratios.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonHeating": cfms_ton_rated_heating.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameAirSourceHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameAirSourceHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHeating": 2})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsCooling": 2})
-      HPXML.add_extension(parent: hp, extensions: {"FanspeedRatioCooling": fanspeedRatioCooling.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"SHRRated": shrrated.join(",")})
+      HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameAirSourceHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameAirSourceHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 2 })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsCooling": 2 })
+      HPXML.add_extension(parent: hp, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "SHRRated": shrrated.join(",") })
     end # control_zone
 
     return true
@@ -1025,7 +1025,7 @@ class HVAC
       cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
         cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
+      HPXML.add_extension(parent: hp, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
       curves = []
       htg_coil.stages.each_with_index do |stage, speed|
         curves << stage.heatingCapacityFunctionofTemperatureCurve
@@ -1034,20 +1034,20 @@ class HVAC
       hEAT_CAP_FT_SPEC.each_with_index do |curve, i|
         hEAT_CAP_FT_SPEC[i] = hEAT_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";")})
-      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioHeating": capacity_ratios_heating.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioCooling": capacity_ratios_cooling.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonHeating": cfms_ton_rated_heating.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
+      HPXML.add_extension(parent: hp, extensions: { "HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";") })
+      HPXML.add_extension(parent: hp, extensions: { "CapacityRatioHeating": capacity_ratios_heating.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "CapacityRatioCooling": capacity_ratios_cooling.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonHeating": cfms_ton_rated_heating.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "RatedCFMperTonCooling": cfms_ton_rated_cooling.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
-      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameAirSourceHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameAirSourceHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHeating": 4})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsCooling": 4})
-      HPXML.add_extension(parent: hp, extensions: {"FanspeedRatioCooling": fanspeedRatioCooling.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"SHRRated": shrrated.join(",")})
+      HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameAirSourceHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameAirSourceHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 4 })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsCooling": 4 })
+      HPXML.add_extension(parent: hp, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "SHRRated": shrrated.join(",") })
     end # control_zone
 
     return true
@@ -1325,10 +1325,10 @@ class HVAC
         shrs_rated_4 << shrs_rated[mshp_index]
       end
       air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
-      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioHeating": capacity_ratios_heating_4.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"CapacityRatioCooling": capacity_ratios_cooling_4.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"HeatingCFMs": cfms_heating_4.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"CoolingCFMs": cfms_cooling_4.join(",")})
+      HPXML.add_extension(parent: hp, extensions: { "CapacityRatioHeating": capacity_ratios_heating_4.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "CapacityRatioCooling": capacity_ratios_cooling_4.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "HeatingCFMs": cfms_heating_4.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "CoolingCFMs": cfms_cooling_4.join(",") })
       curves = []
       shrrated = []
       clg_coil.stages.each_with_index do |stage, speed|
@@ -1343,7 +1343,7 @@ class HVAC
       cOOL_CAP_FT_SPEC.each_with_index do |curve, i|
         cOOL_CAP_FT_SPEC[i] = cOOL_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";")})
+      HPXML.add_extension(parent: hp, extensions: { "COOL_CAP_FT_SPEC": cOOL_CAP_FT_SPEC.join(";") })
       curves = []
       htg_coil.stages.each_with_index do |stage, speed|
         curves << stage.heatingCapacityFunctionofTemperatureCurve
@@ -1352,17 +1352,17 @@ class HVAC
       hEAT_CAP_FT_SPEC.each_with_index do |curve, i|
         hEAT_CAP_FT_SPEC[i] = hEAT_CAP_FT_SPEC[i].join(",")
       end
-      HPXML.add_extension(parent: hp, extensions: {"HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";")})
-      HPXML.add_extension(parent: hp, extensions: {"HeatingCapacityOffset": heating_capacity_offset})
-      HPXML.add_extension(parent: hp, extensions: {"HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad)})
-      HPXML.add_extension(parent: hp, extensions: {"FanspeedRatioCooling": fanspeedRatioCooling.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"SHRRated": shrs_rated_4.join(",")})
+      HPXML.add_extension(parent: hp, extensions: { "HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";") })
+      HPXML.add_extension(parent: hp, extensions: { "HeatingCapacityOffset": heating_capacity_offset })
+      HPXML.add_extension(parent: hp, extensions: { "HPSizedForMaxLoad": (heat_pump_capacity == Constants.SizingAutoMaxLoad) })
+      HPXML.add_extension(parent: hp, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "SHRRated": shrs_rated_4.join(",") })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameMiniSplitHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameMiniSplitHeatPump)
-      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameMiniSplitHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameMiniSplitHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsHeating": 4})
-      HPXML.add_extension(parent: hp, extensions: {"NumSpeedsCooling": 4})
+      HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameMiniSplitHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameMiniSplitHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsHeating": 4 })
+      HPXML.add_extension(parent: hp, extensions: { "NumSpeedsCooling": 4 })
     end # control_zone
 
     return true
@@ -1623,25 +1623,25 @@ class HVAC
                          clg_coil.sensibleCoolingCapacityCoefficient4,
                          clg_coil.sensibleCoolingCapacityCoefficient5,
                          clg_coil.sensibleCoolingCapacityCoefficient6]
-      HPXML.add_extension(parent: hp, extensions: {"COOL_CAP_FT_SPEC": HVAC.convert_curve_gshp(cOOL_CAP_FT_SPEC, true).join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"COOL_SH_FT_SPEC": HVAC.convert_curve_gshp(cOOL_SH_FT_SPEC, true).join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"COIL_BF_FT_SPEC": cOIL_BF_FT_SPEC.join(",")})
-      HPXML.add_extension(parent: hp, extensions: {"SHRRated": shr.to_s})
-      HPXML.add_extension(parent: hp, extensions: {"CoilBF": coilBF})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_BoreSpacing": bore_spacing})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_BoreHoles": bore_holes})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_BoreDepth": bore_depth})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_BoreConfig": bore_config})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_SpacingType": u_tube_spacing_type})
-      HPXML.add_extension(parent: hp, extensions: {"CoolingEIR": 1.0 / clg_coil.ratedCoolingCoefficientofPerformance})
-      HPXML.add_extension(parent: hp, extensions: {"HeatingEIR": 1.0 / htg_coil.ratedHeatingCoefficientofPerformance})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_HXDTDesign": plant_loop.sizingPlant.loopDesignTemperatureDifference})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_HXCHWDesign": plant_loop.sizingPlant.designLoopExitTemperature})
-      HPXML.add_extension(parent: hp, extensions: {"GSHP_HXHWDesign": plant_loop.minimumLoopTemperature})
+      HPXML.add_extension(parent: hp, extensions: { "COOL_CAP_FT_SPEC": HVAC.convert_curve_gshp(cOOL_CAP_FT_SPEC, true).join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "COOL_SH_FT_SPEC": HVAC.convert_curve_gshp(cOOL_SH_FT_SPEC, true).join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "COIL_BF_FT_SPEC": cOIL_BF_FT_SPEC.join(",") })
+      HPXML.add_extension(parent: hp, extensions: { "SHRRated": shr.to_s })
+      HPXML.add_extension(parent: hp, extensions: { "CoilBF": coilBF })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_BoreSpacing": bore_spacing })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_BoreHoles": bore_holes })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_BoreDepth": bore_depth })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_BoreConfig": bore_config })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_SpacingType": u_tube_spacing_type })
+      HPXML.add_extension(parent: hp, extensions: { "CoolingEIR": 1.0 / clg_coil.ratedCoolingCoefficientofPerformance })
+      HPXML.add_extension(parent: hp, extensions: { "HeatingEIR": 1.0 / htg_coil.ratedHeatingCoefficientofPerformance })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_HXDTDesign": plant_loop.sizingPlant.loopDesignTemperatureDifference })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_HXCHWDesign": plant_loop.sizingPlant.designLoopExitTemperature })
+      HPXML.add_extension(parent: hp, extensions: { "GSHP_HXHWDesign": plant_loop.minimumLoopTemperature })
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
       air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
-      HPXML.add_extension(parent: hp, extensions: {"HeatType": Constants.ObjectNameGroundSourceHeatPump})
-      HPXML.add_extension(parent: hp, extensions: {"CoolType": Constants.ObjectNameGroundSourceHeatPump})
+      HPXML.add_extension(parent: hp, extensions: { "HeatType": Constants.ObjectNameGroundSourceHeatPump })
+      HPXML.add_extension(parent: hp, extensions: { "CoolType": Constants.ObjectNameGroundSourceHeatPump })
     end # control_zone
 
     htg_objects = []
@@ -1724,12 +1724,12 @@ class HVAC
 
         # Store info for HVAC Sizing measure
         curves = [clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve]
-        HPXML.add_extension(parent: clgsys, extensions: {"COOL_CAP_FT_SPEC": HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 1).join(",")})
-        HPXML.add_extension(parent: clgsys, extensions: {"CoolingCFMs ": airflow_rate.to_s})
-        HPXML.add_extension(parent: clgsys, extensions: {"RatedCFMperTonCooling": cfms_ton_rated.join(",")})
+        HPXML.add_extension(parent: clgsys, extensions: { "COOL_CAP_FT_SPEC": HVACSizing.get_2d_vector_from_CAP_FT_SPEC_curves(curves, 1).join(",") })
+        HPXML.add_extension(parent: clgsys, extensions: { "CoolingCFMs ": airflow_rate.to_s })
+        HPXML.add_extension(parent: clgsys, extensions: { "RatedCFMperTonCooling": cfms_ton_rated.join(",") })
         ptac.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameRoomAirConditioner)
-        HPXML.add_extension(parent: clgsys, extensions: {"CoolType": Constants.ObjectNameRoomAirConditioner})
-        HPXML.add_extension(parent: clgsys, extensions: {"SHRRated": clg_coil.ratedSensibleHeatRatio.get})
+        HPXML.add_extension(parent: clgsys, extensions: { "CoolType": Constants.ObjectNameRoomAirConditioner })
+        HPXML.add_extension(parent: clgsys, extensions: { "SHRRated": clg_coil.ratedSensibleHeatRatio.get })
       end # zone
     end # control_zone
 
@@ -1844,8 +1844,8 @@ class HVAC
         end
 
         air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
-        HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameFurnace})
-        HPXML.add_extension(parent: htgsys, extensions: {"NumSpeedsHeating": 1})
+        HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameFurnace })
+        HPXML.add_extension(parent: htgsys, extensions: { "NumSpeedsHeating": 1 })
       else
         # Attach to existing cooling unitary system
         obj_name = Constants.ObjectNameCentralAirConditionerAndFurnace
@@ -1912,8 +1912,8 @@ class HVAC
 
         # Store info for HVAC Sizing measure
         attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
-        HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameFurnace})
-        HPXML.add_extension(parent: htgsys, extensions: {"NumSpeedsHeating": 1})
+        HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameFurnace })
+        HPXML.add_extension(parent: htgsys, extensions: { "NumSpeedsHeating": 1 })
       end
     end
 
@@ -2072,9 +2072,9 @@ class HVAC
 
         # Store info for HVAC Sizing measure
         baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameBoiler)
-        HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameBoiler})
-        HPXML.add_extension(parent: htgsys, extensions: {"NumSpeedsHeating": 1})
-        HPXML.add_extension(parent: htgsys, extensions: {"BoilerDesignTemp": UnitConversions.convert(boiler.designWaterOutletTemperature.get, "C", "F")})
+        HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameBoiler })
+        HPXML.add_extension(parent: htgsys, extensions: { "NumSpeedsHeating": 1 })
+        HPXML.add_extension(parent: htgsys, extensions: { "BoilerDesignTemp": UnitConversions.convert(boiler.designWaterOutletTemperature.get, "C", "F") })
       end
     end
 
@@ -2113,8 +2113,8 @@ class HVAC
         zone.setSequentialCoolingFraction(baseboard_heater, 0)
 
         # Store info for HVAC Sizing measure
-        HPXML.add_extension(parent: htgsys, extensions: {"NumSpeedsHeating": 1})
-        HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameElectricBaseboard})
+        HPXML.add_extension(parent: htgsys, extensions: { "NumSpeedsHeating": 1 })
+        HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameElectricBaseboard })
       end
     end
 
@@ -2194,8 +2194,8 @@ class HVAC
         zone.setSequentialCoolingFraction(unitary_system, 0)
 
         # Store info for HVAC Sizing measure
-        HPXML.add_extension(parent: htgsys, extensions: {"RatedCFMperTonHeating": airflow_rate.to_s})
-        HPXML.add_extension(parent: htgsys, extensions: {"HeatType": Constants.ObjectNameUnitHeater})
+        HPXML.add_extension(parent: htgsys, extensions: { "RatedCFMperTonHeating": airflow_rate.to_s })
+        HPXML.add_extension(parent: htgsys, extensions: { "HeatType": Constants.ObjectNameUnitHeater })
       end
     end
 

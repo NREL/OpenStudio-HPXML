@@ -124,29 +124,29 @@ class Airflow
 
     # Store info for HVAC Sizing measure
     if not building.living.ELA.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceELA": building.living.ELA})
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceCFM": building.living.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceELA": building.living.ELA })
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceCFM": building.living.inf_flow })
     else
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceELA": 0})
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"LivingSpaceCFM": 0})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceELA": 0 })
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceCFM": 0 })
     end
     unless building.conditioned_basement.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"BasementConditionedCFM": building.conditioned_basement.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "BasementConditionedCFM": building.conditioned_basement.inf_flow })
     end
     unless building.vented_crawlspace.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow })
     end
     unless building.unvented_crawlspace.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"CrawlspaceUnventedCFM": building.unvented_crawlspace.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "CrawlspaceUnventedCFM": building.unvented_crawlspace.inf_flow })
     end
     unless building.unconditioned_basement.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"BasementUnconditionedCFM": building.unconditioned_basement.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "BasementUnconditionedCFM": building.unconditioned_basement.inf_flow })
     end
     unless building.vented_attic.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"AtticVentedCFM": building.vented_attic.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "AtticVentedCFM": building.vented_attic.inf_flow })
     end
     unless building.unvented_attic.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"AtticUnventedCFM": building.unvented_attic.inf_flow})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "AtticUnventedCFM": building.unvented_attic.inf_flow })
     end
 
     terrain = { Constants.TerrainOcean => "Ocean",      # Ocean, Bayou flat country
@@ -682,11 +682,11 @@ class Airflow
 
     # Store info for HVAC Sizing measure
     unless ventilation_fan.nil?
-      HPXML.add_extension(parent: ventilation_fan, extensions: {"Type": mech_vent.type})
-      HPXML.add_extension(parent: ventilation_fan, extensions: {"TotalEfficiency": mech_vent.total_efficiency})
-      HPXML.add_extension(parent: ventilation_fan, extensions: {"LatentEffectiveness": latent_effectiveness})
-      HPXML.add_extension(parent: ventilation_fan, extensions: {"ApparentSensibleEffectiveness": apparent_sensible_effectiveness})
-      HPXML.add_extension(parent: ventilation_fan, extensions: {"WholeHouseRate": mech_vent.whole_house_cfm})
+      HPXML.add_extension(parent: ventilation_fan, extensions: { "Type": mech_vent.type })
+      HPXML.add_extension(parent: ventilation_fan, extensions: { "TotalEfficiency": mech_vent.total_efficiency })
+      HPXML.add_extension(parent: ventilation_fan, extensions: { "LatentEffectiveness": latent_effectiveness })
+      HPXML.add_extension(parent: ventilation_fan, extensions: { "ApparentSensibleEffectiveness": apparent_sensible_effectiveness })
+      HPXML.add_extension(parent: ventilation_fan, extensions: { "WholeHouseRate": mech_vent.whole_house_cfm })
     end
 
     mech_vent.frac_fan_heat = frac_fan_heat

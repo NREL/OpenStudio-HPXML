@@ -440,7 +440,7 @@ class OSModel
         if thermal_zone == "basement - conditioned"
           living_volume = @cvolume - zone_volume
         end
-        
+
         model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
         model_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
       end
@@ -449,13 +449,13 @@ class OSModel
     # Conditioned living
     thermal_zones.each do |thermal_zone|
       next if thermal_zone != "living space"
-        
+
       zones_updated += 1
 
       if living_volume <= 0
         fail "Calculated volume for living zone (#{living_volume}) is not greater than zero."
       end
-      
+
       model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
       model_zone.setVolume(UnitConversions.convert(living_volume, "ft^3", "m^3"))
     end
@@ -469,11 +469,11 @@ class OSModel
       zone_floor_area = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: thermal_zone)
 
       # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
-      zone_length = zone_floor_area ** 0.5
+      zone_length = zone_floor_area**0.5
       roof_pitch = Geometry.get_thermal_zone_roof_pitch(building: building, thermal_zone: thermal_zone)
       zone_height = roof_pitch * (zone_length / 2.0) / 12.0
       zone_volume = [zone_floor_area * zone_height / 3.0, 0.01].max
-      
+
       model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
       model_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
     end
@@ -2604,7 +2604,7 @@ class OSModel
         infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
-      end      
+      end
     end
 
     vented_attic_sla = nil
@@ -3085,7 +3085,7 @@ class OSModel
       ]
       constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, wall_id)
 
-      HPXML.add_extension(parent: wall, extensions:{"cavity_r": cavity_r})
+      HPXML.add_extension(parent: wall, extensions: { "cavity_r": cavity_r })
 
       success = Constructions.apply_wood_stud_wall(runner, model, [surface], "#{wall_id} construction",
                                                    cavity_r, install_grade, constr_set.stud.thick_in,
@@ -3108,7 +3108,7 @@ class OSModel
       ]
       constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      HPXML.add_extension(parent: wall, extensions:{"cavity_r": cavity_r})
+      HPXML.add_extension(parent: wall, extensions: { "cavity_r": cavity_r })
 
       success = Constructions.apply_steel_stud_wall(runner, model, [surface], "WallConstruction",
                                                     cavity_r, install_grade, constr_set.cavity_thick_in,
@@ -3167,7 +3167,7 @@ class OSModel
       ]
       constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      HPXML.add_extension(parent: wall, extensions:{"sip_ins_thick_in": constr_set.thick_in})
+      HPXML.add_extension(parent: wall, extensions: { "sip_ins_thick_in": constr_set.thick_in })
 
       success = Constructions.apply_sip_wall(runner, model, [surface], "WallConstruction",
                                              cavity_r, constr_set.thick_in, constr_set.framing_factor,

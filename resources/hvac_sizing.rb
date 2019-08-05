@@ -63,53 +63,53 @@ class HVACSizing
     @shelter_class = get_shelter_class(building: building, min_neighbor_distance: min_neighbor_distance)
 
     # Calculate loads for each conditioned thermal zone
-    zones_loads = process_zone_loads(runner: runner, model: model, building: building, weather: weather)
+    zones_loads = process_zone_loads(runner: runner, building: building, weather: weather)
     return false if zones_loads.nil?
 
     # Display debug info
     if show_debug_info
-      display_zone_loads(runner, zones_loads)
+      display_zone_loads(runner: runner, zones_loads: zones_loads)
     end
 
     # Aggregate zone loads into initial loads
-    init_loads = aggregate_zone_loads(zones_loads)
+    init_loads = aggregate_zone_loads(zones_loads: zones_loads)
     return false if init_loads.nil?
 
     # For airloop systems serving multiple zones, calculate air flow ratio to slave zones
-    zone_ratios = process_slave_zone_flow_ratios(runner, model, zones_loads)
+    zone_ratios = process_slave_zone_flow_ratios(runner: runner, zones_loads: zones_loads)
     return false if zone_ratios.nil?
 
     # Get HVAC system info
-    hvacs = get_hvacs(runner: runner, model: model, building: building)
+    hvacs = get_hvacs(runner: runner, building: building)
     return false if hvacs.nil?
 
     hvacs.each do |hvac|
-      hvac = calculate_hvac_temperatures(init_loads, hvac)
+      hvac = calculate_hvac_temperatures(init_loads: init_loads, hvac: hvac)
       return false if init_loads.nil?
 
-      hvac_init_loads = apply_hvac_load_fractions(init_loads, hvac)
+      hvac_init_loads = apply_hvac_load_fractions(init_loads: init_loads, hvac: hvac)
       return false if hvac_init_loads.nil?
 
-      hvac_init_loads = apply_hp_sizing_logic(hvac_init_loads, hvac)
+      hvac_init_loads = apply_hp_sizing_logic(hvac_init_loads: hvac_init_loads, hvac: hvac)
       return false if hvac_init_loads.nil?
 
       hvac_final_values = FinalValues.new
 
       # Calculate heating ducts load
-      hvac_final_values = process_duct_loads_heating(runner: runner, model: model, building: building, hvac_final_values: hvac_final_values, weather: weather, hvac: hvac, init_heat_load: hvac_init_loads.Heat)
+      hvac_final_values = process_duct_loads_heating(runner: runner, building: building, hvac_final_values: hvac_final_values, weather: weather, hvac: hvac, init_heat_load: hvac_init_loads.Heat)
       return false if hvac_final_values.nil?
 
       # Calculate cooling ducts load
-      hvac_final_values = process_duct_loads_cooling(runner: runner, model: model, building: building, hvac_final_values: hvac_final_values, weather: weather, hvac: hvac, init_cool_load_sens: hvac_init_loads.Cool_Sens, init_cool_load_lat: hvac_init_loads.Cool_Lat)
+      hvac_final_values = process_duct_loads_cooling(runner: runner, building: building, hvac_final_values: hvac_final_values, weather: weather, hvac: hvac, init_cool_load_sens: hvac_init_loads.Cool_Sens, init_cool_load_lat: hvac_init_loads.Cool_Lat)
       return false if hvac_final_values.nil?
 
-      hvac_final_values = process_cooling_equipment_adjustments(runner, hvac_final_values, weather, hvac)
+      hvac_final_values = process_cooling_equipment_adjustments(runner: runner, hvac_final_values: hvac_final_values, weather: weather, hvac: hvac)
       return false if hvac_final_values.nil?
 
-      hvac_final_values = process_fixed_equipment(runner, hvac_final_values, hvac)
+      hvac_final_values = process_fixed_equipment(runner: runner, hvac_final_values: hvac_final_values, hvac: hvac)
       return false if hvac_final_values.nil?
 
-      hvac_final_values = process_finalize(runner, hvac_final_values, zones_loads, weather, hvac)
+      hvac_final_values = process_finalize(runner: runner, hvac_final_values: hvac_final_values, zones_loads: zones_loads, weather: weather, hvac: hvac)
       return false if hvac_final_values.nil?
 
       # Set OpenStudio object values
@@ -119,7 +119,7 @@ class HVACSizing
 
       # Display debug info
       if show_debug_info
-        display_hvac_final_values_results(runner, hvac_final_values)
+        display_hvac_final_values_results(runner: runner, hvac_final_values: hvac_final_values)
       end
     end
 
@@ -423,10 +423,9 @@ class HVACSizing
     return cool_temp
   end
 
-    def self.process_zone_loads(runner:,
-                                model:,
-                                building:,
-                                weather:)
+  def self.process_zone_loads(runner:,
+                              building:,
+                              weather:)
     thermal_zones = Geometry.get_thermal_zones(building: building)
 
     # Constant loads (no variation throughout day)
@@ -440,7 +439,7 @@ class HVACSizing
       zone_loads = process_load_walls(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_load_roofs(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_load_floors(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
-      zone_loads = process_infiltration_ventilation(runner: runner, model: model, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_infiltration_ventilation(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       return nil if zone_loads.nil?
 
       zones_loads[thermal_zone] = zone_loads
@@ -478,7 +477,7 @@ class HVACSizing
     end
 
     return zones_loads
-  end
+end
 
   def self.process_load_windows_skylights(runner:,
                                           building:,
@@ -623,7 +622,7 @@ class HVACSizing
     afl_hr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     Geometry.get_thermal_zone_above_grade_exterior_walls(building: building, thermal_zone: thermal_zone).each do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)  
+      wall_values = HPXML.get_wall_values(wall: wall)
 
       building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
         window_values = HPXML.get_window_values(window: window)
@@ -650,6 +649,7 @@ class HVACSizing
           interior_shading_factor_winter = window_values[:interior_shading_factor_winter]
         end
         return nil if window_values[:shgc].nil?
+
         shgc_with_interior_shade_cool = window_values[:shgc] * interior_shading_factor_summer
         shgc_with_interior_shade_heat = window_values[:shgc] * interior_shading_factor_winter
 
@@ -805,8 +805,9 @@ class HVACSizing
         interior_shading_factor_summer = 1.0
         interior_shading_factor_winter = 1.0
         return nil if skylight_values[:shgc].nil?
+
         shgc_with_interior_shade_cool = skylight_values[:shgc] * interior_shading_factor_summer
-        shgc_with_interior_shade_heat = skylight_values[:shgc] * interior_shading_factor_winter  
+        shgc_with_interior_shade_heat = skylight_values[:shgc] * interior_shading_factor_winter
 
         skylightHasIntShading = true # TODO
 
@@ -908,6 +909,7 @@ class HVACSizing
 
         door_rvalue = door_values[:r_value]
         return nil if door_rvalue.nil?
+
         door_ufactor = 1.0 / door_rvalue # TODO
 
         zone_loads.Heat_Doors += door_ufactor * door_values[:area] * @htd
@@ -1067,7 +1069,7 @@ class HVACSizing
 
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
       ins_wall_ufactor = 1.0 / (wall_constr_rvalue + wall_ins_rvalue + Material.AirFilmVertical.rvalue)
-      unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)      
+      unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)
       above_grade_height = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone) - foundation_wall_values[:height]
 
       # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
@@ -1237,7 +1239,6 @@ class HVACSizing
   end
 
   def self.process_infiltration_ventilation(runner:,
-                                            model:,
                                             building:,
                                             thermal_zone:,
                                             zone_loads:,
@@ -1283,7 +1284,7 @@ class HVACSizing
 
     icfm_Cooling = ela_in2 * (c_s * @ctd.abs + c_w * windspeed_cooling_mph**2)**0.5
     icfm_Heating = ela_in2 * (c_s * @htd.abs + c_w * windspeed_heating_mph**2)**0.5
-    q_unb, q_bal_Sens, q_bal_Lat = get_ventilation_rates(runner: runner, model: model, building: building)
+    q_unb, q_bal_Sens, q_bal_Lat = get_ventilation_rates(runner: runner, building: building)
     return nil if q_unb.nil? or q_bal_Sens.nil? or q_bal_Lat.nil?
 
     cfm_Heating = q_bal_Sens + (icfm_Heating**2 + q_unb**2)**0.5
@@ -1390,7 +1391,7 @@ class HVACSizing
     return int_Sens_Hr, int_Lat_Hr
   end
 
-  def self.aggregate_zone_loads(zones_loads)
+  def self.aggregate_zone_loads(zones_loads:)
     '''
     Intermediate Loads
     (total loads excluding ducts)
@@ -1425,7 +1426,8 @@ class HVACSizing
     return init_loads
   end
 
-  def self.calculate_hvac_temperatures(init_loads, hvac)
+  def self.calculate_hvac_temperatures(init_loads:,
+                                       hvac:)
     '''
     HVAC Temperatures
     '''
@@ -1454,7 +1456,8 @@ class HVACSizing
     return hvac
   end
 
-  def self.apply_hvac_load_fractions(init_loads, hvac)
+  def self.apply_hvac_load_fractions(init_loads:,
+                                     hvac:)
     '''
     Intermediate Loads (HVAC-specific)
     '''
@@ -1475,7 +1478,8 @@ class HVACSizing
     return hvac_init_loads
   end
 
-  def self.apply_hp_sizing_logic(hvac_init_loads, hvac)
+  def self.apply_hp_sizing_logic(hvac_init_loads:,
+                                 hvac:)
     # If true, uses the larger of heating and cooling loads for heat pump capacity sizing (required for ERI).
     # Otherwise, uses standard Manual S oversize allowances.
     hp_use_max_load = true
@@ -1500,14 +1504,13 @@ class HVACSizing
   end
 
   def self.get_duct_regain_factor(runner:,
-                                  model:,
                                   building:,
                                   duct:)
     # dse_Fregain values comes from MJ8 pg 204 and Walker (1998) "Technical background for default
     # values used for forced air systems in proposed ASHRAE Std. 152"
 
     dse_Fregain = nil
-    thermal_zones = {"living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented"}
+    thermal_zones = { "living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented" }
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
 
     if duct[:duct_location] == "outside" # Outside
@@ -1517,7 +1520,7 @@ class HVACSizing
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner: runner, building: building, thermal_zone: duct[:duct_location])
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
-      
+
       infiltration_cfm = 0
       unless air_infiltration_measurement.elements["extension/#{thermal_zones[duct[:duct_location]]}CFM"].nil?
         infiltration_cfm = Float(air_infiltration_measurement.elements["extension/#{thermal_zones[duct[:duct_location]]}CFM"].text)
@@ -1595,7 +1598,6 @@ class HVACSizing
   end
 
   def self.process_duct_loads_heating(runner:,
-                                      model:,
                                       building:,
                                       hvac_final_values:,
                                       weather:,
@@ -1625,7 +1627,7 @@ class HVACSizing
       # in each space. Fregain shall be calculated separately for supply and return locations.
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
-        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner: runner, model: model, building: building, duct: duct)
+        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner: runner, building: building, duct: duct)
         if dse_Fregains[duct[:duct_location]].nil?
           runner.registerError("Unexpected duct location: #{duct[:duct_location]}.")
           return nil
@@ -1666,7 +1668,6 @@ class HVACSizing
   end
 
   def self.process_duct_loads_cooling(runner:,
-                                      model:,
                                       building:,
                                       hvac_final_values:,
                                       weather:,
@@ -1705,7 +1706,7 @@ class HVACSizing
       # in each space. Fregain shall be calculated separately for supply and return locations.
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
-        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner: runner, model: model, building: building, duct: duct)
+        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(runner: runner, building: building, duct: duct)
         return nil if dse_Fregains[duct[:duct_location]].nil?
       end
       fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
@@ -1760,7 +1761,10 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_cooling_equipment_adjustments(runner, hvac_final_values, weather, hvac)
+  def self.process_cooling_equipment_adjustments(runner:,
+                                                 hvac_final_values:,
+                                                 weather:,
+                                                 hvac:)
     '''
     Equipment Adjustments
     '''
@@ -1981,7 +1985,9 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_fixed_equipment(runner, hvac_final_values, hvac)
+  def self.process_fixed_equipment(runner:,
+                                   hvac_final_values:,
+                                   hvac:)
     '''
     Fixed Sizing Equipment
     '''
@@ -2005,7 +2011,11 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_finalize(runner, hvac_final_values, zones_loads, weather, hvac)
+  def self.process_finalize(runner:,
+                            hvac_final_values:,
+                            zones_loads:,
+                            weather:,
+                            hvac:)
     '''
     Finalize Sizing Calculations
     '''
@@ -2293,7 +2303,8 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_slave_zone_flow_ratios(runner, model, zones_loads)
+  def self.process_slave_zone_flow_ratios(runner:,
+                                          zones_loads:)
     '''
     Flow Ratios for Slave Zones
     '''
@@ -2345,8 +2356,8 @@ class HVACSizing
     return zone_ratios
   end
 
-    def self.get_shelter_class(building:,
-                               min_neighbor_distance:)
+  def self.get_shelter_class(building:,
+                             min_neighbor_distance:)
     height_ft = height = 8.0 * @ncfl_ag
     above_grade_exterior_wall_area = Geometry.calculate_above_grade_exterior_wall_area(building: building)
     above_grade_wall_area = Geometry.calculate_above_grade_wall_area(building: building)
@@ -2375,7 +2386,7 @@ class HVACSizing
     end
 
     return shelter_class
-  end
+end
 
   def self.get_wallgroup_wood_or_steel_stud(cavity_ins_r_value:)
     '''
@@ -2401,9 +2412,8 @@ class HVACSizing
   end
 
   def self.get_ventilation_rates(runner:,
-                                 model:,
                                  building:)
-    
+
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     mechVentType = Constants.VentTypeNone
     mechVentWholeHouseRate = 0.0
@@ -2566,7 +2576,7 @@ class HVACSizing
       end
 
       if ducts_values[:duct_leakage_units] == "CFM25"
-          ducts_values[:leakage_cfm_25] = ducts_values[:duct_leakage_value]
+        ducts_values[:leakage_cfm_25] = ducts_values[:duct_leakage_value]
       end
 
       ductss << ducts_values
@@ -2642,7 +2652,7 @@ class HVACSizing
     ducts.each do |duct|
       next if duct[:duct_location] == "living space"
 
-      u_factors[duct[:duct_type]][duct[:duct_location]] = 1.0 / Airflow.get_duct_insulation_rvalue(duct[:duct_insulation_r_value], duct[:duct_type])      
+      u_factors[duct[:duct_type]][duct[:duct_location]] = 1.0 / Airflow.get_duct_insulation_rvalue(duct[:duct_insulation_r_value], duct[:duct_type])
     end
 
     supply_u, return_u = calc_ducts_area_weighted_average(ducts, u_factors)
@@ -2657,7 +2667,7 @@ class HVACSizing
 
     @hvac_map[heating_system_values[:id]].each do |object|
       if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem or
-         object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater or 
+         object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater or
          object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric or
          object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
         hvac.Objects << object
@@ -2673,7 +2683,7 @@ class HVACSizing
     hvac.FixedHeatingCapacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "Btu/hr", "ton") unless hvac.FixedHeatingCapacity.nil?
     hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text) unless heating_system.elements["extension/NumSpeedsHeating"].nil?
     hvac.BoilerDesignTemp = Float(heating_system.elements["extension/BoilerDesignTemp"].text) unless heating_system.elements["extension/BoilerDesignTemp"].nil?
-    hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)    
+    hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)
   end
 
   def self.assign_cooling_system(building:,
@@ -2683,7 +2693,7 @@ class HVACSizing
 
     @hvac_map[cooling_system_values[:id]].each do |object|
       if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem or
-         object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater or 
+         object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater or
          object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric or
          object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
         hvac.Objects << object
@@ -2721,7 +2731,7 @@ class HVACSizing
 
     @hvac_map[heat_pump_values[:id]].each do |object|
       if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem or
-         object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater or 
+         object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater or
          object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric or
          object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
         hvac.Objects << object
@@ -2734,7 +2744,7 @@ class HVACSizing
     hvac.CoolingLoadFraction = heat_pump_values[:fraction_cool_load_served]
     hvac.HeatingLoadFraction = heat_pump_values[:fraction_heat_load_served]
     hvac.CoolingCFMs = heat_pump.elements["extension/CoolingCFMs"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/CoolingCFMs"].nil?
-    hvac.HeatingCFMs = heat_pump.elements["extension/HeatingCFMs"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/HeatingCFMs"].nil?    
+    hvac.HeatingCFMs = heat_pump.elements["extension/HeatingCFMs"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/HeatingCFMs"].nil?
     hvac.HEAT_CAP_FT_SPEC = heat_pump.elements["extension/HEAT_CAP_FT_SPEC"].text.split(";") unless heat_pump.elements["extension/HEAT_CAP_FT_SPEC"].nil?
     unless hvac.HEAT_CAP_FT_SPEC.nil?
       hvac.HEAT_CAP_FT_SPEC.each_with_index do |curve, i|
@@ -2753,7 +2763,7 @@ class HVACSizing
     hvac.GSHP_BoreHoles = heat_pump.elements["extension/GSHP_BoreHoles"].text unless heat_pump.elements["extension/GSHP_BoreHoles"].nil?
     hvac.GSHP_BoreDepth = heat_pump.elements["extension/GSHP_BoreDepth"].text unless heat_pump.elements["extension/GSHP_BoreDepth"].nil?
     hvac.GSHP_BoreConfig = heat_pump.elements["extension/GSHP_BoreConfig"].text unless heat_pump.elements["extension/GSHP_BoreConfig"].nil?
-    hvac.GSHP_SpacingType = heat_pump.elements["extension/GSHP_SpacingType"].text unless heat_pump.elements["extension/GSHP_SpacingType"].nil?    
+    hvac.GSHP_SpacingType = heat_pump.elements["extension/GSHP_SpacingType"].text unless heat_pump.elements["extension/GSHP_SpacingType"].nil?
     hvac.CoolingEIR = Float(heat_pump.elements["extension/CoolingEIR"].text) unless heat_pump.elements["extension/CoolingEIR"].nil?
     hvac.HeatingEIR = Float(heat_pump.elements["extension/HeatingEIR"].text) unless heat_pump.elements["extension/HeatingEIR"].nil?
     @hvac_map[heat_pump_values[:id]].each do |object|
@@ -2789,7 +2799,6 @@ class HVACSizing
   end
 
   def self.get_hvacs(runner:,
-                     model:,
                      building:)
     # Get unique set of HVAC equipment
     hvacs = []
@@ -2928,7 +2937,6 @@ class HVACSizing
         thermal_zone_UAs["foundation"] += ufactor * foundation_wall_values[:area]
 
       end
-      
     end
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
@@ -2940,7 +2948,6 @@ class HVACSizing
         thermal_zone_UAs["outdoors"] += ufactor * wall_values[:area]
 
       end
-
     end
 
     building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
@@ -2949,7 +2956,6 @@ class HVACSizing
       # TODO
       # ufactor = 1.0 / slab_values[:insulation_assembly_r_value]
       # thermal_zone_UAs["foundation"] += ufactor * slab_values[:area]
-
     end
 
     building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
@@ -2959,13 +2965,12 @@ class HVACSizing
 
       ufactor = 1.0 / framefloor_values[:insulation_assembly_r_value]
       thermal_zone_UAs["surface"] += ufactor * framefloor_values[:area]
-
     end
 
     # Infiltration UA
-    thermal_zones = {"living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented"}
+    thermal_zones = { "living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented" }
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
-    
+
     infiltration_cfm = 0
     unless air_infiltration_measurement.elements["extension/#{thermal_zones[thermal_zone]}CFM"].nil?
       infiltration_cfm = Float(air_infiltration_measurement.elements["extension/#{thermal_zones[thermal_zone]}CFM"].text)
@@ -3072,6 +3077,7 @@ class HVACSizing
     if ['WoodStud', 'SteelFrame'].include?(wall_type)
       cavity_r = wall.elements["extension/cavity_r"]
       return nil if cavity_r.nil?
+
       cavity_r = Float(cavity_r.text)
 
       wallGroup = get_wallgroup_wood_or_steel_stud(cavity_ins_r_value: cavity_r)
@@ -3111,6 +3117,7 @@ class HVACSizing
 
       sip_ins_thick_in = wall.elements["extension/sip_ins_thick_in"]
       return nil if sip_ins_thick_in.nil?
+
       sip_ins_thick_in = Float(sip_ins_thick_in.text)
 
       # Manual J refers to SIPs as Structural Foam Panel (SFP)
@@ -3541,7 +3548,7 @@ class HVACSizing
     ceiling_ufactor = nil
     building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
       framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-      
+
       ceiling_ufactor = 1.0 / framefloor_values[:insulation_assembly_r_value] # TODO
     end
     ceiling_ufactor = 1 # TODO: there is no frame floor for ceiling above conditioned basement
@@ -3836,7 +3843,7 @@ class HVACSizing
 
     return true
   end
-  
+
   def self.get_thermal_zone_r_value(runner:,
                                     building:,
                                     thermal_zone:,
@@ -3927,7 +3934,8 @@ class HVACSizing
     return simple_glazing
   end
 
-  def self.display_zone_loads(runner, zone_loads)
+  def self.display_zone_loads(runner:,
+                              zone_loads:)
     zone_loads.keys.each do |thermal_zone|
       loads = zone_loads[thermal_zone]
       s = "Zone Loads for #{thermal_zone}:"
@@ -3950,7 +3958,8 @@ class HVACSizing
     end
   end
 
-  def self.display_hvac_final_values_results(runner, hvac_final_values)
+  def self.display_hvac_final_values_results(runner:,
+                                             hvac_final_values:)
     s = "Final Results:"
     loads = [
       :Heat_Load, :Heat_Load_Ducts,

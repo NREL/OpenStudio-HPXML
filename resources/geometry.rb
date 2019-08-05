@@ -47,39 +47,39 @@ class Geometry
     end
     return thermal_zones.uniq
   end
-  
+
   def self.get_model_thermal_zone(model:,
                                   thermal_zone:)
     model.getThermalZones.each do |zone|
-      if ( thermal_zone == "living space" and Geometry.is_living(zone) ) or
-         ( thermal_zone == "basement - conditioned" and Geometry.is_conditioned_basement(zone) ) or
-         ( thermal_zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(zone) ) or
-         ( thermal_zone == "crawlspace - vented" and Geometry.is_vented_crawl(zone) ) or
-         ( thermal_zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(zone) ) or
-         ( thermal_zone == "garage" and Geometry.is_garage(zone) ) or
-         ( thermal_zone == "attic - vented" and Geometry.is_vented_attic(zone) ) or
-         ( thermal_zone == "attic - unvented" and Geometry.is_unvented_attic(zone) )
+      if (thermal_zone == "living space" and Geometry.is_living(zone)) or
+         (thermal_zone == "basement - conditioned" and Geometry.is_conditioned_basement(zone)) or
+         (thermal_zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(zone)) or
+         (thermal_zone == "crawlspace - vented" and Geometry.is_vented_crawl(zone)) or
+         (thermal_zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(zone)) or
+         (thermal_zone == "garage" and Geometry.is_garage(zone)) or
+         (thermal_zone == "attic - vented" and Geometry.is_vented_attic(zone)) or
+         (thermal_zone == "attic - unvented" and Geometry.is_unvented_attic(zone))
         return zone
-      end      
+      end
     end
   end
 
   def self.get_hpxml_thermal_zone(building:,
                                   thermal_zone:)
     Geometry.get_thermal_zones(building: building).each do |zone|
-      if ( zone == "living space" and Geometry.is_living(thermal_zone) ) or
-         ( zone == "basement - conditioned" and Geometry.is_conditioned_basement(thermal_zone) ) or
-         ( zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(thermal_zone) ) or
-         ( zone == "crawlspace - vented" and Geometry.is_vented_crawl(thermal_zone) ) or
-         ( zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(thermal_zone) ) or
-         ( zone == "garage" and Geometry.is_garage(thermal_zone) ) or
-         ( zone == "attic - vented" and Geometry.is_vented_attic(thermal_zone) ) or
-         ( zone == "attic - unvented" and Geometry.is_unvented_attic(thermal_zone) )
+      if (zone == "living space" and Geometry.is_living(thermal_zone)) or
+         (zone == "basement - conditioned" and Geometry.is_conditioned_basement(thermal_zone)) or
+         (zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(thermal_zone)) or
+         (zone == "crawlspace - vented" and Geometry.is_vented_crawl(thermal_zone)) or
+         (zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(thermal_zone)) or
+         (zone == "garage" and Geometry.is_garage(thermal_zone)) or
+         (zone == "attic - vented" and Geometry.is_vented_attic(thermal_zone)) or
+         (zone == "attic - unvented" and Geometry.is_unvented_attic(thermal_zone))
         return zone
-      end  
+      end
     end
   end
-  
+
   def self.get_thermal_zone_floor_area(building:,
                                        thermal_zone:)
     floor_area = 0
@@ -140,7 +140,7 @@ class Geometry
     end
     return maxzs.max - minzs.min
   end
-  
+
   def self.get_height_of_thermal_zone(building:,
                                       thermal_zone:)
     heights = []
@@ -178,9 +178,10 @@ class Geometry
       end
     end
   end
-  
+
   def self.thermal_zone_is_conditioned(thermal_zone:)
     return true if thermal_zone == "living space" or thermal_zone.include? "conditioned" or thermal_zone == "other housing unit"
+
     return false
   end
 
@@ -196,13 +197,14 @@ class Geometry
 
     return false
   end
-  
+
   def self.thermal_zone_is_above_grade(building:,
                                        thermal_zone:)
     return true if thermal_zone == "living space"
     return true if thermal_zone.include? "attic"
     return false if thermal_zone.include? "basement"
     return false if thermal_zone.include? "crawlspace"
+
     if thermal_zone.include? "garage"
       building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
         slab_values = HPXML.get_slab_values(slab: slab)
@@ -210,6 +212,7 @@ class Geometry
         next if slab_values[:interior_adjacent_to] != thermal_zone
 
         return true if slab_values[:depth_below_grade] == 0
+
         return false
       end
     end
@@ -220,7 +223,7 @@ class Geometry
   def self.zone_is_below_grade(zone)
     return !self.zone_is_above_grade(zone)
   end
-  
+
   def self.thermal_zone_is_below_grade(building:,
                                        thermal_zone:)
     return !self.thermal_zone_is_above_grade(building: building, thermal_zone: thermal_zone)
@@ -378,7 +381,7 @@ class Geometry
       wall_values = HPXML.get_wall_values(wall: wall)
       wall_area += wall_values[:area]
     end
-    
+
     building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
       fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
       height = fnd_wall_values[:height]
@@ -398,16 +401,16 @@ class Geometry
 
   def self.calculate_above_grade_exterior_wall_area(building:)
     wall_area = 0
-  
+
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
       wall_values = HPXML.get_wall_values(wall: wall)
 
       next unless ["living space", "attic - conditioned", "basement - conditioned", "crawlspace - conditioned", "garage - conditioned"].include? wall_values[:interior_adjacent_to]
       next if wall_values[:exterior_adjacent_to] != "outside"
 
-      wall_area += wall_values[:area]      
+      wall_area += wall_values[:area]
     end
-    
+
     building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
       fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
 
@@ -622,7 +625,7 @@ class Geometry
     end
     return above_grade_exterior_walls
   end
-  
+
   def self.get_thermal_zone_above_grade_exterior_walls(building:,
                                                        thermal_zone:)
     above_grade_exterior_walls = []
@@ -668,7 +671,7 @@ class Geometry
     end
     return above_grade_exterior_floors
   end
-  
+
   def self.get_thermal_zone_above_grade_exterior_floors(building:,
                                                         thermal_zone:)
     above_grade_exterior_floors = []
@@ -699,7 +702,7 @@ class Geometry
     end
     return above_grade_ground_floors
   end
-  
+
   def self.get_thermal_zone_above_grade_ground_floors(building:,
                                                       thermal_zone:)
     above_grade_ground_floors = []
@@ -730,7 +733,7 @@ class Geometry
     end
     return above_grade_exterior_roofs
   end
-  
+
   def self.get_thermal_zone_above_grade_exterior_roofs(building:,
                                                        thermal_zone:)
     above_grade_exterior_roofs = []
@@ -768,7 +771,7 @@ class Geometry
       next if wall_values[:exterior_adjacent_to] == "outside"
       next if wall_values[:exterior_adjacent_to] == "ground"
 
-      if ( self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to]) ) or ( self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]) )
+      if (self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to])) or (self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]))
         interzonal_walls << wall
       end
     end
@@ -788,7 +791,7 @@ class Geometry
     end
     return interzonal_floors
   end
-  
+
   def self.get_thermal_zone_interzonal_floors_and_ceilings(building:,
                                                            thermal_zone:)
     interzonal_floors = []
