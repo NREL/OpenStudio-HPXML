@@ -2594,17 +2594,17 @@ class OSModel
     infil_const_ach = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
       air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
+      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
+      if infilvolume.nil?
+        infilvolume = @cvolume
+      end
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
       elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
-      end
-      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
-    end
-    if infilvolume.nil?
-      infilvolume = @cvolume
+      end      
     end
 
     vented_attic_sla = nil
@@ -2883,8 +2883,7 @@ class OSModel
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
     ventilation_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     success = Airflow.apply(model, runner, air_infiltration_measurement, ventilation_fan, infil, mech_vent, nat_vent, duct_systems,
-                            @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
-                            @min_neighbor_distance)
+                            @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area, @min_neighbor_distance)
     return false if not success
 
     return true

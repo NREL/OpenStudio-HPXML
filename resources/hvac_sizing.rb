@@ -1610,6 +1610,7 @@ class HVACSizing
       hvac_final_values.Heat_Load = init_heat_load
     else
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
+
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
 
       design_temp_values = { Constants.DuctSideSupply => @heat_design_temps, Constants.DuctSideReturn => @heat_design_temps }
@@ -2555,13 +2556,17 @@ class HVACSizing
     air_distribution.elements.each("Ducts") do |ducts|
       ducts_values = HPXML.get_ducts_values(ducts: ducts)
 
-      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
         duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
         next if duct_leakage_measurement_values[:duct_type] != ducts_values[:duct_type]
 
         ducts_values.merge! duct_leakage_measurement_values
       end
+
+      if ducts_values[:duct_leakage_units] == "CFM25"
+          ducts_values[:leakage_cfm_25] = ducts_values[:duct_leakage_value]
+      end
+
       ductss << ducts_values
     end
     return ductss
@@ -2616,7 +2621,7 @@ class HVACSizing
     ducts.each do |duct|
       next if duct[:duct_location] == "living space"
 
-      if not duct[:leakage_frac].nil?
+      if not duct[:leakage_frac].nil? # TODO: is this always nil?
         cfms[duct[:duct_type]] += duct[:leakage_frac] * system_cfm
       elsif not duct[:leakage_cfm_25].nil?
         cfms[duct[:duct_type]] += duct[:leakage_cfm_25]
@@ -2635,7 +2640,7 @@ class HVACSizing
     ducts.each do |duct|
       next if duct[:duct_location] == "living space"
 
-      u_factors[duct[:duct_type]][duct[:duct_location]] = 1.0 / duct[:duct_insulation_r_value]
+      u_factors[duct[:duct_type]][duct[:duct_location]] = 1.0 / Airflow.get_duct_insulation_rvalue(duct[:duct_insulation_r_value], duct[:duct_type])      
     end
 
     supply_u, return_u = calc_ducts_area_weighted_average(ducts, u_factors)
