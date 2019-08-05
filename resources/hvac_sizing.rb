@@ -21,7 +21,6 @@ class HVACSizing
                  hvac_map:,
                  show_debug_info: false)
 
-    @model_spaces = model.getSpaces
     @cfa = cfa
     @cfa_ag = cfa_ag
     @nbeds = nbeds
@@ -1068,9 +1067,8 @@ class HVACSizing
 
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
       ins_wall_ufactor = 1.0 / (wall_constr_rvalue + wall_ins_rvalue + Material.AirFilmVertical.rvalue)
-      unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)
-      height_of_spaces = 8.0 # TODO
-      above_grade_height = height_of_spaces - foundation_wall_values[:height]
+      unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)      
+      above_grade_height = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone) - foundation_wall_values[:height]
 
       # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
       u_value_mj8 = 0.0
@@ -1278,42 +1276,13 @@ class HVACSizing
       return nil
     end
 
-    infilvolume = nil
-    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
-      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
-    end
-    if infilvolume.nil?
-      infilvolume = @cvolume
-    end
-
-    infil_ach50 = nil
-    infil_const_ach = nil
-    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
-      if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
-        infil_ach50 = air_infiltration_measurement_values[:air_leakage]
-      elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
-        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
-      else
-        infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
-      end
-    end
-
-    ela = 0
-    unless infil_ach50.nil?
-      sla = Airflow.get_infiltration_SLA_from_ACH50(infil_ach50, 0.65, @cfa, infilvolume)
-      ach = Airflow.get_infiltration_ACH_from_SLA(sla, @ncfl_ag, weather)
-      ela = sla * @cfa_ag
-    end
-
-    ela_in2 = UnitConversions.convert(ela, "ft^2", "in^2") # TODO: this is off
+    air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
+    ela_in2 = UnitConversions.convert(Float(air_infiltration_measurement.elements["extension/ELA"].text), "ft^2", "in^2")
     windspeed_cooling_mph = UnitConversions.convert(@windspeed_cooling, "m/s", "mph")
     windspeed_heating_mph = UnitConversions.convert(@windspeed_heating, "m/s", "mph")
 
     icfm_Cooling = ela_in2 * (c_s * @ctd.abs + c_w * windspeed_cooling_mph**2)**0.5
     icfm_Heating = ela_in2 * (c_s * @htd.abs + c_w * windspeed_heating_mph**2)**0.5
-
     q_unb, q_bal_Sens, q_bal_Lat = get_ventilation_rates(runner: runner, model: model, building: building)
     return nil if q_unb.nil? or q_bal_Sens.nil? or q_bal_Lat.nil?
 
@@ -2431,24 +2400,14 @@ class HVACSizing
   def self.get_ventilation_rates(runner:,
                                  model:,
                                  building:)
+    
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
-    whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
     mechVentType = Constants.VentTypeNone
     mechVentWholeHouseRate = 0.0
-    if not whole_house_fan_values.nil?
-      fan_type = whole_house_fan_values[:fan_type]
-      if fan_type == "supply only"
-        mechVentType = Constants.VentTypeSupply
-      elsif fan_type == "exhaust only"
-        mechVentType = Constants.VentTypeExhaust
-      elsif fan_type == "central fan integrated supply"
-        mechVentType = Constants.VentTypeCFIS
-      elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
-        mechVentType = Constants.VentTypeBalanced
-      end
-      mechVentWholeHouseRate = whole_house_fan_values[:rated_flow_rate]
+    unless whole_house_fan.nil?
+      mechVentType = whole_house_fan.elements["extension/Type"].text
+      mechVentWholeHouseRate = Float(whole_house_fan.elements["extension/WholeHouseRate"].text)
     end
-    return nil if mechVentType.nil? or mechVentWholeHouseRate.nil?
 
     q_unb = 0
     q_bal_Sens = 0
@@ -2459,9 +2418,9 @@ class HVACSizing
     elsif mechVentType == Constants.VentTypeSupply or mechVentType == Constants.VentTypeCFIS
       q_unb = mechVentWholeHouseRate
     elsif mechVentType == Constants.VentTypeBalanced
-      totalEfficiency = get_feature(runner: runner, obj: model.getBuilding, feature: Constants.SizingInfoMechVentTotalEfficiency, datatype: 'double')
-      apparentSensibleEffectiveness = get_feature(runner: runner, obj: model.getBuilding, feature: Constants.SizingInfoMechVentApparentSensibleEffectiveness, datatype: 'double')
-      latentEffectiveness = get_feature(runner: runner, obj: model.getBuilding, feature: Constants.SizingInfoMechVentLatentEffectiveness, datatype: 'double')
+      totalEfficiency = Float(whole_house_fan.elements["extension/TotalEfficiency"].text)
+      apparentSensibleEffectiveness = Float(whole_house_fan.elements["extension/ApparentSensibleEffectiveness"].text)
+      latentEffectiveness = Float(whole_house_fan.elements["extension/LatentEffectiveness"].text)
       return nil if totalEfficiency.nil? or latentEffectiveness.nil? or apparentSensibleEffectiveness.nil?
 
       q_bal_Sens = mechVentWholeHouseRate * (1 - apparentSensibleEffectiveness)
@@ -2997,7 +2956,7 @@ class HVACSizing
     end
 
     # Infiltration UA
-    infiltration_cfm = 0 # TODO
+    infiltration_cfm = get_feature(runner: runner, obj: thermal_zone, feature: Constants.SizingInfoZoneInfiltrationCFM, datatype: 'double', register_error: false)
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     thermal_zone_UAs["infil"] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, "hr", "min")
 
@@ -3632,7 +3591,7 @@ class HVACSizing
                              zone_ratios:)
     # Updates object properties in the model
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
+    thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
 
     hvac.Objects.uniq.each do |object|
       if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem

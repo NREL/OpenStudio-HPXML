@@ -645,6 +645,7 @@ class Geometry
 
       next if rim_joist_values[:interior_adjacent_to] != thermal_zone
       next if rim_joist_values[:exterior_adjacent_to] != "outside"
+      next unless self.thermal_zone_is_above_grade(building: building, thermal_zone: thermal_zone)
 
       above_grade_exterior_rim_joists << rim_joist
     end
@@ -764,9 +765,12 @@ class Geometry
       wall_values = HPXML.get_wall_values(wall: wall)
 
       next if wall_values[:interior_adjacent_to] != thermal_zone
-      next if self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to])
+      next if wall_values[:exterior_adjacent_to] == "outside"
+      next if wall_values[:exterior_adjacent_to] == "ground"
 
-      interzonal_walls << wall
+      if ( self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to]) ) or ( self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]) )
+        interzonal_walls << wall
+      end
     end
     return interzonal_walls
   end

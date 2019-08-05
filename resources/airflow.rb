@@ -7,7 +7,7 @@ require_relative "psychrometrics"
 require_relative "hvac"
 
 class Airflow
-  def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+  def self.apply(model, runner, air_infiltration_measurement, ventilation_fan, infil, mech_vent, nat_vent, duct_systems,
                  cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
     weather = WeatherProcess.new(model, runner)
     if weather.error?
@@ -96,7 +96,7 @@ class Airflow
     success = process_infiltration_for_conditioned_zones(model, runner, infil, wind_speed, building, weather)
     return false if not success
 
-    success = process_mech_vent(model, runner, mech_vent, building, weather, infil)
+    success = process_mech_vent(model, runner, ventilation_fan, mech_vent, building, weather, infil)
     return false if not success
 
     if mech_vent.type == Constants.VentTypeCFIS
@@ -124,17 +124,15 @@ class Airflow
 
     # Store info for HVAC Sizing measure
     if not building.living.ELA.nil?
-      building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationELA, building.living.ELA.to_f)
-      building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.living.inf_flow.to_f)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"ELA": building.living.ELA})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"InfFlow": building.living.inf_flow})
     else
-      building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationELA, 0.0)
-      building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, 0.0)
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"ELA": 0})
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: {"InfFlow": 0})
     end
     unless building.conditioned_basement.nil?
       building.conditioned_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.conditioned_basement.inf_flow)
     end
-
-    # Store info for HVAC Sizing measure
     unless building.vented_crawlspace.nil?
       building.vented_crawlspace.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.vented_crawlspace.inf_flow.to_f)
     end
@@ -149,12 +147,6 @@ class Airflow
     end
     unless building.unvented_attic.nil?
       building.unvented_attic.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.unvented_attic.inf_flow)
-    end
-    model.getAirLoopHVACs.each do |air_loop|
-      has_ducts = air_loop.additionalProperties.getFeatureAsBoolean(Constants.SizingInfoDuctExist)
-      next if has_ducts.is_initialized
-
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, false)
     end
 
     terrain = { Constants.TerrainOcean => "Ocean",      # Ocean, Bayou flat country
@@ -544,7 +536,7 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent(model, runner, mech_vent, building, weather, infil)
+  def self.process_mech_vent(model, runner, ventilation_fan, mech_vent, building, weather, infil)
     if mech_vent.type == Constants.VentTypeCFIS
       if not HVAC.has_ducted_equipment(model, runner, mech_vent.cfis_air_loop)
         runner.registerError("A CFIS ventilation system has been specified but the building does not have central, forced air equipment.")
@@ -689,11 +681,13 @@ class Airflow
     end
 
     # Store info for HVAC Sizing measure
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentType, mech_vent.type)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentTotalEfficiency, mech_vent.total_efficiency.to_f)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentLatentEffectiveness, latent_effectiveness.to_f)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentApparentSensibleEffectiveness, apparent_sensible_effectiveness.to_f)
-    model.getBuilding.additionalProperties.setFeature(Constants.SizingInfoMechVentWholeHouseRate, mech_vent.whole_house_cfm.to_f)
+    unless ventilation_fan.nil?
+      HPXML.add_extension(parent: ventilation_fan, extensions: {"Type": mech_vent.type})
+      HPXML.add_extension(parent: ventilation_fan, extensions: {"TotalEfficiency": mech_vent.total_efficiency})
+      HPXML.add_extension(parent: ventilation_fan, extensions: {"LatentEffectiveness": latent_effectiveness})
+      HPXML.add_extension(parent: ventilation_fan, extensions: {"ApparentSensibleEffectiveness": apparent_sensible_effectiveness})
+      HPXML.add_extension(parent: ventilation_fan, extensions: {"WholeHouseRate": mech_vent.whole_house_cfm})
+    end
 
     mech_vent.frac_fan_heat = frac_fan_heat
     mech_vent.num_fans = num_fans
@@ -750,17 +744,6 @@ class Airflow
         duct.zone = duct.space.thermalZone.get
         duct.zone_handle = duct.zone.handle.to_s
       end
-    end
-
-    if ducts.size > 0 and building.living.zone.airLoopHVACs.include? air_loop
-      # Store info for HVAC Sizing measure
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctExist, true)
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctSides, ducts.map { |duct| duct.side }.join(","))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLocationZones, ducts.map { |duct| duct.zone_handle.to_s }.join(","))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageFracs, ducts.map { |duct| duct.leakage_frac.to_f }.join(","))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctLeakageCFM25s, ducts.map { |duct| duct.leakage_cfm25.to_f }.join(","))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctAreas, ducts.map { |duct| duct.area.to_f }.join(","))
-      air_loop.additionalProperties.setFeature(Constants.SizingInfoDuctRvalues, ducts.map { |duct| duct.rvalue.to_f }.join(","))
     end
 
     return true
