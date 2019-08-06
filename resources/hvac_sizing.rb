@@ -2774,7 +2774,7 @@ end
     hvac.GSHP_HXDTDesign = UnitConversions.convert(Float(heat_pump.elements["extension/GSHP_HXDTDesign"].text), "K", "R") unless heat_pump.elements["extension/GSHP_HXDTDesign"].nil?
     hvac.GSHP_HXCHWDesign = UnitConversions.convert(Float(heat_pump.elements["extension/GSHP_HXCHWDesign"].text), "C", "F") unless heat_pump.elements["extension/GSHP_HXCHWDesign"].nil?
     hvac.GSHP_HXHWDesign = UnitConversions.convert(Float(heat_pump.elements["extension/GSHP_HXHWDesign"].text), "C", "F") unless heat_pump.elements["extension/GSHP_HXHWDesign"].nil?
-    hvac.HPSizedForMaxLoad = heat_pump.elements["extension/HPSizedForMaxLoad"].text unless heat_pump.elements["extension/HPSizedForMaxLoad"].nil?
+    hvac.HPSizedForMaxLoad = Boolean(heat_pump.elements["extension/HPSizedForMaxLoad"].text) unless heat_pump.elements["extension/HPSizedForMaxLoad"].nil?
     hvac.FixedHeatingCapacity = heat_pump_values[:heating_capacity]
     unless hvac.FixedHeatingCapacity.nil?
       hvac.FixedHeatingCapacity = nil if hvac.FixedHeatingCapacity < 0
