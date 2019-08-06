@@ -2976,9 +2976,8 @@ class OSModel
   def self.add_building_output_variables(runner, model, map_tsv_dir)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
                         OutputVars.SpaceHeatingFuel,
-                        OutputVars.SpaceHeatingLoad,
-                        OutputVars.SpaceCoolingElectricity,
-                        OutputVars.SpaceCoolingLoad]
+                        OutputVars.SpaceHVACLoad,
+                        OutputVars.SpaceCoolingElectricity]
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
@@ -3813,26 +3812,14 @@ class OutputVars
              'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy', 'Boiler Propane Energy', 'Boiler FuelOil#1 Energy'] }
   end
 
-  def self.SpaceHeatingLoad
-    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Heating Energy'],
-             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Heating Energy'],
-             'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Heating Energy'],
-             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Heating Energy'],
-             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Heating Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Total Heating Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
+  def self.SpaceHVACLoad
+    return { 'OpenStudio::Model::ThermalZone' => ['Zone Predicted Sensible Load to Setpoint Heat Transfer Rate'] }
   end
 
   def self.SpaceCoolingElectricity
     return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
              'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
              'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'] }
-  end
-
-  def self.SpaceCoolingLoad
-    return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Total Cooling Energy'],
-             'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Total Cooling Energy'],
-             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Total Cooling Energy'] }
   end
 
   def self.WaterHeatingElectricity
