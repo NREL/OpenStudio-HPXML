@@ -82,20 +82,42 @@ class Geometry
 
   def self.get_thermal_zone_floor_area(building:,
                                        thermal_zone:)
-    floor_area = 0
-    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-      next if framefloor_values[:exterior_adjacent_to] != thermal_zone
-
-      floor_area += framefloor_values[:area]
-    end
-    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+    construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
+    cfa = construction_values[:conditioned_floor_area]
+    cfa_ag = cfa
+    enclosure = building.elements["BuildingDetails/Enclosure"]
+    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='basement - conditioned']") do |slab|
       slab_values = HPXML.get_slab_values(slab: slab)
-      next if slab_values[:interior_adjacent_to] != thermal_zone
-
-      floor_area += slab_values[:area]
+      cfa_ag -= slab_values[:area]
     end
-    return floor_area
+    gfa = 0 # garage floor area
+    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='garage']") do |garage_slab|
+      slab_values = HPXML.get_slab_values(slab: garage_slab)
+      gfa += slab_values[:area]
+    end
+
+    if thermal_zone == "living space"
+      return cfa_ag
+    elsif thermal_zone == "basement - conditioned"
+      return cfa - cfa_ag
+    elsif thermal_zone == "garage"
+      return gfa
+    else
+      floor_area = 0
+      building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+        next if framefloor_values[:exterior_adjacent_to] != thermal_zone
+
+        floor_area += framefloor_values[:area]
+      end
+      building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
+        slab_values = HPXML.get_slab_values(slab: slab)
+        next if slab_values[:interior_adjacent_to] != thermal_zone
+
+        floor_area += slab_values[:area]
+      end
+      return floor_area
+    end    
   end
 
   def self.get_zone_volume(zone, runner = nil)

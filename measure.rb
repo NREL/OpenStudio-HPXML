@@ -238,16 +238,8 @@ class OSModel
     # Global variables
     construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = construction_values[:conditioned_floor_area]
-    @cfa_ag = @cfa
-    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='basement - conditioned']") do |slab|
-      slab_values = HPXML.get_slab_values(slab: slab)
-      @cfa_ag -= slab_values[:area]
-    end
-    @gfa = 0 # garage floor area
-    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='garage']") do |garage_slab|
-      slab_values = HPXML.get_slab_values(slab: garage_slab)
-      @gfa += slab_values[:area]
-    end
+    @cfa_ag = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: "living space")
+    @gfa = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: "garage")
     @cvolume = construction_values[:conditioned_building_volume]
     @ncfl = construction_values[:number_of_conditioned_floors]
     @ncfl_ag = construction_values[:number_of_conditioned_floors_above_grade]

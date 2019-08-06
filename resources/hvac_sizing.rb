@@ -1329,52 +1329,52 @@ end
     int_Lat_Hr = [0] * 24
 
     # Plug loads, appliances, showers/sinks/baths, occupants, ceiling fans
-    building.elements.each("BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
-      next # TODO
-      water_fixture_values = HPXML.get_water_fixture_values(water_fixture: water_fixture)
-      sched_values = [0.014, 0.007, 0.005, 0.005, 0.007, 0.018, 0.042, 0.062, 0.066, 0.062, 0.054, 0.050, 0.049, 0.045, 0.043, 0.041, 0.048, 0.065, 0.075, 0.069, 0.057, 0.048, 0.040, 0.027]
-      max_mult = 1.04 * 1.04
-    end
+    # building.elements.each("BuildingDetails/Systems/WaterHeating/WaterFixture") do |water_fixture|
+    #   next # TODO
+    #   water_fixture_values = HPXML.get_water_fixture_values(water_fixture: water_fixture)
+    #   sched_values = [0.014, 0.007, 0.005, 0.005, 0.007, 0.018, 0.042, 0.062, 0.066, 0.062, 0.054, 0.050, 0.049, 0.045, 0.043, 0.041, 0.048, 0.065, 0.075, 0.069, 0.057, 0.048, 0.040, 0.027]
+    #   max_mult = 1.04 * 1.04
+    # end
 
-    clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
-    if not clothes_washer_values.nil?
-      cw_mef = clothes_washer_values[:modified_energy_factor]
-      if cw_mef.nil?
-        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
-      end
-      annual_energy, sensible_frac, latent_frac, _ = HotWaterAndAppliances.calc_clothes_washer_energy_gpd(@eri_version, @nbeds, clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:label_electric_rate], clothes_washer_values[:label_gas_rate], clothes_washer_values[:label_annual_gas_cost], clothes_washer_values[:capacity])
-      sched_values = [0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017]
-      max_mult = 1.15 * 1.04
+    # clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
+    # if not clothes_washer_values.nil?
+    #   cw_mef = clothes_washer_values[:modified_energy_factor]
+    #   if cw_mef.nil?
+    #     cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
+    #   end
+    #   annual_energy, sensible_frac, latent_frac, _ = HotWaterAndAppliances.calc_clothes_washer_energy_gpd(@eri_version, @nbeds, clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:label_electric_rate], clothes_washer_values[:label_gas_rate], clothes_washer_values[:label_annual_gas_cost], clothes_washer_values[:capacity])
+    #   sched_values = [0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017]
+    #   max_mult = 1.15 * 1.04
 
-      int_Sens_Hr, int_Lat_Hr = add_internal_gains(annual_energy, sched_values, max_mult, sensible_frac, latent_frac, int_Sens_Hr, int_Lat_Hr)
-    end
+    #   int_Sens_Hr, int_Lat_Hr = add_internal_gains(annual_energy, sched_values, max_mult, sensible_frac, latent_frac, int_Sens_Hr, int_Lat_Hr)
+    # end
 
-    clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
-    if not clothes_dryer_values.nil?
-      cd_ef = clothes_dryer_values[:energy_factor]
-      if cd_ef.nil?
-        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
-      end
-      annual_energy, cd_annual_therm, sensible_frac, latent_frac = HotWaterAndAppliances.calc_clothes_dryer_energy(@nbeds, clothes_dryer_values[:fuel_type], cd_ef, clothes_dryer_values[:control_type], clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:capacity], cw_mef)
-      sched_values = [0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024]
-      max_mult = 1.15 * 1.04
+    # clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
+    # if not clothes_dryer_values.nil?
+    #   cd_ef = clothes_dryer_values[:energy_factor]
+    #   if cd_ef.nil?
+    #     cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
+    #   end
+    #   annual_energy, cd_annual_therm, sensible_frac, latent_frac = HotWaterAndAppliances.calc_clothes_dryer_energy(@nbeds, clothes_dryer_values[:fuel_type], cd_ef, clothes_dryer_values[:control_type], clothes_washer_values[:rated_annual_kwh], clothes_washer_values[:capacity], cw_mef)
+    #   sched_values = [0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024]
+    #   max_mult = 1.15 * 1.04
 
-      int_Sens_Hr, int_Lat_Hr = add_internal_gains(annual_energy, sched_values, max_mult, sensible_frac, latent_frac, int_Sens_Hr, int_Lat_Hr)
-    end
+    #   int_Sens_Hr, int_Lat_Hr = add_internal_gains(annual_energy, sched_values, max_mult, sensible_frac, latent_frac, int_Sens_Hr, int_Lat_Hr)
+    # end
 
-    dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
-    if not dishwasher_values.nil?
-      dw_ef = dishwasher_values[:energy_factor]
-      if dishwasher_values[:energy_factor].nil?
-        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
-      end
+    # dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
+    # if not dishwasher_values.nil?
+    #   dw_ef = dishwasher_values[:energy_factor]
+    #   if dishwasher_values[:energy_factor].nil?
+    #     dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
+    #   end
 
-      annual_energy, sensible_frac, letent_frac, _ = HotWaterAndAppliances.calc_dishwasher_energy_gpd(@eri_version, @nbeds, dw_ef, dishwasher_values[:place_setting_capacity])
-      sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
-      max_mult = 1.05 * 1.04
+    #   annual_energy, sensible_frac, letent_frac, _ = HotWaterAndAppliances.calc_dishwasher_energy_gpd(@eri_version, @nbeds, dw_ef, dishwasher_values[:place_setting_capacity])
+    #   sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
+    #   max_mult = 1.05 * 1.04
 
-      int_Sens_Hr, int_Lat_Hr = add_internal_gains(annual_energy, sched_values, max_mult, sensible_frac, latent_frac, int_Sens_Hr, int_Lat_Hr)
-    end
+    #   int_Sens_Hr, int_Lat_Hr = add_internal_gains(annual_energy, sched_values, max_mult, sensible_frac, latent_frac, int_Sens_Hr, int_Lat_Hr)
+    # end
 
     # TODO: more internal gains
 
