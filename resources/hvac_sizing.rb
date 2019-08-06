@@ -2781,8 +2781,10 @@ end
     end
     hvac.FixedHeatingCapacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "Btu/hr", "ton") unless hvac.FixedHeatingCapacity.nil?
     hvac.FixedSuppHeatingCapacity = heat_pump_values[:backup_heating_capacity]
-    unless hvac.FixedSuppHeatingCapacity.nil?
+    if not hvac.FixedSuppHeatingCapacity.nil?
       hvac.FixedSuppHeatingCapacity = nil if hvac.FixedSuppHeatingCapacity < 0
+    else
+      hvac.FixedSuppHeatingCapacity = 0
     end
     hvac.FixedSuppHeatingCapacity = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "Btu/hr", "ton") unless hvac.FixedSuppHeatingCapacity.nil?
     hvac.HeatingCapacityOffset = Float(heat_pump.elements["extension/HeatingCapacityOffset"].text) unless heat_pump.elements["extension/HeatingCapacityOffset"].nil?
