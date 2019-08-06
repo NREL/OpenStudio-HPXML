@@ -747,28 +747,29 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Mechanical Ventilation
     mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     if not mv.nil?
-      found_mv_energy = false
+      mv_energy = 0.0
       results.keys.each do |k|
         next if k[0] != 'Electricity' or k[1] != 'Interior Equipment' or not k[2].start_with? Constants.ObjectNameMechanicalVentilation
 
-        found_mv_energy = true
+        mv_energy = results[k]
+      end
         if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
           # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
-          assert_operator(results[k], :>, 0)
           fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
           hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
           fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
-          assert_operator(results[k], :<, fan_kwhs)
+        if fan_kwhs > 0
+          assert_operator(mv_energy, :>, 0)
+          assert_operator(mv_energy, :<, fan_kwhs)
+        else
+          assert_equal(mv_energy, 0.0)
+        end
         else
           # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
           fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
           hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
           fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
-          assert_in_delta(fan_kwhs, results[k], 0.1)
-        end
-      end
-      if not found_mv_energy
-        flunk "Could not find mechanical ventilation energy for #{hpxml_path}."
+        assert_in_delta(mv_energy, fan_kwhs, 0.1)
       end
 
       # CFIS
@@ -780,7 +781,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_delta(hpxml_value, sql_value, 0.001)
 
         # Flow rate
-        hpxml_value = Float(XMLHelper.get_value(mv, "RatedFlowRate")) * Float(XMLHelper.get_value(mv, "HoursInOperation")) / 24.0
+        hpxml_value = Float(XMLHelper.get_value(mv, "TestedFlowRate")) * Float(XMLHelper.get_value(mv, "HoursInOperation")) / 24.0
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_flow_rate_output_var.variableName}')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
         assert_in_delta(hpxml_value, sql_value, 0.001)
@@ -907,7 +908,7 @@ class HPXMLTranslatorTest < MiniTest::Test
   def _test_hrv_erv_inputs(test_dir, all_results)
     # Compare HRV and ERV results that use different inputs
     ["hrv", "erv"].each do |mv_type|
-      puts "#{mv_type} test results:"
+      puts "#{mv_type.upcase} test results:"
 
       base_xml = "#{test_dir}/base-mechvent-#{mv_type}.xml"
       results_base = all_results[base_xml]

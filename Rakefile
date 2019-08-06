@@ -93,6 +93,10 @@ def create_hpxmls
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
+    'base-dhw-jacket-electric.xml' => 'base.xml',
+    'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
+    'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-jacket-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
     'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
@@ -172,6 +176,7 @@ def create_hpxmls
     'base-mechvent-erv-asre.xml' => 'base.xml',
     'base-mechvent-erv-atre-asre.xml' => 'base.xml',
     'base-mechvent-exhaust.xml' => 'base.xml',
+    'base-mechvent-exhaust-rated-flow-rate.xml' => 'base.xml',
     'base-mechvent-hrv.xml' => 'base.xml',
     'base-mechvent-hrv-asre.xml' => 'base.xml',
     'base-mechvent-supply.xml' => 'base.xml',
@@ -208,6 +213,23 @@ def create_hpxmls
     'cfis/base-hvac-room-ac-furnace-gas-cfis.xml' => 'base-hvac-room-ac-furnace-gas.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
+    'hvac_autosizing/base-atticroof-cathedral-autosize.xml' => 'base-atticroof-cathedral.xml',
+    'hvac_autosizing/base-atticroof-conditioned-autosize.xml' => 'base-atticroof-conditioned.xml',
+    'hvac_autosizing/base-atticroof-flat-autosize.xml' => 'base-atticroof-flat.xml',
+    'hvac_autosizing/base-atticroof-vented-autosize.xml' => 'base-atticroof-vented.xml',
+    'hvac_autosizing/base-enclosure-garage-autosize.xml' => 'base-enclosure-garage.xml',
+    'hvac_autosizing/base-enclosure-overhangs-autosize.xml' => 'base-enclosure-overhangs.xml',
+    'hvac_autosizing/base-enclosure-skylights-autosize.xml' => 'base-enclosure-skylights.xml',
+    'hvac_autosizing/base-enclosure-walltype-cmu-autosize.xml' => 'base-enclosure-walltype-cmu.xml',
+    'hvac_autosizing/base-enclosure-walltype-doublestud-autosize.xml' => 'base-enclosure-walltype-doublestud.xml',
+    'hvac_autosizing/base-enclosure-walltype-icf-autosize.xml' => 'base-enclosure-walltype-icf.xml',
+    'hvac_autosizing/base-enclosure-walltype-sip-autosize.xml' => 'base-enclosure-walltype-sip.xml',
+    'hvac_autosizing/base-enclosure-walltype-structuralbrick-autosize.xml' => 'base-enclosure-walltype-structuralbrick.xml',
+    'hvac_autosizing/base-foundation-ambient-autosize.xml' => 'base-foundation-ambient.xml',
+    'hvac_autosizing/base-foundation-slab-autosize.xml' => 'base-foundation-slab.xml',
+    'hvac_autosizing/base-foundation-unconditioned-basement-autosize.xml' => 'base-foundation-unconditioned-basement.xml',
+    'hvac_autosizing/base-foundation-unvented-crawlspace-autosize.xml' => 'base-foundation-unvented-crawlspace.xml',
+    'hvac_autosizing/base-foundation-vented-crawlspace-autosize.xml' => 'base-foundation-vented-crawlspace.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-2-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'hvac_autosizing/base-hvac-air-to-air-heat-pump-var-speed-autosize.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
@@ -218,6 +240,8 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-central-ac-only-2-speed-autosize.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_autosizing/base-hvac-central-ac-only-var-speed-autosize.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_autosizing/base-hvac-central-ac-plus-air-to-air-heat-pump-heating-autosize.xml' => 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml',
+    'hvac_autosizing/base-hvac-dse-autosize.xml' => 'base-hvac-dse.xml',
+    'hvac_autosizing/base-hvac-ducts-outside-autosize.xml' => 'base-hvac-ducts-outside.xml',
     'hvac_autosizing/base-hvac-elec-resistance-only-autosize.xml' => 'base-hvac-elec-resistance-only.xml',
     'hvac_autosizing/base-hvac-furnace-elec-only-autosize.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-2-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -232,6 +256,9 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-stove-oil-only-autosize.xml' => 'base-hvac-stove-oil-only.xml',
     'hvac_autosizing/base-hvac-wall-furnace-elec-only-autosize.xml' => 'base-hvac-wall-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-wall-furnace-propane-only-autosize.xml' => 'base-hvac-wall-furnace-propane-only.xml',
+    'hvac_autosizing/base-mechvent-erv-autosize.xml' => 'base-mechvent-erv.xml',
+    'hvac_autosizing/base-mechvent-exhaust-autosize.xml' => 'base-mechvent-exhaust.xml',
+    'hvac_autosizing/base-mechvent-supply-autosize.xml' => 'base-mechvent-supply.xml',
 
     'hvac_base/base-base.xml' => 'base.xml',
     'hvac_base/base-hvac-air-to-air-heat-pump-1-speed-base.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -2070,7 +2097,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   if ['base-mechvent-balanced.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "balanced",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :fan_power => 60 }
   elsif ['invalid_files/unattached-cfis.xml',
@@ -2094,7 +2121,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
          'cfis/base-hvac-room-ac-furnace-gas-cfis.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "central fan integrated supply",
-                                 :rated_flow_rate => 330,
+                                 :tested_flow_rate => 330,
                                  :hours_in_operation => 8,
                                  :fan_power => 300,
                                  :distribution_system_idref => "HVACDistribution" }
@@ -2104,7 +2131,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency => 0.48,
                                  :sensible_recovery_efficiency => 0.72,
@@ -2112,7 +2139,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv-atre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency_adjusted => 0.526,
                                  :sensible_recovery_efficiency => 0.72,
@@ -2120,7 +2147,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency => 0.48,
                                  :sensible_recovery_efficiency_adjusted => 0.79,
@@ -2128,12 +2155,18 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-erv-atre-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency_adjusted => 0.526,
                                  :sensible_recovery_efficiency_adjusted => 0.79,
                                  :fan_power => 60 }
   elsif ['base-mechvent-exhaust.xml'].include? hpxml_file
+    ventilation_fans_values << { :id => "MechanicalVentilation",
+                                 :fan_type => "exhaust only",
+                                 :tested_flow_rate => 110,
+                                 :hours_in_operation => 24,
+                                 :fan_power => 30 }
+  elsif ['base-mechvent-exhaust-rated-flow-rate.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "exhaust only",
                                  :rated_flow_rate => 110,
@@ -2142,27 +2175,27 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
   elsif ['base-mechvent-hrv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "heat recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :sensible_recovery_efficiency => 0.72,
                                  :fan_power => 60 }
   elsif ['base-mechvent-hrv-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "heat recovery ventilator",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :sensible_recovery_efficiency_adjusted => 0.790,
                                  :fan_power => 60 }
   elsif ['base-mechvent-supply.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "supply only",
-                                 :rated_flow_rate => 110,
+                                 :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :fan_power => 30 }
   elsif ['cfis/base-hvac-boiler-gas-central-ac-1-speed-cfis.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "central fan integrated supply",
-                                 :rated_flow_rate => 330,
+                                 :tested_flow_rate => 330,
                                  :hours_in_operation => 8,
                                  :fan_power => 300,
                                  :distribution_system_idref => "HVACDistribution2" }
@@ -2279,6 +2312,11 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
+  elsif ['base-dhw-jacket-electric.xml',
+         'base-dhw-jacket-indirect.xml',
+         'base-dhw-jacket-gas.xml',
+         'base-dhw-jacket-hpwh.xml'].include? hpxml_file
+    water_heating_systems_values[0][:jacket_r_value] = 10.0
   elsif ['base-dhw-indirect.xml',
          'base-dhw-indirect-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with storage tank"

@@ -2972,19 +2972,6 @@ class HVACSizing
     return MathTools.biquadratic(airFlowRate / capacity_tons, temp, @shr_biquadratic)
   end
 
-  def self.space_is_vented(space, min_sla_for_venting)
-    ela = 0.0
-    space.spaceInfiltrationEffectiveLeakageAreas.each do |leakage_area|
-      ela += UnitConversions.convert(leakage_area.effectiveAirLeakageArea, "cm^2", "ft^2")
-    end
-    sla = ela / UnitConversions.convert(space.floorArea, "m^2", "ft^2")
-    if sla > min_sla_for_venting
-      return true
-    end
-
-    return false
-  end
-
   def self.true_azimuth(surface)
     true_azimuth = nil
     facade = Geometry.get_facade_for_surface(surface)
@@ -3004,58 +2991,6 @@ class HVACSizing
       true_azimuth = true_azimuth - 360
     end
     return true_azimuth
-  end
-
-  def self.calculate_t_attic_iter(runner, attic_UAs, t_solair, cool_setpoint, coolingLoad_Ducts_Sens)
-    # Calculate new value for Tattic based on updated duct losses
-    sum_uat = -coolingLoad_Ducts_Sens
-    attic_UAs.each do |ua_type, ua|
-      if ua_type == "outdoors" or ua_type == "infil"
-        sum_uat += ua * t_solair
-      elsif ua_type == "surface" # adjacent to conditioned
-        sum_uat += ua * cool_setpoint
-      elsif ua_type == "total" or ua_type == "foundation"
-      # skip
-      else
-          runner.registerError("Unexpected ua_type: '#{ua_type}'.")
-          return nil
-      end
-    end
-    t_attic_iter = sum_uat / attic_UAs["total"]
-    t_attic_iter = [t_attic_iter, t_solair].min # Prevent attic from being hotter than T_solair
-    t_attic_iter = [t_attic_iter, cool_setpoint].max # Prevent attic from being colder than cool_setpoint
-    return t_attic_iter
-  end
-
-  def self.calculate_t_solair(weather, roofAbsorptance, roofPitch)
-    # Calculates Tsolair under design conditions
-    # Uses equation (30) from 2009 ASHRAE Handbook-Fundamentals (IP), p 18.22:
-
-    t_outdoor = weather.design.CoolingDrybulb # Design outdoor air temp (F)
-    i_b = weather.design.CoolingDirectNormal
-    i_d = weather.design.CoolingDiffuseHorizontal
-
-    # Use max summer direct normal plus diffuse solar radiation, adjusted for roof pitch
-    # (Not calculating max coincident i_b + i_d because that requires knowing roofPitch in advance; will typically coincide with peak i_b though.)
-    i_T = UnitConversions.convert(i_b + i_d * (1 + Math::cos(roofPitch.deg2rad)) / 2, "W/m^2", "Btu/(hr*ft^2)") # total solar radiation incident on surface (Btu/h/ft2)
-    # Adjust diffuse horizontal for roof pitch using isotropic diffuse model (Liu and Jordan 1963) from Duffie and Beckman eq 2.15.1
-
-    h_o = 4 # coefficient of heat transfer for long-wave radiation and convection at outer surface (Btu/h-ft2-F)
-    # Value of 4.0 for 7.5 mph wind (summer design) from 2009 ASHRAE H-F (IP) p 26.1
-    # p 18.22 assumes h_o = 3.0 Btu/hft2F for horizontal surfaces, but we found 4.0 gives
-    # more realistic sol air temperatures and is more realistic for residential roofs.
-
-    emittance = 1.0 # hemispherical emittance of surface = 1 for horizontal surface, from 2009 ASHRAE H-F (IP) p 18.22
-
-    deltaR = 20 # difference between long-wave radiation incident on surface from sky and surroundings
-    # and radiation emitted by blackbody at outdoor air temperature
-    # 20 Btu/h-ft2 appropriate for horizontal surfaces, from ASHRAE H-F (IP) p 18.22
-
-    deltaR_inclined = deltaR * Math::cos(roofPitch.deg2rad) # Correct deltaR for inclined surface,
-    # from eq. 2.32 in  Castelino, R.L. 1992. "Implementation of the Revised Transfer Function Method and Evaluation of the CLTD/SCL/CLF Method" (Thesis) Oklahoma State University
-
-    t_solair = t_outdoor + (roofAbsorptance * i_T - emittance * deltaR_inclined) / h_o
-    return t_solair
   end
 
   def self.get_space_ua_values(runner, space, weather)
