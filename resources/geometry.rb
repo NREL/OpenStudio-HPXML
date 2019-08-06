@@ -90,18 +90,11 @@ class Geometry
       slab_values = HPXML.get_slab_values(slab: slab)
       cfa_ag -= slab_values[:area]
     end
-    gfa = 0 # garage floor area
-    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='garage']") do |garage_slab|
-      slab_values = HPXML.get_slab_values(slab: garage_slab)
-      gfa += slab_values[:area]
-    end
 
     if thermal_zone == "living space"
       return cfa_ag
     elsif thermal_zone == "basement - conditioned"
       return cfa - cfa_ag
-    elsif thermal_zone == "garage"
-      return gfa
     else
       floor_area = 0
       building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
@@ -117,7 +110,7 @@ class Geometry
         floor_area += slab_values[:area]
       end
       return floor_area
-    end    
+    end
   end
 
   def self.get_zone_volume(zone, runner = nil)
