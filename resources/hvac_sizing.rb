@@ -2802,9 +2802,11 @@ class HVACSizing
         if not ratedCFMperTonHeating.nil?
           hvac.RatedCFMperTonHeating = ratedCFMperTonHeating.split(",").map(&:to_f)
         end
+      end
 
-        hvac.HeatingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracHeatLoadServed, 'double')
-        return nil if hvac.HeatingLoadFraction.nil?
+      heatingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracHeatLoadServed, 'double', false)
+      if not heatingLoadFraction.nil?
+        hvac.HeatingLoadFraction = heatingLoadFraction
       end
 
       if equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric
