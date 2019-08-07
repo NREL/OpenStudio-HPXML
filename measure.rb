@@ -1973,7 +1973,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, dse_cool,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id, clgsys)
           return false if not success
@@ -1984,7 +1984,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, dse_cool,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id, clgsys)
           return false if not success
@@ -1995,7 +1995,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, dse_cool,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id, clgsys)
           return false if not success
@@ -2012,7 +2012,7 @@ class OSModel
         shr = 0.65
         airflow_rate = 350.0
         success = HVAC.apply_room_ac(model, runner, eer, shr,
-                                     airflow_rate, cool_capacity_btuh, load_frac,
+                                     airflow_rate, cool_capacity_btuh,
                                      sequential_load_frac, @control_slave_zones_hash,
                                      @hvac_map, sys_id, clgsys)
         return false if not success
@@ -2065,7 +2065,7 @@ class OSModel
           fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
           success = HVAC.apply_furnace(model, runner, fuel, afue,
                                        heat_capacity_btuh, fan_power, dse_heat,
-                                       load_frac, sequential_load_frac,
+                                       sequential_load_frac,
                                        attached_clg_system, @control_slave_zones_hash,
                                        @hvac_map, sys_id, htgsys)
           return false if not success
@@ -2077,7 +2077,7 @@ class OSModel
           airflow_rate = 0.0
           success = HVAC.apply_unit_heater(model, runner, fuel,
                                            afue, heat_capacity_btuh, fan_power,
-                                           airflow_rate, load_frac,
+                                           airflow_rate,
                                            sequential_load_frac, @control_slave_zones_hash,
                                            @hvac_map, sys_id, htgsys)
           return false if not success
@@ -2094,7 +2094,7 @@ class OSModel
           design_temp = 180.0
           success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                       oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                      heat_capacity_btuh, design_temp, dse_heat, load_frac,
+                                      heat_capacity_btuh, design_temp, dse_heat,
                                       sequential_load_frac, @control_slave_zones_hash,
                                       @hvac_map, sys_id, htgsys)
           return false if not success
@@ -2103,7 +2103,7 @@ class OSModel
 
           efficiency = heating_system_values[:heating_efficiency_percent]
           success = HVAC.apply_electric_baseboard(model, runner, efficiency,
-                                                  heat_capacity_btuh, load_frac,
+                                                  heat_capacity_btuh,
                                                   sequential_load_frac, @control_slave_zones_hash,
                                                   @hvac_map, sys_id, htgsys)
           return false if not success
@@ -2115,7 +2115,7 @@ class OSModel
           fan_power = 0.5 # For fuel equipment, will be overridden by EAE later
           success = HVAC.apply_unit_heater(model, runner, fuel,
                                            efficiency, heat_capacity_btuh, fan_power,
-                                           airflow_rate, load_frac,
+                                           airflow_rate,
                                            sequential_load_frac, @control_slave_zones_hash,
                                            @hvac_map, sys_id, htgsys)
           return false if not success
@@ -2188,7 +2188,7 @@ class OSModel
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
-                                                   load_frac_heat, load_frac_cool,
+                                                   load_frac_heat,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id, hp)
           return false if not success
@@ -2201,7 +2201,7 @@ class OSModel
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
-                                                   load_frac_heat, load_frac_cool,
+                                                   load_frac_heat,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id, hp)
           return false if not success
@@ -2214,7 +2214,7 @@ class OSModel
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
-                                                   load_frac_heat, load_frac_cool,
+                                                   load_frac_heat,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id, hp)
           return false if not success
@@ -2254,7 +2254,7 @@ class OSModel
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
-                                  dse_heat, dse_cool, load_frac_heat, load_frac_cool,
+                                  dse_heat, dse_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id, hp)
         return false if not success
@@ -2290,7 +2290,6 @@ class OSModel
                                   u_tube_leg_spacing, u_tube_spacing_type,
                                   fan_power, cool_capacity_btuh, backup_heat_efficiency,
                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
-                                  load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id, hp)
         return false if not success
