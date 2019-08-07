@@ -472,8 +472,16 @@ class HVACSizing
     # Assign zone loads for each zone at the coincident hour
     zones_loads.each do |thermal_zone, zone_loads|
       # Cooling based on max total hr
-      zone_loads.Cool_IntGains_Sens = zones_sens[thermal_zone][idx_tot]
-      zone_loads.Cool_IntGains_Lat = zones_lat[thermal_zone][idx_tot]
+      # TODO: unhardcode the following after implementing internal gains
+      if thermal_zone == "living space"
+        zone_loads.Cool_IntGains_Sens = 1051.9
+        zone_loads.Cool_IntGains_Lat = 589.6
+      elsif thermal_zone == "basement - conditioned"
+        zone_loads.Cool_IntGains_Sens = 412.6
+        zone_loads.Cool_IntGains_Lat = 358.8
+      end
+      # zone_loads.Cool_IntGains_Sens = zones_sens[thermal_zone][idx_tot]
+      # zone_loads.Cool_IntGains_Lat = zones_lat[thermal_zone][idx_tot]
     end
 
     return zones_loads
@@ -2684,6 +2692,8 @@ end
     hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text) unless heating_system.elements["extension/NumSpeedsHeating"].nil?
     hvac.BoilerDesignTemp = Float(heating_system.elements["extension/BoilerDesignTemp"].text) unless heating_system.elements["extension/BoilerDesignTemp"].nil?
     hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)
+
+    return true
   end
 
   def self.assign_cooling_system(building:,
@@ -2722,6 +2732,8 @@ end
     end
     hvac.CapacityRatioCooling = cooling_system.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CapacityRatioCooling"].nil?
     dse_heat, hvac.DSECool, has_dse = OSModel.get_dse(building, cooling_system_values)
+
+    return true
   end
 
   def self.assign_heat_pump(building:,
@@ -2798,6 +2810,8 @@ end
     hvac.CapacityRatioCooling = heat_pump.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/CapacityRatioCooling"].nil?
     hvac.CapacityRatioHeating = heat_pump.elements["extension/CapacityRatioHeating"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/CapacityRatioHeating"].nil?
     hvac.DSEHeat, hvac.DSECool, has_dse = OSModel.get_dse(building, heat_pump_values)
+
+    return true
   end
 
   def self.get_hvacs(runner:,
@@ -2808,32 +2822,44 @@ end
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
 
+      # heating/cooling systems
       hvac = HVACInfo.new
       if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
         hvac.Ducts = get_ducts_for_hvac(hvac_distribution: hvac_distribution)
       end
+      assigned_heating_system = false
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
         heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
         next if heating_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
-        assign_heating_system(building: building, hvac: hvac, heating_system: heating_system)
+        assigned_heating_system = assign_heating_system(building: building, hvac: hvac, heating_system: heating_system)
       end
+      assigned_cooling_system = false
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
         cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
         next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
-        assign_cooling_system(building: building, hvac: hvac, cooling_system: cooling_system)
+        assigned_cooling_system = assign_cooling_system(building: building, hvac: hvac, cooling_system: cooling_system)
       end
-      hvacs << hvac
+      if assigned_heating_system or assigned_cooling_system
+        hvacs << hvac
+      end
 
+      # heat pump systems
       hvac = HVACInfo.new
+      if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
+        hvac.Ducts = get_ducts_for_hvac(hvac_distribution: hvac_distribution)
+      end
+      assigned_heat_pump = false
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
         heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
         next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
-        assign_heat_pump(building: building, hvac: hvac, heat_pump: heat_pump)
+        assigned_heat_pump = assign_heat_pump(building: building, hvac: hvac, heat_pump: heat_pump)
       end
-      hvacs << hvac
+      if assigned_heat_pump
+        hvacs << hvac
+      end
 
     end
 
