@@ -2860,7 +2860,6 @@ end
       if assigned_heat_pump
         hvacs << hvac
       end
-
     end
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
