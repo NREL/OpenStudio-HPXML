@@ -767,74 +767,34 @@ class Airflow
   end
 
   def self.process_whole_house_fan_and_nat_vent(model, runner, whf, nat_vent, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather)
-    thermostatsetpointdualsetpoint = building.living.zone.thermostatSetpointDualSetpoint
+    thermostatsetpointdualsetpoint = building.living.zone.thermostatSetpointDualSetpoint.get
 
     # Get setpoints
-    heatingSetpointWeekday = Array.new
-    heatingSetpointWeekend = Array.new
-    coolingSetpointWeekday = Array.new
-    coolingSetpointWeekend = Array.new
-    if thermostatsetpointdualsetpoint.is_initialized
-      thermostatsetpointdualsetpoint = thermostatsetpointdualsetpoint.get
-
-      heatingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
-      heatingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
-      if heatingSetpointWeekday.nil? or heatingSetpointWeekend.nil?
-        return false
-      end
-
-      heatingSetpointWeekday = heatingSetpointWeekday[0].map { |j| UnitConversions.convert(j, "C", "F") } # get january hourly setpoints
-      heatingSetpointWeekend = heatingSetpointWeekend[0].map { |j| UnitConversions.convert(j, "C", "F") } # get january hourly setpoints
-
-      coolingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
-      coolingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
-      if coolingSetpointWeekday.nil? or coolingSetpointWeekend.nil?
-        return false
-      end
-
-      coolingSetpointWeekday = coolingSetpointWeekday[6].map { |j| UnitConversions.convert(j, "C", "F") } # get july hourly setpoints
-      coolingSetpointWeekend = coolingSetpointWeekend[6].map { |j| UnitConversions.convert(j, "C", "F") } # get july hourly setpoints
-    end
-
-    if heatingSetpointWeekday.empty?
-      runner.registerWarning("No heating setpoint schedule found. Assuming #{Constants.DefaultHeatingSetpoint} F for natural ventilation calculations.")
-      ovlp_ssn_hourly_temp = Array.new(24, UnitConversions.convert(Constants.DefaultHeatingSetpoint + nat_vent.ovlp_offset, "F", "C"))
-      heatingSetpointWeekday = Array.new(24, Constants.DefaultHeatingSetpoint)
-      heatingSetpointWeekend = Array.new(24, Constants.DefaultHeatingSetpoint)
-    else
-      ovlp_ssn_hourly_temp = Array.new(24, UnitConversions.convert([heatingSetpointWeekday.max, heatingSetpointWeekend.max].max + nat_vent.ovlp_offset, "F", "C"))
-    end
-    if coolingSetpointWeekday.empty?
-      runner.registerWarning("No cooling setpoint schedule found. Assuming #{Constants.DefaultCoolingSetpoint} F for natural ventilation calculations.")
-      coolingSetpointWeekday = Array.new(24, Constants.DefaultCoolingSetpoint)
-      coolingSetpointWeekend = Array.new(24, Constants.DefaultCoolingSetpoint)
-    end
-    ovlp_ssn_hourly_weekend_temp = ovlp_ssn_hourly_temp
-
-    # Get heating and cooling seasons
-    heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather, runner)
-    if heating_season.nil? or cooling_season.nil?
+    heatingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
+    heatingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
+    if heatingSetpointWeekday.nil? or heatingSetpointWeekend.nil?
       return false
     end
 
-    # Specify an array of hourly lower-temperature-limits for natural ventilation
-    htg_ssn_hourly_temp = Array.new
-    coolingSetpointWeekday.each do |x|
-      htg_ssn_hourly_temp << UnitConversions.convert(x - nat_vent.htg_offset, "F", "C")
-    end
-    htg_ssn_hourly_weekend_temp = Array.new
-    coolingSetpointWeekend.each do |x|
-      htg_ssn_hourly_weekend_temp << UnitConversions.convert(x - nat_vent.htg_offset, "F", "C")
+    coolingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday', runner)
+    coolingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend', runner)
+    if coolingSetpointWeekday.nil? or coolingSetpointWeekend.nil?
+      return false
     end
 
-    clg_ssn_hourly_temp = Array.new
-    heatingSetpointWeekday.each do |x|
-      clg_ssn_hourly_temp << UnitConversions.convert(x + nat_vent.clg_offset, "F", "C")
+    # Calculate natural ventilation lower setpoint as average of heating and cooling setpoints
+    temp_hourly_wkdy = []
+    temp_hourly_wked = []
+    for m in 1..12
+      temp_hourly_wkdy << []
+      temp_hourly_wked << []
+      for h in 1..24
+        temp_hourly_wkdy[m - 1] << (heatingSetpointWeekday[m - 1][h - 1] + coolingSetpointWeekday[m - 1][h - 1]) / 2.0
+        temp_hourly_wked[m - 1] << (heatingSetpointWeekend[m - 1][h - 1] + coolingSetpointWeekend[m - 1][h - 1]) / 2.0
+      end
     end
-    clg_ssn_hourly_weekend_temp = Array.new
-    heatingSetpointWeekend.each do |x|
-      clg_ssn_hourly_weekend_temp << UnitConversions.convert(x + nat_vent.clg_offset, "F", "C")
-    end
+
+    temp_sch = HourlyByMonthSchedule.new(model, runner, Constants.ObjectNameNaturalVentilation + " temp schedule", temp_hourly_wkdy, temp_hourly_wked, normalize_values = false, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsTemperature)
 
     # Explanation for FRAC-VENT-AREA equation:
     # From DOE22 Vol2-Dictionary: For VENT-METHOD = S-G, this is 0.6 times
@@ -851,38 +811,6 @@ class Airflow
     f_w_nv = wind_speed.shielding_coef * (1 - hor_vent_frac)**(1.0 / 3.0) * building.living.f_t_SG
     c_s = f_s_nv**2.0 * Constants.g * building.living.height / (Constants.AssumedInsideTemp + 460.0)
     c_w = f_w_nv**2.0
-
-    season_type = []
-    (0..11).to_a.each do |month|
-      if heating_season[month] == 1.0 and cooling_season[month] == 0.0
-        season_type << Constants.SeasonHeating
-      elsif heating_season[month] == 0.0 and cooling_season[month] == 1.0
-        season_type << Constants.SeasonCooling
-      elsif heating_season[month] == 1.0 and cooling_season[month] == 1.0
-        season_type << Constants.SeasonOverlap
-      else
-        season_type << Constants.SeasonNone
-      end
-    end
-
-    temp_hourly_wkdy = []
-    temp_hourly_wked = []
-    season_type.each_with_index do |ssn_type, month|
-      if ssn_type == Constants.SeasonHeating
-        ssn_schedule_wkdy = htg_ssn_hourly_temp
-        ssn_schedule_wked = htg_ssn_hourly_weekend_temp
-      elsif ssn_type == Constants.SeasonCooling
-        ssn_schedule_wkdy = clg_ssn_hourly_temp
-        ssn_schedule_wked = clg_ssn_hourly_weekend_temp
-      else
-        ssn_schedule_wkdy = ovlp_ssn_hourly_temp
-        ssn_schedule_wked = ovlp_ssn_hourly_weekend_temp
-      end
-      temp_hourly_wkdy << ssn_schedule_wkdy
-      temp_hourly_wked << ssn_schedule_wked
-    end
-
-    temp_sch = HourlyByMonthSchedule.new(model, runner, Constants.ObjectNameNaturalVentilation + " temp schedule", temp_hourly_wkdy, temp_hourly_wked, normalize_values = false, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsTemperature)
 
     wout_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Humidity Ratio")
     wout_sensor.setName("#{Constants.ObjectNameNaturalVentilation} wt s")
@@ -903,55 +831,36 @@ class Airflow
       date_s = OpenStudio::Date::fromDayOfYear(day_startm[m])
       date_e = OpenStudio::Date::fromDayOfYear(day_endm[m])
 
-      if ((season_type[m - 1] == Constants.SeasonHeating and nat_vent.htg_season) or (season_type[m - 1] == Constants.SeasonCooling and nat_vent.clg_season) or (season_type[m - 1] == Constants.SeasonOverlap and nat_vent.ovlp_season)) and (nat_vent.num_weekdays + nat_vent.num_weekends != 0)
-        on_rule = OpenStudio::Model::ScheduleRule.new(nv_avail_sch)
-        on_rule.setName(Constants.ObjectNameNaturalVentilation + " availability schedule #{Schedule.allday_name} ruleset#{m} on")
-        on_rule_day = on_rule.daySchedule
-        on_rule_day.setName(Constants.ObjectNameNaturalVentilation + " availability schedule #{Schedule.allday_name}1 on")
-        for h in 1..24
-          on_rule_day.addValue(time[h], 1)
-        end
-        if nat_vent.num_weekdays >= 1
-          on_rule.setApplyMonday(true)
-        end
-        if nat_vent.num_weekdays >= 2
-          on_rule.setApplyWednesday(true)
-        end
-        if nat_vent.num_weekdays >= 3
-          on_rule.setApplyFriday(true)
-        end
-        if nat_vent.num_weekdays >= 4
-          on_rule.setApplyTuesday(true)
-        end
-        if nat_vent.num_weekdays == 5
-          on_rule.setApplyThursday(true)
-        end
-        if nat_vent.num_weekends >= 1
-          on_rule.setApplySaturday(true)
-        end
-        if nat_vent.num_weekends == 2
-          on_rule.setApplySunday(true)
-        end
-        on_rule.setStartDate(date_s)
-        on_rule.setEndDate(date_e)
-      else
-        off_rule = OpenStudio::Model::ScheduleRule.new(nv_avail_sch)
-        off_rule.setName(Constants.ObjectNameNaturalVentilation + " availability schedule #{Schedule.allday_name} ruleset#{m} off")
-        off_rule_day = off_rule.daySchedule
-        off_rule_day.setName(Constants.ObjectNameNaturalVentilation + " availability schedule #{Schedule.allday_name}1 off")
-        for h in 1..24
-          off_rule_day.addValue(time[h], 0)
-        end
-        off_rule.setApplyMonday(true)
-        off_rule.setApplyTuesday(true)
-        off_rule.setApplyWednesday(true)
-        off_rule.setApplyThursday(true)
-        off_rule.setApplyFriday(true)
-        off_rule.setApplySaturday(true)
-        off_rule.setApplySunday(true)
-        off_rule.setStartDate(date_s)
-        off_rule.setEndDate(date_e)
+      on_rule = OpenStudio::Model::ScheduleRule.new(nv_avail_sch)
+      on_rule.setName(Constants.ObjectNameNaturalVentilation + " availability schedule #{Schedule.allday_name} ruleset#{m} on")
+      on_rule_day = on_rule.daySchedule
+      on_rule_day.setName(Constants.ObjectNameNaturalVentilation + " availability schedule #{Schedule.allday_name}1 on")
+      for h in 1..24
+        on_rule_day.addValue(time[h], 1)
       end
+      if nat_vent.num_weekdays >= 1
+        on_rule.setApplyMonday(true)
+      end
+      if nat_vent.num_weekdays >= 2
+        on_rule.setApplyWednesday(true)
+      end
+      if nat_vent.num_weekdays >= 3
+        on_rule.setApplyFriday(true)
+      end
+      if nat_vent.num_weekdays >= 4
+        on_rule.setApplyTuesday(true)
+      end
+      if nat_vent.num_weekdays == 5
+        on_rule.setApplyThursday(true)
+      end
+      if nat_vent.num_weekends >= 1
+        on_rule.setApplySaturday(true)
+      end
+      if nat_vent.num_weekends == 2
+        on_rule.setApplySunday(true)
+      end
+      on_rule.setStartDate(date_s)
+      on_rule.setEndDate(date_e)
     end
 
     whf_zone = nil
@@ -1024,29 +933,29 @@ class Airflow
     whf_and_nv_program.addLine("Set Tdiff = Tin-Tout")
     whf_and_nv_program.addLine("Set dT = (@Abs Tdiff)")
     whf_and_nv_program.addLine("Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)")
-    whf_and_nv_program.addLine("Set NVArea = #{UnitConversions.convert(area, "ft^2", "cm^2")}")
-    whf_and_nv_program.addLine("Set Cs = #{UnitConversions.convert(c_s, "ft^2/(s^2*R)", "L^2/(s^2*cm^4*K)")}")
-    whf_and_nv_program.addLine("Set Cw = #{c_w * 0.01}")
-    whf_and_nv_program.addLine("Set MaxNV = #{UnitConversions.convert(max_flow_rate, "cfm", "m^3/s")}")
     whf_and_nv_program.addLine("Set MaxHR = #{nat_vent.max_oa_hr}")
     whf_and_nv_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
-    whf_and_nv_program.addLine("Set NVAvail = #{nv_avail_sensor.name}")
-    whf_and_nv_program.addLine("Set Vwind = #{vwind_sensor.name}")
-    whf_and_nv_program.addLine("Set NV_SG = (NVAvail*NVArea)*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
     whf_and_nv_program.addLine("Set SP = #{sp_sensor.name}")
-    whf_and_nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>SP) && (Tin>Tout) && (Tout>SP)")
+    whf_and_nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>SP) && (Tin>Tout)")
     whf_and_nv_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf.cfm, "cfm", "m^3/s")}")
-    whf_and_nv_program.addLine("  If (WHF_Flow>0)") # prioritize WHF over natural ventilation if available
+    whf_and_nv_program.addLine("  If (WHF_Flow>0)") # If available, prioritize whole house fan
     whf_and_nv_program.addLine("    Set #{nv_flow_actuator.name} = 0")
     whf_and_nv_program.addLine("    Set #{whf_flow_actuator.name} = WHF_Flow")
     whf_and_nv_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = WHF_Flow") unless whf_zone.nil?
     whf_and_nv_program.addLine("    Set #{whf_elec_actuator.name} = #{whf.fan_power_w}")
-    whf_and_nv_program.addLine("  Else")
-    whf_and_nv_program.addLine("    Set NVadj1 = (Tin-SP)/(Tin-Tout)")
-    whf_and_nv_program.addLine("    Set NVadj2 = (@Min NVadj1 1)")
-    whf_and_nv_program.addLine("    Set NVadj3 = (@Max NVadj2 0)")
-    whf_and_nv_program.addLine("    Set NVadj = NV_SG*NVadj3")
-    whf_and_nv_program.addLine("    Set #{nv_flow_actuator.name} = (@Min NVadj MaxNV)")
+    whf_and_nv_program.addLine("  Else") # Natural ventilation
+    whf_and_nv_program.addLine("    Set NVArea = #{UnitConversions.convert(area, "ft^2", "cm^2")}")
+    whf_and_nv_program.addLine("    Set Cs = #{UnitConversions.convert(c_s, "ft^2/(s^2*R)", "L^2/(s^2*cm^4*K)")}")
+    whf_and_nv_program.addLine("    Set Cw = #{c_w * 0.01}")
+    whf_and_nv_program.addLine("    Set MaxNV = #{UnitConversions.convert(max_flow_rate, "cfm", "m^3/s")}")
+    whf_and_nv_program.addLine("    Set NVAvail = #{nv_avail_sensor.name}")
+    whf_and_nv_program.addLine("    Set Vwind = #{vwind_sensor.name}")
+    whf_and_nv_program.addLine("    Set NV_SG = (NVAvail*NVArea)*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
+    # whf_and_nv_program.addLine("    Set NVadj1 = (Tin-SP)/(Tin-Tout)")
+    # whf_and_nv_program.addLine("    Set NVadj2 = (@Min NVadj1 1)")
+    # whf_and_nv_program.addLine("    Set NVadj3 = (@Max NVadj2 0)")
+    # whf_and_nv_program.addLine("    Set NV_SG = NV_SG*NVadj3")
+    whf_and_nv_program.addLine("    Set #{nv_flow_actuator.name} = (@Min NV_SG MaxNV)")
     whf_and_nv_program.addLine("    Set #{whf_flow_actuator.name} = 0")
     whf_and_nv_program.addLine("    Set #{liv_to_zone_flow_rate_actuator.name} = 0") unless whf_zone.nil?
     whf_and_nv_program.addLine("    Set #{whf_elec_actuator.name} = 0")
@@ -2050,13 +1959,7 @@ class Infiltration
 end
 
 class NaturalVentilation
-  def initialize(htg_offset, clg_offset, ovlp_offset, htg_season, clg_season, ovlp_season, num_weekdays, num_weekends, frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh)
-    @htg_offset = htg_offset
-    @clg_offset = clg_offset
-    @ovlp_offset = ovlp_offset
-    @htg_season = htg_season
-    @clg_season = clg_season
-    @ovlp_season = ovlp_season
+  def initialize(num_weekdays, num_weekends, frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh)
     @num_weekdays = num_weekdays
     @num_weekends = num_weekends
     @frac_windows_open = frac_windows_open
@@ -2064,7 +1967,7 @@ class NaturalVentilation
     @max_oa_hr = max_oa_hr
     @max_oa_rh = max_oa_rh
   end
-  attr_accessor(:htg_offset, :clg_offset, :ovlp_offset, :htg_season, :clg_season, :ovlp_season, :num_weekdays, :num_weekends, :frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh)
+  attr_accessor(:num_weekdays, :num_weekends, :frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh)
 end
 
 class WholeHouseFan

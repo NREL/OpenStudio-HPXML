@@ -2797,26 +2797,20 @@ class OSModel
     site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     disable_nat_vent = site_values[:disable_natural_ventilation]
     if not disable_nat_vent.nil? and disable_nat_vent
-      nat_vent_htg_season = false
-      nat_vent_clg_season = false
-      nat_vent_ovlp_season = false
+      nat_vent_num_weekdays = 0
+      nat_vent_num_weekends = 0
+      nat_vent_frac_windows_open = 0.0
+      nat_vent_frac_window_area_openable = 0.0
     else
-      nat_vent_htg_season = true
-      nat_vent_clg_season = true
-      nat_vent_ovlp_season = true
+      nat_vent_num_weekdays = 5
+      nat_vent_num_weekends = 2
+      nat_vent_frac_windows_open = 0.33
+      nat_vent_frac_window_area_openable = 0.2
     end
-    nat_vent_htg_offset = 1.0
-    nat_vent_clg_offset = 1.0
-    nat_vent_ovlp_offset = 1.0
-    nat_vent_num_weekdays = 5
-    nat_vent_num_weekends = 2
-    nat_vent_frac_windows_open = 0.33
-    nat_vent_frac_window_area_openable = 0.2
     nat_vent_max_oa_hr = 0.0115
     nat_vent_max_oa_rh = 0.7
-    nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
-                                      nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
-                                      nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
+    nat_vent = NaturalVentilation.new(nat_vent_num_weekdays, nat_vent_num_weekends,
+                                      nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
                                       nat_vent_max_oa_hr, nat_vent_max_oa_rh)
 
     # Ducts
