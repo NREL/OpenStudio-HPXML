@@ -450,7 +450,7 @@ class HVACSizing
     zones_sens = {}
     zones_lat = {}
     thermal_zones.each do |thermal_zone|
-      next if not Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
+      next unless Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
 
       zones_sens[thermal_zone], zones_lat[thermal_zone] = process_internal_gains(runner: runner, building: building, thermal_zone: thermal_zone, weather: weather)
       return nil if zones_sens[thermal_zone].nil? or zones_lat[thermal_zone].nil?

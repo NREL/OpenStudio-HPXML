@@ -195,7 +195,7 @@ class Geometry
   end
 
   def self.thermal_zone_is_conditioned(thermal_zone:)
-    return true if thermal_zone == "living space" or thermal_zone.include? "conditioned" or thermal_zone == "other housing unit"
+    return true if thermal_zone == "living space" or thermal_zone.include? "- conditioned" or thermal_zone == "other housing unit"
 
     return false
   end
