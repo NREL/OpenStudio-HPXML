@@ -8,7 +8,7 @@ require_relative "schedules"
 class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse_cool, frac_cool_load_served,
+                                   capacity, dse_cool,
                                    sequential_cool_load_frac, control_slave_zones_hash,
                                    hvac_map, sys_id, clgsys)
 
@@ -140,7 +140,7 @@ class HVAC
 
   def self.apply_central_ac_2speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse_cool, frac_cool_load_served,
+                                   capacity, dse_cool,
                                    sequential_cool_load_frac, control_slave_zones_hash,
                                    hvac_map, sys_id, clgsys)
 
@@ -288,7 +288,7 @@ class HVAC
 
   def self.apply_central_ac_4speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, dse_cool, frac_cool_load_served,
+                                   capacity, dse_cool,
                                    sequential_cool_load_frac, control_slave_zones_hash,
                                    hvac_map, sys_id, clgsys)
 
@@ -443,7 +443,7 @@ class HVAC
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse_heat, dse_cool,
-                                     frac_heat_load_served, frac_cool_load_served,
+                                     frac_heat_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id, hp)
 
@@ -633,7 +633,7 @@ class HVAC
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse_heat, dse_cool,
-                                     frac_heat_load_served, frac_cool_load_served,
+                                     frac_heat_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id, hp)
 
@@ -839,7 +839,7 @@ class HVAC
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity, supplemental_efficiency,
                                      supplemental_capacity, dse_heat, dse_cool,
-                                     frac_heat_load_served, frac_cool_load_served,
+                                     frac_heat_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_slave_zones_hash, hvac_map, sys_id, hp)
 
@@ -1052,7 +1052,7 @@ class HVAC
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
                       heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
-                      dse_heat, dse_cool, frac_heat_load_served, frac_cool_load_served,
+                      dse_heat, dse_cool,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_slave_zones_hash, hvac_map, sys_id, hp)
 
@@ -1365,7 +1365,6 @@ class HVAC
                       u_tube_leg_spacing, u_tube_spacing_type,
                       fan_power, heat_pump_capacity, supplemental_efficiency,
                       supplemental_capacity, dse_heat, dse_cool,
-                      frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_slave_zones_hash, hvac_map, sys_id, hp)
 
@@ -1645,7 +1644,7 @@ class HVAC
   end
 
   def self.apply_room_ac(model, runner, eer, shr,
-                         airflow_rate, capacity, frac_cool_load_served,
+                         airflow_rate, capacity,
                          sequential_cool_load_frac, control_slave_zones_hash,
                          hvac_map, sys_id, clgsys)
 
@@ -1723,7 +1722,7 @@ class HVAC
 
   def self.apply_furnace(model, runner, fuel_type, afue,
                          capacity, fan_power_installed, dse_heat,
-                         frac_heat_load_served, sequential_heat_load_frac,
+                         sequential_heat_load_frac,
                          attached_cooling_system, control_slave_zones_hash,
                          hvac_map, sys_id, htgsys)
 
@@ -1905,7 +1904,7 @@ class HVAC
 
   def self.apply_boiler(model, runner, fuel_type, system_type, afue,
                         oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                        capacity, design_temp, dse_heat, frac_heat_load_served,
+                        capacity, design_temp, dse_heat,
                         sequential_heat_load_frac, control_slave_zones_hash,
                         hvac_map, sys_id, htgsys)
 
@@ -2072,7 +2071,7 @@ class HVAC
   end
 
   def self.apply_electric_baseboard(model, runner, efficiency, capacity,
-                                    frac_heat_load_served, sequential_heat_load_frac,
+                                    sequential_heat_load_frac,
                                     control_slave_zones_hash,
                                     hvac_map, sys_id, htgsys)
 
@@ -2105,7 +2104,7 @@ class HVAC
 
   def self.apply_unit_heater(model, runner, fuel_type,
                              efficiency, capacity, fan_power,
-                             airflow_rate, frac_heat_load_served,
+                             airflow_rate,
                              sequential_heat_load_frac, control_slave_zones_hash,
                              hvac_map, sys_id, htgsys)
 
