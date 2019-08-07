@@ -2809,33 +2809,32 @@ end
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
 
       hvac = HVACInfo.new
-
       if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
         hvac.Ducts = get_ducts_for_hvac(hvac_distribution: hvac_distribution)
       end
-
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
         heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
         next if heating_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         assign_heating_system(building: building, hvac: hvac, heating_system: heating_system)
       end
-
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
         cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
         next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         assign_cooling_system(building: building, hvac: hvac, cooling_system: cooling_system)
       end
+      hvacs << hvac
 
+      hvac = HVACInfo.new
       building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
         heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
         next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         assign_heat_pump(building: building, hvac: hvac, heat_pump: heat_pump)
       end
-
       hvacs << hvac
+
     end
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
