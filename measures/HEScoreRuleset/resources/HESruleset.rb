@@ -486,7 +486,7 @@ class HEScoreRuleset
       cooling_values[:cooling_system_fuel] = "electricity"
       cooling_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
 
-      if cooling_values[:cooling_system_type] == "central air conditioning"
+      if cooling_values[:cooling_system_type] == "central air conditioner"
         if not cooling_values[:year_installed].nil?
           cooling_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(cooling_values[:year_installed],
                                                                             cooling_values[:cooling_system_type],
@@ -791,7 +791,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
     year = 2010
   end
 
-  type_id = { 'central air conditioning' => 'split_dx',
+  type_id = { 'central air conditioner' => 'split_dx',
               'room air conditioner' => 'packaged_dx',
               'air-to-air' => 'heat_pump',
               'Furnace' => 'central_furnace',

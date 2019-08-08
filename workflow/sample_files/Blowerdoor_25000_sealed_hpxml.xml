@@ -292,7 +292,7 @@
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
               <DistributionSystem idref="hvac1_dist"/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>

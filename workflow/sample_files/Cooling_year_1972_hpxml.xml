@@ -288,7 +288,7 @@
               <SystemIdentifier id="hvac1_cool"/>
               <YearInstalled>1972</YearInstalled>
               <DistributionSystem idref="hvac1_dist"/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
             </CoolingSystem>
           </HVACPlant>
