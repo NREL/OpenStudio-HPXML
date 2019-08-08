@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 
 gem 'nokogiri', '~> 1.6', '<= 1.6.8.1'
+gem 'rake'
 
 group :test do
   gem 'minitest', '~> 5.9'
@@ -10,5 +11,5 @@ group :test do
   gem 'simplecov'
   gem 'codecov'
   gem 'minitest-reporters'
-  gem 'minitest-ci', :git => 'https://github.com/circleci/minitest-ci.git' # For CircleCI Automatic test metadata collection
+  gem 'minitest-ci' # For CircleCI Automatic test metadata collection
 end
