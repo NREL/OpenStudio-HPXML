@@ -93,6 +93,11 @@ class EnergyPlusValidator
 
       # [Neighbors]
       "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors" => {
+        "NeighborBuilding" => one_or_more, # See [NeighborBuilding]
+      },
+
+      # [NeighborBuilding]
+      "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding" => {
         "Azimuth" => one,
         "Distance" => one,
         "Height" => zero_or_one
