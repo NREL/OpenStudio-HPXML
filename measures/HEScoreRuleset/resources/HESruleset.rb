@@ -712,7 +712,7 @@ class HEScoreRuleset
     HPXML.add_clothes_washer(hpxml: hpxml,
                              id: "ClothesWasher",
                              location: "living space", # FIXME: Verify
-                             modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_mef(),
+                             modified_energy_factor: HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(HotWaterAndAppliances.get_clothes_washer_reference_imef()),
                              rated_annual_kwh: HotWaterAndAppliances.get_clothes_washer_reference_ler(),
                              label_electric_rate: HotWaterAndAppliances.get_clothes_washer_reference_elec_rate(),
                              label_gas_rate: HotWaterAndAppliances.get_clothes_washer_reference_gas_rate(),
@@ -725,7 +725,7 @@ class HEScoreRuleset
                             id: "ClothesDryer",
                             location: "living space", # FIXME: Verify
                             fuel_type: "electricity",
-                            energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_ef(Constants.FuelTypeElectric),
+                            energy_factor: HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(Constants.FuelTypeElectric)),
                             control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
   end
 
