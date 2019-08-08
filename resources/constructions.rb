@@ -454,30 +454,6 @@ class Constructions
         return false
       end
     end
-    thick_ins.each_with_index do |thick_in, idx|
-      if not thick_in.nil? and thick_in <= 0.0
-        runner.registerError("Thickness #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    conds.each_with_index do |cond, idx|
-      if not cond.nil? and cond <= 0.0
-        runner.registerError("Conductivity #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    denss.each_with_index do |dens, idx|
-      if not dens.nil? and dens <= 0.0
-        runner.registerError("Density #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    specheats.each_with_index do |specheat, idx|
-      if not specheat.nil? and specheat <= 0.0
-        runner.registerError("Specific Heat #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
 
     # Define materials
     mats = []
@@ -877,11 +853,6 @@ class Constructions
                                  wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                                  wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                                  wall_height, wall_height_above_grade, foundation = nil)
-
-    if wall_surfaces.empty?
-      runner.registerError("No wall surfaces found adjacent to floor surface.")
-      return false
-    end
 
     # Calculate interior wall R-value
     int_wall_rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
