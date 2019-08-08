@@ -814,9 +814,12 @@ class Geometry
       framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
 
       next if framefloor_values[:interior_adjacent_to] != thermal_zone
-      next if self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to])
+      next if framefloor_values[:exterior_adjacent_to] == "outside"
+      next if framefloor_values[:exterior_adjacent_to] == "ground"
 
-      interzonal_floors << framefloor
+      if (self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:interior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to])) or (self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:interior_adjacent_to]))
+        interzonal_floors << framefloor
+      end
     end
     return interzonal_floors
   end
