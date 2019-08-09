@@ -12,7 +12,7 @@
 	},
 
 	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "ruby --version",
+	"postCreateCommand": "rm Gemfile.lock && bundle install",
 
 	"extensions": [
 		"rebornix.Ruby"
