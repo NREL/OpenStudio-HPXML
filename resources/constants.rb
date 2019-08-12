@@ -691,6 +691,10 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoZoneInfiltrationACH
+    return __method__.to_s
+  end
+
   def self.SizingInfoZoneInfiltrationCFM
     return __method__.to_s
   end
