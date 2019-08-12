@@ -1,4 +1,5 @@
 require_relative '../../HPXMLtoOpenStudio/tests/minitest_helper'
+require_relative '../../HPXMLtoOpenStudio/resources/hpxml.rb'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
@@ -23,6 +24,28 @@ class HEScoreRulesetTest < MiniTest::Test
 
       FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
     end
+  end
+
+  def test_neighbors
+    this_dir = File.dirname(__FILE__)
+    xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Base_hpxml.xml")
+
+    args_hash = {
+      "hpxml_path" => xml,
+      "hpxml_output_path" => xml.gsub('.xml', '.xml.out')
+    }
+
+    _test_measure(args_hash)
+
+    hpxml_doc = XMLHelper.parse_file(args_hash["hpxml_output_path"])
+
+    hpxml_doc.elements.each("HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
+      neighbor_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
+      assert_in_epsilon(neighbor_values[:distance], 20.0, 0.000001)
+      assert([90, 270].include?(neighbor_values[:azimuth]))
+      assert_in_epsilon(neighbor_values[:height], 12.0, 0.000001)
+    end
+
   end
 
   def test_infiltration
