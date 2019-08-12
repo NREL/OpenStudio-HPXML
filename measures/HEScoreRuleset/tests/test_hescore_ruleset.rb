@@ -45,7 +45,6 @@ class HEScoreRulesetTest < MiniTest::Test
       assert([90, 270].include?(neighbor_values[:azimuth]))
       assert_in_epsilon(neighbor_values[:height], 12.0, 0.000001)
     end
-
   end
 
   def test_infiltration
