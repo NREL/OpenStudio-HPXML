@@ -1910,7 +1910,7 @@ class OSModel
           success = Waterheater.apply_tankless(model, runner, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                               solar_fraction, @nbeds, @dhw_map, sys_id)
+                                               @nbeds, @dhw_map, sys_id, solar_fraction)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -1941,7 +1941,8 @@ class OSModel
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, space, capacity_kbtuh,
                                                tank_vol, setpoint_temp, oncycle_power,
-                                               offcycle_power, ec_adj, @nbeds, boiler_sys['plant_loop'], @dhw_map, sys_id, wh_type, jacket_r)
+                                               offcycle_power, ec_adj, @nbeds, boiler_sys['plant_loop'],
+                                               @dhw_map, sys_id, wh_type, jacket_r)
           return false if not success
 
         else

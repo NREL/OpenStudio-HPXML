@@ -755,10 +755,15 @@ class Waterheater
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
-      recovery_time = 0.2 # This variable is used for E+ autosizing source heat transfer. Default value 0.2 works well for indirect systems even tested with more spiky draw profile.
+      # This variable is used for E+ autosizing source heat transfer.
+      # Default value 0.2 works well for indirect systems even tested with more spiky draw profile.
+      recovery_time = 0.2
     else
       tank_type = Constants.WaterHeaterTypeTankless
-      recovery_time = 0.005 # This variable is used for E+ autosizing source heat transfer. Default value 0.05 works well for combi tankless systems even tested with more spiky draw profile. The recovery time must be smaller for tankless system because of higher sensitivity to load caused by smaller volume.
+      # This variable is used for E+ autosizing source heat transfer.
+      # Default value 0.05 works well for combi tankless systems even tested with more spiky draw profile.
+      # The recovery time must be smaller for tankless system because of higher sensitivity to load caused by smaller volume.
+      recovery_time = 0.005
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
@@ -772,7 +777,7 @@ class Waterheater
     # Create an initial simple tank model by calling create_new_heater
     assumed_ef = get_indirect_assumed_ef_for_tank_losses()
     assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
-    new_tank = create_new_heater(model, runner, nbeds, obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0)
+    new_tank = create_new_heater(model, runner, nbeds, obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, 0)
     new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
     dhw_map[sys_id] << new_tank
 
