@@ -3446,7 +3446,7 @@ class HVACSizing
       wall_ins_height = UnitConversions.convert(foundation.exteriorVerticalInsulationDepth.get, "m", "ft").round
     end
 
-    wall_constr_rvalue = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
+    wall_constr_rvalue = 1.0 / self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
 
     return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
   end
