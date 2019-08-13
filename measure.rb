@@ -1834,7 +1834,8 @@ class OSModel
         dwhr_efficiency = hot_water_distribution_values[:dwhr_efficiency]
       end
     end
-
+    ec_adj = nil
+    wh_eta_c = nil
     # Water Heater
     related_hvac_list = [] # list of heating systems refered in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
@@ -1935,10 +1936,19 @@ class OSModel
           fail "Unhandled water heater (#{wh_type})."
 
         end
-
+        
+        #TODO: HPWH? Should we use nominal COP as eta_c?
+        act_vol = Waterheater.calc_actual_tankvol(tank_vol, fuel, wh_type)
+        u, ua, wh_eta_c = Waterheater.calc_tank_UA(act_vol, fuel, ef, re, capacity_kbtuh, wh_type, cycling_derate, jacket_r)
+        
         dhw_loop_fracs[sys_id] = dhw_load_frac
       end
+    else
+      ec_adj = 1.0
+      wh_eta_c = 1.0
     end
+    puts ec_adj
+    puts wh_eta_c
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
     living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
     success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
@@ -1953,7 +1963,7 @@ class OSModel
                                           recirc_pump_power, dwhr_present,
                                           dwhr_facilities_connected, dwhr_is_equal_flow,
                                           dwhr_efficiency, dhw_loop_fracs, @eri_version,
-                                          @dhw_map)
+                                          @dhw_map, ec_adj, wh_eta_c)
     return false if not success
 
     return true

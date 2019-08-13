@@ -16,7 +16,7 @@ class HotWaterAndAppliances
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
                  dwhr_efficiency, dhw_loop_fracs, eri_version,
-                 dhw_map)
+                 dhw_map, ec_adj, wh_eta_c)
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
@@ -81,7 +81,7 @@ class HotWaterAndAppliances
       add_electric_equipment(model, cw_name, cw_space, cw_design_level_w, cw_frac_sens, cw_frac_lat, cw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
-        add_water_use_equipment(model, cw_name, cw_peak_flow * dhw_load_frac, cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+        add_water_use_equipment(model, cw_name, cw_peak_flow * dhw_load_frac * ec_adj * wh_eta_c, cw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
 
@@ -108,7 +108,7 @@ class HotWaterAndAppliances
       add_electric_equipment(model, dw_name, living_space, dw_design_level_w, dw_frac_sens, dw_frac_lat, dw_schedule.schedule)
       dhw_loop_fracs.each do |sys_id, dhw_load_frac|
         dhw_loop = dhw_loops[sys_id]
-        add_water_use_equipment(model, dw_name, dw_peak_flow * dhw_load_frac, dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+        add_water_use_equipment(model, dw_name, dw_peak_flow * dhw_load_frac * ec_adj * wh_eta_c, dw_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
       end
     end
 
@@ -139,8 +139,9 @@ class HotWaterAndAppliances
       # Fixtures (showers, sinks, baths) + distribution losses
       fx_gpd = get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures, daily_mw_fractions)
       fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
+      #fx_gpd *=  ec_adj * wh_eta_c
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
-
+        
       disaggregate_sinks_showers_baths = false
       if disaggregate_sinks_showers_baths
         fx_names = [Constants.ObjectNameShower,
@@ -174,7 +175,7 @@ class HotWaterAndAppliances
 
         dhw_loop_fracs.each do |sys_id, dhw_load_frac|
           dhw_loop = dhw_loops[sys_id]
-          add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac, fx_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
+          add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac * ec_adj * wh_eta_c, fx_schedule.schedule, setpoint_scheds[dhw_loop], water_use_connections[dhw_loop])
         end
         add_other_equipment(model, fx_name_sens, living_space, fx_design_level_sens, 1.0, 0.0, fx_schedule.schedule, nil)
         add_other_equipment(model, fx_name_lat, living_space, fx_design_level_lat, 0.0, 1.0, fx_schedule.schedule, nil)
