@@ -948,39 +948,35 @@ end
 
 def get_roof_assembly_r(r_cavity, r_cont, material, has_radiant_barrier)
   # Roof Assembly R-value
-  # FIXME: Verify
-  # FIXME: Need values below where nil
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/roof-construction-types
-  materials = ["asphalt or fiberglass shingles",    # Composition Shingles
-               "wood shingles or shakes",           # Wood Shakes
-               "slate or tile shingles",            # Clay Tile
-               "concrete",                          # Concrete Tile
-               "plastic/rubber/synthetic sheeting"] # Tar and Gravel
-  material_index = materials.index(material)
+  materials_map = {
+    "asphalt or fiberglass shingles" => "co",    # Composition Shingles
+    "wood shingles or shakes" => "wo",           # Wood Shakes
+    "slate or tile shingles" => "rc",            # Clay Tile
+    "concrete" => "lc",                          # Concrete Tile
+    "plastic/rubber/synthetic sheeting" => "tg"  # Tar and Gravel
+  }
   has_r_cont = !r_cont.nil?
   if not has_r_cont and not has_radiant_barrier
     # Wood Frame
-    val = { 0.0 => [3.3, 4.0, 3.4, 3.4, 3.7],                                 # rfwf00co, rfwf00wo, rfwf00rc, rfwf00lc, rfwf00tg
-            11.0 => [13.5, 14.3, 13.7, 13.5, 13.9],                           # rfwf11co, rfwf11wo, rfwf11rc, rfwf11lc, rfwf11tg
-            13.0 => [14.9, 15.6, 15.2, 14.9, 15.4],                           # rfwf13co, rfwf13wo, rfwf13rc, rfwf13lc, rfwf13tg
-            15.0 => [16.4, 16.9, 16.4, 16.4, 16.7],                           # rfwf15co, rfwf15wo, rfwf15rc, rfwf15lc, rfwf15tg
-            19.0 => [20.0, 20.8, 20.4, 20.4, 20.4],                           # rfwf19co, rfwf19wo, rfwf19rc, rfwf19lc, rfwf19tg
-            21.0 => [21.7, 22.2, 21.7, 21.3, 21.7],                           # rfwf21co, rfwf21wo, rfwf21rc, rfwf21lc, rfwf21tg
-            27.0 => [nil, 27.8, 27.0, 27.0, 27.0],                            # rfwf27co, rfwf27wo, rfwf27rc, rfwf27lc, rfwf27tg
-            30.0 => [nil, nil, nil, nil, nil] }[r_cavity][material_index]     # rfwf30co, rfwf30wo, rfwf30rc, rfwf30lc, rfwf30tg
+    doe2rooftype = "wf"
   elsif not has_r_cont and has_radiant_barrier
     # Wood Frame with Radiant Barrier
-    val = { 0.0 => [5.6, 6.3, 5.7, 5.6, 6.0] }[r_cavity][material_index] # rfrb00co, rfrb00wo, rfrb00rc, rfrb00lc, rfrb00tg
+    doe2rooftype = "rb"
   elsif has_r_cont and not has_radiant_barrier
     # Wood Frame with Rigid Foam Sheathing
-    val = { 0.0 => [8.3, 9.0, 8.4, 8.3, 8.7],                                 # rfps00co, rfps00wo, rfps00rc, rfps00lc, rfps00tg
-            11.0 => [18.5, 19.2, 18.5, 18.5, 18.9],                           # rfps11co, rfps11wo, rfps11rc, rfps11lc, rfps11tg
-            13.0 => [20.0, 20.8, 20.0, 20.0, 20.4],                           # rfps13co, rfps13wo, rfps13rc, rfps13lc, rfps13tg
-            15.0 => [21.3, 22.2, 21.3, 21.3, 21.7],                           # rfps15co, rfps15wo, rfps15rc, rfps15lc, rfps15tg
-            19.0 => [nil, 25.6, 25.6, 25.0, 25.6],                            # rfps19co, rfps19wo, rfps19rc, rfps19lc, rfps19tg
-            21.0 => [nil, 27.0, 27.0, 26.3, 27.0] }[r_cavity][material_index] # rfps21co, rfps21wo, rfps21rc, rfps21lc, rfps21tg
+    doe2rooftype = "ps"
   end
+
+  doe2code = "rf%s%02.0f%s" % [doe2rooftype, r_cavity, materials_map[material]]
+
+  val = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), "lu_roof_eff_rvalue.csv"), headers: true) do |row|
+    next unless row["doe2code"] == doe2code
+    val = Float(row["Eff-R-value"])
+    break
+  end
+
   return val if not val.nil?
 
   fail "Could not get default roof assembly R-value for R-cavity '#{r_cavity}' and R-cont '#{r_cont}' and material '#{material}' and radiant barrier '#{has_radiant_barrier}'"
