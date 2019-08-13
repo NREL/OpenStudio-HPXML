@@ -2813,51 +2813,12 @@ class OSModel
 
     # Ducts
     duct_systems = {}
-    side_map = { 'supply' => Constants.DuctSideSupply,
-                 'return' => Constants.DuctSideReturn }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      air_ducts = []
-
-      # Duct leakage
-      leakage_to_outside_cfm25 = { Constants.DuctSideSupply => 0.0,
-                                   Constants.DuctSideReturn => 0.0 }
-      air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
-        duct_leakage_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
-        next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
-
-        duct_side = side_map[duct_leakage_values[:duct_type]]
-        leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
-      end
-
-      # Duct location, Rvalue, Area
-      total_duct_area = { Constants.DuctSideSupply => 0.0,
-                          Constants.DuctSideReturn => 0.0 }
-      air_distribution.elements.each("Ducts") do |ducts|
-        ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
-
-        # Calculate total duct area in unconditioned spaces
-        duct_side = side_map[ducts_values[:duct_type]]
-        total_duct_area[duct_side] += ducts_values[:duct_surface_area]
-      end
-
-      air_distribution.elements.each("Ducts") do |ducts|
-        ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
-
-        duct_side = side_map[ducts_values[:duct_type]]
-        duct_area = ducts_values[:duct_surface_area]
-        duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
-        # Apportion leakage to individual ducts by surface area
-        duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
-                            duct_area / total_duct_area[duct_side])
-
-        air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
-      end
+      air_ducts = self.create_ducts(air_distribution, model, spaces)
 
       # Connect AirLoopHVACs to ducts
       dist_id = hvac_distribution_values[:id]
@@ -2873,9 +2834,15 @@ class OSModel
 
           @hvac_map[sys_id].each do |loop|
             next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-            next if duct_systems[air_ducts] == loop # already assigned
 
-            duct_systems[air_ducts] = loop
+            if duct_systems[air_ducts].nil?
+              duct_systems[air_ducts] = loop
+            else
+              # Multiple air loops associated with this duct system, treat
+              # as separate duct systems.
+              air_ducts2 = self.create_ducts(air_distribution, model, spaces)
+              duct_systems[air_ducts2] = loop
+            end
           end
         end
       end
@@ -2896,6 +2863,52 @@ class OSModel
     return false if not success
 
     return true
+  end
+
+  def self.create_ducts(air_distribution, model, spaces)
+    air_ducts = []
+
+    side_map = { 'supply' => Constants.DuctSideSupply,
+                 'return' => Constants.DuctSideReturn }
+
+    # Duct leakage
+    leakage_to_outside_cfm25 = { Constants.DuctSideSupply => 0.0,
+                                 Constants.DuctSideReturn => 0.0 }
+    air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
+      duct_leakage_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
+      next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
+
+      duct_side = side_map[duct_leakage_values[:duct_type]]
+      leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
+    end
+
+    # Duct location, Rvalue, Area
+    total_duct_area = { Constants.DuctSideSupply => 0.0,
+                        Constants.DuctSideReturn => 0.0 }
+    air_distribution.elements.each("Ducts") do |ducts|
+      ducts_values = HPXML.get_ducts_values(ducts: ducts)
+      next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
+
+      # Calculate total duct area in unconditioned spaces
+      duct_side = side_map[ducts_values[:duct_type]]
+      total_duct_area[duct_side] += ducts_values[:duct_surface_area]
+    end
+
+    air_distribution.elements.each("Ducts") do |ducts|
+      ducts_values = HPXML.get_ducts_values(ducts: ducts)
+      next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
+
+      duct_side = side_map[ducts_values[:duct_type]]
+      duct_area = ducts_values[:duct_surface_area]
+      duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
+      # Apportion leakage to individual ducts by surface area
+      duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
+                          duct_area / total_duct_area[duct_side])
+
+      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+    end
+
+    return air_ducts
   end
 
   def self.add_hvac_sizing(runner, model, weather)
