@@ -60,55 +60,6 @@ class WeatherProcess
     return @epw_path
   end
 
-  def add_design_days_for_autosizing
-    heating_design_day = OpenStudio::Model::DesignDay.new(@model)
-    heating_design_day.setName("Ann Htg 99% Condns DB")
-    heating_design_day.setMaximumDryBulbTemperature(UnitConversions.convert(@design.HeatingDrybulb, "F", "C"))
-    heating_design_day.setHumidityIndicatingConditionsAtMaximumDryBulb(UnitConversions.convert(@design.HeatingDrybulb, "F", "C"))
-    heating_design_day.setBarometricPressure(UnitConversions.convert(Psychrometrics.Pstd_fZ(@header.Altitude), "psi", "pa"))
-    heating_design_day.setWindSpeed(@design.HeatingWindspeed)
-    heating_design_day.setDayOfMonth(21)
-    heating_design_day.setMonth(1)
-    heating_design_day.setDayType("WinterDesignDay")
-    heating_design_day.setHumidityIndicatingType("Wetbulb")
-    heating_design_day.setDryBulbTemperatureRangeModifierType("DefaultMultipliers")
-    heating_design_day.setSolarModelIndicator("ASHRAEClearSky")
-
-    cooling_design_day = OpenStudio::Model::DesignDay.new(@model)
-    cooling_design_day.setName("Ann Clg 1% Condns DB=>MWB")
-    cooling_design_day.setMaximumDryBulbTemperature(UnitConversions.convert(@design.CoolingDrybulb, "F", "C"))
-    cooling_design_day.setDailyDryBulbTemperatureRange(UnitConversions.convert(@design.DailyTemperatureRange, "R", "K"))
-    cooling_design_day.setHumidityIndicatingConditionsAtMaximumDryBulb(UnitConversions.convert(@design.CoolingWetbulb, "F", "C"))
-    cooling_design_day.setBarometricPressure(UnitConversions.convert(Psychrometrics.Pstd_fZ(@header.Altitude), "psi", "pa"))
-    cooling_design_day.setWindSpeed(@design.CoolingWindspeed)
-    cooling_design_day.setDayOfMonth(21)
-    cooling_design_day.setMonth(7)
-    cooling_design_day.setDayType("SummerDesignDay")
-    cooling_design_day.setHumidityIndicatingType("Wetbulb")
-    cooling_design_day.setDryBulbTemperatureRangeModifierType("DefaultMultipliers")
-    cooling_design_day.setSolarModelIndicator("ASHRAEClearSky")
-  end
-
-  def actual_year_timestamps
-    timestamps = []
-    if @epw_file.startDateActualYear.is_initialized
-
-      run_period = @model.getRunPeriod
-      begin_time = Time.new(@epw_file.startDateActualYear.get, run_period.getBeginMonth, run_period.getBeginDayOfMonth)
-      end_time = Time.new(@epw_file.startDateActualYear.get, run_period.getEndMonth, run_period.getEndDayOfMonth, 23)
-
-      @epw_file.data.each do |epw_data_row|
-        epw_time = Time.new(epw_data_row.year, epw_data_row.month, epw_data_row.day, epw_data_row.hour, epw_data_row.minute)
-
-        if epw_time >= begin_time and epw_time <= (end_time + 60 * 60)
-          epw_time = epw_time.strftime("%Y/%m/%d %H:%M:00")
-          timestamps << epw_time
-        end
-      end
-    end
-    return timestamps
-  end
-
   def error?
     return @error
   end
@@ -350,7 +301,7 @@ class WeatherProcess
     calc_avg_highs_lows(dailyhighdbs, dailylowdbs)
     calc_avg_windspeed(rowdata)
     calc_ground_temperatures
-    @data.WSF = get_ashrae_622_wsf
+    @data.WSF = calc_ashrae_622_wsf(rowdata)
 
     if not epwHasDesignData
       @runner.registerWarning("No design condition info found; calculating design conditions from EPW weather data.")
@@ -485,48 +436,41 @@ class WeatherProcess
     @design.CoolingDiffuseHorizontal = max_solar_radiation_hour['diffhoriz']
   end
 
-  def get_ashrae_622_wsf
-    # Looks up the ASHRAE 62.2 weather and shielding factor from ASHRAE622WSF
-    # for the specified WMO station number. If not found, uses the average value
-    # in the file.
+  def calc_ashrae_622_wsf(rowdata)
+    # Calculates the wSF value per report LBNL-5795E "Infiltration as Ventilation: Weather-Induced Dilution"
 
-    # Sets the WSF value.
+    # Constants
+    c_d = 1.0       # unitless, discharge coefficient for ELA (at 4 Pa)
+    t_indoor = 22.0 # C, indoor setpoint year-round
+    n = 0.67        # unitless, pressure exponent
+    s = 0.7         # unitless, shelter class 4 for 1-story with flue, enhanced model
+    delta_p = 4.0   # Pa, pressure difference indoor-outdoor
+    u_min = 1.0     # m/s, minimum windspeed per hour
+    ela = 0.074     # m^2, effective leakage area (assumed)
+    cfa = 185.0     # m^2, conditioned floor area
+    h = 2.5         # m, single story height
+    g = 0.48        # unitless, wind speed multiplier for 1-story, enhanced model
+    c_s = 0.069     # (Pa/K)^n, stack coefficient, 1-story with flue, enhanced model
+    c_w = 0.142     # (Pa*s^2/m^2)^n, wind coefficient, bsmt slab 1-story with flue, enhanced model
+    roe = 1.2       # kg/m^3, air density (assumed at sea level)
 
-    ashrae_csv = File.join(File.dirname(__FILE__), 'ASHRAE622WSF.csv')
-    if not File.exists?(ashrae_csv)
-      return nil
+    c = c_d * ela * (2 / roe)**0.5 * delta_p**(0.5 - n) # m^3/(s*Pa^n), flow coefficient
+
+    taus = []
+    prev_tau = 0.0
+    for hr in 0..rowdata.size - 1
+      q_s = c * c_s * (t_indoor - rowdata[hr]['db']).abs**n
+      q_w = c * c_w * (s * g * [rowdata[hr]['ws'], u_min].max)**(2 * n)
+      q_tot = (q_s**2 + q_w**2)**0.5
+      ach = 3600.0 * q_tot / (h * cfa)
+      taus << (1 - Math.exp(-ach)) / ach + prev_tau * Math.exp(-ach)
+      prev_tau = taus[-1]
     end
 
-    ashrae_csvlines = []
-    File.open(ashrae_csv) do |file|
-      # if not os.path.exists(ashrae_csv):
-      #    raise IOError("Cannot find file " + ashrae_csv)
-      file.each do |line|
-        line = line.strip.chomp.chomp(',').chomp # remove RHS whitespace and extra comma
-        ashrae_csvlines << line
-      end
-    end
+    tau = taus.inject { |sum, n| sum + n } / taus.size.to_f # Mean annual turnover time (hours)
+    wsf = (cfa / ela) / (1000.0 * tau)
 
-    keys = ashrae_csvlines.delete_at(0).split(',')
-    ashrae_dict = []
-    ashrae_csvlines.each do |line|
-      line = line.split(',')
-      ashrae_dict << Hash[keys.zip(line)]
-    end
-
-    wsfs = []
-    ashrae_dict.each do |adict|
-      if adict['TMY3'] == @header.Station
-        return adict['wsf'].to_f
-      end
-
-      wsfs << adict['wsf'].to_f
-    end
-
-    # Value not found, use average
-    wsf_avg = wsfs.inject { |sum, n| sum + n } / wsfs.length
-    @runner.registerWarning("ASHRAE 62.2 WSF not found for station number #{@header.Station.to_s}, using the national average value of #{wsf_avg.round(3).to_s} instead.")
-    return wsf_avg
+    return wsf.round(2)
   end
 
   def get_design_info_from_epw

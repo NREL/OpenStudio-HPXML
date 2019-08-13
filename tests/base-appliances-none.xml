@@ -250,7 +250,7 @@
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
               <CoolingCapacity>48000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
@@ -315,7 +315,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>30.0</PipingLength>
+                <PipingLength>90.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>

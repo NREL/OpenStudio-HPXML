@@ -41,7 +41,13 @@ class HotWaterAndAppliances
         dhw_loop.addDemandBranchForComponent(water_use_connections[dhw_loop])
 
         # Get water heater setpoint schedule
-        setpoint_scheds[dhw_loop] = Waterheater.get_water_heater_setpoint_schedule(model, dhw_loop, runner)
+        dhw_map[sys_id].each do |dhw_object|
+          if dhw_object.is_a? OpenStudio::Model::WaterHeaterMixed
+            setpoint_scheds[dhw_loop] = dhw_object.setpointTemperatureSchedule.get
+          elsif dhw_object.is_a? OpenStudio::Model::WaterHeaterHeatPumpWrappedCondenser
+            setpoint_scheds[dhw_loop] = dhw_object.compressorSetpointTemperatureSchedule
+          end
+        end
         if setpoint_scheds[dhw_loop].nil?
           return false
         end
@@ -131,7 +137,7 @@ class HotWaterAndAppliances
       fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
 
-      disaggregate_sinks_showers_baths = true
+      disaggregate_sinks_showers_baths = false
       if disaggregate_sinks_showers_baths
         fx_names = [Constants.ObjectNameShower,
                     Constants.ObjectNameSink,
@@ -264,11 +270,11 @@ class HotWaterAndAppliances
     return annual_kwh
   end
 
-  def self.get_clothes_dryer_reference_ef(fuel_type)
+  def self.get_clothes_dryer_reference_cef(fuel_type)
     if fuel_type == Constants.FuelTypeElectric
-      return 3.01 # lb/kWh
+      return 2.62
     else
-      return 2.67 # lb/kWh
+      return 2.32
     end
   end
 
@@ -311,8 +317,8 @@ class HotWaterAndAppliances
     return cef * 1.15 # Interpretation on ANSI/RESNET/ICC 301-2014 Clothes Dryer CEF
   end
 
-  def self.get_clothes_washer_reference_mef()
-    return 0.817
+  def self.get_clothes_washer_reference_imef()
+    return 0.331
   end
 
   def self.get_clothes_washer_reference_ler()
@@ -320,7 +326,7 @@ class HotWaterAndAppliances
   end
 
   def self.get_clothes_washer_reference_elec_rate()
-    return 0.08 # $/kWh
+    return 0.0803 # $/kWh
   end
 
   def self.get_clothes_washer_reference_gas_rate()
