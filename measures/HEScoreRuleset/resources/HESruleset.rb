@@ -875,47 +875,42 @@ def get_default_water_heater_capacity(fuel)
   fail "Could not get default water heater capacity for fuel '#{fuel}'"
 end
 
+def get_wall_effective_r(doe2code)
+  val = nil
+  CSV.foreach(File.join(File.dirname(__FILE__), "lu_wall_eff_rvalue.csv"), headers: true) do |row|
+    next unless row["doe2code"] == doe2code
+    val = Float(row["Eff-R-value"])
+    break
+  end
+  return val
+end
+
+@siding_map = {
+  "wood siding" => "wo",
+  "stucco" => "st",
+  "vinyl siding" => "vi",
+  "aluminum siding" => "al",
+  "brick veneer" => "br",
+  nil => "nn"
+}
+
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
-  # FIXME: Verify
   # FIXME: Need values below where nil
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  sidings = ["wood siding",     # Wood Siding
-             "stucco",          # Stucco Finish
-             "vinyl siding",    # Vinyl Siding
-             "aluminum siding", # Aluminum Siding
-             "brick veneer"]    # Brick Veneer
-  siding_index = sidings.index(siding)
   has_r_cont = !r_cont.nil?
   if not has_r_cont and not ove
     # Wood Frame
-    val = { 0.0 => [4.6, 3.2, 3.8, 3.7, 4.7],                                # ewwf00wo, ewwf00st, ewwf00vi, ewwf00al, ewwf00br
-            3.0 => [7.0, 5.8, 6.3, 6.2, 7.1],                                # ewwf03wo, ewwf03st, ewwf03vi, ewwf03al, ewwf03br
-            7.0 => [9.7, 8.5, 9.0, 8.8, 9.8],                                # ewwf07wo, ewwf07st, ewwf07vi, ewwf07al, ewwf07br
-            11.0 => [11.5, 10.2, 10.8, 10.6, 11.6],                          # ewwf11wo, ewwf11st, ewwf11vi, ewwf11al, ewwf11br
-            13.0 => [12.5, 11.1, 11.6, 11.5, 12.5],                          # ewwf13wo, ewwf13st, ewwf13vi, ewwf13al, ewwf13br
-            15.0 => [13.3, 11.9, 12.5, 12.3, 13.3],                          # ewwf15wo, ewwf15st, ewwf15vi, ewwf15al, ewwf15br
-            19.0 => [16.9, 15.4, 16.1, 15.9, 16.9],                          # ewwf19wo, ewwf19st, ewwf19vi, ewwf19al, ewwf19br
-            21.0 => [17.5, 16.1, 16.9, 16.7, 17.9] }[r_cavity][siding_index] # ewwf21wo, ewwf21st, ewwf21vi, ewwf21al, ewwf21br
+    doe2walltype = "wf"
   elsif has_r_cont and not ove
     # Wood Frame with Rigid Foam Sheathing
-    val = { 0.0 => [nil, nil, nil, nil, nil],                                # ewps00wo, ewps00st, ewps00vi, ewps00al, ewps00br
-            3.0 => [nil, nil, nil, nil, nil],                                # ewps03wo, ewps03st, ewps03vi, ewps03al, ewps03br
-            7.0 => [nil, nil, nil, nil, nil],                                # ewps07wo, ewps07st, ewps07vi, ewps07al, ewps07br
-            11.0 => [16.7, 15.4, 15.9, 15.9, 16.9],                          # ewps11wo, ewps11st, ewps11vi, ewps11al, ewps11br
-            13.0 => [17.9, 16.4, 16.9, 16.9, 17.9],                          # ewps13wo, ewps13st, ewps13vi, ewps13al, ewps13br
-            15.0 => [18.5, 17.2, 17.9, 17.9, 18.9],                          # ewps15wo, ewps15st, ewps15vi, ewps15al, ewps15br
-            19.0 => [22.2, 20.8, 21.3, 21.3, 22.2],                          # ewps19wo, ewps19st, ewps19vi, ewps19al, ewps19br
-            21.0 => [22.7, 21.7, 22.2, 22.2, 23.3] }[r_cavity][siding_index] # ewps21wo, ewps21st, ewps21vi, ewps21al, ewps21br
+    doe2walltype = "ps"
   elsif not has_r_cont and ove
     # Wood Frame with Optimal Value Engineering
-    val = { 19.0 => [19.2, 17.9, 18.5, 18.2, 19.2],                          # ewov19wo, ewov19st, ewov19vi, ewov19al, ewov19br
-            21.0 => [20.4, 18.9, 19.6, 19.6, 20.4],                          # ewov21wo, ewov21st, ewov21vi, ewov21al, ewov21br
-            27.0 => [25.6, 24.4, 25.0, 24.4, 25.6],                          # ewov27wo, ewov27st, ewov27vi, ewov27al, ewov27br
-            33.0 => [30.3, 29.4, 29.4, 29.4, 30.3],                          # ewov33wo, ewov33st, ewov33vi, ewov33al, ewov33br
-            38.0 => [34.5, 33.3, 34.5, 34.5, 34.5] }[r_cavity][siding_index] # ewov38wo, ewov38st, ewov38vi, ewov38al, ewov38br
+    doe2walltype = "ov"
   end
+  doe2code = "ew%s%02.0f" % [doe2walltype, r_cavity, @siding_map[siding]]
+  val = get_wall_effective_r(doe2code)
   return val if not val.nil?
 
   fail "Could not get default wood stud wall assembly R-value for R-cavity '#{r_cavity}' and R-cont '#{r_cont}' and siding '#{siding}' and ove '#{ove}'"
@@ -923,12 +918,9 @@ end
 
 def get_structural_block_wall_assembly_r(r_cont)
   # Walls Structural Block Assembly R-value
-  # FIXME: Verify
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  val = { nil => 2.9, # ewbr00nn
-          5.0 => 7.9,            # ewbr05nn
-          10.0 => 12.8 }[r_cont] # ewbr10nn
+  doe2code = "ewbr%02.0fnn" % (r_cont.nil? ? 0.0 : r_cont)
+  val = get_wall_effective_r(doe2code)
   return val if not val.nil?
 
   fail "Could not get default structural block wall assembly R-value for R-cavity '#{r_cont}'"
@@ -936,16 +928,9 @@ end
 
 def get_concrete_block_wall_assembly_r(r_cavity, siding)
   # Walls Concrete Block Assembly R-value
-  # FIXME: Verify
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  sidings = ["stucco",       # Stucco Finish
-             "brick veneer", # Brick Veneer
-             nil]            # None
-  siding_index = sidings.index(siding)
-  val = { 0.0 => [4.1, 5.6, 4.0],                           # ewcb00st, ewcb00br, ewcb00nn
-          3.0 => [5.7, 7.2, 5.6],                           # ewcb03st, ewcb03br, ewcb03nn
-          6.0 => [8.5, 10.0, 8.3] }[r_cavity][siding_index] # ewcb06st, ewcb06br, ewcb06nn
+  doe2code = "ewcb%02.0f%s" % [r_cavity, @siding_map[siding]]
+  val = get_wall_effective_r(doe2code)
   return val if not val.nil?
 
   fail "Could not get default concrete block wall assembly R-value for R-cavity '#{r_cavity}' and siding '#{siding}'"
@@ -953,10 +938,10 @@ end
 
 def get_straw_bale_wall_assembly_r(siding)
   # Walls Straw Bale Assembly R-value
-  # FIXME: Verify
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  return 58.8 if siding == "stucco" # ewsb00st
+  doe2code = "ewsb00%s" % @siding_map[siding]
+  val = get_wall_effective_r(doe2code)
+  return val if not val.nil?
 
   fail "Could not get default straw bale assembly R-value for siding '#{siding}'"
 end
