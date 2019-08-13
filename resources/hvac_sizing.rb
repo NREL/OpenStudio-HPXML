@@ -1114,7 +1114,8 @@ class HVACSizing
     zone_loads.Cool_IntGains_Sens = 0
     zone_loads.Cool_IntGains_Lat = 0
 
-    n_occupants = @nbeds + 1 # Number of occupants based on Section 22-3
+    # Per ANSI/RESNET/ICC 301
+    n_occupants = @nbeds + 1
     intGains_Sens = 1600.0 + 230.0 * n_occupants
     intGains_Lat = 200.0 * n_occupants
 
