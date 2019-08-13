@@ -885,7 +885,7 @@ def get_wall_effective_r(doe2code)
   return val
 end
 
-@siding_map = {
+$siding_map = {
   "wood siding" => "wo",
   "stucco" => "st",
   "vinyl siding" => "vi",
@@ -909,7 +909,7 @@ def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
     # Wood Frame with Optimal Value Engineering
     doe2walltype = "ov"
   end
-  doe2code = "ew%s%02.0f" % [doe2walltype, r_cavity, @siding_map[siding]]
+  doe2code = "ew%s%02.0f%s" % [doe2walltype, r_cavity, $siding_map[siding]]
   val = get_wall_effective_r(doe2code)
   return val if not val.nil?
 
@@ -929,7 +929,7 @@ end
 def get_concrete_block_wall_assembly_r(r_cavity, siding)
   # Walls Concrete Block Assembly R-value
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  doe2code = "ewcb%02.0f%s" % [r_cavity, @siding_map[siding]]
+  doe2code = "ewcb%02.0f%s" % [r_cavity, $siding_map[siding]]
   val = get_wall_effective_r(doe2code)
   return val if not val.nil?
 
@@ -939,7 +939,7 @@ end
 def get_straw_bale_wall_assembly_r(siding)
   # Walls Straw Bale Assembly R-value
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
-  doe2code = "ewsb00%s" % @siding_map[siding]
+  doe2code = "ewsb00%s" % $siding_map[siding]
   val = get_wall_effective_r(doe2code)
   return val if not val.nil?
 
