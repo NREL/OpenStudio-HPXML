@@ -85,11 +85,13 @@ class HPXML
   def self.add_site_neighbor(hpxml:,
                              azimuth:,
                              distance:,
+                             height: nil,
                              **remainder)
     neighbors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
     neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
     XMLHelper.add_element(neighbor_building, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(neighbor_building, "Distance", Float(distance))
+    XMLHelper.add_element(neighbor_building, "Height", Float(height)) unless height.nil?
 
     return neighbor_building
   end
@@ -98,7 +100,8 @@ class HPXML
     return nil if neighbor_building.nil?
 
     return { :azimuth => to_integer_or_nil(XMLHelper.get_value(neighbor_building, "Azimuth")),
-             :distance => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance")) }
+             :distance => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance")),
+             :height => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Height")) }
   end
 
   def self.add_building_occupancy(hpxml:,
