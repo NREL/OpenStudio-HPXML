@@ -100,7 +100,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding" => {
         "Azimuth" => one,
         "Distance" => one,
-        "Height" => zero_or_one
+        "Height" => zero_or_one # if omitted, the neighbor is the same height as the main building
       },
 
       # [WeatherStation]
