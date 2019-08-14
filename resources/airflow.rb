@@ -1595,7 +1595,7 @@ class Airflow
     bath_sch_sensor.setKeyName(bath_exhaust_sch.schedule.name.to_s)
 
     if mech_vent.has_dryer and mech_vent.dryer_exhaust > 0
-      dryer_exhaust_sch = HotWaterSchedule.new(model, runner, Constants.ObjectNameMechanicalVentilation + " dryer exhaust schedule", Constants.ObjectNameMechanicalVentilation + " dryer exhaust temperature schedule", building.nbeds, mech_vent.dryer_exhaust_day_shift, "ClothesDryerExhaust", 0, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+      dryer_exhaust_sch = HotWaterSchedule.new(model, runner, Constants.ObjectNameMechanicalVentilation + " dryer exhaust schedule", building.nbeds, 0, true)
       dryer_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
       dryer_sch_sensor.setName("#{Constants.ObjectNameMechanicalVentilation} dryer sch s")
       dryer_sch_sensor.setKeyName(dryer_exhaust_sch.schedule.name.to_s)
