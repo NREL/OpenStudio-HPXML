@@ -98,10 +98,12 @@ class HEScoreRuleset
     # FIXME: Verify. What about townhouses?
     HPXML.add_site_neighbor(hpxml: hpxml,
                             azimuth: sanitize_azimuth(@bldg_azimuth + 90.0),
-                            distance: 12.0)
+                            distance: 20.0,
+                            height: 12.0)
     HPXML.add_site_neighbor(hpxml: hpxml,
                             azimuth: sanitize_azimuth(@bldg_azimuth - 90.0),
-                            distance: 12.0)
+                            distance: 20.0,
+                            height: 12.0)
 
     HPXML.add_building_occupancy(hpxml: hpxml,
                                  number_of_residents: Geometry.get_occupancy_default_num(@nbeds))
@@ -363,20 +365,19 @@ class HEScoreRuleset
         # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
       end
 
-      # Add one HPXML window per story (for this facade) to accommodate different overhang distances
-      window_height = 4.0 # FIXME: Hard-coded
-      for story in 1..@ncfl_ag
-        HPXML.add_window(hpxml: hpxml,
-                         id: "#{window_values[:id]}_story#{story}",
-                         area: window_values[:area] / @ncfl_ag,
-                         azimuth: orientation_to_azimuth(window_values[:orientation]),
-                         ufactor: window_values[:ufactor],
-                         shgc: window_values[:shgc],
-                         overhangs_depth: 1.0, # FIXME: Verify
-                         overhangs_distance_to_top_of_window: 2.0, # FIXME: Hard-coded
-                         overhangs_distance_to_bottom_of_window: 6.0, # FIXME: Hard-coded
-                         wall_idref: window_values[:wall_idref])
-      end
+      # Add one HPXML window per side of the house with only the overhangs from the roof.
+      HPXML.add_window(
+        hpxml: hpxml,
+        id: window_values[:id],
+        area: window_values[:area],
+        azimuth: orientation_to_azimuth(window_values[:orientation]),
+        ufactor: window_values[:ufactor],
+        shgc: window_values[:shgc],
+        overhangs_depth: 1.0,
+        overhangs_distance_to_top_of_window: 0.0,
+        overhangs_distance_to_bottom_of_window: @ceil_height * @ncfl_ag,
+        wall_idref: window_values[:wall_idref]
+      )
       # Uses ERI Reference Home for interior shading
     end
   end

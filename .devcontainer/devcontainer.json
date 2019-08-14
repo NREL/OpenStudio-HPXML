@@ -7,10 +7,12 @@
 	// "appPort": [],
 
 	// Uncomment the next line if you want to add in default container specific settings.json values
-	// "settings":  { "workbench.colorTheme": "Quiet Light" },
+	"settings":  { 
+		"ruby.useLanguageServer": true
+	},
 
 	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "ruby --version",
+	"postCreateCommand": "rm Gemfile.lock && bundle install",
 
 	"extensions": [
 		"rebornix.Ruby"
