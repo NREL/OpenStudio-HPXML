@@ -332,7 +332,7 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>Unknown</DuctInsulationMaterial>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
@@ -347,7 +347,7 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>Unknown</DuctInsulationMaterial>
                   <DuctLocation>attic - unconditioned</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>

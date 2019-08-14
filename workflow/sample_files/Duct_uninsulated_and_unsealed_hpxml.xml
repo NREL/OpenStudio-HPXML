@@ -300,7 +300,7 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>false</DuctInsulationPresent>
+                  <DuctInsulationMaterial>None</DuctInsulationMaterial>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>

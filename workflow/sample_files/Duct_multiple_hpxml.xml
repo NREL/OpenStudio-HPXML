@@ -315,17 +315,17 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>Unknown</DuctInsulationMaterial>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>0.5</FractionDuctArea>
                 </Ducts>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>Unknown</DuctInsulationMaterial>
                   <DuctLocation>basement - unconditioned</DuctLocation>
                   <FractionDuctArea>0.3</FractionDuctArea>
                 </Ducts>
                 <Ducts>
-                  <DuctInsulationPresent>false</DuctInsulationPresent>
+                  <DuctInsulationMaterial>None</DuctInsulationMaterial>
                   <DuctLocation>basement - unconditioned</DuctLocation>
                   <FractionDuctArea>0.2</FractionDuctArea>
                 </Ducts>

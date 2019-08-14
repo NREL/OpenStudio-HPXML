@@ -315,7 +315,7 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>Unknown</DuctInsulationMaterial>
                   <DuctLocation>basement - unconditioned</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>

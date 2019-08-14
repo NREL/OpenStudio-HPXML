@@ -295,7 +295,7 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>Unknown</DuctInsulationMaterial>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>

@@ -315,7 +315,7 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>Unknown</DuctInsulationMaterial>
                   <DuctLocation>crawlspace - vented</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
