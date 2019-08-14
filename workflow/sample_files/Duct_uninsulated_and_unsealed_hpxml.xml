@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
+<HPXML xmlns="http://hpxmlonline.com/2014/6" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
@@ -300,7 +301,9 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationMaterial>None</DuctInsulationMaterial>
+                  <DuctInsulationMaterial>
+                    <None/>
+                  </DuctInsulationMaterial>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
