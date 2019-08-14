@@ -46,6 +46,7 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofBedrooms" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume" => one,
+        "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors" => zero_or_one, # See [Neighbors]
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
 
@@ -88,6 +89,18 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='other']" => zero_or_one, # See [PlugLoads]
         "/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']" => zero_or_one, # See [Television]
+      },
+
+      # [Neighbors]
+      "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors" => {
+        "NeighborBuilding" => one_or_more, # See [NeighborBuilding]
+      },
+
+      # [NeighborBuilding]
+      "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding" => {
+        "Azimuth" => one,
+        "Distance" => one,
+        "Height" => zero_or_one # if omitted, the neighbor is the same height as the main building
       },
 
       # [WeatherStation]

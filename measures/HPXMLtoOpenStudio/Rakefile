@@ -604,7 +604,8 @@ def get_hpxml_file_site_neighbor_values(hpxml_file, site_neighbors_values)
     site_neighbors_values << { :azimuth => 0,
                                :distance => 10 }
     site_neighbors_values << { :azimuth => 180,
-                               :distance => 15 }
+                               :distance => 15,
+                               :height => 12 }
   elsif ['invalid_files/bad-site-neighbor-azimuth.xml'].include? hpxml_file
     site_neighbors_values[0][:azimuth] = 145
   end
