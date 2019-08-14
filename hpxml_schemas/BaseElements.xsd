@@ -168,16 +168,23 @@
 					<xs:documentation>Describe</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="Unknown"/>
+			<xs:element name="None">
+				<xs:annotation>
+					<xs:documentation>Indicates insulation not present.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Unknown">
+				<xs:annotation>
+					<xs:documentation>Indicates insulation present but material type unknown.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:choice>
 	</xs:complexType>
 	<xs:complexType name="InsulationInfo">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
-			<xs:element minOccurs="0" name="InsulationPresent" type="xs:boolean"/>
 			<xs:element minOccurs="0" name="InsulationGrade" type="InsulationGrade"/>
 			<xs:element minOccurs="0" name="InsulationCondition" type="InsulationCondition"/>
-			<xs:element minOccurs="0" name="InsulationLocation" type="InsulationLocation"/>
 			<xs:element minOccurs="0" name="AssemblyEffectiveRValue" type="RValue">
 				<xs:annotation>
 					<xs:documentation>This should indicate the effective R-value of the complete assembly including any air films or other treatments.</xs:documentation>
@@ -3339,7 +3346,8 @@ http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:docum
 					<xs:sequence>
 						<xs:element name="DuctType" type="DuctType" minOccurs="0"/>
 						<xs:element name="DuctMaterial" type="DuctMaterial" minOccurs="0"/>
-						<xs:element minOccurs="0" name="DuctInsulationPresent" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="DuctInsulationMaterial"
+							type="InsulationMaterial"/>
 						<xs:element name="DuctInsulationRValue" type="RValue" minOccurs="0"/>
 						<xs:element minOccurs="0" name="DuctInsulationThickness"
 							type="LengthMeasurement">
