@@ -29,7 +29,6 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     hvac_base_dir = File.absolute_path(File.join(this_dir, "hvac_base"))
-    hvac_dse_dir = File.absolute_path(File.join(this_dir, "hvac_dse"))
     hvac_multiple_dir = File.absolute_path(File.join(this_dir, "hvac_multiple"))
     hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
     hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "hvac_load_fracs"))
@@ -39,7 +38,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     test_dirs = [this_dir,
                  cfis_dir,
                  hvac_base_dir,
-                 hvac_dse_dir,
                  hvac_multiple_dir,
                  hvac_partial_dir,
                  hvac_load_fracs_dir,
@@ -63,7 +61,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     _write_summary_results(results_dir, all_results)
 
     # Cross simulation tests
-    _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
@@ -270,7 +267,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       results[[fueltype, category, subcategory, fuel_units]] = val
     end
 
-    # Disaggregate any crankcase and defrost energy from results (for DSE tests)
+    # Disaggregate any crankcase and defrost energy from results
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
@@ -368,7 +365,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_equal(true, success)
     end
 
-    # Add output variables for crankcase and defrost energy (for DSE tests)
+    # Add output variables for crankcase and defrost energy
     vars = ["Cooling Coil Crankcase Heater Electric Energy",
             "Heating Coil Crankcase Heater Electric Energy",
             "Heating Coil Defrost Electric Energy"]
@@ -669,19 +666,23 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # HVAC Capacities
-    htg_cap = 0.0
-    clg_cap = 0.0
+    htg_cap = nil
+    clg_cap = nil
     has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+      htg_cap = 0 if htg_cap.nil?
       htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
       htg_cap += htg_sys_cap if htg_sys_cap > 0
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
+      clg_cap = 0 if clg_cap.nil?
       clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
       clg_cap += clg_sys_cap if clg_sys_cap > 0
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
+      htg_cap = 0 if htg_cap.nil?
+      clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
       if hp_type == "mini-split"
@@ -698,15 +699,21 @@ class HPXMLTranslatorTest < MiniTest::Test
         has_gshp_coil = true
       end
     end
-    if clg_cap > 0
-      hpxml_value = clg_cap
+    if not clg_cap.nil?
       sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if clg_cap > 0
+        assert_in_epsilon(clg_cap, sql_value, 0.01)
+      else # autosized
+        assert_operator(sql_value, :>, 1)
+      end
     end
-    if htg_cap > 0 and not (has_multispeed_dx_heating_coil or has_gshp_coil)
-      hpxml_value = htg_cap
+    if not htg_cap.nil? and not (has_multispeed_dx_heating_coil or has_gshp_coil)
       sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if htg_cap > 0
+        assert_in_epsilon(htg_cap, sql_value, 0.01)
+      else # autosized
+        assert_operator(sql_value, :>, 1)
+      end
     end
 
     # HVAC Load Fractions
@@ -932,42 +939,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
-  def _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
-    # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
-    puts "DSE test results:"
-    xmls.sort.each do |xml|
-      next if not xml.include? hvac_dse_dir
-      next if not xml.include? "-dse-0.8"
-
-      xml_dse80 = File.absolute_path(xml)
-      xml_dse100 = xml_dse80.gsub(hvac_dse_dir, hvac_base_dir).gsub("-dse-0.8.xml", "-base.xml")
-
-      results_dse80 = all_results[xml_dse80]
-      results_dse100 = all_results[xml_dse100]
-      next if results_dse100.nil?
-
-      # Compare results
-      results_dse80.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
-        next if k[0] == 'Capacity'
-
-        result_dse80 = results_dse80[k].to_f
-        result_dse100 = results_dse100[k].to_f
-        next if result_dse80 == 0.0 and result_dse100 == 0.0
-
-        dse_actual = result_dse100 / result_dse80
-        dse_expect = 0.8
-        if File.basename(xml) == "base-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
-          dse_expect = 1.0 # TODO: Generalize this
-        end
-
-        _display_result_epsilon(xml, dse_expect, dse_actual, k)
-        assert_in_epsilon(dse_expect, dse_actual, 0.05)
-      end
-    end
-  end
-
   def _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     # Compare end use results for three of an HVAC system to results for one HVAC system.
     puts "Multiple HVAC test results:"
@@ -1046,7 +1017,11 @@ class HPXMLTranslatorTest < MiniTest::Test
         next if result_33 == 0.0 and result_100 == 0.0
 
         _display_result_epsilon(xml, result_33, result_100 / 3.0, k)
-        assert_in_epsilon(result_33, result_100 / 3.0, 0.05)
+        if result_100 > 1.0
+          assert_in_epsilon(result_33, result_100 / 3.0, 0.05)
+        else
+          assert_in_delta(result_33, result_100 / 3.0, 0.05)
+        end
       end
     end
   end
