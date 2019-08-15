@@ -244,7 +244,7 @@ class EnergyPlusValidator
 
       ## [HeatingType=Furnace]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution/DistributionSystemType/AirDistribution" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='AFUE']/Value" => one,
@@ -259,7 +259,7 @@ class EnergyPlusValidator
 
       ## [HeatingType=Boiler]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler]" => {
-        "../../HVACDistribution[DistributionSystemType/HydronicDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution/DistributionSystemType/HydronicDistribution" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='AFUE']/Value" => one,
@@ -289,7 +289,7 @@ class EnergyPlusValidator
 
       ## [CoolingType=CentralAC]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioner']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution/DistributionSystemType/AirDistribution" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
       },
@@ -314,7 +314,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=ASHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='air-to-air']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution/DistributionSystemType/AirDistribution" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
@@ -322,7 +322,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=MSHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='mini-split']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => zero_or_more, # See [HVACDistribution]
+        "../../HVACDistribution/DistributionSystemType/AirDistribution" => zero_or_more, # See [HVACDistribution]
         "DistributionSystem" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
@@ -330,7 +330,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=GSHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='ground-to-air']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution/DistributionSystemType/AirDistribution" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
         "AnnualHeatingEfficiency[Units='COP']/Value" => one,
@@ -353,7 +353,7 @@ class EnergyPlusValidator
       # [HVACDistribution]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[DistributionSystemType/AirDistribution | DistributionSystemType/HydronicDistribution | DistributionSystemType[Other='DSE']]" => one, # See [HVACDistType=Air] or [HVACDistType=DSE]
+        "[DistributionSystemType/AirDistribution | DistributionSystemType/HydronicDistribution]" => one, # See [HVACDistType=Air]
       },
 
       ## [HVACDistType=Air]
@@ -362,11 +362,6 @@ class EnergyPlusValidator
         "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value" => one,
         "Ducts[DuctType='supply']" => one_or_more, # See [HVACDuct]
         "Ducts[DuctType='return']" => one_or_more, # See [HVACDuct]
-      },
-
-      ## [HVACDistType=DSE]
-      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other='DSE']]" => {
-        "[AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency]" => one_or_more,
       },
 
       ## [HVACDuct]
