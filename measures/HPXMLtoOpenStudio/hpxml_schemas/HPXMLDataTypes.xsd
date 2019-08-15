@@ -665,6 +665,8 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="cavity"/>
 			<xs:enumeration value="continuous"/>
+			<xs:enumeration value="continuous - interior"/>
+			<xs:enumeration value="continuous - exterior"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="InsulationBattType">
@@ -931,7 +933,7 @@
 	<!--Cooling System Information Below-->
 	<xs:simpleType name="CoolingSystemType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="central air conditioning"/>
+			<xs:enumeration value="central air conditioner"/>
 			<xs:enumeration value="mini-split"/>
 			<xs:enumeration value="room air conditioner"/>
 			<xs:enumeration value="evaporative cooler"/>
@@ -1059,13 +1061,16 @@
 			<xs:enumeration value="crawlspace - unconditioned"/>
 			<xs:enumeration value="crawlspace - unvented"/>
 			<xs:enumeration value="crawlspace - vented"/>
+			<xs:enumeration value="exterior wall"/>
 			<xs:enumeration value="garage"/>
 			<xs:enumeration value="garage - conditioned"/>
 			<xs:enumeration value="garage - unconditioned"/>
 			<xs:enumeration value="interstitial space"/>
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="outside"/>
+			<xs:enumeration value="roof deck"/>
 			<xs:enumeration value="unconditioned space"/>
+			<xs:enumeration value="under slab"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="DuctLeakageTestMethod">

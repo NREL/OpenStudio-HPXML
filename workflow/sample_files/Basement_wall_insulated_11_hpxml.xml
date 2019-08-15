@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
+<HPXML xmlns="http://hpxmlonline.com/2014/6" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
@@ -302,7 +303,7 @@
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
               <DistributionSystem idref="hvac1_dist"/>
-              <CoolingSystemType>central air conditioning</CoolingSystemType>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
@@ -315,7 +316,9 @@
             <DistributionSystemType>
               <AirDistribution>
                 <Ducts>
-                  <DuctInsulationPresent>true</DuctInsulationPresent>
+                  <DuctInsulationMaterial>
+                    <Unknown/>
+                  </DuctInsulationMaterial>
                   <DuctLocation>living space</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
