@@ -911,10 +911,18 @@ class OSModel
         drywall_thick_in = 0.0
       end
       film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surface])).rvalue
-      mat_roofing = Material.RoofingAsphaltShinglesDark
       solar_abs = roof_values[:solar_absorptance]
       emitt = roof_values[:emittance]
       has_radiant_barrier = roof_values[:radiant_barrier]
+      if solar_abs >= 0.875
+        mat_roofing = Material.RoofingAsphaltShinglesDark
+      elsif solar_abs >= 0.75
+        mat_roofing = Material.RoofingAsphaltShinglesMed
+      elsif solar_abs >= 0.6
+        mat_roofing = Material.RoofingAsphaltShinglesLight
+      else
+        mat_roofing = Material.RoofingAsphaltShinglesWhiteCool
+      end
 
       assembly_r = roof_values[:insulation_assembly_r_value]
       constr_sets = [
@@ -2837,7 +2845,7 @@ class OSModel
 
             if duct_systems[air_ducts].nil?
               duct_systems[air_ducts] = loop
-            else
+            elsif duct_systems[air_ducts] != loop
               # Multiple air loops associated with this duct system, treat
               # as separate duct systems.
               air_ducts2 = self.create_ducts(air_distribution, model, spaces)
