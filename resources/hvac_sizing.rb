@@ -1250,33 +1250,14 @@ class HVACSizing
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
-      infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
-      infiltration_cfm = 0 if infiltration_cfm.nil?
-
       if not ceiling_insulated
         if not walls_insulated
-          if infiltration_cfm == 0
-            dse_Fregain = 0.55 # Uninsulated ceiling, uninsulated walls, no infiltration
-          else # infiltration_cfm > 0
-            dse_Fregain = 0.51 # Uninsulated ceiling, uninsulated walls, with infiltration
-          end
-        else # walls_insulated
-          if infiltration_cfm == 0
-            dse_Fregain = 0.78 # Uninsulated ceiling, insulated walls, no infiltration
-          else # infiltration_cfm > 0
-            dse_Fregain = 0.74 # Uninsulated ceiling, insulated walls, with infiltration
-          end
+          dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
+        else
+          dse_Fregain = 0.75 # Uninsulated ceiling, insulated walls
         end
-      else # ceiling_insulated
-        if walls_insulated
-          if infiltration_cfm == 0
-            dse_Fregain = 0.32 # Insulated ceiling, insulated walls, no infiltration
-          else # infiltration_cfm > 0
-            dse_Fregain = 0.27 # Insulated ceiling, insulated walls, with infiltration
-          end
-        else # not walls_insulated
-          dse_Fregain = 0.06 # Insulated ceiling and uninsulated walls
-        end
+      else
+        dse_Fregain = 0.30 # Insulated ceiling
       end
 
     elsif Geometry.is_vented_crawl(duct.LocationSpace) or Geometry.is_unvented_crawl(duct.LocationSpace)
@@ -1284,24 +1265,27 @@ class HVACSizing
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
-      infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
-      infiltration_cfm = 0 if infiltration_cfm.nil?
+      is_vented = Geometry.is_vented_crawl(duct.LocationSpace)
 
-      if infiltration_cfm > 0
-        if ceiling_insulated
-          dse_Fregain = 0.12    # Insulated ceiling and uninsulated walls
-        else
-          dse_Fregain = 0.50    # Uninsulated ceiling and uninsulated walls
-        end
-      else # infiltration_cfm == 0
-        if not ceiling_insulated and not walls_insulated
-          dse_Fregain = 0.60    # Uninsulated ceiling and uninsulated walls
+      if is_vented
+        if ceiling_insulated and walls_insulated
+          dse_Fregain = 0.17 # Insulated ceiling, insulated walls
         elsif ceiling_insulated and not walls_insulated
-          dse_Fregain = 0.16    # Insulated ceiling and uninsulated walls
+          dse_Fregain = 0.12 # Insulated ceiling, uninsulated walls
         elsif not ceiling_insulated and walls_insulated
-          dse_Fregain = 0.76    # Uninsulated ceiling and insulated walls (not explicitly included in A152)
-        else
-          dse_Fregain = 0.30    # Insulated ceiling and insulated walls
+          dse_Fregain = 0.66 # Uninsulated ceiling, insulated walls
+        elsif not ceiling_insulated and not walls_insulated
+          dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
+        end
+      else # unvented
+        if ceiling_insulated and walls_insulated
+          dse_Fregain = 0.30 # Insulated ceiling, insulated walls
+        elsif ceiling_insulated and not walls_insulated
+          dse_Fregain = 0.16 # Insulated ceiling, uninsulated walls
+        elsif not ceiling_insulated and walls_insulated
+          dse_Fregain = 0.76 # Uninsulated ceiling, insulated walls
+        elsif not ceiling_insulated and not walls_insulated
+          dse_Fregain = 0.60 # Uninsulated ceiling, uninsulated walls
         end
       end
 
