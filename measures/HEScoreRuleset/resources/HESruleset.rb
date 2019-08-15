@@ -487,7 +487,7 @@ class HEScoreRuleset
       cooling_values[:cooling_system_fuel] = "electricity"
       cooling_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
 
-      if cooling_values[:cooling_system_type] == "central air conditioning"
+      if cooling_values[:cooling_system_type] == "central air conditioner"
         if not cooling_values[:year_installed].nil?
           cooling_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(cooling_values[:year_installed],
                                                                             cooling_values[:cooling_system_type],
@@ -713,7 +713,7 @@ class HEScoreRuleset
     HPXML.add_clothes_washer(hpxml: hpxml,
                              id: "ClothesWasher",
                              location: "living space", # FIXME: Verify
-                             modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_mef(),
+                             integrated_modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_imef(),
                              rated_annual_kwh: HotWaterAndAppliances.get_clothes_washer_reference_ler(),
                              label_electric_rate: HotWaterAndAppliances.get_clothes_washer_reference_elec_rate(),
                              label_gas_rate: HotWaterAndAppliances.get_clothes_washer_reference_gas_rate(),
@@ -726,7 +726,7 @@ class HEScoreRuleset
                             id: "ClothesDryer",
                             location: "living space", # FIXME: Verify
                             fuel_type: "electricity",
-                            energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_ef(Constants.FuelTypeElectric),
+                            combined_energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_cef(Constants.FuelTypeElectric),
                             control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
   end
 
@@ -792,7 +792,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
     year = 2010
   end
 
-  type_id = { 'central air conditioning' => 'split_dx',
+  type_id = { 'central air conditioner' => 'split_dx',
               'room air conditioner' => 'packaged_dx',
               'air-to-air' => 'heat_pump',
               'Furnace' => 'central_furnace',
