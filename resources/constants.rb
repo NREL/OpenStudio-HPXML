@@ -491,10 +491,6 @@ class Constants
     return 'autosize'
   end
 
-  def self.SizingAutoMaxLoad
-    return 'autosize for max load'
-  end
-
   def self.SizingInfoCMUWallFurringInsRvalue
     return __method__.to_s
   end
@@ -580,10 +576,6 @@ class Constants
   end
 
   def self.SizingInfoGSHPUTubeSpacingType
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHPSizedForMaxLoad
     return __method__.to_s
   end
 

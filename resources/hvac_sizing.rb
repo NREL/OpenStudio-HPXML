@@ -1957,34 +1957,21 @@ class HVACSizing
         hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
       end
     else
-      if hvac.HPSizedForMaxLoad
-        # Auto size the heat pump heating capacity based on the heating design temperature (if the heating capacity is larger than the cooling capacity)
-        hvac_final_values.Heat_Capacity = heatCap_Rated
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-          cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
-          hvac_final_values.Cool_Capacity = hvac_final_values.Heat_Capacity
-          hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
-        elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-          hvac_final_values.Cool_Capacity = hvac_final_values.Heat_Capacity - hvac.HeatingCapacityOffset
-          hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
-        end
+      cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
+      load_shr = hvac_final_values.Cool_Load_Sens / hvac_final_values.Cool_Load_Tot
+      if (weather.data.HDD65F / weather.data.CDD50F) < 2.0 or load_shr < 0.95
+        # Mild winter or has a latent cooling load
+        hvac_final_values.Cool_Capacity = [(hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
       else
-        cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
-        load_shr = hvac_final_values.Cool_Load_Sens / hvac_final_values.Cool_Load_Tot
-        if (weather.data.HDD65F / weather.data.CDD50F) < 2.0 or load_shr < 0.95
-          # Mild winter or has a latent cooling load
-          hvac_final_values.Cool_Capacity = [(hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
-        else
-          # Cold winter and no latent cooling load (add a ton rule applies)
-          hvac_final_values.Cool_Capacity = [(hvac_final_values.Cool_Load_Tot + hvac.OverSizeDelta) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
-        end
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-          hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
-          hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
-        elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-          hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
-          hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
-        end
+        # Cold winter and no latent cooling load (add a ton rule applies)
+        hvac_final_values.Cool_Capacity = [(hvac_final_values.Cool_Load_Tot + hvac.OverSizeDelta) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
+      end
+      if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
+        hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
+        hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
       end
     end
 
@@ -2585,11 +2572,6 @@ class HVACSizing
       end
 
       if not htg_coil.nil?
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-          hvac.HPSizedForMaxLoad = get_feature(runner, equip, Constants.SizingInfoHPSizedForMaxLoad, 'boolean')
-          return nil if hvac.HPSizedForMaxLoad.nil?
-        end
-
         ratedCFMperTonHeating = get_feature(runner, equip, Constants.SizingInfoHVACRatedCFMperTonHeating, 'string', false)
         if not ratedCFMperTonHeating.nil?
           hvac.RatedCFMperTonHeating = ratedCFMperTonHeating.split(",").map(&:to_f)
@@ -3867,7 +3849,6 @@ class HVACInfo
     self.CapacityRatioHeating = [1.0]
     self.OverSizeLimit = 1.15
     self.OverSizeDelta = 15000.0
-    self.HPSizedForMaxLoad = false
     self.FanspeedRatioCooling = [1.0]
     self.DSECool = 1.0
     self.DSEHeat = 1.0
@@ -3890,7 +3871,7 @@ class HVACInfo
                 :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
-                :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :HPSizedForMaxLoad,
+                :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta,
                 :FanspeedRatioCooling, :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR,
                 :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
