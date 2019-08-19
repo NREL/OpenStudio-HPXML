@@ -138,6 +138,7 @@ def create_hpxmls
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
@@ -652,6 +653,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
         hpxml_file.include? 'hvac_partial' or
         hpxml_file.include? 'hvac_multiple' or
         hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
         hpxml_file.include? 'hvac_load_fracs'
     building_construction_values[:number_of_conditioned_floors] -= 1
     building_construction_values[:conditioned_floor_area] -= 1350
@@ -800,6 +802,7 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
         hpxml_file.include? 'hvac_partial' or
         hpxml_file.include? 'hvac_multiple' or
         hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
         hpxml_file.include? 'hvac_load_fracs'
     rim_joists_values = []
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
@@ -1050,6 +1053,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
         hpxml_file.include? 'hvac_partial' or
         hpxml_file.include? 'hvac_multiple' or
         hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
         hpxml_file.include? 'hvac_load_fracs'
     foundation_walls_values = []
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
@@ -1151,6 +1155,7 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
         hpxml_file.include? 'hvac_partial' or
         hpxml_file.include? 'hvac_multiple' or
         hpxml_file.include? 'hvac_base' or
+        hpxml_file.include? 'hvac_dse' or
         hpxml_file.include? 'hvac_load_fracs'
     slabs_values[0][:interior_adjacent_to] = "living space"
     slabs_values[0][:under_slab_insulation_width] = nil
@@ -1833,6 +1838,10 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
     hvac_distributions_values << { :id => "HVACDistribution6",
                                    :distribution_system_type => "AirDistribution" }
+  elsif ['base-hvac-dse.xml'].include? hpxml_file
+    hvac_distributions_values[0][:distribution_system_type] = "DSE"
+    hvac_distributions_values[0][:annual_heating_dse] = 0.8
+    hvac_distributions_values[0][:annual_cooling_dse] = 0.7
   elsif hpxml_file.include? 'hvac_multiple' and not hvac_distributions_values.empty?
     hvac_distributions_values << hvac_distributions_values[0].dup
     hvac_distributions_values[1][:id] = "HVACDistribution2"
