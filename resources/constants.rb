@@ -33,8 +33,16 @@ class Constants
     return 14.696 # standard atmospheric pressure (psia)
   end
 
+  def self.RimJoistHeight
+    return 1.0
+  end
+
   def self.small
     return 1e-9
+  end
+
+  def self.WallHeight
+    return 8.0
   end
 
   # Strings --------------------

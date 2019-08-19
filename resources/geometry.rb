@@ -24,10 +24,12 @@ class Geometry
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
       wall_values = HPXML.get_wall_values(wall: wall)
       thermal_zones << wall_values[:interior_adjacent_to]
+      thermal_zones << wall_values[:exterior_adjacent_to]
     end
     building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
       foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
       thermal_zones << foundation_wall_values[:interior_adjacent_to]
+      thermal_zones << foundation_wall_values[:exterior_adjacent_to]
     end
     building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
       roof_values = HPXML.get_roof_values(roof: roof)
@@ -40,11 +42,16 @@ class Geometry
     building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
       framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
       thermal_zones << framefloor_values[:interior_adjacent_to]
+      thermal_zones << framefloor_values[:exterior_adjacent_to]
     end
-    building.elements.each("BuildingDetails/Enclosure/Slabs/S;an") do |slab|
+    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
       slab_values = HPXML.get_slab_values(slab: slab)
       thermal_zones << slab_values[:interior_adjacent_to]
     end
+    thermal_zones.delete("outside")
+    thermal_zones.delete("ground")
+    thermal_zones.delete("other")
+    thermal_zones.delete("other housing unit")
     return thermal_zones.uniq
   end
 
@@ -157,7 +164,8 @@ class Geometry
   end
 
   def self.get_height_of_thermal_zone(building:,
-                                      thermal_zone:)
+                                      thermal_zone:,
+                                      number_of_conditioned_floors_above_grade:)
     heights = []
     building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
       foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
@@ -165,7 +173,7 @@ class Geometry
 
       height = foundation_wall_values[:height]
       if building.elements["BuildingDetails/Enclosure/RimJoists/RimJoist"]
-        height += 1.0
+        height += Constants.RimJoistHeight
       end
       heights << height
     end
@@ -173,7 +181,12 @@ class Geometry
       wall_values = HPXML.get_wall_values(wall: wall)
       next if wall_values[:interior_adjacent_to] != thermal_zone
 
-      heights << 8.0
+      num_floors = 1
+      if thermal_zone == "living space"
+        num_floors = number_of_conditioned_floors_above_grade
+      end
+
+      heights << Constants.WallHeight * num_floors
     end
     return heights.max
   end
