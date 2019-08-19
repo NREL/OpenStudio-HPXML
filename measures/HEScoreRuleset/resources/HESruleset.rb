@@ -70,6 +70,7 @@ class HEScoreRuleset
     @year_built = orig_building_construction_values[:year_built]
     @nbeds = orig_building_construction_values[:number_of_bedrooms]
     @cfa = orig_building_construction_values[:conditioned_floor_area] # ft^2
+    @is_townhouse = (orig_building_construction_values[:residential_facility_type] == 'single-family attached')
     @fnd_types = get_foundation_details(orig_details)
     @ducts = get_ducts_details(orig_details)
     @cfa_basement = @fnd_types["basement - conditioned"]
@@ -83,7 +84,7 @@ class HEScoreRuleset
     @has_uncond_bsmnt = @fnd_types.keys.include?("basement - unconditioned")
     @ncfl = @ncfl_ag + (@has_cond_bsmnt ? 1 : 0)
     @nfl = @ncfl + (@has_uncond_bsmnt ? 1 : 0)
-    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2 FIXME: Verify. Does this change for shape=townhouse? Maybe ridge changes to front-back instead of left-right
+    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
     @bldg_length_side = (3.0 * @bldg_footprint / 5.0)**0.5 # ft
     @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
     @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
@@ -157,13 +158,21 @@ class HEScoreRuleset
                                    roof_values[:insulation_continuous_r_value],
                                    roof_values[:roof_type],
                                    roof_values[:radiant_barrier])
-
-      roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180] # FIXME: Verify
+      cos_roof_angle = Math.cos(UnitConversions.convert(@roof_angle, "deg", "rad"))
+      # FIXME: this assumes that the roof area is the plan-view area of the roof and then calculates an actual roof area from that. 
+      # Is this consistent with how people are using HEScore?
+      if @is_townhouse
+        roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
+        roof_area = @bldg_length_front / (2. * cos_roof_angle) * @bldg_length_side
+      else
+        roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
+        roof_area = @bldg_length_side / (2. * cos_roof_angle) * @bldg_length_front
+      end
       roof_azimuths.each_with_index do |roof_azimuth, idx|
         HPXML.add_roof(hpxml: hpxml,
                        id: "#{roof_values[:id]}_#{idx}",
                        interior_adjacent_to: attic_adjacent,
-                       area: 1000.0 / 2, # FIXME: Hard-coded. Use input if cathedral ceiling or conditioned attic, otherwise calculate default?
+                       area: roof_area,
                        azimuth: sanitize_azimuth(roof_azimuth),
                        solar_absorptance: roof_values[:solar_absorptance],
                        emittance: 0.9, # ERI assumption; TODO get values from method
@@ -224,9 +233,14 @@ class HEScoreRuleset
 
       # Gable wall: Two surfaces per HES zone_roof
       # FIXME: Do we want gable walls even for cathedral ceiling and conditioned attic where roof area is provided by the user?
+      # FIXME: Gable walls are being inserted at ground level and shaded by the neighbors
       gable_height = @bldg_length_side / 2 * Math.sin(UnitConversions.convert(@roof_angle, "deg", "rad"))
       gable_area = @bldg_length_side / 2 * gable_height
-      gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270] # FIXME: Verify
+      if @is_townhouse
+        gable_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
+      else
+        gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
+      end
       gable_azimuths.each_with_index do |gable_azimuth, idx|
         HPXML.add_wall(hpxml: hpxml,
                        id: "#{HPXML.get_id(orig_attic)}_gable_#{idx}",
