@@ -48,18 +48,20 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base-atticroof-conditioned.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
 
+    @flags = OSModel.get_global_flags
+    
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     xmls.each do |xml|
       all_results[xml] = _run_xml(xml, this_dir, args.dup)
     end
-
+    
     _write_summary_results(results_dir, all_results)
 
     # Cross simulation tests
@@ -794,6 +796,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not cw.nil? and not wh.nil?
       # Location
       location = XMLHelper.get_value(cw, "Location")
+      location = 'living space' if @flags['single_conditioned_zone'] and location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
@@ -809,6 +812,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not cd.nil? and not wh.nil?
       # Location
       location = XMLHelper.get_value(cd, "Location")
+      location = 'living space' if @flags['single_conditioned_zone'] and location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
@@ -824,6 +828,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not refr.nil?
       # Location
       location = XMLHelper.get_value(refr, "Location")
+      location = 'living space' if @flags['single_conditioned_zone'] and location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeConditionedBasement,

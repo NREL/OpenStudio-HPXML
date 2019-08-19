@@ -51,6 +51,7 @@ class Airflow
     end
     building.cfa = cfa
     building.infilvolume = infilvolume
+    building.infilheight = Float(ncfl_ag) * infilvolume / cfa # vertical distance between lowest and highest above-grade points within the pressure boundary
     building.nbeds = nbeds
     building.nbaths = nbaths
     building.ncfl = ncfl
@@ -413,7 +414,7 @@ class Airflow
       x_i = x_i * (1 - y_i)
 
       building.living.hor_lk_frac = r_i
-      z_f = flue_height / (building.living.height + building.living.coord_z)
+      z_f = flue_height / (building.infilheight + building.living.coord_z)
 
       # Calculate Stack Coefficient
       m_o = (x_i + (2.0 * n_i + 1.0) * y_i)**2.0 / (2 - r_i)
@@ -439,7 +440,7 @@ class Airflow
 
       f_s = ((1.0 + n_i * r_i) / (n_i + 1.0)) * (0.5 - 0.5 * m_i**(1.2))**(n_i + 1.0) + f_i
 
-      stack_coef = f_s * (UnitConversions.convert(outside_air_density * Constants.g * building.living.height, "lbm/(ft*s^2)", "inH2O") / (Constants.AssumedInsideTemp + 460.0))**n_i # inH2O^n/R^n
+      stack_coef = f_s * (UnitConversions.convert(outside_air_density * Constants.g * building.infilheight, "lbm/(ft*s^2)", "inH2O") / (Constants.AssumedInsideTemp + 460.0))**n_i # inH2O^n/R^n
 
       # Calculate wind coefficient
       if vented_crawl
@@ -472,14 +473,14 @@ class Airflow
       building.living.ACH = Airflow.get_infiltration_ACH_from_SLA(building.living.SLA, building.ncfl_ag, weather)
 
       # Convert living space ACH to cfm:
-      building.living.inf_flow = building.living.ACH / UnitConversions.convert(1.0, "hr", "min") * building.living.volume # cfm
+      building.living.inf_flow = building.living.ACH / UnitConversions.convert(1.0, "hr", "min") * building.infilvolume # cfm
 
     elsif not infil.living_constant_ach.nil?
 
       building.living.inf_method = @infMethodConstantCFM
 
       building.living.ACH = infil.living_constant_ach
-      building.living.inf_flow = building.living.ACH / UnitConversions.convert(1.0, "hr", "min") * building.living.volume # cfm
+      building.living.inf_flow = building.living.ACH / UnitConversions.convert(1.0, "hr", "min") * building.infilvolume # cfm
 
     end
 
@@ -836,20 +837,14 @@ class Airflow
       clg_ssn_hourly_weekend_temp << UnitConversions.convert(x + nat_vent.clg_offset, "F", "C")
     end
 
-    # Explanation for FRAC-VENT-AREA equation:
-    # From DOE22 Vol2-Dictionary: For VENT-METHOD = S-G, this is 0.6 times
-    # the open window area divided by the floor area.
-    # According to 2010 BA Benchmark, 33% of the windows on any facade will
-    # be open at any given time and can only be opened to 20% of their area.
-
     area = 0.6 * building.window_area * nat_vent.frac_windows_open * nat_vent.frac_window_area_openable # ft^2 (For S-G, this is 0.6*(open window area))
     max_rate = 20.0 # Air Changes per hour
-    max_flow_rate = max_rate * building.living.volume / UnitConversions.convert(1.0, "hr", "min")
+    max_flow_rate = max_rate * building.infilvolume / UnitConversions.convert(1.0, "hr", "min")
     neutral_level = 0.5
     hor_vent_frac = 0.0
     f_s_nv = 2.0 / 3.0 * (1.0 + hor_vent_frac / 2.0) * (2.0 * neutral_level * (1 - neutral_level))**0.5 / (neutral_level**0.5 + (1 - neutral_level)**0.5)
     f_w_nv = wind_speed.shielding_coef * (1 - hor_vent_frac)**(1.0 / 3.0) * building.living.f_t_SG
-    c_s = f_s_nv**2.0 * Constants.g * building.living.height / (Constants.AssumedInsideTemp + 460.0)
+    c_s = f_s_nv**2.0 * Constants.g * building.infilheight / (Constants.AssumedInsideTemp + 460.0)
     c_w = f_w_nv**2.0
 
     season_type = []
@@ -1719,7 +1714,7 @@ class Airflow
         infil_program.addLine("Set s_m = #{wind_speed.ashrae_terrain_thickness}")
         infil_program.addLine("Set s_s = #{wind_speed.ashrae_site_terrain_thickness}")
         infil_program.addLine("Set z_m = #{UnitConversions.convert(wind_speed.height, "ft", "m")}")
-        infil_program.addLine("Set z_s = #{UnitConversions.convert(building.living.height, "ft", "m")}")
+        infil_program.addLine("Set z_s = #{UnitConversions.convert(building.infilheight, "ft", "m")}")
         infil_program.addLine("Set f_t = (((s_m/z_m)^p_m)*((z_s/s_s)^p_s))")
         infil_program.addLine("Set Tdiff = #{tin_sensor.name}-#{tout_sensor.name}")
         infil_program.addLine("Set dT = @Abs Tdiff")
@@ -1734,7 +1729,7 @@ class Airflow
         infil_program.addLine("Set Qn = 0")
       end
     elsif building.living.inf_method == @infMethodConstantCFM
-      infil_program.addLine("Set Qn = #{building.living.ACH * UnitConversions.convert(building.living.volume, "ft^3", "m^3") / UnitConversions.convert(1.0, "hr", "s")}")
+      infil_program.addLine("Set Qn = #{building.living.ACH * UnitConversions.convert(building.infilvolume, "ft^3", "m^3") / UnitConversions.convert(1.0, "hr", "s")}")
     end
 
     if mech_vent.type == Constants.VentTypeCFIS
@@ -2058,5 +2053,5 @@ end
 class Building
   def initialize
   end
-  attr_accessor(:cfa, :infilvolume, :nbeds, :nbaths, :ncfl, :ncfl_ag, :window_area, :height, :stories, :above_grade_volume, :SLA, :living, :conditioned_basement, :garage, :unconditioned_basement, :vented_crawlspace, :unvented_crawlspace, :vented_attic, :unvented_attic)
+  attr_accessor(:cfa, :infilvolume, :infilheight, :nbeds, :nbaths, :ncfl, :ncfl_ag, :window_area, :height, :stories, :above_grade_volume, :SLA, :living, :conditioned_basement, :garage, :unconditioned_basement, :vented_crawlspace, :unvented_crawlspace, :vented_attic, :unvented_attic)
 end
