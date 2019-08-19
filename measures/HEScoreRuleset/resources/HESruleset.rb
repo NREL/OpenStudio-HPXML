@@ -252,9 +252,11 @@ class HEScoreRuleset
         fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: fndwall)
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
         if ["basement - unconditioned", "basement - conditioned"].include? fnd_adjacent
-          fndwall_height = 8.0 # FIXME: Verify
+          fndwall_height = 8.0
+          depth_below_grade = fndwall_height - 1.0
         else
-          fndwall_height = 2.5 # FIXME: Verify
+          fndwall_height = 2.5
+          depth_below_grade = 0.0
         end
 
         HPXML.add_foundation_wall(hpxml: hpxml,
@@ -264,7 +266,7 @@ class HEScoreRuleset
                                   height: fndwall_height,
                                   area: fndwall_height * @bldg_perimeter, # FIXME: Verify
                                   thickness: 8, # FIXME: Verify
-                                  depth_below_grade: fndwall_height, # FIXME: Verify
+                                  depth_below_grade: depth_below_grade,
                                   insulation_assembly_r_value: fndwall_values[:insulation_r_value] + 3.0) # FIXME: need to convert from insulation R-value to assembly R-value
       end
     end
