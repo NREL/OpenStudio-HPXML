@@ -669,19 +669,23 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # HVAC Capacities
-    htg_cap = 0.0
-    clg_cap = 0.0
+    htg_cap = nil
+    clg_cap = nil
     has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
+      htg_cap = 0 if htg_cap.nil?
       htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
       htg_cap += htg_sys_cap if htg_sys_cap > 0
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
+      clg_cap = 0 if clg_cap.nil?
       clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
       clg_cap += clg_sys_cap if clg_sys_cap > 0
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
+      htg_cap = 0 if htg_cap.nil?
+      clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
       if hp_type == "mini-split"
@@ -698,15 +702,21 @@ class HPXMLTranslatorTest < MiniTest::Test
         has_gshp_coil = true
       end
     end
-    if clg_cap > 0
-      hpxml_value = clg_cap
+    if not clg_cap.nil?
       sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if clg_cap > 0
+        assert_in_epsilon(clg_cap, sql_value, 0.01)
+      else # autosized
+        assert_operator(sql_value, :>, 1)
+      end
     end
-    if htg_cap > 0 and not (has_multispeed_dx_heating_coil or has_gshp_coil)
-      hpxml_value = htg_cap
+    if not htg_cap.nil? and not (has_multispeed_dx_heating_coil or has_gshp_coil)
       sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if htg_cap > 0
+        assert_in_epsilon(htg_cap, sql_value, 0.01)
+      else # autosized
+        assert_operator(sql_value, :>, 1)
+      end
     end
 
     # HVAC Load Fractions
