@@ -1078,7 +1078,7 @@ end
       k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
       ins_wall_ufactor = 1.0 / (wall_constr_rvalue + wall_ins_rvalue + Material.AirFilmVertical.rvalue)
       unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)
-      above_grade_height = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone) - foundation_wall_values[:height]
+      above_grade_height = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone, number_of_conditioned_floors_above_grade: @ncfl_ag) - foundation_wall_values[:height]
 
       # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
       u_value_mj8 = 0.0
