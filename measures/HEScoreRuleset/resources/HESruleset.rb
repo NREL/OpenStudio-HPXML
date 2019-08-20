@@ -154,6 +154,7 @@ class HEScoreRuleset
       roof_id = HPXML.get_idref(orig_attic, "AttachedToRoof")
       roof = orig_details.elements["Enclosure/Roofs/Roof[SystemIdentifier[@id='#{roof_id}']]"]
       roof_values = HPXML.get_roof_values(roof: roof)
+      roof_area = roof_values[:area]
       if roof_values[:solar_absorptance].nil?
         roof_values[:solar_absorptance] = get_roof_solar_absorptance(roof_values[:roof_color])
       end
@@ -161,15 +162,16 @@ class HEScoreRuleset
                                    roof_values[:insulation_continuous_r_value],
                                    roof_values[:roof_type],
                                    roof_values[:radiant_barrier])
-      cos_roof_angle = Math.cos(UnitConversions.convert(@roof_angle, "deg", "rad"))
-      # FIXME: this assumes that the roof area is the plan-view area of the roof and then calculates an actual roof area from that. 
-      # Is this consistent with how people are using HEScore?
+      if roof_area.nil?
+        # FIXME: This only seems to work for vented attics. Conditioned attics don't have a floor or roof area. Better error messages could be had here.
+        floor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
+        frame_floor_area = Float(orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier/@id='#{floor_id}']/Area/text()"].to_s)
+        roof_area = frame_floor_area / (2. * Math.cos(UnitConversions.convert(@roof_angle, "deg", "rad"))) if roof_area.nil?
+      end
       if @is_townhouse
         roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
-        roof_area = @bldg_length_front / (2. * cos_roof_angle) * @bldg_length_side
       else
         roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
-        roof_area = @bldg_length_side / (2. * cos_roof_angle) * @bldg_length_front
       end
       roof_azimuths.each_with_index do |roof_azimuth, idx|
         HPXML.add_roof(hpxml: hpxml,
