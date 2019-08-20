@@ -87,6 +87,9 @@ class HEScoreRuleset
     @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
     @bldg_length_side = (3.0 * @bldg_footprint / 5.0)**0.5 # ft
     @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
+    if @is_townhouse
+      @bldg_length_front, @bldg_length_side = @bldg_length_side, @bldg_length_front
+    end
     @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
     @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
     @roof_angle = 30.0 # deg
