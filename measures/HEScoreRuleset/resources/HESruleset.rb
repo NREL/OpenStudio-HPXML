@@ -227,33 +227,6 @@ class HEScoreRuleset
                      insulation_assembly_r_value: wall_r)
     end
 
-    # Gable walls
-    orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
-      attic_adjacent = get_attic_adjacent(orig_attic)
-
-      # Gable wall: Two surfaces per HES zone_roof
-      # FIXME: Do we want gable walls even for cathedral ceiling and conditioned attic where roof area is provided by the user?
-      # FIXME: Gable walls are being inserted at ground level and shaded by the neighbors
-      gable_height = @bldg_length_side / 2 * Math.sin(UnitConversions.convert(@roof_angle, "deg", "rad"))
-      gable_area = @bldg_length_side / 2 * gable_height
-      if @is_townhouse
-        gable_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
-      else
-        gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
-      end
-      gable_azimuths.each_with_index do |gable_azimuth, idx|
-        HPXML.add_wall(hpxml: hpxml,
-                       id: "#{HPXML.get_id(orig_attic)}_gable_#{idx}",
-                       exterior_adjacent_to: "outside",
-                       interior_adjacent_to: attic_adjacent,
-                       wall_type: "WoodStud",
-                       area: gable_area, # FIXME: Verify
-                       azimuth: sanitize_azimuth(gable_azimuth),
-                       solar_absorptance: 0.75, # ERI assumption; TODO get values from method
-                       emittance: 0.9, # ERI assumption; TODO get values from method
-                       insulation_assembly_r_value: 4.0) # FIXME: Hard-coded
-      end
-    end
   end
 
   def self.set_enclosure_foundation_walls(orig_details, hpxml)
