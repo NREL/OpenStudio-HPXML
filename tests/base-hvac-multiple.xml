@@ -360,6 +360,7 @@
               <DistributionSystem idref='HVACDistribution5'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>4800.0</HeatingCapacity>
               <CoolingCapacity>4800.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -383,6 +384,7 @@
               <DistributionSystem idref='HVACDistribution6'/>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>4800.0</HeatingCapacity>
               <CoolingCapacity>4800.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -405,6 +407,7 @@
               <SystemIdentifier id='HeatPump3'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>4800.0</HeatingCapacity>
               <CoolingCapacity>4800.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>

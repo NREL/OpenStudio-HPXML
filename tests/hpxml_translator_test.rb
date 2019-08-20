@@ -50,7 +50,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base-hvac-air-to-air-heat-pump-1-speed*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -685,13 +685,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
-      hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
       if hp_type == "mini-split"
         hp_cap *= 1.20 # TODO: Generalize this
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
-      clg_cap += hp_cap if hp_cap > 0
-      htg_cap += hp_cap if hp_cap > 0
+      clg_cap += hp_cap_clg if hp_cap_clg > 0
+      htg_cap += hp_cap_htg if hp_cap_htg > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
       if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 8.5
         has_multispeed_dx_heating_coil = true
