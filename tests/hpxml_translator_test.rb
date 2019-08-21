@@ -51,8 +51,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    @flags = OSModel.get_global_flags
-
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
@@ -803,7 +801,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not cw.nil? and not wh.nil?
       # Location
       location = XMLHelper.get_value(cw, "Location")
-      location = 'living space' if @flags['single_conditioned_zone'] and location == 'basement - conditioned'
+      location = 'living space' if location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
@@ -819,7 +817,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not cd.nil? and not wh.nil?
       # Location
       location = XMLHelper.get_value(cd, "Location")
-      location = 'living space' if @flags['single_conditioned_zone'] and location == 'basement - conditioned'
+      location = 'living space' if location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
@@ -835,7 +833,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not refr.nil?
       # Location
       location = XMLHelper.get_value(refr, "Location")
-      location = 'living space' if @flags['single_conditioned_zone'] and location == 'basement - conditioned'
+      location = 'living space' if location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
                       'basement - conditioned' => Constants.SpaceTypeConditionedBasement,

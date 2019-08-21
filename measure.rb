@@ -235,9 +235,6 @@ class OSModel
     @eri_version = hpxml_values[:eri_calculation_version]
     fail "Could not find ERI Version" if @eri_version.nil?
 
-    # Global flags
-    @flags = get_global_flags
-
     # Global variables
     construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
     @cfa = construction_values[:conditioned_floor_area]
@@ -343,11 +340,6 @@ class OSModel
     return false if not success
 
     return true
-  end
-
-  def self.get_global_flags
-    flags = { 'single_conditioned_zone' => true } # Set to false to model conditioned basement as a separate zone
-    return flags
   end
 
   private
@@ -3472,11 +3464,7 @@ class OSModel
     elsif ["basement - unconditioned"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
-      if @flags['single_conditioned_zone']
-        surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
-      else
-        surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
-      end
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     elsif ["crawlspace - vented"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? interior_adjacent_to
@@ -3504,11 +3492,7 @@ class OSModel
     elsif ["basement - unconditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
-      if @flags['single_conditioned_zone']
-        surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
-      else
-        surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
-      end
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     elsif ["crawlspace - vented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? exterior_adjacent_to
@@ -3534,11 +3518,7 @@ class OSModel
     if location == 'living space'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - conditioned'
-      if @flags['single_conditioned_zone']
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-      else
-        space = create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement)
-      end
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - unconditioned'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement)
     elsif location == 'garage'

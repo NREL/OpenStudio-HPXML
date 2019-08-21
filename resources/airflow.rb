@@ -51,7 +51,7 @@ class Airflow
     end
     building.cfa = cfa
     building.infilvolume = infilvolume
-    building.infilheight = Float(ncfl_ag) * infilvolume / cfa # vertical distance between lowest and highest above-grade points within the pressure boundary
+    building.infilheight = calc_infil_height(ncfl_ag, infilvolume, cfa)
     building.nbeds = nbeds
     building.nbaths = nbaths
     building.ncfl = ncfl
@@ -1893,6 +1893,11 @@ class Airflow
       program_calling_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
       program_calling_manager.addProgram(duct_program)
     end
+  end
+
+  def self.calc_infil_height(ncfl_ag, infilvolume, cfa)
+    # TODO: Use equation in 301.rb calc_mech_vent_q_fan method
+    return Float(ncfl_ag) * infilvolume / cfa # vertical distance between lowest and highest above-grade points within the pressure boundary
   end
 
   def self.get_infiltration_ACH_from_SLA(sla, numStoriesAboveGrade, weather)
