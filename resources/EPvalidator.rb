@@ -365,6 +365,7 @@ class EnergyPlusValidator
       },
 
       ## [HVACDistType=DSE]
+      ## WARNING: These inputs are unused and EnergyPlus output will NOT reflect the specified DSE. To account for DSE, apply the value to the EnergyPlus output.
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other='DSE']]" => {
         "[AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency]" => one_or_more,
       },
