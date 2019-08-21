@@ -2321,7 +2321,11 @@ class OSModel
         max_heating_capacity = 1.2
         min_heating_airflow_rate = 200.0
         max_heating_airflow_rate = 400.0
-        heating_capacity_offset = 2300.0
+        if heat_capacity_btuh == Constants.SizingAuto || cool_capacity_btuh == Constants.SizingAuto
+          heating_capacity_offset = 2300.0
+        else
+          heating_capacity_offset = heat_capacity_btuh - cool_capacity_btuh
+        end
         cap_retention_frac = 0.25
         cap_retention_temp = -5.0
         pan_heater_power = 0.0

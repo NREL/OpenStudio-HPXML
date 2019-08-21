@@ -50,7 +50,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base-hvac-mini-split-heat-pump-*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -688,7 +688,8 @@ class HPXMLTranslatorTest < MiniTest::Test
       hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
       hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
       if hp_type == "mini-split"
-        hp_cap *= 1.20 # TODO: Generalize this
+        hp_cap_clg *= 1.20 # TODO: Generalize this
+        hp_cap_htg *= 1.20 # TODO: Generalize this
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
       clg_cap += hp_cap_clg if hp_cap_clg > 0
