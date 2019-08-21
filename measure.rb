@@ -719,7 +719,7 @@ class OSModel
     return vertices
   end
 
-  def self.add_wall_polygon(x, y, z, azimuth = 0, offsets = [0] * 4)
+  def self.add_wall_polygon(x, y, z, azimuth = 0, offsets = [0] * 4, subsurface_area = 0)
     x = UnitConversions.convert(x, "ft", "m")
     y = UnitConversions.convert(y, "ft", "m")
     z = UnitConversions.convert(z, "ft", "m")
@@ -727,7 +727,20 @@ class OSModel
     vertices = OpenStudio::Point3dVector.new
     vertices << OpenStudio::Point3d.new(0 - (x / 2) - offsets[1], 0, z - offsets[0])
     vertices << OpenStudio::Point3d.new(0 - (x / 2) - offsets[1], 0, z + y + offsets[2])
-    vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2])
+    if subsurface_area > 0
+      subsurface_area = UnitConversions.convert(subsurface_area, "ft^2", "m^2")
+      sub_length = x / 10.0
+      sub_height = subsurface_area / sub_length
+      if sub_height >= y
+        sub_height = y - 0.1
+        sub_length = subsurface_area / sub_height
+      end
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3] - sub_length, 0, z + y + offsets[2])
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3] - sub_length, 0, z + y + offsets[2] - sub_height)
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2] - sub_height)
+    else
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2])
+    end
     vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z - offsets[0])
 
     # Rotate about the z axis
@@ -1148,14 +1161,16 @@ class OSModel
       kiva_instances, kiva_slabs = get_kiva_instances(fnd_walls, slabs)
 
       # Obtain some wall/slab information
-      fnd_wall_lengths = {}
+      fnd_wall_gross_areas = {}
       fnd_wall_net_areas = {}
+      fnd_wall_lengths = {}
       fnd_walls.each_with_index do |fnd_wall, fnd_wall_idx|
         fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
+        fnd_wall_gross_areas[fnd_wall] = fnd_wall_values[:area]
         fnd_wall_net_areas[fnd_wall] = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
-        fnd_wall_lengths[fnd_wall] = fnd_wall_net_areas[fnd_wall] / fnd_wall_values[:height]
+        fnd_wall_lengths[fnd_wall] = fnd_wall_gross_areas[fnd_wall] / fnd_wall_values[:height]
       end
       slab_exp_perims = {}
       slab_areas = {}
@@ -1178,6 +1193,7 @@ class OSModel
         kiva_slab_area = kiva_slabs_list.flatten.map { |e| slab_areas[e] }.inject(0, :+)
         kiva_fnd_wall_length = fnd_walls_list.flatten.map { |e| fnd_wall_lengths[e] }.inject(0, :+)
         kiva_fnd_wall_net_area = fnd_walls_list.flatten.map { |e| fnd_wall_net_areas[e] }.inject(0, :+)
+        kiva_fnd_wall_gross_area = fnd_walls_list.flatten.map { |e| fnd_wall_gross_areas[e] }.inject(0, :+)
         slab_frac = kiva_slab_exp_perim / total_slab_exp_perim
         if total_fnd_wall_length > 0
           fnd_wall_frac = kiva_fnd_wall_length / total_fnd_wall_length
@@ -1190,7 +1206,8 @@ class OSModel
           fnd_wall = fnd_walls_list[0]
           fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
           combined_wall_net_area = kiva_fnd_wall_net_area * slab_frac
-          kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area,
+          combined_wall_gross_area = kiva_fnd_wall_gross_area * slab_frac
+          kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area, combined_wall_gross_area,
                                                 total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
           return false if kiva_foundation.nil?
         end
@@ -1290,12 +1307,13 @@ class OSModel
     end
   end
 
-  def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area,
+  def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area, combined_wall_gross_area,
                                total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
+
     height = fnd_wall_values[:height]
     height_ag = height - fnd_wall_values[:depth_below_grade]
     z_origin = -1 * fnd_wall_values[:depth_below_grade]
-    length = combined_wall_net_area / height
+    length = combined_wall_gross_area / height
 
     if total_fnd_wall_length > total_slab_exp_perim
       # Calculate exposed section of wall based on slab's total exposed perimeter.
@@ -1307,7 +1325,15 @@ class OSModel
       azimuth = fnd_wall_values[:azimuth]
     end
 
-    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
+    if combined_wall_gross_area > combined_wall_net_area
+      # Create a "notch" in the wall to account for the subsurfaces. This ensures that
+      # we preserve the appropriate wall height, length, and area for Kiva.
+      subsurface_area = combined_wall_gross_area - combined_wall_net_area
+    else
+      subsurface_area = 0
+    end
+
+    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
     surface.additionalProperties.setFeature("Length", length)
     surface.additionalProperties.setFeature("Azimuth", azimuth)
     surface.additionalProperties.setFeature("Tilt", 90.0)
@@ -1355,9 +1381,10 @@ class OSModel
     return surface.adjacentFoundation.get
   end
 
-  def self.add_foundation_slab(runner, model, spaces, slab_values, combined_slab_exp_perim,
+  def self.add_foundation_slab(runner, model, spaces, slab_values, slab_exp_perim,
                                combined_slab_area, z_origin, kiva_foundation)
-    slab_tot_perim = combined_slab_exp_perim
+
+    slab_tot_perim = slab_exp_perim
     if slab_tot_perim**2 - 16.0 * combined_slab_area <= 0
       # Cannot construct rectangle with this perimeter/area. Some of the
       # perimeter is presumably not exposed, so bump up perimeter value.
@@ -1406,7 +1433,7 @@ class OSModel
     success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
                                                   slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                                   slab_perim_depth, slab_whole_r, slab_values[:thickness],
-                                                  combined_slab_exp_perim, mat_carpet, kiva_foundation)
+                                                  slab_exp_perim, mat_carpet, kiva_foundation)
     return nil if not success
 
     # FIXME: Temporary code for sizing
@@ -3691,6 +3718,7 @@ class OSModel
         fnd_wall_values2 = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall2)
         next unless fnd_wall_values2[:exterior_adjacent_to] == fnd_wall_values[:exterior_adjacent_to]
         next unless fnd_wall_values2[:height] == fnd_wall_values[:height]
+        next unless fnd_wall_values2[:azimuth] == fnd_wall_values[:azimuth]
         next unless fnd_wall_values2[:thickness] == fnd_wall_values[:thickness]
         next unless fnd_wall_values2[:depth_below_grade] == fnd_wall_values[:depth_below_grade]
         next unless fnd_wall_values2[:insulation_distance_to_bottom] == fnd_wall_values[:insulation_distance_to_bottom]

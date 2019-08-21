@@ -49,8 +49,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/base*.xml"].sort.each do |xml|
-        next if xml.include? "base-foundation-unconditioned-basement-above-grade.xml" # FIXME: TEMPORARY
-
         xmls << File.absolute_path(xml)
       end
     end
@@ -486,7 +484,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Foundations
-    # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them this way.
+    # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them to end up this way.
     num_kiva_instances = 0
     File.readlines(File.join(rundir, "eplusout.eio")).each do |eio_line|
       if eio_line.downcase.start_with? "foundation kiva"
@@ -494,6 +492,21 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_equal(1.0, kiva_perim_frac)
         num_kiva_instances += 1
       end
+    end
+
+    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,
+                                    'base-foundation-ambient-autosize.xml' => 0,
+                                    'base-foundation-multiple.xml' => 2,
+                                    'base-enclosure-2stories-garage.xml' => 2,
+                                    'base-enclosure-garage.xml' => 2,
+                                    'hvac_autosizing/base-enclosure-garage-autosize.xml' => 2,
+                                    'base-foundation-walkout-basement.xml' => 4,
+                                    'base-foundation-complex.xml' => 10 }
+
+    if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
+      assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
+    else
+      assert_equal(1, num_kiva_instances)
     end
 
     # Enclosure Foundation Slabs
