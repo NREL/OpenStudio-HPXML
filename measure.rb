@@ -234,7 +234,7 @@ class OSModel
 
     @eri_version = hpxml_values[:eri_calculation_version]
     fail "Could not find ERI Version" if @eri_version.nil?
-    
+
     # Global flags
     @flags = get_global_flags
 
@@ -344,9 +344,9 @@ class OSModel
 
     return true
   end
-  
+
   def self.get_global_flags
-    flags = {'single_conditioned_zone' => true} # Set to false to model conditioned basement as a separate zone
+    flags = { 'single_conditioned_zone' => true } # Set to false to model conditioned basement as a separate zone
     return flags
   end
 
@@ -2799,7 +2799,7 @@ class OSModel
       nat_vent_ovlp_season = true
       nat_vent_num_weekdays = 5
       nat_vent_num_weekends = 2
-      # According to 2010 BA Benchmark, 33% of the windows will be open 
+      # According to 2010 BA Benchmark, 33% of the windows will be open
       # at any given time and can only be opened to 20% of their area.
       nat_vent_frac_windows_open = 0.33
       nat_vent_frac_window_area_openable = 0.2
