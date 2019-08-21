@@ -2958,7 +2958,6 @@ class OSModel
   def self.add_building_output_variables(runner, model, map_tsv_dir)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
                         OutputVars.SpaceHeatingFuel,
-                        OutputVars.SpaceHVACLoad,
                         OutputVars.SpaceCoolingElectricity]
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
@@ -2986,6 +2985,9 @@ class OSModel
         end
       end
     end
+
+    # Add cooling and heating load output
+    add_ems_cooling_heating_load_output(model)
 
     # Add output variables to model
     @hvac_map.each do |sys_id, hvac_objects|
@@ -3024,6 +3026,43 @@ class OSModel
           outputVariable.setKeyValue(object.name.to_s)
         end
       end
+    end
+  end
+
+  def self.add_ems_cooling_heating_load_output(model)
+    control_zones = @control_slave_zones_hash.keys
+    control_zones.each do |living_zone|
+      # sensors
+      load_rate_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
+      load_rate_sensor.setName("#{living_zone.name} Sensible Load Rate")
+      load_rate_sensor.setKeyName(living_zone.name.to_s)
+
+      # program
+      load_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+      load_program.setName("#{living_zone.name} clg htg load output program")
+      load_program.addLine("Set #{living_zone.name}_htg_load = 0")
+      load_program.addLine("Set #{living_zone.name}_clg_load = 0")
+      load_program.addLine("If #{load_rate_sensor.name} > 0")
+      load_program.addLine("Set #{living_zone.name}_htg_load = #{load_rate_sensor.name} * 3600")
+      load_program.addLine("Else")
+      load_program.addLine("Set #{living_zone.name}_clg_load = - #{load_rate_sensor.name} * 3600")
+      load_program.addLine("EndIf")
+
+      # ems output variables
+      ['clg', 'htg'].each do |load_type|
+        @hvac_map["BLDGLOAD:#{living_zone.name}_#{load_type}_load"] = []
+        ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{living_zone.name}_#{load_type}_load")
+        ems_output_load.setName("#{living_zone.name} #{load_type} load")
+        ems_output_load.setTypeOfDataInVariable("Summed")
+        ems_output_load.setUpdateFrequency("ZoneTimestep")
+        ems_output_load.setEMSProgramOrSubroutineName(load_program)
+        ems_output_load.setUnits("J")
+        @hvac_map["BLDGLOAD:#{living_zone.name}_#{load_type}_load"] << ems_output_load
+      end
+      load_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+      load_program_manager.setName("#{living_zone.name} load program calling manager")
+      load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+      load_program_manager.addProgram(load_program)
     end
   end
 
@@ -3792,10 +3831,6 @@ class OutputVars
     return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy', 'Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
              'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy', 'Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
              'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy', 'Boiler Propane Energy', 'Boiler FuelOil#1 Energy'] }
-  end
-
-  def self.SpaceHVACLoad
-    return { 'OpenStudio::Model::ThermalZone' => ['Zone Predicted Sensible Load to Setpoint Heat Transfer Rate'] }
   end
 
   def self.SpaceCoolingElectricity
