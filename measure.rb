@@ -3050,19 +3050,27 @@ class OSModel
 
       # ems output variables
       ['clg', 'htg'].each do |load_type|
-        @hvac_map["BLDGLOAD:#{living_zone.name}_#{load_type}_load"] = []
         ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{living_zone.name}_#{load_type}_load")
-        ems_output_load.setName("#{living_zone.name} #{load_type} load")
+        if load_type == 'htg'
+          ems_output_load.setName(Constants.EMSOutputNameHeatingLoad)
+        else
+          ems_output_load.setName(Constants.EMSOutputNameCoolingLoad)
+        end
         ems_output_load.setTypeOfDataInVariable("Summed")
         ems_output_load.setUpdateFrequency("ZoneTimestep")
         ems_output_load.setEMSProgramOrSubroutineName(load_program)
         ems_output_load.setUnits("J")
-        @hvac_map["BLDGLOAD:#{living_zone.name}_#{load_type}_load"] << ems_output_load
+		
+		# add output variable to model
+        outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
+        outputVariable.setReportingFrequency('runperiod')
+        outputVariable.setKeyValue('*')
       end
       load_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       load_program_manager.setName("#{living_zone.name} load program calling manager")
       load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
       load_program_manager.addProgram(load_program)
+	  
     end
   end
 

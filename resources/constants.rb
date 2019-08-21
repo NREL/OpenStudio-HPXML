@@ -774,4 +774,12 @@ class Constants
   def self.WaterHeaterTypeHeatPump
     return 'heatpump'
   end
+
+  def self.EMSOutputNameHeatingLoad
+    return 'living zone htg load'
+  end
+
+  def self.EMSOutputNameCoolingLoad
+    return 'living zone clg load'
+  end
 end
