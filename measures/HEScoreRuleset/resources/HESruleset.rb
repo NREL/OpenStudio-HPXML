@@ -653,11 +653,30 @@ class HEScoreRuleset
       elsif wh_sys_values[:water_heater_type] != "instantaneous water heater" and wh_sys_values[:water_heater_type] != "space-heating boiler with tankless coil"
         wh_tank_volume = get_default_water_heater_volume(wh_sys_values[:fuel_type])
       end
+
+      # Water heater location
+      has_basement = false
+      basement_is_conditioned = nil
+      orig_details.elements.each("Enclosure/Foundations/Foundation") do |foundation|
+        if XMLHelper.get_child_name(foundation, "FoundationType") == 'Basement'
+          has_basement = true
+          basement_is_conditioned = XMLHelper.get_value(foundation, "FoundationType/Basement/Conditioned") == "true" or basement_is_conditioned
+        end
+      end
+      if has_basement
+        if basement_is_conditioned
+          water_heater_location = "basement - conditioned"
+        else
+          water_heater_location = "basement - unconditioned"
+        end
+      else
+        water_heater_location = "living space"
+      end
       HPXML.add_water_heating_system(hpxml: hpxml,
                                      id: wh_sys_values[:id],
                                      fuel_type: wh_sys_values[:fuel_type],
                                      water_heater_type: wh_sys_values[:water_heater_type],
-                                     location: "living space", # FIXME: To be decided later
+                                     location: water_heater_location,
                                      tank_volume: wh_tank_volume,
                                      fraction_dhw_load_served: 1.0,
                                      heating_capacity: wh_capacity,
