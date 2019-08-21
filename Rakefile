@@ -124,7 +124,9 @@ def create_hpxmls
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed-fixed-htg.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-2-speed-fixed-htg.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-fixed-htg.xml' => 'base.xml',
     'base-hvac-boiler-elec-only.xml' => 'base.xml',
     'base-hvac-boiler-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-boiler-gas-only.xml' => 'base.xml',
@@ -1454,7 +1456,9 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-air-to-air-heat-pump-1-speed-fixed-htg.xml',
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
+         'base-hvac-air-to-air-heat-pump-2-speed-fixed-htg.xml',
          'base-hvac-air-to-air-heat-pump-var-speed.xml',
+         'base-hvac-air-to-air-heat-pump-var-speed-fixed-htg.xml',
          'base-hvac-central-ac-only-1-speed.xml',
          'base-hvac-central-ac-only-2-speed.xml',
          'base-hvac-central-ac-only-var-speed.xml',
@@ -1608,7 +1612,9 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
   elsif ['base-hvac-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-air-to-air-heat-pump-1-speed-fixed-htg.xml',
          'base-hvac-air-to-air-heat-pump-2-speed.xml',
+         'base-hvac-air-to-air-heat-pump-2-speed-fixed-htg.xml',
          'base-hvac-air-to-air-heat-pump-var-speed.xml',
+         'base-hvac-air-to-air-heat-pump-var-speed-fixed-htg.xml',
          'base-hvac-boiler-elec-only.xml',
          'base-hvac-boiler-gas-only.xml',
          'base-hvac-boiler-oil-only.xml',
@@ -1706,7 +1712,8 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     elsif hpxml_file == 'base-hvac-air-to-air-heat-pump-1-speed-fixed-htg.xml'
       heat_pumps_values[0][:heating_capacity] = 42000 # Something different than the cooling capacity
     end
-  elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml'].include? hpxml_file
+  elsif ['base-hvac-air-to-air-heat-pump-2-speed.xml',
+         'base-hvac-air-to-air-heat-pump-2-speed-fixed-htg.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "air-to-air",
@@ -1720,7 +1727,13 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 9.3,
                            :cooling_efficiency_seer => 18 }
-  elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml'].include? hpxml_file
+
+    if hpxml_file == 'base-hvac-air-to-air-heat-pump-2-speed-fixed-htg.xml'
+      heat_pumps_values[0][:heating_capacity] = 42000 # Something different than the cooling capacity
+    end
+
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed.xml',
+         'base-hvac-air-to-air-heat-pump-var-speed-fixed-htg.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "air-to-air",
@@ -1734,6 +1747,11 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 22 }
+
+    if hpxml_file == 'base-hvac-air-to-air-heat-pump-var-speed-fixed-htg.xml'
+      heat_pumps_values[0][:heating_capacity] = 42000 # Something different than the cooling capacity
+    end
+
   elsif ['base-hvac-ground-to-air-heat-pump.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution",
@@ -1844,6 +1862,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
   elsif hpxml_file.include? 'hvac_dse' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] /= 0.8
+    heat_pumps_values[0][:heating_capacity] /= 0.8
     heat_pumps_values[0][:backup_heating_capacity] /= 0.8
   end
 

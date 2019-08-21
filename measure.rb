@@ -2188,6 +2188,19 @@ class OSModel
         heat_capacity_btuh = Constants.SizingAuto
       end
 
+      # If SizingAutoMaxLoad is set for either cooling and heating then use it for both
+      if (cool_capacity_btuh == Constants.SizingAutoMaxLoad) ^ (heat_capacity_btuh == Constants.SizingAutoMaxLoad)
+        cool_capacity_btuh = Constants.SizingAutoMaxLoad
+        heat_pump_capacity_heat = Constants.SizingAutoMaxLoad
+        runner.registerWarning("Setting heat pump sizing mode to #{Constants.SizingAutoMaxLoad} for both operation modes since it was entered for one but not two of the modes.")
+      end
+
+      # Heating and cooling capacity must either be Autosize or Fixed. All combinations of auto and fixed are not supported.
+      if (cool_capacity_btuh == Constants.SizingAuto || cool_capacity_btuh == Constants.SizingAutoMaxLoad) ^
+         (heat_capacity_btuh == Constants.SizingAuto || heat_capacity_btuh == Constants.SizingAutoMaxLoad)
+        runner.registerError("Heat pump cooling and heating capacity should either both be auto-sized or fixed-sized.")
+      end
+
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
       sequential_load_frac_heat = load_frac_heat / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_heat_load_served -= load_frac_heat
@@ -2257,7 +2270,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, backup_heat_efficiency,
+                                                   cool_capacity_btuh, heat_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2275,7 +2288,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, backup_heat_efficiency,
+                                                   cool_capacity_btuh, heat_capacity_btuh, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,

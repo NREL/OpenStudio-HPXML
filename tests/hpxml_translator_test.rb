@@ -50,7 +50,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base-hvac-air-to-air-heat-pump-1-speed*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
