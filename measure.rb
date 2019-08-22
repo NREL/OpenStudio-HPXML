@@ -720,7 +720,7 @@ class OSModel
     return vertices
   end
 
-  def self.add_wall_polygon(x, y, z, azimuth = 0, offsets = [0] * 4)
+  def self.add_wall_polygon(x, y, z, azimuth = 0, offsets = [0] * 4, subsurface_area = 0)
     x = UnitConversions.convert(x, "ft", "m")
     y = UnitConversions.convert(y, "ft", "m")
     z = UnitConversions.convert(z, "ft", "m")
@@ -728,7 +728,20 @@ class OSModel
     vertices = OpenStudio::Point3dVector.new
     vertices << OpenStudio::Point3d.new(0 - (x / 2) - offsets[1], 0, z - offsets[0])
     vertices << OpenStudio::Point3d.new(0 - (x / 2) - offsets[1], 0, z + y + offsets[2])
-    vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2])
+    if subsurface_area > 0
+      subsurface_area = UnitConversions.convert(subsurface_area, "ft^2", "m^2")
+      sub_length = x / 10.0
+      sub_height = subsurface_area / sub_length
+      if sub_height >= y
+        sub_height = y - 0.1
+        sub_length = subsurface_area / sub_height
+      end
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3] - sub_length, 0, z + y + offsets[2])
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3] - sub_length, 0, z + y + offsets[2] - sub_height)
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2] - sub_height)
+    else
+      vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z + y + offsets[2])
+    end
     vertices << OpenStudio::Point3d.new(x - (x / 2) + offsets[3], 0, z - offsets[0])
 
     # Rotate about the z axis
@@ -1143,8 +1156,6 @@ class OSModel
     end
 
     foundation_types.each do |foundation_type|
-      # Create Kiva foundation for each type
-
       # Get attached foundation walls/slabs
       fnd_walls = []
       slabs = []
@@ -1155,169 +1166,106 @@ class OSModel
         slabs << slab
       end
 
-      # Calculate sum of exterior foundation wall lengths
-      sum_wall_length = 0.0
-      fnd_walls.each do |fnd_wall|
+      # Calculate combinations of slabs/walls for each Kiva instance
+      kiva_instances, kiva_slabs = get_kiva_instances(fnd_walls, slabs)
+
+      # Obtain some wall/slab information
+      fnd_wall_gross_areas = {}
+      fnd_wall_net_areas = {}
+      fnd_wall_lengths = {}
+      fnd_walls.each_with_index do |fnd_wall, fnd_wall_idx|
         fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
-        net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
-        sum_wall_length += net_area / fnd_wall_values[:height]
+        fnd_wall_gross_areas[fnd_wall] = fnd_wall_values[:area]
+        fnd_wall_net_areas[fnd_wall] = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
+        fnd_wall_lengths[fnd_wall] = fnd_wall_gross_areas[fnd_wall] / fnd_wall_values[:height]
       end
-
-      # Obtain the exposed perimeter for each slab
-      slabs_perimeter_exposed = {}
-      slabs.each do |slab|
+      slab_exp_perims = {}
+      slab_areas = {}
+      slabs.each_with_index do |slab, slab_idx|
         slab_values = HPXML.get_slab_values(slab: slab)
-        slabs_perimeter_exposed[slab_values[:id]] = slab_values[:exposed_perimeter]
+        slab_exp_perims[slab] = slab_values[:exposed_perimeter]
+        slab_areas[slab] = slab_values[:area]
       end
+      total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
+      total_slab_area = slab_areas.values.inject(0, :+)
+      total_fnd_wall_length = fnd_wall_lengths.values.inject(0, :+)
 
-      # Exterior foundation wall surfaces
-      foundation_object = {}
-      fnd_walls.each do |fnd_wall|
-        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-        next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
+      no_wall_slab_exp_perim = {}
 
-        height = fnd_wall_values[:height]
-        net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
-        height_ag = height - fnd_wall_values[:depth_below_grade]
-        z_origin = -1 * fnd_wall_values[:depth_below_grade]
-        total_length = net_area / height
+      kiva_instances.each do |fnd_walls_list, kiva_slabs_list|
+        kiva_foundation = nil
 
-        azimuth = @default_azimuth # don't split up surface due to the Kiva runtime impact
-        if not fnd_wall_values[:azimuth].nil?
-          azimuth = fnd_wall_values[:azimuth]
-        end
-
-        # Attach a portion of the foundation wall to each slab. This is
-        # needed if there are multiple Slab elements defined for the foundation.
-        slabs_perimeter_exposed.each do |slab_id, slab_perimeter_exposed|
-          # Calculate exposed section of wall based on slab's total exposed perimeter.
-          # Apportioned to each foundation wall.
-          length = total_length * slab_perimeter_exposed / sum_wall_length
-
-          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
-          surface.additionalProperties.setFeature("Length", length)
-          surface.additionalProperties.setFeature("Azimuth", azimuth)
-          surface.additionalProperties.setFeature("Tilt", 90.0)
-          surface.setName(fnd_wall_values[:id])
-          surface.setSurfaceType("Wall")
-          set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
-          set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
-
-          if is_thermal_boundary(fnd_wall_values)
-            drywall_thick_in = 0.5
-          else
-            drywall_thick_in = 0.0
-          end
-          filled_cavity = true
-          concrete_thick_in = fnd_wall_values[:thickness]
-          cavity_r = 0.0
-          cavity_depth_in = 0.0
-          install_grade = 1
-          framing_factor = 0.0
-          assembly_r = fnd_wall_values[:insulation_assembly_r_value]
-          if not assembly_r.nil?
-            rigid_height = height
-            film_r = Material.AirFilmVertical.rvalue
-            rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
-            if rigid_r < 0 # Try without drywall
-              drywall_thick_in = 0.0
-              rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
-            end
-          else
-            rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
-            rigid_r = fnd_wall_values[:insulation_r_value]
-          end
-
-          foundation = foundation_object[slab_id]
-
-          # TODO: Currently assumes all walls have the same height, insulation height, etc.
-          success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
-                                                        rigid_height, cavity_r, install_grade,
-                                                        cavity_depth_in, filled_cavity, framing_factor,
-                                                        rigid_r, drywall_thick_in, concrete_thick_in,
-                                                        height, height_ag, foundation)
-          return false if not success
-
-          if not assembly_r.nil?
-            check_surface_assembly_rvalue(surface, film_r, assembly_r)
-          end
-
-          foundation_object[slab_id] = surface.adjacentFoundation.get
-        end
-      end
-
-      # Foundation slab surfaces
-      slabs.each do |slab|
-        slab_values = HPXML.get_slab_values(slab: slab)
-
-        # Need to ensure surface perimeter >= user-specified exposed perimeter
-        # (for Kiva) and surface area == user-specified area.
-        exp_perim = slab_values[:exposed_perimeter]
-        tot_perim = exp_perim
-        if tot_perim**2 - 16.0 * slab_values[:area] <= 0
-          # Cannot construct rectangle with this perimeter/area. Some of the
-          # perimeter is presumably not exposed, so bump up perimeter value.
-          tot_perim = Math.sqrt(16.0 * slab_values[:area])
-        end
-        sqrt_term = tot_perim**2 - 16.0 * slab_values[:area]
-        length = tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
-        width = tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
-
-        z_origin = -1 * slab_values[:depth_below_grade]
-
-        surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
-        surface.setName(slab_values[:id])
-        surface.setSurfaceType("Floor")
-        surface.setOutsideBoundaryCondition("Foundation")
-        set_surface_interior(model, spaces, surface, slab_values[:id], slab_values[:interior_adjacent_to])
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-
-        perim_r = slab_values[:perimeter_insulation_r_value]
-        perim_depth = slab_values[:perimeter_insulation_depth]
-        if perim_r == 0 or perim_depth == 0
-          perim_r = 0
-          perim_depth = 0
-        end
-
-        if slab_values[:under_slab_insulation_spans_entire_slab]
-          whole_r = slab_values[:under_slab_insulation_r_value]
-          under_r = 0
-          under_width = 0
+        # Apportion referenced walls/slabs for this Kiva instance
+        kiva_slab_exp_perim = kiva_slabs_list.flatten.map { |e| slab_exp_perims[e] }.inject(0, :+)
+        kiva_slab_area = kiva_slabs_list.flatten.map { |e| slab_areas[e] }.inject(0, :+)
+        kiva_fnd_wall_length = fnd_walls_list.flatten.map { |e| fnd_wall_lengths[e] }.inject(0, :+)
+        kiva_fnd_wall_net_area = fnd_walls_list.flatten.map { |e| fnd_wall_net_areas[e] }.inject(0, :+)
+        kiva_fnd_wall_gross_area = fnd_walls_list.flatten.map { |e| fnd_wall_gross_areas[e] }.inject(0, :+)
+        slab_frac = kiva_slab_exp_perim / total_slab_exp_perim
+        if total_fnd_wall_length > 0
+          fnd_wall_frac = kiva_fnd_wall_length / total_fnd_wall_length
         else
-          under_r = slab_values[:under_slab_insulation_r_value]
-          under_width = slab_values[:under_slab_insulation_width]
-          if under_r == 0 or under_width == 0
-            under_r = 0
-            under_width = 0
-          end
-          whole_r = 0
-        end
-        slab_gap_r = under_r
-
-        mat_carpet = nil
-        if slab_values[:carpet_fraction] > 0 and slab_values[:carpet_r_value] > 0
-          mat_carpet = Material.CoveringBare(slab_values[:carpet_fraction],
-                                             slab_values[:carpet_r_value])
+          fnd_wall_frac = 1.0 # Handle slab foundation type
         end
 
-        foundation = foundation_object[slab_values[:id]]
+        if not fnd_walls_list.empty?
+          # Add single combined exterior foundation wall surface (for similar surfaces)
+          fnd_wall = fnd_walls_list[0]
+          fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+          combined_wall_net_area = kiva_fnd_wall_net_area * slab_frac
+          combined_wall_gross_area = kiva_fnd_wall_gross_area * slab_frac
+          kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area, combined_wall_gross_area,
+                                                total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
+          return false if kiva_foundation.nil?
+        end
 
-        success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
-                                                      under_r, under_width, slab_gap_r, perim_r,
-                                                      perim_depth, whole_r, slab_values[:thickness],
-                                                      exp_perim, mat_carpet, foundation)
-        return false if not success
+        # Add single combined foundation slab surface (for similar surfaces)
+        slab = kiva_slabs_list[0]
+        slab_values = HPXML.get_slab_values(slab: slab)
+        combined_slab_exp_perim = kiva_slab_exp_perim * fnd_wall_frac
+        combined_slab_area = kiva_slab_area * fnd_wall_frac
+        no_wall_slab_exp_perim[slab] = 0.0 if no_wall_slab_exp_perim[slab].nil?
+        if not fnd_walls_list.empty? and combined_slab_exp_perim > kiva_fnd_wall_length * slab_frac
+          # Keep track of no-wall slab exposed perimeter
+          no_wall_slab_exp_perim[slab] += (combined_slab_exp_perim - kiva_fnd_wall_length * slab_frac)
 
-        # FIXME: Temporary code for sizing
-        surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
+          # Reduce this slab's exposed perimeter so that EnergyPlus does not automatically
+          # create a second no-wall Kiva instance for each of our Kiva instances.
+          # Instead, we will later create our own Kiva instance to account for it.
+          # This reduces the number of Kiva instances we end up with.
+          exp_perim_frac = (kiva_fnd_wall_length * slab_frac) / combined_slab_exp_perim
+          combined_slab_exp_perim *= exp_perim_frac
+          combined_slab_area *= exp_perim_frac
+        end
+        if not fnd_walls_list.empty?
+          z_origin = -1 * fnd_wall_values[:depth_below_grade] # Position based on adjacent foundation walls
+        else
+          z_origin = -1 * slab_values[:depth_below_grade]
+        end
+        kiva_foundation = add_foundation_slab(runner, model, spaces, slab_values, combined_slab_exp_perim,
+                                              combined_slab_area, z_origin, kiva_foundation)
+        return false if kiva_foundation.nil?
+      end
+
+      # For each slab list, create a no-wall Kiva slab instance if needed.
+      kiva_slabs.each do |kiva_slabs_list|
+        # Single combined foundation slab surface
+        slab = kiva_slabs_list[0]
+        next unless no_wall_slab_exp_perim[slab] > 0
+
+        slab_values = HPXML.get_slab_values(slab: slab)
+        z_origin = 0
+        combined_slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
+        kiva_foundation = add_foundation_slab(runner, model, spaces, slab_values, no_wall_slab_exp_perim[slab],
+                                              combined_slab_area, z_origin, nil)
+        return false if kiva_foundation.nil?
       end
 
       # Interior foundation wall surfaces
-      # The above-grade portion of the walls are modeled as EnergyPlus surfaces with standard adjacency.
-      # The below-grade portion of the walls (in contact with ground) are not modeled, as Kiva does not
+      # The above-grade portion of these walls are modeled as EnergyPlus surfaces with standard adjacency.
+      # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
       fnd_walls.each do |fnd_wall|
         fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
@@ -1366,6 +1314,141 @@ class OSModel
         return false if not success
       end
     end
+  end
+
+  def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area, combined_wall_gross_area,
+                               total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
+
+    height = fnd_wall_values[:height]
+    height_ag = height - fnd_wall_values[:depth_below_grade]
+    z_origin = -1 * fnd_wall_values[:depth_below_grade]
+    length = combined_wall_gross_area / height
+
+    if total_fnd_wall_length > total_slab_exp_perim
+      # Calculate exposed section of wall based on slab's total exposed perimeter.
+      length *= total_slab_exp_perim / total_fnd_wall_length
+    end
+
+    azimuth = @default_azimuth
+    if not fnd_wall_values[:azimuth].nil?
+      azimuth = fnd_wall_values[:azimuth]
+    end
+
+    if combined_wall_gross_area > combined_wall_net_area
+      # Create a "notch" in the wall to account for the subsurfaces. This ensures that
+      # we preserve the appropriate wall height, length, and area for Kiva.
+      subsurface_area = combined_wall_gross_area - combined_wall_net_area
+    else
+      subsurface_area = 0
+    end
+
+    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
+    surface.additionalProperties.setFeature("Length", length)
+    surface.additionalProperties.setFeature("Azimuth", azimuth)
+    surface.additionalProperties.setFeature("Tilt", 90.0)
+    surface.setName(fnd_wall_values[:id])
+    surface.setSurfaceType("Wall")
+    set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
+    set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
+
+    if is_thermal_boundary(fnd_wall_values)
+      drywall_thick_in = 0.5
+    else
+      drywall_thick_in = 0.0
+    end
+    filled_cavity = true
+    concrete_thick_in = fnd_wall_values[:thickness]
+    cavity_r = 0.0
+    cavity_depth_in = 0.0
+    install_grade = 1
+    framing_factor = 0.0
+    assembly_r = fnd_wall_values[:insulation_assembly_r_value]
+    if not assembly_r.nil?
+      rigid_height = height
+      film_r = Material.AirFilmVertical.rvalue
+      rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
+      if rigid_r < 0 # Try without drywall
+        drywall_thick_in = 0.0
+        rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
+      end
+    else
+      rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
+      rigid_r = fnd_wall_values[:insulation_r_value]
+    end
+
+    success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
+                                                  rigid_height, cavity_r, install_grade,
+                                                  cavity_depth_in, filled_cavity, framing_factor,
+                                                  rigid_r, drywall_thick_in, concrete_thick_in,
+                                                  height, height_ag, kiva_foundation)
+    return nil if not success
+
+    if not assembly_r.nil?
+      check_surface_assembly_rvalue(surface, film_r, assembly_r)
+    end
+
+    return surface.adjacentFoundation.get
+  end
+
+  def self.add_foundation_slab(runner, model, spaces, slab_values, slab_exp_perim,
+                               combined_slab_area, z_origin, kiva_foundation)
+
+    slab_tot_perim = slab_exp_perim
+    if slab_tot_perim**2 - 16.0 * combined_slab_area <= 0
+      # Cannot construct rectangle with this perimeter/area. Some of the
+      # perimeter is presumably not exposed, so bump up perimeter value.
+      slab_tot_perim = Math.sqrt(16.0 * combined_slab_area)
+    end
+    sqrt_term = [slab_tot_perim**2 - 16.0 * combined_slab_area, 0.0].max
+    slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
+    slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
+
+    surface = OpenStudio::Model::Surface.new(add_floor_polygon(slab_length, slab_width, z_origin), model)
+    surface.setName(slab_values[:id])
+    surface.setSurfaceType("Floor")
+    surface.setOutsideBoundaryCondition("Foundation")
+    set_surface_interior(model, spaces, surface, slab_values[:id], slab_values[:interior_adjacent_to])
+    surface.setSunExposure("NoSun")
+    surface.setWindExposure("NoWind")
+
+    slab_perim_r = slab_values[:perimeter_insulation_r_value]
+    slab_perim_depth = slab_values[:perimeter_insulation_depth]
+    if slab_perim_r == 0 or slab_perim_depth == 0
+      slab_perim_r = 0
+      slab_perim_depth = 0
+    end
+
+    if slab_values[:under_slab_insulation_spans_entire_slab]
+      slab_whole_r = slab_values[:under_slab_insulation_r_value]
+      slab_under_r = 0
+      slab_under_width = 0
+    else
+      slab_under_r = slab_values[:under_slab_insulation_r_value]
+      slab_under_width = slab_values[:under_slab_insulation_width]
+      if slab_under_r == 0 or slab_under_width == 0
+        slab_under_r = 0
+        slab_under_width = 0
+      end
+      slab_whole_r = 0
+    end
+    slab_gap_r = slab_under_r
+
+    mat_carpet = nil
+    if slab_values[:carpet_fraction] > 0 and slab_values[:carpet_r_value] > 0
+      mat_carpet = Material.CoveringBare(slab_values[:carpet_fraction],
+                                         slab_values[:carpet_r_value])
+    end
+
+    success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
+                                                  slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
+                                                  slab_perim_depth, slab_whole_r, slab_values[:thickness],
+                                                  slab_exp_perim, mat_carpet, kiva_foundation)
+    return nil if not success
+
+    # FIXME: Temporary code for sizing
+    surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
+
+    return surface.adjacentFoundation.get
   end
 
   def self.add_conditioned_floor_area(runner, model, building, spaces)
@@ -1985,7 +2068,7 @@ class OSModel
       sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac
 
-      dse_heat, dse_cool, has_dse = get_dse(building, cooling_system_values)
+      check_distribution_system(building, cooling_system_values)
 
       sys_id = cooling_system_values[:id]
       @hvac_map[sys_id] = []
@@ -2004,7 +2087,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2015,7 +2098,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2026,7 +2109,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2066,7 +2149,7 @@ class OSModel
 
         htg_type = heating_system_values[:heating_system_type]
 
-        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
+        check_distribution_system(building, heating_system_values)
 
         attached_clg_system = get_attached_clg_system(heating_system_values, building)
 
@@ -2095,7 +2178,7 @@ class OSModel
           afue = heating_system_values[:heating_efficiency_afue]
           fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
           success = HVAC.apply_furnace(model, runner, fuel, afue,
-                                       heat_capacity_btuh, fan_power, dse_heat,
+                                       heat_capacity_btuh, fan_power,
                                        load_frac, sequential_load_frac,
                                        attached_clg_system, @control_slave_zones_hash,
                                        @hvac_map, sys_id)
@@ -2125,7 +2208,7 @@ class OSModel
           design_temp = 180.0
           success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                       oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                      heat_capacity_btuh, design_temp, dse_heat, load_frac,
+                                      heat_capacity_btuh, design_temp, load_frac,
                                       sequential_load_frac, @control_slave_zones_hash,
                                       @hvac_map, sys_id)
           return false if not success
@@ -2164,6 +2247,8 @@ class OSModel
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
       heat_pump_values = HPXML.get_heat_pump_values(heat_pump: hp)
 
+      check_distribution_system(building, heat_pump_values)
+
       hp_type = heat_pump_values[:heat_pump_type]
 
       cool_capacity_btuh = heat_pump_values[:cooling_capacity]
@@ -2191,8 +2276,6 @@ class OSModel
         backup_heat_efficiency = 1.0
       end
 
-      dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
-
       sys_id = heat_pump_values[:id]
       @hvac_map[sys_id] = []
 
@@ -2218,7 +2301,7 @@ class OSModel
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                                   backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2231,7 +2314,7 @@ class OSModel
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                                   backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2244,7 +2327,7 @@ class OSModel
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                                   backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2275,7 +2358,7 @@ class OSModel
         cap_retention_temp = -5.0
         pan_heater_power = 0.0
         fan_power = 0.07
-        is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
+        is_ducted = XMLHelper.has_element(hp, "DistributionSystem")
         success = HVAC.apply_mshp(model, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
                                   min_cooling_airflow_rate, max_cooling_airflow_rate,
@@ -2285,7 +2368,7 @@ class OSModel
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
-                                  dse_heat, dse_cool, load_frac_heat, load_frac_cool,
+                                  load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success
@@ -2320,7 +2403,7 @@ class OSModel
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
                                   fan_power, cool_capacity_btuh, backup_heat_efficiency,
-                                  backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                  backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2466,40 +2549,22 @@ class OSModel
     return true
   end
 
-  def self.get_dse(building, system_values)
+  def self.check_distribution_system(building, system_values)
     dist_id = system_values[:distribution_system_idref]
-    if dist_id.nil? # No distribution system
-      return 1.0, 1.0, false
-    end
+    return if dist_id.nil?
 
     # Get attached distribution system
-    attached_dist = nil
-    found_attached_dist = nil
-    annual_cooling_dse = nil
-    annual_heating_dse = nil
+    found_attached_dist = false
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
       next if dist_id != hvac_distribution_values[:id]
 
       found_attached_dist = true
-      next if hvac_distribution_values[:distribution_system_type] != 'DSE'
-
-      attached_dist = dist
-      annual_cooling_dse = hvac_distribution_values[:annual_cooling_dse]
-      annual_heating_dse = hvac_distribution_values[:annual_heating_dse]
     end
 
     if not found_attached_dist
       fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_values[:id]}'."
     end
-
-    if attached_dist.nil? # No attached DSEs for system
-      return 1.0, 1.0, false
-    end
-
-    dse_cool = annual_cooling_dse
-    dse_heat = annual_heating_dse
-    return dse_heat, dse_cool, true
   end
 
   def self.get_boiler_and_boiler_loop(loop_hvacs, heating_source_id, sys_id)
@@ -3640,6 +3705,64 @@ class OSModel
       end
     end
     return min_neighbor_distance
+  end
+
+  def self.get_kiva_instances(fnd_walls, slabs)
+    # Identify unique Kiva foundations that are required.
+    # Some foundation walls or slabs with similar properties can share a Kiva foundation instance.
+    kiva_fnd_walls = []
+    fnd_walls.each_with_index do |fnd_wall, fnd_wall_idx|
+      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
+      next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
+      next if kiva_fnd_walls.flatten.include? fnd_wall # Skip if already processed
+
+      kiva_fnd_walls << [fnd_wall]
+
+      # Identify any other foundation walls that can share the Kiva foundation.
+      fnd_walls[fnd_wall_idx + 1..-1].each do |fnd_wall2|
+        next if kiva_fnd_walls.flatten.include? fnd_wall2 # Skip if already processed
+
+        fnd_wall_values2 = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall2)
+        next unless fnd_wall_values2[:exterior_adjacent_to] == fnd_wall_values[:exterior_adjacent_to]
+        next unless fnd_wall_values2[:height] == fnd_wall_values[:height]
+        next unless fnd_wall_values2[:azimuth] == fnd_wall_values[:azimuth]
+        next unless fnd_wall_values2[:thickness] == fnd_wall_values[:thickness]
+        next unless fnd_wall_values2[:depth_below_grade] == fnd_wall_values[:depth_below_grade]
+        next unless fnd_wall_values2[:insulation_distance_to_bottom] == fnd_wall_values[:insulation_distance_to_bottom]
+        next unless fnd_wall_values2[:insulation_r_value] == fnd_wall_values[:insulation_r_value]
+        next unless fnd_wall_values2[:insulation_assembly_r_value] == fnd_wall_values[:insulation_assembly_r_value]
+
+        kiva_fnd_walls[-1] << fnd_wall2
+      end
+    end
+    if kiva_fnd_walls.empty? # Handle slab foundation type
+      kiva_fnd_walls << []
+    end
+    kiva_slabs = []
+    slabs.each_with_index do |slab, slab_idx|
+      slab_values = HPXML.get_slab_values(slab: slab)
+      next if kiva_slabs.flatten.include? slab # Skip if already processed
+
+      kiva_slabs << [slab]
+
+      # Identify any other foundation slabs that can share the Kiva foundation.
+      slabs[slab_idx + 1..-1].each do |slab2|
+        next if kiva_slabs.flatten.include? slab2 # Skip if already processed
+
+        slab_values2 = HPXML.get_slab_values(slab: slab2)
+        next unless slab_values2[:thickness] == slab_values[:thickness]
+        next unless slab_values2[:perimeter_insulation_depth] == slab_values[:perimeter_insulation_depth]
+        next unless slab_values2[:under_slab_insulation_width] == slab_values[:under_slab_insulation_width]
+        next unless slab_values2[:under_slab_insulation_spans_entire_slab] == slab_values[:under_slab_insulation_spans_entire_slab]
+        next unless slab_values2[:carpet_fraction] == slab_values[:carpet_fraction]
+        next unless slab_values2[:carpet_r_value] == slab_values[:carpet_r_value]
+        next unless slab_values2[:perimeter_insulation_r_value] == slab_values[:perimeter_insulation_r_value]
+        next unless slab_values2[:under_slab_insulation_r_value] == slab_values[:under_slab_insulation_r_value]
+
+        kiva_slabs[-1] << slab2
+      end
+    end
+    return kiva_fnd_walls.product(kiva_slabs), kiva_slabs
   end
 end
 
