@@ -801,10 +801,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not cw.nil? and not wh.nil?
       # Location
       location = XMLHelper.get_value(cw, "Location")
-      location = 'living space' if location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -817,10 +816,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not cd.nil? and not wh.nil?
       # Location
       location = XMLHelper.get_value(cd, "Location")
-      location = 'living space' if location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -833,10 +831,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     if not refr.nil?
       # Location
       location = XMLHelper.get_value(refr, "Location")
-      location = 'living space' if location == 'basement - conditioned'
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
