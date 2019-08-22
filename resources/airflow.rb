@@ -100,9 +100,6 @@ class Airflow
     return false if not success
 
     if mech_vent.type == Constants.VentTypeCFIS
-      success = process_cfis(model, runner, mech_vent)
-      return false if not success
-
       cfis_program = create_cfis_objects(model, runner, building, mech_vent)
       return false if cfis_program.nil?
     end
@@ -715,20 +712,6 @@ class Airflow
     return true
   end
 
-  def self.process_cfis(model, runner, mech_vent)
-    # Validate Inputs
-    if mech_vent.cfis_open_time < 0
-      runner.registerError("Mechanical Ventilation: CFIS minimum damper open time must be greater than or equal to 0.")
-      return false
-    end
-    if mech_vent.cfis_airflow_frac < 0 or mech_vent.cfis_airflow_frac > 1
-      runner.registerError("Mechanical Ventilation: CFIS blower airflow rate must be greater than or equal to 0 and less than or equal to 1.")
-      return false
-    end
-
-    return true
-  end
-
   def self.process_ducts(model, runner, ducts, building, air_loop)
     # Validate Inputs
     ducts.each do |duct|
@@ -1076,7 +1059,7 @@ class Airflow
     end
     return true if all_ducts_conditioned
 
-    def self.create_duct_actuator(model, name, space, is_outside = false)
+    def self.create_duct_actuator_and_equipment(model, name, space, is_latent, is_outside = false)
       var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
       other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
       other_equip_def.setName("#{var.name} equip")
@@ -1087,6 +1070,8 @@ class Airflow
       other_equip.setSpace(space)
       if is_outside
         other_equip_def.setFractionLost(1.0)
+      elsif is_latent
+        other_equip_def.setFractionLatent(1.0)
       end
       actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(other_equip, "OtherEquipment", "Power Level")
       actuator.setName("#{other_equip.name} act")
@@ -1217,47 +1202,47 @@ class Airflow
         # -- Actuators --
 
         # Other equipment objects to cancel out the supply air leakage directly into the return plenum
-        supply_sens_lk_to_liv_var, supply_sens_lk_to_liv_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupSensLkToLv", living_space)
-        supply_lat_lk_to_liv_var, supply_lat_lk_to_liv_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupLatLkToLv", living_space)
+        supply_sens_lk_to_liv_var, supply_sens_lk_to_liv_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToLv", living_space, false)
+        supply_lat_lk_to_liv_var, supply_lat_lk_to_liv_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToLv", living_space, true)
 
         # Supply duct conduction load added to the living space
-        supply_cond_to_liv_var, supply_cond_to_liv_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupCondToLv", living_space)
+        supply_cond_to_liv_var, supply_cond_to_liv_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToLv", living_space, false)
 
         # Return duct conduction load added to the return plenum zone
-        return_cond_to_rp_var, return_cond_to_rp_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetCondToRP", ra_duct_zone.spaces[0])
+        return_cond_to_rp_var, return_cond_to_rp_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToRP", ra_duct_zone.spaces[0], false)
 
         # Return duct sensible leakage impact on the return plenum
-        return_sens_lk_to_rp_var, return_sens_lk_to_rp_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetSensLkToRP", ra_duct_zone.spaces[0])
+        return_sens_lk_to_rp_var, return_sens_lk_to_rp_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} RetSensLkToRP", ra_duct_zone.spaces[0], false)
 
         # Return duct latent leakage impact on the return plenum
-        return_lat_lk_to_rp_var, return_lat_lk_to_rp_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetLatLkToRP", ra_duct_zone.spaces[0])
+        return_lat_lk_to_rp_var, return_lat_lk_to_rp_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} RetLatLkToRP", ra_duct_zone.spaces[0], true)
 
         # Supply duct conduction impact on the duct zone
         if duct_zone.nil? # Outside
-          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupCondToDZ", living_space, true)
+          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToDZ", living_space, false, true)
         else
-          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupCondToDZ", duct_zone.spaces[0])
+          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToDZ", duct_zone.spaces[0], false)
         end
 
         # Return duct conduction impact on the duct zone
         if duct_zone.nil? # Outside
-          return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetCondToDZ", living_space, true)
+          return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToDZ", living_space, false, true)
         else
-          return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} RetCondToDZ", duct_zone.spaces[0])
+          return_cond_to_dz_var, return_cond_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToDZ", duct_zone.spaces[0], false)
         end
 
         # Supply duct sensible leakage impact on the duct zone
         if duct_zone.nil? # Outside
-          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupSensLkToDZ", living_space, true)
+          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToDZ", living_space, false, true)
         else
-          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupSensLkToDZ", duct_zone.spaces[0])
+          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToDZ", duct_zone.spaces[0], false)
         end
 
         # Supply duct latent leakage impact on the duct zone
         if duct_zone.nil? # Outside
-          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupLatLkToDZ", living_space, true)
+          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToDZ", living_space, true, true)
         else
-          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator(model, "#{air_loop_name_idx} SupLatLkToDZ", duct_zone.spaces[0])
+          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_duct_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToDZ", duct_zone.spaces[0], true)
         end
 
         # Two objects are required to model the air exchange between the duct zone and the living space since
@@ -1565,6 +1550,11 @@ class Airflow
   end
 
   def self.create_cfis_objects(model, runner, building, mech_vent)
+    if mech_vent.cfis_airflow_frac < 0 or mech_vent.cfis_airflow_frac > 1
+      runner.registerError("Mechanical Ventilation: CFIS blower airflow rate must be greater than or equal to 0 and less than or equal to 1.")
+      return nil
+    end
+
     mech_vent.cfis_t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
     mech_vent.cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
     mech_vent.cfis_f_damper_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_f_damper_open") # Fraction of timestep the CFIS damper is open. Used by infiltration and duct leakage programs
@@ -1611,7 +1601,7 @@ class Airflow
     bath_sch_sensor.setKeyName(bath_exhaust_sch.schedule.name.to_s)
 
     if mech_vent.has_dryer and mech_vent.dryer_exhaust > 0
-      dryer_exhaust_sch = HotWaterSchedule.new(model, runner, Constants.ObjectNameMechanicalVentilation + " dryer exhaust schedule", Constants.ObjectNameMechanicalVentilation + " dryer exhaust temperature schedule", building.nbeds, mech_vent.dryer_exhaust_day_shift, "ClothesDryerExhaust", 0, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+      dryer_exhaust_sch = HotWaterSchedule.new(model, runner, Constants.ObjectNameMechanicalVentilation + " dryer exhaust schedule", building.nbeds, 0, true)
       dryer_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
       dryer_sch_sensor.setName("#{Constants.ObjectNameMechanicalVentilation} dryer sch s")
       dryer_sch_sensor.setKeyName(dryer_exhaust_sch.schedule.name.to_s)
@@ -1871,22 +1861,15 @@ class Airflow
       end
     end
     if mech_vent.type != Constants.VentTypeCFIS
-      if mech_vent.fan_power_w != 0
-        infil_program.addLine("Set faneff_wh = #{UnitConversions.convert(300.0 / (mech_vent.fan_power_w / mech_vent.whole_house_cfm / mech_vent.num_fans), "cfm", "m^3/s")}")
+      if mech_vent.whole_house_cfm > 0
+        infil_program.addLine("Set #{whole_house_fan_actuator.name} = QWHV * #{mech_vent.fan_power_w} / #{UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s")}")
       else
-        infil_program.addLine("Set faneff_wh = 1")
+        infil_program.addLine("Set #{whole_house_fan_actuator.name} = #{mech_vent.fan_power_w}")
       end
-      infil_program.addLine("Set #{whole_house_fan_actuator.name} = (QWHV*300)/faneff_wh*#{mech_vent.num_fans}")
     end
 
-    if mech_vent.spot_fan_w_per_cfm != 0
-      infil_program.addLine("Set faneff_sp = #{UnitConversions.convert(300.0 / mech_vent.spot_fan_w_per_cfm, "cfm", "m^3/s")}")
-    else
-      infil_program.addLine("Set faneff_sp = 1")
-    end
-
-    infil_program.addLine("Set #{range_hood_fan_actuator.name} = (Qrange*300)/faneff_sp")
-    infil_program.addLine("Set #{bath_exhaust_sch_fan_actuator.name} = (Qbath*300)/faneff_sp")
+    infil_program.addLine("Set #{range_hood_fan_actuator.name} = Qrange * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
+    infil_program.addLine("Set #{bath_exhaust_sch_fan_actuator.name} = Qbath * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
     infil_program.addLine("Set Q_acctd_for_elsewhere = QhpwhOut+QhpwhIn+QductsOut+QductsIn")
     infil_program.addLine("Set #{infil_flow_actuator.name} = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere")
     infil_program.addLine("Set #{infil_flow_actuator.name} = (@Max #{infil_flow_actuator.name} 0)")

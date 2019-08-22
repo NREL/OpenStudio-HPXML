@@ -548,14 +548,6 @@ class Geometry
                              cfa, nbeds)
 
     # Error checking
-    if num_occ < 0
-      runner.registerError("Number of occupants cannot be negative.")
-      return false
-    end
-    if occ_gain < 0
-      runner.registerError("Internal gains cannot be negative.")
-      return false
-    end
     if sens_frac < 0 or sens_frac > 1
       runner.registerError("Sensible fraction must be greater than or equal to 0 and less than or equal to 1.")
       return false

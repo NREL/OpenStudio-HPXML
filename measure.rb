@@ -1846,6 +1846,7 @@ class OSModel
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
+        jacket_r = water_heating_system_values[:jacket_r_value]
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1879,7 +1880,7 @@ class OSModel
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj,
-                                           @nbeds, @dhw_map, sys_id)
+                                           @nbeds, @dhw_map, sys_id, jacket_r)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1902,7 +1903,7 @@ class OSModel
 
           tank_vol = water_heating_system_values[:tank_volume]
           success = Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
-                                               @nbeds, @dhw_map, sys_id)
+                                               @nbeds, @dhw_map, sys_id, jacket_r)
 
           return false if not success
 
@@ -1913,22 +1914,20 @@ class OSModel
           else
             tank_vol = water_heating_system_values[:tank_volume]
           end
-          # Fuel type and EF are only used to estimate indirect tank losses
-          fuel_type = Constants.FuelTypeElectric
-          ef = 0.95
           heating_source_id = water_heating_system_values[:related_hvac]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
-            boiler_plant_loop = get_boiler_loop(@hvac_map, heating_source_id, sys_id)
+            boiler_sys = get_boiler_and_boiler_loop(@hvac_map, heating_source_id, sys_id)
           else
             fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end
+          @dhw_map[sys_id] << boiler_sys['boiler']
           capacity_kbtuh = 0.0
           oncycle_power = 0.0
           offcycle_power = 0.0
-          success = Waterheater.apply_indirect(model, runner, fuel_type, space, capacity_kbtuh,
-                                               tank_vol, ef, re, setpoint_temp, oncycle_power,
-                                               offcycle_power, ec_adj, @nbeds, boiler_plant_loop, @dhw_map, sys_id, wh_type)
+          success = Waterheater.apply_indirect(model, runner, space, capacity_kbtuh,
+                                               tank_vol, setpoint_temp, oncycle_power,
+                                               offcycle_power, ec_adj, @nbeds, boiler_sys['plant_loop'], @dhw_map, sys_id, wh_type, jacket_r)
           return false if not success
 
         else
@@ -1977,7 +1976,7 @@ class OSModel
       sequential_load_frac = load_frac / @total_frac_remaining_cool_load_served # Fraction of remaining load served by this system
       @total_frac_remaining_cool_load_served -= load_frac
 
-      dse_heat, dse_cool, has_dse = get_dse(building, cooling_system_values)
+      check_distribution_system(building, cooling_system_values)
 
       sys_id = cooling_system_values[:id]
       @hvac_map[sys_id] = []
@@ -1996,7 +1995,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2007,7 +2006,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2018,7 +2017,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, dse_cool, load_frac,
+                                                 cool_capacity_btuh, load_frac,
                                                  sequential_load_frac, @control_slave_zones_hash,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2065,7 +2064,7 @@ class OSModel
 
         htg_type = heating_system_values[:heating_system_type]
 
-        dse_heat, dse_cool, has_dse = get_dse(building, heating_system_values)
+        check_distribution_system(building, heating_system_values)
 
         attached_clg_system = get_attached_clg_system(heating_system_values, building)
 
@@ -2094,7 +2093,7 @@ class OSModel
           afue = heating_system_values[:heating_efficiency_afue]
           fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
           success = HVAC.apply_furnace(model, runner, fuel, afue,
-                                       heat_capacity_btuh, fan_power, dse_heat,
+                                       heat_capacity_btuh, fan_power,
                                        load_frac, sequential_load_frac,
                                        attached_clg_system, @control_slave_zones_hash,
                                        @hvac_map, sys_id)
@@ -2124,7 +2123,7 @@ class OSModel
           design_temp = 180.0
           success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                       oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
-                                      heat_capacity_btuh, design_temp, dse_heat, load_frac,
+                                      heat_capacity_btuh, design_temp, load_frac,
                                       sequential_load_frac, @control_slave_zones_hash,
                                       @hvac_map, sys_id)
           return false if not success
@@ -2163,6 +2162,8 @@ class OSModel
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
       heat_pump_values = HPXML.get_heat_pump_values(heat_pump: hp)
 
+      check_distribution_system(building, heat_pump_values)
+
       hp_type = heat_pump_values[:heat_pump_type]
 
       cool_capacity_btuh = heat_pump_values[:cooling_capacity]
@@ -2190,8 +2191,6 @@ class OSModel
         backup_heat_efficiency = 1.0
       end
 
-      dse_heat, dse_cool, has_dse = get_dse(building, heat_pump_values)
-
       sys_id = heat_pump_values[:id]
       @hvac_map[sys_id] = []
 
@@ -2217,7 +2216,7 @@ class OSModel
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                                   backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2230,7 +2229,7 @@ class OSModel
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                                   backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2243,7 +2242,7 @@ class OSModel
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                                   backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2274,7 +2273,7 @@ class OSModel
         cap_retention_temp = -5.0
         pan_heater_power = 0.0
         fan_power = 0.07
-        is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)
+        is_ducted = XMLHelper.has_element(hp, "DistributionSystem")
         success = HVAC.apply_mshp(model, runner, seer, hspf, shr,
                                   min_cooling_capacity, max_cooling_capacity,
                                   min_cooling_airflow_rate, max_cooling_airflow_rate,
@@ -2284,7 +2283,7 @@ class OSModel
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
-                                  dse_heat, dse_cool, load_frac_heat, load_frac_cool,
+                                  load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
         return false if not success
@@ -2319,7 +2318,7 @@ class OSModel
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
                                   fan_power, cool_capacity_btuh, backup_heat_efficiency,
-                                  backup_heat_capacity_btuh, dse_heat, dse_cool,
+                                  backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @control_slave_zones_hash, @hvac_map, sys_id)
@@ -2465,50 +2464,36 @@ class OSModel
     return true
   end
 
-  def self.get_dse(building, system_values)
+  def self.check_distribution_system(building, system_values)
     dist_id = system_values[:distribution_system_idref]
-    if dist_id.nil? # No distribution system
-      return 1.0, 1.0, false
-    end
+    return if dist_id.nil?
 
     # Get attached distribution system
-    attached_dist = nil
-    found_attached_dist = nil
-    annual_cooling_dse = nil
-    annual_heating_dse = nil
+    found_attached_dist = false
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
       next if dist_id != hvac_distribution_values[:id]
 
       found_attached_dist = true
-      next if hvac_distribution_values[:distribution_system_type] != 'DSE'
-
-      attached_dist = dist
-      annual_cooling_dse = hvac_distribution_values[:annual_cooling_dse]
-      annual_heating_dse = hvac_distribution_values[:annual_heating_dse]
     end
 
     if not found_attached_dist
       fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_values[:id]}'."
     end
-
-    if attached_dist.nil? # No attached DSEs for system
-      return 1.0, 1.0, false
-    end
-
-    dse_cool = annual_cooling_dse
-    dse_heat = annual_heating_dse
-    return dse_heat, dse_cool, true
   end
 
-  def self.get_boiler_loop(loop_hvacs, heating_source_id, sys_id)
+  def self.get_boiler_and_boiler_loop(loop_hvacs, heating_source_id, sys_id)
     # Search for the right boiler OS object
+    related_boiler_sys = {}
     if loop_hvacs.keys.include? heating_source_id
       loop_hvacs[heating_source_id].each do |comp|
         if comp.is_a? OpenStudio::Model::PlantLoop
-          return comp
+          related_boiler_sys['plant_loop'] = comp
+        elsif comp.is_a? OpenStudio::Model::BoilerHotWater
+          related_boiler_sys['boiler'] = comp
         end
       end
+      return related_boiler_sys
     else
       fail "RelatedHVACSystem '#{heating_source_id}' not found for water heating system '#{sys_id}'."
     end
@@ -2717,14 +2702,18 @@ class OSModel
           mech_vent_total_efficiency_adjusted = whole_house_fan_values[:total_recovery_efficiency_adjusted]
         end
       end
-      mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
+      mech_vent_cfm = whole_house_fan_values[:tested_flow_rate]
+      if mech_vent_cfm.nil?
+        mech_vent_cfm = whole_house_fan_values[:rated_flow_rate]
+      end
       mech_vent_fan_w = whole_house_fan_values[:fan_power]
       if mech_vent_type == Constants.VentTypeCFIS
         # CFIS: Specify minimum open time in minutes
         cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
       else
-        # Other: Adjust CFM based on hours/day of operation
+        # Other: Adjust constant CFM/power based on hours per day of operation
         mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
+        mech_vent_fan_w *= (whole_house_fan_values[:hours_in_operation] / 24.0)
       end
     end
     cfis_airflow_frac = 1.0
@@ -2982,6 +2971,8 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
+                       OutputVars.WaterHeatingCombiBoilerHeatExchanger,
+                       OutputVars.WaterHeatingCombiBoiler,
                        OutputVars.WaterHeatingFuel,
                        OutputVars.WaterHeatingLoad]
 
@@ -3841,6 +3832,14 @@ class OutputVars
 
   def self.WaterHeatingElectricityRecircPump
     return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
+  end
+
+  def self.WaterHeatingCombiBoilerHeatExchanger
+    return { 'OpenStudio::Model::HeatExchangerFluidToFluid' => ['Fluid Heat Exchanger Heat Transfer Energy'] }
+  end
+
+  def self.WaterHeatingCombiBoiler
+    return { 'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
   end
 
   def self.WaterHeatingFuel
