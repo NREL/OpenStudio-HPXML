@@ -859,6 +859,10 @@ class Waterheater
       ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side unless jacket_r.nil?
     end
     u = ua / surface_area # Btu/hr-ft^2-F
+    if eta_c > 1
+      runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
+    end
+    
     return u, ua, eta_c
   end
 

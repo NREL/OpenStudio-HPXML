@@ -1834,8 +1834,7 @@ class OSModel
         dwhr_efficiency = hot_water_distribution_values[:dwhr_efficiency]
       end
     end
-    ec_adj = nil
-    wh_eta_c = nil
+
     # Water Heater
     related_hvac_list = [] # list of heating systems refered in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
@@ -1861,7 +1860,11 @@ class OSModel
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
-
+                                                                              
+        if ec_adj != 1
+          runner.registerWarning("Water heater energy consumption is being adjusted by postprocessing to account for distribution system waste.")
+        end
+        
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
         sys_id = water_heating_system_values[:id]
@@ -1943,12 +1946,7 @@ class OSModel
         
         dhw_loop_fracs[sys_id] = dhw_load_frac
       end
-    else
-      ec_adj = 1.0
-      wh_eta_c = 1.0
     end
-    puts ec_adj
-    puts wh_eta_c
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
     living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
     success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
@@ -1963,7 +1961,7 @@ class OSModel
                                           recirc_pump_power, dwhr_present,
                                           dwhr_facilities_connected, dwhr_is_equal_flow,
                                           dwhr_efficiency, dhw_loop_fracs, @eri_version,
-                                          @dhw_map, ec_adj, wh_eta_c)
+                                          @dhw_map)
     return false if not success
 
     return true
