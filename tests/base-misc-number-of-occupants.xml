@@ -44,8 +44,8 @@
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Denver, CO</Name>
-          <WMO>725650</WMO>
+          <Name>Atlanta, GA</Name>
+          <WMO>722190</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>

@@ -680,8 +680,8 @@ def get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zo
   if ['base.xml'].include? hpxml_file
     climate_and_risk_zones_values = { :iecc2006 => "5B",
                                       :weather_station_id => "WeatherStation",
-                                      :weather_station_name => "Denver, CO",
-                                      :weather_station_wmo => "725650" }
+                                      :weather_station_name => "Atlanta, GA",
+                                      :weather_station_wmo => "722190" }
   elsif ['invalid_files/bad-wmo.xml'].include? hpxml_file
     climate_and_risk_zones_values[:weather_station_wmo] = "999999"
   end
