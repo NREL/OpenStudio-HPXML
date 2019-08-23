@@ -1244,7 +1244,7 @@ class HVAC
                       ground_diffusivity, fluid_type, frac_glycol,
                       design_delta_t, pump_head,
                       u_tube_leg_spacing, u_tube_spacing_type,
-                      fan_power, heat_pump_capacity, supplemental_efficiency,
+                      fan_power, heat_pump_capacity_cool, heat_pump_capacity_heat, supplemental_efficiency,
                       supplemental_capacity, dse_heat, dse_cool,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
@@ -1362,8 +1362,8 @@ class HVAC
     control_slave_zones_hash.each do |control_zone, slave_zones|
       htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model)
       htg_coil.setName(obj_name + " htg coil")
-      if heat_pump_capacity != Constants.SizingAuto
-        htg_coil.setRatedHeatingCapacity(OpenStudio::OptionalDouble.new(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W"))) # Used by HVACSizing measure
+      if heat_pump_capacity_heat != Constants.SizingAuto
+        htg_coil.setRatedHeatingCapacity(OpenStudio::OptionalDouble.new(UnitConversions.convert(heat_pump_capacity_heat, "Btu/hr", "W"))) # Used by HVACSizing measure
       end
       htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / heatingEIR)
       htg_coil.setHeatingCapacityCoefficient1(gshp_HEAT_CAP_fT_coeff[0])
@@ -1388,8 +1388,8 @@ class HVAC
 
       clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model)
       clg_coil.setName(obj_name + " clg coil")
-      if heat_pump_capacity != Constants.SizingAuto
-        clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      if heat_pump_capacity_cool != Constants.SizingAuto
+        clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump_capacity_cool, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       clg_coil.setRatedCoolingCoefficientofPerformance(1.0 / coolingEIR)
       clg_coil.setTotalCoolingCapacityCoefficient1(gshp_COOL_CAP_fT_coeff[0])

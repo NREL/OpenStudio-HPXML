@@ -2378,7 +2378,7 @@ class OSModel
                                   ground_diffusivity, fluid_type, frac_glycol,
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
-                                  fan_power, cool_capacity_btuh, backup_heat_efficiency,
+                                  fan_power, cool_capacity_btuh, heat_capacity_btuh, backup_heat_efficiency,
                                   backup_heat_capacity_btuh, dse_heat, dse_cool,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,

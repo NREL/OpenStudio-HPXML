@@ -1974,8 +1974,6 @@ class HVACSizing
 
       if hvac.FixedCoolingCapacity.nil?
         hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-      else
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       end
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
@@ -2027,8 +2025,10 @@ class HVACSizing
 
       bore_length *= bore_length_mult
 
-      hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      if hvac.FixedCoolingCapacity.nil?
+        hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      end
       hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
       cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
                                  (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *
