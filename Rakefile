@@ -124,7 +124,8 @@ def create_hpxmls
     'base-foundation-unconditioned-basement-above-grade.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
-    'base-foundation-multiple-slab.xml' => 'base.xml',
+    'base-foundation-walkout-basement.xml' => 'base.xml',
+    'base-foundation-complex.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
@@ -1062,6 +1063,80 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
     foundation_walls_values[-1][:area] *= 0.75
     foundation_walls_values[-1][:id] += "Adiabatic"
     foundation_walls_values[-1][:exterior_adjacent_to] = "other housing unit"
+  elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
+    foundation_walls_values = [{ :id => "FoundationWall1",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 8,
+                                 :area => 480,
+                                 :thickness => 8,
+                                 :depth_below_grade => 7,
+                                 :insulation_distance_to_bottom => 8,
+                                 :insulation_r_value => 8.9 },
+                               { :id => "FoundationWall2",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 120,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_distance_to_bottom => 4,
+                                 :insulation_r_value => 8.9 },
+                               { :id => "FoundationWall3",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 2,
+                                 :area => 60,
+                                 :thickness => 8,
+                                 :depth_below_grade => 1,
+                                 :insulation_distance_to_bottom => 2,
+                                 :insulation_r_value => 8.9 }]
+  elsif ['base-foundation-complex.xml'].include? hpxml_file
+    foundation_walls_values = [{ :id => "FoundationWall1",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 8,
+                                 :area => 160,
+                                 :thickness => 8,
+                                 :depth_below_grade => 7,
+                                 :insulation_distance_to_bottom => 0,
+                                 :insulation_r_value => 0.0 },
+                               { :id => "FoundationWall2",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 8,
+                                 :area => 240,
+                                 :thickness => 8,
+                                 :depth_below_grade => 7,
+                                 :insulation_distance_to_bottom => 8,
+                                 :insulation_r_value => 8.9 },
+                               { :id => "FoundationWall3",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 160,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_distance_to_bottom => 0,
+                                 :insulation_r_value => 0.0 },
+                               { :id => "FoundationWall4",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 120,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_distance_to_bottom => 4,
+                                 :insulation_r_value => 8.9 },
+                               { :id => "FoundationWall5",
+                                 :exterior_adjacent_to => "ground",
+                                 :interior_adjacent_to => "basement - conditioned",
+                                 :height => 4,
+                                 :area => 80,
+                                 :thickness => 8,
+                                 :depth_below_grade => 3,
+                                 :insulation_distance_to_bottom => 4,
+                                 :insulation_r_value => 8.9 }]
   end
   return foundation_walls_values
 end
@@ -1142,15 +1217,12 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :exposed_perimeter => 150,
                       :perimeter_insulation_depth => 0,
                       :under_slab_insulation_width => 0,
-                      :depth_below_grade => 7,
                       :perimeter_insulation_r_value => 0,
                       :under_slab_insulation_r_value => 0,
                       :carpet_fraction => 0,
                       :carpet_r_value => 0 }]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
-  elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
-    slabs_values[0][:depth_below_grade] = 4
   elsif ['base-foundation-slab.xml'].include? hpxml_file or
         hpxml_file.include? 'hvac_partial' or
         hpxml_file.include? 'hvac_multiple' or
@@ -1172,7 +1244,6 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
       slabs_values[0][:interior_adjacent_to] = "crawlspace - vented"
     end
     slabs_values[0][:thickness] = 0
-    slabs_values[0][:depth_below_grade] = 3
     slabs_values[0][:carpet_r_value] = 2.5
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     slabs_values[0][:area] = 675
@@ -1184,7 +1255,6 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :exposed_perimeter => 75,
                       :perimeter_insulation_depth => 0,
                       :under_slab_insulation_width => 0,
-                      :depth_below_grade => 3,
                       :perimeter_insulation_r_value => 0,
                       :under_slab_insulation_r_value => 0,
                       :carpet_fraction => 0,
@@ -1220,22 +1290,40 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :under_slab_insulation_r_value => 0,
                       :carpet_fraction => 0,
                       :carpet_r_value => 0 }
-  elsif ['base-foundation-multiple-slab.xml'].include? hpxml_file
-    # Multiple slabs for the same (basement) foundation
-    slabs_values[0][:area] = 450
-    slabs_values[0][:exposed_perimeter] = 50
-    slabs_values << { :id => "Slab2",
+  elsif ['base-foundation-complex.xml'].include? hpxml_file
+    slabs_values = [{ :id => "Slab1",
                       :interior_adjacent_to => "basement - conditioned",
-                      :area => 900,
+                      :area => 675,
                       :thickness => 4,
-                      :exposed_perimeter => 100,
+                      :exposed_perimeter => 75,
                       :perimeter_insulation_depth => 0,
                       :under_slab_insulation_width => 0,
-                      :depth_below_grade => 7,
                       :perimeter_insulation_r_value => 0,
                       :under_slab_insulation_r_value => 0,
                       :carpet_fraction => 0,
-                      :carpet_r_value => 0 }
+                      :carpet_r_value => 0 },
+                    { :id => "Slab2",
+                      :interior_adjacent_to => "basement - conditioned",
+                      :area => 405,
+                      :thickness => 4,
+                      :exposed_perimeter => 45,
+                      :perimeter_insulation_depth => 1,
+                      :under_slab_insulation_width => 0,
+                      :perimeter_insulation_r_value => 5,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 },
+                    { :id => "Slab3",
+                      :interior_adjacent_to => "basement - conditioned",
+                      :area => 270,
+                      :thickness => 4,
+                      :exposed_perimeter => 30,
+                      :perimeter_insulation_depth => 1,
+                      :under_slab_insulation_width => 0,
+                      :perimeter_insulation_r_value => 5,
+                      :under_slab_insulation_r_value => 0,
+                      :carpet_fraction => 0,
+                      :carpet_r_value => 0 }]
   end
   return slabs_values
 end

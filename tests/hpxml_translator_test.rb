@@ -480,29 +480,49 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # Enclosure Foundation Slabs
-    bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
-      slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
-
-      # Exposed Area
-      hpxml_value = Float(XMLHelper.get_value(slab, 'Area'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
-
-      # Tilt
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(180.0, sql_value, 0.01)
-    end
-
     # Enclosure Foundations
-    # Ensure Kiva instances have appropriate perimeter fraction
-    # TODO: Update for walkout basements, which use multiple Kiva instances per foundation.
+    # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them to end up this way.
+    num_kiva_instances = 0
     File.readlines(File.join(rundir, "eplusout.eio")).each do |eio_line|
-      if eio_line.start_with? "Foundation Kiva"
+      if eio_line.downcase.start_with? "foundation kiva"
         kiva_perim_frac = Float(eio_line.split(",")[5])
         assert_equal(1.0, kiva_perim_frac)
+        num_kiva_instances += 1
+      end
+    end
+
+    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
+                                    'base-foundation-ambient-autosize.xml' => 0,      # no foundation in contact w/ ground
+                                    'base-foundation-multiple.xml' => 2,              # additional instance for 2nd foundation type
+                                    'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
+                                    'base-enclosure-garage.xml' => 2,                 # additional instance for garage
+                                    'base-enclosure-garage-autosize.xml' => 2,        # additional instance for garage
+                                    'base-enclosure-adiabatic-surfaces.xml' => 2,     # additional instance for adiabatic construction
+                                    'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
+                                    'base-foundation-complex.xml' => 10 }
+
+    if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
+      assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
+    else
+      assert_equal(1, num_kiva_instances)
+    end
+
+    # Enclosure Foundation Slabs
+    num_slabs = bldg_details.elements['count(Enclosure/Slabs/Slab)']
+    if num_slabs <= 1 and num_kiva_instances <= 1 # The slab surfaces may be combined in these situations, so skip tests
+      bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
+        slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
+
+        # Exposed Area
+        hpxml_value = Float(XMLHelper.get_value(slab, 'Area'))
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+        # Tilt
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(180.0, sql_value, 0.01)
       end
     end
 
