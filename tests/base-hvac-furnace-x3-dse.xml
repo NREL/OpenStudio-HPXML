@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-21T18:57:59-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-08-23T09:33:18-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -232,15 +232,58 @@
       <Systems>
         <HVAC>
           <HVACPlant>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem2'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id='HeatingSystem3'/>
+              <DistributionSystem idref='HVACDistribution'/>
+              <HeatingSystemType>
+                <Furnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingCapacity>21333.333333333332</HeatingCapacity>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.92</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.333</FractionHeatLoadServed>
+            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
-              <CoolingSystemType>room air conditioner</CoolingSystemType>
+              <DistributionSystem idref='HVACDistribution'/>
+              <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000.0</CoolingCapacity>
-              <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>8.5</Value>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -248,6 +291,14 @@
             <SystemIdentifier id='HVACControl'/>
             <ControlType>manual thermostat</ControlType>
           </HVACControl>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution'/>
+            <DistributionSystemType>
+              <Other>DSE</Other>
+            </DistributionSystemType>
+            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
+            <AnnualCoolingDistributionSystemEfficiency>0.7</AnnualCoolingDistributionSystemEfficiency>
+          </HVACDistribution>
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
