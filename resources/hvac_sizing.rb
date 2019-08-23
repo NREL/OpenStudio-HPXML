@@ -180,10 +180,10 @@ class HVACSizing
 
       is_vented = Geometry.is_vented_attic(space)
 
-      attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
+      attic_floor_r = self.get_space_r_value(runner, space, "floor")
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
+      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling")
       return nil if attic_roof_r.nil?
 
       # Unconditioned attic
@@ -257,10 +257,10 @@ class HVACSizing
 
       is_vented = Geometry.is_vented_attic(space)
 
-      attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
+      attic_floor_r = self.get_space_r_value(runner, space, "floor")
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
+      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling")
       return nil if attic_roof_r.nil?
 
       # Unconditioned attic
@@ -291,8 +291,8 @@ class HVACSizing
           roof_material = get_feature(runner, surface, Constants.SizingInfoRoofMaterial, 'string')
           return nil if roof_color.nil? or roof_material.nil?
 
-          has_radiant_barrier = get_feature(runner, surface, Constants.SizingInfoRoofHasRadiantBarrier, 'boolean', false)
-          has_radiant_barrier = false if has_radiant_barrier.nil?
+          has_radiant_barrier = get_feature(runner, surface, Constants.SizingInfoRoofHasRadiantBarrier, 'boolean')
+          return nil if has_radiant_barrier.nil?
 
           if not is_vented
             if not has_radiant_barrier
@@ -957,8 +957,8 @@ class HVACSizing
       cavity_r = get_feature(runner, roof, Constants.SizingInfoRoofCavityRvalue, 'double')
       return nil if cavity_r.nil?
 
-      rigid_r = get_feature(runner, roof, Constants.SizingInfoRoofRigidInsRvalue, 'double', false)
-      rigid_r = 0 if rigid_r.nil?
+      rigid_r = get_feature(runner, roof, Constants.SizingInfoRoofRigidInsRvalue, 'double')
+      return nil if rigid_r.nil?
 
       total_r = cavity_r + rigid_r
 
@@ -1081,7 +1081,9 @@ class HVACSizing
     end
 
     # Per ANSI/RESNET/ICC 301
-    ach_nat = get_feature(runner, thermal_zone, Constants.SizingInfoZoneInfiltrationACH, 'double', false)
+    ach_nat = get_feature(runner, thermal_zone, Constants.SizingInfoZoneInfiltrationACH, 'double')
+    return nil if ach_nat.nil?
+
     ach_Cooling = 1.2 * ach_nat
     ach_Heating = 1.6 * ach_nat
 
@@ -2402,14 +2404,9 @@ class HVACSizing
       clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
 
       # Get type of heating/cooling system
-      hvac.CoolType = get_feature(runner, equip, Constants.SizingInfoHVACCoolType, 'string', false)
-      if hvac.CoolType.nil? and not clg_coil.nil?
-        hvac.CoolType = get_feature(runner, clg_coil, Constants.SizingInfoHVACCoolType, 'string', false)
-      end
-      hvac.HeatType = get_feature(runner, equip, Constants.SizingInfoHVACHeatType, 'string', false)
-      if hvac.HeatType.nil? and not htg_coil.nil?
-        hvac.HeatType = get_feature(runner, htg_coil, Constants.SizingInfoHVACHeatType, 'string', false)
-      end
+      hvac.CoolType = get_feature(runner, equip, Constants.SizingInfoHVACCoolType, 'string')
+      hvac.HeatType = get_feature(runner, equip, Constants.SizingInfoHVACHeatType, 'string')
+      return nil if hvac.CoolType.nil? or hvac.HeatType.nil?
 
       # Retrieve ducts if they exist
       if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
@@ -2791,7 +2788,7 @@ class HVACSizing
 
     # Infiltration UA
     infiltration_cfm = get_feature(runner, space.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
-    infiltration_cfm = 0 if infiltration_cfm.nil?
+    infiltration_cfm = 0.0 if infiltration_cfm.nil?
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     space_UAs["infil"] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, "hr", "min")
 
@@ -2874,7 +2871,7 @@ class HVACSizing
     return nil if wall_type.nil?
 
     rigid_r = get_feature(runner, wall, Constants.SizingInfoWallRigidInsRvalue, 'double', false)
-    rigid_r = 0 if rigid_r.nil?
+    return nil if rigid_r.nil?
 
     # Determine the wall Group Number (A - K = 1 - 11) for exterior walls (ie. all walls except basement walls)
     maxWallGroup = 11
@@ -2919,7 +2916,7 @@ class HVACSizing
 
     elsif wall_type == 'SIP'
       rigid_thick_in = get_feature(runner, wall, Constants.SizingInfoWallRigidInsThickness, 'double', false)
-      rigid_thick_in = 0 if rigid_thick_in.nil?
+      return nil if rigid_thick_in.nil?
 
       sip_ins_thick_in = get_feature(runner, wall, Constants.SizingInfoSIPWallInsThickness, 'double')
       return nil if sip_ins_thick_in.nil?
@@ -2938,7 +2935,7 @@ class HVACSizing
 
     elsif wall_type == 'CMU'
       cmu_furring_ins_r = get_feature(runner, wall, Constants.SizingInfoCMUWallFurringInsRvalue, 'double', false)
-      cmu_furring_ins_r = 0 if cmu_furring_ins_r.nil?
+      return nil if cmu_furring_ins_r.nil?
 
       # Manual J uses the same wall group for filled or hollow block
       if cmu_furring_ins_r < 2
