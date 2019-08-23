@@ -3060,8 +3060,8 @@ class OSModel
         ems_output_load.setUpdateFrequency("ZoneTimestep")
         ems_output_load.setEMSProgramOrSubroutineName(load_program)
         ems_output_load.setUnits("J")
-		
-		# add output variable to model
+
+        # add output variable to model
         outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
         outputVariable.setReportingFrequency('runperiod')
         outputVariable.setKeyValue('*')
@@ -3070,7 +3070,6 @@ class OSModel
       load_program_manager.setName("#{living_zone.name} load program calling manager")
       load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
       load_program_manager.addProgram(load_program)
-	  
     end
   end
 
