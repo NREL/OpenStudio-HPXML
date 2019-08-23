@@ -3523,6 +3523,17 @@ class OSModel
       attached_system_values = HPXML.get_cooling_system_values(cooling_system: clg_sys)
       next unless system_values[:distribution_system_idref] == attached_system_values[:distribution_system_idref]
 
+      # Check that it's an AirDistribution (not DSE)
+      is_air_distribution = false
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
+        hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
+        next unless hvac_distribution_values[:id] == system_values[:distribution_system_idref]
+        next unless hvac_distribution_values[:distribution_system_type] == "AirDistribution"
+
+        is_air_distribution = true
+      end
+      next unless is_air_distribution
+
       @hvac_map[attached_system_values[:id]].each do |hvac_object|
         next unless hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
 
