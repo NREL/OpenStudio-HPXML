@@ -169,6 +169,7 @@ def create_hpxmls
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only-no-eae.xml' => 'base-hvac-wall-furnace-propane-only.xml',
+    'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-infiltration-ach-natural.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -1632,6 +1633,15 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_system_fuel] = "propane"
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
+  elsif ['base-hvac-furnace-x3-dse.xml'].include? hpxml_file
+    heating_systems_values << heating_systems_values[0].dup
+    heating_systems_values << heating_systems_values[1].dup
+    heating_systems_values[1][:id] = "HeatingSystem2"
+    heating_systems_values[2][:id] = "HeatingSystem3"
+    for i in 0..2
+      heating_systems_values[i][:heating_capacity] /= 3.0
+      heating_systems_values[i][:fraction_heat_load_served] = 0.333
+    end
   elsif ['invalid_files/unattached-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = "foobar"
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
@@ -1926,7 +1936,8 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
     hvac_distributions_values << { :id => "HVACDistribution6",
                                    :distribution_system_type => "AirDistribution" }
-  elsif ['base-hvac-dse.xml'].include? hpxml_file
+  elsif ['base-hvac-dse.xml',
+         'base-hvac-furnace-x3-dse.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
     hvac_distributions_values[0][:annual_heating_dse] = 0.8
     hvac_distributions_values[0][:annual_cooling_dse] = 0.7
