@@ -287,7 +287,8 @@ class OSModel
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
 
-    @control_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
+    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+    @living_zone = @living_space.thermalZone.get
 
     success = add_cooling_system(runner, model, building)
     return false if not success
@@ -1890,8 +1891,7 @@ class OSModel
       end
     end
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
-    living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
-    success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
+    success = HotWaterAndAppliances.apply(model, runner, weather, @living_space,
                                           @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
                                           cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                           cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
@@ -1946,7 +1946,7 @@ class OSModel
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, load_frac,
-                                                 sequential_load_frac, @control_zone,
+                                                 sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
 
@@ -1957,7 +1957,7 @@ class OSModel
           success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, load_frac,
-                                                 sequential_load_frac, @control_zone,
+                                                 sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
 
@@ -1968,7 +1968,7 @@ class OSModel
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, load_frac,
-                                                 sequential_load_frac, @control_zone,
+                                                 sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
 
@@ -1985,7 +1985,7 @@ class OSModel
         airflow_rate = 350.0
         success = HVAC.apply_room_ac(model, runner, eer, shr,
                                      airflow_rate, cool_capacity_btuh, load_frac,
-                                     sequential_load_frac, @control_zone,
+                                     sequential_load_frac, @living_zone,
                                      @hvac_map, sys_id)
         return false if not success
 
@@ -2038,7 +2038,7 @@ class OSModel
           success = HVAC.apply_furnace(model, runner, fuel, afue,
                                        heat_capacity_btuh, fan_power,
                                        load_frac, sequential_load_frac,
-                                       attached_clg_system, @control_zone,
+                                       attached_clg_system, @living_zone,
                                        @hvac_map, sys_id)
           return false if not success
 
@@ -2050,7 +2050,7 @@ class OSModel
           success = HVAC.apply_unit_heater(model, runner, fuel,
                                            afue, heat_capacity_btuh, fan_power,
                                            airflow_rate, load_frac,
-                                           sequential_load_frac, @control_zone,
+                                           sequential_load_frac, @living_zone,
                                            @hvac_map, sys_id)
           return false if not success
 
@@ -2067,7 +2067,7 @@ class OSModel
           success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                       oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                                       heat_capacity_btuh, design_temp, load_frac,
-                                      sequential_load_frac, @control_zone,
+                                      sequential_load_frac, @living_zone,
                                       @hvac_map, sys_id)
           return false if not success
 
@@ -2076,7 +2076,7 @@ class OSModel
           efficiency = heating_system_values[:heating_efficiency_percent]
           success = HVAC.apply_electric_baseboard(model, runner, efficiency,
                                                   heat_capacity_btuh, load_frac,
-                                                  sequential_load_frac, @control_zone,
+                                                  sequential_load_frac, @living_zone,
                                                   @hvac_map, sys_id)
           return false if not success
 
@@ -2088,7 +2088,7 @@ class OSModel
           success = HVAC.apply_unit_heater(model, runner, fuel,
                                            efficiency, heat_capacity_btuh, fan_power,
                                            airflow_rate, load_frac,
-                                           sequential_load_frac, @control_zone,
+                                           sequential_load_frac, @living_zone,
                                            @hvac_map, sys_id)
           return false if not success
 
@@ -2162,7 +2162,7 @@ class OSModel
                                                    backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_zone, @hvac_map, sys_id)
+                                                   @living_zone, @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2175,7 +2175,7 @@ class OSModel
                                                    backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_zone, @hvac_map, sys_id)
+                                                   @living_zone, @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2188,7 +2188,7 @@ class OSModel
                                                    backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_zone, @hvac_map, sys_id)
+                                                   @living_zone, @hvac_map, sys_id)
           return false if not success
 
         else
@@ -2228,7 +2228,7 @@ class OSModel
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
-                                  @control_zone, @hvac_map, sys_id)
+                                  @living_zone, @hvac_map, sys_id)
         return false if not success
 
       elsif hp_type == "ground-to-air"
@@ -2264,7 +2264,7 @@ class OSModel
                                   backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
-                                  @control_zone, @hvac_map, sys_id)
+                                  @living_zone, @hvac_map, sys_id)
         return false if not success
 
       end
@@ -2275,7 +2275,7 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building)
     if @use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, 1, 1, @control_zone)
+      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, 1, 1, @living_zone)
       return false if not success
 
       return true
@@ -2302,7 +2302,7 @@ class OSModel
                                            @total_frac_remaining_heat_load_served,
                                            sequential_cool_load_frac,
                                            sequential_heat_load_frac,
-                                           @control_zone)
+                                           @living_zone)
       return false if not success
     end
 
@@ -2312,8 +2312,6 @@ class OSModel
   def self.add_setpoints(runner, model, building, weather, spaces)
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
-
-    living_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
 
     control_type = hvac_control_values[:control_type]
     heating_temp = hvac_control_values[:setpoint_temp_heating_season]
@@ -2338,7 +2336,7 @@ class OSModel
     htg_season_end_month = 12
     success = HVAC.apply_heating_setpoints(model, runner, weather, htg_weekday_setpoints, htg_weekend_setpoints,
                                            htg_use_auto_season, htg_season_start_month, htg_season_end_month,
-                                           living_zone)
+                                           @living_zone)
     return false if not success
 
     cooling_temp = hvac_control_values[:setpoint_temp_cooling_season]
@@ -2373,7 +2371,7 @@ class OSModel
     clg_season_end_month = 12
     success = HVAC.apply_cooling_setpoints(model, runner, weather, clg_weekday_setpoints, clg_weekend_setpoints,
                                            clg_use_auto_season, clg_season_start_month, clg_season_end_month,
-                                           living_zone)
+                                           @living_zone)
     return false if not success
 
     return true
@@ -2399,9 +2397,8 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
     success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
-                                      @cfa, living_space)
+                                      @cfa, @living_space)
     return false if not success
 
     return true
@@ -2491,10 +2488,9 @@ class OSModel
       tv_annual_kwh = 0
     end
 
-    living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
     success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
                                         misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh,
-                                        @cfa, living_space)
+                                        @cfa, @living_space)
     return false if not success
 
     return true
@@ -2524,10 +2520,9 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
     garage_space = get_space_of_type(spaces, Constants.SpaceTypeGarage)
     success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
-                                  living_space, garage_space)
+                                  @living_space, garage_space)
     return false if not success
 
     return true
