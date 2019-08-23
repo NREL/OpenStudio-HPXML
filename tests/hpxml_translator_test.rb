@@ -780,22 +780,22 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         mv_energy = results[k]
       end
-        if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
-          # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
-          fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
-          hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
-          fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
+      if XMLHelper.has_element(mv, "AttachedToHVACDistributionSystem")
+        # CFIS, check for positive mech vent energy that is less than the energy if it had run 24/7
+        fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
+        hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
+        fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
         if fan_kwhs > 0
           assert_operator(mv_energy, :>, 0)
           assert_operator(mv_energy, :<, fan_kwhs)
         else
           assert_equal(mv_energy, 0.0)
         end
-        else
-          # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
-          fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
-          hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
-          fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
+      else
+        # Supply, exhaust, ERV, HRV, etc., check for appropriate mech vent energy
+        fan_w = Float(XMLHelper.get_value(mv, "FanPower"))
+        hrs_per_day = Float(XMLHelper.get_value(mv, "HoursInOperation"))
+        fan_kwhs = UnitConversions.convert(fan_w * hrs_per_day * 365.0, 'Wh', 'GJ')
         assert_in_delta(mv_energy, fan_kwhs, 0.1)
       end
 
