@@ -2404,9 +2404,8 @@ class HVACSizing
       clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
 
       # Get type of heating/cooling system
-      hvac.CoolType = get_feature(runner, equip, Constants.SizingInfoHVACCoolType, 'string')
-      hvac.HeatType = get_feature(runner, equip, Constants.SizingInfoHVACHeatType, 'string')
-      return nil if hvac.CoolType.nil? or hvac.HeatType.nil?
+      hvac.CoolType = get_feature(runner, equip, Constants.SizingInfoHVACCoolType, 'string', false)
+      hvac.HeatType = get_feature(runner, equip, Constants.SizingInfoHVACHeatType, 'string', false)
 
       # Retrieve ducts if they exist
       if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
