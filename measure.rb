@@ -3053,7 +3053,8 @@ class OSModel
 
   def self.add_building_output_variables(runner, model, map_tsv_dir)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
-                        OutputVars.SpaceHeatingFuel,
+                        OutputVars.SpaceHeatingNaturalGas,
+                        OutputVars.SpaceHeatingOtherFuel,
                         OutputVars.SpaceHeatingLoad,
                         OutputVars.SpaceCoolingElectricity,
                         OutputVars.SpaceCoolingLoad]
@@ -3062,7 +3063,8 @@ class OSModel
                        OutputVars.WaterHeatingElectricityRecircPump,
                        OutputVars.WaterHeatingCombiBoilerHeatExchanger,
                        OutputVars.WaterHeatingCombiBoiler,
-                       OutputVars.WaterHeatingFuel,
+                       OutputVars.WaterHeatingNaturalGas,
+                       OutputVars.WaterHeatingOtherFuel,
                        OutputVars.WaterHeatingLoad]
 
     # Remove objects that are not referenced by output vars and are not
@@ -3536,6 +3538,17 @@ class OSModel
       attached_system_values = HPXML.get_cooling_system_values(cooling_system: clg_sys)
       next unless system_values[:distribution_system_idref] == attached_system_values[:distribution_system_idref]
 
+      # Check that it's an AirDistribution (not DSE)
+      is_air_distribution = false
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
+        hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
+        next unless hvac_distribution_values[:id] == system_values[:distribution_system_idref]
+        next unless hvac_distribution_values[:distribution_system_type] == "AirDistribution"
+
+        is_air_distribution = true
+      end
+      next unless is_air_distribution
+
       @hvac_map[attached_system_values[:id]].each do |hvac_object|
         next unless hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
 
@@ -3955,10 +3968,16 @@ class OutputVars
              'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'] }
   end
 
-  def self.SpaceHeatingFuel
-    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy', 'Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy', 'Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy', 'Boiler Propane Energy', 'Boiler FuelOil#1 Energy'] }
+  def self.SpaceHeatingNaturalGas
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy'] }
+  end
+
+  def self.SpaceHeatingOtherFuel
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy', 'Boiler FuelOil#1 Energy'] }
   end
 
   def self.SpaceHeatingLoad
@@ -4001,9 +4020,14 @@ class OutputVars
     return { 'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
   end
 
-  def self.WaterHeatingFuel
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy', 'Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'] }
+  def self.WaterHeatingNaturalGas
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy'] }
+  end
+
+  def self.WaterHeatingOtherFuel
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'] }
   end
 
   def self.WaterHeatingLoad
