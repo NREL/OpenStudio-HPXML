@@ -1446,7 +1446,7 @@ class OSModel
     return nil if not success
 
     # FIXME: Temporary code for sizing
-    surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
+    surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 10.0)
 
     return surface.adjacentFoundation.get
   end
