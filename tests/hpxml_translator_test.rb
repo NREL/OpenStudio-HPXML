@@ -49,7 +49,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     xmls = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/base*.xml"].sort.each do |xml|
-      next if File.basename(xml) != "base-dhw-tank-gas-10x-pipe.xml"
+      next if File.basename(xml) != "base-dhw-tank-heat-pump.xml"
       #next if File.basename(xml) != "base-dhw-tank-gas.xml"
         xmls << File.absolute_path(xml)
       end

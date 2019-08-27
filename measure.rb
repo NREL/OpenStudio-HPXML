@@ -1862,7 +1862,8 @@ class OSModel
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
                                                                               
         if ec_adj != 1
-          runner.registerWarning("Water heater energy consumption is being adjusted by postprocessing to account for distribution system waste.")
+          runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
+          
         end
         
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
@@ -1908,7 +1909,6 @@ class OSModel
           tank_vol = water_heating_system_values[:tank_volume]
           success = Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
                                                @nbeds, @dhw_map, sys_id, jacket_r)
-
           return false if not success
 
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
@@ -1939,12 +1939,8 @@ class OSModel
           fail "Unhandled water heater (#{wh_type})."
 
         end
-        
-        #TODO: HPWH? Should we use nominal COP as eta_c?
-        act_vol = Waterheater.calc_actual_tankvol(tank_vol, fuel, wh_type)
-        u, ua, wh_eta_c = Waterheater.calc_tank_UA(act_vol, fuel, ef, re, capacity_kbtuh, wh_type, cycling_derate, jacket_r)
-        
         dhw_loop_fracs[sys_id] = dhw_load_frac
+      
       end
     end
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
