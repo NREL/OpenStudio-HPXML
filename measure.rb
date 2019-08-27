@@ -3073,47 +3073,44 @@ class OSModel
   end
 
   def self.add_ems_cooling_heating_load_output(model)
-    control_zones = @control_slave_zones_hash.keys
-    control_zones.each do |living_zone|
-      # sensors
-      load_rate_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
-      load_rate_sensor.setName("#{living_zone.name} Sensible Load Rate")
-      load_rate_sensor.setKeyName(living_zone.name.to_s)
+    # sensors
+    load_rate_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
+    load_rate_sensor.setName("#{@living_zone.name} Sensible Load Rate")
+    load_rate_sensor.setKeyName(@living_zone.name.to_s)
 
-      # program
-      load_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      load_program.setName("#{living_zone.name} clg htg load output program")
-      load_program.addLine("Set #{living_zone.name}_htg_load = 0")
-      load_program.addLine("Set #{living_zone.name}_clg_load = 0")
-      load_program.addLine("If #{load_rate_sensor.name} > 0")
-      load_program.addLine("Set #{living_zone.name}_htg_load = #{load_rate_sensor.name} * 3600")
-      load_program.addLine("Else")
-      load_program.addLine("Set #{living_zone.name}_clg_load = - #{load_rate_sensor.name} * 3600")
-      load_program.addLine("EndIf")
+    # program
+    load_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    load_program.setName("#{@living_zone.name} clg htg load output program")
+    load_program.addLine("Set #{@living_zone.name}_htg_load = 0")
+    load_program.addLine("Set #{@living_zone.name}_clg_load = 0")
+    load_program.addLine("If #{load_rate_sensor.name} > 0")
+    load_program.addLine("  Set #{@living_zone.name}_htg_load = #{load_rate_sensor.name} * 3600")
+    load_program.addLine("Else")
+    load_program.addLine("  Set #{@living_zone.name}_clg_load = - #{load_rate_sensor.name} * 3600")
+    load_program.addLine("EndIf")
 
-      # ems output variables
-      ['clg', 'htg'].each do |load_type|
-        ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{living_zone.name}_#{load_type}_load")
-        if load_type == 'htg'
-          ems_output_load.setName(Constants.EMSOutputNameHeatingLoad)
-        else
-          ems_output_load.setName(Constants.EMSOutputNameCoolingLoad)
-        end
-        ems_output_load.setTypeOfDataInVariable("Summed")
-        ems_output_load.setUpdateFrequency("ZoneTimestep")
-        ems_output_load.setEMSProgramOrSubroutineName(load_program)
-        ems_output_load.setUnits("J")
-
-        # add output variable to model
-        outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
-        outputVariable.setReportingFrequency('runperiod')
-        outputVariable.setKeyValue('*')
+    # ems output variables
+    ['clg', 'htg'].each do |load_type|
+      ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{@living_zone.name}_#{load_type}_load")
+      if load_type == 'htg'
+        ems_output_load.setName(Constants.EMSOutputNameHeatingLoad)
+      else
+        ems_output_load.setName(Constants.EMSOutputNameCoolingLoad)
       end
-      load_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      load_program_manager.setName("#{living_zone.name} load program calling manager")
-      load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
-      load_program_manager.addProgram(load_program)
+      ems_output_load.setTypeOfDataInVariable("Summed")
+      ems_output_load.setUpdateFrequency("ZoneTimestep")
+      ems_output_load.setEMSProgramOrSubroutineName(load_program)
+      ems_output_load.setUnits("J")
+
+      # add output variable to model
+      outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
+      outputVariable.setReportingFrequency('runperiod')
+      outputVariable.setKeyValue('*')
     end
+    load_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    load_program_manager.setName("#{@living_zone.name} load program calling manager")
+    load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+    load_program_manager.addProgram(load_program)
   end
 
   def self.write_mapping(map, map_tsv_path)
