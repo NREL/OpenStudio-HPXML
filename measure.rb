@@ -3146,21 +3146,54 @@ class OSModel
       load_program.addLine("Set #{living_zone.name}_clg_load = - #{load_rate_sensor.name} * 3600")
       load_program.addLine("EndIf")
 
+      # sensors for unmet setpoint degree hours
+      zone_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
+      zone_temp_sensor.setName("#{living_zone.name} Zone Air Temperature")
+      zone_temp_sensor.setKeyName(living_zone.name.to_s)
+      clg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Thermostat Cooling Setpoint Temperature")
+      clg_stp_sensor.setName("#{living_zone.name} Zone Clg Stp Temp")
+      clg_stp_sensor.setKeyName(living_zone.name.to_s)
+      htg_stp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Thermostat Heating Setpoint Temperature")
+      htg_stp_sensor.setName("#{living_zone.name} Zone Hlg Stp Temp")
+      htg_stp_sensor.setKeyName(living_zone.name.to_s)
+
+      # program for unmet setpoint degree hours
+      dh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+      dh_program.setName("#{living_zone.name} unmet degree hour program")
+      dh_program.addLine("Set #{living_zone.name}_clg_unmet_dh = 0.0")
+      dh_program.addLine("Set #{living_zone.name}_htg_unmet_dh = 0.0")
+      dh_program.addLine("If #{zone_temp_sensor.name} > #{clg_stp_sensor.name}")
+      dh_program.addLine("Set #{living_zone.name}_clg_unmet_dh = (#{zone_temp_sensor.name} - #{clg_stp_sensor.name}) * ZoneTimestep")
+      dh_program.addLine("Elseif #{zone_temp_sensor.name} < #{htg_stp_sensor.name}")
+      dh_program.addLine("Set #{living_zone.name}_htg_unmet_dh = (#{htg_stp_sensor.name} - #{zone_temp_sensor.name}) * ZoneTimestep")
+      dh_program.addLine("EndIf")
+
       # ems output variables
       ['clg', 'htg'].each do |load_type|
         ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{living_zone.name}_#{load_type}_load")
+        ems_output_degree_hour = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{living_zone.name}_#{load_type}_unmet_dh")
         if load_type == 'htg'
           ems_output_load.setName(Constants.EMSOutputNameHeatingLoad)
+          ems_output_degree_hour.setName(Constants.EMSOutputNameHeatingUnmetDegreeHour)
         else
           ems_output_load.setName(Constants.EMSOutputNameCoolingLoad)
+          ems_output_degree_hour.setName(Constants.EMSOutputNameCoolingUnmetDegreeHour)
         end
         ems_output_load.setTypeOfDataInVariable("Summed")
         ems_output_load.setUpdateFrequency("ZoneTimestep")
         ems_output_load.setEMSProgramOrSubroutineName(load_program)
         ems_output_load.setUnits("J")
 
+        ems_output_degree_hour.setTypeOfDataInVariable("Summed")
+        ems_output_degree_hour.setUpdateFrequency("ZoneTimestep")
+        ems_output_degree_hour.setEMSProgramOrSubroutineName(dh_program)
+
         # add output variable to model
         outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
+        outputVariable.setReportingFrequency('runperiod')
+        outputVariable.setKeyValue('*')
+
+        outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_degree_hour.name.to_s, model)
         outputVariable.setReportingFrequency('runperiod')
         outputVariable.setKeyValue('*')
       end
@@ -3168,6 +3201,11 @@ class OSModel
       load_program_manager.setName("#{living_zone.name} load program calling manager")
       load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
       load_program_manager.addProgram(load_program)
+
+      dh_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+      dh_program_manager.setName("#{living_zone.name} unmet degree hour program calling manager")
+      dh_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+      dh_program_manager.addProgram(dh_program)
     end
   end
 

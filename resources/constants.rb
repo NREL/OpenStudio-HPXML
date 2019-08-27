@@ -778,4 +778,12 @@ class Constants
   def self.EMSOutputNameCoolingLoad
     return 'living zone clg load'
   end
+
+  def self.EMSOutputNameHeatingUnmetDegreeHour
+    return 'living zone htg unmet degree hour'
+  end
+
+  def self.EMSOutputNameCoolingUnmetDegreeHour
+    return 'living zone clg unmet degree hour'
+  end
 end
