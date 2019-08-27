@@ -367,10 +367,6 @@ class HVAC
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
 
-    if heat_pump_capacity == Constants.SizingAutoMaxLoad
-      runner.registerWarning("Using #{Constants.SizingAutoMaxLoad} is not recommended for single-speed heat pumps. When sized larger than the cooling load, this can lead to humidity concerns due to reduced dehumidification performance by the heat pump.")
-    end
-
     num_speeds = 1
     fan_power_rated = get_fan_power_rated(seer)
     capacity_ratios = HVAC.one_speed_capacity_ratios
@@ -406,7 +402,7 @@ class HVAC
     htg_coil = OpenStudio::Model::CoilHeatingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, htg_coil_stage_data[0].heatingCapacityFunctionofTemperatureCurve, htg_coil_stage_data[0].heatingCapacityFunctionofFlowFractionCurve, htg_coil_stage_data[0].energyInputRatioFunctionofTemperatureCurve, htg_coil_stage_data[0].energyInputRatioFunctionofFlowFractionCurve, htg_coil_stage_data[0].partLoadFractionCorrelationCurve)
     htg_coil_stage_data[0].remove
     htg_coil.setName(obj_name + " htg coil")
-    if heat_pump_capacity != Constants.SizingAuto and heat_pump_capacity != Constants.SizingAutoMaxLoad
+    if heat_pump_capacity != Constants.SizingAuto
       htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     htg_coil.setRatedCOP(1.0 / heating_eirs[0])
@@ -435,7 +431,7 @@ class HVAC
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, clg_coil_stage_data[0].totalCoolingCapacityFunctionofTemperatureCurve, clg_coil_stage_data[0].totalCoolingCapacityFunctionofFlowFractionCurve, clg_coil_stage_data[0].energyInputRatioFunctionofTemperatureCurve, clg_coil_stage_data[0].energyInputRatioFunctionofFlowFractionCurve, clg_coil_stage_data[0].partLoadFractionCorrelationCurve)
     clg_coil_stage_data[0].remove
     clg_coil.setName(obj_name + " clg coil")
-    if heat_pump_capacity != Constants.SizingAuto and heat_pump_capacity != Constants.SizingAutoMaxLoad
+    if heat_pump_capacity != Constants.SizingAuto
       clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     clg_coil.setRatedSensibleHeatRatio(shrs_rated_gross[0])
@@ -512,7 +508,6 @@ class HVAC
     control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
 
     # Store info for HVAC Sizing measure
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonHeating, cfms_ton_rated_heating.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated_cooling.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
@@ -683,7 +678,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated_cooling.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
 
@@ -853,7 +847,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACRatedCFMperTonCooling, cfms_ton_rated_cooling.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameAirSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameAirSourceHeatPump)
 
@@ -1083,7 +1076,7 @@ class HVAC
 
       program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       program.setName(obj_name + " pan heater program")
-      if heat_pump_capacity != Constants.SizingAuto and heat_pump_capacity != Constants.SizingAutoMaxLoad
+      if heat_pump_capacity != Constants.SizingAuto
         num_outdoor_units = (UnitConversions.convert(heat_pump_capacity, "Btu/hr", "ton") / 1.5).ceil # Assume 1.5 tons max per outdoor unit
       else
         num_outdoor_units = 2
@@ -1122,7 +1115,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, cfms_heating_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolingCFMs, cfms_cooling_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCapacityOffset, heating_capacity_offset)
-    air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHPSizedForMaxLoad, (heat_pump_capacity == Constants.SizingAutoMaxLoad))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACSHR, shrs_rated_4.join(","))
@@ -3789,7 +3781,7 @@ class HVAC
                                                                            cool_eir_fff_curve,
                                                                            cool_plf_fplr_curve,
                                                                            const_biquadratic)
-      if outputCapacity != Constants.SizingAuto and outputCapacity != Constants.SizingAutoMaxLoad
+      if outputCapacity != Constants.SizingAuto
         stage_data.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(outputCapacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       stage_data.setGrossRatedSensibleHeatRatio(shrs_rated_gross[speed])
@@ -3825,7 +3817,7 @@ class HVAC
                                                                            hp_heat_eir_fff_curve,
                                                                            hp_heat_plf_fplr_curve,
                                                                            const_biquadratic)
-      if outputCapacity != Constants.SizingAuto and outputCapacity != Constants.SizingAutoMaxLoad
+      if outputCapacity != Constants.SizingAuto
         stage_data.setGrossRatedHeatingCapacity(UnitConversions.convert(outputCapacity, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       stage_data.setGrossRatedHeatingCOP(1.0 / heating_eirs[speed])
