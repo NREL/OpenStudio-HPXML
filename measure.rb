@@ -249,6 +249,7 @@ class OSModel
       @gfa += slab_values[:area]
     end
     @cvolume = construction_values[:conditioned_building_volume]
+    @infilvolume = get_infiltration_volume(building)
     @ncfl = construction_values[:number_of_conditioned_floors]
     @ncfl_ag = construction_values[:number_of_conditioned_floors_above_grade]
     @nbeds = construction_values[:number_of_bedrooms]
@@ -923,10 +924,18 @@ class OSModel
         drywall_thick_in = 0.0
       end
       film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surface])).rvalue
-      mat_roofing = Material.RoofingAsphaltShinglesDark
       solar_abs = roof_values[:solar_absorptance]
       emitt = roof_values[:emittance]
       has_radiant_barrier = roof_values[:radiant_barrier]
+      if solar_abs >= 0.875
+        mat_roofing = Material.RoofingAsphaltShinglesDark
+      elsif solar_abs >= 0.75
+        mat_roofing = Material.RoofingAsphaltShinglesMed
+      elsif solar_abs >= 0.6
+        mat_roofing = Material.RoofingAsphaltShinglesLight
+      else
+        mat_roofing = Material.RoofingAsphaltShinglesWhiteCool
+      end
 
       assembly_r = roof_values[:insulation_assembly_r_value]
       constr_sets = [
@@ -1437,7 +1446,7 @@ class OSModel
     return nil if not success
 
     # FIXME: Temporary code for sizing
-    surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 5.0)
+    surface.additionalProperties.setFeature(Constants.SizingInfoSlabRvalue, 10.0)
 
     return surface.adjacentFoundation.get
   end
@@ -2668,15 +2677,6 @@ class OSModel
 
   def self.add_airflow(runner, model, building, spaces)
     # Infiltration
-    infilvolume = nil
-    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
-      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
-    end
-    if infilvolume.nil?
-      infilvolume = @cvolume
-    end
-
     infil_ach50 = nil
     infil_const_ach = nil
     building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
@@ -2684,7 +2684,7 @@ class OSModel
       if air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "ACH"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
       elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
-        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / infilvolume # Convert CFM50 to ACH50
+        infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / @infilvolume # Convert CFM50 to ACH50
       else
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
       end
@@ -2886,51 +2886,12 @@ class OSModel
 
     # Ducts
     duct_systems = {}
-    side_map = { 'supply' => Constants.DuctSideSupply,
-                 'return' => Constants.DuctSideReturn }
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      air_ducts = []
-
-      # Duct leakage
-      leakage_to_outside_cfm25 = { Constants.DuctSideSupply => 0.0,
-                                   Constants.DuctSideReturn => 0.0 }
-      air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
-        duct_leakage_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
-        next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
-
-        duct_side = side_map[duct_leakage_values[:duct_type]]
-        leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
-      end
-
-      # Duct location, Rvalue, Area
-      total_duct_area = { Constants.DuctSideSupply => 0.0,
-                          Constants.DuctSideReturn => 0.0 }
-      air_distribution.elements.each("Ducts") do |ducts|
-        ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
-
-        # Calculate total duct area in unconditioned spaces
-        duct_side = side_map[ducts_values[:duct_type]]
-        total_duct_area[duct_side] += ducts_values[:duct_surface_area]
-      end
-
-      air_distribution.elements.each("Ducts") do |ducts|
-        ducts_values = HPXML.get_ducts_values(ducts: ducts)
-        next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
-
-        duct_side = side_map[ducts_values[:duct_type]]
-        duct_area = ducts_values[:duct_surface_area]
-        duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
-        # Apportion leakage to individual ducts by surface area
-        duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
-                            duct_area / total_duct_area[duct_side])
-
-        air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
-      end
+      air_ducts = self.create_ducts(air_distribution, model, spaces)
 
       # Connect AirLoopHVACs to ducts
       dist_id = hvac_distribution_values[:id]
@@ -2946,9 +2907,15 @@ class OSModel
 
           @hvac_map[sys_id].each do |loop|
             next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-            next if duct_systems[air_ducts] == loop # already assigned
 
-            duct_systems[air_ducts] = loop
+            if duct_systems[air_ducts].nil?
+              duct_systems[air_ducts] = loop
+            elsif duct_systems[air_ducts] != loop
+              # Multiple air loops associated with this duct system, treat
+              # as separate duct systems.
+              air_ducts2 = self.create_ducts(air_distribution, model, spaces)
+              duct_systems[air_ducts2] = loop
+            end
           end
         end
       end
@@ -2964,15 +2931,61 @@ class OSModel
     end
 
     success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
-                            @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
+                            @cfa, @infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
                             @min_neighbor_distance)
     return false if not success
 
     return true
   end
 
+  def self.create_ducts(air_distribution, model, spaces)
+    air_ducts = []
+
+    side_map = { 'supply' => Constants.DuctSideSupply,
+                 'return' => Constants.DuctSideReturn }
+
+    # Duct leakage
+    leakage_to_outside_cfm25 = { Constants.DuctSideSupply => 0.0,
+                                 Constants.DuctSideReturn => 0.0 }
+    air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
+      duct_leakage_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
+      next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
+
+      duct_side = side_map[duct_leakage_values[:duct_type]]
+      leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
+    end
+
+    # Duct location, Rvalue, Area
+    total_duct_area = { Constants.DuctSideSupply => 0.0,
+                        Constants.DuctSideReturn => 0.0 }
+    air_distribution.elements.each("Ducts") do |ducts|
+      ducts_values = HPXML.get_ducts_values(ducts: ducts)
+      next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
+
+      # Calculate total duct area in unconditioned spaces
+      duct_side = side_map[ducts_values[:duct_type]]
+      total_duct_area[duct_side] += ducts_values[:duct_surface_area]
+    end
+
+    air_distribution.elements.each("Ducts") do |ducts|
+      ducts_values = HPXML.get_ducts_values(ducts: ducts)
+      next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
+
+      duct_side = side_map[ducts_values[:duct_type]]
+      duct_area = ducts_values[:duct_surface_area]
+      duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
+      # Apportion leakage to individual ducts by surface area
+      duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
+                          duct_area / total_duct_area[duct_side])
+
+      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+    end
+
+    return air_ducts
+  end
+
   def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @nbeds, @min_neighbor_distance, false)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, false)
     return false if not success
 
     return true
@@ -3724,6 +3737,18 @@ class OSModel
     if not surface.space.is_initialized
       fail "Attached wall '#{wall_idref}' not found for #{subsurface_type} '#{subsurface_id}'."
     end
+  end
+
+  def self.get_infiltration_volume(building)
+    infilvolume = nil
+    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
+      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
+      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
+    end
+    if infilvolume.nil?
+      infilvolume = @cvolume
+    end
+    return infilvolume
   end
 
   def self.get_min_neighbor_distance(building)

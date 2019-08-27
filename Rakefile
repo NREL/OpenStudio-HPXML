@@ -72,6 +72,7 @@ def create_hpxmls
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
+    'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
@@ -1937,7 +1938,8 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
     hvac_distributions_values << { :id => "HVACDistribution6",
                                    :distribution_system_type => "AirDistribution" }
   elsif ['base-hvac-dse.xml',
-         'base-hvac-furnace-x3-dse.xml'].include? hpxml_file
+         'base-hvac-furnace-x3-dse.xml',
+         'base-dhw-indirect-dse.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
     hvac_distributions_values[0][:annual_heating_dse] = 0.8
     hvac_distributions_values[0][:annual_cooling_dse] = 0.7
