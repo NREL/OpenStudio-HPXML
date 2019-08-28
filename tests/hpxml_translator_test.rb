@@ -761,7 +761,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Water Heater
     wh = bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem"]
-    if not wh.nil? and not wh.elements["WaterHeaterType"].text.include? "boiler" # FIXME: Currently excluding combi boilers
+    if not wh.nil?
       # EC_adj, compare calculated value to value obtained from simulation results
       calculated_ec_adj = nil
       runner.result.stepInfo.each do |s|
@@ -770,6 +770,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         calculated_ec_adj = Float(s.gsub("EC_adj=", ""))
       end
 
+      # Obtain water heating energy consumption and adjusted water heating energy consumption
       water_heater_energy = 0.0
       water_heater_adj_energy = 0.0
       results.keys.each do |k|
@@ -781,6 +782,20 @@ class HPXMLTranslatorTest < MiniTest::Test
           water_heater_energy += results[k]
         end
       end
+
+      # Add any combi water heating energy use
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoilerHeatExchanger.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoiler.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get
+      if combi_htg_load > 0 and combi_hx_load > 0
+        results.keys.each do |k|
+          next unless k[1] == "Heating" and k[3] == "GJ"
+
+          water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
+        end
+      end
+
       simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
       assert_in_delta(calculated_ec_adj, simulated_ec_adj, 0.01)
     end
