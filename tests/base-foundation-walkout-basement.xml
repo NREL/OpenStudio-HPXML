@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T11:46:43-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-08-20T08:43:52-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -120,16 +120,50 @@
         </Walls>
         <FoundationWalls>
           <FoundationWall>
-            <SystemIdentifier id='FoundationWall'/>
+            <SystemIdentifier id='FoundationWall1'/>
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
-            <Area>1200.0</Area>
+            <Area>480.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
-              <SystemIdentifier id='FoundationWallInsulation'/>
+              <SystemIdentifier id='FoundationWall1Insulation'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall2'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>4.0</Height>
+            <Area>120.0</Area>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>3.0</DepthBelowGrade>
+            <DistanceToBottomOfInsulation>4.0</DistanceToBottomOfInsulation>
+            <Insulation>
+              <SystemIdentifier id='FoundationWall2Insulation'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall3'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>2.0</Height>
+            <Area>60.0</Area>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>1.0</DepthBelowGrade>
+            <DistanceToBottomOfInsulation>2.0</DistanceToBottomOfInsulation>
+            <Insulation>
+              <SystemIdentifier id='FoundationWall3Insulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
@@ -286,32 +320,19 @@
                 <Ducts>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>living space</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>150.0</DuctSurfaceArea>
                 </Ducts>
                 <Ducts>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>living space</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='MechanicalVentilation'/>
-              <FanType>central fan integrated supply</FanType>
-              <TestedFlowRate>330.0</TestedFlowRate>
-              <HoursInOperation>8.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>300.0</FanPower>
-              <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
