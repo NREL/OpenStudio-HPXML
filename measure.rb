@@ -1836,7 +1836,7 @@ class OSModel
     end
 
     # Water Heater
-    related_hvac_list = [] # list of heating systems refered in water heating system "RelatedHVACSystem" element
+    related_hvac_list = [] # list of heating systems referred in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
@@ -1851,7 +1851,7 @@ class OSModel
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
           uef = water_heating_system_values[:uniform_energy_factor]
-          # allow systems not requiring ef and not specifying fuel type,  eg.indirect water heater
+          # allow systems not requiring EF and not specifying fuel type, e.g., indirect water heater
           if not uef.nil?
             ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
           end
@@ -1861,9 +1861,9 @@ class OSModel
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
+        runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
         if ec_adj != 1
           runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
-
         end
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]

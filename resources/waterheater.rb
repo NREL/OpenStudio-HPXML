@@ -782,7 +782,7 @@ class Waterheater
       tank = heater
     end
 
-    # Add an other equipment object for water heating that will get actuated, has a small inital load but gets overwritten by EMS
+    # Add an other equipment object for water heating that will get actuated, has a small initial load but gets overwritten by EMS
     ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameWaterHeaterAdjustment(heater.name), space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
 
     # EMS for calculating the EC_adj
