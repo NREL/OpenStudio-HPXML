@@ -297,11 +297,27 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Obtain HVAC capacities
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%User-Specified%Capacity' AND Description NOT LIKE '%Supplemental%' AND Units='W'"
-    results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+    htg_cap_w = 0
+    for spd in [4, 2]
+      # Get capacity of highest speed for multispeed coil
+      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Heating:DX:MultiSpeed' AND Description LIKE '%User-Specified Speed #{spd}%Capacity' AND Units='W'"
+      htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
+      break if htg_cap_w > 0
+    end
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE ((CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND CompType!='Coil:Heating:DX:MultiSpeed') AND Description LIKE '%User-Specified%Capacity' AND Units='W'"
+    htg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
+    results[["Capacity", "Heating", "General", "W"]] = htg_cap_w
 
-    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
-    results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+    clg_cap_w = 0
+    for spd in [4, 2]
+      # Get capacity of highest speed for multispeed coil
+      query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType='Coil:Cooling:DX:MultiSpeed' AND Description LIKE 'Speed #{spd} User-Specified%Total%Capacity' AND Units='W'"
+      clg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
+      break if clg_cap_w > 0
+    end
+    query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND CompType!='Coil:Cooling:DX:MultiSpeed' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
+    clg_cap_w += sqlFile.execAndReturnFirstDouble(query).get
+    results[["Capacity", "Cooling", "General", "W"]] = clg_cap_w
 
     sqlFile.close
 
@@ -703,12 +719,21 @@ class HPXMLTranslatorTest < MiniTest::Test
       clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      clg_cap_mult = 1.0
+      htg_cap_mult = 1.0
+      htg_cap_delta = 0.0
       if hp_type == "mini-split"
-        hp_cap *= 1.20 # TODO: Generalize this
+        # TODO: Generalize this
+        clg_cap_mult = 1.20
+        htg_cap_mult = 1.20
+        htg_cap_delta = 2300.0
+      elsif hp_type == "air-to-air" and XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 21 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 9.5
+        # TODO: Generalize this
+        htg_cap_mult = 1.17
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
-      clg_cap += hp_cap if hp_cap > 0
-      htg_cap += hp_cap if hp_cap > 0
+      clg_cap += (hp_cap * clg_cap_mult) if hp_cap > 0
+      htg_cap += ((hp_cap + htg_cap_delta) * htg_cap_mult) if hp_cap > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
     end
     if not clg_cap.nil?
