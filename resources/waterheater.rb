@@ -698,13 +698,16 @@ class Waterheater
     return hx
   end
 
-  def self.calc_water_heater_capacity(fuel, num_beds, num_baths = nil)
+  def self.calc_water_heater_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
     # Calculate the capacity of the water heater based on the fuel type and number of bedrooms and bathrooms in a home
     # returns the capacity in kBtu/hr
 
     if num_baths.nil?
       num_baths = get_default_num_bathrooms(num_beds)
     end
+
+    # Adjust the heating capacity if there are multiple water heaters in the home
+    num_baths /= num_water_heaters.to_f
 
     if fuel != Constants.FuelTypeElectric
       if num_beds <= 3
@@ -739,7 +742,7 @@ class Waterheater
       else
         input_power = UnitConversions.convert(5.5, "kW", "kBtu/hr")
       end
-      return input_power
+      return input_power # kBtu/hr
     end
   end
 

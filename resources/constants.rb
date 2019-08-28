@@ -495,19 +495,7 @@ class Constants
     return 'autosize'
   end
 
-  def self.SizingAutoMaxLoad
-    return 'autosize for max load'
-  end
-
   def self.SizingInfoCMUWallFurringInsRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACDSECool
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACDSEHeat
     return __method__.to_s
   end
 
@@ -584,10 +572,6 @@ class Constants
   end
 
   def self.SizingInfoGSHPUTubeSpacingType
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHPSizedForMaxLoad
     return __method__.to_s
   end
 
@@ -695,6 +679,10 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoZoneInfiltrationACH
+    return __method__.to_s
+  end
+
   def self.SizingInfoZoneInfiltrationCFM
     return __method__.to_s
   end
@@ -785,5 +773,13 @@ class Constants
 
   def self.WaterHeaterTypeHeatPump
     return 'heatpump'
+  end
+
+  def self.EMSOutputNameHeatingLoad
+    return 'living zone htg load'
+  end
+
+  def self.EMSOutputNameCoolingLoad
+    return 'living zone clg load'
   end
 end
