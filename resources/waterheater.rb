@@ -34,7 +34,7 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
+    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
 
     return true
   end
@@ -67,7 +67,7 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
+    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
     return true
   end
@@ -564,7 +564,7 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(tank)
 
-    add_ec_adj(model, runner, hpwh, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
+    dhw_map[sys_id] << add_ec_adj(model, runner, hpwh, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
 
     return true
   end
@@ -685,7 +685,7 @@ class Waterheater
     program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
     program_calling_manager.addProgram(indirect_ctrl_program)
 
-    add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
+    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
 
     return true
   end
@@ -857,6 +857,21 @@ class Waterheater
     program_calling_manager.setName("#{heater.name} EC_adj ProgramManager")
     program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
     program_calling_manager.addProgram(ec_adj_program)
+
+    # Sensor for EMS reporting
+    ec_adj_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{ep_consumption_name.gsub('Rate', 'Energy').gsub('Power', 'Energy')}")
+    ec_adj_object_sensor.setName("#{ec_adj_object.name} energy consumption")
+    ec_adj_object_sensor.setKeyName(ec_adj_object.name.to_s)
+
+    # EMS Output Variable for reporting
+    ec_adj_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, ec_adj_object_sensor)
+    ec_adj_output_var.setName(Constants.ObjectNameWaterHeaterAdjustment(heater.name))
+    ec_adj_output_var.setTypeOfDataInVariable("Summed")
+    ec_adj_output_var.setUpdateFrequency("SystemTimestep")
+    ec_adj_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
+    ec_adj_output_var.setUnits("J")
+
+    return ec_adj_output_var
   end
 
   def self.get_default_hot_water_temperature(eri_version)
