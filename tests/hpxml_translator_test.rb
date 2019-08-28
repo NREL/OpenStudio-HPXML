@@ -814,7 +814,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
-      assert_in_delta(calculated_ec_adj, simulated_ec_adj, 0.01)
+      assert_in_delta(calculated_ec_adj, simulated_ec_adj, 0.02)
     end
 
     # Mechanical Ventilation
