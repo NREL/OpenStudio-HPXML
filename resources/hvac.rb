@@ -431,7 +431,7 @@ class HVAC
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
       fan.setMotorEfficiency(1)
       fan.setMotorInAirstreamFraction(0)
-      hvac_map[sys_id] += self.disaggregate_fan(model, fan, nil, evap_cooler)
+      hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [evap_cooler])
 
       air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
       air_loop.setName(obj_name + " airloop")
@@ -456,6 +456,7 @@ class HVAC
       unitary_system.setSupplyAirFlowRateMethodWhenNoCoolingorHeatingisRequired('SupplyAirFlowRate')
       unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
       unitary_system.addToNode(air_loop.supplyInletNode)
+      unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
 
       # Outdoor air intake system
       oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -2249,11 +2250,11 @@ class HVAC
 
     clg_object_sensors = []
     clg_objects.each do |clg_object|
-	  if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+      if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         var = "Evaporative Cooler Electric Energy"
       else
         var = "Cooling Coil Electric Energy"
-      end
+        end
       clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       clg_object_sensor.setName("#{clg_object.name} s")
       clg_object_sensor.setKeyName(clg_object.name.to_s)
