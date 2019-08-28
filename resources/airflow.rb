@@ -126,11 +126,9 @@ class Airflow
     if not building.living.ELA.nil?
       building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationELA, building.living.ELA.to_f)
       building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.living.inf_flow.to_f)
-      building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationACH, building.living.ACH.to_f)
     else
       building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationELA, 0.0)
       building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, 0.0)
-      building.living.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationACH, 0.0)
     end
     unless building.conditioned_basement.nil?
       building.conditioned_basement.zone.additionalProperties.setFeature(Constants.SizingInfoZoneInfiltrationCFM, building.conditioned_basement.inf_flow)

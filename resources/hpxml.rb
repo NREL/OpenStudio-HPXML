@@ -626,7 +626,7 @@ class HPXML
                     perimeter_insulation_depth:,
                     under_slab_insulation_width: nil,
                     under_slab_insulation_spans_entire_slab: nil,
-                    depth_below_grade: nil,
+                    depth_below_grade:,
                     carpet_fraction:,
                     carpet_r_value:,
                     perimeter_insulation_id: nil,
@@ -645,7 +645,7 @@ class HPXML
     XMLHelper.add_element(slab, "PerimeterInsulationDepth", Float(perimeter_insulation_depth))
     XMLHelper.add_element(slab, "UnderSlabInsulationWidth", Float(under_slab_insulation_width)) unless under_slab_insulation_width.nil?
     XMLHelper.add_element(slab, "UnderSlabInsulationSpansEntireSlab", Boolean(under_slab_insulation_spans_entire_slab)) unless under_slab_insulation_spans_entire_slab.nil?
-    XMLHelper.add_element(slab, "DepthBelowGrade", Float(depth_below_grade)) unless depth_below_grade.nil?
+    XMLHelper.add_element(slab, "DepthBelowGrade", Float(depth_below_grade))
     add_layer_insulation(parent: slab,
                          element_name: "PerimeterInsulation",
                          id: perimeter_insulation_id,

@@ -71,7 +71,6 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -151,7 +150,6 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "DoubleWoodStud")
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -231,7 +229,6 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "CMU")
       surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, Float(furring_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -292,7 +289,6 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "ICF")
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -368,8 +364,6 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SIP")
       surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsThickness, Float(sheathing_thick_in))
     end
 
     return true
@@ -441,7 +435,6 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SteelStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -520,7 +513,6 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "Generic")
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -589,7 +581,6 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true

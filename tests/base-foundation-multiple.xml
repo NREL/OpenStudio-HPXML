@@ -224,6 +224,7 @@
             <ExposedPerimeter>75.0</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
             <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
@@ -251,6 +252,7 @@
             <ExposedPerimeter>75.0</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
             <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
+            <DepthBelowGrade>3.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabUnderCrawlspacePerimeterInsulation'/>
               <Layer>
