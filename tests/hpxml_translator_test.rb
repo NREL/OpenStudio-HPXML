@@ -688,8 +688,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     # HVAC Capacities
     htg_cap = nil
     clg_cap = nil
-    has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
-    has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
       htg_cap = 0 if htg_cap.nil?
       htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
@@ -712,12 +710,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       clg_cap += hp_cap if hp_cap > 0
       htg_cap += hp_cap if hp_cap > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
-      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 8.5
-        has_multispeed_dx_heating_coil = true
-      end
-      if hp_type == "ground-to-air"
-        has_gshp_coil = true
-      end
     end
     if not clg_cap.nil?
       sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
@@ -727,7 +719,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_operator(sql_value, :>, 1)
       end
     end
-    if not htg_cap.nil? and not (has_multispeed_dx_heating_coil or has_gshp_coil)
+    if not htg_cap.nil?
       sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
       if htg_cap > 0
         assert_in_epsilon(htg_cap, sql_value, 0.01)
