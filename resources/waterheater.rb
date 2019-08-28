@@ -34,6 +34,8 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
+    add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
+
     return true
   end
 
@@ -64,6 +66,8 @@ class Waterheater
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
+
+    add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
     return true
   end
@@ -560,12 +564,13 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(tank)
 
-    self.add_ec_adj(model, runner, tank, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
+    add_ec_adj(model, runner, hpwh, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
 
     return true
   end
 
-  def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, boiler_plant_loop, dhw_map, sys_id, wh_type, jacket_r)
+  def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj,
+                          nbeds, boiler, boiler_plant_loop, boiler_fuel_type, dhw_map, sys_id, wh_type, jacket_r)
     obj_name_indirect = Constants.ObjectNameWaterHeater
 
     if wh_type == "space-heating boiler with storage tank"
@@ -587,9 +592,9 @@ class Waterheater
     # Create an initial simple tank model by calling create_new_heater
     assumed_ef = get_indirect_assumed_ef_for_tank_losses()
     assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
-    new_tank = create_new_heater(obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
-    new_tank.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
-    dhw_map[sys_id] << new_tank
+    new_heater = create_new_heater(obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+    new_heater.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
+    dhw_map[sys_id] << new_heater
 
     # Create alternate setpoint schedule for source side flow control
     alternate_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
@@ -600,12 +605,12 @@ class Waterheater
     hx_temp = 54 # 54C is more reasonable for highest desired hot water temperature, with 2C deadband, it would be expected to be controlled between 52C - 54C
     alternate_stp_sch.setValue(alt_temp)
     hx_stp_sch.setValue(hx_temp)
-    new_tank.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
-    new_tank.setIndirectAlternateSetpointTemperatureSchedule (alternate_stp_sch)
+    new_heater.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
+    new_heater.setIndirectAlternateSetpointTemperatureSchedule (alternate_stp_sch)
 
     # change loop equipment operation scheme to heating load
     scheme_dhw = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
-    scheme_dhw.addEquipment(1000000000, new_tank)
+    scheme_dhw.addEquipment(1000000000, new_heater)
     loop.setPrimaryPlantEquipmentOperationScheme(scheme_dhw)
     dhw_map[sys_id] << loop
 
@@ -632,12 +637,12 @@ class Waterheater
     new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
     new_source_manager.addToNode(source_loop.supplyOutletNode)
 
-    source_loop.addDemandBranchForComponent(new_tank)
+    source_loop.addDemandBranchForComponent(new_heater)
 
     # Add heat exchanger to boiler loop
     boiler_plant_loop.addDemandBranchForComponent(indirect_hx)
 
-    loop.addSupplyBranchForComponent(new_tank)
+    loop.addSupplyBranchForComponent(new_heater)
 
     # EMS for offsetting reaction lag and recover tank temperature
     # Sensors
@@ -679,6 +684,8 @@ class Waterheater
     program_calling_manager.setName("#{obj_name_indirect} ProgramManager")
     program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
     program_calling_manager.addProgram(indirect_ctrl_program)
+
+    add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
 
     return true
   end
@@ -762,85 +769,89 @@ class Waterheater
     num_baths = 2.0 / 3.0 * num_beds
   end
 
-  def self.add_ec_adj(model, runner, heater, ec_adj, space, fuel_type, wh_type)
-    adjusmtment = 1 - ec_adj
-    if space.nil? # WH is outdoors, set the other equipment to be in the first conditioned space just so it has a location
-      spaces = Geometry.get_conditioned_spaces(model.getSpaces)
-      space = spaces[0]
+  def self.add_ec_adj(model, runner, heater, ec_adj, space, fuel_type, wh_type, combi_boiler = nil, combi_hx = nil)
+    adjusmtment = ec_adj - 1.0
+
+    if space.nil? # WH is outdoors, set the other equipment to be in a random space
+      space = model.getSpaces[0]
     end
+
+    if wh_type == "heat pump water heater"
+      tank = heater.tank
+    else
+      tank = heater
+    end
+
     # Add an other equipment object for water heating that will get actuated, has a small inital load but gets overwritten by EMS
-    ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, "water_heater_ec_adj", space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameWaterHeaterECAdjustment(heater.name), space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+
     # EMS for calculating the EC_adj
+
     # Sensors
+    ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
+                            Constants.FuelTypePropane => "Propane Rate",
+                            Constants.FuelTypeOil => "Oil Rate",
+                            Constants.FuelTypeGas => "Gas Rate" }[fuel_type]
     if wh_type.include? "boiler"
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fluid Heat Exchanger Heat Transfer Energy")
-      ec_adj_sensor_hx.setName("#{Constants.ObjectNameWaterHeater} hx energy")
-      ec_adj_sensor_hx.setKeyName("#{Constants.ObjectNameTankHX}")
-      ec_adj_sensor_boiler = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Boiler Heating Energy")
-      ec_adj_sensor_boiler.setName("#{Constants.ObjectNameWaterHeater} boiler energy")
-      ec_adj_sensor_boiler.setKeyName("#{Constants.ObjectNameWaterHeater}")
+      ec_adj_sensor_hx.setName("#{combi_hx.name} energy")
+      ec_adj_sensor_hx.setKeyName(combi_hx.name.to_s)
+      ec_adj_sensor_boiler_heating = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Boiler Heating Energy")
+      ec_adj_sensor_boiler_heating.setName("#{combi_boiler.name} heating energy")
+      ec_adj_sensor_boiler_heating.setKeyName(combi_boiler.name.to_s)
+      ec_adj_sensor_boiler = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Boiler #{ep_consumption_name}")
+      ec_adj_sensor_boiler.setName("#{combi_boiler.name} energy")
+      ec_adj_sensor_boiler.setKeyName(combi_boiler.name.to_s)
     elsif wh_type == "heat pump water heater"
       ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Electric Power")
-      ec_adj_sensor.setName("#{Constants.ObjectNameWaterHeater} energy")
-      ec_adj_sensor.setKeyName("#{Constants.ObjectNameWaterHeater} tank")
+      ec_adj_sensor.setName("#{heater.tank.name} energy")
+      ec_adj_sensor.setKeyName(heater.tank.name.to_s)
       ec_adj_hp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling Coil Water Heating Electric Power")
-      ec_adj_hp_sensor.setName("#{Constants.ObjectNameWaterHeater} hp energy")
-      ec_adj_hp_sensor.setKeyName("#{Constants.ObjectNameWaterHeater} coil")
+      ec_adj_hp_sensor.setName("#{heater.dXCoil.name} energy")
+      ec_adj_hp_sensor.setKeyName(heater.dXCoil.name.to_s)
       ec_adj_fan_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Electric Power")
-      ec_adj_fan_sensor.setName("#{Constants.ObjectNameWaterHeater} fan energy")
-      ec_adj_fan_sensor.setKeyName("#{Constants.ObjectNameWaterHeater} fan")
+      ec_adj_fan_sensor.setName("#{heater.fan.name} energy")
+      ec_adj_fan_sensor.setKeyName(heater.fan.name.to_s)
     else
-      if fuel_type == Constants.FuelTypeElectric
-        ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Electric Power")
-        ec_adj_sensor.setName("#{Constants.ObjectNameWaterHeater} energy")
-        ec_adj_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
-      elsif fuel_type == Constants.FuelTypePropane
-        ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Propane Rate")
-        ec_adj_sensor.setName("#{Constants.ObjectNameWaterHeater} energy")
-        ec_adj_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
-      elsif fuel_type == Constants.FuelTypeOil
-        ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Oil Rate")
-        ec_adj_sensor.setName("#{Constants.ObjectNameWaterHeater} energy")
-        ec_adj_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
-      elsif fuel_type == Constants.FuelTypeGas
-        ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Gas Rate")
-        ec_adj_sensor.setName("#{Constants.ObjectNameWaterHeater} energy")
-        ec_adj_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
-      end
+      ec_adj_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater #{ep_consumption_name}")
+      ec_adj_sensor.setName("#{heater.name} energy")
+      ec_adj_sensor.setKeyName(heater.name.to_s)
     end
 
     ec_adj_oncyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater On Cycle Parasitic Electric Power")
-    ec_adj_oncyc_sensor.setName("#{Constants.ObjectNameWaterHeater} on cycle parasitic")
-    if wh_type == "heat pump water heater"
-      ec_adj_oncyc_sensor.setKeyName("#{Constants.ObjectNameWaterHeater} tank")
-    else
-      ec_adj_oncyc_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
-    end
+    ec_adj_oncyc_sensor.setName("#{tank.name} on cycle parasitic")
+    ec_adj_oncyc_sensor.setKeyName(tank.name.to_s)
     ec_adj_offcyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Off Cycle Parasitic Electric Power")
-    ec_adj_offcyc_sensor.setName("#{Constants.ObjectNameWaterHeater} off cycle parasitic")
-    if wh_type == "heat pump water heater"
-      ec_adj_offcyc_sensor.setKeyName("#{Constants.ObjectNameWaterHeater} tank")
-    else
-      ec_adj_offcyc_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
-    end
+    ec_adj_offcyc_sensor.setName("#{tank.name} off cycle parasitic")
+    ec_adj_offcyc_sensor.setKeyName(tank.name.to_s)
+
     # Actuators
     ec_adj_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(ec_adj_object, "OtherEquipment", "Power Level")
-    ec_adj_actuator.setName("#{Constants.ObjectNameWaterHeater} ec_adj_act")
+    ec_adj_actuator.setName("#{heater.name} ec_adj_act")
 
     # Program
     ec_adj_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    ec_adj_program.setName("#{Constants.ObjectNameWaterHeater} EC_adj")
+    ec_adj_program.setName("#{heater.name} EC_adj")
     if wh_type.include? "boiler"
-      ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_sensor_hx.name} / #{ec_adj_sensor_boiler.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
+      ec_adj_program.addLine("Set tmp_ec_adj_oncyc_sensor = #{ec_adj_oncyc_sensor.name}")
+      ec_adj_program.addLine("Set tmp_ec_adj_offcyc_sensor = #{ec_adj_offcyc_sensor.name}")
+      ec_adj_program.addLine("Set tmp_ec_adj_sensor_hx = #{ec_adj_sensor_hx.name}")
+      ec_adj_program.addLine("Set tmp_ec_adj_sensor_boiler_heating = #{ec_adj_sensor_boiler_heating.name}")
+      ec_adj_program.addLine("Set tmp_ec_adj_sensor_boiler = #{ec_adj_sensor_boiler.name}")
+      ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
+      ec_adj_program.addLine("If #{ec_adj_sensor_boiler_heating.name} > 0")
+      ec_adj_program.addLine("  Set wh_e_cons = wh_e_cons + (@Abs #{ec_adj_sensor_hx.name}) / #{ec_adj_sensor_boiler_heating.name} * #{ec_adj_sensor_boiler.name}")
+      ec_adj_program.addLine("EndIf")
     elsif wh_type == "heat pump water heater"
       ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name} + #{ec_adj_hp_sensor.name} + #{ec_adj_fan_sensor.name}")
     else
       ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
     end
     ec_adj_program.addLine("Set #{ec_adj_actuator.name} = #{adjusmtment} * wh_e_cons")
-    # ProgramCallingManagers
+
+    # Program Calling Manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{Constants.ObjectNameWaterHeater} EC_adj ProgramManager")
+    program_calling_manager.setName("#{heater.name} EC_adj ProgramManager")
     program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
     program_calling_manager.addProgram(ec_adj_program)
   end
@@ -1062,8 +1073,6 @@ class Waterheater
     ua_w_k = UnitConversions.convert(ua, "Btu/(hr*F)", "W/K")
     new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
     new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
-
-    self.add_ec_adj(model, runner, new_heater, ec_adj, space, fuel, wh_type)
 
     return new_heater
   end

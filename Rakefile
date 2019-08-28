@@ -76,8 +76,8 @@ def create_hpxmls
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
-    'base-dhw-pipe-length-small.xml' => 'base.xml',
-    'base-dhw-pipe-length-large.xml' => 'base.xml',
+    'base-dhw-pipe-length-double.xml' => 'base.xml',
+    'base-dhw-pipe-length-half.xml' => 'base.xml',
     'base-dhw-recirc-demand.xml' => 'base.xml',
     'base-dhw-recirc-manual.xml' => 'base.xml',
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
@@ -2415,10 +2415,10 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribut
     hot_water_distribution_values[:recirculation_piping_length] = 50
     hot_water_distribution_values[:recirculation_branch_piping_length] = 50
     hot_water_distribution_values[:recirculation_pump_power] = 50
-  elsif ['base-dhw-pipe-length-small.xml'].include? hpxml_file
-    hot_water_distribution_values[:standard_piping_length] *= 0.1
-  elsif ['base-dhw-pipe-length-large.xml'].include? hpxml_file
-    hot_water_distribution_values[:standard_piping_length] *= 10.0
+  elsif ['base-dhw-pipe-length-double.xml'].include? hpxml_file
+    hot_water_distribution_values[:standard_piping_length] *= 2.0
+  elsif ['base-dhw-pipe-length-half.xml'].include? hpxml_file
+    hot_water_distribution_values[:standard_piping_length] *= 0.5
   elsif ['base-dhw-none.xml'].include? hpxml_file
     hot_water_distribution_values = {}
   end
