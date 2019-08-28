@@ -783,14 +783,14 @@ class Waterheater
     end
 
     # Add an other equipment object for water heating that will get actuated, has a small inital load but gets overwritten by EMS
-    ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameWaterHeaterECAdjustment(heater.name), space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
+    ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, Constants.ObjectNameWaterHeaterAdjustment(heater.name), space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
 
     # EMS for calculating the EC_adj
 
     # Sensors
     ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
                             Constants.FuelTypePropane => "Propane Rate",
-                            Constants.FuelTypeOil => "Oil Rate",
+                            Constants.FuelTypeOil => "FuelOil#1 Rate",
                             Constants.FuelTypeGas => "Gas Rate" }[fuel_type]
     if wh_type.include? "boiler"
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fluid Heat Exchanger Heat Transfer Energy")
