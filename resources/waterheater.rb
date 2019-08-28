@@ -559,8 +559,8 @@ class Waterheater
     program_calling_manager.addProgram(hpwh_ducting_program)
 
     loop.addSupplyBranchForComponent(tank)
-    
-    self.add_ec_adj(model,runner,tank,ec_adj,space,Constants.FuelTypeElectric,"heat pump water heater")
+
+    self.add_ec_adj(model, runner, tank, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
 
     return true
   end
@@ -761,14 +761,14 @@ class Waterheater
     # "According to 70% of estate agents, a property should have two bathrooms for every three bedrooms..."
     num_baths = 2.0 / 3.0 * num_beds
   end
-  
-  def self.add_ec_adj(model,runner,heater,ec_adj,space,fuel_type,wh_type)
+
+  def self.add_ec_adj(model, runner, heater, ec_adj, space, fuel_type, wh_type)
     adjusmtment = 1 - ec_adj
-    if space.nil? #WH is outdoors, set the other equipment to be in the first conditioned space just so it has a location
+    if space.nil? # WH is outdoors, set the other equipment to be in the first conditioned space just so it has a location
       spaces = Geometry.get_conditioned_spaces(model.getSpaces)
       space = spaces[0]
     end
-    #Add an other equipment object for water heating that will get actuated, has a small inital load but gets overwritten by EMS
+    # Add an other equipment object for water heating that will get actuated, has a small inital load but gets overwritten by EMS
     ec_adj_object = HotWaterAndAppliances.add_other_equipment(model, "water_heater_ec_adj", space, 0.01, 0, 0, model.alwaysOnDiscreteSchedule, fuel_type)
     # EMS for calculating the EC_adj
     # Sensors
@@ -808,14 +808,14 @@ class Waterheater
         ec_adj_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
       end
     end
-    
+
     ec_adj_oncyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater On Cycle Parasitic Electric Power")
     ec_adj_oncyc_sensor.setName("#{Constants.ObjectNameWaterHeater} on cycle parasitic")
     if wh_type == "heat pump water heater"
       ec_adj_oncyc_sensor.setKeyName("#{Constants.ObjectNameWaterHeater} tank")
     else
       ec_adj_oncyc_sensor.setKeyName("#{Constants.ObjectNameWaterHeater}")
-    end   
+    end
     ec_adj_offcyc_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Off Cycle Parasitic Electric Power")
     ec_adj_offcyc_sensor.setName("#{Constants.ObjectNameWaterHeater} off cycle parasitic")
     if wh_type == "heat pump water heater"
@@ -946,7 +946,7 @@ class Waterheater
     if eta_c > 1
       runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
     end
-    
+
     return u, ua, eta_c
   end
 
@@ -1063,7 +1063,7 @@ class Waterheater
     new_heater.setOnCycleLossCoefficienttoAmbientTemperature(ua_w_k)
     new_heater.setOffCycleLossCoefficienttoAmbientTemperature(ua_w_k)
 
-    self.add_ec_adj(model,runner,new_heater,ec_adj,space,fuel,wh_type)
+    self.add_ec_adj(model, runner, new_heater, ec_adj, space, fuel, wh_type)
 
     return new_heater
   end

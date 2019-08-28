@@ -308,7 +308,7 @@
             <Location>other exterior</Location>
             <TankVolume>50.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>4500.0</HeatingCapacity>
+            <HeatingCapacity>40000.0</HeatingCapacity>
             <EnergyFactor>0.59</EnergyFactor>
             <RecoveryEfficiency>0.76</RecoveryEfficiency>
           </WaterHeatingSystem>

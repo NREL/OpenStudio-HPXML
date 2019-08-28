@@ -1860,12 +1860,12 @@ class OSModel
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
-                                                                              
+
         if ec_adj != 1
           runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
-          
+
         end
-        
+
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
         sys_id = water_heating_system_values[:id]
@@ -1940,7 +1940,6 @@ class OSModel
 
         end
         dhw_loop_fracs[sys_id] = dhw_load_frac
-      
       end
     end
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
