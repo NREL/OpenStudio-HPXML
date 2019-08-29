@@ -1928,7 +1928,7 @@ class OSModel
     end
 
     # Water Heater
-    related_hvac_list = [] # list of heating systems refered in water heating system "RelatedHVACSystem" element
+    related_hvac_list = [] # list of heating systems referred in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
@@ -1943,7 +1943,7 @@ class OSModel
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
           uef = water_heating_system_values[:uniform_energy_factor]
-          # allow systems not requiring ef and not specifying fuel type,  eg.indirect water heater
+          # allow systems not requiring EF and not specifying fuel type, e.g., indirect water heater
           if not uef.nil?
             ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
           end
@@ -1952,6 +1952,11 @@ class OSModel
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
+
+        runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
+        if ec_adj != 1
+          runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
+        end
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
@@ -1996,7 +2001,6 @@ class OSModel
           tank_vol = water_heating_system_values[:tank_volume]
           success = Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
                                                @nbeds, @dhw_map, sys_id, jacket_r)
-
           return false if not success
 
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
@@ -2010,6 +2014,7 @@ class OSModel
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
             boiler_sys = get_boiler_and_boiler_loop(@hvac_map, heating_source_id, sys_id)
+            boiler_fuel_type = to_beopt_fuel(Waterheater.get_combi_system_fuel(heating_source_id, building.elements["BuildingDetails"]))
           else
             fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end
@@ -2019,7 +2024,9 @@ class OSModel
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, space, capacity_kbtuh,
                                                tank_vol, setpoint_temp, oncycle_power,
-                                               offcycle_power, ec_adj, @nbeds, boiler_sys['plant_loop'], @dhw_map, sys_id, wh_type, jacket_r)
+                                               offcycle_power, ec_adj, @nbeds, boiler_sys['boiler'],
+                                               boiler_sys['plant_loop'], boiler_fuel_type,
+                                               @dhw_map, sys_id, wh_type, jacket_r)
           return false if not success
 
         else
@@ -2027,7 +2034,6 @@ class OSModel
           fail "Unhandled water heater (#{wh_type})."
 
         end
-
         dhw_loop_fracs[sys_id] = dhw_load_frac
       end
     end
