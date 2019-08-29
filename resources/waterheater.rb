@@ -855,7 +855,7 @@ class Waterheater
     # Program Calling Manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{heater.name} EC_adj ProgramManager")
-    program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
+    program_calling_manager.setCallingPoint("EndOfSystemTimestepBeforeHVACReporting")
     program_calling_manager.addProgram(ec_adj_program)
 
     # Sensor for EMS reporting
