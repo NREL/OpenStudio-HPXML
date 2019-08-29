@@ -267,10 +267,12 @@ class HPXMLTranslatorTest < MiniTest::Test
       results[[fueltype, category, subcategory, fuel_units]] = val
     end
 
-    # Move EC_adj from Interior Equipment category to Water Systems
+    # Move EC_adj from Interior Equipment category to a single EC_adj subcategory in Water Systems
     results.keys.each do |k|
       if k[1] == "Interior Equipment" and k[2].end_with? Constants.ObjectNameWaterHeaterAdjustment(nil)
-        results[[k[0], "Water Systems", k[2], k[3]]] = results[k]
+        new_key = [k[0], "Water Systems", "EC_adj", k[3]]
+        results[new_key] = 0 if results[new_key].nil?
+        results[new_key] += results[k]
         results.delete(k)
       end
     end
@@ -793,7 +795,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       results.keys.each do |k|
         next unless k[1] == "Water Systems" and k[3] == "GJ"
 
-        if k[2].end_with? Constants.ObjectNameWaterHeaterAdjustment(nil)
+        if k[2] == "EC_adj"
           water_heater_adj_energy += results[k]
         else
           water_heater_energy += results[k]
@@ -814,7 +816,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
-      assert_in_delta(calculated_ec_adj, simulated_ec_adj, 0.02)
+      assert_in_epsilon(calculated_ec_adj, simulated_ec_adj, 0.02)
     end
 
     # Mechanical Ventilation
