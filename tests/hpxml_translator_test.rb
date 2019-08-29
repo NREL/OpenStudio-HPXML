@@ -267,6 +267,16 @@ class HPXMLTranslatorTest < MiniTest::Test
       results[[fueltype, category, subcategory, fuel_units]] = val
     end
 
+    # Move EC_adj from Interior Equipment category to a single EC_adj subcategory in Water Systems
+    results.keys.each do |k|
+      if k[1] == "Interior Equipment" and k[2].end_with? Constants.ObjectNameWaterHeaterAdjustment(nil)
+        new_key = [k[0], "Water Systems", "EC_adj", k[3]]
+        results[new_key] = 0 if results[new_key].nil?
+        results[new_key] += results[k]
+        results.delete(k)
+      end
+    end
+
     # Disaggregate any crankcase and defrost energy from results
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
@@ -401,12 +411,12 @@ class HPXMLTranslatorTest < MiniTest::Test
     results = _get_results(rundir, sim_time, workflow_time)
 
     # Verify simulation outputs
-    _verify_simulation_outputs(rundir, args['hpxml_path'], results)
+    _verify_simulation_outputs(runner, rundir, args['hpxml_path'], results)
 
     return results
   end
 
-  def _verify_simulation_outputs(rundir, hpxml_path, results)
+  def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
     File.readlines(File.join(rundir, "eplusout.err")).each do |err_line|
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
@@ -769,7 +779,45 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Water Heater
-    wh = bldg_details.elements["Systems/WaterHeating"]
+    wh = bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem"]
+    if not wh.nil?
+      # EC_adj, compare calculated value to value obtained from simulation results
+      calculated_ec_adj = nil
+      runner.result.stepInfo.each do |s|
+        next unless s.start_with? "EC_adj="
+
+        calculated_ec_adj = Float(s.gsub("EC_adj=", ""))
+      end
+
+      # Obtain water heating energy consumption and adjusted water heating energy consumption
+      water_heater_energy = 0.0
+      water_heater_adj_energy = 0.0
+      results.keys.each do |k|
+        next unless k[1] == "Water Systems" and k[3] == "GJ"
+
+        if k[2] == "EC_adj"
+          water_heater_adj_energy += results[k]
+        else
+          water_heater_energy += results[k]
+        end
+      end
+
+      # Add any combi water heating energy use
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoilerHeatExchanger.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoiler.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get
+      if combi_htg_load > 0 and combi_hx_load > 0
+        results.keys.each do |k|
+          next unless k[1] == "Heating" and k[3] == "GJ"
+
+          water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
+        end
+      end
+
+      simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
+      assert_in_epsilon(calculated_ec_adj, simulated_ec_adj, 0.02)
+    end
 
     # Mechanical Ventilation
     mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]

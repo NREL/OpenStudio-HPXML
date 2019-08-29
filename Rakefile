@@ -2287,7 +2287,7 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
                                       :location => "living space",
                                       :tank_volume => 50,
                                       :fraction_dhw_load_served => 0.2,
-                                      :heating_capacity => 4500,
+                                      :heating_capacity => 40000,
                                       :energy_factor => 0.59,
                                       :recovery_efficiency => 0.76 }
     water_heating_systems_values << { :id => "WaterHeater3",
@@ -2321,7 +2321,7 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
          'base-dhw-tank-gas-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "natural gas"
     water_heating_systems_values[0][:tank_volume] = 50
-    water_heating_systems_values[0][:heating_capacity] = 4500
+    water_heating_systems_values[0][:heating_capacity] = 40000
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
     if hpxml_file == 'base-dhw-tank-gas-outside.xml'
@@ -2366,13 +2366,13 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-tank-oil.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "fuel oil"
     water_heating_systems_values[0][:tank_volume] = 50
-    water_heating_systems_values[0][:heating_capacity] = 4500
+    water_heating_systems_values[0][:heating_capacity] = 40000
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
   elsif ['base-dhw-tank-propane.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "propane"
     water_heating_systems_values[0][:tank_volume] = 50
-    water_heating_systems_values[0][:heating_capacity] = 4500
+    water_heating_systems_values[0][:heating_capacity] = 40000
     water_heating_systems_values[0][:energy_factor] = 0.59
     water_heating_systems_values[0][:recovery_efficiency] = 0.76
   elsif ['base-dhw-uef.xml'].include? hpxml_file
@@ -2441,7 +2441,7 @@ def get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribut
   if ['base.xml'].include? hpxml_file
     hot_water_distribution_values = { :id => "HotWaterDstribution",
                                       :system_type => "Standard",
-                                      :standard_piping_length => 90,
+                                      :standard_piping_length => 50, # Chosen to test a negative EC_adj
                                       :pipe_r_value => 0.0 }
   elsif ['base-dhw-dwhr.xml'].include? hpxml_file
     hot_water_distribution_values[:dwhr_facilities_connected] = "all"
