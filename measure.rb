@@ -2424,7 +2424,7 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building)
     if @use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, 1, 1, @control_slave_zones_hash)
+      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, @control_slave_zones_hash)
       return false if not success
 
       return true
