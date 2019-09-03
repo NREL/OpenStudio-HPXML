@@ -655,20 +655,10 @@ class HEScoreRuleset
       end
 
       # Water heater location
-      has_basement = false
-      basement_is_conditioned = nil
-      orig_details.elements.each("Enclosure/Foundations/Foundation") do |foundation|
-        if XMLHelper.get_child_name(foundation, "FoundationType") == 'Basement'
-          has_basement = true
-          basement_is_conditioned = XMLHelper.get_value(foundation, "FoundationType/Basement/Conditioned") == "true" or basement_is_conditioned
-        end
-      end
-      if has_basement
-        if basement_is_conditioned
-          water_heater_location = "basement - conditioned"
-        else
-          water_heater_location = "basement - unconditioned"
-        end
+      if @has_cond_bsmnt
+        water_heater_location = "basement - conditioned"
+      elsif @has_uncond_bsmnt
+        water_heater_location = "basement - unconditioned"
       else
         water_heater_location = "living space"
       end
