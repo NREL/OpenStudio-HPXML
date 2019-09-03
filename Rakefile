@@ -2741,14 +2741,19 @@ end
 
 def get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
   if ['base-misc-loads-detailed.xml'].include? hpxml_file
-    plug_loads_values << { :id => "PlugLoadMisc",
+    plug_loads_values = [{ :id => "PlugLoadMisc",
                            :plug_load_type => "other",
                            :kWh_per_year => 7302,
                            :frac_sensible => 0.82,
-                           :frac_latent => 0.18 }
-    plug_loads_values << { :id => "PlugLoadMisc2",
+                           :frac_latent => 0.18 },
+                         { :id => "PlugLoadMisc2",
                            :plug_load_type => "TV other",
-                           :kWh_per_year => 400 }
+                           :kWh_per_year => 400 }]
+  else
+    plug_loads_values = [{ :id => "PlugLoadMisc",
+                           :plug_load_type => "other" },
+                         { :id => "PlugLoadMisc2",
+                           :plug_load_type => "TV other" }]
   end
   return plug_loads_values
 end
