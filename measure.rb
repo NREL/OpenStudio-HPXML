@@ -2691,9 +2691,10 @@ class OSModel
         infil_ach50 = air_infiltration_measurement_values[:air_leakage]
       elsif air_infiltration_measurement_values[:house_pressure] == 50 and air_infiltration_measurement_values[:unit_of_measure] == "CFM"
         infil_ach50 = air_infiltration_measurement_values[:air_leakage] * 60.0 / @infilvolume # Convert CFM50 to ACH50
-      else
+      elsif not air_infiltration_measurement_values[:constant_ach_natural].nil?
         infil_const_ach = air_infiltration_measurement_values[:constant_ach_natural]
       end
+      break unless infil_ach50.nil? and infil_const_ach.nil?
     end
 
     vented_attic_sla = nil
