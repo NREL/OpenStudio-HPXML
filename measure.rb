@@ -288,9 +288,8 @@ class OSModel
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
 
-    control_zone = get_space_of_type(spaces, Constants.SpaceTypeLiving).thermalZone.get
-    slave_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
-    @control_slave_zones_hash = { control_zone => slave_zones }
+    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+    @living_zone = @living_space.thermalZone.get
 
     success = add_cooling_system(runner, model, building)
     return false if not success
@@ -424,12 +423,11 @@ class OSModel
     thermal_zones = model.getThermalZones
 
     # Init
-    living_volume = @cvolume
     zones_updated = 0
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if Geometry.is_conditioned_basement(thermal_zone) or Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_unvented_crawl(thermal_zone) or
+      if Geometry.is_unconditioned_basement(thermal_zone) or Geometry.is_unvented_crawl(thermal_zone) or
          Geometry.is_vented_crawl(thermal_zone) or Geometry.is_garage(thermal_zone)
         zones_updated += 1
 
@@ -448,11 +446,6 @@ class OSModel
         end
 
         thermal_zone.setVolume(UnitConversions.convert(zone_volume, "ft^3", "m^3"))
-
-        if Geometry.is_conditioned_basement(thermal_zone)
-          living_volume = @cvolume - zone_volume
-        end
-
       end
     end
 
@@ -460,12 +453,7 @@ class OSModel
     thermal_zones.each do |thermal_zone|
       if Geometry.is_living(thermal_zone)
         zones_updated += 1
-
-        if living_volume <= 0
-          fail "Calculated volume for living zone (#{living_volume}) is not greater than zero."
-        end
-
-        thermal_zone.setVolume(UnitConversions.convert(living_volume, "ft^3", "m^3"))
+        thermal_zone.setVolume(UnitConversions.convert(@cvolume, "ft^3", "m^3"))
       end
     end
 
@@ -1456,45 +1444,8 @@ class OSModel
     # TODO: Use HPXML values not Model values
     cfa = @cfa.round(1)
 
-    model.getThermalZones.each do |zone|
-      next if not Geometry.is_conditioned_basement(zone)
-
-      floor_area = 0.0
-      ceiling_area = 0.0
-      zone.spaces.each do |space|
-        space.surfaces.each do |surface|
-          if surface.surfaceType.downcase.to_s == "floor"
-            floor_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
-          elsif surface.surfaceType.downcase.to_s == "roofceiling"
-            ceiling_area += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
-          end
-        end
-      end
-
-      addtl_cfa = floor_area - ceiling_area
-      if addtl_cfa > 0
-        runner.registerWarning("Adding conditioned basement adiabatic ceiling with #{addtl_cfa.to_s} ft^2.")
-
-        conditioned_floor_width = Math::sqrt(addtl_cfa)
-        conditioned_floor_length = addtl_cfa / conditioned_floor_width
-        z_origin = @foundation_top
-
-        surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
-
-        surface.setSunExposure("NoSun")
-        surface.setWindExposure("NoWind")
-        surface.setName("inferred conditioned basement ceiling")
-        surface.setSurfaceType("RoofCeiling")
-        surface.setSpace(zone.spaces[0])
-        surface.setOutsideBoundaryCondition("Adiabatic")
-
-        # Apply Construction
-        success = apply_adiabatic_construction(runner, model, [surface], "floor")
-        return false if not success
-      end
-    end
-
-    # Next check if we need to add floors between conditioned spaces (e.g., 2-story buildings).
+    # Check if we need to add floors between conditioned spaces (e.g., 2-story buildings).
+    # This ensures that the E+ reported Conditioned Floor Area is correct.
 
     # Calculate cfa already added to model
     model_cfa = 0.0
@@ -2038,8 +1989,7 @@ class OSModel
       end
     end
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
-    living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
-    success = HotWaterAndAppliances.apply(model, runner, weather, living_space,
+    success = HotWaterAndAppliances.apply(model, runner, weather, @living_space,
                                           @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
                                           cw_mef, cw_ler, cw_elec_rate, cw_gas_rate,
                                           cw_agc, cw_cap, cw_space, cd_fuel, cd_ef, cd_control,
@@ -2094,7 +2044,7 @@ class OSModel
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, load_frac,
-                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
 
@@ -2105,7 +2055,7 @@ class OSModel
           success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, load_frac,
-                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
 
@@ -2116,7 +2066,7 @@ class OSModel
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
                                                  cool_capacity_btuh, load_frac,
-                                                 sequential_load_frac, @control_slave_zones_hash,
+                                                 sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
 
@@ -2133,7 +2083,7 @@ class OSModel
         airflow_rate = 350.0
         success = HVAC.apply_room_ac(model, runner, eer, shr,
                                      airflow_rate, cool_capacity_btuh, load_frac,
-                                     sequential_load_frac, @control_slave_zones_hash,
+                                     sequential_load_frac, @living_zone,
                                      @hvac_map, sys_id)
         return false if not success
 
@@ -2186,7 +2136,7 @@ class OSModel
           success = HVAC.apply_furnace(model, runner, fuel, afue,
                                        heat_capacity_btuh, fan_power,
                                        load_frac, sequential_load_frac,
-                                       attached_clg_system, @control_slave_zones_hash,
+                                       attached_clg_system, @living_zone,
                                        @hvac_map, sys_id)
           return false if not success
 
@@ -2198,7 +2148,7 @@ class OSModel
           success = HVAC.apply_unit_heater(model, runner, fuel,
                                            afue, heat_capacity_btuh, fan_power,
                                            airflow_rate, load_frac,
-                                           sequential_load_frac, @control_slave_zones_hash,
+                                           sequential_load_frac, @living_zone,
                                            @hvac_map, sys_id)
           return false if not success
 
@@ -2215,7 +2165,7 @@ class OSModel
           success = HVAC.apply_boiler(model, runner, fuel, system_type, afue,
                                       oat_reset_enabled, oat_high, oat_low, oat_hwst_high, oat_hwst_low,
                                       heat_capacity_btuh, design_temp, load_frac,
-                                      sequential_load_frac, @control_slave_zones_hash,
+                                      sequential_load_frac, @living_zone,
                                       @hvac_map, sys_id)
           return false if not success
 
@@ -2224,7 +2174,7 @@ class OSModel
           efficiency = heating_system_values[:heating_efficiency_percent]
           success = HVAC.apply_electric_baseboard(model, runner, efficiency,
                                                   heat_capacity_btuh, load_frac,
-                                                  sequential_load_frac, @control_slave_zones_hash,
+                                                  sequential_load_frac, @living_zone,
                                                   @hvac_map, sys_id)
           return false if not success
 
@@ -2236,7 +2186,7 @@ class OSModel
           success = HVAC.apply_unit_heater(model, runner, fuel,
                                            efficiency, heat_capacity_btuh, fan_power,
                                            airflow_rate, load_frac,
-                                           sequential_load_frac, @control_slave_zones_hash,
+                                           sequential_load_frac, @living_zone,
                                            @hvac_map, sys_id)
           return false if not success
 
@@ -2310,7 +2260,7 @@ class OSModel
                                                    backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_slave_zones_hash, @hvac_map, sys_id)
+                                                   @living_zone, @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "2-Speed"
@@ -2323,7 +2273,7 @@ class OSModel
                                                    backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_slave_zones_hash, @hvac_map, sys_id)
+                                                   @living_zone, @hvac_map, sys_id)
           return false if not success
 
         elsif num_speeds == "Variable-Speed"
@@ -2336,7 +2286,7 @@ class OSModel
                                                    backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
-                                                   @control_slave_zones_hash, @hvac_map, sys_id)
+                                                   @living_zone, @hvac_map, sys_id)
           return false if not success
 
         else
@@ -2376,7 +2326,7 @@ class OSModel
                                   backup_heat_efficiency, backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
-                                  @control_slave_zones_hash, @hvac_map, sys_id)
+                                  @living_zone, @hvac_map, sys_id)
         return false if not success
 
       elsif hp_type == "ground-to-air"
@@ -2412,7 +2362,7 @@ class OSModel
                                   backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
-                                  @control_slave_zones_hash, @hvac_map, sys_id)
+                                  @living_zone, @hvac_map, sys_id)
         return false if not success
 
       end
@@ -2423,7 +2373,7 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building)
     if @use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, 1, 1, @control_slave_zones_hash)
+      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, 1, 1, @living_zone)
       return false if not success
 
       return true
@@ -2450,7 +2400,7 @@ class OSModel
                                            @total_frac_remaining_heat_load_served,
                                            sequential_cool_load_frac,
                                            sequential_heat_load_frac,
-                                           @control_slave_zones_hash)
+                                           @living_zone)
       return false if not success
     end
 
@@ -2460,8 +2410,6 @@ class OSModel
   def self.add_setpoints(runner, model, building, weather, spaces)
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
-
-    conditioned_zones = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement]).map { |z| z.thermalZone.get }.compact
 
     control_type = hvac_control_values[:control_type]
     heating_temp = hvac_control_values[:setpoint_temp_heating_season]
@@ -2486,7 +2434,7 @@ class OSModel
     htg_season_end_month = 12
     success = HVAC.apply_heating_setpoints(model, runner, weather, htg_weekday_setpoints, htg_weekend_setpoints,
                                            htg_use_auto_season, htg_season_start_month, htg_season_end_month,
-                                           conditioned_zones)
+                                           @living_zone)
     return false if not success
 
     cooling_temp = hvac_control_values[:setpoint_temp_cooling_season]
@@ -2521,7 +2469,7 @@ class OSModel
     clg_season_end_month = 12
     success = HVAC.apply_cooling_setpoints(model, runner, weather, clg_weekday_setpoints, clg_weekend_setpoints,
                                            clg_use_auto_season, clg_season_start_month, clg_season_end_month,
-                                           conditioned_zones)
+                                           @living_zone)
     return false if not success
 
     return true
@@ -2547,9 +2495,8 @@ class OSModel
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
-                                      @cfa, conditioned_spaces)
+                                      @cfa, @living_space)
     return false if not success
 
     return true
@@ -2639,10 +2586,9 @@ class OSModel
       tv_annual_kwh = 0
     end
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
     success, sch = MiscLoads.apply_plug(model, runner, misc_annual_kwh, misc_sens_frac, misc_lat_frac,
                                         misc_weekday_sch, misc_weekend_sch, misc_monthly_sch, tv_annual_kwh,
-                                        @cfa, conditioned_spaces)
+                                        @cfa, @living_space)
     return false if not success
 
     return true
@@ -2672,10 +2618,9 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    conditioned_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement])
-    garage_spaces = get_spaces_of_type(spaces, [Constants.SpaceTypeGarage])
+    garage_space = get_space_of_type(spaces, Constants.SpaceTypeGarage)
     success, sch = Lighting.apply(model, runner, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
-                                  conditioned_spaces, garage_spaces)
+                                  @living_space, garage_space)
     return false if not success
 
     return true
@@ -2727,7 +2672,6 @@ class OSModel
     living_ach50 = infil_ach50
     living_constant_ach = infil_const_ach
     garage_ach50 = infil_ach50
-    conditioned_basement_ach = 0
     unconditioned_basement_ach = 0.1
     unvented_crawl_sla = 0
     unvented_attic_sla = 0
@@ -2739,8 +2683,7 @@ class OSModel
     has_flue_chimney = false
     terrain = Constants.TerrainSuburban
     infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
-                             vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach,
-                             conditioned_basement_ach, has_flue_chimney, terrain)
+                             vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
@@ -2880,6 +2823,8 @@ class OSModel
       nat_vent_ovlp_season = true
       nat_vent_num_weekdays = 5
       nat_vent_num_weekends = 2
+      # According to 2010 BA Benchmark, 33% of the windows will be open
+      # at any given time and can only be opened to 20% of their area.
       nat_vent_frac_windows_open = 0.33
       nat_vent_frac_window_area_openable = 0.2
       nat_vent_max_oa_hr = 0.0115
@@ -3134,47 +3079,44 @@ class OSModel
   end
 
   def self.add_ems_cooling_heating_load_output(model)
-    control_zones = @control_slave_zones_hash.keys
-    control_zones.each do |living_zone|
-      # sensors
-      load_rate_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
-      load_rate_sensor.setName("#{living_zone.name} Sensible Load Rate")
-      load_rate_sensor.setKeyName(living_zone.name.to_s)
+    # sensors
+    load_rate_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
+    load_rate_sensor.setName("#{@living_zone.name} Sensible Load Rate")
+    load_rate_sensor.setKeyName(@living_zone.name.to_s)
 
-      # program
-      load_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-      load_program.setName("#{living_zone.name} clg htg load output program")
-      load_program.addLine("Set #{living_zone.name}_htg_load = 0")
-      load_program.addLine("Set #{living_zone.name}_clg_load = 0")
-      load_program.addLine("If #{load_rate_sensor.name} > 0")
-      load_program.addLine("Set #{living_zone.name}_htg_load = #{load_rate_sensor.name} * 3600")
-      load_program.addLine("Else")
-      load_program.addLine("Set #{living_zone.name}_clg_load = - #{load_rate_sensor.name} * 3600")
-      load_program.addLine("EndIf")
+    # program
+    load_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    load_program.setName("#{@living_zone.name} clg htg load output program")
+    load_program.addLine("Set #{@living_zone.name}_htg_load = 0")
+    load_program.addLine("Set #{@living_zone.name}_clg_load = 0")
+    load_program.addLine("If #{load_rate_sensor.name} > 0")
+    load_program.addLine("  Set #{@living_zone.name}_htg_load = #{load_rate_sensor.name} * 3600")
+    load_program.addLine("Else")
+    load_program.addLine("  Set #{@living_zone.name}_clg_load = - #{load_rate_sensor.name} * 3600")
+    load_program.addLine("EndIf")
 
-      # ems output variables
-      ['clg', 'htg'].each do |load_type|
-        ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{living_zone.name}_#{load_type}_load")
-        if load_type == 'htg'
-          ems_output_load.setName(Constants.EMSOutputNameHeatingLoad)
-        else
-          ems_output_load.setName(Constants.EMSOutputNameCoolingLoad)
-        end
-        ems_output_load.setTypeOfDataInVariable("Summed")
-        ems_output_load.setUpdateFrequency("ZoneTimestep")
-        ems_output_load.setEMSProgramOrSubroutineName(load_program)
-        ems_output_load.setUnits("J")
-
-        # add output variable to model
-        outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
-        outputVariable.setReportingFrequency('runperiod')
-        outputVariable.setKeyValue('*')
+    # ems output variables
+    ['clg', 'htg'].each do |load_type|
+      ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{@living_zone.name}_#{load_type}_load")
+      if load_type == 'htg'
+        ems_output_load.setName(Constants.EMSOutputNameHeatingLoad)
+      else
+        ems_output_load.setName(Constants.EMSOutputNameCoolingLoad)
       end
-      load_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-      load_program_manager.setName("#{living_zone.name} load program calling manager")
-      load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
-      load_program_manager.addProgram(load_program)
+      ems_output_load.setTypeOfDataInVariable("Summed")
+      ems_output_load.setUpdateFrequency("ZoneTimestep")
+      ems_output_load.setEMSProgramOrSubroutineName(load_program)
+      ems_output_load.setUnits("J")
+
+      # add output variable to model
+      outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
+      outputVariable.setReportingFrequency('runperiod')
+      outputVariable.setKeyValue('*')
     end
+    load_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    load_program_manager.setName("#{@living_zone.name} load program calling manager")
+    load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+    load_program_manager.addProgram(load_program)
   end
 
   def self.write_mapping(map, map_tsv_path)
@@ -3622,7 +3564,7 @@ class OSModel
     elsif ["basement - unconditioned"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
+      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     elsif ["crawlspace - vented"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? interior_adjacent_to
@@ -3650,7 +3592,7 @@ class OSModel
     elsif ["basement - unconditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement))
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     elsif ["crawlspace - vented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? exterior_adjacent_to
@@ -3676,7 +3618,7 @@ class OSModel
     if location == 'living space'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - conditioned'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeConditionedBasement)
+      space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
     elsif location == 'basement - unconditioned'
       space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement)
     elsif location == 'garage'
