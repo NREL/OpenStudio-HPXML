@@ -62,6 +62,8 @@ class HEScoreRuleset
 
   def self.set_summary(orig_details, hpxml)
     # Get HPXML values
+    @state_code = orig_details.root().elements["/HPXML/Building/Site/Address/StateCode"].text
+
     orig_site_values = HPXML.get_site_values(site: orig_details.elements["BuildingSummary/Site"])
     @bldg_orient = orig_site_values[:orientation_of_front_of_home]
     @bldg_azimuth = orientation_to_azimuth(@bldg_orient)
@@ -448,30 +450,59 @@ class HEScoreRuleset
       end
 
       if ["Furnace", "WallFurnace"].include? heating_values[:heating_system_type]
-        if heating_values[:heating_system_fuel] == "electricity"
+        if not heating_values[:heating_efficiency_afue].nil?
+          # Do nothing, we already have the AFUE
+        elsif heating_values[:heating_system_fuel] == "electricity"
           heating_values[:heating_efficiency_afue] = 0.98
+        elsif heating_values[:energy_star] and heating_values[:heating_system_type] == "Furnace"
+          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(
+            heating_values[:year_installed],
+            heating_values[:heating_system_type],
+            heating_values[:heating_system_fuel],
+            "AFUE",
+            "energy_star",
+            @state_code
+          )
         elsif not heating_values[:year_installed].nil?
-          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(heating_values[:year_installed],
-                                                                            heating_values[:heating_system_type],
-                                                                            heating_values[:heating_system_fuel],
-                                                                            "AFUE")
+          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(
+            heating_values[:year_installed],
+            heating_values[:heating_system_type],
+            heating_values[:heating_system_fuel],
+            "AFUE"
+          )
         end
 
       elsif heating_values[:heating_system_type] == "Boiler"
-        if heating_values[:heating_system_fuel] == "electricity"
+        if not heating_values[:heating_efficiency_afue].nil?
+          # Do nothing, we already have the AFUE
+        elsif heating_values[:heating_system_fuel] == "electricity"
           heating_values[:heating_efficiency_afue] = 0.98
+        elsif heating_values[:energy_star]
+          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(
+            heating_values[:year_installed],
+            heating_values[:heating_system_type],
+            heating_values[:heating_system_fuel],
+            "AFUE",
+            "energy_star"
+          )
         elsif not heating_values[:year_installed].nil?
-          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(heating_values[:year_installed],
-                                                                            heating_values[:heating_system_type],
-                                                                            heating_values[:heating_system_fuel],
-                                                                            "AFUE")
+          heating_values[:heating_efficiency_afue] = lookup_hvac_efficiency(
+            heating_values[:year_installed],
+            heating_values[:heating_system_type],
+            heating_values[:heating_system_fuel],
+            "AFUE"
+          )
         end
 
       elsif heating_values[:heating_system_type] == "ElectricResistance"
-        heating_values[:heating_efficiency_percent] = 0.98
+        if heating_values[:heating_efficiency_percent].nil?
+          heating_values[:heating_efficiency_percent] = 0.98
+        end
 
       elsif heating_values[:heating_system_type] == "Stove"
-        if heating_values[:heating_system_fuel] == "wood"
+        if not heating_values[:heating_efficiency_percent].nil?
+          # Do nothing, we already have the heating efficiency percent
+        elsif heating_values[:heating_system_fuel] == "wood"
           heating_values[:heating_efficiency_percent] = 0.60
         elsif heating_values[:heating_system_fuel] == "wood pellets"
           heating_values[:heating_efficiency_percent] = 0.78
@@ -488,19 +519,43 @@ class HEScoreRuleset
       cooling_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
 
       if cooling_values[:cooling_system_type] == "central air conditioner"
-        if not cooling_values[:year_installed].nil?
-          cooling_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(cooling_values[:year_installed],
-                                                                            cooling_values[:cooling_system_type],
-                                                                            cooling_values[:cooling_system_fuel],
-                                                                            "SEER")
+        if not cooling_values[:cooling_efficiency_seer].nil?
+          # Do nothing, we already have the SEER
+        elsif cooling_values[:energy_star]
+          cooling_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(
+            cooling_values[:year_installed],
+            cooling_values[:cooling_system_type],
+            cooling_values[:cooling_system_fuel],
+            "SEER",
+            "energy_star"
+          )
+        elsif not cooling_values[:year_installed].nil?
+          cooling_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(
+            cooling_values[:year_installed],
+            cooling_values[:cooling_system_type],
+            cooling_values[:cooling_system_fuel],
+            "SEER"
+          )
         end
 
       elsif cooling_values[:cooling_system_type] == "room air conditioner"
-        if not cooling_values[:year_installed].nil?
-          cooling_values[:cooling_efficiency_eer] = lookup_hvac_efficiency(cooling_values[:year_installed],
-                                                                           cooling_values[:cooling_system_type],
-                                                                           cooling_values[:cooling_system_fuel],
-                                                                           "EER")
+        if not cooling_values[:cooling_efficiency_eer].nil?
+          # Do nothing, we already have the EER
+        elsif cooling_values[:energy_star]
+          cooling_values[:cooling_efficiency_eer] = lookup_hvac_efficiency(
+            cooling_values[:year_installed],
+            cooling_values[:cooling_system_type],
+            cooling_values[:cooling_system_fuel],
+            "EER",
+            "energy_star"
+          )
+        elsif not cooling_values[:year_installed].nil?
+          cooling_values[:cooling_efficiency_eer] = lookup_hvac_efficiency(
+            cooling_values[:year_installed],
+            cooling_values[:cooling_system_type],
+            cooling_values[:cooling_system_fuel],
+            "EER"
+          )
         end
       end
 
@@ -517,15 +572,41 @@ class HEScoreRuleset
       hp_values[:backup_heating_efficiency_percent] = 1.0
 
       if hp_values[:heat_pump_type] == "air-to-air"
-        if not hp_values[:year_installed].nil?
-          hp_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(hp_values[:year_installed],
-                                                                       hp_values[:heat_pump_type],
-                                                                       hp_values[:heat_pump_fuel],
-                                                                       "SEER")
-          hp_values[:heating_efficiency_hspf] = lookup_hvac_efficiency(hp_values[:year_installed],
-                                                                       hp_values[:heat_pump_type],
-                                                                       hp_values[:heat_pump_fuel],
-                                                                       "HSPF")
+        if not hp_values[:cooling_efficiency_seer].nil?
+          # Do nothing, we have the SEER
+        elsif hp_values[:energy_star]
+          hp_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(
+            hp_values[:year_installed],
+            hp_values[:heat_pump_type],
+            hp_values[:heat_pump_fuel],
+            "SEER",
+            "energy_star"
+          )
+        elsif not hp_values[:year_installed].nil?
+          hp_values[:cooling_efficiency_seer] = lookup_hvac_efficiency(
+            hp_values[:year_installed],
+            hp_values[:heat_pump_type],
+            hp_values[:heat_pump_fuel],
+            "SEER"
+          )
+        end
+        if not hp_values[:heating_efficiency_hspf].nil?
+          # Do nothing, we have the HSPF
+        elsif hp_values[:energy_star]
+          hp_values[:heating_efficiency_hspf] = lookup_hvac_efficiency(
+            hp_values[:year_installed],
+            hp_values[:heat_pump_type],
+            hp_values[:heat_pump_fuel],
+            "HSPF",
+            "energy_star"
+          )
+        elsif not hp_values[:year_installed].nil?
+          hp_values[:heating_efficiency_hspf] = lookup_hvac_efficiency(
+            hp_values[:year_installed],
+            hp_values[:heat_pump_type],
+            hp_values[:heat_pump_fuel],
+            "HSPF"
+          )
         end
       end
 
@@ -785,8 +866,10 @@ class HEScoreRuleset
   end
 end
 
-def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
-  if year < 1970
+def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='shipment_weighted', state_code=nil)
+  if year.nil?
+    year = 0
+  elsif year < 1970
     year = 1970
   elsif year > 2010
     year = 2010
@@ -805,12 +888,26 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units)
 
   metric_id = units.downcase
 
+  fail "Invalid performance_id for HVAC lookup #{performance_id}." if not ['shipment_weighted', 'energy_star'].include?(performance_id)
+  region_id = nil
+  if performance_id == 'energy_star' and type_id == 'central_furnace' and ['lpg', 'natural_gas'].include? fuel_primary_id
+    fail "state_code required for Energy Star central furnaces" if state_code.nil?
+    CSV.foreach(File.join(File.dirname(__FILE__), "lu_es_furnace_region.csv"), headers: true) do |row|
+      next unless row['state_code'] = state_code
+      region_id = row['furnace_region']
+      break
+    end
+    fail "Could not lookup Energy Star furnace region for state #{state_code}." if region_id.nil?
+  end
+
   value = nil
   CSV.foreach(File.join(File.dirname(__FILE__), "lu_hvac_equipment_efficiency.csv"), headers: true) do |row|
+    next unless row['performance_id'] == performance_id
     next unless Integer(row['year']) == year
     next unless row['type_id'] == type_id
     next unless row['fuel_primary_id'] == fuel_primary_id
     next unless row['metric_id'] == metric_id
+    next unless row['region_id'] == region_id
 
     value = Float(row['value'])
     break
