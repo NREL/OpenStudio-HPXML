@@ -253,26 +253,20 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <HydronicDistribution/>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <HydronicDistribution/>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <HydronicDistribution/>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -290,7 +284,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>90.0</PipingLength>
+                <PipingLength>50.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>
@@ -385,6 +379,16 @@
           <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
         </LightingGroup>
       </Lighting>
+      <MiscLoads>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc'/>
+          <PlugLoadType>other</PlugLoadType>
+        </PlugLoad>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc2'/>
+          <PlugLoadType>TV other</PlugLoadType>
+        </PlugLoad>
+      </MiscLoads>
     </BuildingDetails>
   </Building>
 </HPXML>
