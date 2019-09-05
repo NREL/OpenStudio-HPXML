@@ -714,9 +714,23 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/WaterHeating/WaterHeatingSystem") do |orig_wh_sys|
       wh_sys_values = HPXML.get_water_heating_system_values(water_heating_system: orig_wh_sys)
 
-      if not wh_sys_values[:year_installed].nil?
-        wh_sys_values[:energy_factor] = lookup_water_heater_efficiency(wh_sys_values[:year_installed],
-                                                                       wh_sys_values[:fuel_type])
+      if not wh_sys_values[:energy_factor].nil?
+        # Do nothing, we already have the energy factor
+      elsif wh_sys_values[:energy_star]
+        wh_sys_values[:energy_factor] = lookup_water_heater_efficiency(
+          wh_sys_values[:year_installed],
+          wh_sys_values[:fuel_type],
+          "energy_star"
+        )
+      elsif not wh_sys_values[:year_installed].nil?
+        wh_sys_values[:energy_factor] = lookup_water_heater_efficiency(
+          wh_sys_values[:year_installed],
+          wh_sys_values[:fuel_type]
+        )
+      end
+
+      if wh_sys_values[:fuel_type] == 'electricity' and wh_sys_values[:energy_factor] > 1.0
+        wh_sys_values[:water_heater_type] = 'heat pump water heater'
       end
 
       wh_capacity = nil
@@ -917,8 +931,10 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='sh
   return value
 end
 
-def lookup_water_heater_efficiency(year, fuel_type)
-  if year < 1972
+def lookup_water_heater_efficiency(year, fuel_type, performance_id='shipment_weighted')
+  if year.nil?
+    year = 0
+  elsif year < 1972
     year = 1972
   elsif year > 2010
     year = 2010
@@ -927,8 +943,11 @@ def lookup_water_heater_efficiency(year, fuel_type)
   fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
   fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
 
+  fail "Invalid performance_id for water heater lookup #{performance_id}." if not ['shipment_weighted', 'energy_star'].include?(performance_id)
+
   value = nil
   CSV.foreach(File.join(File.dirname(__FILE__), "lu_water_heater_efficiency.csv"), headers: true) do |row|
+    next unless row['performance_id'] == performance_id
     next unless Integer(row['year']) == year
     next unless row['fuel_primary_id'] == fuel_primary_id
 
