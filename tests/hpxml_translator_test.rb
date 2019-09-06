@@ -991,6 +991,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
         results = all_results[xml]
+        next if results.nil?
 
         # Compare results
         results_base.keys.each do |k|
