@@ -1589,7 +1589,7 @@ class Airflow
     wh_sch_sensor.setName("#{Constants.ObjectNameMechanicalVentilation} wh sch s")
     wh_sch_sensor.setKeyName(model.alwaysOnDiscreteSchedule.name.to_s)
 
-    if mech_vent.type == Constants.VentTypeBalanced and (mech_vent.sensible_efficiency > 0 or mech_vent.sensible_efficiency_adjusted > 0) and mech_vent.whole_house_cfm > 0
+    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness > 0 and mech_vent.whole_house_cfm > 0
       # ERV/HRV; balanced systems without energy recovery are modeled via EMS
 
       balanced_flow_rate = [UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s"), 0.0000001].max
@@ -1847,7 +1847,7 @@ class Airflow
     infil_program.addLine("Set #{range_hood_fan_actuator.name} = Qrange * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
     infil_program.addLine("Set #{bath_exhaust_sch_fan_actuator.name} = Qbath * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
     infil_program.addLine("Set Q_acctd_for_elsewhere = QhpwhOut+QhpwhIn+QductsOut+QductsIn")
-    if mech_vent.type == Constants.VentTypeBalanced and (mech_vent.sensible_efficiency == 0 or mech_vent.sensible_efficiency_adjusted == 0) and mech_vent.whole_house_cfm > 0
+    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness == 0 and mech_vent.whole_house_cfm > 0
       # Balanced system without energy recovery, account for airflow here
       infil_program.addLine("Set #{infil_flow_actuator.name} = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere+QWHV")
     else
