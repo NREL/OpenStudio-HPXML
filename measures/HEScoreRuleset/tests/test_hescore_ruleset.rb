@@ -190,6 +190,70 @@ class HEScoreRulesetTest < MiniTest::Test
     assert_in_epsilon(10.2, ach50, 0.01)
   end
 
+  def test_hvac_lookup
+    small_number = 0.00000000001
+    eff1 = lookup_hvac_efficiency(2010, "central air conditioner", "electricity", "SEER")
+    assert_in_epsilon(eff1, 13.76, small_number)
+
+    eff2 = lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star", "CO")
+    assert_in_epsilon(eff2, 0.95, small_number)
+
+    eff3 = lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star", "GA")
+    assert_in_epsilon(eff3, 0.9, small_number)
+
+    err4 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star")
+    end
+    assert_match(/state_code required/, err4.message)
+
+    err5 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(1997, "Furnace", "unicorn tears", "AFUE")
+    end
+    assert_match(/Unexpected fuel_type/, err5.message)
+
+    err6 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(1997, "some invalid hvac_type", "electricity", "SEER")
+    end
+    assert_match(/Unexpected hvac_type/, err6.message)
+
+    err7 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(2010, "central air conditioner", "electricity", "EER")
+    end
+    assert_match(/Could not lookup default HVAC efficiency/, err7.message)
+
+    err8 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(nil, "Furnace", "natural gas", "AFUE", "energy_star", "ON")
+    end
+    assert_match(/Could not lookup Energy Star furnace region for state/, err8.message)
+
+    eff9 = lookup_hvac_efficiency(nil, "Boiler", "natural gas", "AFUE", "energy_star")
+    assert_in_epsilon(eff9, 0.85, small_number)
+
+    eff10 = lookup_hvac_efficiency(nil, "air-to-air", "electricity", "SEER", "energy_star")
+    assert_in_epsilon(eff10, 14.0, small_number)
+      
+    eff11 = lookup_hvac_efficiency(nil, "air-to-air", "electricity", "HSPF", "energy_star")
+    assert_in_epsilon(eff11, 8.2, small_number)
+
+    err12 = assert_raises RuntimeError do
+      lookup_hvac_efficiency(2010, "central air conditioner", "electricity", "SEER", "bogus_performance_id")
+    end
+    assert_match(/Invalid performance_id for HVAC lookup/, err12.message)
+
+    assert_in_epsilon(
+      lookup_hvac_efficiency(2010, "air-to-air", "electricity", "SEER"),
+      lookup_hvac_efficiency(2011, "air-to-air", "electricity", "SEER"),
+      small_number
+    )
+
+    assert_in_epsilon(
+      lookup_hvac_efficiency(1969, "Boiler", "fuel oil", "AFUE"),
+      lookup_hvac_efficiency(1970, "Boiler", "fuel oil", "AFUE"),
+      small_number
+    )
+
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HEScoreMeasure.new

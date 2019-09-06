@@ -907,7 +907,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='sh
   if performance_id == 'energy_star' and type_id == 'central_furnace' and ['lpg', 'natural_gas'].include? fuel_primary_id
     fail "state_code required for Energy Star central furnaces" if state_code.nil?
     CSV.foreach(File.join(File.dirname(__FILE__), "lu_es_furnace_region.csv"), headers: true) do |row|
-      next unless row['state_code'] = state_code
+      next unless row['state_code'] == state_code
       region_id = row['furnace_region']
       break
     end
