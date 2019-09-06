@@ -1498,14 +1498,17 @@ class HPXML
   def self.add_refrigerator(hpxml:,
                             id:,
                             location:,
-                            rated_annual_kwh:,
+                            rated_annual_kwh: nil,
+                            adjusted_annual_kwh: nil,
                             **remainder)
     appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
     refrigerator = XMLHelper.add_element(appliances, "Refrigerator")
     sys_id = XMLHelper.add_element(refrigerator, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
     XMLHelper.add_element(refrigerator, "Location", location)
-    XMLHelper.add_element(refrigerator, "RatedAnnualkWh", Float(rated_annual_kwh))
+    XMLHelper.add_element(refrigerator, "RatedAnnualkWh", Float(rated_annual_kwh)) unless rated_annual_kwh.nil?
+    HPXML.add_extension(parent: refrigerator,
+                        extensions: { "AdjustedAnnualkWh": to_float_or_nil(adjusted_annual_kwh) })
 
     return refrigerator
   end
@@ -1515,7 +1518,8 @@ class HPXML
 
     return { :id => HPXML.get_id(refrigerator),
              :location => XMLHelper.get_value(refrigerator, "Location"),
-             :rated_annual_kwh => to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh")) }
+             :rated_annual_kwh => to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh")),
+             :adjusted_annual_kwh => to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh")) }
   end
 
   def self.add_cooking_range(hpxml:,

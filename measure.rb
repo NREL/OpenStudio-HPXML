@@ -1811,7 +1811,10 @@ class OSModel
     refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
     if not refrigerator_values.nil?
       fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
-      fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+      fridge_annual_kwh = refrigerator_values[:adjusted_annual_kwh]
+      if fridge_annual_kwh.nil?
+        fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+      end
     else
       fridge_annual_kwh = fridge_space = nil
     end
@@ -2919,6 +2922,8 @@ class OSModel
       next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
 
       duct_side = side_map[duct_leakage_values[:duct_type]]
+      next if duct_side.nil?
+
       leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
     end
 
@@ -2931,6 +2936,8 @@ class OSModel
 
       # Calculate total duct area in unconditioned spaces
       duct_side = side_map[ducts_values[:duct_type]]
+      next if duct_side.nil?
+
       total_duct_area[duct_side] += ducts_values[:duct_surface_area]
     end
 
@@ -2939,6 +2946,8 @@ class OSModel
       next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
 
       duct_side = side_map[ducts_values[:duct_type]]
+      next if duct_side.nil?
+
       duct_area = ducts_values[:duct_surface_area]
       duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
       # Apportion leakage to individual ducts by surface area
