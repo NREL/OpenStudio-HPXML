@@ -254,6 +254,59 @@ class HEScoreRulesetTest < MiniTest::Test
 
   end
 
+  def test_dhw_lookup
+    small_number = 0.00000000001
+    eff1 = lookup_water_heater_efficiency(2006, "electricity")
+    assert_in_epsilon(eff1, 0.9, small_number)
+
+    eff2 = lookup_water_heater_efficiency(1998, "natural gas")
+    assert_in_epsilon(eff2, 0.501, small_number)
+
+    eff3 = lookup_water_heater_efficiency(2007, "propane")
+    assert_in_epsilon(eff3, 0.55, small_number)
+
+    eff4 = lookup_water_heater_efficiency(1989, "fuel oil")
+    assert_in_epsilon(eff4, 0.54, small_number)
+
+    eff5 = lookup_water_heater_efficiency(nil, "natural gas", "energy_star")
+    assert_in_epsilon(eff5, 0.67, small_number)
+
+    eff6 = lookup_water_heater_efficiency(nil, "propane", "energy_star")
+    assert_in_epsilon(eff6, 0.67, small_number)
+
+    eff7 = lookup_water_heater_efficiency(nil, "electricity", "energy_star")
+    assert_in_epsilon(eff7, 2.76, small_number)
+
+    err8 = assert_raises RuntimeError do
+      lookup_water_heater_efficiency(2006, "unicorn tears")
+    end
+    assert_match(/Unexpected fuel_type/, err8.message)
+
+    err9 = assert_raises RuntimeError do
+      lookup_water_heater_efficiency(2006, "electricity", "bogus performance_id")
+    end
+    assert_match(/Invalid performance_id/, err9.message)
+
+    err10 = assert_raises RuntimeError do
+      lookup_water_heater_efficiency(nil, "fuel oil", "energy_star")
+    end
+    assert_match(/Could not lookup default water heating efficiency/, err10.message)
+
+    ["natural gas", "electricity", "propane", "fuel oil"].each do |fuel_type|
+      assert_in_epsilon(
+        lookup_water_heater_efficiency(2010, fuel_type),
+        lookup_water_heater_efficiency(2011, fuel_type),
+        small_number
+      )
+      assert_in_epsilon(
+        lookup_water_heater_efficiency(1971, fuel_type),
+        lookup_water_heater_efficiency(1972, fuel_type),
+        small_number
+      )
+    end
+
+  end
+
   def _test_measure(args_hash)
     # create an instance of the measure
     measure = HEScoreMeasure.new
