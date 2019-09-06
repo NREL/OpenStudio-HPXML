@@ -730,7 +730,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       clg_cap += hp_cap if hp_cap > 0
       htg_cap += hp_cap if hp_cap > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
-      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 8.5
+      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15
         has_multispeed_dx_heating_coil = true
       end
       if hp_type == "ground-to-air"

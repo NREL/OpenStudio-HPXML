@@ -2256,11 +2256,7 @@ class OSModel
         seer = heat_pump_values[:cooling_efficiency_seer]
         hspf = heat_pump_values[:heating_efficiency_hspf]
 
-        if load_frac_cool > 0
-          num_speeds = get_ashp_num_speeds_by_seer(seer)
-        else
-          num_speeds = get_ashp_num_speeds_by_hspf(hspf)
-        end
+        num_speeds = get_ashp_num_speeds_by_seer(seer)
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
@@ -3900,16 +3896,6 @@ def get_ashp_num_speeds_by_seer(seer)
   elsif seer <= 21
     return "2-Speed"
   elsif seer > 21
-    return "Variable-Speed"
-  end
-end
-
-def get_ashp_num_speeds_by_hspf(hspf)
-  if hspf <= 8.5
-    return "1-Speed"
-  elsif hspf <= 9.5
-    return "2-Speed"
-  elsif hspf > 9.5
     return "Variable-Speed"
   end
 end
