@@ -303,7 +303,7 @@ class OSModel
     success = add_residual_hvac(runner, model, building)
     return false if not success
 
-    success = add_setpoints(runner, model, building, weather, spaces)
+    success = add_setpoints(runner, model, building, weather)
     return false if not success
 
     success = add_ceiling_fans(runner, model, building, spaces)
@@ -2389,33 +2389,32 @@ class OSModel
 
   def self.add_residual_hvac(runner, model, building)
     if @use_only_ideal_air
-      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, 1, 1, @living_zone)
+      success = HVAC.apply_ideal_air_loads(model, runner, 1, 1, @living_zone)
       return false if not success
 
       return true
     end
 
-    @total_frac_remaining_cool_load_served = 0 if @total_frac_remaining_cool_load_served >= 0.99
-    @total_frac_remaining_heat_load_served = 0 if @total_frac_remaining_heat_load_served >= 0.99
+    # Adds an ideal air system to meet either:
+    # 1. Any expected unmet load (i.e., because the sum of fractions load served is less than 1), or
+    # 2. Any unexpected load (i.e., because the HVAC systems are undersized to meet the load)
+    #
+    # Addressing #2 ensures we can correctly calculate heating/cooling loads without having to run
+    # an additional EnergyPlus simulation solely for that purpose, as well as allows us to report
+    # the unmet load (i.e., the energy delivered by the ideal air system).
+    if @total_frac_remaining_cool_load_served < 1
+      sequential_cool_load_frac = 1
+    else
+      sequential_cool_load_frac = 0 # no cooling system, don't add ideal air for cooling either
+    end
 
-    # Only add ideal air if heating/cooling system doesn't meet entire load
-    if @total_frac_remaining_heat_load_served > 0.01 or @total_frac_remaining_cool_load_served > 0.01
-      if @total_frac_remaining_cool_load_served > 0.01
-        sequential_cool_load_frac = 1
-      else
-        sequential_cool_load_frac = 0
-      end
-
-      if @total_frac_remaining_heat_load_served > 0.01
-        sequential_heat_load_frac = 1
-      else
-        sequential_heat_load_frac = 0
-      end
-      success = HVAC.apply_ideal_air_loads(model, runner,
-                                           @total_frac_remaining_cool_load_served,
-                                           @total_frac_remaining_heat_load_served,
-                                           sequential_cool_load_frac,
-                                           sequential_heat_load_frac,
+    if @total_frac_remaining_heat_load_served < 1
+      sequential_heat_load_frac = 1
+    else
+      sequential_heat_load_frac = 0 # no heating system, don't add ideal air for heating either
+    end
+    if sequential_heat_load_frac > 0 or sequential_cool_load_frac > 0
+      success = HVAC.apply_ideal_air_loads(model, runner, sequential_cool_load_frac, sequential_heat_load_frac,
                                            @living_zone)
       return false if not success
     end
@@ -2423,7 +2422,7 @@ class OSModel
     return true
   end
 
-  def self.add_setpoints(runner, model, building, weather, spaces)
+  def self.add_setpoints(runner, model, building, weather)
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
 
@@ -3051,9 +3050,6 @@ class OSModel
       end
     end
 
-    # Add cooling and heating load output
-    add_ems_cooling_heating_load_output(model)
-
     # Add output variables to model
     @hvac_map.each do |sys_id, hvac_objects|
       hvac_output_vars.each do |hvac_output_var|
@@ -3092,47 +3088,6 @@ class OSModel
         end
       end
     end
-  end
-
-  def self.add_ems_cooling_heating_load_output(model)
-    # sensors
-    load_rate_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
-    load_rate_sensor.setName("#{@living_zone.name} Sensible Load Rate")
-    load_rate_sensor.setKeyName(@living_zone.name.to_s)
-
-    # program
-    load_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    load_program.setName("#{@living_zone.name} clg htg load output program")
-    load_program.addLine("Set #{@living_zone.name}_htg_load = 0")
-    load_program.addLine("Set #{@living_zone.name}_clg_load = 0")
-    load_program.addLine("If #{load_rate_sensor.name} > 0")
-    load_program.addLine("  Set #{@living_zone.name}_htg_load = #{load_rate_sensor.name} * 3600")
-    load_program.addLine("Else")
-    load_program.addLine("  Set #{@living_zone.name}_clg_load = - #{load_rate_sensor.name} * 3600")
-    load_program.addLine("EndIf")
-
-    # ems output variables
-    ['clg', 'htg'].each do |load_type|
-      ems_output_load = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{@living_zone.name}_#{load_type}_load")
-      if load_type == 'htg'
-        ems_output_load.setName(Constants.EMSOutputNameHeatingLoad)
-      else
-        ems_output_load.setName(Constants.EMSOutputNameCoolingLoad)
-      end
-      ems_output_load.setTypeOfDataInVariable("Summed")
-      ems_output_load.setUpdateFrequency("ZoneTimestep")
-      ems_output_load.setEMSProgramOrSubroutineName(load_program)
-      ems_output_load.setUnits("J")
-
-      # add output variable to model
-      outputVariable = OpenStudio::Model::OutputVariable.new(ems_output_load.name.to_s, model)
-      outputVariable.setReportingFrequency('runperiod')
-      outputVariable.setKeyValue('*')
-    end
-    load_program_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    load_program_manager.setName("#{@living_zone.name} load program calling manager")
-    load_program_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
-    load_program_manager.addProgram(load_program)
   end
 
   def self.write_mapping(map, map_tsv_path)

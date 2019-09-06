@@ -65,6 +65,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     _test_hrv_erv_inputs(this_dir, all_results)
+    _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
   end
 
   def test_invalid
@@ -312,6 +313,13 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
     results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+
+    # Obtain Heating/Cooling loads
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Heating:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    results[["Load", "Heating", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Cooling:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    results[["Load", "Cooling", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
 
     sqlFile.close
 
@@ -762,7 +770,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if htg_load_frac == 0
       found_htg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Heating' and k[0] != 'Capacity'
+        next unless k[1] == 'Heating' and k[0] != 'Capacity' and k[0] != "Load"
 
         found_htg_energy = true
       end
@@ -771,7 +779,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if clg_load_frac == 0
       found_clg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Cooling' and k[0] != 'Capacity'
+        next unless k[1] == 'Cooling' and k[0] != 'Capacity' and k[0] != "Load"
 
         found_clg_energy = true
       end
@@ -1008,6 +1016,35 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
+  def _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
+    puts "Heating/Cooling Loads test results:"
+
+    base_xml = "#{hvac_base_dir}/base-hvac-ideal-air-base.xml"
+    results_base = all_results[File.absolute_path(base_xml)]
+    return if results_base.nil?
+
+    xmls.sort.each do |xml|
+      next if not xml.include? hvac_base_dir
+
+      xml_compare = File.absolute_path(xml)
+      results_compare = all_results[xml_compare]
+      next if results_compare.nil?
+
+      # Compare results
+      results_compare.keys.each do |k|
+        next if not ["Heating", "Cooling"].include? k[1]
+        next if not ["Load"].include? k[0]
+
+        result_base = results_base[k].to_f
+        result_compare = results_compare[k].to_f
+        next if result_base <= 0.1 or result_compare <= 0.1
+
+        _display_result_delta(xml, result_base, result_compare, k)
+        assert_in_delta(result_base, result_compare, 0.25)
+      end
+    end
+  end
+
   def _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     # Compare end use results for three of an HVAC system to results for one HVAC system.
     puts "Multiple HVAC test results:"
@@ -1023,8 +1060,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       results_x3.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
+        next unless ["Heating", "Cooling"].include? k[1]
+        next unless ["General"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == "Load"
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
@@ -1082,8 +1120,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       results_33.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
+        next unless ["Heating", "Cooling"].include? k[1]
+        next unless ["General"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == "Load"
 
         result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f
