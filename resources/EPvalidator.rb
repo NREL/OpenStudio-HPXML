@@ -194,10 +194,10 @@ class EnergyPlusValidator
         "Azimuth" => one,
         "UFactor" => one,
         "SHGC" => one,
+        "InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
+        "InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
         "Overhangs" => zero_or_one, # See [WindowOverhang]
         "AttachedToWall" => one,
-        "extension/InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
-        "extension/InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
       },
 
       ## [WindowOverhang]
