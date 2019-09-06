@@ -653,12 +653,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
          'base-foundation-slab.xml',
          'base-foundation-unconditioned-basement.xml',
          'base-foundation-unvented-crawlspace.xml',
-         'base-foundation-vented-crawlspace.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+         'base-foundation-vented-crawlspace.xml'].include? hpxml_file
     building_construction_values[:number_of_conditioned_floors] -= 1
     building_construction_values[:conditioned_floor_area] -= 1350
     building_construction_values[:conditioned_building_volume] -= 1350 * 8
@@ -802,12 +797,7 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :emittance => 0.92,
                            :insulation_assembly_r_value => 23.0 }]
   elsif ['base-foundation-ambient.xml',
-         'base-foundation-slab.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+         'base-foundation-slab.xml'].include? hpxml_file
     rim_joists_values = []
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..rim_joists_values.size - 1
@@ -1053,12 +1043,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :insulation_distance_to_bottom => 4,
                                  :insulation_r_value => 8.9 }
   elsif ['base-foundation-ambient.xml',
-         'base-foundation-slab.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+         'base-foundation-slab.xml'].include? hpxml_file
     foundation_walls_values = []
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     foundation_walls_values << foundation_walls_values[0].dup
@@ -1226,12 +1211,7 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :carpet_r_value => 0 }]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
-  elsif ['base-foundation-slab.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+  elsif ['base-foundation-slab.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "living space"
     slabs_values[0][:under_slab_insulation_width] = nil
     slabs_values[0][:under_slab_insulation_spans_entire_slab] = true

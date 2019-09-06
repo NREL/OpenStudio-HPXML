@@ -879,7 +879,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cw, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -894,7 +894,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cd, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -909,7 +909,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(refr, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
@@ -999,6 +999,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
         results = all_results[xml]
+        next if results.nil?
 
         # Compare results
         results_base.keys.each do |k|

@@ -185,11 +185,9 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.7</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.85</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.7</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.85</InteriorShadingFactorWinter>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth'/>
@@ -197,11 +195,9 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.01</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.99</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.01</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.99</InteriorShadingFactorWinter>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast'/>
@@ -209,11 +205,9 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.99</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.01</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.99</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.01</InteriorShadingFactorWinter>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest'/>
@@ -221,11 +215,9 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.85</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.7</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.85</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.7</InteriorShadingFactorWinter>
-            </extension>
           </Window>
         </Windows>
         <Doors>
