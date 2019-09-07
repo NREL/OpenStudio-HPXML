@@ -1589,7 +1589,8 @@ class Airflow
     wh_sch_sensor.setName("#{Constants.ObjectNameMechanicalVentilation} wh sch s")
     wh_sch_sensor.setKeyName(model.alwaysOnDiscreteSchedule.name.to_s)
 
-    if mech_vent.type == Constants.VentTypeBalanced
+    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness > 0 and mech_vent.whole_house_cfm > 0
+      # ERV/HRV; balanced systems without energy recovery are modeled via EMS
 
       balanced_flow_rate = [UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s"), 0.0000001].max
 
@@ -1824,18 +1825,15 @@ class Airflow
       infil_program.addLine("Set Qout = Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
       infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
       infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
-      infil_program.addLine("Set Qb = QWHV + (@Min Qout Qin)")
     else
       if mech_vent.type == Constants.VentTypeExhaust
         infil_program.addLine("Set Qout = QWHV+Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
         infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
         infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
-        infil_program.addLine("Set Qb = (@Min Qout Qin)")
       else # mech_vent.type == Constants.VentTypeSupply
         infil_program.addLine("Set Qout = Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
         infil_program.addLine("Set Qin = QWHV+QhpwhIn+QductsIn")
         infil_program.addLine("Set Qu = @Abs (Qout- Qin)")
-        infil_program.addLine("Set Qb = (@Min Qout Qin)")
       end
     end
     if mech_vent.type != Constants.VentTypeCFIS
@@ -1849,7 +1847,12 @@ class Airflow
     infil_program.addLine("Set #{range_hood_fan_actuator.name} = Qrange * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
     infil_program.addLine("Set #{bath_exhaust_sch_fan_actuator.name} = Qbath * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
     infil_program.addLine("Set Q_acctd_for_elsewhere = QhpwhOut+QhpwhIn+QductsOut+QductsIn")
-    infil_program.addLine("Set #{infil_flow_actuator.name} = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere")
+    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness == 0 and mech_vent.whole_house_cfm > 0
+      # Balanced system without energy recovery, account for airflow here
+      infil_program.addLine("Set #{infil_flow_actuator.name} = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere+QWHV")
+    else
+      infil_program.addLine("Set #{infil_flow_actuator.name} = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere")
+    end
     infil_program.addLine("Set #{infil_flow_actuator.name} = (@Max #{infil_flow_actuator.name} 0)")
 
     return infil_program

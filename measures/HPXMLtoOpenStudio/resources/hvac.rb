@@ -1879,8 +1879,7 @@ class HVAC
     return true
   end
 
-  def self.apply_ideal_air_loads(model, runner, frac_cool_load_served, frac_heat_load_served,
-                                 sequential_cool_load_frac, sequential_heat_load_frac,
+  def self.apply_ideal_air_loads(model, runner, sequential_cool_load_frac, sequential_heat_load_frac,
                                  control_zone)
 
     obj_name = Constants.ObjectNameIdealAirSystem
@@ -1901,8 +1900,6 @@ class HVAC
     control_zone.setSequentialHeatingFraction(ideal_air, sequential_heat_load_frac.round(5))
 
     # Store info for HVAC Sizing measure
-    ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
-    ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
     ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameIdealAirSystem)
     ideal_air.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameIdealAirSystem)
 
