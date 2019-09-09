@@ -3,22 +3,6 @@ require_relative "unit_conversions"
 require_relative "util"
 
 class Geometry
-  def self.initialize_transformation_matrix(m)
-    m[0, 0] = 1
-    m[1, 1] = 1
-    m[2, 2] = 1
-    m[3, 3] = 1
-    return m
-  end
-
-  def self.make_polygon(*pts)
-    p = OpenStudio::Point3dVector.new
-    pts.each do |pt|
-      p << pt
-    end
-    return p
-  end
-
   def self.get_zone_volume(zone, runner = nil)
     if zone.isVolumeAutocalculated or not zone.volume.is_initialized
       # Calculate volume from spaces
@@ -36,20 +20,6 @@ class Geometry
     return volume
   end
 
-  def self.get_above_grade_conditioned_volume(model, runner = nil)
-    volume = 0
-    model.getThermalZones.each do |zone|
-      next if not (self.zone_is_conditioned(zone) and self.zone_is_above_grade(zone))
-
-      volume += self.get_zone_volume(zone, runner)
-    end
-    if volume == 0 and not runner.nil?
-      runner.registerError("Could not find any above-grade conditioned volume.")
-      return nil
-    end
-    return volume
-  end
-
   # Calculates space heights as the max z coordinate minus the min z coordinate
   def self.get_height_of_spaces(spaces)
     minzs = []
@@ -60,6 +30,15 @@ class Geometry
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, "m", "ft")
     end
     return maxzs.max - minzs.min
+  end
+
+  def self.get_max_z_of_spaces(spaces)
+    maxzs = []
+    spaces.each do |space|
+      zvalues = self.getSurfaceZValues(space.surfaces)
+      maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, "m", "ft")
+    end
+    return maxzs.max
   end
 
   # Calculates the surface height as the max z coordinate minus the min z coordinate
@@ -76,39 +55,6 @@ class Geometry
         return false
       end
     end
-  end
-
-  # Returns true if all spaces in zone are fully above grade
-  def self.zone_is_above_grade(zone)
-    spaces_are_above_grade = []
-    zone.spaces.each do |space|
-      spaces_are_above_grade << self.space_is_above_grade(space)
-    end
-    if spaces_are_above_grade.all?
-      return true
-    end
-
-    return false
-  end
-
-  # Returns true if all spaces in zone are either fully or partially below grade
-  def self.zone_is_below_grade(zone)
-    return !self.zone_is_above_grade(zone)
-  end
-
-  def self.get_conditioned_above_and_below_grade_zones(thermal_zones)
-    conditioned_living_zones = []
-    conditioned_basement_zones = []
-    thermal_zones.each do |thermal_zone|
-      next unless self.zone_is_conditioned(thermal_zone)
-
-      if self.zone_is_above_grade(thermal_zone)
-        conditioned_living_zones << thermal_zone
-      elsif self.zone_is_below_grade(thermal_zone)
-        conditioned_basement_zones << thermal_zone
-      end
-    end
-    return conditioned_living_zones, conditioned_basement_zones
   end
 
   def self.get_thermal_zones_from_spaces(spaces)
@@ -139,7 +85,7 @@ class Geometry
   end
 
   def self.is_conditioned_space_type(space_type)
-    if [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement].include? space_type
+    if [Constants.SpaceTypeLiving].include? space_type
       return true
     end
 
@@ -291,10 +237,6 @@ class Geometry
 
   def self.is_unvented_crawl(space_or_zone)
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedCrawl)
-  end
-
-  def self.is_conditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeConditionedBasement)
   end
 
   def self.is_unconditioned_basement(space_or_zone)

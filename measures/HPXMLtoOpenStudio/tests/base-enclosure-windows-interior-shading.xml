@@ -158,7 +158,6 @@
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
             <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
@@ -186,11 +185,9 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.7</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.85</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.7</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.85</InteriorShadingFactorWinter>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth'/>
@@ -198,11 +195,9 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.01</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.99</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.01</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.99</InteriorShadingFactorWinter>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast'/>
@@ -210,11 +205,9 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.99</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.01</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.99</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.01</InteriorShadingFactorWinter>
-            </extension>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest'/>
@@ -222,11 +215,9 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
+            <InteriorShadingFactorSummer>0.85</InteriorShadingFactorSummer>
+            <InteriorShadingFactorWinter>0.7</InteriorShadingFactorWinter>
             <AttachedToWall idref='Wall'/>
-            <extension>
-              <InteriorShadingFactorSummer>0.85</InteriorShadingFactorSummer>
-              <InteriorShadingFactorWinter>0.7</InteriorShadingFactorWinter>
-            </extension>
           </Window>
         </Windows>
         <Doors>
@@ -331,7 +322,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>90.0</PipingLength>
+                <PipingLength>50.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>
@@ -426,6 +417,16 @@
           <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
         </LightingGroup>
       </Lighting>
+      <MiscLoads>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc'/>
+          <PlugLoadType>other</PlugLoadType>
+        </PlugLoad>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc2'/>
+          <PlugLoadType>TV other</PlugLoadType>
+        </PlugLoad>
+      </MiscLoads>
     </BuildingDetails>
   </Building>
 </HPXML>
