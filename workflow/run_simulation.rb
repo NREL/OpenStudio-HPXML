@@ -166,7 +166,7 @@ def create_output(designdir, resultsdir)
     end
   end
 
-  # Add disaggregated heating/cooling fan and pump energy
+  # Subtract out disaggregated heating/cooling fan and pump energy from hot water electricity end use
   hes_resource_type = :electric
   to_units = get_fuel_site_units(hes_resource_type)
   for hes_end_use in [:heating, :cooling]
@@ -180,8 +180,13 @@ def create_output(designdir, resultsdir)
       result = UnitConversions.convert(sql_result, "J", to_units) # convert from J to site energy units
       result_gj = sql_result / 1000000000.0 # convert from J to GJ
 
+      # Add to heating/cooling end use
       results[[hes_end_use, hes_resource_type]][i - 1] += result
       results_gj[[hes_end_use, hes_resource_type]][i - 1] += result_gj
+
+      # Subtract from hot water end use
+      results[[:hot_water, hes_resource_type]][i - 1] -= result
+      results_gj[[:hot_water, hes_resource_type]][i - 1] -= result_gj
     end
   end
 
@@ -224,7 +229,7 @@ def create_output(designdir, resultsdir)
     hes_end_use, hes_resource_type = hes_key
     to_units = get_fuel_site_units(hes_resource_type)
     annual_value = values.inject(0, :+)
-    next if annual_value == 0
+    next if annual_value <= 0.01
 
     values.each_with_index do |value, idx|
       end_use = { "quantity" => value,

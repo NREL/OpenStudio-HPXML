@@ -12,7 +12,7 @@ def get_output_meter_requests
   # Mapping between HEScore output [end_use, resource_type] and a list of E+ output meters
   return {
     # Heating
-    [:heating, :electric] => ["Heating:Electricity"], # Note: Heating fan/pump is later added here
+    [:heating, :electric] => ["Heating:Electricity"],
     [:heating, :natural_gas] => ['Heating:Gas'],
     [:heating, :lpg] => ['Heating:Propane'],
     [:heating, :fuel_oil] => ['Heating:FuelOil#1'],
@@ -20,10 +20,12 @@ def get_output_meter_requests
     [:heating, :pellet_wood] => ['Heating:OtherFuel2'],
 
     # Cooling
-    [:cooling, :electric] => ["Cooling:Electricity"], # Note: Cooling fan/pump is later added here
+    [:cooling, :electric] => ["Cooling:Electricity"],
 
     # Hot Water
-    [:hot_water, :electric] => ["WaterSystems:Electricity"],
+    [:hot_water, :electric] => ["WaterSystems:Electricity",
+                                "Fans:Electricity",         # E.g., HPWH fan energy. Note: Heating and cooling fan/pump is subtracted out from here
+                                "Pumps:Electricity"],       # E.g., Combi boiler pump energy for hot water. Note: Heating and cooling fan/pump is subtracted out from here
     [:hot_water, :natural_gas] => ["WaterSystems:Gas"],
     [:hot_water, :lpg] => ["WaterSystems:Propane"],
     [:hot_water, :fuel_oil] => ["WaterSystems:FuelOil#1"],

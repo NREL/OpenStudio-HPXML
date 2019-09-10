@@ -151,6 +151,10 @@ class HEScoreTest < Minitest::Unit::TestCase
     hw_fuels = []
     hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |hw_sys|
       hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, "FuelType")]
+      hw_type = XMLHelper.get_value(hw_sys, "WaterHeaterType")
+      if hw_type.include? "boiler" or hw_type == "heat pump water heater"
+        hw_fuels << fuel_map["electricity"] # fan/pump
+      end
     end
 
     # Get HPXML values for PV
