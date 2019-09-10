@@ -138,7 +138,9 @@ class HEScoreTest < Minitest::Unit::TestCase
     htg_fuels = []
     hvac_plant.elements.each("HeatingSystem[FractionHeatLoadServed>0]") do |htg_sys|
       htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, "HeatingSystemFuel")]
-      htg_fuels << fuel_map["electricity"] # fan/pump
+      if !htg_sys.elements["HeatingSystemType/Furnace"].nil? or !htg_sys.elements["HeatingSystemType/Boiler"].nil?
+        htg_fuels << fuel_map["electricity"] # fan/pump
+      end
     end
     hvac_plant.elements.each("HeatPump[FractionHeatLoadServed>0]") do |hp|
       htg_fuels << fuel_map["electricity"]
