@@ -1073,13 +1073,6 @@ class HVACSizing
 
     return nil if zone_loads.nil?
 
-    if Geometry.zone_is_below_grade(thermal_zone)
-      zone_loads.Heat_Infil = 0
-      zone_loads.Cool_Infil_Sens = 0
-      zone_loads.Cool_Infil_Lat = 0
-      return zone_loads
-    end
-
     # Per ANSI/RESNET/ICC 301
     ach_nat = get_feature(runner, thermal_zone, Constants.SizingInfoZoneInfiltrationACH, 'double')
     return nil if ach_nat.nil?
@@ -1247,7 +1240,7 @@ class HVACSizing
     if duct.LocationSpace.nil? # Outside
       dse_Fregain = 0.0
 
-    elsif Geometry.is_unconditioned_basement(duct.LocationSpace) or Geometry.is_conditioned_basement(duct.LocationSpace)
+    elsif Geometry.is_unconditioned_basement(duct.LocationSpace)
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
@@ -2383,15 +2376,13 @@ class HVACSizing
     equips = {}
 
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
-    control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
+    control_zone = HVAC.get_control_zone(thermal_zones)
 
-    control_slave_zones_hash.keys.each do |control_zone|
-      HVAC.existing_equipment(model, runner, control_zone).each do |equip|
-        next if equips.keys.include? equip
-        next if equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
+    HVAC.existing_equipment(model, runner, control_zone).each do |equip|
+      next if equips.keys.include? equip
+      next if equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
 
-        equips[equip] = control_zone
-      end
+      equips[equip] = control_zone
     end
 
     # Process each equipment
@@ -2673,32 +2664,6 @@ class HVACSizing
       elsif not supp_htg_coil.nil?
         runner.registerError("Unexpected supplemental heating coil: #{supp_htg_coil.name}.")
         return nil
-      end
-    end
-
-    # Populate other zone objects (e.g., in a conditioned basement) related to a given HVAC object
-    hvacs.each do |hvac|
-      hvac.Objects.each do |object|
-        other_zone_object = get_feature(runner, object, Constants.SizingInfoHVACOtherZoneObject, 'string', false)
-        next if other_zone_object.nil?
-
-        thermal_zones.each do |thermal_zone|
-          thermal_zone.equipment.each do |equip|
-            next unless equip.handle.to_s == other_zone_object
-
-            if equip.to_ZoneHVACPackagedTerminalAirConditioner.is_initialized
-              hvac.Objects << equip.to_ZoneHVACPackagedTerminalAirConditioner.get
-            elsif equip.to_ZoneHVACBaseboardConvectiveWater.is_initialized
-              hvac.Objects << equip.to_ZoneHVACBaseboardConvectiveWater.get
-            elsif equip.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-              hvac.Objects << equip.to_ZoneHVACBaseboardConvectiveElectric.get
-            elsif equip.to_AirLoopHVACUnitarySystem.is_initialized
-              hvac.Objects << equip.to_AirLoopHVACUnitarySystem.get
-            else
-              fail "Unexpected object type."
-            end
-          end
-        end
       end
     end
 

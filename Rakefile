@@ -63,6 +63,7 @@ def create_hpxmls
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
+    'base-appliances-refrigerator-adjusted.xml' => 'base.xml',
     'base-appliances-washer-imef.xml' => 'base.xml',
     'base-atticroof-cathedral.xml' => 'base.xml',
     'base-atticroof-conditioned.xml' => 'base.xml',
@@ -277,6 +278,7 @@ def create_hpxmls
     'hvac_base/base-hvac-furnace-gas-only-base.xml' => 'base-hvac-furnace-gas-only.xml',
     'hvac_base/base-hvac-furnace-gas-room-ac-base.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'hvac_base/base-hvac-ground-to-air-heat-pump-base.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'hvac_base/base-hvac-ideal-air-base.xml' => 'base-hvac-ideal-air.xml',
     'hvac_base/base-hvac-mini-split-heat-pump-ducted-base.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'hvac_base/base-hvac-mini-split-heat-pump-ductless-base.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'hvac_base/base-hvac-room-ac-only-base.xml' => 'base-hvac-room-ac-only.xml',
@@ -652,12 +654,7 @@ def get_hpxml_file_building_construction_values(hpxml_file, building_constructio
          'base-foundation-slab.xml',
          'base-foundation-unconditioned-basement.xml',
          'base-foundation-unvented-crawlspace.xml',
-         'base-foundation-vented-crawlspace.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+         'base-foundation-vented-crawlspace.xml'].include? hpxml_file
     building_construction_values[:number_of_conditioned_floors] -= 1
     building_construction_values[:conditioned_floor_area] -= 1350
     building_construction_values[:conditioned_building_volume] -= 1350 * 8
@@ -801,12 +798,7 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :emittance => 0.92,
                            :insulation_assembly_r_value => 23.0 }]
   elsif ['base-foundation-ambient.xml',
-         'base-foundation-slab.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+         'base-foundation-slab.xml'].include? hpxml_file
     rim_joists_values = []
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..rim_joists_values.size - 1
@@ -1052,12 +1044,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :insulation_distance_to_bottom => 4,
                                  :insulation_r_value => 8.9 }
   elsif ['base-foundation-ambient.xml',
-         'base-foundation-slab.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+         'base-foundation-slab.xml'].include? hpxml_file
     foundation_walls_values = []
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     foundation_walls_values << foundation_walls_values[0].dup
@@ -1225,12 +1212,7 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :carpet_r_value => 0 }]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
-  elsif ['base-foundation-slab.xml'].include? hpxml_file or
-        hpxml_file.include? 'hvac_partial' or
-        hpxml_file.include? 'hvac_multiple' or
-        hpxml_file.include? 'hvac_base' or
-        hpxml_file.include? 'hvac_dse' or
-        hpxml_file.include? 'hvac_load_fracs'
+  elsif ['base-foundation-slab.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "living space"
     slabs_values[0][:under_slab_insulation_width] = nil
     slabs_values[0][:under_slab_insulation_spans_entire_slab] = true
@@ -2677,6 +2659,8 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
     refrigerator_values = { :id => "Refrigerator",
                             :location => "living space",
                             :rated_annual_kwh => 650 }
+  elsif ['base-appliances-refrigerator-adjusted.xml'].include? hpxml_file
+    refrigerator_values[:adjusted_annual_kwh] = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
     refrigerator_values = {}
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
@@ -2741,14 +2725,19 @@ end
 
 def get_hpxml_file_plug_loads_values(hpxml_file, plug_loads_values)
   if ['base-misc-loads-detailed.xml'].include? hpxml_file
-    plug_loads_values << { :id => "PlugLoadMisc",
+    plug_loads_values = [{ :id => "PlugLoadMisc",
                            :plug_load_type => "other",
                            :kWh_per_year => 7302,
                            :frac_sensible => 0.82,
-                           :frac_latent => 0.18 }
-    plug_loads_values << { :id => "PlugLoadMisc2",
+                           :frac_latent => 0.18 },
+                         { :id => "PlugLoadMisc2",
                            :plug_load_type => "TV other",
-                           :kWh_per_year => 400 }
+                           :kWh_per_year => 400 }]
+  else
+    plug_loads_values = [{ :id => "PlugLoadMisc",
+                           :plug_load_type => "other" },
+                         { :id => "PlugLoadMisc2",
+                           :plug_load_type => "TV other" }]
   end
   return plug_loads_values
 end
