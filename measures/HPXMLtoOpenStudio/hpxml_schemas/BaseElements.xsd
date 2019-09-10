@@ -4395,7 +4395,8 @@ master meter with sub-metering = tenant sub-metered by building owner</xs:docume
 				type="WindowThirdPartyCertification"/>
 			<xs:element minOccurs="0" name="VisibleTransmittance" type="Fraction"/>
 			<xs:element minOccurs="0" name="InteriorShading" type="InteriorShading"/>
-			<xs:element minOccurs="0" name="InteriorShadingFactor" type="Fraction"/>
+			<xs:element minOccurs="0" name="InteriorShadingFactorSummer" type="Fraction"/>
+			<xs:element minOccurs="0" name="InteriorShadingFactorWinter" type="Fraction"/>
 			<xs:element minOccurs="0" name="ExteriorShading" type="ExteriorShading"/>
 			<xs:element minOccurs="0" name="Overhangs">
 				<xs:complexType>
