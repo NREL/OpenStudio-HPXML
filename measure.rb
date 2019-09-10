@@ -3056,15 +3056,33 @@ class OSModel
     end
 
     # Add output variables to model
+    ems_objects = []
     @hvac_map.each do |sys_id, hvac_objects|
-      hvac_output_vars.each do |hvac_output_var|
-        add_output_variables(model, hvac_output_var, hvac_objects)
+      hvac_objects.each do |hvac_object|
+        if hvac_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+          ems_objects << hvac_object
+        else
+          hvac_output_vars.each do |hvac_output_var|
+            add_output_variable(model, hvac_output_var, hvac_object)
+          end
+        end
       end
     end
     @dhw_map.each do |sys_id, dhw_objects|
-      dhw_output_vars.each do |dhw_output_var|
-        add_output_variables(model, dhw_output_var, dhw_objects)
+      dhw_objects.each do |dhw_object|
+        if dhw_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+          ems_objects << dhw_object
+        else
+          dhw_output_vars.each do |dhw_output_var|
+            add_output_variable(model, dhw_output_var, dhw_object)
+          end
+        end
       end
+    end
+
+    # Add EMS output variables to model
+    ems_objects.uniq.each do |ems_object|
+      add_output_variable(model, nil, ems_object)
     end
 
     if map_tsv_dir.is_initialized
@@ -3077,20 +3095,18 @@ class OSModel
     return true
   end
 
-  def self.add_output_variables(model, vars, objects)
-    objects.each do |object|
-      if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-        outputVariable = OpenStudio::Model::OutputVariable.new(object.name.to_s, model)
-        outputVariable.setReportingFrequency('runperiod')
-        outputVariable.setKeyValue('*')
-      else
-        next if vars[object.class.to_s].nil?
+  def self.add_output_variable(model, vars, object)
+    if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+      outputVariable = OpenStudio::Model::OutputVariable.new(object.name.to_s, model)
+      outputVariable.setReportingFrequency('runperiod')
+      outputVariable.setKeyValue('*')
+    else
+      return if vars[object.class.to_s].nil?
 
-        vars[object.class.to_s].each do |object_var|
-          outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
-          outputVariable.setReportingFrequency('runperiod')
-          outputVariable.setKeyValue(object.name.to_s)
-        end
+      vars[object.class.to_s].each do |object_var|
+        outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
+        outputVariable.setReportingFrequency('runperiod')
+        outputVariable.setKeyValue(object.name.to_s)
       end
     end
   end
