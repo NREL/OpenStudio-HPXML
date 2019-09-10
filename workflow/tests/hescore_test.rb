@@ -136,9 +136,9 @@ class HEScoreTest < Minitest::Unit::TestCase
     # Get HPXML values for HVAC
     hvac_plant = hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant"]
     htg_fuels = []
-    htg_fuels << fuel_map["electricity"] # fan/pump
     hvac_plant.elements.each("HeatingSystem[FractionHeatLoadServed>0]") do |htg_sys|
       htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, "HeatingSystemFuel")]
+      htg_fuels << fuel_map["electricity"] # fan/pump
     end
     hvac_plant.elements.each("HeatPump[FractionHeatLoadServed>0]") do |hp|
       htg_fuels << fuel_map["electricity"]
