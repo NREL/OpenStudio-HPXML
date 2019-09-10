@@ -12,7 +12,7 @@ def get_output_meter_requests
   # TODO: Add hot water and cold water resource_types? Anything else?
   return {
     # Heating
-    [:heating, :electric] => ["Heating:Electricity"],
+    [:heating, :electric] => ["Heating:Electricity"], # Note: Heating fan/pump is later added here
     [:heating, :natural_gas] => ['Heating:Gas'],
     [:heating, :lpg] => ['Heating:Propane'],
     [:heating, :fuel_oil] => ['Heating:FuelOil#1'],
@@ -20,7 +20,7 @@ def get_output_meter_requests
     [:heating, :pellet_wood] => ['Heating:OtherFuel2'],
 
     # Cooling
-    [:cooling, :electric] => ["Cooling:Electricity"],
+    [:cooling, :electric] => ["Cooling:Electricity"], # Note: Heating fan/pump is later added here
 
     # Hot Water
     [:hot_water, :electric] => ["WaterSystems:Electricity"],
@@ -44,8 +44,7 @@ def get_output_meter_requests
                                "ExteriorLights:Electricity"],
 
     # Circulation
-    [:circulation, :electric] => ["Fans:Electricity",
-                                  "Pumps:Electricity"],
+    [:circulation, :electric] => [],
 
     # Generation
     [:generation, :electric] => ["ElectricityProduced:Facility"]

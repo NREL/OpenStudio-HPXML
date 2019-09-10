@@ -161,6 +161,25 @@ def create_output(designdir, resultsdir)
     end
   end
 
+  # Add disaggregated heating/cooling fan and pump energy
+  hes_resource_type = :electric
+  to_units = get_fuel_site_units(hes_resource_type)
+  for hes_end_use in [:heating, :cooling]
+    for i in 1..12
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName LIKE '%#{Constants.ObjectNameFanPumpDisaggregate(hes_end_use == :cooling)}' AND ReportingFrequency='Monthly' AND VariableUnits='J') AND TimeIndex='#{i}'"
+      sql_result = sqlFile.execAndReturnFirstDouble(query)
+      next unless sql_result.is_initialized
+
+      sql_result = sql_result.get
+
+      result = UnitConversions.convert(sql_result, "J", to_units) # convert from J to site energy units
+      result_gj = sql_result / 1000000000.0 # convert from J to GJ
+
+      results[[hes_end_use, hes_resource_type]][i - 1] += result
+      results_gj[[hes_end_use, hes_resource_type]][i - 1] += result_gj
+    end
+  end
+
   # Error-checking
   net_energy_gj = sqlFile.netSiteEnergy.get - sqlFile.districtHeatingHeating.get - sqlFile.districtCoolingCooling.get
   sum_energy_gj = 0

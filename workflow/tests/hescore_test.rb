@@ -81,6 +81,7 @@ class HEScoreTest < Minitest::Unit::TestCase
   end
 
   def _get_results(parent_dir, runtime)
+    # Retrieve results from results.json
     json_path = File.join(parent_dir, "results", "results.json")
     data = JSON.parse(File.read(json_path))
 
