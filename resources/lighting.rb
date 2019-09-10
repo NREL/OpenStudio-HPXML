@@ -4,7 +4,7 @@ require_relative "unit_conversions"
 
 class Lighting
   def self.apply(model, runner, weather, interior_kwh, garage_kwh, exterior_kwh, cfa, gfa,
-                 conditioned_spaces, garage_spaces)
+                 living_space, garage_space)
     lat = weather.header.Latitude
     long = weather.header.Longitude
     tz = weather.header.Timezone
@@ -125,46 +125,36 @@ class Lighting
 
     # Add lighting to each conditioned space
     if interior_kwh > 0
-      conditioned_spaces.each do |conditioned_space|
-        space_obj_name = "#{Constants.ObjectNameLighting} #{conditioned_space.name.to_s}"
+      space_design_level = sch.calcDesignLevel(sch.maxval * interior_kwh)
 
-        space_ltg_ann = interior_kwh * UnitConversions.convert(conditioned_space.floorArea, "m^2", "ft^2") / cfa
-        space_design_level = sch.calcDesignLevel(sch.maxval * space_ltg_ann)
-
-        # Add lighting
-        ltg_def = OpenStudio::Model::LightsDefinition.new(model)
-        ltg = OpenStudio::Model::Lights.new(ltg_def)
-        ltg.setName(space_obj_name)
-        ltg.setSpace(conditioned_space)
-        ltg_def.setName(space_obj_name)
-        ltg_def.setLightingLevel(space_design_level)
-        ltg_def.setFractionRadiant(0.6)
-        ltg_def.setFractionVisible(0.2)
-        ltg_def.setReturnAirFraction(0.0)
-        ltg.setSchedule(sch.schedule)
-      end
+      # Add lighting
+      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+      ltg = OpenStudio::Model::Lights.new(ltg_def)
+      ltg.setName(Constants.ObjectNameLighting)
+      ltg.setSpace(living_space)
+      ltg_def.setName(Constants.ObjectNameLighting)
+      ltg_def.setLightingLevel(space_design_level)
+      ltg_def.setFractionRadiant(0.6)
+      ltg_def.setFractionVisible(0.2)
+      ltg_def.setReturnAirFraction(0.0)
+      ltg.setSchedule(sch.schedule)
     end
 
     # Add lighting to each garage space
     if garage_kwh > 0
-      garage_spaces.each do |garage_space|
-        space_obj_name = "#{Constants.ObjectNameLighting} #{garage_space.name.to_s}"
+      space_design_level = sch.calcDesignLevel(sch.maxval * garage_kwh)
 
-        space_ltg_ann = garage_kwh * UnitConversions.convert(garage_space.floorArea, "m^2", "ft^2") / gfa
-        space_design_level = sch.calcDesignLevel(sch.maxval * space_ltg_ann)
-
-        # Add lighting
-        ltg_def = OpenStudio::Model::LightsDefinition.new(model)
-        ltg = OpenStudio::Model::Lights.new(ltg_def)
-        ltg.setName(space_obj_name)
-        ltg.setSpace(garage_space)
-        ltg_def.setName(space_obj_name)
-        ltg_def.setLightingLevel(space_design_level)
-        ltg_def.setFractionRadiant(0.6)
-        ltg_def.setFractionVisible(0.2)
-        ltg_def.setReturnAirFraction(0.0)
-        ltg.setSchedule(sch.schedule)
-      end
+      # Add lighting
+      ltg_def = OpenStudio::Model::LightsDefinition.new(model)
+      ltg = OpenStudio::Model::Lights.new(ltg_def)
+      ltg.setName(Constants.ObjectNameLighting)
+      ltg.setSpace(garage_space)
+      ltg_def.setName(Constants.ObjectNameLighting)
+      ltg_def.setLightingLevel(space_design_level)
+      ltg_def.setFractionRadiant(0.6)
+      ltg_def.setFractionVisible(0.2)
+      ltg_def.setReturnAirFraction(0.0)
+      ltg.setSchedule(sch.schedule)
     end
 
     if exterior_kwh > 0
