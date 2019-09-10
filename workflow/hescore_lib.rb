@@ -11,7 +11,7 @@ end
 def get_output_meter_requests
   # Mapping between HEScore output [end_use, resource_type] and a list of E+ output meters
   return {
-    # Heating
+    # Heating Energy
     [:heating, :electric] => ["Heating:Electricity"],
     [:heating, :natural_gas] => ['Heating:Gas'],
     [:heating, :lpg] => ['Heating:Propane'],
@@ -19,40 +19,38 @@ def get_output_meter_requests
     [:heating, :cord_wood] => ['Heating:OtherFuel1'],
     [:heating, :pellet_wood] => ['Heating:OtherFuel2'],
 
-    # Cooling
+    # Cooling Energy
     [:cooling, :electric] => ["Cooling:Electricity"],
 
-    # Hot Water
+    # Hot Water Energy
     [:hot_water, :electric] => ["WaterSystems:Electricity",
-                                "Fans:Electricity",         # E.g., HPWH fan energy. Note: Heating and cooling fan/pump is subtracted out from here
-                                "Pumps:Electricity"],       # E.g., Combi boiler pump energy for hot water. Note: Heating and cooling fan/pump is subtracted out from here
+                                "Fans:Electricity",         # Note: Heating/cooling fan energy is later subtracted out from here
+                                "Pumps:Electricity"],       # Note: Heating/cooling pump energy is later subtracted out from here
     [:hot_water, :natural_gas] => ["WaterSystems:Gas"],
     [:hot_water, :lpg] => ["WaterSystems:Propane"],
     [:hot_water, :fuel_oil] => ["WaterSystems:FuelOil#1"],
 
-    # Large Appliances
+    # Large Appliances Energy
     [:large_appliance, :electric] => ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Electricity"],
 
-    # Small Appliances
-    # Note: large appliances are subtracted out from small appliances later
-    [:small_appliance, :electric] => ["InteriorEquipment:Electricity"],
+    # Small Appliances Energy
+    [:small_appliance, :electric] => ["InteriorEquipment:Electricity"], # Note: large appliances are later subtracted out from small appliances later
 
-    # Lighting
+    # Lighting Energy
     [:lighting, :electric] => ["InteriorLights:Electricity",
                                "ExteriorLights:Electricity"],
 
-    # Circulation
+    # Circulation Energy
     [:circulation, :electric] => [],
 
-    # Generation
+    # Generation Energy
     [:generation, :electric] => ["ElectricityProduced:Facility"],
 
-    # Hot Water
-    # Note: Added later from Output Variables
-    [:hot_water, :hot_water] => []
+    # Hot Water Volume
+    [:hot_water, :hot_water] => [] # Note: Hot water in gallons is later added via Output Variables
   }
 end

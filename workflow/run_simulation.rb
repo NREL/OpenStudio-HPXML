@@ -190,7 +190,7 @@ def create_output(designdir, resultsdir)
     end
   end
 
-  # Add hot water gallons per day output
+  # Add hot water volume output
   hes_end_use = :hot_water
   hes_resource_type = :hot_water
   to_units = get_fuel_site_units(hes_resource_type)
