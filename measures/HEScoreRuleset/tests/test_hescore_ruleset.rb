@@ -247,11 +247,22 @@ class HEScoreRulesetTest < MiniTest::Test
     )
 
     assert_in_epsilon(
+      lookup_hvac_efficiency(2010, "Furnace", "natural gas", "AFUE"),
+      lookup_hvac_efficiency(2020, "Furnace", "natural gas", "AFUE"),
+      small_number
+    )
+
+    assert_in_epsilon(
       lookup_hvac_efficiency(1969, "Boiler", "fuel oil", "AFUE"),
       lookup_hvac_efficiency(1970, "Boiler", "fuel oil", "AFUE"),
       small_number
     )
 
+    assert_in_epsilon(
+      lookup_hvac_efficiency(1955, "central air conditioner", "electricity", "SEER"),
+      lookup_hvac_efficiency(1970, "central air conditioner", "electricity", "SEER"),
+      small_number
+    )
   end
 
   def test_dhw_lookup
@@ -299,7 +310,17 @@ class HEScoreRulesetTest < MiniTest::Test
         small_number
       )
       assert_in_epsilon(
+        lookup_water_heater_efficiency(2010, fuel_type),
+        lookup_water_heater_efficiency(2020, fuel_type),
+        small_number
+      )
+      assert_in_epsilon(
         lookup_water_heater_efficiency(1971, fuel_type),
+        lookup_water_heater_efficiency(1972, fuel_type),
+        small_number
+      )
+      assert_in_epsilon(
+        lookup_water_heater_efficiency(1955, fuel_type),
         lookup_water_heater_efficiency(1972, fuel_type),
         small_number
       )

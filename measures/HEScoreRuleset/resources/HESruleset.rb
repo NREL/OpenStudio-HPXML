@@ -880,13 +880,8 @@ class HEScoreRuleset
 end
 
 def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='shipment_weighted', state_code=nil)
-  if year.nil?
-    year = 0
-  elsif year < 1970
-    year = 1970
-  elsif year > 2010
-    year = 2010
-  end
+
+  year = 0 if year.nil?
 
   type_id = { 'central air conditioner' => 'split_dx',
               'room air conditioner' => 'packaged_dx',
@@ -914,16 +909,19 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='sh
   end
 
   value = nil
+  lookup_year = 0
   CSV.foreach(File.join(File.dirname(__FILE__), "lu_hvac_equipment_efficiency.csv"), headers: true) do |row|
     next unless row['performance_id'] == performance_id
-    next unless Integer(row['year']) == year
     next unless row['type_id'] == type_id
     next unless row['fuel_primary_id'] == fuel_primary_id
     next unless row['metric_id'] == metric_id
     next unless row['region_id'] == region_id
 
-    value = Float(row['value'])
-    break
+    row_year = Integer(row['year'])
+    if (row_year - year).abs <= (lookup_year - year).abs
+      lookup_year = row_year
+      value = Float(row['value'])
+    end
   end
   fail "Could not lookup default HVAC efficiency." if value.nil?
 
@@ -931,13 +929,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='sh
 end
 
 def lookup_water_heater_efficiency(year, fuel_type, performance_id='shipment_weighted')
-  if year.nil?
-    year = 0
-  elsif year < 1972
-    year = 1972
-  elsif year > 2010
-    year = 2010
-  end
+  year = 0 if year.nil?
 
   fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
   fail "Unexpected fuel_type #{fuel_type}." if fuel_primary_id.nil?
@@ -945,13 +937,16 @@ def lookup_water_heater_efficiency(year, fuel_type, performance_id='shipment_wei
   fail "Invalid performance_id for water heater lookup #{performance_id}." if not ['shipment_weighted', 'energy_star'].include?(performance_id)
 
   value = nil
+  lookup_year = 0
   CSV.foreach(File.join(File.dirname(__FILE__), "lu_water_heater_efficiency.csv"), headers: true) do |row|
     next unless row['performance_id'] == performance_id
-    next unless Integer(row['year']) == year
     next unless row['fuel_primary_id'] == fuel_primary_id
 
-    value = Float(row['value'])
-    break
+    row_year = Integer(row['year'])
+    if (row_year - year).abs <= (lookup_year - year).abs
+      lookup_year = row_year
+      value = Float(row['value'])
+    end
   end
   fail "Could not lookup default water heating efficiency." if value.nil?
 
