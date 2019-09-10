@@ -4,12 +4,12 @@ def get_fuel_site_units(hes_resource_type)
            :lpg => 'kBtu',
            :fuel_oil => 'kBtu',
            :cord_wood => 'kBtu',
-           :pellet_wood => 'kBtu' }[hes_resource_type]
+           :pellet_wood => 'kBtu',
+           :hot_water => 'gallons' }[hes_resource_type]
 end
 
 def get_output_meter_requests
   # Mapping between HEScore output [end_use, resource_type] and a list of E+ output meters
-  # TODO: Add hot water and cold water resource_types? Anything else?
   return {
     # Heating
     [:heating, :electric] => ["Heating:Electricity"], # Note: Heating fan/pump is later added here
@@ -20,7 +20,7 @@ def get_output_meter_requests
     [:heating, :pellet_wood] => ['Heating:OtherFuel2'],
 
     # Cooling
-    [:cooling, :electric] => ["Cooling:Electricity"], # Note: Heating fan/pump is later added here
+    [:cooling, :electric] => ["Cooling:Electricity"], # Note: Cooling fan/pump is later added here
 
     # Hot Water
     [:hot_water, :electric] => ["WaterSystems:Electricity"],
@@ -47,6 +47,10 @@ def get_output_meter_requests
     [:circulation, :electric] => [],
 
     # Generation
-    [:generation, :electric] => ["ElectricityProduced:Facility"]
+    [:generation, :electric] => ["ElectricityProduced:Facility"],
+
+    # Hot Water
+    # Note: Added later from Output Variables
+    [:hot_water, :hot_water] => []
   }
 end

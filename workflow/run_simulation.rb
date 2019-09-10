@@ -100,6 +100,11 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
     end
   end
 
+  # Add monthly hot water output request
+  outputVariable = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
+  outputVariable.setReportingFrequency('monthly')
+  outputVariable.setKeyValue('*')
+
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
   model_idf = forward_translator.translateModel(model)
@@ -180,6 +185,22 @@ def create_output(designdir, resultsdir)
     end
   end
 
+  # Add hot water gallons per day output
+  hes_end_use = :hot_water
+  hes_resource_type = :hot_water
+  to_units = get_fuel_site_units(hes_resource_type)
+  for i in 1..12
+    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND ReportingFrequency='Monthly' AND VariableUnits='m3') AND TimeIndex='#{i}'"
+    sql_result = sqlFile.execAndReturnFirstDouble(query)
+    next unless sql_result.is_initialized
+
+    sql_result = sql_result.get
+
+    result = UnitConversions.convert(sql_result, "m^3", "gal")
+
+    results[[hes_end_use, hes_resource_type]][i - 1] = result
+  end
+
   # Error-checking
   net_energy_gj = sqlFile.netSiteEnergy.get - sqlFile.districtHeatingHeating.get - sqlFile.districtCoolingCooling.get
   sum_energy_gj = 0
@@ -197,7 +218,7 @@ def create_output(designdir, resultsdir)
 
   sqlFile.close
 
-  # Write results to XML
+  # Write results to JSON
   data = { "end_use" => [] }
   results.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
