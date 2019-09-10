@@ -729,9 +729,8 @@ class HEScoreRuleset
         )
       end
 
-      if wh_sys_values[:fuel_type] == 'electricity' and wh_sys_values[:energy_factor] > 1.0
-        wh_sys_values[:water_heater_type] = 'heat pump water heater'
-      end
+      fail "Water Heater Type must be provided" if wh_sys_values[:water_heater_type].nil?
+      fail "Electric water heaters must be heat pump water heaters to be Energy Star qualified" if wh_sys_values[:energy_star] and wh_sys_values[:fuel_type] == 'electricity' and wh_sys_values[:water_heater_type] != 'heat pump water heater'
 
       wh_capacity = nil
       if wh_sys_values[:water_heater_type] == "storage water heater"
