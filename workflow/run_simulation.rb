@@ -162,7 +162,7 @@ def create_output(designdir, resultsdir)
   end
 
   # Error-checking
-  net_energy_gj = sqlFile.netSiteEnergy.get
+  net_energy_gj = sqlFile.netSiteEnergy.get - sqlFile.districtHeatingHeating.get - sqlFile.districtCoolingCooling.get
   sum_energy_gj = 0
   results_gj.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
