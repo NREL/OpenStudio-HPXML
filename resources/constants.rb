@@ -411,6 +411,10 @@ class Constants
     return "water heater"
   end
 
+  def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
+    return "#{water_heater_name} EC adjustment"
+  end
+
   def self.ObjectNameTankHX
     return "dhw source hx"
   end
@@ -524,10 +528,6 @@ class Constants
   end
 
   def self.SizingInfoDuctRvalues
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACOtherZoneObject # Link between zonal equipment in control zone and slave zones
     return __method__.to_s
   end
 
@@ -699,10 +699,6 @@ class Constants
     return 'unvented crawlspace'
   end
 
-  def self.SpaceTypeConditionedBasement
-    return 'conditioned basement'
-  end
-
   def self.SpaceTypeGarage
     return 'garage'
   end
@@ -773,13 +769,5 @@ class Constants
 
   def self.WaterHeaterTypeHeatPump
     return 'heatpump'
-  end
-
-  def self.EMSOutputNameHeatingLoad
-    return 'living zone htg load'
-  end
-
-  def self.EMSOutputNameCoolingLoad
-    return 'living zone clg load'
   end
 end

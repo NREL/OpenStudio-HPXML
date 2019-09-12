@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:27:24-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-09-06T05:17:58-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -299,18 +299,6 @@
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='MechanicalVentilation'/>
-              <FanType>supply only</FanType>
-              <TestedFlowRate>110.0</TestedFlowRate>
-              <HoursInOperation>24.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>30.0</FanPower>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
@@ -372,6 +360,9 @@
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
+          <extension>
+            <AdjustedAnnualkWh>600.0</AdjustedAnnualkWh>
+          </extension>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
