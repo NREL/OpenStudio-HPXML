@@ -889,6 +889,7 @@ def get_wall_effective_r_from_doe2code(doe2code)
   val = nil
   CSV.foreach(File.join(File.dirname(__FILE__), "lu_wall_eff_rvalue.csv"), headers: true) do |row|
     next unless row["doe2code"] == doe2code
+
     val = Float(row["Eff-R-value"])
     break
   end
@@ -960,6 +961,7 @@ def get_roof_effective_r_from_doe2code(doe2code)
   val = nil
   CSV.foreach(File.join(File.dirname(__FILE__), "lu_roof_eff_rvalue.csv"), headers: true) do |row|
     next unless row["doe2code"] == doe2code
+
     val = Float(row["Eff-R-value"])
     break
   end

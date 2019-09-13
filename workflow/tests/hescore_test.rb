@@ -81,6 +81,7 @@ class HEScoreTest < Minitest::Unit::TestCase
   end
 
   def _get_results(parent_dir, runtime)
+    # Retrieve results from results.json
     json_path = File.join(parent_dir, "results", "results.json")
     data = JSON.parse(File.read(json_path))
 
@@ -88,17 +89,17 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Fill in missing results with zeroes
     get_output_meter_requests.each do |hes_key, ep_meters|
-      category = hes_key[0]
-      fuel = hes_key[1]
-      units = get_fuel_site_units(fuel)
-      key = [fuel.to_s, category.to_s, units]
+      end_use = hes_key[0]
+      resource_type = hes_key[1]
+      units = get_fuel_site_units(resource_type)
+      key = [resource_type.to_s, end_use.to_s, units]
 
       found_in_results = false
       data["end_use"].each do |result|
-        fuel = result["resource_type"]
-        category = result["end_use"]
+        resource_type = result["resource_type"]
+        end_use = result["end_use"]
         units = result["units"]
-        results_key = [fuel, category, units]
+        results_key = [resource_type, end_use, units]
         next if results_key != key
 
         if results[key].nil?
@@ -137,6 +138,9 @@ class HEScoreTest < Minitest::Unit::TestCase
     htg_fuels = []
     hvac_plant.elements.each("HeatingSystem[FractionHeatLoadServed>0]") do |htg_sys|
       htg_fuels << fuel_map[XMLHelper.get_value(htg_sys, "HeatingSystemFuel")]
+      if !htg_sys.elements["HeatingSystemType/Furnace"].nil? or !htg_sys.elements["HeatingSystemType/Boiler"].nil?
+        htg_fuels << fuel_map["electricity"] # fan/pump
+      end
     end
     hvac_plant.elements.each("HeatPump[FractionHeatLoadServed>0]") do |hp|
       htg_fuels << fuel_map["electricity"]
@@ -147,26 +151,30 @@ class HEScoreTest < Minitest::Unit::TestCase
     hw_fuels = []
     hpxml_doc.elements.each("/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem") do |hw_sys|
       hw_fuels << fuel_map[XMLHelper.get_value(hw_sys, "FuelType")]
+      hw_type = XMLHelper.get_value(hw_sys, "WaterHeaterType")
+      if hw_type.include? "boiler" or hw_type == "heat pump water heater"
+        hw_fuels << fuel_map["electricity"] # fan/pump
+      end
     end
 
     # Get HPXML values for PV
     has_pv = !hpxml_doc.elements["/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem"].nil?
 
-    tested_categories = []
+    tested_end_uses = []
     results.each do |key, value|
-      fuel, category, units = key
+      resource_type, end_use, units = key
 
       # Check lighting end use matches ERI calculation
-      if category == "lighting" and fuel == "electric" and units == "kWh"
+      if end_use == "lighting" and resource_type == "electric" and units == "kWh"
         eri_int_ltg = 455.0 + 0.80 * cfa
         eri_ext_ltg = 100.0 + 0.05 * cfa
         eri_ltg = eri_int_ltg + eri_ext_ltg
         assert_in_epsilon(eri_ltg, value, 0.01)
-        tested_categories << category
+        tested_end_uses << end_use
       end
 
       # Check large_appliance end use matches ERI calculation
-      if category == "large_appliance" and fuel == "electric" and units == "kWh"
+      if end_use == "large_appliance" and resource_type == "electric" and units == "kWh"
         eri_fridge = 637.0 + 18.0 * nbr
         eri_range_oven = 331.0 + 39.0 * nbr
         eri_clothes_dryer = 524.0 + 149.0 * nbr
@@ -174,63 +182,68 @@ class HEScoreTest < Minitest::Unit::TestCase
         eri_dishwasher = 78.0 + 31.0 * nbr
         eri_large_appl = eri_fridge + eri_range_oven + eri_clothes_dryer + eri_clothes_washer + eri_dishwasher
         assert_in_epsilon(eri_large_appl, value, 0.01)
-        tested_categories << category
+        tested_end_uses << end_use
       end
 
       # Check small_appliance end use matches ERI calculation
-      if category == "small_appliance" and fuel == "electric" and units == "kWh"
+      if end_use == "small_appliance" and resource_type == "electric" and units == "kWh"
         eri_mels = 0.91 * cfa
         eri_tv = 413.0 + 69.0 * nbr
         eri_small_appl = eri_mels + eri_tv
         assert_in_epsilon(eri_small_appl, value, 0.01)
-        tested_categories << category
+        tested_end_uses << end_use
       end
 
       # Check heating end use by fuel reflects presence of system
-      if category == "heating"
+      if end_use == "heating"
         if xml.include? "sample_files/Location_CZ09_hpxml.xml"
           # skip test: hot climate so potentially no heating energy
-        elsif htg_fuels.include? fuel
+        elsif htg_fuels.include? resource_type
           assert_operator(value, :>, 0)
         else
           assert_operator(value, :<, 0.5)
         end
-        tested_categories << category
+        tested_end_uses << end_use
       end
 
       # Check cooling end use reflects presence of cooling system
-      if category == "cooling" and fuel == "electric"
+      if end_use == "cooling" and resource_type == "electric"
         if has_clg
           assert_operator(value, :>, 0)
         else
           assert_operator(value, :<, 0.5)
         end
-        tested_categories << category
+        tested_end_uses << end_use
       end
 
       # Check hot_water end use by fuel reflects presence of system
-      if category == "hot_water"
-        if hw_fuels.include? fuel
+      if end_use == "hot_water" and resource_type != "hot_water"
+        if hw_fuels.include? resource_type
           assert_operator(value, :>, 0)
         else
           assert_operator(value, :<, 0.5)
         end
-        tested_categories << category
+        tested_end_uses << end_use
+      end
+
+      # Check hot water use > 0
+      if end_use == "hot_water" and resource_type == "hot_water"
+        assert_operator(value, :>, 0)
       end
 
       # Check generation end use reflects presence of PV system
-      if category == "generation" and fuel == "electric"
+      if end_use == "generation" and resource_type == "electric"
         if has_pv
           assert_operator(value, :>, 0)
         else
           assert_operator(value, :<, 0.5)
         end
-        tested_categories << category
+        tested_end_uses << end_use
       end
     end
 
     # Check we actually tested the right number of categories
-    assert_equal(7, tested_categories.uniq.size)
+    assert_equal(7, tested_end_uses.uniq.size)
   end
 
   def _write_summary_results(results)
