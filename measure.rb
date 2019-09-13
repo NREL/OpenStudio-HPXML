@@ -3030,11 +3030,12 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
-                       OutputVars.WaterHeatingCombiBoilerHeatExchanger,
-                       OutputVars.WaterHeatingCombiBoiler,
+                       OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
+                       OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingNaturalGas,
                        OutputVars.WaterHeatingOtherFuel,
-                       OutputVars.WaterHeatingLoad]
+                       OutputVars.WaterHeatingLoad,
+                       OutputVars.WaterHeatingLoadTankLosses]
 
     # Remove objects that are not referenced by output vars and are not
     # EMS output vars.
@@ -3991,6 +3992,11 @@ class OutputVars
 
   def self.WaterHeatingLoad
     return { 'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'] }
+  end
+
+  def self.WaterHeatingLoadTankLosses
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Heat Loss Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Heat Loss Energy'] }
   end
 end
 
