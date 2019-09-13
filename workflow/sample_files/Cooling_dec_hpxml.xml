@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-09-05T15:21:19-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-09-05T15:28:18-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2296.24492">
+    <BuildingID id="bid-2337.24533">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.85</Address1>
+        <Address1>Regression run 6.126</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Floor2 unconditioned basement</comments>
+          <comments>Cooling dec</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -85,16 +85,6 @@
               <SlabOnGrade/>
             </FoundationType>
             <AttachedToSlab idref="floor1_slab"/>
-          </Foundation>
-          <Foundation>
-            <SystemIdentifier id="floor2"/>
-            <FoundationType>
-              <Basement>
-                <Conditioned>false</Conditioned>
-              </Basement>
-            </FoundationType>
-            <AttachedToFoundationWall idref="floor2_foundation_wall"/>
-            <AttachedToFrameFloor idref="floor2_frame_floor"/>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -199,35 +189,10 @@
             </extension>
           </Wall>
         </Walls>
-        <FoundationWalls>
-          <FoundationWall>
-            <SystemIdentifier id="floor2_foundation_wall"/>
-            <Insulation>
-              <SystemIdentifier id="insulation2"/>
-              <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>0</NominalRValue>
-              </Layer>
-            </Insulation>
-          </FoundationWall>
-        </FoundationWalls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id="floor2_frame_floor"/>
-            <Area>400</Area>
-            <Insulation>
-              <SystemIdentifier id="floor2_floor_insulation"/>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>00</NominalRValue>
-              </Layer>
-            </Insulation>
-          </FrameFloor>
-        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id="floor1_slab"/>
-            <Area>600</Area>
+            <Area>1000</Area>
             <PerimeterInsulation>
               <SystemIdentifier id="slab1_insulation"/>
               <Layer>
@@ -322,13 +287,8 @@
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
-              <DistributionSystem idref="hvac1_dist"/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
+              <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>15</Value>
-              </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
           <HVACDistribution>

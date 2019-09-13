@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
-<HPXML xmlns="http://hpxmlonline.com/2014/6" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
+<HPXML xmlns="http://hpxmlonline.com/2014/6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="3.0">
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-06-18T17:49:58-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-09-05T15:14:28-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -12,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2394">
+    <BuildingID id="bid-2264.24460">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -28,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-03-18</Date>
+      <Date>2019-05-03</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -91,6 +90,7 @@
         <Roofs>
           <Roof>
             <SystemIdentifier id="roof1"/>
+            <Area>1000</Area>
             <Area>1000</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>

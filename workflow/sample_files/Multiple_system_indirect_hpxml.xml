@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-09-05T15:21:19-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-09-05T15:33:50-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2296.24492">
+    <BuildingID id="bid-2369.24565">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.85</Address1>
+        <Address1>Regression run 6.158</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -47,7 +47,7 @@
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Floor2 unconditioned basement</comments>
+          <comments>Multiple system indirect</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -85,16 +85,6 @@
               <SlabOnGrade/>
             </FoundationType>
             <AttachedToSlab idref="floor1_slab"/>
-          </Foundation>
-          <Foundation>
-            <SystemIdentifier id="floor2"/>
-            <FoundationType>
-              <Basement>
-                <Conditioned>false</Conditioned>
-              </Basement>
-            </FoundationType>
-            <AttachedToFoundationWall idref="floor2_foundation_wall"/>
-            <AttachedToFrameFloor idref="floor2_frame_floor"/>
           </Foundation>
         </Foundations>
         <Roofs>
@@ -199,35 +189,10 @@
             </extension>
           </Wall>
         </Walls>
-        <FoundationWalls>
-          <FoundationWall>
-            <SystemIdentifier id="floor2_foundation_wall"/>
-            <Insulation>
-              <SystemIdentifier id="insulation2"/>
-              <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>0</NominalRValue>
-              </Layer>
-            </Insulation>
-          </FoundationWall>
-        </FoundationWalls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id="floor2_frame_floor"/>
-            <Area>400</Area>
-            <Insulation>
-              <SystemIdentifier id="floor2_floor_insulation"/>
-              <Layer>
-                <InstallationType>cavity</InstallationType>
-                <NominalRValue>00</NominalRValue>
-              </Layer>
-            </Insulation>
-          </FrameFloor>
-        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id="floor1_slab"/>
-            <Area>600</Area>
+            <Area>1000</Area>
             <PerimeterInsulation>
               <SystemIdentifier id="slab1_insulation"/>
               <Layer>
@@ -309,22 +274,33 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id="hvac1_heat"/>
-              <DistributionSystem idref="hvac1_dist"/>
               <HeatingSystemType>
-                <Furnace/>
+                <Boiler/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.95</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.7</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id="hvac2_heat"/>
+              <HeatingSystemType>
+                <WallFurnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.65</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.3</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
               <DistributionSystem idref="hvac1_dist"/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.7</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>15</Value>
@@ -352,9 +328,8 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id="water_heater1"/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <EnergyFactor>0.9</EnergyFactor>
+            <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
+            <RelatedHVACSystem idref="hvac1_heat"/>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>
