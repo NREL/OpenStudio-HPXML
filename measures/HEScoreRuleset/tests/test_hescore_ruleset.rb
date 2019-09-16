@@ -387,6 +387,7 @@ class HEScoreRulesetTest < MiniTest::Test
       eff_rvalue = Float(XMLHelper.get_value(wall, "Insulation/AssemblyEffectiveRValue"))
       wallid = wall.elements["SystemIdentifier"].attribute('id').value
       next if wall_code_by_id[wallid].nil?
+
       assert_in_epsilon(eff_rvalue, get_wall_effective_r_from_doe2code(wall_code_by_id[wallid]), 0.01)
     end
 
@@ -401,6 +402,5 @@ class HEScoreRulesetTest < MiniTest::Test
       eff_rvalue = Float(XMLHelper.get_value(roof, "Insulation/AssemblyEffectiveRValue"))
       assert_in_epsilon(eff_rvalue, get_roof_effective_r_from_doe2code(roof_code_by_id[roofid.split('_')[0]]), 0.01)
     end
-
   end
 end
