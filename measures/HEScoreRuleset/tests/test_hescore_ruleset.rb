@@ -7,6 +7,7 @@ require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils'
+require 'rexml/xpath'
 
 class HEScoreRulesetTest < MiniTest::Test
   def test_valid_simulations
@@ -188,6 +189,19 @@ class HEScoreRulesetTest < MiniTest::Test
              [0.25, 0.2, "crawlspace - vented"]]
     ach50 = calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
     assert_in_epsilon(10.2, ach50, 0.01)
+  end
+
+  def test_foundation_area_lookup
+    this_dir = File.dirname(__FILE__)
+    xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement_hpxml.xml")
+    hpxml_doc = XMLHelper.parse_file(xml)
+    hpxml = hpxml_doc.root
+    slab_foundation = hpxml.elements['//Foundation[1]']
+    slab_area = get_foundation_area(slab_foundation)
+    assert_in_epsilon(slab_area, 600.0, 0.01)
+    basement_foundation = hpxml.elements['//Foundation[2]']
+    basement_area = get_foundation_area(basement_foundation)
+    assert_in_epsilon(basement_area, 400.0, 0.01)
   end
 
   def _test_measure(args_hash)
