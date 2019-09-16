@@ -1986,22 +1986,30 @@ class HVAC
 
     if not htg_objects.empty?
       fan_or_pump_ems_output_var_heat = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_heat")
-      fan_or_pump_ems_output_var_heat.setName("#{fan_or_pump.name} Heating")
+      fan_or_pump_ems_output_var_heat.setName(Constants.ObjectNameFanPumpDisaggregate(false, fan_or_pump.name.to_s))
       fan_or_pump_ems_output_var_heat.setTypeOfDataInVariable("Summed")
       fan_or_pump_ems_output_var_heat.setUpdateFrequency("SystemTimestep")
       fan_or_pump_ems_output_var_heat.setEMSProgramOrSubroutineName(fan_or_pump_program)
       fan_or_pump_ems_output_var_heat.setUnits("J")
       hvac_objects << fan_or_pump_ems_output_var_heat
+
+      outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var_heat.name.to_s, model)
+      outputVariable.setReportingFrequency('monthly')
+      outputVariable.setKeyValue('*')
     end
 
     if not clg_objects.empty?
       fan_or_pump_ems_output_var_cool = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_cool")
-      fan_or_pump_ems_output_var_cool.setName("#{fan_or_pump.name} Cooling")
+      fan_or_pump_ems_output_var_cool.setName(Constants.ObjectNameFanPumpDisaggregate(true, fan_or_pump.name.to_s))
       fan_or_pump_ems_output_var_cool.setTypeOfDataInVariable("Summed")
       fan_or_pump_ems_output_var_cool.setUpdateFrequency("SystemTimestep")
       fan_or_pump_ems_output_var_cool.setEMSProgramOrSubroutineName(fan_or_pump_program)
       fan_or_pump_ems_output_var_cool.setUnits("J")
       hvac_objects << fan_or_pump_ems_output_var_cool
+
+      outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var_cool.name.to_s, model)
+      outputVariable.setReportingFrequency('monthly')
+      outputVariable.setKeyValue('*')
     end
 
     return hvac_objects
