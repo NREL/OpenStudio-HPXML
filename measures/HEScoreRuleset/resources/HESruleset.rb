@@ -318,14 +318,16 @@ class HEScoreRuleset
   def self.set_enclosure_slabs(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
       fnd_adjacent = get_foundation_adjacent(orig_foundation)
+      fnd_type = XMLHelper.get_child_name(orig_foundation, "FoundationType")
       fnd_area = get_foundation_area(orig_foundation)
 
       # Slab
-      if fnd_adjacent == "living space"
+      if fnd_type == "SlabOnGrade"
         slab_id = HPXML.get_idref(orig_foundation, "AttachedToSlab")
         slab = orig_details.elements["Enclosure/Slabs/Slab[SystemIdentifier[@id='#{slab_id}']]"]
         slab_values = HPXML.get_slab_values(slab: slab)
-      else
+        slab_values[:depth_below_grade] = 0
+      elsif fnd_type == "Basement"
         framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
         framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
         framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
@@ -334,6 +336,12 @@ class HEScoreRuleset
         slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
         slab_values[:area] = framefloor_values[:area]
         slab_values[:perimeter_insulation_r_value] = 0
+        slab_values[:depth_below_grade] = 7  # 8ft basement wall with 1ft above grade.
+      elsif fnd_type == "Crawlspace"
+        # Don't put a slab under a crawlspace.
+        next
+      else
+        fail "Unexpected foundation type: #{fnd_type}"
       end
 
       HPXML.add_slab(hpxml: hpxml,
@@ -343,8 +351,8 @@ class HEScoreRuleset
                      thickness: 4,
                      exposed_perimeter: @bldg_perimeter * fnd_area / @bldg_footprint,
                      perimeter_insulation_depth: 1, # FIXME: Hard-coded
-                     under_slab_insulation_width: 0, # FIXME: Verify
-                     depth_below_grade: 0, # FIXME: Verify
+                     under_slab_insulation_width: 0,
+                     depth_below_grade: slab_values[:depth_below_grade],
                      carpet_fraction: 0.5, # FIXME: Hard-coded
                      carpet_r_value: 2, # FIXME: Hard-coded
                      perimeter_insulation_r_value: slab_values[:perimeter_insulation_r_value],
