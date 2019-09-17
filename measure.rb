@@ -634,21 +634,29 @@ class OSModel
     # 2. At least one roofceiling surface
     # 3. At least one surface adjacent to outside/ground
     model.getThermalZones.each do |zone|
-      n_floorsroofsceilings = 0
+      n_floors = 0
+      n_roofceilings = 0
       n_exteriors = 0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
           if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
             n_exteriors += 1
           end
-          if ["floor", "roofceiling"].include? surface.surfaceType.downcase
-            n_floorsroofsceilings += 1
+          if surface.surfaceType.downcase == "floor"
+            n_floors += 1
+          end
+          if surface.surfaceType.downcase == "roofceiling"
+            n_roofceilings += 1
           end
         end
       end
 
-      if n_floorsroofsceilings < 1
-        runner.registerError("Thermal zone '#{zone.name}' must have at least two floor/roof/ceiling surfaces.")
+      if n_floors == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one floor surface.")
+        return false
+      end
+      if n_roofceilings == 0
+        runner.registerError("Thermal zone '#{zone.name}' must have at least one roof/ceiling surface.")
         return false
       end
       if n_exteriors == 0
