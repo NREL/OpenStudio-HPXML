@@ -339,6 +339,10 @@ class Constants
     return "infil"
   end
 
+  def self.ObjectNameERVHRV
+    return "erv or hrv"
+  end
+
   def self.ObjectNameLighting
     return "lighting"
   end
