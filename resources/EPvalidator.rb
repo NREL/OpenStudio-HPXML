@@ -230,7 +230,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
-        "HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove]" => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove]
+        "HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove | PortableHeater]" => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater]
         "HeatingCapacity" => one, # Use -1 for autosizing
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
       },
@@ -267,6 +267,13 @@ class EnergyPlusValidator
 
       ## [HeatingType=Stove]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]" => {
+        "DistributionSystem" => zero,
+        "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity' or HeatingSystemFuel='wood' or HeatingSystemFuel='wood pellets']" => one, # See [HeatingType=FuelEquipment] if not electricity
+        "AnnualHeatingEfficiency[Units='Percent']/Value" => one,
+      },
+
+      ## [HeatingType=PortableHeater]
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/PortableHeater]" => {
         "DistributionSystem" => zero,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity' or HeatingSystemFuel='wood' or HeatingSystemFuel='wood pellets']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='Percent']/Value" => one,
