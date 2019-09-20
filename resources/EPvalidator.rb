@@ -625,20 +625,20 @@ class EnergyPlusValidator
     # Check sum of FractionCoolLoadServeds <= 1
     frac_cool_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed/text())"]
     frac_cool_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed/text())"]
-    if frac_cool_load > 1
+    if frac_cool_load > 1.01 # Use 1.01 in case of rounding
       errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
     end
 
     # Check sum of FractionHeatLoadServeds <= 1
     frac_heat_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed/text())"]
     frac_heat_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed/text())"]
-    if frac_heat_load > 1
+    if frac_heat_load > 1.01 # Use 1.01 in case of rounding
       errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
     end
 
     # Check sum of FractionDHWLoadServed == 1
     frac_dhw_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed/text())"]
-    if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01)
+    if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
 
