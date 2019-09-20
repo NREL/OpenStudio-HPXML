@@ -1669,8 +1669,8 @@ class Airflow
 
     if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness > 0 and mech_vent.whole_house_cfm > 0
       # ERV/HRV EMS load model; balanced systems without energy recovery are modeled via EMS airflow
-	  # E+ ERV model is using standard density for MFR calculation, caused discrepancy with our current workflow; E+ ERV model has a bug not meeting setpoint perfectly
-	  # Therefore ERV is modeled within EMS infiltration program
+      # E+ ERV model is using standard density for MFR calculation, caused discrepancy with our current workflow; E+ ERV model has a bug not meeting setpoint perfectly
+      # Therefore ERV is modeled within EMS infiltration program
 
       balanced_flow_rate = UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s")
 
