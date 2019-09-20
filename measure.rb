@@ -2189,7 +2189,7 @@ class OSModel
                                                   @hvac_map, sys_id)
           return false if not success
 
-        elsif htg_type == "Stove"
+        elsif htg_type == "Stove" or htg_type == "PortableHeater"
 
           efficiency = heating_system_values[:heating_efficiency_percent]
           airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
