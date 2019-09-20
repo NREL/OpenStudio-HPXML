@@ -1027,7 +1027,7 @@ class Airflow
     return ra_duct_zone
   end
 
-  def self.create_sens_lant_load_actuator_and_equipment(model, name, space, is_latent, is_outside = false)
+  def self.create_sens_lat_load_actuator_and_equipment(model, name, space, is_latent, is_outside = false)
     var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
     other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     other_equip_def.setName("#{var.name} equip")
@@ -1181,47 +1181,47 @@ class Airflow
         # -- Actuators --
 
         # Other equipment objects to cancel out the supply air leakage directly into the return plenum
-        supply_sens_lk_to_liv_var, supply_sens_lk_to_liv_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToLv", living_space, false)
-        supply_lat_lk_to_liv_var, supply_lat_lk_to_liv_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToLv", living_space, true)
+        supply_sens_lk_to_liv_var, supply_sens_lk_to_liv_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToLv", living_space, false)
+        supply_lat_lk_to_liv_var, supply_lat_lk_to_liv_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToLv", living_space, true)
 
         # Supply duct conduction load added to the living space
-        supply_cond_to_liv_var, supply_cond_to_liv_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToLv", living_space, false)
+        supply_cond_to_liv_var, supply_cond_to_liv_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToLv", living_space, false)
 
         # Return duct conduction load added to the return plenum zone
-        return_cond_to_rp_var, return_cond_to_rp_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToRP", ra_duct_zone.spaces[0], false)
+        return_cond_to_rp_var, return_cond_to_rp_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToRP", ra_duct_zone.spaces[0], false)
 
         # Return duct sensible leakage impact on the return plenum
-        return_sens_lk_to_rp_var, return_sens_lk_to_rp_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetSensLkToRP", ra_duct_zone.spaces[0], false)
+        return_sens_lk_to_rp_var, return_sens_lk_to_rp_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetSensLkToRP", ra_duct_zone.spaces[0], false)
 
         # Return duct latent leakage impact on the return plenum
-        return_lat_lk_to_rp_var, return_lat_lk_to_rp_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetLatLkToRP", ra_duct_zone.spaces[0], true)
+        return_lat_lk_to_rp_var, return_lat_lk_to_rp_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetLatLkToRP", ra_duct_zone.spaces[0], true)
 
         # Supply duct conduction impact on the duct zone
         if duct_zone.nil? # Outside
-          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToDZ", living_space, false, true)
+          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToDZ", living_space, false, true)
         else
-          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToDZ", duct_zone.spaces[0], false)
+          supply_cond_to_dz_var, supply_cond_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupCondToDZ", duct_zone.spaces[0], false)
         end
 
         # Return duct conduction impact on the duct zone
         if duct_zone.nil? # Outside
-          return_cond_to_dz_var, return_cond_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToDZ", living_space, false, true)
+          return_cond_to_dz_var, return_cond_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToDZ", living_space, false, true)
         else
-          return_cond_to_dz_var, return_cond_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToDZ", duct_zone.spaces[0], false)
+          return_cond_to_dz_var, return_cond_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} RetCondToDZ", duct_zone.spaces[0], false)
         end
 
         # Supply duct sensible leakage impact on the duct zone
         if duct_zone.nil? # Outside
-          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToDZ", living_space, false, true)
+          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToDZ", living_space, false, true)
         else
-          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToDZ", duct_zone.spaces[0], false)
+          supply_sens_lk_to_dz_var, supply_sens_lk_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupSensLkToDZ", duct_zone.spaces[0], false)
         end
 
         # Supply duct latent leakage impact on the duct zone
         if duct_zone.nil? # Outside
-          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToDZ", living_space, true, true)
+          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToDZ", living_space, true, true)
         else
-          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_sens_lant_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToDZ", duct_zone.spaces[0], true)
+          supply_lat_lk_to_dz_var, supply_lat_lk_to_dz_actuator = create_sens_lat_load_actuator_and_equipment(model, "#{air_loop_name_idx} SupLatLkToDZ", duct_zone.spaces[0], true)
         end
 
         # Two objects are required to model the air exchange between the duct zone and the living space since
@@ -1668,13 +1668,11 @@ class Airflow
     end
 
     if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness > 0 and mech_vent.whole_house_cfm > 0
-      # ERV/HRV; balanced systems without energy recovery are modeled via infiltration actuated EMS
+      # ERV/HRV EMS load model; balanced systems without energy recovery are modeled via EMS airflow
+	  # E+ ERV model is using standard density for MFR calculation, caused discrepancy with our current workflow; E+ ERV model has a bug not meeting setpoint perfectly
+	  # Therefore ERV is modeled within EMS infiltration program
 
-      balanced_flow_rate = [UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s"), 0.0000001].max
-
-      # Effectiveness
-      sensible_effectiveness = mech_vent.sensible_effectiveness
-      latent_effectiveness = mech_vent.latent_effectiveness
+      balanced_flow_rate = UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s")
 
       # Sensors for ERV/HRV
       win_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Humidity Ratio")
@@ -1682,8 +1680,8 @@ class Airflow
       win_sensor.setKeyName(building.living.zone.name.to_s)
 
       # Actuators for ERV/HRV
-      erv_sens_load_var, erv_sens_load_actuator = create_sens_lant_load_actuator_and_equipment(model, Constants.ObjectNameERVHRV + " sensible load", living_space, false)
-      erv_lat_load_var, erv_lat_load_actuator = create_sens_lant_load_actuator_and_equipment(model, Constants.ObjectNameERVHRV + " latent load", living_space, true)
+      erv_sens_load_var, erv_sens_load_actuator = create_sens_lat_load_actuator_and_equipment(model, Constants.ObjectNameERVHRV + " sensible load", living_space, false)
+      erv_lat_load_var, erv_lat_load_actuator = create_sens_lat_load_actuator_and_equipment(model, Constants.ObjectNameERVHRV + " latent load", living_space, true)
 
       # Air property at inlet nodes in two sides of ERV
       infil_program.addLine("Set ERVSupInPb = #{pbar_sensor.name}") # oa barometric pressure
@@ -1703,8 +1701,8 @@ class Airflow
 
       # Heat exchanger calculation
       infil_program.addLine("Set ERVCpMin = (@Min ERVSupCp ERVSecCp)")
-      infil_program.addLine("Set ERVSupOutTemp = ERVSupInTemp + ERVCpMin/ERVSupCp * #{sensible_effectiveness} * (ERVSecInTemp - ERVSupInTemp)")
-      infil_program.addLine("Set ERVSupOutW = ERVSupInW + ERVCpMin/ERVSupCp * #{latent_effectiveness} * (ERVSecInW - ERVSupInW)")
+      infil_program.addLine("Set ERVSupOutTemp = ERVSupInTemp + ERVCpMin/ERVSupCp * #{mech_vent.sensible_effectiveness} * (ERVSecInTemp - ERVSupInTemp)")
+      infil_program.addLine("Set ERVSupOutW = ERVSupInW + ERVCpMin/ERVSupCp * #{mech_vent.latent_effectiveness} * (ERVSecInW - ERVSupInW)")
       infil_program.addLine("Set ERVSupOutEnth = (@HFnTdbW ERVSupOutTemp ERVSupOutW)")
       infil_program.addLine("Set ERVSensHeatTrans = ERV_MFR * ERVSupCp * (ERVSupOutTemp - ERVSupInTemp)")
       infil_program.addLine("Set ERVTotalHeatTrans = ERV_MFR * (ERVSupOutEnth - ERVSupInEnth)")
