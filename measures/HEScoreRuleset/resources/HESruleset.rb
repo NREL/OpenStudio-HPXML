@@ -815,7 +815,7 @@ class HEScoreRuleset
   def self.set_appliances_clothes_washer(hpxml)
     HPXML.add_clothes_washer(hpxml: hpxml,
                              id: "ClothesWasher",
-                             location: "living space", # FIXME: Verify
+                             location: "living space",
                              integrated_modified_energy_factor: HotWaterAndAppliances.get_clothes_washer_reference_imef(),
                              rated_annual_kwh: HotWaterAndAppliances.get_clothes_washer_reference_ler(),
                              label_electric_rate: HotWaterAndAppliances.get_clothes_washer_reference_elec_rate(),
@@ -827,7 +827,7 @@ class HEScoreRuleset
   def self.set_appliances_clothes_dryer(hpxml)
     HPXML.add_clothes_dryer(hpxml: hpxml,
                             id: "ClothesDryer",
-                            location: "living space", # FIXME: Verify
+                            location: "living space",
                             fuel_type: "electricity",
                             combined_energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_cef(Constants.FuelTypeElectric),
                             control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
@@ -843,7 +843,7 @@ class HEScoreRuleset
   def self.set_appliances_refrigerator(hpxml)
     HPXML.add_refrigerator(hpxml: hpxml,
                            id: "Refrigerator",
-                           location: "living space", # FIXME: Verify
+                           location: "living space",
                            rated_annual_kwh: HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds))
   end
 
@@ -888,8 +888,7 @@ class HEScoreRuleset
   end
 end
 
-def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='shipment_weighted', state_code=nil)
-
+def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id = 'shipment_weighted', state_code = nil)
   year = 0 if year.nil?
 
   type_id = { 'central air conditioner' => 'split_dx',
@@ -906,11 +905,14 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='sh
   metric_id = units.downcase
 
   fail "Invalid performance_id for HVAC lookup #{performance_id}." if not ['shipment_weighted', 'energy_star'].include?(performance_id)
+
   region_id = nil
   if performance_id == 'energy_star' and type_id == 'central_furnace' and ['lpg', 'natural_gas'].include? fuel_primary_id
     fail "state_code required for Energy Star central furnaces" if state_code.nil?
+
     CSV.foreach(File.join(File.dirname(__FILE__), "lu_es_furnace_region.csv"), headers: true) do |row|
       next unless row['state_code'] == state_code
+
       region_id = row['furnace_region']
       break
     end
@@ -937,7 +939,7 @@ def lookup_hvac_efficiency(year, hvac_type, fuel_type, units, performance_id='sh
   return value
 end
 
-def lookup_water_heater_efficiency(year, fuel_type, performance_id='shipment_weighted')
+def lookup_water_heater_efficiency(year, fuel_type, performance_id = 'shipment_weighted')
   year = 0 if year.nil?
 
   fuel_primary_id = hpxml_to_hescore_fuel(fuel_type)
