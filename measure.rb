@@ -94,7 +94,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = "2.8.1"
+    os_version = "2.9.0"
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -527,8 +527,11 @@ class OSModel
         min_azimuth_diff = diff2
       end
     end
-    nsides = (360.0 / min_azimuth_diff).ceil
-    nsides = 4 if nsides < 4 # assume rectangle at the minimum
+    if min_azimuth_diff > 0
+      nsides = [(360.0 / min_azimuth_diff).ceil, 4].max # assume rectangle at the minimum
+    else
+      nsides = 4
+    end
     explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, "deg", "rad")))
 
     success = add_neighbors(runner, model, building, max_azimuth_length)
@@ -800,7 +803,7 @@ class OSModel
       net_area -= @subsurface_areas_by_surface[surface_id]
     end
 
-    if net_area <= 0
+    if net_area < 0
       fail "Calculated a negative net surface area for #{surface_type} '#{surface_id}'."
     end
 
@@ -886,6 +889,8 @@ class OSModel
       roof_values = HPXML.get_roof_values(roof: roof)
 
       net_area = net_surface_area(roof_values[:area], roof_values[:id], "Roof")
+      next if net_area < 0.1
+
       width = Math::sqrt(net_area)
       length = net_area / width
       tilt = roof_values[:pitch] / 12.0
@@ -960,6 +965,8 @@ class OSModel
       wall_values = HPXML.get_wall_values(wall: wall)
 
       net_area = net_surface_area(wall_values[:area], wall_values[:id], "Wall")
+      next if net_area < 0.1
+
       height = 8.0 * @ncfl_ag
       length = net_area / height
       z_origin = @foundation_top
@@ -1241,7 +1248,7 @@ class OSModel
       kiva_slabs.each do |kiva_slabs_list|
         # Single combined foundation slab surface
         slab = kiva_slabs_list[0]
-        next unless no_wall_slab_exp_perim[slab] > 0
+        next unless no_wall_slab_exp_perim[slab] > 0.1
 
         slab_values = HPXML.get_slab_values(slab: slab)
         z_origin = 0
@@ -1457,11 +1464,6 @@ class OSModel
 
         model_cfa += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
       end
-    end
-
-    if model_cfa > cfa
-      runner.registerError("Sum of conditioned floor surface areas #{model_cfa.to_s} is greater than ConditionedFloorArea specified #{cfa.to_s}.")
-      return false
     end
 
     addtl_cfa = cfa - model_cfa
@@ -2189,7 +2191,7 @@ class OSModel
                                                   @hvac_map, sys_id)
           return false if not success
 
-        elsif htg_type == "Stove"
+        elsif htg_type == "Stove" or htg_type == "PortableHeater"
 
           efficiency = heating_system_values[:heating_efficiency_percent]
           airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
@@ -3508,7 +3510,7 @@ class OSModel
       end
     end
 
-    if (assembly_r - constr_r).abs > 0.01
+    if (assembly_r - constr_r).abs > 0.05
       fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
     end
   end
