@@ -882,7 +882,8 @@ class HPXML
              :heating_efficiency_cop => to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='COP']/Value")),
              :heating_efficiency_hspf => to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='HSPF']/Value")),
              :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed")),
-             :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")) }
+             :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")),
+             :energy_star => XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_cooling_system(hpxml:,
@@ -937,7 +938,8 @@ class HPXML
              :cooling_efficiency_kw_per_ton => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
              :cooling_efficiency_cop => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='COP']/Value")),
              :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
+             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")),
+             :energy_star => XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_heat_pump(hpxml:,
@@ -1030,7 +1032,8 @@ class HPXML
              :cooling_efficiency_kw_per_ton => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
              :cooling_efficiency_cop => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='COP']/Value")),
              :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
+             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")),
+             :energy_star => XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_hvac_control(hpxml:,
@@ -1256,7 +1259,8 @@ class HPXML
              :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
              :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
              :jacket_r_value => to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")),
-             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem") }
+             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem"),
+             :energy_star => XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_hot_water_distribution(hpxml:,
