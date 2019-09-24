@@ -63,6 +63,7 @@ def create_hpxmls
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
+    'base-appliances-refrigerator-adjusted.xml' => 'base.xml',
     'base-appliances-washer-imef.xml' => 'base.xml',
     'base-atticroof-cathedral.xml' => 'base.xml',
     'base-atticroof-conditioned.xml' => 'base.xml',
@@ -161,6 +162,7 @@ def create_hpxmls
     'base-hvac-ducts-multiple.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-none-no-fuel-access.xml' => 'base-hvac-none.xml',
+    'base-hvac-portable-heater-electric-only.xml' => 'base.xml',
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
     'base-hvac-room-ac-furnace-gas.xml' => 'base.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
@@ -1596,6 +1598,12 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
                                 :electric_auxiliary_energy => 200 }
   elsif ['invalid_files/hvac-frac-load-served.xml'].include? hpxml_file
     heating_systems_values[0][:fraction_heat_load_served] += 0.1
+  elsif ['base-hvac-portable-heater-electric-only.xml'].include? hpxml_file
+    heating_systems_values[0][:distribution_system_idref] = nil
+    heating_systems_values[0][:heating_system_type] = "PortableHeater"
+    heating_systems_values[0][:heating_system_fuel] = "electricity"
+    heating_systems_values[0][:heating_efficiency_afue] = nil
+    heating_systems_values[0][:heating_efficiency_percent] = 1.0
   elsif ['base-hvac-stove-oil-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "Stove"
@@ -2658,6 +2666,8 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
     refrigerator_values = { :id => "Refrigerator",
                             :location => "living space",
                             :rated_annual_kwh => 650 }
+  elsif ['base-appliances-refrigerator-adjusted.xml'].include? hpxml_file
+    refrigerator_values[:adjusted_annual_kwh] = 600
   elsif ['base-appliances-none.xml'].include? hpxml_file
     refrigerator_values = {}
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file

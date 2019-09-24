@@ -94,7 +94,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = "2.8.1"
+    os_version = "2.9.0"
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -527,8 +527,11 @@ class OSModel
         min_azimuth_diff = diff2
       end
     end
-    nsides = (360.0 / min_azimuth_diff).ceil
-    nsides = 4 if nsides < 4 # assume rectangle at the minimum
+    if min_azimuth_diff > 0
+      nsides = [(360.0 / min_azimuth_diff).ceil, 4].max # assume rectangle at the minimum
+    else
+      nsides = 4
+    end
     explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, "deg", "rad")))
 
     success = add_neighbors(runner, model, building, max_azimuth_length)
@@ -800,7 +803,7 @@ class OSModel
       net_area -= @subsurface_areas_by_surface[surface_id]
     end
 
-    if net_area <= 0
+    if net_area < 0
       fail "Calculated a negative net surface area for #{surface_type} '#{surface_id}'."
     end
 
@@ -886,6 +889,8 @@ class OSModel
       roof_values = HPXML.get_roof_values(roof: roof)
 
       net_area = net_surface_area(roof_values[:area], roof_values[:id], "Roof")
+      next if net_area < 0.1
+
       width = Math::sqrt(net_area)
       length = net_area / width
       tilt = roof_values[:pitch] / 12.0
@@ -960,6 +965,8 @@ class OSModel
       wall_values = HPXML.get_wall_values(wall: wall)
 
       net_area = net_surface_area(wall_values[:area], wall_values[:id], "Wall")
+      next if net_area < 0.1
+
       height = 8.0 * @ncfl_ag
       length = net_area / height
       z_origin = @foundation_top
@@ -1241,7 +1248,7 @@ class OSModel
       kiva_slabs.each do |kiva_slabs_list|
         # Single combined foundation slab surface
         slab = kiva_slabs_list[0]
-        next unless no_wall_slab_exp_perim[slab] > 0
+        next unless no_wall_slab_exp_perim[slab] > 0.1
 
         slab_values = HPXML.get_slab_values(slab: slab)
         z_origin = 0
@@ -1457,11 +1464,6 @@ class OSModel
 
         model_cfa += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
       end
-    end
-
-    if model_cfa > cfa
-      runner.registerError("Sum of conditioned floor surface areas #{model_cfa.to_s} is greater than ConditionedFloorArea specified #{cfa.to_s}.")
-      return false
     end
 
     addtl_cfa = cfa - model_cfa
@@ -1811,7 +1813,10 @@ class OSModel
     refrigerator_values = HPXML.get_refrigerator_values(refrigerator: building.elements["BuildingDetails/Appliances/Refrigerator"])
     if not refrigerator_values.nil?
       fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
-      fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+      fridge_annual_kwh = refrigerator_values[:adjusted_annual_kwh]
+      if fridge_annual_kwh.nil?
+        fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+      end
     else
       fridge_annual_kwh = fridge_space = nil
     end
@@ -1905,7 +1910,7 @@ class OSModel
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
         runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
-        if ec_adj != 1
+        if (ec_adj - 1.0).abs > 0.001
           runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
         end
 
@@ -2186,7 +2191,7 @@ class OSModel
                                                   @hvac_map, sys_id)
           return false if not success
 
-        elsif htg_type == "Stove"
+        elsif htg_type == "Stove" or htg_type == "PortableHeater"
 
           efficiency = heating_system_values[:heating_efficiency_percent]
           airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
@@ -2914,6 +2919,8 @@ class OSModel
       next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
 
       duct_side = side_map[duct_leakage_values[:duct_type]]
+      next if duct_side.nil?
+
       leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
     end
 
@@ -2926,6 +2933,8 @@ class OSModel
 
       # Calculate total duct area in unconditioned spaces
       duct_side = side_map[ducts_values[:duct_type]]
+      next if duct_side.nil?
+
       total_duct_area[duct_side] += ducts_values[:duct_surface_area]
     end
 
@@ -2934,6 +2943,8 @@ class OSModel
       next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
 
       duct_side = side_map[ducts_values[:duct_type]]
+      next if duct_side.nil?
+
       duct_area = ducts_values[:duct_surface_area]
       duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
       # Apportion leakage to individual ducts by surface area
@@ -3047,15 +3058,33 @@ class OSModel
     end
 
     # Add output variables to model
+    ems_objects = []
     @hvac_map.each do |sys_id, hvac_objects|
-      hvac_output_vars.each do |hvac_output_var|
-        add_output_variables(model, hvac_output_var, hvac_objects)
+      hvac_objects.each do |hvac_object|
+        if hvac_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+          ems_objects << hvac_object
+        else
+          hvac_output_vars.each do |hvac_output_var|
+            add_output_variable(model, hvac_output_var, hvac_object)
+          end
+        end
       end
     end
     @dhw_map.each do |sys_id, dhw_objects|
-      dhw_output_vars.each do |dhw_output_var|
-        add_output_variables(model, dhw_output_var, dhw_objects)
+      dhw_objects.each do |dhw_object|
+        if dhw_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+          ems_objects << dhw_object
+        else
+          dhw_output_vars.each do |dhw_output_var|
+            add_output_variable(model, dhw_output_var, dhw_object)
+          end
+        end
       end
+    end
+
+    # Add EMS output variables to model
+    ems_objects.uniq.each do |ems_object|
+      add_output_variable(model, nil, ems_object)
     end
 
     if map_tsv_dir.is_initialized
@@ -3068,20 +3097,18 @@ class OSModel
     return true
   end
 
-  def self.add_output_variables(model, vars, objects)
-    objects.each do |object|
-      if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-        outputVariable = OpenStudio::Model::OutputVariable.new(object.name.to_s, model)
-        outputVariable.setReportingFrequency('runperiod')
-        outputVariable.setKeyValue('*')
-      else
-        next if vars[object.class.to_s].nil?
+  def self.add_output_variable(model, vars, object)
+    if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
+      outputVariable = OpenStudio::Model::OutputVariable.new(object.name.to_s, model)
+      outputVariable.setReportingFrequency('runperiod')
+      outputVariable.setKeyValue('*')
+    else
+      return if vars[object.class.to_s].nil?
 
-        vars[object.class.to_s].each do |object_var|
-          outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
-          outputVariable.setReportingFrequency('runperiod')
-          outputVariable.setKeyValue(object.name.to_s)
-        end
+      vars[object.class.to_s].each do |object_var|
+        outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
+        outputVariable.setReportingFrequency('runperiod')
+        outputVariable.setKeyValue(object.name.to_s)
       end
     end
   end
@@ -3483,7 +3510,7 @@ class OSModel
       end
     end
 
-    if (assembly_r - constr_r).abs > 0.01
+    if (assembly_r - constr_r).abs > 0.05
       fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
     end
   end
