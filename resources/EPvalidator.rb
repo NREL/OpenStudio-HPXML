@@ -144,7 +144,7 @@ class EnergyPlusValidator
       },
 
       # [FoundationWall]
-      "/HPXML/Building/BuildingDetails/Enclosure/FoundationWall" => {
+      "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[ExteriorAdjacentTo='ground' or ExteriorAdjacentTo='basement - conditioned' or ExteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - unvented' or ExteriorAdjacentTo='garage' or ExteriorAdjacentTo='other housing unit']" => one,
         "[InteriorAdjacentTo='basement - conditioned' or InteriorAdjacentTo='basement - unconditioned' or InteriorAdjacentTo='crawlspace - vented' or InteriorAdjacentTo='crawlspace - unvented' or InteriorAdjacentTo='garage']" => one,
