@@ -9,7 +9,7 @@ class Constructions
   def self.apply_wood_stud_wall(runner, model, surfaces, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish)
+                                rigid_r, mat_ext_finish, is_below_grade)
 
     return true if surfaces.empty?
 
@@ -31,11 +31,27 @@ class Constructions
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.new(name = "WallSheathing", thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
+      if is_below_grade
+        mat_osb.sAbs = 0.0
+        mat_osb.vAbs = 0.0
+      end
     end
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = "WallRigidIns", thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
+      if is_below_grade
+        mat_rigid.sAbs = 0.0
+        mat_rigid.vAbs = 0.0
+      end
+    end
+    if is_below_grade
+      mat_cavity.sAbs = 0.0
+      mat_cavity.vAbs = 0.0
+      mat_framing.sAbs = 0.0
+      mat_framing.vAbs = 0.0
+      mat_gap.sAbs = 0.0
+      mat_gap.vAbs = 0.0
     end
 
     # Set paths
@@ -806,7 +822,7 @@ class Constructions
                        cavity_r, install_grade,
                        framing_factor, joist_height_in,
                        plywood_thick_in, rigid_r, mat_floor_covering,
-                       mat_carpet)
+                       mat_carpet, is_cond_base)
 
     # Open cavity below, floor covering above (e.g., crawlspace ceiling)
 
@@ -854,6 +870,14 @@ class Constructions
       return false
     end
 
+    surfaces.each do |surface|
+      if is_cond_base
+        exterior_material = surface.construction.get.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
+        exterior_material.setSolarAbsorptance(0.0)
+        exterior_material.setVisibleAbsorptance(0.0)
+      end
+    end
+
     return true
   end
 
@@ -861,7 +885,7 @@ class Constructions
                                  wall_rigid_ins_height, wall_cavity_r, wall_install_grade,
                                  wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                                  wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                 wall_height, wall_height_above_grade, foundation = nil)
+                                 wall_height, wall_height_above_grade, foundation = nil, is_cond_base)
 
     # Calculate interior wall R-value
     int_wall_rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
@@ -881,6 +905,12 @@ class Constructions
 
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
+
+    # Zero out solar absorptance if conditioned basement present
+    if is_cond_base
+      mat_concrete.sAbs = 0.0
+      mat_concrete.vAbs = 0.0
+    end
 
     # Define construction
     constr = Construction.new(wall_constr_name, [1])
@@ -906,7 +936,7 @@ class Constructions
                                  under_r, under_width, gap_r,
                                  perimeter_r, perimeter_depth,
                                  whole_r, concrete_thick_in, exposed_perimeter,
-                                 mat_carpet = nil, foundation = nil)
+                                 mat_carpet = nil, foundation = nil, is_cond_base)
 
     return true if surface.nil?
 
@@ -936,15 +966,31 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, [1.0])
     if not mat_rigid.nil?
+      if is_cond_base
+        mat_rigid.sAbs = 0.0
+        mat_rigid.vAbs = 0.0
+      end
       constr.add_layer(mat_rigid)
     end
     if not mat_concrete.nil?
+      if is_cond_base
+        mat_rigid.sAbs = 0.0
+        mat_rigid.vAbs = 0.0
+      end
       constr.add_layer(mat_concrete)
     end
     if not mat_soil.nil?
+      if is_cond_base
+        mat_rigid.sAbs = 0.0
+        mat_rigid.vAbs = 0.0
+      end
       constr.add_layer(mat_soil)
     end
     if not mat_carpet.nil?
+      if is_cond_base
+        mat_rigid.sAbs = 0.0
+        mat_rigid.vAbs = 0.0
+      end
       constr.add_layer(mat_carpet)
     end
 
@@ -1004,54 +1050,61 @@ class Constructions
   end
 
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
-                                 drywall_thick_in, frac_of_ffa)
+                                 drywall_thick_in, frac_of_ffa, basement_frac_of_cfa)
 
-    spaces = Geometry.get_conditioned_spaces(model.getSpaces)
+    living_space = Geometry.get_conditioned_spaces(model.getSpaces)
 
-    return true if spaces.empty?
+    return true if living_space.empty?
 
-    imdefs = []
-    spaces.each do |space|
-      # Determine existing partition wall mass in space
-      existing_surface_area = 0
-      surfaces.each do |surface|
-        existing_surface_area += surface.grossArea
-      end
+    # Determine existing partition wall mass in space
+    existing_surface_area = 0
+    surfaces.each do |surface|
+      existing_surface_area += surface.grossArea
+    end
 
-      # Determine additional partition wall mass required
-      addtl_surface_area = frac_of_ffa * space.floorArea - existing_surface_area * 2 / spaces.size.to_f
+    # Determine additional partition wall mass required
+    addtl_surface_area_base = frac_of_ffa * living_space.floorArea * basement_frac_of_cfa - existing_surface_area * 2
+    addtl_surface_area_lv = frac_of_ffa * living_space.floorArea * (1 - basement_frac_of_cfa) - existing_surface_area * 2
 
-      if addtl_surface_area > 0
-        # Add remaining partition walls within spaces (those without geometric representation)
-        # as internal mass object.
-        imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-        imdef.setName("#{space.name.to_s} Partition")
-        imdef.setSurfaceArea(addtl_surface_area)
-        imdefs << imdef
+    if addtl_surface_area_lv > 0
+      # Add remaining partition walls within spaces (those without geometric representation)
+      # as internal mass object.
+      obj_name = "#{living_space.name.to_s} Living Partition"
+      imdef = create_os_int_mass_and_def(runner, obj_name, living_space, addtl_surface_area_lv)
 
-        im = OpenStudio::Model::InternalMass.new(imdef)
-        im.setName("#{space.name.to_s} Partition")
-        im.setSpace(space)
-        runner.registerInfo("Added internal mass object '#{im.name.to_s}' to space '#{space.name.to_s}'")
+      is_below_grade = false
+      if not Constructions.apply_wood_stud_wall(runner, model, [imdef], constr_name,
+                                                0, 1, 3.5, false,
+                                                Constants.DefaultFramingFactorInterior,
+                                                drywall_thick_in, 0, 0, nil, is_below_grade)
+        return false
       end
     end
 
-    if not Constructions.apply_wood_stud_wall(runner, model, imdefs, constr_name,
-                                              0, 1, 3.5, false,
-                                              Constants.DefaultFramingFactorInterior,
-                                              drywall_thick_in, 0, 0, nil)
-      return false
+    if addtl_surface_area_base > 0
+      # Add remaining partition walls within spaces (those without geometric representation)
+      # as internal mass object.
+      obj_name = "#{living_space.name.to_s} Base Partition"
+      imdef = create_os_int_mass_and_def(runner, obj_name, living_space, addtl_surface_area_base)
+
+      is_below_grade = true
+      if not Constructions.apply_wood_stud_wall(runner, model, [imdef], constr_name,
+                                                0, 1, 3.5, false,
+                                                Constants.DefaultFramingFactorInterior,
+                                                drywall_thick_in, 0, 0, nil, is_below_grade)
+        return false
+      end
     end
 
     return true
   end
 
   def self.apply_furniture(runner, model, frac_of_ffa, mass_lb_per_sqft = 8.0,
-                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood)
+                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood, basement_frac_of_cfa)
 
     model_spaces = model.getSpaces
 
-    conditioned_spaces = Geometry.get_conditioned_spaces(model_spaces)
+    living_space = Geometry.get_conditioned_spaces(model_spaces)
     unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
     garage_spaces = Geometry.get_garage_spaces(model_spaces)
 
@@ -1062,7 +1115,7 @@ class Constructions
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if conditioned_spaces.include?(space) or unconditioned_basement_spaces.include?(space)
+      if living_space.include?(space) or unconditioned_basement_spaces.include?(space)
         furnAreaFraction = frac_of_ffa
         furnMass = mass_lb_per_sqft
       elsif garage_spaces.include?(space)
@@ -1090,23 +1143,51 @@ class Constructions
       constr = Construction.new(constr_obj_name_space, path_fracs)
       constr.add_layer(mat_fm)
 
-      imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-      imdef.setName(mass_obj_name_space)
-      imdef.setSurfaceArea(furnAreaFraction * space.floorArea)
+      if living_space.include?(space)
+        # living furniture mass
+        living_surface_area = furnAreaFraction * space.floorArea * (1 - basement_frac_of_cfa)
+        living_obj_name = mass_obj_name_space + " living"
+        imdef = create_os_int_mass_and_def(runner, living_obj_name, space, living_surface_area)
+        # Create and assign construction to surfaces
+        if not constr.create_and_assign_constructions([imdef], runner, model)
+          return false
+        end
 
-      im = OpenStudio::Model::InternalMass.new(imdef)
-      im.setName(mass_obj_name_space)
-      im.setSpace(space)
-
-      # Create and assign construction to surfaces
-      if not constr.create_and_assign_constructions([imdef], runner, model)
-        return false
+        # basement furniture mass
+        mat_fm.sAbs = 0.0
+        mat_fm.vAbs = 0.0
+        base_surface_area = furnAreaFraction * space.floorArea * basement_frac_of_cfa
+        base_obj_name = mass_obj_name_space + " base"
+        imdef = create_os_int_mass_and_def(runner, base_obj_name, space, base_surface_area)
+        # Create and assign construction to surfaces
+        if not constr.create_and_assign_constructions([imdef], runner, model)
+          return false
+        end
+      else
+        surface_area = furnAreaFraction * space.floorArea
+        imdef = create_os_int_mass_and_def(runner, mass_obj_name_space, space, surface_area)
+        # Create and assign construction to surfaces
+        if not constr.create_and_assign_constructions([imdef], runner, model)
+          return false
+        end
       end
-
-      runner.registerInfo("Assigned internal mass object '#{mass_obj_name_space}' to space '#{space.name}'.")
     end
 
     return true
+  end
+
+  def self.create_os_int_mass_and_def(object_name, space, area)
+    # create internal mass objects
+    imdef = OpenStudio::Model::InternalMassDefinition.new(model)
+    imdef.setName(obj_name_space)
+    imdef.setSurfaceArea(area)
+
+    im = OpenStudio::Model::InternalMass.new(imdef)
+    im.setName(obj_name_space)
+    im.setSpace(space)
+
+    runner.registerInfo("Assigned internal mass object '#{obj_name}' to space '#{space.name}'.")
+    return imdef
   end
 
   def self.get_exterior_finish_materials

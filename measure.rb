@@ -1041,11 +1041,12 @@ class OSModel
       if rim_joist_values[:exterior_adjacent_to] == "outside"
         film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
         mat_ext_finish = Material.ExtFinishWoodLight
+        solar_abs = rim_joist_values[:solar_absorptance]
       else
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
+        solar_abs = 0.0
       end
-      solar_abs = rim_joist_values[:solar_absorptance]
       emitt = rim_joist_values[:emittance]
 
       assembly_r = rim_joist_values[:insulation_assembly_r_value]
@@ -1364,11 +1365,17 @@ class OSModel
       rigid_r = fnd_wall_values[:insulation_r_value]
     end
 
+    if @cfa != @cfa_ag
+      is_cond_base = true
+    else
+      is_cond_base = false
+    end
+
     success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
                                                   rigid_height, cavity_r, install_grade,
                                                   cavity_depth_in, filled_cavity, framing_factor,
                                                   rigid_r, drywall_thick_in, concrete_thick_in,
-                                                  height, height_ag, kiva_foundation)
+                                                  height, height_ag, kiva_foundation, is_cond_base)
     return nil if not success
 
     if not assembly_r.nil?
@@ -1427,10 +1434,16 @@ class OSModel
                                          slab_values[:carpet_r_value])
     end
 
+    if @cfa != @cfa_ag
+      is_cond_base = true
+    else
+      is_cond_base = false
+    end
+
     success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
                                                   slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                                   slab_perim_depth, slab_whole_r, slab_values[:thickness],
-                                                  slab_exp_perim, mat_carpet, kiva_foundation)
+                                                  slab_exp_perim, mat_carpet, kiva_foundation, is_cond_base)
     return nil if not success
 
     # FIXME: Temporary code for sizing
@@ -1482,8 +1495,24 @@ class OSModel
     surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     surface.setOutsideBoundaryCondition("Adiabatic")
 
+    # add ceiling surfaces accordingly
+    ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+
+    ceiling_surface.setSunExposure("NoSun")
+    ceiling_surface.setWindExposure("NoWind")
+    ceiling_surface.setName("inferred conditioned ceiling")
+    ceiling_surface.setSurfaceType("RoofCeiling")
+    ceiling_surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    ceiling_surface.setOutsideBoundaryCondition("Adiabatic")
+
     # Apply Construction
+    if @cfa != @cfa_ag
+      is_cond_base = true
+    else
+      is_cond_base = false
+    end
     success = apply_adiabatic_construction(runner, model, [surface], "floor")
+    success = apply_adiabatic_construction(runner, model, [ceiling_surface], "floor", is_cond_base)
     return false if not success
 
     return true
@@ -1492,9 +1521,10 @@ class OSModel
   def self.add_thermal_mass(runner, model, building)
     drywall_thick_in = 0.5
     partition_frac_of_cfa = 1.0
+    basement_frac_of_cfa = @cfa - @cfa_ag
     success = Constructions.apply_partition_walls(runner, model, [],
                                                   "PartitionWallConstruction",
-                                                  drywall_thick_in, partition_frac_of_cfa)
+                                                  drywall_thick_in, partition_frac_of_cfa, basement_frac_of_cfa)
     return false if not success
 
     # FIXME ?
@@ -1503,7 +1533,7 @@ class OSModel
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
     success = Constructions.apply_furniture(runner, model, furniture_frac_of_cfa,
-                                            mass_lb_per_sqft, density_lb_per_cuft, mat)
+                                            mass_lb_per_sqft, density_lb_per_cuft, mat, basement_frac_of_cfa)
     return false if not success
 
     return true
@@ -1732,7 +1762,7 @@ class OSModel
     return true
   end
 
-  def self.apply_adiabatic_construction(runner, model, surfaces, type)
+  def self.apply_adiabatic_construction(runner, model, surfaces, type, is_cond_base)
     # Arbitrary construction for heat capacitance.
     # Only applies to surfaces where outside boundary conditioned is
     # adiabatic or surface net area is near zero.
@@ -1748,7 +1778,7 @@ class OSModel
 
       success = Constructions.apply_floor(runner, model, surfaces, "AdiabaticFloorConstruction",
                                           0, 1, 0.07, 5.5, 0.75, 999,
-                                          Material.FloorWood, Material.CoveringBare)
+                                          Material.FloorWood, Material.CoveringBare, is_cond_base)
       return false if not success
 
     elsif type == "roof"
