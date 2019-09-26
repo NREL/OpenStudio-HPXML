@@ -1045,7 +1045,11 @@ class OSModel
       else
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
-        solar_abs = 0.0
+        if @cfa == @cfa_ag
+          solar_abs = rim_joist_values[:solar_absorptance]
+        else
+          solar_abs = 0.0
+        end
       end
       emitt = rim_joist_values[:emittance]
 
@@ -1124,7 +1128,7 @@ class OSModel
                                           cavity_r, install_grade,
                                           constr_set.framing_factor, constr_set.stud.thick_in,
                                           constr_set.osb_thick_in, constr_set.rigid_r,
-                                          mat_floor_covering, constr_set.exterior_material)
+                                          mat_floor_covering, constr_set.exterior_material, false)
       return false if not success
 
       if not assembly_r.nil?
@@ -1299,7 +1303,7 @@ class OSModel
         mat_ext_finish = nil
 
         success = apply_wall_construction(runner, model, surface, fnd_wall_values[:id], wall_type, assembly_r,
-                                          drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance)
+                                          drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance, false)
         return false if not success
       end
     end
@@ -1365,12 +1369,7 @@ class OSModel
       rigid_r = fnd_wall_values[:insulation_r_value]
     end
 
-    if @cfa != @cfa_ag
-      is_cond_base = true
-    else
-      is_cond_base = false
-    end
-
+    is_cond_base = (@cfa != @cfa_ag)
     success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
                                                   rigid_height, cavity_r, install_grade,
                                                   cavity_depth_in, filled_cavity, framing_factor,
@@ -1434,12 +1433,8 @@ class OSModel
                                          slab_values[:carpet_r_value])
     end
 
-    if @cfa != @cfa_ag
-      is_cond_base = true
-    else
-      is_cond_base = false
-    end
-
+    is_cond_base = (@cfa != @cfa_ag)
+    puts is_cond_base
     success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
                                                   slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                                   slab_perim_depth, slab_whole_r, slab_values[:thickness],
@@ -1506,12 +1501,8 @@ class OSModel
     ceiling_surface.setOutsideBoundaryCondition("Adiabatic")
 
     # Apply Construction
-    if @cfa != @cfa_ag
-      is_cond_base = true
-    else
-      is_cond_base = false
-    end
-    success = apply_adiabatic_construction(runner, model, [surface], "floor")
+    is_cond_base = (@cfa != @cfa_ag)
+    success = apply_adiabatic_construction(runner, model, [surface], "floor", false)
     success = apply_adiabatic_construction(runner, model, [ceiling_surface], "floor", is_cond_base)
     return false if not success
 
@@ -1521,7 +1512,7 @@ class OSModel
   def self.add_thermal_mass(runner, model, building)
     drywall_thick_in = 0.5
     partition_frac_of_cfa = 1.0
-    basement_frac_of_cfa = @cfa - @cfa_ag
+    basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
     success = Constructions.apply_partition_walls(runner, model, [],
                                                   "PartitionWallConstruction",
                                                   drywall_thick_in, partition_frac_of_cfa, basement_frac_of_cfa)
@@ -1648,7 +1639,7 @@ class OSModel
       return false if not success
     end
 
-    success = apply_adiabatic_construction(runner, model, surfaces, "wall")
+    success = apply_adiabatic_construction(runner, model, surfaces, "wall", false)
     return false if not success
 
     return true
@@ -1711,7 +1702,7 @@ class OSModel
       return false if not success
     end
 
-    success = apply_adiabatic_construction(runner, model, surfaces, "roof")
+    success = apply_adiabatic_construction(runner, model, surfaces, "roof", false)
     return false if not success
 
     return true
@@ -1756,7 +1747,7 @@ class OSModel
       return false if not success
     end
 
-    success = apply_adiabatic_construction(runner, model, surfaces, "wall")
+    success = apply_adiabatic_construction(runner, model, surfaces, "wall", false)
     return false if not success
 
     return true
@@ -1771,7 +1762,7 @@ class OSModel
 
       success = Constructions.apply_wood_stud_wall(runner, model, surfaces, "AdiabaticWallConstruction",
                                                    0, 1, 3.5, true, 0.1, 0.5, 0, 999,
-                                                   Material.ExtFinishStuccoMedDark)
+                                                   Material.ExtFinishStuccoMedDark, false)
       return false if not success
 
     elsif type == "floor"
@@ -3196,7 +3187,7 @@ class OSModel
                                                    cavity_r, install_grade, constr_set.stud.thick_in,
                                                    cavity_filled, constr_set.framing_factor,
                                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                   constr_set.rigid_r, constr_set.exterior_material)
+                                                   constr_set.rigid_r, constr_set.exterior_material, false)
       return false if not success
 
     elsif wall_type == "SteelFrame"

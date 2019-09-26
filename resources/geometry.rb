@@ -280,14 +280,12 @@ class Geometry
     end
   end
 
-  def self.get_conditioned_spaces(spaces)
-    conditioned_spaces = []
+  def self.get_conditioned_space(spaces)
     spaces.each do |space|
       next if self.space_is_unconditioned(space)
 
-      conditioned_spaces << space
+      return space
     end
-    return conditioned_spaces
   end
 
   def self.get_unconditioned_basement_spaces(spaces)
@@ -518,46 +516,44 @@ class Geometry
     activity_sch = nil
 
     # Get spaces
-    ffa_spaces = self.get_conditioned_spaces(model.getSpaces)
+    space = self.get_conditioned_space(model.getSpaces)
 
-    ffa_spaces.each do |space|
-      space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
+    space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
 
-      space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
+    space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
 
-      if people_sch.nil?
-        # Create schedule
-        people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
-        if not people_sch.validated?
-          return false
-        end
+    if people_sch.nil?
+      # Create schedule
+      people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+      if not people_sch.validated?
+        return false
       end
-
-      if activity_sch.nil?
-        # Create schedule
-        activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
-      end
-
-      # Add people definition for the occ
-      occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-      occ = OpenStudio::Model::People.new(occ_def)
-      occ.setName(space_obj_name)
-      occ.setSpace(space)
-      occ_def.setName(space_obj_name)
-      occ_def.setNumberOfPeopleCalculationMethod("People", 1)
-      occ_def.setNumberofPeople(space_num_occ)
-      occ_def.setFractionRadiant(occ_rad)
-      occ_def.setSensibleHeatFraction(occ_sens)
-      occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
-      occ_def.setCarbonDioxideGenerationRate(0)
-      occ_def.setEnableASHRAE55ComfortWarnings(false)
-      occ.setActivityLevelSchedule(activity_sch)
-      occ.setNumberofPeopleSchedule(people_sch.schedule)
-
-      total_num_occ += space_num_occ
-
-      runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
     end
+
+    if activity_sch.nil?
+      # Create schedule
+      activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
+    end
+
+    # Add people definition for the occ
+    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
+    occ = OpenStudio::Model::People.new(occ_def)
+    occ.setName(space_obj_name)
+    occ.setSpace(space)
+    occ_def.setName(space_obj_name)
+    occ_def.setNumberOfPeopleCalculationMethod("People", 1)
+    occ_def.setNumberofPeople(space_num_occ)
+    occ_def.setFractionRadiant(occ_rad)
+    occ_def.setSensibleHeatFraction(occ_sens)
+    occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
+    occ_def.setCarbonDioxideGenerationRate(0)
+    occ_def.setEnableASHRAE55ComfortWarnings(false)
+    occ.setActivityLevelSchedule(activity_sch)
+    occ.setNumberofPeopleSchedule(people_sch.schedule)
+
+    total_num_occ += space_num_occ
+
+    runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
 
     runner.registerInfo("The building has been assigned #{total_num_occ.round(2)} total occupant(s).")
     return true

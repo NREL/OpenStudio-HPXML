@@ -2026,7 +2026,7 @@ class HVACSizing
   end
 
   def self.get_shelter_class(model, min_neighbor_distance)
-    height_ft = Geometry.get_height_of_spaces(Geometry.get_conditioned_spaces(@model_spaces))
+    height_ft = Geometry.get_height_of_spaces([Geometry.get_conditioned_space(@model_spaces)])
     exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
                          Geometry.calculate_above_grade_wall_area(@model_spaces)
 

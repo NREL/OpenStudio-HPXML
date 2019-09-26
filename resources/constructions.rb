@@ -9,7 +9,7 @@ class Constructions
   def self.apply_wood_stud_wall(runner, model, surfaces, constr_name,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, drywall_thick_in, osb_thick_in,
-                                rigid_r, mat_ext_finish, is_below_grade)
+                                rigid_r, mat_ext_finish, is_cond_base)
 
     return true if surfaces.empty?
 
@@ -31,27 +31,11 @@ class Constructions
     mat_osb = nil
     if osb_thick_in > 0
       mat_osb = Material.new(name = "WallSheathing", thick_in = osb_thick_in, mat_base = BaseMaterial.Wood)
-      if is_below_grade
-        mat_osb.sAbs = 0.0
-        mat_osb.vAbs = 0.0
-      end
     end
     mat_rigid = nil
     if rigid_r > 0
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = "WallRigidIns", thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
-      if is_below_grade
-        mat_rigid.sAbs = 0.0
-        mat_rigid.vAbs = 0.0
-      end
-    end
-    if is_below_grade
-      mat_cavity.sAbs = 0.0
-      mat_cavity.vAbs = 0.0
-      mat_framing.sAbs = 0.0
-      mat_framing.vAbs = 0.0
-      mat_gap.sAbs = 0.0
-      mat_gap.vAbs = 0.0
     end
 
     # Set paths
@@ -85,6 +69,9 @@ class Constructions
 
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
+      if is_cond_base
+        apply_solar_abs_to_surface(surface, 0.0)
+      end
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
       surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
@@ -870,11 +857,9 @@ class Constructions
       return false
     end
 
-    surfaces.each do |surface|
-      if is_cond_base
-        exterior_material = surface.construction.get.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
-        exterior_material.setSolarAbsorptance(0.0)
-        exterior_material.setVisibleAbsorptance(0.0)
+    if is_cond_base
+      surfaces.each do |surface|
+        apply_solar_abs_to_surface(surface, 0.0)
       end
     end
 
@@ -906,12 +891,6 @@ class Constructions
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
 
-    # Zero out solar absorptance if conditioned basement present
-    if is_cond_base
-      mat_concrete.sAbs = 0.0
-      mat_concrete.vAbs = 0.0
-    end
-
     # Define construction
     constr = Construction.new(wall_constr_name, [1])
     constr.add_layer(mat_concrete)
@@ -927,6 +906,10 @@ class Constructions
     # Assign surfaces to Kiva foundation
     wall_surfaces.each do |wall_surface|
       wall_surface.setAdjacentFoundation(foundation)
+      if is_cond_base
+        # Zero out solar absorptance if conditioned basement present
+        apply_solar_abs_to_surface(wall_surface, 0.0)
+      end
     end
 
     return true
@@ -966,37 +949,25 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, [1.0])
     if not mat_rigid.nil?
-      if is_cond_base
-        mat_rigid.sAbs = 0.0
-        mat_rigid.vAbs = 0.0
-      end
       constr.add_layer(mat_rigid)
     end
     if not mat_concrete.nil?
-      if is_cond_base
-        mat_rigid.sAbs = 0.0
-        mat_rigid.vAbs = 0.0
-      end
       constr.add_layer(mat_concrete)
     end
     if not mat_soil.nil?
-      if is_cond_base
-        mat_rigid.sAbs = 0.0
-        mat_rigid.vAbs = 0.0
-      end
       constr.add_layer(mat_soil)
     end
     if not mat_carpet.nil?
-      if is_cond_base
-        mat_rigid.sAbs = 0.0
-        mat_rigid.vAbs = 0.0
-      end
       constr.add_layer(mat_carpet)
     end
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions([surface], runner, model)
       return false
+    end
+
+    if is_cond_base
+      apply_solar_abs_to_surface(surface, 0.0)
     end
 
     # Assign surface to Kiva foundation
@@ -1052,9 +1023,9 @@ class Constructions
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
                                  drywall_thick_in, frac_of_ffa, basement_frac_of_cfa)
 
-    living_space = Geometry.get_conditioned_spaces(model.getSpaces)
+    living_space = Geometry.get_conditioned_space(model.getSpaces)
 
-    return true if living_space.empty?
+    return true if living_space.nil?
 
     # Determine existing partition wall mass in space
     existing_surface_area = 0
@@ -1070,7 +1041,7 @@ class Constructions
       # Add remaining partition walls within spaces (those without geometric representation)
       # as internal mass object.
       obj_name = "#{living_space.name.to_s} Living Partition"
-      imdef = create_os_int_mass_and_def(runner, obj_name, living_space, addtl_surface_area_lv)
+      imdef = create_os_int_mass_and_def(runner, model, obj_name, living_space, addtl_surface_area_lv)
 
       is_below_grade = false
       if not Constructions.apply_wood_stud_wall(runner, model, [imdef], constr_name,
@@ -1085,7 +1056,7 @@ class Constructions
       # Add remaining partition walls within spaces (those without geometric representation)
       # as internal mass object.
       obj_name = "#{living_space.name.to_s} Base Partition"
-      imdef = create_os_int_mass_and_def(runner, obj_name, living_space, addtl_surface_area_base)
+      imdef = create_os_int_mass_and_def(runner, model, obj_name, living_space, addtl_surface_area_base)
 
       is_below_grade = true
       if not Constructions.apply_wood_stud_wall(runner, model, [imdef], constr_name,
@@ -1104,7 +1075,7 @@ class Constructions
 
     model_spaces = model.getSpaces
 
-    living_space = Geometry.get_conditioned_spaces(model_spaces)
+    living_space = Geometry.get_conditioned_space(model_spaces)
     unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
     garage_spaces = Geometry.get_garage_spaces(model_spaces)
 
@@ -1115,7 +1086,7 @@ class Constructions
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if living_space.include?(space) or unconditioned_basement_spaces.include?(space)
+      if living_space == space or unconditioned_basement_spaces.include?(space)
         furnAreaFraction = frac_of_ffa
         furnMass = mass_lb_per_sqft
       elsif garage_spaces.include?(space)
@@ -1143,11 +1114,11 @@ class Constructions
       constr = Construction.new(constr_obj_name_space, path_fracs)
       constr.add_layer(mat_fm)
 
-      if living_space.include?(space)
+      if living_space == space
         # living furniture mass
         living_surface_area = furnAreaFraction * space.floorArea * (1 - basement_frac_of_cfa)
         living_obj_name = mass_obj_name_space + " living"
-        imdef = create_os_int_mass_and_def(runner, living_obj_name, space, living_surface_area)
+        imdef = create_os_int_mass_and_def(runner, model, living_obj_name, space, living_surface_area)
         # Create and assign construction to surfaces
         if not constr.create_and_assign_constructions([imdef], runner, model)
           return false
@@ -1158,14 +1129,14 @@ class Constructions
         mat_fm.vAbs = 0.0
         base_surface_area = furnAreaFraction * space.floorArea * basement_frac_of_cfa
         base_obj_name = mass_obj_name_space + " base"
-        imdef = create_os_int_mass_and_def(runner, base_obj_name, space, base_surface_area)
+        imdef = create_os_int_mass_and_def(runner, model, base_obj_name, space, base_surface_area)
         # Create and assign construction to surfaces
         if not constr.create_and_assign_constructions([imdef], runner, model)
           return false
         end
       else
         surface_area = furnAreaFraction * space.floorArea
-        imdef = create_os_int_mass_and_def(runner, mass_obj_name_space, space, surface_area)
+        imdef = create_os_int_mass_and_def(runner, model, mass_obj_name_space, space, surface_area)
         # Create and assign construction to surfaces
         if not constr.create_and_assign_constructions([imdef], runner, model)
           return false
@@ -1176,18 +1147,25 @@ class Constructions
     return true
   end
 
-  def self.create_os_int_mass_and_def(object_name, space, area)
+  def self.create_os_int_mass_and_def(runner, model, object_name, space, area)
     # create internal mass objects
     imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-    imdef.setName(obj_name_space)
+    imdef.setName(object_name)
     imdef.setSurfaceArea(area)
 
     im = OpenStudio::Model::InternalMass.new(imdef)
-    im.setName(obj_name_space)
+    im.setName(object_name)
     im.setSpace(space)
 
-    runner.registerInfo("Assigned internal mass object '#{obj_name}' to space '#{space.name}'.")
+    runner.registerInfo("Assigned internal mass object '#{object_name}' to space '#{space.name}'.")
     return imdef
+  end
+
+  def self. apply_solar_abs_to_surface(surface, solar_abs)
+    # Applies the solar absorptance to the construction's exterior layer
+    exterior_material = surface.construction.get.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
+    exterior_material.setSolarAbsorptance(solar_abs)
+    exterior_material.setVisibleAbsorptance(solar_abs)
   end
 
   def self.get_exterior_finish_materials
