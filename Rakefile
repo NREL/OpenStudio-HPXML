@@ -63,6 +63,8 @@ def create_hpxmls
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
+    'base-appliances-oil.xml' => 'base.xml',
+    'base-appliances-propane.xml' => 'base.xml',
     'base-appliances-refrigerator-adjusted.xml' => 'base.xml',
     'base-appliances-washer-imef.xml' => 'base.xml',
     'base-atticroof-cathedral.xml' => 'base.xml',
@@ -2620,12 +2622,20 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
                              :fuel_type => "electricity",
                              :combined_energy_factor => 2.62,
                              :control_type => "moisture" }
-  elsif ['base-appliances-gas.xml'].include? hpxml_file
+  elsif ['base-appliances-gas.xml',
+         'base-appliances-propane.xml',
+         'base-appliances-oil.xml'].include? hpxml_file
     clothes_dryer_values = { :id => "ClothesDryer",
                              :location => "living space",
-                             :fuel_type => "natural gas",
                              :energy_factor => 2.67,
                              :control_type => "moisture" }
+    if hpxml_file == 'base-appliances-gas.xml'
+      clothes_dryer_values[:fuel_type] = "natural gas"
+    elsif hpxml_file == 'base-appliances-propane.xml'
+      clothes_dryer_values[:fuel_type] = "propane"
+    elsif hpxml_file == 'base-appliances-oil.xml'
+      clothes_dryer_values[:fuel_type] = "fuel oil"
+    end
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2685,6 +2695,12 @@ def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
     cooking_range_values = {}
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     cooking_range_values[:fuel_type] = "natural gas"
+    cooking_range_values[:is_induction] = false
+  elsif ['base-appliances-propane.xml'].include? hpxml_file
+    cooking_range_values[:fuel_type] = "propane"
+    cooking_range_values[:is_induction] = false
+  elsif ['base-appliances-oil.xml'].include? hpxml_file
+    cooking_range_values[:fuel_type] = "fuel oil"
     cooking_range_values[:is_induction] = false
   end
   return cooking_range_values
