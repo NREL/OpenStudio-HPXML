@@ -37,6 +37,7 @@ class Geometry
     thermal_zones.delete("ground")
     thermal_zones.delete("other")
     thermal_zones.delete("other housing unit")
+    thermal_zones.delete("basement - conditioned")
     return thermal_zones.uniq
   end
 
@@ -160,6 +161,7 @@ class Geometry
       heights << Constants.WallHeight * num_floors
     end
     return heights.max
+  end
 
   def self.get_max_z_of_spaces(spaces)
     maxzs = []
@@ -460,6 +462,10 @@ class Geometry
 
   def self.is_unvented_crawl(space_or_zone)
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedCrawl)
+  end
+
+  def self.is_conditioned_basement(space_or_zone)
+    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeConditionedBasement)
   end
 
   def self.is_unconditioned_basement(space_or_zone)

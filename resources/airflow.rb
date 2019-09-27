@@ -126,12 +126,11 @@ class Airflow
     if not building.living.ELA.nil?
       HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceELA": building.living.ELA })
       HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceCFM": building.living.inf_flow })
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceACH": building.living.ACH })
     else
       HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceELA": 0 })
       HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceCFM": 0 })
-    end
-    unless building.conditioned_basement.nil?
-      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "BasementConditionedCFM": building.conditioned_basement.inf_flow })
+      HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "LivingSpaceACH": 0 })
     end
     unless building.vented_crawlspace.nil?
       HPXML.add_extension(parent: air_infiltration_measurement, extensions: { "CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow })

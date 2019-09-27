@@ -418,7 +418,7 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if thermal_zone == "basement - conditioned" or thermal_zone.include? "crawlspace" or thermal_zone.include? "garage"
+      if thermal_zone == "basement - unconditioned" or thermal_zone.include? "crawlspace" or thermal_zone.include? "garage"
         zones_updated += 1
 
         zone_floor_area = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: thermal_zone)
@@ -426,10 +426,6 @@ class OSModel
         zone_volume = Geometry.get_height_of_thermal_zone(building: building, thermal_zone: thermal_zone, number_of_conditioned_floors_above_grade: @ncfl_ag) * zone_floor_area
         if zone_volume <= 0
           fail "Calculated volume for #{thermal_zone.name} zone (#{zone_volume}) is not greater than zero."
-        end
-
-        if thermal_zone == "basement - conditioned"
-          living_volume = @cvolume - zone_volume
         end
 
         model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
@@ -443,12 +439,8 @@ class OSModel
 
       zones_updated += 1
 
-      if living_volume <= 0
-        fail "Calculated volume for living zone (#{living_volume}) is not greater than zero."
-      end
-
       model_zone = Geometry.get_model_thermal_zone(model: model, thermal_zone: thermal_zone)
-      model_zone.setVolume(UnitConversions.convert(living_volume, "ft^3", "m^3"))
+      model_zone.setVolume(UnitConversions.convert(@cvolume, "ft^3", "m^3"))
     end
 
     # Attic
@@ -2888,19 +2880,18 @@ class OSModel
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
     systems = building.elements["BuildingDetails/Systems"]
     success = Airflow.apply(model, runner, air_infiltration_measurement, systems, infil, mech_vent, nat_vent, duct_systems,
-                            @cfa, infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area, @min_neighbor_distance)
+                            @cfa, @infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area, @min_neighbor_distance)
     return false if not success
 
     return true
   end
-
 
   def self.add_hvac_sizing(runner, model, building, weather)
     return true if @use_only_ideal_air
 
     show_debug_info = false
 
-    success = HVACSizing.apply(model: model, runner: runner, building: building, weather: weather, cfa: @cfa, cfa_ag: @cfa_ag, nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag, cvolume: @cvolume, azimuth: @default_azimuth, eri_version: @eri_version, hvac_map: @hvac_map, show_debug_info: show_debug_info)
+    success = HVACSizing.apply(model: model, runner: runner, building: building, weather: weather, cfa: @cfa, cfa_ag: @cfa_ag, nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag, cvolume: @cvolume, infilvolume: @infilvolume, azimuth: @default_azimuth, eri_version: @eri_version, hvac_map: @hvac_map, show_debug_info: show_debug_info)
     return false if not success
 
     return true

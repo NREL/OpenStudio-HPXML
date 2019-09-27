@@ -16,6 +16,7 @@ class HVACSizing
                  min_neighbor_distance:,
                  ncfl_ag:,
                  cvolume:,
+                 infilvolume:,
                  azimuth:,
                  eri_version:,
                  hvac_map:,
@@ -26,6 +27,7 @@ class HVACSizing
     @nbeds = nbeds
     @ncfl_ag = ncfl_ag
     @cvolume = cvolume
+    @infilvolume = infilvolume
     @north_axis = azimuth
     @eri_version = eri_version
     @hvac_map = hvac_map
@@ -427,13 +429,14 @@ class HVACSizing
       zone_loads = process_load_roofs(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_load_floors(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       zone_loads = process_infiltration_ventilation(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
+      zone_loads = process_internal_gains(runner: runner, building: building, thermal_zone: thermal_zone, zone_loads: zone_loads, weather: weather)
       return nil if zone_loads.nil?
 
       zones_loads[thermal_zone] = zone_loads
     end
 
     return zones_loads
-end
+  end
 
   def self.process_load_windows_skylights(runner:,
                                           building:,
@@ -1206,7 +1209,8 @@ end
     return nil if zone_loads.nil?
 
     # Per ANSI/RESNET/ICC 301
-    ach_nat = get_feature(runner, thermal_zone, Constants.SizingInfoZoneInfiltrationACH, 'double')
+    air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
+    ach_nat = Float(air_infiltration_measurement.elements["extension/LivingSpaceACH"].text)
     return nil if ach_nat.nil?
 
     ach_Cooling = 1.2 * ach_nat
@@ -1231,7 +1235,11 @@ end
     return zone_loads
   end
 
-  def self.process_internal_gains(runner, thermal_zone, zone_loads)
+  def self.process_internal_gains(runner:,
+                                  building:,
+                                  thermal_zone:,
+                                  zone_loads:,
+                                  weather:)
     '''
     Cooling Load: Internal Gains
     '''
@@ -1246,10 +1254,9 @@ end
     intGains_Sens = 1600.0 + 230.0 * n_occupants
     intGains_Lat = 200.0 * n_occupants
 
-    thermal_zone.spaces.each do |space|
-      zone_loads.Cool_IntGains_Sens += intGains_Sens * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
-      zone_loads.Cool_IntGains_Lat += intGains_Lat * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
-    end
+    zone_floor_area = Geometry.get_thermal_zone_floor_area(building: building, thermal_zone: thermal_zone)
+    zone_loads.Cool_IntGains_Sens += intGains_Sens * zone_floor_area / @cfa
+    zone_loads.Cool_IntGains_Lat += intGains_Lat * zone_floor_area / @cfa
 
     return zone_loads
   end
@@ -2161,7 +2168,7 @@ end
     end
 
     return shelter_class
-end
+  end
 
   def self.get_wallgroup_wood_or_steel_stud(cavity_ins_r_value:)
     '''
@@ -2458,7 +2465,6 @@ end
     hvac.FixedHeatingCapacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "Btu/hr", "ton") unless hvac.FixedHeatingCapacity.nil?
     hvac.NumSpeedsHeating = Float(heating_system.elements["extension/NumSpeedsHeating"].text) unless heating_system.elements["extension/NumSpeedsHeating"].nil?
     hvac.BoilerDesignTemp = Float(heating_system.elements["extension/BoilerDesignTemp"].text) unless heating_system.elements["extension/BoilerDesignTemp"].nil?
-    hvac.DSEHeat, dse_cool, has_dse = OSModel.get_dse(building, heating_system_values)
 
     return true
   end
@@ -2498,7 +2504,6 @@ end
       hvac.OverSizeLimit = 1.3
     end
     hvac.CapacityRatioCooling = cooling_system.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless cooling_system.elements["extension/CapacityRatioCooling"].nil?
-    dse_heat, hvac.DSECool, has_dse = OSModel.get_dse(building, cooling_system_values)
 
     return true
   end
@@ -2515,6 +2520,7 @@ end
          object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
         hvac.Objects << object
       end
+    end
     hvac.HeatType = heat_pump.elements["extension/HeatType"].text
     hvac.CoolType = heat_pump.elements["extension/CoolType"].text
     hvac.RatedCFMperTonCooling = heat_pump.elements["extension/RatedCFMperTonCooling"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/RatedCFMperTonCooling"].nil?
@@ -2528,6 +2534,8 @@ end
       hvac.HEAT_CAP_FT_SPEC.each_with_index do |curve, i|
         hvac.HEAT_CAP_FT_SPEC[i] = hvac.HEAT_CAP_FT_SPEC[i].split(",").map(&:to_f)
       end
+    end
+
     hvac.GSHP_BoreDepth = heat_pump.elements["extension/GSHP_BoreDepth"].text unless heat_pump.elements["extension/GSHP_BoreDepth"].nil?
     hvac.GSHP_BoreConfig = heat_pump.elements["extension/GSHP_BoreConfig"].text unless heat_pump.elements["extension/GSHP_BoreConfig"].nil?
     hvac.GSHP_SpacingType = heat_pump.elements["extension/GSHP_SpacingType"].text unless heat_pump.elements["extension/GSHP_SpacingType"].nil?
@@ -2564,7 +2572,6 @@ end
     hvac.NumSpeedsCooling = Float(heat_pump.elements["extension/NumSpeedsCooling"].text) unless heat_pump.elements["extension/NumSpeedsCooling"].nil?
     hvac.CapacityRatioCooling = heat_pump.elements["extension/CapacityRatioCooling"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/CapacityRatioCooling"].nil?
     hvac.CapacityRatioHeating = heat_pump.elements["extension/CapacityRatioHeating"].text.split(",").map(&:to_f) unless heat_pump.elements["extension/CapacityRatioHeating"].nil?
-    hvac.DSEHeat, hvac.DSECool, has_dse = OSModel.get_dse(building, heat_pump_values)
 
     return true
   end
@@ -3366,8 +3373,7 @@ end
                              model:,
                              building:,
                              hvac:,
-                             hvac_final_values:,
-                             zone_ratios:)
+                             hvac_final_values:)
     # Updates object properties in the model
 
     thermal_zones = Geometry.get_thermal_zones_from_spaces(model.getSpaces)
@@ -3765,6 +3771,7 @@ end
     # runner.registerInfo("#{s}\n")
     puts "#{s}\n"
   end
+
 end
 
 class ZoneLoads
@@ -3809,6 +3816,7 @@ class HVACInfo
     self.OverSizeLimit = 1.15
     self.OverSizeDelta = 15000.0
     self.FanspeedRatioCooling = [1.0]
+    self.Objects = []
   end
 
   def has_type(name_or_names)

@@ -503,12 +503,28 @@ class Constants
     return 'autosize'
   end
 
+  def self.SizingInfoSlabRvalue
+    return __method__.to_s
+  end
+
+  def self.SizingInfoWindowOverhangDepth
+    return __method__.to_s
+  end
+
+  def self.SizingInfoWindowOverhangOffset
+    return __method__.to_s
+  end
+
   def self.SpaceTypeVentedCrawl
     return 'vented crawlspace'
   end
 
   def self.SpaceTypeUnventedCrawl
     return 'unvented crawlspace'
+  end
+
+  def self.SpaceTypeConditionedBasement
+    return 'conditioned basement'
   end
 
   def self.SpaceTypeGarage
