@@ -1441,7 +1441,6 @@ class OSModel
     end
 
     is_cond_base = (@cfa != @cfa_ag)
-    puts is_cond_base
     success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
                                                   slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                                   slab_perim_depth, slab_whole_r, slab_values[:thickness],
