@@ -29,24 +29,20 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     hvac_base_dir = File.absolute_path(File.join(this_dir, "hvac_base"))
-    hvac_dse_dir = File.absolute_path(File.join(this_dir, "hvac_dse"))
     hvac_multiple_dir = File.absolute_path(File.join(this_dir, "hvac_multiple"))
     hvac_partial_dir = File.absolute_path(File.join(this_dir, "hvac_partial"))
     hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "hvac_load_fracs"))
     water_heating_multiple_dir = File.absolute_path(File.join(this_dir, "water_heating_multiple"))
     autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
 
-    test_dirs = [
-      this_dir,
-      cfis_dir,
-      hvac_base_dir,
-      hvac_dse_dir,
-      hvac_multiple_dir,
-      hvac_partial_dir,
-      hvac_load_fracs_dir,
-      water_heating_multiple_dir,
-      autosize_dir
-    ]
+    test_dirs = [this_dir,
+                 cfis_dir,
+                 hvac_base_dir,
+                 hvac_multiple_dir,
+                 hvac_partial_dir,
+                 hvac_load_fracs_dir,
+                 water_heating_multiple_dir,
+                 autosize_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
@@ -65,11 +61,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     _write_summary_results(results_dir, all_results)
 
     # Cross simulation tests
-    _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     _test_hrv_erv_inputs(this_dir, all_results)
+    _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
   end
 
   def test_invalid
@@ -272,7 +268,17 @@ class HPXMLTranslatorTest < MiniTest::Test
       results[[fueltype, category, subcategory, fuel_units]] = val
     end
 
-    # Disaggregate any crankcase and defrost energy from results (for DSE tests)
+    # Move EC_adj from Interior Equipment category to a single EC_adj subcategory in Water Systems
+    results.keys.each do |k|
+      if k[1] == "Interior Equipment" and k[2].end_with? Constants.ObjectNameWaterHeaterAdjustment(nil)
+        new_key = [k[0], "Water Systems", "EC_adj", k[3]]
+        results[new_key] = 0 if results[new_key].nil?
+        results[new_key] += results[k]
+        results.delete(k)
+      end
+    end
+
+    # Disaggregate any crankcase and defrost energy from results
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
@@ -307,6 +313,13 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
     results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+
+    # Obtain Heating/Cooling loads
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Heating:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    results[["Load", "Heating", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Cooling:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    results[["Load", "Cooling", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
 
     sqlFile.close
 
@@ -370,7 +383,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_equal(true, success)
     end
 
-    # Add output variables for crankcase and defrost energy (for DSE tests)
+    # Add output variables for crankcase and defrost energy
     vars = ["Cooling Coil Crankcase Heater Electric Energy",
             "Heating Coil Crankcase Heater Electric Energy",
             "Heating Coil Defrost Electric Energy"]
@@ -406,12 +419,12 @@ class HPXMLTranslatorTest < MiniTest::Test
     results = _get_results(rundir, sim_time, workflow_time)
 
     # Verify simulation outputs
-    _verify_simulation_outputs(rundir, args['hpxml_path'], results)
+    _verify_simulation_outputs(runner, rundir, args['hpxml_path'], results)
 
     return results
   end
 
-  def _verify_simulation_outputs(rundir, hpxml_path, results)
+  def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
     File.readlines(File.join(rundir, "eplusout.err")).each do |err_line|
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
@@ -485,29 +498,49 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # Enclosure Foundation Slabs
-    bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
-      slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
-
-      # Exposed Area
-      hpxml_value = Float(XMLHelper.get_value(slab, 'Area'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
-
-      # Tilt
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(180.0, sql_value, 0.01)
-    end
-
     # Enclosure Foundations
-    # Ensure Kiva instances have appropriate perimeter fraction
-    # TODO: Update for walkout basements, which use multiple Kiva instances per foundation.
+    # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them to end up this way.
+    num_kiva_instances = 0
     File.readlines(File.join(rundir, "eplusout.eio")).each do |eio_line|
-      if eio_line.start_with? "Foundation Kiva"
+      if eio_line.downcase.start_with? "foundation kiva"
         kiva_perim_frac = Float(eio_line.split(",")[5])
         assert_equal(1.0, kiva_perim_frac)
+        num_kiva_instances += 1
+      end
+    end
+
+    num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
+                                    'base-foundation-ambient-autosize.xml' => 0,      # no foundation in contact w/ ground
+                                    'base-foundation-multiple.xml' => 2,              # additional instance for 2nd foundation type
+                                    'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
+                                    'base-enclosure-garage.xml' => 2,                 # additional instance for garage
+                                    'base-enclosure-garage-autosize.xml' => 2,        # additional instance for garage
+                                    'base-enclosure-adiabatic-surfaces.xml' => 2,     # additional instance for adiabatic construction
+                                    'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
+                                    'base-foundation-complex.xml' => 10 }
+
+    if not num_expected_kiva_instances[File.basename(hpxml_path)].nil?
+      assert_equal(num_expected_kiva_instances[File.basename(hpxml_path)], num_kiva_instances)
+    else
+      assert_equal(1, num_kiva_instances)
+    end
+
+    # Enclosure Foundation Slabs
+    num_slabs = bldg_details.elements['count(Enclosure/Slabs/Slab)']
+    if num_slabs <= 1 and num_kiva_instances <= 1 # The slab surfaces may be combined in these situations, so skip tests
+      bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
+        slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
+
+        # Exposed Area
+        hpxml_value = Float(XMLHelper.get_value(slab, 'Area'))
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Gross Area' AND Units='m2'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+
+        # Tilt
+        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{slab_id}' AND ColumnName='Tilt' AND Units='deg'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(180.0, sql_value, 0.01)
       end
     end
 
@@ -697,7 +730,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       clg_cap += hp_cap if hp_cap > 0
       htg_cap += hp_cap if hp_cap > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
-      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 8.5
+      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15
         has_multispeed_dx_heating_coil = true
       end
       if hp_type == "ground-to-air"
@@ -737,7 +770,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if htg_load_frac == 0
       found_htg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Heating' and k[0] != 'Capacity'
+        next unless k[1] == 'Heating' and k[0] != 'Capacity' and k[0] != "Load"
 
         found_htg_energy = true
       end
@@ -746,7 +779,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if clg_load_frac == 0
       found_clg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Cooling' and k[0] != 'Capacity'
+        next unless k[1] == 'Cooling' and k[0] != 'Capacity' and k[0] != "Load"
 
         found_clg_energy = true
       end
@@ -754,7 +787,45 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Water Heater
-    wh = bldg_details.elements["Systems/WaterHeating"]
+    wh = bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem"]
+    if not wh.nil?
+      # EC_adj, compare calculated value to value obtained from simulation results
+      calculated_ec_adj = nil
+      runner.result.stepInfo.each do |s|
+        next unless s.start_with? "EC_adj="
+
+        calculated_ec_adj = Float(s.gsub("EC_adj=", ""))
+      end
+
+      # Obtain water heating energy consumption and adjusted water heating energy consumption
+      water_heater_energy = 0.0
+      water_heater_adj_energy = 0.0
+      results.keys.each do |k|
+        next unless k[1] == "Water Systems" and k[3] == "GJ"
+
+        if k[2] == "EC_adj"
+          water_heater_adj_energy += results[k]
+        else
+          water_heater_energy += results[k]
+        end
+      end
+
+      # Add any combi water heating energy use
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoilerHeatExchanger.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoiler.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get
+      if combi_htg_load > 0 and combi_hx_load > 0
+        results.keys.each do |k|
+          next unless k[1] == "Heating" and k[3] == "GJ"
+
+          water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
+        end
+      end
+
+      simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
+      assert_in_epsilon(calculated_ec_adj, simulated_ec_adj, 0.02)
+    end
 
     # Mechanical Ventilation
     mv = bldg_details.elements["Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
@@ -808,7 +879,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cw, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -823,7 +894,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cd, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -838,7 +909,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(refr, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
@@ -928,6 +999,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
         results = all_results[xml]
+        next if results.nil?
 
         # Compare results
         results_base.keys.each do |k|
@@ -944,38 +1016,31 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
-  def _test_dse(xmls, hvac_dse_dir, hvac_base_dir, all_results)
-    # Compare 0.8 DSE heating/cooling results to 1.0 DSE results.
-    puts "DSE test results:"
+  def _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
+    puts "Heating/Cooling Loads test results:"
+
+    base_xml = "#{hvac_base_dir}/base-hvac-ideal-air-base.xml"
+    results_base = all_results[File.absolute_path(base_xml)]
+    return if results_base.nil?
+
     xmls.sort.each do |xml|
-      next if not xml.include? hvac_dse_dir
-      next if not xml.include? "-dse-0.8"
+      next if not xml.include? hvac_base_dir
 
-      xml_dse80 = File.absolute_path(xml)
-      xml_dse100 = xml_dse80.gsub(hvac_dse_dir, hvac_base_dir).gsub("-dse-0.8.xml", "-base.xml")
-
-      results_dse80 = all_results[xml_dse80]
-      results_dse100 = all_results[xml_dse100]
-      next if results_dse100.nil?
+      xml_compare = File.absolute_path(xml)
+      results_compare = all_results[xml_compare]
+      next if results_compare.nil?
 
       # Compare results
-      results_dse80.keys.each do |k|
+      results_compare.keys.each do |k|
         next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
-        next if k[0] == 'Capacity'
+        next if not ["Load"].include? k[0]
 
-        result_dse80 = results_dse80[k].to_f
-        result_dse100 = results_dse100[k].to_f
-        next if result_dse80 == 0.0 and result_dse100 == 0.0
+        result_base = results_base[k].to_f
+        result_compare = results_compare[k].to_f
+        next if result_base <= 0.1 or result_compare <= 0.1
 
-        dse_actual = result_dse100 / result_dse80
-        dse_expect = 0.8
-        if File.basename(xml) == "base-hvac-furnace-gas-room-ac-dse-0.8.xml" and k[1] == "Cooling"
-          dse_expect = 1.0 # TODO: Generalize this
-        end
-
-        _display_result_epsilon(xml, dse_expect, dse_actual, k)
-        assert_in_epsilon(dse_expect, dse_actual, 0.05)
+        _display_result_delta(xml, result_base, result_compare, k)
+        assert_in_delta(result_base, result_compare, 0.25)
       end
     end
   end
@@ -995,15 +1060,20 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       results_x3.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
+        next unless ["Heating", "Cooling"].include? k[1]
+        next unless ["General"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == "Load"
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
         next if result_x1 == 0.0 and result_x3 == 0.0
 
         _display_result_epsilon(xml, result_x1, result_x3, k)
-        assert_in_epsilon(result_x1, result_x3, 0.12)
+        if result_x1 > 1.0
+          assert_in_epsilon(result_x1, result_x3, 0.12)
+        else
+          assert_in_delta(result_x1, result_x3, 0.1)
+        end
       end
     end
   end
@@ -1050,8 +1120,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       results_33.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
+        next unless ["Heating", "Cooling"].include? k[1]
+        next unless ["General"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == "Load"
 
         result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f

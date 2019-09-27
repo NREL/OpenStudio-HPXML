@@ -415,6 +415,10 @@ class Constants
     return "water heater"
   end
 
+  def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
+    return "#{water_heater_name} EC adjustment"
+  end
+
   def self.ObjectNameTankHX
     return "dhw source hx"
   end
@@ -499,32 +503,12 @@ class Constants
     return 'autosize'
   end
 
-  def self.SizingAutoMaxLoad
-    return 'autosize for max load'
-  end
-
-  def self.SizingInfoSlabRvalue
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWindowOverhangDepth
-    return __method__.to_s
-  end
-
-  def self.SizingInfoWindowOverhangOffset
-    return __method__.to_s
-  end
-
   def self.SpaceTypeVentedCrawl
     return 'vented crawlspace'
   end
 
   def self.SpaceTypeUnventedCrawl
     return 'unvented crawlspace'
-  end
-
-  def self.SpaceTypeConditionedBasement
-    return 'conditioned basement'
   end
 
   def self.SpaceTypeGarage
