@@ -696,7 +696,6 @@ class Waterheater
     return true
   end
 
-<<<<<<< HEAD
   def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type)
     # Create a schedule for desuperheater control (schedule value - desuperheater deadband = a little bit over tank stp would be good)
     new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
