@@ -523,10 +523,6 @@ class Constants
     return 'unvented crawlspace'
   end
 
-  def self.SpaceTypeConditionedBasement
-    return 'conditioned basement'
-  end
-
   def self.SpaceTypeGarage
     return 'garage'
   end

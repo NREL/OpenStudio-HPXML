@@ -464,10 +464,6 @@ class Geometry
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedCrawl)
   end
 
-  def self.is_conditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeConditionedBasement)
-  end
-
   def self.is_unconditioned_basement(space_or_zone)
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedBasement)
   end
