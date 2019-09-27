@@ -231,7 +231,7 @@ class HEScoreRulesetTest < MiniTest::Test
 
     eff10 = lookup_hvac_efficiency(nil, "air-to-air", "electricity", "SEER", "energy_star")
     assert_in_epsilon(eff10, 14.0, small_number)
-      
+
     eff11 = lookup_hvac_efficiency(nil, "air-to-air", "electricity", "HSPF", "energy_star")
     assert_in_epsilon(eff11, 8.2, small_number)
 
@@ -325,7 +325,6 @@ class HEScoreRulesetTest < MiniTest::Test
         small_number
       )
     end
-
   end
 
   def _test_measure(args_hash)
