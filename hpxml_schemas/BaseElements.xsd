@@ -168,16 +168,23 @@
 					<xs:documentation>Describe</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="Unknown"/>
+			<xs:element name="None">
+				<xs:annotation>
+					<xs:documentation>Indicates insulation not present.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Unknown">
+				<xs:annotation>
+					<xs:documentation>Indicates insulation present but material type unknown.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:choice>
 	</xs:complexType>
 	<xs:complexType name="InsulationInfo">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
-			<xs:element minOccurs="0" name="InsulationPresent" type="xs:boolean"/>
 			<xs:element minOccurs="0" name="InsulationGrade" type="InsulationGrade"/>
 			<xs:element minOccurs="0" name="InsulationCondition" type="InsulationCondition"/>
-			<xs:element minOccurs="0" name="InsulationLocation" type="InsulationLocation"/>
 			<xs:element minOccurs="0" name="AssemblyEffectiveRValue" type="RValue">
 				<xs:annotation>
 					<xs:documentation>This should indicate the effective R-value of the complete assembly including any air films or other treatments.</xs:documentation>
@@ -1363,6 +1370,20 @@
 												<xs:documentation>The net sensible energy recovered by the supply airstream as adjusted by electric consumption, case heat loss or heat gain, air leakage, airflow mass imbalance between the two airstreams and the energy used for defrost (when running the Very Low Temperature Test), as a percent of the potential sensible energy that could be recovered plus the exhaust fan energy. Values for some products can be found at the Home Ventilating Institute (hvi.org).</xs:documentation>
 												</xs:annotation>
 												</xs:element>
+												<xs:element minOccurs="0"
+												name="AdjustedTotalRecoveryEfficiency"
+												type="Fraction">
+												<xs:annotation>
+												<xs:documentation>The net total energy (sensible plus latent, also called enthalpy) recovered by the supply airstream adjusted by case heat loss or heat gain, air leakage and airflow mass imbalance between the two airstreams, as a percent of the potential total energy that could be recovered. This value is used to predict and compare Cooling Season Performance for the HRV/ERV unit. This value should be used for energy modeling when wattage for air movement is separately accounted for in the energy model. Values for some products can be found at the Home Ventilating Institute (hvi.org).</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0"
+												name="AdjustedSensibleRecoveryEfficiency"
+												type="Fraction">
+												<xs:annotation>
+												<xs:documentation>The net sensible energy recovered by the supply airstream as adjusted by case heat loss or heat gain, air leakage, airflow mass imbalance between the two airstreams and the energy used for defrost (when running the Very Low Temperature Test), as a percent of the potential sensible energy that could be recovered. This value should be used for energy modeling when wattage for air movement is separately accounted for in the energy model. Values for some products can be found at the Home Ventilating Institute (hvi.org).</xs:documentation>
+												</xs:annotation>
+												</xs:element>
 												<xs:element minOccurs="0" name="FanPower"
 												type="xs:double">
 												<xs:annotation>
@@ -1494,7 +1515,28 @@
 												</xs:sequence>
 												</xs:complexType>
 												</xs:element>
-											</xs:sequence>
+												<xs:element minOccurs="0" name="TankWall">
+												<xs:annotation>
+												<xs:documentation>Refers to the insulation in the tank wall itself. This information is sometimes vailable on the water heater's name plate or the units specification sheet, or can be estimated by removing the water heater's access plate.</xs:documentation>
+												</xs:annotation>
+												<xs:complexType>
+												<xs:sequence>
+												<xs:element minOccurs="0"
+												name="InsulationMaterial"
+												type="InsulationMaterial"/>
+												<xs:element name="TankWallRValue" type="RValue"
+												minOccurs="0"/>
+												<xs:element minOccurs="0" name="Thickness"
+												type="LengthMeasurement">
+												<xs:annotation>
+												<xs:documentation>[in]</xs:documentation>
+												</xs:annotation>
+												</xs:element>
+												<xs:element minOccurs="0" ref="extension"/>
+												</xs:sequence>
+												</xs:complexType>
+												</xs:element>
+                      </xs:sequence>
 										</xs:complexType>
 									</xs:element>
 									<xs:element name="MeetsACCA5QIHVACSpecification"
@@ -1505,10 +1547,10 @@
 											<xs:documentation>[deg F]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="HasDesuperheater"
+									<xs:element minOccurs="0" name="UsesDesuperheater"
 										type="xs:boolean">
 										<xs:annotation>
-											<xs:documentation>Indicates whether this water heater has a desuperheater. The attached heat pump or air conditioner can be referenced in the RelatedHVACSystem element.</xs:documentation>
+											<xs:documentation>Indicates whether this water heater uses a desuperheater. The attached heat pump or air conditioner can be referenced in the RelatedHVACSystem element.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="HasSharedCombustionVentilation"
@@ -1722,6 +1764,27 @@
 											<xs:documentation>[deg]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="CollectorRatedOpticalEfficiency">
+										<xs:annotation>
+											<xs:documentation>Often referred to as Fr-tau-alpha (FRta), this describes the optical efficiency portion of the overall collector efficiency. In the OG-100 SRCC Certified Solar Thermal Collector Directory, this is the y-intercept of the efficiency curve.</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:double">
+												<xs:minExclusive value="0"/>
+												<xs:maxExclusive value="1"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
+									<xs:element minOccurs="0" name="CollectorRatedThermalLosses">
+										<xs:annotation>
+											<xs:documentation>Often referred to as Fr-Ul (FRUl), this describes the collector thermal losses portion of the overall collector efficiency. In the OG-100 SRCC Certified Solar Thermal Collector Directory, this is the slope of the efficiency curve.</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:double">
+												<xs:minExclusive value="0"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
 									<xs:element minOccurs="0" name="StorageVolume" type="Volume">
 										<xs:annotation>
 											<xs:documentation>[gal]</xs:documentation>
@@ -1729,6 +1792,27 @@
 									</xs:element>
 									<xs:element minOccurs="0" name="ConnectedTo"
 										type="LocalReference"/>
+									<xs:element minOccurs="0" name="SolarFraction">
+										<xs:annotation>
+											<xs:documentation>The Solar Fraction is the portion of the total conventional hot water heating load (delivered energy and tank standby losses). The higher the solar fraction, the greater the solar contribution to water heating, which reduces the energy required by the backup water heater. This value can be found in the OG-300 SRCC Certified Solar Water Heating System Directory.</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:double">
+												<xs:minExclusive value="0"/>
+												<xs:maxInclusive value="1"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
+									<xs:element minOccurs="0" name="SolarEnergyFactor">
+										<xs:annotation>
+											<xs:documentation>The Solar Energy Factor is defined as the energy delivered by the system divided by the electrical or gas energy put into the system. The higher the number, the more energy efficient. This value can be found in the OG-300 SRCC Certified Solar Water Heating System Directory.</xs:documentation>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:double">
+												<xs:minExclusive value="0"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
 							</xs:complexType>
@@ -1981,36 +2065,6 @@
 						<xs:element name="NumberofLightingControls"
 							type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
 						<xs:element name="Location" type="LightingLocation" minOccurs="0"> </xs:element>
-						<xs:element ref="extension" minOccurs="0"/>
-					</xs:sequence>
-				</xs:complexType>
-			</xs:element>
-			<xs:element minOccurs="0" name="LightingFractions">
-				<xs:annotation>
-					<xs:documentation>DEPRECATED - Please use LightingGroup/FractionofUnitInLocation</xs:documentation>
-				</xs:annotation>
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element minOccurs="0" name="FractionIncandescent" type="Fraction">
-							<xs:annotation>
-								<xs:documentation>Fraction of lights that are incandescent.</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" name="FractionCFL" type="Fraction">
-							<xs:annotation>
-								<xs:documentation>Fraction of the lights that are compact fluorescent.</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" name="FractionLFL" type="Fraction">
-							<xs:annotation>
-								<xs:documentation>Fraction of the lights that are linear fluorescent.</xs:documentation>
-							</xs:annotation>
-						</xs:element>
-						<xs:element minOccurs="0" name="FractionLED" type="Fraction">
-							<xs:annotation>
-								<xs:documentation>Fraction of lights that are LED.</xs:documentation>
-							</xs:annotation>
-						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
@@ -3172,7 +3226,7 @@ http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:docum
 					<xs:element name="GeothermalLoop" type="GeothermalLoop" minOccurs="0"/>
 					<xs:element minOccurs="0" name="BackupType">
 						<xs:annotation>
-							<xs:documentation>Whether the heat pump backup is integrated into the unit (describe in BackupSystemFuel, BackupAFUE, BackupHeatingCapacity), or a separate heating system (add reference in BackupSystem).</xs:documentation>
+							<xs:documentation>Whether the heat pump backup is integrated into the unit (describe in BackupSystemFuel, BackupAnnualHeatingEfficiency, BackupHeatingCapacity), or a separate heating system (add reference in BackupSystem).</xs:documentation>
 						</xs:annotation>
 						<xs:simpleType>
 							<xs:restriction base="xs:string">
@@ -3292,7 +3346,8 @@ http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:docum
 					<xs:sequence>
 						<xs:element name="DuctType" type="DuctType" minOccurs="0"/>
 						<xs:element name="DuctMaterial" type="DuctMaterial" minOccurs="0"/>
-						<xs:element minOccurs="0" name="DuctInsulationPresent" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="DuctInsulationMaterial"
+							type="InsulationMaterial"/>
 						<xs:element name="DuctInsulationRValue" type="RValue" minOccurs="0"/>
 						<xs:element minOccurs="0" name="DuctInsulationThickness"
 							type="LengthMeasurement">
@@ -4340,7 +4395,8 @@ master meter with sub-metering = tenant sub-metered by building owner</xs:docume
 				type="WindowThirdPartyCertification"/>
 			<xs:element minOccurs="0" name="VisibleTransmittance" type="Fraction"/>
 			<xs:element minOccurs="0" name="InteriorShading" type="InteriorShading"/>
-			<xs:element minOccurs="0" name="InteriorShadingFactor" type="Fraction"/>
+			<xs:element minOccurs="0" name="InteriorShadingFactorSummer" type="Fraction"/>
+			<xs:element minOccurs="0" name="InteriorShadingFactorWinter" type="Fraction"/>
 			<xs:element minOccurs="0" name="ExteriorShading" type="ExteriorShading"/>
 			<xs:element minOccurs="0" name="Overhangs">
 				<xs:complexType>
