@@ -1380,7 +1380,7 @@ class HVACSizing
     # values used for forced air systems in proposed ASHRAE Std. 152"
 
     dse_Fregain = nil
-    thermal_zones = { "living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented" }
+    thermal_zones = { "living space" => "LivingSpace", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented" }
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
 
     if duct[:duct_location] == "outside" # Outside
@@ -2349,6 +2349,9 @@ class HVACSizing
     air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
     air_distribution.elements.each("Ducts") do |ducts|
       ducts_values = HPXML.get_ducts_values(ducts: ducts)
+      if ducts_values[:duct_location] == "basement - conditioned"
+        ducts_values[:duct_location] = "living space"
+      end
 
       air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
         duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
@@ -2756,7 +2759,7 @@ class HVACSizing
     end
 
     # Infiltration UA
-    thermal_zones = { "living space" => "LivingSpace", "basement - conditioned" => "BasementConditioned", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented" }
+    thermal_zones = { "living space" => "LivingSpace", "basement - unconditioned" => "BasementUnconditioned", "crawlspace - vented" => "CrawlspaceVented", "crawlspace - unvented" => "CrawlspaceUnvented", "attic - vented" => "AtticVented", "attic - unvented" => "AtticUnvented" }
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement"]
 
     infiltration_cfm = 0
