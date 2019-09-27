@@ -99,9 +99,9 @@ def create_hpxmls
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-desuperheater-singlespeed.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-dhw-desuperheater-singlespeed-tankless.xml' => 'base-hvac-central-ac-only-1-speed.xml',
-    'base-dhw-desuperheater-2-speed.xml.skip' => 'base-hvac-central-ac-only-2-speed.xml',
-    'base-dhw-desuperheater-var-speed.xml.skip' => 'base-hvac-central-ac-only-var-speed.xml',
-    'base-dhw-desuperheater-gshp.xml.skip' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'base-dhw-desuperheater-2-speed.xml' => 'base-hvac-central-ac-only-2-speed.xml',
+    'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
+    'base-dhw-desuperheater-gshp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-jacket-indirect.xml' => 'base-dhw-indirect.xml',
@@ -2384,13 +2384,13 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:energy_factor] = 0.99
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
-  elsif ['base-dhw-desuperheater-2-speed.xml.skip'].include? hpxml_file
+  elsif ['base-dhw-desuperheater-2-speed.xml'].include? hpxml_file
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
-  elsif ['base-dhw-desuperheater-var-speed.xml.skip'].include? hpxml_file
+  elsif ['base-dhw-desuperheater-var-speed.xml'].include? hpxml_file
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
-  elsif ['base-dhw-desuperheater-gshp.xml.skip'].include? hpxml_file
+  elsif ['base-dhw-desuperheater-gshp.xml'].include? hpxml_file
     water_heating_systems_values[0][:has_desuperheater] = true
     water_heating_systems_values[0][:related_hvac] = "HeatPump"
   elsif ['base-dhw-jacket-electric.xml',
