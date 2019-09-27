@@ -191,7 +191,7 @@ class EnergyPlusValidator
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
         "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
-        "DepthBelowGrade" => one,
+        "[DepthBelowGrade | [InteriorAdjacentTo!='living space']]" => one_or_more, # DepthBelowGrade only required when InteriorAdjacentTo='living space'
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
@@ -207,10 +207,10 @@ class EnergyPlusValidator
         "Azimuth" => one,
         "UFactor" => one,
         "SHGC" => one,
+        "InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
+        "InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
         "Overhangs" => zero_or_one, # See [WindowOverhang]
         "AttachedToWall" => one,
-        "extension/InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
-        "extension/InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
       },
 
       ## [WindowOverhang]
@@ -378,6 +378,7 @@ class EnergyPlusValidator
       },
 
       ## [HVACDistType=DSE]
+      ## WARNING: These inputs are unused and EnergyPlus output will NOT reflect the specified DSE. To account for DSE, apply the value to the EnergyPlus output.
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other='DSE']]" => {
         "[AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency]" => one_or_more,
       },

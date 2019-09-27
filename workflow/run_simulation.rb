@@ -100,6 +100,11 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
     end
   end
 
+  # Add monthly hot water output request
+  outputVariable = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
+  outputVariable.setReportingFrequency('monthly')
+  outputVariable.setKeyValue('*')
+
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
   model_idf = forward_translator.translateModel(model)
@@ -161,8 +166,48 @@ def create_output(designdir, resultsdir)
     end
   end
 
+  # Subtract out disaggregated heating/cooling fan and pump energy from hot water electricity end use
+  hes_resource_type = :electric
+  to_units = get_fuel_site_units(hes_resource_type)
+  for hes_end_use in [:heating, :cooling]
+    for i in 1..12
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName LIKE '%#{Constants.ObjectNameFanPumpDisaggregate(hes_end_use == :cooling)}' AND ReportingFrequency='Monthly' AND VariableUnits='J') AND TimeIndex='#{i}'"
+      sql_result = sqlFile.execAndReturnFirstDouble(query)
+      next unless sql_result.is_initialized
+
+      sql_result = sql_result.get
+
+      result = UnitConversions.convert(sql_result, "J", to_units) # convert from J to site energy units
+      result_gj = sql_result / 1000000000.0 # convert from J to GJ
+
+      # Add to heating/cooling end use
+      results[[hes_end_use, hes_resource_type]][i - 1] += result
+      results_gj[[hes_end_use, hes_resource_type]][i - 1] += result_gj
+
+      # Subtract from hot water end use
+      results[[:hot_water, hes_resource_type]][i - 1] -= result
+      results_gj[[:hot_water, hes_resource_type]][i - 1] -= result_gj
+    end
+  end
+
+  # Add hot water volume output
+  hes_end_use = :hot_water
+  hes_resource_type = :hot_water
+  to_units = get_fuel_site_units(hes_resource_type)
+  for i in 1..12
+    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND ReportingFrequency='Monthly' AND VariableUnits='m3') AND TimeIndex='#{i}'"
+    sql_result = sqlFile.execAndReturnFirstDouble(query)
+    next unless sql_result.is_initialized
+
+    sql_result = sql_result.get
+
+    result = UnitConversions.convert(sql_result, "m^3", "gal")
+
+    results[[hes_end_use, hes_resource_type]][i - 1] = result
+  end
+
   # Error-checking
-  net_energy_gj = sqlFile.netSiteEnergy.get
+  net_energy_gj = sqlFile.netSiteEnergy.get - sqlFile.districtHeatingHeating.get - sqlFile.districtCoolingCooling.get
   sum_energy_gj = 0
   results_gj.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
@@ -178,13 +223,13 @@ def create_output(designdir, resultsdir)
 
   sqlFile.close
 
-  # Write results to XML
+  # Write results to JSON
   data = { "end_use" => [] }
   results.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
     to_units = get_fuel_site_units(hes_resource_type)
     annual_value = values.inject(0, :+)
-    next if annual_value == 0
+    next if annual_value <= 0.01
 
     values.each_with_index do |value, idx|
       end_use = { "quantity" => value,

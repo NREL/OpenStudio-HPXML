@@ -630,7 +630,7 @@ class HPXML
                     perimeter_insulation_depth:,
                     under_slab_insulation_width: nil,
                     under_slab_insulation_spans_entire_slab: nil,
-                    depth_below_grade:,
+                    depth_below_grade: nil,
                     carpet_fraction:,
                     carpet_r_value:,
                     perimeter_insulation_id: nil,
@@ -649,7 +649,7 @@ class HPXML
     XMLHelper.add_element(slab, "PerimeterInsulationDepth", Float(perimeter_insulation_depth))
     XMLHelper.add_element(slab, "UnderSlabInsulationWidth", Float(under_slab_insulation_width)) unless under_slab_insulation_width.nil?
     XMLHelper.add_element(slab, "UnderSlabInsulationSpansEntireSlab", Boolean(under_slab_insulation_spans_entire_slab)) unless under_slab_insulation_spans_entire_slab.nil?
-    XMLHelper.add_element(slab, "DepthBelowGrade", Float(depth_below_grade))
+    XMLHelper.add_element(slab, "DepthBelowGrade", Float(depth_below_grade)) unless depth_below_grade.nil?
     add_layer_insulation(parent: slab,
                          element_name: "PerimeterInsulation",
                          id: perimeter_insulation_id,
@@ -710,6 +710,8 @@ class HPXML
     XMLHelper.add_element(window, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(window, "UFactor", Float(ufactor))
     XMLHelper.add_element(window, "SHGC", Float(shgc))
+    XMLHelper.add_element(window, "InteriorShadingFactorSummer", Float(interior_shading_factor_summer)) unless interior_shading_factor_summer.nil?
+    XMLHelper.add_element(window, "InteriorShadingFactorWinter", Float(interior_shading_factor_winter)) unless interior_shading_factor_winter.nil?
     if not overhangs_depth.nil? or not overhangs_distance_to_top_of_window.nil? or not overhangs_distance_to_bottom_of_window.nil?
       overhangs = XMLHelper.add_element(window, "Overhangs")
       XMLHelper.add_element(overhangs, "Depth", Float(overhangs_depth))
@@ -718,9 +720,7 @@ class HPXML
     end
     attached_to_wall = XMLHelper.add_element(window, "AttachedToWall")
     XMLHelper.add_attribute(attached_to_wall, "idref", wall_idref)
-    HPXML.add_extension(parent: window,
-                        extensions: { "InteriorShadingFactorSummer": to_float_or_nil(interior_shading_factor_summer),
-                                      "InteriorShadingFactorWinter": to_float_or_nil(interior_shading_factor_winter) })
+
     return window
   end
 
@@ -743,13 +743,13 @@ class HPXML
              :gas_fill => XMLHelper.get_value(window, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(window, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(window, "SHGC")),
+             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "InteriorShadingFactorSummer")),
+             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "InteriorShadingFactorWinter")),
              :exterior_shading => XMLHelper.get_value(window, "ExteriorShading"),
              :overhangs_depth => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth")),
              :overhangs_distance_to_top_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow")),
              :overhangs_distance_to_bottom_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow")),
-             :wall_idref => HPXML.get_idref(window, "AttachedToWall"),
-             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "extension/InteriorShadingFactorSummer")),
-             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "extension/InteriorShadingFactorWinter")) }
+             :wall_idref => HPXML.get_idref(window, "AttachedToWall") }
   end
 
   def self.add_skylight(hpxml:,
@@ -883,7 +883,8 @@ class HPXML
              :heating_efficiency_cop => to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='COP']/Value")),
              :heating_efficiency_hspf => to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='HSPF']/Value")),
              :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed")),
-             :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")) }
+             :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")),
+             :energy_star => XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_cooling_system(hpxml:,
@@ -938,7 +939,8 @@ class HPXML
              :cooling_efficiency_kw_per_ton => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
              :cooling_efficiency_cop => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='COP']/Value")),
              :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
+             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")),
+             :energy_star => XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_heat_pump(hpxml:,
@@ -1031,7 +1033,8 @@ class HPXML
              :cooling_efficiency_kw_per_ton => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
              :cooling_efficiency_cop => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='COP']/Value")),
              :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
+             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")),
+             :energy_star => XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_hvac_control(hpxml:,
@@ -1257,7 +1260,8 @@ class HPXML
              :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
              :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
              :jacket_r_value => to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")),
-             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem") }
+             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem"),
+             :energy_star => XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_hot_water_distribution(hpxml:,
