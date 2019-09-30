@@ -109,7 +109,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'two-repeating-idref-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."] }
 
     # Test simulations
-    Dir["#{this_dir}/invalid_files/.xml"].sort.each do |xml|
+    Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
       _run_xml(File.absolute_path(xml), this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
     end
   end
