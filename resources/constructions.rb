@@ -1117,22 +1117,26 @@ class Constructions
       if living_space == space
         # living furniture mass
         living_surface_area = furnAreaFraction * space.floorArea * (1 - basement_frac_of_cfa)
-        living_obj_name = mass_obj_name_space + " living"
-        imdef = create_os_int_mass_and_def(runner, model, living_obj_name, space, living_surface_area)
-        # Create and assign construction to surfaces
-        if not constr.create_and_assign_constructions([imdef], runner, model)
-          return false
+        if living_surface_area > 0
+          living_obj_name = mass_obj_name_space + " living"
+          imdef = create_os_int_mass_and_def(runner, model, living_obj_name, space, living_surface_area)
+          # Create and assign construction to surfaces
+          if not constr.create_and_assign_constructions([imdef], runner, model)
+            return false
+          end
         end
 
         # basement furniture mass
         mat_fm.sAbs = 0.0
         mat_fm.vAbs = 0.0
         base_surface_area = furnAreaFraction * space.floorArea * basement_frac_of_cfa
-        base_obj_name = mass_obj_name_space + " base"
-        imdef = create_os_int_mass_and_def(runner, model, base_obj_name, space, base_surface_area)
-        # Create and assign construction to surfaces
-        if not constr.create_and_assign_constructions([imdef], runner, model)
-          return false
+        if base_surface_area > 0
+          base_obj_name = mass_obj_name_space + " base"
+          imdef = create_os_int_mass_and_def(runner, model, base_obj_name, space, base_surface_area)
+          # Create and assign construction to surfaces
+          if not constr.create_and_assign_constructions([imdef], runner, model)
+            return false
+          end
         end
       else
         surface_area = furnAreaFraction * space.floorArea
