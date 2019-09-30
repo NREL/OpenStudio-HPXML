@@ -1310,7 +1310,7 @@ class OSModel
         mat_ext_finish = nil
 
         success = apply_wall_construction(runner, model, surface, fnd_wall_values[:id], wall_type, assembly_r,
-                                          drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance, false)
+                                          drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance)
         return false if not success
       end
     end
