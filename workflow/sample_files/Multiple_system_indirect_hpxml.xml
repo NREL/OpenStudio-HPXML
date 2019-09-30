@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-09-18T09:49:19-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-09-18T10:14:49-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2564.24765">
+    <BuildingID id="bid-2701.24902">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.21</Address1>
+        <Address1>Regression run 6.158</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -32,22 +32,22 @@
     <BuildingDetails>
       <BuildingSummary>
         <Site>
-          <Surroundings>attached on one side</Surroundings>
+          <Surroundings>stand-alone</Surroundings>
           <OrientationOfFrontOfHome>north</OrientationOfFrontOfHome>
         </Site>
         <BuildingConstruction>
           <YearBuilt>1970</YearBuilt>
-          <ResidentialFacilityType>single-family attached</ResidentialFacilityType>
+          <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloorsAboveGrade>2</NumberofConditionedFloorsAboveGrade>
           <AverageCeilingHeight>8</AverageCeilingHeight>
           <NumberofBedrooms>4</NumberofBedrooms>
           <ConditionedFloorArea>2000</ConditionedFloorArea>
           <extension>
-            <hescore_building_shape>town_house</hescore_building_shape>
+            <hescore_building_shape>rectangle</hescore_building_shape>
           </extension>
         </BuildingConstruction>
         <extension>
-          <comments>Townhouse left</comments>
+          <comments>Multiple system indirect</comments>
         </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -167,6 +167,26 @@
               <hescore_wall_code>ewwf13vi</hescore_wall_code>
             </extension>
           </Wall>
+          <Wall>
+            <SystemIdentifier id="left_wall"/>
+            <WallType>
+              <WoodStud>
+                <OptimumValueEngineering>false</OptimumValueEngineering>
+              </WoodStud>
+            </WallType>
+            <Orientation>east</Orientation>
+            <Siding>vinyl siding</Siding>
+            <Insulation>
+              <SystemIdentifier id="left_wall_insulation"/>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>13</NominalRValue>
+              </Layer>
+            </Insulation>
+            <extension>
+              <hescore_wall_code>ewwf13vi</hescore_wall_code>
+            </extension>
+          </Wall>
         </Walls>
         <Slabs>
           <Slab>
@@ -227,6 +247,21 @@
               <hescore_window_code>dcaw</hescore_window_code>
             </extension>
           </Window>
+          <Window>
+            <SystemIdentifier id="left_window"/>
+            <Area>30</Area>
+            <Orientation>east</Orientation>
+            <FrameType>
+              <Wood/>
+            </FrameType>
+            <GlassLayers>double-pane</GlassLayers>
+            <GasFill>air</GasFill>
+            <ExteriorShading>none</ExteriorShading>
+            <AttachedToWall idref="left_wall"/>
+            <extension>
+              <hescore_window_code>dcaw</hescore_window_code>
+            </extension>
+          </Window>
         </Windows>
         <extension>
           <hescore_wall_construction_same>true</hescore_wall_construction_same>
@@ -238,22 +273,33 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id="hvac1_heat"/>
-              <DistributionSystem idref="hvac1_dist"/>
               <HeatingSystemType>
-                <Furnace/>
+                <Boiler/>
               </HeatingSystemType>
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
                 <Value>0.95</Value>
               </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1</FractionHeatLoadServed>
+              <FractionHeatLoadServed>0.7</FractionHeatLoadServed>
+            </HeatingSystem>
+            <HeatingSystem>
+              <SystemIdentifier id="hvac2_heat"/>
+              <HeatingSystemType>
+                <WallFurnace/>
+              </HeatingSystemType>
+              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <AnnualHeatingEfficiency>
+                <Units>AFUE</Units>
+                <Value>0.65</Value>
+              </AnnualHeatingEfficiency>
+              <FractionHeatLoadServed>0.3</FractionHeatLoadServed>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id="hvac1_cool"/>
               <DistributionSystem idref="hvac1_dist"/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <FractionCoolLoadServed>1</FractionCoolLoadServed>
+              <FractionCoolLoadServed>0.7</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>15</Value>
@@ -281,9 +327,8 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id="water_heater1"/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <EnergyFactor>0.9</EnergyFactor>
+            <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
+            <RelatedHVACSystem idref="hvac1_heat"/>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>
