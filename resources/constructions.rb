@@ -1139,13 +1139,6 @@ class Constructions
     return imdef
   end
 
-  def self. apply_solar_abs_to_surface(surface, solar_abs)
-    # Applies the solar absorptance to the construction's exterior layer
-    exterior_material = surface.construction.get.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
-    exterior_material.setSolarAbsorptance(solar_abs)
-    exterior_material.setVisibleAbsorptance(solar_abs)
-  end
-
   def self.get_exterior_finish_materials
     mats = []
     mats << Material.ExtFinishStuccoMedDark
