@@ -263,6 +263,7 @@ class OSModel
     @subsurface_areas_by_surface = calc_subsurface_areas_by_surface(building)
     @default_azimuth = get_default_azimuth(building)
     @min_neighbor_distance = get_min_neighbor_distance(building)
+    @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
@@ -404,6 +405,9 @@ class OSModel
     return false if not success
 
     success = add_thermal_mass(runner, model, building)
+    return false if not success
+
+    success = modify_cond_basement_surface_properties(runner, model)
     return false if not success
 
     success = check_for_errors(runner, model)
@@ -661,6 +665,63 @@ class OSModel
     end
 
     return true
+  end
+
+  def self.modify_cond_basement_surface_properties(runner, model)
+    # modify conditioned basement surface properties here
+    # zero out solar absorptance in conditioned basement
+    @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
+      # zero out solar absorptance for some surfaces
+      mat_share = false
+      const = cond_bsmnt_surface.construction.get
+      exterior_material = const.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
+      mat_share = if_share_mat(model, cond_bsmnt_surface, exterior_material)
+      if mat_share
+        # create new construction for these surfaces
+        new_const = const.clone.to_Construction.get
+        cond_bsmnt_surface.setConstruction(new_const)
+        exterior_material = exterior_material.clone.to_StandardOpaqueMaterial.get
+        new_const.to_LayeredConstruction.get.setLayer(0, exterior_material)
+      end
+      exterior_material.setSolarAbsorptance(0.0)
+      exterior_material.setVisibleAbsorptance(0.0)
+    end
+    return true
+  end
+
+  def self.if_share_mat(model, surface1, mat1)
+    # determine if mat1 used by surface1 is shared through model
+    const = surface1.construction.get
+    if surface1.is_a? OpenStudio::Model::Surface
+      model.getSurfaces.each do |surface|
+        next unless surface != surface1
+        if surface.construction.get == const
+          return true
+        else
+          surface.construction.get.to_LayeredConstruction.get.layers.each do |layer|
+            layer_mat = layer.to_StandardOpaqueMaterial.get
+            if layer_mat == mat1
+              return true
+            end
+          end
+        end
+      end
+    elsif surface1.is_a? OpenStudio::Model::InternalMassDefinition
+      model.getInternalMassDefinitions.each do |imd|
+        next unless imd != surface1
+        if imd.construction.get == const
+          return true
+        else
+          imd.construction.get.to_LayeredConstruction.get.layers.each do |layer|
+            layer_mat = layer.to_StandardOpaqueMaterial.get
+            if layer_mat == mat1
+              return true
+            end
+          end
+        end
+      end
+    end
+    return false
   end
 
   def self.create_space_and_zone(model, spaces, space_type)
@@ -1048,16 +1109,11 @@ class OSModel
       if rim_joist_values[:exterior_adjacent_to] == "outside"
         film_r = Material.AirFilmVertical.rvalue + Material.AirFilmOutside.rvalue
         mat_ext_finish = Material.ExtFinishWoodLight
-        solar_abs = rim_joist_values[:solar_absorptance]
       else
         film_r = 2.0 * Material.AirFilmVertical.rvalue
         mat_ext_finish = nil
-        if @cfa == @cfa_ag
-          solar_abs = rim_joist_values[:solar_absorptance]
-        else
-          solar_abs = 0.0
-        end
       end
+      solar_abs = rim_joist_values[:solar_absorptance]
       emitt = rim_joist_values[:emittance]
 
       assembly_r = rim_joist_values[:insulation_assembly_r_value]
@@ -1135,7 +1191,7 @@ class OSModel
                                           cavity_r, install_grade,
                                           constr_set.framing_factor, constr_set.stud.thick_in,
                                           constr_set.osb_thick_in, constr_set.rigid_r,
-                                          mat_floor_covering, constr_set.exterior_material, false)
+                                          mat_floor_covering, constr_set.exterior_material)
       return false if not success
 
       if not assembly_r.nil?
@@ -1376,12 +1432,11 @@ class OSModel
       rigid_r = fnd_wall_values[:insulation_r_value]
     end
 
-    is_cond_base = (@cfa != @cfa_ag)
     success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
                                                   rigid_height, cavity_r, install_grade,
                                                   cavity_depth_in, filled_cavity, framing_factor,
                                                   rigid_r, drywall_thick_in, concrete_thick_in,
-                                                  height, height_ag, kiva_foundation, is_cond_base)
+                                                  height, height_ag, kiva_foundation)
     return nil if not success
 
     if not assembly_r.nil?
@@ -1440,11 +1495,10 @@ class OSModel
                                          slab_values[:carpet_r_value])
     end
 
-    is_cond_base = (@cfa != @cfa_ag)
     success = Constructions.apply_foundation_slab(runner, model, surface, "#{slab_values[:id]} construction",
                                                   slab_under_r, slab_under_width, slab_gap_r, slab_perim_r,
                                                   slab_perim_depth, slab_whole_r, slab_values[:thickness],
-                                                  slab_exp_perim, mat_carpet, kiva_foundation, is_cond_base)
+                                                  slab_exp_perim, mat_carpet, kiva_foundation)
     return nil if not success
 
     # FIXME: Temporary code for sizing
@@ -1501,10 +1555,14 @@ class OSModel
     ceiling_surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     ceiling_surface.setOutsideBoundaryCondition("Adiabatic")
 
+    if not @cond_bsmnt_surfaces.empty?
+      # assumming added ceiling is in conditioned basement
+      @cond_bsmnt_surfaces << ceiling_surface
+    end
+
     # Apply Construction
-    is_cond_base = (@cfa != @cfa_ag)
-    success = apply_adiabatic_construction(runner, model, [surface], "floor", false)
-    success = apply_adiabatic_construction(runner, model, [ceiling_surface], "floor", is_cond_base)
+    success = apply_adiabatic_construction(runner, model, [surface], "floor")
+    success = apply_adiabatic_construction(runner, model, [ceiling_surface], "floor")
     return false if not success
 
     return true
@@ -1516,7 +1574,7 @@ class OSModel
     basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
     success = Constructions.apply_partition_walls(runner, model, [],
                                                   "PartitionWallConstruction",
-                                                  drywall_thick_in, partition_frac_of_cfa, basement_frac_of_cfa)
+                                                  drywall_thick_in, partition_frac_of_cfa, basement_frac_of_cfa, @cond_bsmnt_surfaces)
     return false if not success
 
     # FIXME ?
@@ -1525,7 +1583,7 @@ class OSModel
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
     success = Constructions.apply_furniture(runner, model, furniture_frac_of_cfa,
-                                            mass_lb_per_sqft, density_lb_per_cuft, mat, basement_frac_of_cfa)
+                                            mass_lb_per_sqft, density_lb_per_cuft, mat, basement_frac_of_cfa, @cond_bsmnt_surfaces)
     return false if not success
 
     return true
@@ -1640,7 +1698,7 @@ class OSModel
       return false if not success
     end
 
-    success = apply_adiabatic_construction(runner, model, surfaces, "wall", false)
+    success = apply_adiabatic_construction(runner, model, surfaces, "wall")
     return false if not success
 
     return true
@@ -1703,7 +1761,7 @@ class OSModel
       return false if not success
     end
 
-    success = apply_adiabatic_construction(runner, model, surfaces, "roof", false)
+    success = apply_adiabatic_construction(runner, model, surfaces, "roof")
     return false if not success
 
     return true
@@ -1748,13 +1806,13 @@ class OSModel
       return false if not success
     end
 
-    success = apply_adiabatic_construction(runner, model, surfaces, "wall", false)
+    success = apply_adiabatic_construction(runner, model, surfaces, "wall")
     return false if not success
 
     return true
   end
 
-  def self.apply_adiabatic_construction(runner, model, surfaces, type, is_cond_base)
+  def self.apply_adiabatic_construction(runner, model, surfaces, type)
     # Arbitrary construction for heat capacitance.
     # Only applies to surfaces where outside boundary conditioned is
     # adiabatic or surface net area is near zero.
@@ -1763,14 +1821,14 @@ class OSModel
 
       success = Constructions.apply_wood_stud_wall(runner, model, surfaces, "AdiabaticWallConstruction",
                                                    0, 1, 3.5, true, 0.1, 0.5, 0, 999,
-                                                   Material.ExtFinishStuccoMedDark, false)
+                                                   Material.ExtFinishStuccoMedDark)
       return false if not success
 
     elsif type == "floor"
 
       success = Constructions.apply_floor(runner, model, surfaces, "AdiabaticFloorConstruction",
                                           0, 1, 0.07, 5.5, 0.75, 999,
-                                          Material.FloorWood, Material.CoveringBare, is_cond_base)
+                                          Material.FloorWood, Material.CoveringBare)
       return false if not success
 
     elsif type == "roof"
@@ -3188,7 +3246,7 @@ class OSModel
                                                    cavity_r, install_grade, constr_set.stud.thick_in,
                                                    cavity_filled, constr_set.framing_factor,
                                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
-                                                   constr_set.rigid_r, constr_set.exterior_material, false)
+                                                   constr_set.rigid_r, constr_set.exterior_material)
       return false if not success
 
     elsif wall_type == "SteelFrame"
@@ -3579,6 +3637,7 @@ class OSModel
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+      @cond_bsmnt_surfaces << surface
     elsif ["crawlspace - vented"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? interior_adjacent_to
