@@ -244,6 +244,25 @@ class HEScoreRuleset
     end
   end
 
+  def self.get_foundation_perimeter(foundation)
+    n_foundations = foundation.parent.elements.size
+    if n_foundations == 1
+      return @bldg_perimeter
+    elsif n_foundations == 2
+      fnd_area = get_foundation_area(foundation)
+      long_side = [@bldg_length_front, @bldg_length_side].max
+      short_side = [@bldg_length_front, @bldg_length_side].min
+      total_foundation_area = 0
+      foundation.parent.elements.each do |a_foundation|
+        total_foundation_area += get_foundation_area(a_foundation)
+      end
+      fnd_frac = fnd_area / total_foundation_area
+      return short_side + 2 * long_side * fnd_frac
+    else
+      fail "Only one or two foundations is allowed."
+    end
+  end
+
   def self.set_enclosure_foundation_walls(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
       fnd_adjacent = get_foundation_adjacent(orig_foundation)
@@ -267,7 +286,7 @@ class HEScoreRuleset
                                   exterior_adjacent_to: "ground",
                                   interior_adjacent_to: fnd_adjacent,
                                   height: fndwall_height,
-                                  area: fndwall_height * @bldg_perimeter * fnd_area / @bldg_footprint,
+                                  area: fndwall_height * get_foundation_perimeter(orig_foundation),
                                   thickness: 10,
                                   depth_below_grade: depth_below_grade,
                                   insulation_r_value: fndwall_values[:insulation_r_value],
@@ -361,7 +380,7 @@ class HEScoreRuleset
                      interior_adjacent_to: fnd_adjacent,
                      area: slab_values[:area],
                      thickness: slab_values[:thickness],
-                     exposed_perimeter: @bldg_perimeter * fnd_area / @bldg_footprint,
+                     exposed_perimeter: get_foundation_perimeter(orig_foundation),
                      perimeter_insulation_depth: 1, # FIXME: Hard-coded
                      under_slab_insulation_width: 0,
                      depth_below_grade: slab_values[:depth_below_grade],
