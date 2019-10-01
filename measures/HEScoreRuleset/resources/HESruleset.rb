@@ -329,6 +329,7 @@ class HEScoreRuleset
         slab = orig_details.elements["Enclosure/Slabs/Slab[SystemIdentifier[@id='#{slab_id}']]"]
         slab_values = HPXML.get_slab_values(slab: slab)
         slab_values[:depth_below_grade] = 0
+        slab_values[:thickness] = 4
       elsif fnd_type == "Basement"
         framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
         framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
@@ -339,9 +340,14 @@ class HEScoreRuleset
         slab_values[:area] = framefloor_values[:area]
         slab_values[:perimeter_insulation_r_value] = 0
         slab_values[:depth_below_grade] = 7  # 8ft basement wall with 1ft above grade.
+        slab_values[:thickness] = 4
       elsif fnd_type == "Crawlspace"
-        # Don't put a slab under a crawlspace.
-        next
+        slab_values = {}
+        slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
+        slab_values[:area] = framefloor_values[:area]
+        slab_values[:perimeter_insulation_r_value] = 0
+        slab_values[:depth_below_grade] = 1
+        slab_values[:thickness] = 0
       else
         fail "Unexpected foundation type: #{fnd_type}"
       end
@@ -350,7 +356,7 @@ class HEScoreRuleset
                      id: slab_values[:id],
                      interior_adjacent_to: fnd_adjacent,
                      area: slab_values[:area],
-                     thickness: 4,
+                     thickness: slab_values[:thickness],
                      exposed_perimeter: @bldg_perimeter * fnd_area / @bldg_footprint,
                      perimeter_insulation_depth: 1, # FIXME: Hard-coded
                      under_slab_insulation_width: 0,
