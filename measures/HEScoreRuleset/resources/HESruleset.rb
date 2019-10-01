@@ -342,6 +342,10 @@ class HEScoreRuleset
         slab_values[:depth_below_grade] = 7  # 8ft basement wall with 1ft above grade.
         slab_values[:thickness] = 4
       elsif fnd_type == "Crawlspace"
+        framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
+        framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+
         slab_values = {}
         slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
         slab_values[:area] = framefloor_values[:area]
