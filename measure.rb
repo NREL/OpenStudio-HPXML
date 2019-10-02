@@ -411,8 +411,9 @@ class OSModel
     return false if not success
 
     @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+    @living_zone = @living_space.thermalZone.get
 
-    success = assign_view_factor(runner, model, @living_space)
+    success = assign_view_factor(runner, model)
     return false if not success
 
     success = check_for_errors(runner, model)
@@ -694,25 +695,58 @@ class OSModel
     return true
   end
 
-  def self.assign_view_factor(runner, model, living)
-    all_surfaces = []
-    living.surfaces.each do |surface|
-      next if @cond_bsmnt_surfaces.include? surface
+  def self.assign_view_factor(runner, model)
+    # zero out view factors between conditioned basement surfaces and living zone surfaces
+    all_surfaces = [] # all surfaces in single conditioned space
+    lv_surfaces = []  # surfaces in living
+    cond_base_surfaces = [] # surfaces in conditioned basement
 
+    @living_space.surfaces.each do |surface|
       surface.subSurfaces.each do |sub_surface|
         all_surfaces << sub_surface
       end
       all_surfaces << surface
     end
-    living.internalMass.each do |im|
-      next if @cond_bsmnt_surfaces.include? im.internalMassDefinition
-
+    @living_space.internalMass.each do |im|
       all_surfaces << im
     end
+
+    all_surfaces.each do |surface|
+      if @cond_bsmnt_surfaces.include? surface or
+         ((@cond_bsmnt_surfaces.include? surface.internalMassDefinition) if surface.is_a? OpenStudio::Model::InternalMass)
+        cond_base_surfaces << surface
+      else
+        lv_surfaces << surface
+      end
+    end
+    # calculate view factors separately for living and conditioned basement
+    vf_map_lv = calc_approximate_view_factor(runner, model, lv_surfaces)
+    vf_map_cb = calc_approximate_view_factor(runner, model, cond_base_surfaces)
+
+    all_surfaces.each do |from_surface|
+      all_surfaces.each do |to_surface|
+        if (vf_map_lv[from_surface].nil? or vf_map_lv[from_surface][to_surface].nil?) and
+           (vf_map_cb[from_surface].nil? or vf_map_cb[from_surface][to_surface].nil?)
+          vf = 0.0
+        elsif lv_surfaces.include? from_surface
+          vf = vf_map_lv[from_surface][to_surface]
+        else
+          vf = vf_map_cb[from_surface][to_surface]
+        end
+        os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf)
+        zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
+        zone_prop.addViewFactor(os_vf)
+      end
+    end
+    return true
+  end
+
+  def self.calc_approximate_view_factor(runner, model, all_surfaces)
+    # calculate approximate view factor using E+ approach
+    # used for recalculating single thermal zone view factor matrix
     same_ang_limit = 10.0
     vf_map = {}
-    all_surfaces.each do |surface|
-      puts surface
+    all_surfaces.each do |surface| # surface, subsurface, and internalmass
       if surface.is_a? OpenStudio::Model::InternalMass
         s_azimuth = 0.0
         s_tilt = 90.0
@@ -727,11 +761,14 @@ class OSModel
       end
       zone_seen_area = 0.0
       surface_vf_map = {}
+
+      # sum all the surface area that could be seen by surface1 up
       all_surfaces.each do |surface2|
         next if surface2 == surface
         next if surface2.is_a? OpenStudio::Model::SubSurface
 
         if surface2.is_a? OpenStudio::Model::InternalMass
+          # all surfaces see internal mass
           zone_seen_area += surface2.surfaceArea.get
         else
           s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
@@ -745,14 +782,14 @@ class OSModel
           end
         end
       end
-      puts zone_seen_area
+
       all_surfaces.each do |surface2|
         next if surface2 == surface
         next if surface2.is_a? OpenStudio::Model::SubSurface # handled together with its parant surface
 
         if surface2.is_a? OpenStudio::Model::InternalMass
           surface_vf_map[surface2] = surface2.surfaceArea.get / zone_seen_area
-        else
+        else # surfaces
           s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
           s2_tilt = UnitConversions.convert(surface2.tilt, "rad", "deg")
           surface_type = surface2.surfaceType.downcase
@@ -761,20 +798,22 @@ class OSModel
              (s_azimuth - s2_azimuth).abs > same_ang_limit or
              (s_tilt - s2_tilt).abs > same_ang_limit
             if not surface2.subSurfaces.size == 0
+              # calculate surface and its sub surfaces view factors
+              parent_surface_a = surface2.grossArea
               surface2.subSurfaces.each do |sub_surface|
-                surface_vf_map[surface2] = (surface2.grossArea - sub_surface.grossArea) / zone_seen_area
+                parent_surface_a -= sub_surface.grossArea
+                surface_vf_map[surface2] = parent_surface_a / zone_seen_area
                 surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
               end
-            else
+            else # no subsurface
               surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
             end
           end
         end
       end
       vf_map[surface] = surface_vf_map
-      puts vf_map[surface]
     end
-    return true
+    return vf_map
   end
 
   def self.if_share_mat(model, surface1, mat1)
