@@ -410,6 +410,11 @@ class OSModel
     success = modify_cond_basement_surface_properties(runner, model)
     return false if not success
 
+    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+
+    success = assign_view_factor(runner, model, @living_space)
+    return false if not success
+
     success = check_for_errors(runner, model)
     return false if not success
 
@@ -685,6 +690,89 @@ class OSModel
       end
       exterior_material.setSolarAbsorptance(0.0)
       exterior_material.setVisibleAbsorptance(0.0)
+    end
+    return true
+  end
+
+  def self.assign_view_factor(runner, model, living)
+    all_surfaces = []
+    living.surfaces.each do |surface|
+      next if @cond_bsmnt_surfaces.include? surface
+
+      surface.subSurfaces.each do |sub_surface|
+        all_surfaces << sub_surface
+      end
+      all_surfaces << surface
+    end
+    living.internalMass.each do |im|
+      next if @cond_bsmnt_surfaces.include? im.internalMassDefinition
+
+      all_surfaces << im
+    end
+    same_ang_limit = 10.0
+    vf_map = {}
+    all_surfaces.each do |surface|
+      puts surface
+      if surface.is_a? OpenStudio::Model::InternalMass
+        s_azimuth = 0.0
+        s_tilt = 90.0
+      else
+        s_azimuth = UnitConversions.convert(surface.azimuth, "rad", "deg")
+        s_tilt = UnitConversions.convert(surface.tilt, "rad", "deg")
+        if surface.is_a? OpenStudio::Model::SubSurface
+          s_type = surface.surface.get.surfaceType.downcase
+        else
+          s_type = surface.surfaceType.downcase
+        end
+      end
+      zone_seen_area = 0.0
+      surface_vf_map = {}
+      all_surfaces.each do |surface2|
+        next if surface2 == surface
+        next if surface2.is_a? OpenStudio::Model::SubSurface
+
+        if surface2.is_a? OpenStudio::Model::InternalMass
+          zone_seen_area += surface2.surfaceArea.get
+        else
+          s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
+          s2_tilt = UnitConversions.convert(surface2.tilt, "rad", "deg")
+          surface_type = surface2.surfaceType.downcase
+          if (surface_type == "floor") or
+             (s_type == "floor" and surface_type == "roofceiling") or
+             (s_azimuth - s2_azimuth).abs > same_ang_limit or
+             (s_tilt - s2_tilt).abs > same_ang_limit
+            zone_seen_area += surface2.grossArea # include subsurface area
+          end
+        end
+      end
+      puts zone_seen_area
+      all_surfaces.each do |surface2|
+        next if surface2 == surface
+        next if surface2.is_a? OpenStudio::Model::SubSurface # handled together with its parant surface
+
+        if surface2.is_a? OpenStudio::Model::InternalMass
+          surface_vf_map[surface2] = surface2.surfaceArea.get / zone_seen_area
+        else
+          s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
+          s2_tilt = UnitConversions.convert(surface2.tilt, "rad", "deg")
+          surface_type = surface2.surfaceType.downcase
+          if (surface_type == "floor") or
+             (s_type == "floor" and surface_type == "roofceiling") or
+             (s_azimuth - s2_azimuth).abs > same_ang_limit or
+             (s_tilt - s2_tilt).abs > same_ang_limit
+            if not surface2.subSurfaces.size == 0
+              surface2.subSurfaces.each do |sub_surface|
+                surface_vf_map[surface2] = (surface2.grossArea - sub_surface.grossArea) / zone_seen_area
+                surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
+              end
+            else
+              surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
+            end
+          end
+        end
+      end
+      vf_map[surface] = surface_vf_map
+      puts vf_map[surface]
     end
     return true
   end
