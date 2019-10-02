@@ -365,6 +365,9 @@ class HEScoreRuleset
 
       if window_values[:exterior_shading] == "solar screens"
         # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
+        window_values[:shgc] *= 0.29
+      else
+        window_values[:shgc] *= 0.7
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -401,6 +404,7 @@ class HEScoreRuleset
 
       if skylight_values[:exterior_shading] == "solar screens"
         # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
+        skylight_values[:shgc] *= 0.29
       end
 
       HPXML.add_skylight(hpxml: hpxml,
