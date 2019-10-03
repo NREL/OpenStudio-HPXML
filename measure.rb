@@ -819,31 +819,16 @@ class OSModel
   def self.if_share_mat(model, surface1, mat1)
     # determine if mat1 used by surface1 is shared through model
     const = surface1.construction.get
-    if surface1.is_a? OpenStudio::Model::Surface
-      model.getSurfaces.each do |surface|
-        next unless surface != surface1
-        if surface.construction.get == const
-          return true
-        else
-          surface.construction.get.to_LayeredConstruction.get.layers.each do |layer|
-            layer_mat = layer.to_StandardOpaqueMaterial.get
-            if layer_mat == mat1
-              return true
-            end
-          end
-        end
-      end
-    elsif surface1.is_a? OpenStudio::Model::InternalMassDefinition
-      model.getInternalMassDefinitions.each do |imd|
-        next unless imd != surface1
-        if imd.construction.get == const
-          return true
-        else
-          imd.construction.get.to_LayeredConstruction.get.layers.each do |layer|
-            layer_mat = layer.to_StandardOpaqueMaterial.get
-            if layer_mat == mat1
-              return true
-            end
+    all_surfaces = model.getSurfaces | model.getSubSurfaces | model.getInternalMassDefinitions
+    all_surfaces.each do |surface|
+      next if surface == surface1
+      if surface.construction.get == const
+        return true
+      else
+        surface.construction.get.to_LayeredConstruction.get.layers.each do |layer|
+          layer_mat = layer.to_Material.get
+          if layer_mat == mat1
+            return true
           end
         end
       end
@@ -1688,8 +1673,7 @@ class OSModel
     end
 
     # Apply Construction
-    success = apply_adiabatic_construction(runner, model, [surface], "floor")
-    success = apply_adiabatic_construction(runner, model, [ceiling_surface], "floor")
+    success = apply_adiabatic_construction(runner, model, [surface, ceiling_surface], "floor")
     return false if not success
 
     return true
