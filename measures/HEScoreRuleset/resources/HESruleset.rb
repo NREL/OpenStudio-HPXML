@@ -403,7 +403,9 @@ class HEScoreRuleset
                                                                                       skylight_values[:gas_fill])
       end
 
-      shading_factor = (skylight_values[:exterior_shading] == "solar screens") ? 0.29 : 1.0;
+      if skylight_values[:exterior_shading] == "solar screens"
+        skylight_values[:shgc] *= 0.29
+      end
 
       HPXML.add_skylight(hpxml: hpxml,
                          id: skylight_values[:id],
@@ -411,8 +413,6 @@ class HEScoreRuleset
                          azimuth: orientation_to_azimuth(@bldg_orient), # FIXME: Hard-coded
                          ufactor: skylight_values[:ufactor],
                          shgc: skylight_values[:shgc],
-                         interior_shading_factor_summer: shading_factor,
-                         interior_shading_factor_winter: shading_factor,
                          roof_idref: "#{skylight_values[:roof_idref]}_0") # FIXME: Hard-coded
       # No overhangs
     end
