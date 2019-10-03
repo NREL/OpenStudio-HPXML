@@ -364,10 +364,9 @@ class HEScoreRuleset
       end
 
       if window_values[:exterior_shading] == "solar screens"
-        # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
-        window_values[:shgc] *= 0.29
+        interior_shading_factor_summer = 0.29
       else
-        window_values[:shgc] *= 0.7
+        interior_shading_factor_summer = 0.7
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -381,7 +380,9 @@ class HEScoreRuleset
         overhangs_depth: 1.0,
         overhangs_distance_to_top_of_window: 0.0,
         overhangs_distance_to_bottom_of_window: @ceil_height * @ncfl_ag,
-        wall_idref: window_values[:wall_idref]
+        wall_idref: window_values[:wall_idref],
+        interior_shading_factor_summer: interior_shading_factor_summer,
+        interior_shading_factor_winter: 0.85
       )
       # Uses ERI Reference Home for interior shading
     end
@@ -402,10 +403,7 @@ class HEScoreRuleset
                                                                                       skylight_values[:gas_fill])
       end
 
-      if skylight_values[:exterior_shading] == "solar screens"
-        # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
-        skylight_values[:shgc] *= 0.29
-      end
+      shading_factor = (skylight_values[:exterior_shading] == "solar screens") ? 0.29 : 1.0;
 
       HPXML.add_skylight(hpxml: hpxml,
                          id: skylight_values[:id],
@@ -413,6 +411,8 @@ class HEScoreRuleset
                          azimuth: orientation_to_azimuth(@bldg_orient), # FIXME: Hard-coded
                          ufactor: skylight_values[:ufactor],
                          shgc: skylight_values[:shgc],
+                         interior_shading_factor_summer: shading_factor,
+                         interior_shading_factor_winter: shading_factor,
                          roof_idref: "#{skylight_values[:roof_idref]}_0") # FIXME: Hard-coded
       # No overhangs
     end
