@@ -757,8 +757,8 @@ class HPXML
                         azimuth:,
                         ufactor:,
                         shgc:,
-                        interior_shading_factor_summer:,
-                        interior_shading_factor_winter:,
+                        interior_shading_factor_summer: nil,
+                        interior_shading_factor_winter: nil,
                         roof_idref:,
                         **remainder)
     skylights = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Skylights"])
