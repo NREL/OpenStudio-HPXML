@@ -757,6 +757,8 @@ class HPXML
                         azimuth:,
                         ufactor:,
                         shgc:,
+                        interior_shading_factor_summer: nil,
+                        interior_shading_factor_winter: nil,
                         roof_idref:,
                         **remainder)
     skylights = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Enclosure", "Skylights"])
@@ -767,6 +769,12 @@ class HPXML
     XMLHelper.add_element(skylight, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(skylight, "UFactor", Float(ufactor))
     XMLHelper.add_element(skylight, "SHGC", Float(shgc))
+    unless interior_shading_factor_summer.nil?
+      XMLHelper.add_element(skylight, "InteriorShadingFactorSummer", Float(interior_shading_factor_summer))
+    end
+    unless interior_shading_factor_winter.nil?
+      XMLHelper.add_element(skylight, "InteriorShadingFactorWinter", Float(interior_shading_factor_winter))
+    end
     attached_to_roof = XMLHelper.add_element(skylight, "AttachedToRoof")
     XMLHelper.add_attribute(attached_to_roof, "idref", roof_idref)
 
@@ -792,6 +800,8 @@ class HPXML
              :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(skylight, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(skylight, "SHGC")),
+             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(skylight, "InteriorShadingFactorSummer")),
+             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(skylight, "InteriorShadingFactorWinter")),
              :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading"),
              :roof_idref => HPXML.get_idref(skylight, "AttachedToRoof") }
   end
