@@ -2230,6 +2230,7 @@ class OSModel
 
         seer = heat_pump_values[:cooling_efficiency_seer]
         hspf = heat_pump_values[:heating_efficiency_hspf]
+        heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
 
         if load_frac_cool > 0
           num_speeds = get_ashp_num_speeds_by_seer(seer)
@@ -2252,7 +2253,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, heat_capacity_btuh, backup_heat_efficiency,
+                                                   cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2270,7 +2271,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, heat_capacity_btuh, backup_heat_efficiency,
+                                                   cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2288,7 +2289,7 @@ class OSModel
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, heat_capacity_btuh, backup_heat_efficiency,
+                                                   cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F, backup_heat_efficiency,
                                                    backup_heat_capacity_btuh, dse_heat, dse_cool,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
@@ -2313,6 +2314,8 @@ class OSModel
           shr = heat_pump_values[:cooling_shr]
         end
 
+        heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
+
         min_cooling_capacity = 0.4
         max_cooling_capacity = 1.2
         min_cooling_airflow_rate = 200.0
@@ -2326,8 +2329,18 @@ class OSModel
         else
           heating_capacity_offset = heat_capacity_btuh - cool_capacity_btuh
         end
-        cap_retention_frac = 0.25
-        cap_retention_temp = -5.0
+
+        if heat_capacity_btuh_17F.nil?
+          cap_retention_frac = 0.25
+          cap_retention_temp = -5.0
+        else
+          if heat_capacity_btuh == Constants.SizingAuto || heat_capacity_btuh == Constants.SizingAutoMaxLoad
+            runner.registerError("HeatingCapacity17F is not supported when autosizing.")
+          end
+          cap_retention_frac = heat_capacity_btuh_17F / heat_capacity_btuh
+          cap_retention_temp = 17.0
+        end
+
         pan_heater_power = 0.0
         fan_power = 0.07
         is_ducted = (XMLHelper.has_element(hp, "DistributionSystem") and not has_dse)

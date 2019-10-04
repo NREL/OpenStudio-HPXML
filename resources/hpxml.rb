@@ -948,6 +948,7 @@ class HPXML
                          heat_pump_type:,
                          heat_pump_fuel:,
                          heating_capacity: nil,
+                         heating_capacity_17F: nil,
                          cooling_capacity:,
                          cooling_shr: nil,
                          backup_heating_fuel: nil,
@@ -975,6 +976,7 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatPumpType", heat_pump_type)
     XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel)
     XMLHelper.add_element(heat_pump, "HeatingCapacity", Float(heating_capacity)) unless heating_capacity.nil?
+    XMLHelper.add_element(heat_pump, "HeatingCapacity17F", Float(heating_capacity_17F)) unless heating_capacity_17F.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", Float(cooling_capacity))
     unless cooling_shr.nil?
       XMLHelper.add_element(heat_pump, "CoolingSensibleHeatFraction", Float(cooling_shr))
@@ -1023,6 +1025,7 @@ class HPXML
              :heat_pump_type => XMLHelper.get_value(heat_pump, "HeatPumpType"),
              :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
              :heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity")),
+             :heating_capacity_17F => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity17F")),
              :cooling_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity")),
              :cooling_shr => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingSensibleHeatFraction")),
              :backup_heating_fuel => XMLHelper.get_value(heat_pump, "BackupSystemFuel"),

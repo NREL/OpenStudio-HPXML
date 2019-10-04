@@ -204,7 +204,7 @@
               <SystemIdentifier id='HeatPump'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>15233.333333333334</HeatingCapacity>
+              <HeatingCapacity>16766.666666666668</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -227,7 +227,7 @@
               <SystemIdentifier id='SpaceHeatPump_ID2'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>15233.333333333334</HeatingCapacity>
+              <HeatingCapacity>16766.666666666668</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -250,7 +250,7 @@
               <SystemIdentifier id='SpaceHeatPump_ID3'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>15233.333333333334</HeatingCapacity>
+              <HeatingCapacity>16766.666666666668</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
