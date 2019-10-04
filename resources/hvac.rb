@@ -369,12 +369,12 @@ class HVAC
     evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
     evap_cooler.setName(obj_name)
     evap_cooler.setCoolerEffectiveness(cooler_effectiveness)
+    evap_cooler.setPrimaryAirDesignFlowRate(1.0) # FIXME
     hvac_map[sys_id] << evap_cooler
 
     # See https://github.com/NREL/openstudio-standards/blob/49626ee957db63129bb74cfe08b48abd571de759/lib/openstudio-standards/prototypes/common/objects/Prototype.hvac_systems.rb#L3764
     # See 1ZoneEvapCooler.idf
 
-    # FIXME: Needs outside air system?
     # adjusted design temperatures for evap cooler
     dsgn_temps = {}
     dsgn_temps['clg_dsgn_sup_air_temp_f'] = 70.0
@@ -386,6 +386,7 @@ class HVAC
 
     # FIXME: Fan power is currently zeroed out, is this correct?
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
+    fan.setMaximumFlowRate(1.0) # FIXME
     fan.setName(obj_name + " supply fan")
     fan.setEndUseSubcategory("supply fan")
     fan.setFanEfficiency(1)
@@ -397,6 +398,7 @@ class HVAC
     hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [evap_cooler])
 
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
+    air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop.setName(obj_name + " airloop")
     air_supply_inlet_node = air_loop.supplyInletNode
     air_supply_outlet_node = air_loop.supplyOutletNode
@@ -408,12 +410,21 @@ class HVAC
     # Dummy zero-capacity cooling coil
     dummy_clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
     dummy_clg_coil.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
+    dummy_clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
+    dummy_clg_coil.setRatedSensibleHeatRatio(0.85)
+    dummy_clg_coil.setEvaporativeCondenserEffectiveness(0.9)
+    dummy_clg_coil.setEvaporativeCondenserAirFlowRate(1.0)
+    dummy_clg_coil.setEvaporativeCondenserPumpRatedPowerConsumption(0.0)
+    dummy_clg_coil.setRatedAirFlowRate(1) # FIXME
     unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     unitary_system.setName("Evap Cooler Cycling Fan")
     unitary_system.setSupplyFan(fan)
     unitary_system.setCoolingCoil(dummy_clg_coil)
     unitary_system.setControllingZoneorThermostatLocation(control_zone)
     unitary_system.setFanPlacement('BlowThrough')
+    unitary_system.setSupplyAirFlowRateDuringCoolingOperation(1.0)  # FIXME
+    unitary_system.setSupplyAirFlowRateDuringHeatingOperation(1.0)  # FIXME
+    unitary_system.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(1.0) # FIXME
     unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
     unitary_system.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
     unitary_system.setSupplyAirFlowRateMethodWhenNoCoolingorHeatingisRequired('SupplyAirFlowRate')
@@ -424,7 +435,7 @@ class HVAC
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
     oa_intake_controller.setName("#{air_loop.name} OA Controller")
-    oa_intake_controller.resetMaximumOutdoorAirFlowRate()
+    oa_intake_controller.setMaximumOutdoorAirFlowRate(1.0) # FIXME
     oa_intake_controller.setMinimumLimitType('FixedMinimum')
     oa_intake_controller.resetEconomizerMinimumLimitDryBulbTemperature
     oa_intake_controller.setMinimumFractionofOutdoorAirSchedule(model.alwaysOnDiscreteSchedule)
@@ -445,41 +456,6 @@ class HVAC
     evap_stpt_manager.setMinimumSetpointTemperature(dsgn_temps['clg_dsgn_sup_air_temp_c'])
     evap_stpt_manager.setOffsetTemperatureDifference(dsgn_temps['approach_k'])
     evap_stpt_manager.addToNode(air_loop.supplyOutletNode)
-
-    # Schedule to control the airloop availability
-    air_loop_avail_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    air_loop_avail_sch.setName("#{air_loop.name} Availability Sch")
-    air_loop_avail_sch.setValue(1)
-    air_loop.setAvailabilitySchedule(air_loop_avail_sch)
-
-    # EMS to turn on Evap Cooler if there is a cooling load in the target zone.
-    # Without this EMS, the airloop runs 24/7-365 even when there is no load in the zone.
-
-    # Create a sensor to read the zone load
-    zn_load_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model,
-                                                                         'Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate')
-    zn_load_sensor.setName("Clg Load Sensor")
-    zn_load_sensor.setKeyName(control_zone.handle.to_s)
-
-    # Create an actuator to set the airloop availability
-    air_loop_avail_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(air_loop_avail_sch,
-                                                                                    'Schedule:Constant',
-                                                                                    'Schedule Value')
-    air_loop_avail_actuator.setName("#{air_loop.name.to_s.gsub(/[ +-.]/, '_')} Availability Actuator")
-
-    # Create a program to turn on Evap Cooler if
-    # there is a cooling load in the target zone.
-    # Load < 0.0 is a cooling load.
-    avail_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    avail_program.setName("#{air_loop.name.to_s.gsub(/[ +-.]/, '_')} Availability Control")
-    avail_program_body = <<-EMS
-        IF #{zn_load_sensor.handle} < 0.0
-          SET #{air_loop_avail_actuator.handle} = 1
-        ELSE
-          SET #{air_loop_avail_actuator.handle} = 0
-        ENDIF
-    EMS
-    avail_program.setBody(avail_program_body)
 
     # Supply Air
     zone_splitter = air_loop.zoneSplitter
@@ -2072,7 +2048,7 @@ class HVAC
         var = "Evaporative Cooler Electric Energy"
       else
         var = "Cooling Coil Electric Energy"
-        end
+      end
       clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       clg_object_sensor.setName("#{clg_object.name} s")
       clg_object_sensor.setKeyName(clg_object.name.to_s)
