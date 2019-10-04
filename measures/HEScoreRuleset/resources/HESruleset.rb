@@ -165,7 +165,6 @@ class HEScoreRuleset
                                    roof_values[:roof_type],
                                    roof_values[:radiant_barrier])
       if roof_area.nil?
-        # FIXME: This only seems to work for vented attics. Conditioned attics don't have a floor or roof area. Better error messages could be had here.
         floor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
         frame_floor_area = Float(orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier/@id='#{floor_id}']/Area/text()"].to_s)
         roof_area = frame_floor_area / (2. * Math.cos(UnitConversions.convert(@roof_angle, "deg", "rad"))) if roof_area.nil?
