@@ -3464,8 +3464,12 @@ class HVACSizing
         ## Evaporative Cooler ##
 
         # Air Loop
+        object.setPrimaryAirDesignFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
         air_loop = object.airLoopHVAC.get
         air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
+        unitary_sys = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
+        fan = unitary_sys.supplyFan.get.to_FanOnOff.get
+        fan.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
 
         thermal_zones.each do |thermal_zone|
           thermal_zone.airLoopHVACTerminals.each do |aterm|
@@ -3474,7 +3478,7 @@ class HVACSizing
 
             # Air Terminal
             aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
-            aterm.setMaximumAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s") * zone_ratios[thermal_zone])
+            aterm.setMaximumAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
           end
         end
 

@@ -369,7 +369,6 @@ class HVAC
     evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
     evap_cooler.setName(obj_name)
     evap_cooler.setCoolerEffectiveness(cooler_effectiveness)
-    evap_cooler.setPrimaryAirDesignFlowRate(1.0) # FIXME
     hvac_map[sys_id] << evap_cooler
 
     # See https://github.com/NREL/openstudio-standards/blob/49626ee957db63129bb74cfe08b48abd571de759/lib/openstudio-standards/prototypes/common/objects/Prototype.hvac_systems.rb#L3764
@@ -386,7 +385,6 @@ class HVAC
 
     # FIXME: Fan power is currently zeroed out, is this correct?
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-    fan.setMaximumFlowRate(1.0) # FIXME
     fan.setName(obj_name + " supply fan")
     fan.setEndUseSubcategory("supply fan")
     fan.setFanEfficiency(1)
@@ -4245,7 +4243,11 @@ class HVAC
     thermal_zone.airLoopHVACs.each do |air_loop|
       system = get_unitary_system_from_air_loop_hvac(air_loop)
       next if system.nil?
-      next if system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get == Constants.ObjectNameEvaporativeCooler
+
+      # skip evap cooler dummy unitary system
+      if system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).is_initialized
+        next if system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get == Constants.ObjectNameEvaporativeCooler
+      end
 
       clg_coil = nil
       htg_coil = nil
