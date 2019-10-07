@@ -1004,9 +1004,7 @@ class Constructions
   end
 
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
-                                 drywall_thick_in, frac_of_ffa, basement_frac_of_cfa, cond_base_surfaces)
-
-    living_space = Geometry.get_conditioned_space(model.getSpaces)
+                                 drywall_thick_in, frac_of_ffa, basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     return true if living_space.nil?
 
@@ -1050,11 +1048,10 @@ class Constructions
   end
 
   def self.apply_furniture(runner, model, frac_of_ffa, mass_lb_per_sqft = 8.0,
-                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood, basement_frac_of_cfa, cond_base_surfaces)
+                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood, basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     model_spaces = model.getSpaces
 
-    living_space = Geometry.get_conditioned_space(model_spaces)
     unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
     garage_spaces = Geometry.get_garage_spaces(model_spaces)
 
@@ -1065,7 +1062,7 @@ class Constructions
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if living_space == space or unconditioned_basement_spaces.include?(space)
+      if space == living_space or unconditioned_basement_spaces.include?(space)
         furnAreaFraction = frac_of_ffa
         furnMass = mass_lb_per_sqft
       elsif garage_spaces.include?(space)
@@ -1094,7 +1091,7 @@ class Constructions
       constr.add_layer(mat_fm)
 
       imdefs = []
-      if living_space == space
+      if space == living_space
         # if living space, judge if includes conditioned basement, create furniture independently
         living_surface_area = furnAreaFraction * space.floorArea * (1 - basement_frac_of_cfa)
         base_surface_area = furnAreaFraction * space.floorArea * basement_frac_of_cfa

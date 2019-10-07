@@ -6,7 +6,7 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info)
+  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space)
     @model_spaces = model.getSpaces
     @nbeds = nbeds
     @cfa = cfa
@@ -32,7 +32,7 @@ class HVACSizing
     end
 
     # Get shelter class
-    @shelter_class = get_shelter_class(model, min_neighbor_distance)
+    @shelter_class = get_shelter_class(model, min_neighbor_distance, living_space)
 
     # Calculate loads for each conditioned thermal zone
     zones_loads = process_zone_loads(runner, model, weather)
@@ -1969,8 +1969,8 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.get_shelter_class(model, min_neighbor_distance)
-    height_ft = Geometry.get_height_of_spaces([Geometry.get_conditioned_space(@model_spaces)])
+  def self.get_shelter_class(model, min_neighbor_distance, living_space)
+    height_ft = Geometry.get_height_of_spaces([living_space])
     exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
                          Geometry.calculate_above_grade_wall_area(@model_spaces)
 
