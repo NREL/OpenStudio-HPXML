@@ -414,9 +414,6 @@ class OSModel
     success = modify_cond_basement_surface_properties(runner, model)
     return false if not success
 
-    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
-    @living_zone = @living_space.thermalZone.get
-
     success = assign_view_factor(runner, model)
     return false if not success
 
@@ -729,10 +726,10 @@ class OSModel
 
     all_surfaces.each do |from_surface|
       all_surfaces.each do |to_surface|
-        if (vf_map_lv[from_surface].nil? or vf_map_lv[from_surface][to_surface].nil?) and
-           (vf_map_cb[from_surface].nil? or vf_map_cb[from_surface][to_surface].nil?)
-          vf = 0.0
-        elsif lv_surfaces.include? from_surface
+        next if (vf_map_lv[from_surface].nil? or vf_map_lv[from_surface][to_surface].nil?) and
+                (vf_map_cb[from_surface].nil? or vf_map_cb[from_surface][to_surface].nil?)
+
+        if lv_surfaces.include? from_surface
           vf = vf_map_lv[from_surface][to_surface]
         else
           vf = vf_map_cb[from_surface][to_surface]
