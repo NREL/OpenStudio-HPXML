@@ -404,6 +404,10 @@ class OSModel
     success = add_conditioned_floor_area(runner, model, building, spaces)
     return false if not success
 
+    # update living space/zone global variable
+    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+    @living_zone = @living_space.thermalZone.get
+
     success = add_thermal_mass(runner, model, building)
     return false if not success
 
@@ -1003,7 +1007,7 @@ class OSModel
       end
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
+      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, @living_space)
       return false if not success
     end
 
@@ -1685,7 +1689,7 @@ class OSModel
     basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
     success = Constructions.apply_partition_walls(runner, model, [],
                                                   "PartitionWallConstruction",
-                                                  drywall_thick_in, partition_frac_of_cfa, basement_frac_of_cfa, @cond_bsmnt_surfaces)
+                                                  drywall_thick_in, partition_frac_of_cfa, basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
     return false if not success
 
     # FIXME ?
@@ -1694,7 +1698,7 @@ class OSModel
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
     success = Constructions.apply_furniture(runner, model, furniture_frac_of_cfa,
-                                            mass_lb_per_sqft, density_lb_per_cuft, mat, basement_frac_of_cfa, @cond_bsmnt_surfaces)
+                                            mass_lb_per_sqft, density_lb_per_cuft, mat, basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
     return false if not success
 
     return true
@@ -3147,7 +3151,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, false)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, false, @living_space)
     return false if not success
 
     return true

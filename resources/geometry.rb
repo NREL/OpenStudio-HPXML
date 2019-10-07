@@ -280,14 +280,6 @@ class Geometry
     end
   end
 
-  def self.get_conditioned_space(spaces)
-    spaces.each do |space|
-      next if self.space_is_unconditioned(space)
-
-      return space
-    end
-  end
-
   def self.get_unconditioned_basement_spaces(spaces)
     unconditioned_basement_spaces = []
     spaces.each do |space|
@@ -485,7 +477,7 @@ class Geometry
   end
 
   def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             cfa, nbeds)
+                             cfa, nbeds, space)
 
     # Error checking
     if sens_frac < 0 or sens_frac > 1
@@ -514,9 +506,6 @@ class Geometry
     total_num_occ = 0
     people_sch = nil
     activity_sch = nil
-
-    # Get spaces
-    space = self.get_conditioned_space(model.getSpaces)
 
     space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
 
