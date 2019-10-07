@@ -578,7 +578,7 @@ class Waterheater
       recovery_time = 0.2 # This variable is used for E+ autosizing source heat transfer. Default value 0.2 works well for indirect systems even tested with more spiky draw profile.
     else
       tank_type = Constants.WaterHeaterTypeTankless
-      recovery_time = 0.005 # This variable is used for E+ autosizing source heat transfer. Default value 0.05 works well for combi tankless systems even tested with more spiky draw profile. The recovery time must be smaller for tankless system because of higher sensitivity to load caused by smaller volume.
+      recovery_time = 0.0005 # This variable is used for E+ autosizing source heat transfer. Value 0.0005 shows good resilience tested with more spiky draw profile. The recovery time must be smaller for tankless system because of higher sensitivity caused by smaller tank volume.
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
@@ -601,8 +601,8 @@ class Waterheater
     hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
     alternate_stp_sch.setName("#{obj_name_indirect} Alt Spt")
     hx_stp_sch.setName("#{obj_name_indirect} HX Spt")
-    alt_temp = 54
-    hx_temp = 54 # 54C is more reasonable for highest desired hot water temperature, with 2C deadband, it would be expected to be controlled between 52C - 54C
+    alt_temp = UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0
+    hx_temp = UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0
     alternate_stp_sch.setValue(alt_temp)
     hx_stp_sch.setValue(hx_temp)
     new_heater.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
