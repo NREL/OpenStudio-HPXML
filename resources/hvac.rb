@@ -408,7 +408,7 @@ class HVAC
     # Dummy zero-capacity cooling coil
     dummy_clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
     dummy_clg_coil.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
-    dummy_clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(capacity, 'Btu/hr', 'W'))
+    dummy_clg_coil.setRatedTotalCoolingCapacity(2000) # dummy capacity
     dummy_clg_coil.setRatedSensibleHeatRatio(0.85)
     dummy_clg_coil.setEvaporativeCondenserEffectiveness(0.9)
     dummy_clg_coil.setEvaporativeCondenserAirFlowRate(1.0)
@@ -474,6 +474,9 @@ class HVAC
     evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
     evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
 
+    # TODO:
+    # 1. Did evap cooler need capacity information? It's cooling potential is based on outdoor air condition. Capacity is not used anywhere in workflow
+    # 2. How to calculate correct air flow rate for evap cooler? (in order to ensure it's meeting setpoint all the time) for some climate(hot humid), it might be impossible.
     return true
   end
 
