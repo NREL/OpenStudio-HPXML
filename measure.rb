@@ -1675,8 +1675,10 @@ class OSModel
       # Apply construction
       ufactor = skylight_values[:ufactor]
       shgc = skylight_values[:shgc]
-      cool_shade_mult = 1.0
-      heat_shade_mult = 1.0
+      cool_shade_mult = skylight_values.fetch(:interior_shading_factor_summer, 1.0)
+      cool_shade_mult = cool_shade_mult.nil? ? 1.0 : cool_shade_mult
+      heat_shade_mult = skylight_values.fetch(:interior_shading_factor_winter, 1.0)
+      heat_shade_mult = heat_shade_mult.nil? ? 1.0 : heat_shade_mult
       success = Constructions.apply_skylight(runner, model, [sub_surface],
                                              "SkylightConstruction",
                                              weather, cooling_season, ufactor, shgc,
