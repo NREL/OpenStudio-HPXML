@@ -72,6 +72,7 @@ class HEScoreRuleset
     @year_built = orig_building_construction_values[:year_built]
     @nbeds = orig_building_construction_values[:number_of_bedrooms]
     @cfa = orig_building_construction_values[:conditioned_floor_area] # ft^2
+    @is_townhouse = (orig_building_construction_values[:residential_facility_type] == 'single-family attached')
     @fnd_types = get_foundation_details(orig_details)
     @ducts = get_ducts_details(orig_details)
     @cfa_basement = @fnd_types["basement - conditioned"]
@@ -85,9 +86,12 @@ class HEScoreRuleset
     @has_uncond_bsmnt = @fnd_types.keys.include?("basement - unconditioned")
     @ncfl = @ncfl_ag + (@has_cond_bsmnt ? 1 : 0)
     @nfl = @ncfl + (@has_uncond_bsmnt ? 1 : 0)
-    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2 FIXME: Verify. Does this change for shape=townhouse? Maybe ridge changes to front-back instead of left-right
+    @bldg_footprint = (@cfa - @cfa_basement) / @ncfl_ag # ft^2
     @bldg_length_side = (3.0 * @bldg_footprint / 5.0)**0.5 # ft
     @bldg_length_front = (5.0 / 3.0) * @bldg_length_side # ft
+    if @is_townhouse
+      @bldg_length_front, @bldg_length_side = @bldg_length_side, @bldg_length_front
+    end
     @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
     @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
     @roof_angle = 30.0 # deg
@@ -152,6 +156,7 @@ class HEScoreRuleset
       roof_id = HPXML.get_idref(orig_attic, "AttachedToRoof")
       roof = orig_details.elements["Enclosure/Roofs/Roof[SystemIdentifier[@id='#{roof_id}']]"]
       roof_values = HPXML.get_roof_values(roof: roof)
+      roof_area = roof_values[:area]
       if roof_values[:solar_absorptance].nil?
         roof_values[:solar_absorptance] = get_roof_solar_absorptance(roof_values[:roof_color])
       end
@@ -159,13 +164,21 @@ class HEScoreRuleset
                                    roof_values[:insulation_continuous_r_value],
                                    roof_values[:roof_type],
                                    roof_values[:radiant_barrier])
-
-      roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180] # FIXME: Verify
+      if roof_area.nil?
+        floor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
+        frame_floor_area = Float(orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier/@id='#{floor_id}']/Area/text()"].to_s)
+        roof_area = frame_floor_area / (2. * Math.cos(UnitConversions.convert(@roof_angle, "deg", "rad"))) if roof_area.nil?
+      end
+      if @is_townhouse
+        roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
+      else
+        roof_azimuths = [@bldg_azimuth, @bldg_azimuth + 180]
+      end
       roof_azimuths.each_with_index do |roof_azimuth, idx|
         HPXML.add_roof(hpxml: hpxml,
                        id: "#{roof_values[:id]}_#{idx}",
                        interior_adjacent_to: attic_adjacent,
-                       area: 1000.0 / 2, # FIXME: Hard-coded. Use input if cathedral ceiling or conditioned attic, otherwise calculate default?
+                       area: roof_area,
                        azimuth: sanitize_azimuth(roof_azimuth),
                        solar_absorptance: roof_values[:solar_absorptance],
                        emittance: 0.9, # ERI assumption; TODO get values from method
@@ -220,28 +233,6 @@ class HEScoreRuleset
                      insulation_assembly_r_value: wall_r)
     end
 
-    # Gable walls
-    orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
-      attic_adjacent = get_attic_adjacent(orig_attic)
-
-      # Gable wall: Two surfaces per HES zone_roof
-      # FIXME: Do we want gable walls even for cathedral ceiling and conditioned attic where roof area is provided by the user?
-      gable_height = @bldg_length_side / 2 * Math.sin(UnitConversions.convert(@roof_angle, "deg", "rad"))
-      gable_area = @bldg_length_side / 2 * gable_height
-      gable_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270] # FIXME: Verify
-      gable_azimuths.each_with_index do |gable_azimuth, idx|
-        HPXML.add_wall(hpxml: hpxml,
-                       id: "#{HPXML.get_id(orig_attic)}_gable_#{idx}",
-                       exterior_adjacent_to: "outside",
-                       interior_adjacent_to: attic_adjacent,
-                       wall_type: "WoodStud",
-                       area: gable_area, # FIXME: Verify
-                       azimuth: sanitize_azimuth(gable_azimuth),
-                       solar_absorptance: 0.75, # ERI assumption; TODO get values from method
-                       emittance: 0.9, # ERI assumption; TODO get values from method
-                       insulation_assembly_r_value: 4.0) # FIXME: Hard-coded
-      end
-    end
   end
 
   def self.get_foundation_perimeter(foundation)
@@ -407,7 +398,9 @@ class HEScoreRuleset
       end
 
       if window_values[:exterior_shading] == "solar screens"
-        # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
+        interior_shading_factor_summer = 0.29
+      else
+        interior_shading_factor_summer = 0.7
       end
 
       # Add one HPXML window per side of the house with only the overhangs from the roof.
@@ -421,7 +414,9 @@ class HEScoreRuleset
         overhangs_depth: 1.0,
         overhangs_distance_to_top_of_window: 0.0,
         overhangs_distance_to_bottom_of_window: @ceil_height * @ncfl_ag,
-        wall_idref: window_values[:wall_idref]
+        wall_idref: window_values[:wall_idref],
+        interior_shading_factor_summer: interior_shading_factor_summer,
+        interior_shading_factor_winter: 0.85
       )
       # Uses ERI Reference Home for interior shading
     end
@@ -443,7 +438,7 @@ class HEScoreRuleset
       end
 
       if skylight_values[:exterior_shading] == "solar screens"
-        # FIXME: Solar screen (add R-0.1 and multiply SHGC by 0.85?)
+        skylight_values[:shgc] *= 0.29
       end
 
       HPXML.add_skylight(hpxml: hpxml,
