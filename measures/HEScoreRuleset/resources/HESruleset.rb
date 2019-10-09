@@ -178,7 +178,7 @@ class HEScoreRuleset
         HPXML.add_roof(hpxml: hpxml,
                        id: "#{roof_values[:id]}_#{idx}",
                        interior_adjacent_to: attic_adjacent,
-                       area: roof_area,
+                       area: roof_area / 2.0,
                        azimuth: sanitize_azimuth(roof_azimuth),
                        solar_absorptance: roof_values[:solar_absorptance],
                        emittance: 0.9, # ERI assumption; TODO get values from method
