@@ -363,7 +363,7 @@ class HVAC
                                     sequential_cool_load_frac, control_zone,
                                     hvac_map, sys_id)
 
-    cooler_effectiveness = 0.75
+    cooler_effectiveness = 0.72
     obj_name = Constants.ObjectNameEvaporativeCooler
 
     evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
@@ -475,7 +475,7 @@ class HVAC
     evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
 
     # TODO:
-    # 1. Did evap cooler need capacity information? It's cooling potential is based on outdoor air condition. Capacity is not used anywhere in workflow
+    # 1. Did evap cooler need capacity information? Its cooling potential is based on outdoor air condition. Capacity is not used anywhere in workflow
     # 2. How to calculate correct air flow rate for evap cooler? (in order to ensure it's meeting setpoint all the time) for some climate(hot humid), it might be impossible.
     return true
   end
