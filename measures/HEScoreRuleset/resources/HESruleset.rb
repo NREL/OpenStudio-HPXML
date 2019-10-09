@@ -409,7 +409,6 @@ class HEScoreRuleset
           ufactor: skylight_values[:ufactor],
           shgc: skylight_values[:shgc],
           roof_idref: roof_values[:id])
-        roof.elements['Area'].text = String(roof_values[:area] - skylight_area)
       end
     end
   end
