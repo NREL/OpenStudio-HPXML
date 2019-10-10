@@ -178,7 +178,7 @@ class EnergyPlusValidator
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
         "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
-        "[DepthBelowGrade | [InteriorAdjacentTo!='living space']]" => one_or_more, # DepthBelowGrade only required when InteriorAdjacentTo='living space'
+        "[DepthBelowGrade | [InteriorAdjacentTo!='living space' and InteriorAdjacentTo!='garage']]" => one_or_more, # DepthBelowGrade only required when InteriorAdjacentTo is 'living space' or 'garage'
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
@@ -230,7 +230,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
-        "HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove]" => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove]
+        "HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove | PortableHeater]" => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater]
         "HeatingCapacity" => one, # Use -1 for autosizing
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
       },
@@ -267,6 +267,13 @@ class EnergyPlusValidator
 
       ## [HeatingType=Stove]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Stove]" => {
+        "DistributionSystem" => zero,
+        "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity' or HeatingSystemFuel='wood' or HeatingSystemFuel='wood pellets']" => one, # See [HeatingType=FuelEquipment] if not electricity
+        "AnnualHeatingEfficiency[Units='Percent']/Value" => one,
+      },
+
+      ## [HeatingType=PortableHeater]
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/PortableHeater]" => {
         "DistributionSystem" => zero,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity' or HeatingSystemFuel='wood' or HeatingSystemFuel='wood pellets']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='Percent']/Value" => one,
@@ -618,20 +625,20 @@ class EnergyPlusValidator
     # Check sum of FractionCoolLoadServeds <= 1
     frac_cool_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed/text())"]
     frac_cool_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed/text())"]
-    if frac_cool_load > 1
+    if frac_cool_load > 1.01 # Use 1.01 in case of rounding
       errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
     end
 
     # Check sum of FractionHeatLoadServeds <= 1
     frac_heat_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed/text())"]
     frac_heat_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed/text())"]
-    if frac_heat_load > 1
+    if frac_heat_load > 1.01 # Use 1.01 in case of rounding
       errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
     end
 
     # Check sum of FractionDHWLoadServed == 1
     frac_dhw_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed/text())"]
-    if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01)
+    if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
 
