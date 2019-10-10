@@ -1,4 +1,3 @@
-# Add classes or functions here than can be used across a variety of our python classes and modules.
 require_relative "constants"
 require_relative "util"
 require_relative "weather"
@@ -702,7 +701,7 @@ class Waterheater
     new_schedule.setName("#{tank.name} desuperheater setpoint schedule")
     new_schedule.setValue(UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0 + 0.5)
 
-    # create a desuperheater objects
+    # create a desuperheater object
     desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
     desuperheater.setDeadBandTemperatureDifference(0.2)
     desuperheater.setRatedHeatReclaimRecoveryEfficiency(0.25)
@@ -711,32 +710,6 @@ class Waterheater
 
     # attach to the clg coil source
     desuperheater.setHeatingSource(desuperheater_clg_coil)
-  end
-
-  def self.get_location_hierarchy(ba_cz_name)
-    if [Constants.BAZoneHotDry, Constants.BAZoneHotHumid].include? ba_cz_name
-      return [Constants.SpaceTypeGarage,
-              Constants.SpaceTypeLiving,
-              Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnventedCrawl,
-              Constants.SpaceTypeVentedCrawl,
-              Constants.SpaceTypeUnventedAttic,
-              Constants.SpaceTypeVentedAttic]
-
-    elsif [Constants.BAZoneMarine, Constants.BAZoneMixedHumid, Constants.BAZoneMixedDry, Constants.BAZoneCold, Constants.BAZoneVeryCold, Constants.BAZoneSubarctic].include? ba_cz_name
-      return [Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnconditionedBasement,
-              Constants.SpaceTypeLiving,
-              Constants.SpaceTypeUnventedCrawl,
-              Constants.SpaceTypeVentedCrawl,
-              Constants.SpaceTypeUnventedAttic,
-              Constants.SpaceTypeVentedAttic]
-    elsif ba_cz_name.nil?
-      return [Constants.SpaceTypeConditionedBasement,
-              Constants.SpaceTypeUnconditionedBasement,
-              Constants.SpaceTypeGarage,
-              Constants.SpaceTypeLiving]
-    end
   end
 
   def self.create_new_hx(model, name)

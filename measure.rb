@@ -1900,10 +1900,10 @@ class OSModel
         fuel = water_heating_system_values[:fuel_type]
         jacket_r = water_heating_system_values[:jacket_r_value]
 
-        has_desuperheater = water_heating_system_values[:has_desuperheater]
+        uses_desuperheater = water_heating_system_values[:uses_desuperheater]
         relatedhvac = water_heating_system_values[:related_hvac]
 
-        if has_desuperheater
+        if uses_desuperheater
           if not related_hvac_list.include? relatedhvac
             related_hvac_list << relatedhvac
             desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
@@ -2038,7 +2038,7 @@ class OSModel
           end
         end
       end
-      fail "The Related HVAC system '#{relatedhvac}' for WaterHeatingSystem '#{wh_id}' is not currently supported for desuperheater simulation"
+      fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{wh_id}' is not currently supported for desuperheaters."
     else
       fail "RelatedHVACSystem '#{relatedhvac}' not found for water heating system '#{wh_id}'."
     end

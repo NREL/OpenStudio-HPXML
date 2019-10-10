@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-06-13T17:30:10-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-10-10T08:20:01-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -296,7 +296,7 @@
             <HeatingCapacity>18767.0</HeatingCapacity>
             <EnergyFactor>0.95</EnergyFactor>
             <UsesDesuperheater>true</UsesDesuperheater>
-            <RelatedHVACSystem idref='CoolingSystem_bad'/>
+            <RelatedHVACSystem idref='CoolingSystem'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>
