@@ -144,7 +144,7 @@ class EnergyPlusValidator
       },
 
       # [FoundationWall]
-      "/HPXML/Building/BuildingDetails/Enclosure/FoundationWall" => {
+      "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[ExteriorAdjacentTo='ground' or ExteriorAdjacentTo='basement - conditioned' or ExteriorAdjacentTo='basement - unconditioned' or ExteriorAdjacentTo='crawlspace - vented' or ExteriorAdjacentTo='crawlspace - unvented' or ExteriorAdjacentTo='garage' or ExteriorAdjacentTo='other housing unit']" => one,
         "[InteriorAdjacentTo='basement - conditioned' or InteriorAdjacentTo='basement - unconditioned' or InteriorAdjacentTo='crawlspace - vented' or InteriorAdjacentTo='crawlspace - unvented' or InteriorAdjacentTo='garage']" => one,
@@ -178,7 +178,7 @@ class EnergyPlusValidator
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
         "[UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']]" => one,
-        "DepthBelowGrade" => one,
+        "[DepthBelowGrade | [InteriorAdjacentTo!='living space' and InteriorAdjacentTo!='garage']]" => one_or_more, # DepthBelowGrade only required when InteriorAdjacentTo is 'living space' or 'garage'
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
@@ -194,10 +194,10 @@ class EnergyPlusValidator
         "Azimuth" => one,
         "UFactor" => one,
         "SHGC" => one,
+        "InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
+        "InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
         "Overhangs" => zero_or_one, # See [WindowOverhang]
         "AttachedToWall" => one,
-        "extension/InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
-        "extension/InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
       },
 
       ## [WindowOverhang]
@@ -230,7 +230,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
-        "HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove]" => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove]
+        "HeatingSystemType[ElectricResistance | Furnace | WallFurnace | Boiler | Stove | PortableHeater]" => one, # See [HeatingType=Resistance] or [HeatingType=Furnace] or [HeatingType=WallFurnace] or [HeatingType=Boiler] or [HeatingType=Stove] or [HeatingType=PortableHeater]
         "HeatingCapacity" => one, # Use -1 for autosizing
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatingSystems and HeatPumps
       },
@@ -272,6 +272,13 @@ class EnergyPlusValidator
         "AnnualHeatingEfficiency[Units='Percent']/Value" => one,
       },
 
+      ## [HeatingType=PortableHeater]
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/PortableHeater]" => {
+        "DistributionSystem" => zero,
+        "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity' or HeatingSystemFuel='wood' or HeatingSystemFuel='wood pellets']" => one, # See [HeatingType=FuelEquipment] if not electricity
+        "AnnualHeatingEfficiency[Units='Percent']/Value" => one,
+      },
+
       ## [HeatingType=FuelEquipment]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane']" => {
         "ElectricAuxiliaryEnergy" => zero_or_one, # If not provided, uses 301 defaults for furnace/boiler and zero for other heating systems
@@ -281,14 +288,14 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "../../HVACControl" => one, # See [HVACControl]
-        "[CoolingSystemType='central air conditioning' or CoolingSystemType='room air conditioner']" => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC]
+        "[CoolingSystemType='central air conditioner' or CoolingSystemType='room air conditioner']" => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC]
         "[CoolingSystemFuel='electricity']" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
 
       ## [CoolingType=CentralAC]
-      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioning']" => {
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioner']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
@@ -365,6 +372,7 @@ class EnergyPlusValidator
       },
 
       ## [HVACDistType=DSE]
+      ## WARNING: These inputs are unused and EnergyPlus output will NOT reflect the specified DSE. To account for DSE, apply the value to the EnergyPlus output.
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution[DistributionSystemType[Other='DSE']]" => {
         "[AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency]" => one_or_more,
       },
@@ -372,7 +380,7 @@ class EnergyPlusValidator
       ## [HVACDuct]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return']" => {
         "DuctInsulationRValue" => one,
-        "[DuctLocation='living space' or DuctLocation='basement - conditioned' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - vented' or DuctLocation='crawlspace - unvented' or DuctLocation='attic - vented' or DuctLocation='attic - unvented' or DuctLocation='garage']" => one,
+        "[DuctLocation='living space' or DuctLocation='basement - conditioned' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - vented' or DuctLocation='crawlspace - unvented' or DuctLocation='attic - vented' or DuctLocation='attic - unvented' or DuctLocation='garage' or DuctLocation='outside']" => one,
         "DuctSurfaceArea" => one,
       },
 
@@ -380,7 +388,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[FanType='energy recovery ventilator' or FanType='heat recovery ventilator' or FanType='exhaust only' or FanType='supply only' or FanType='balanced' or FanType='central fan integrated supply']" => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
-        "RatedFlowRate" => one,
+        "[TestedFlowRate | RatedFlowRate]" => one_or_more,
         "HoursInOperation" => one,
         "UsedForWholeBuildingVentilation" => one,
         "FanPower" => one,
@@ -388,13 +396,13 @@ class EnergyPlusValidator
 
       ## [MechVentType=HRV]
       "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true'][FanType='heat recovery ventilator']" => {
-        "SensibleRecoveryEfficiency" => one,
+        "[SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency]" => one,
       },
 
       ## [MechVentType=ERV]
       "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true'][FanType='energy recovery ventilator']" => {
-        "TotalRecoveryEfficiency" => one,
-        "SensibleRecoveryEfficiency" => one,
+        "[TotalRecoveryEfficiency | AdjustedTotalRecoveryEfficiency]" => one,
+        "[SensibleRecoveryEfficiency | AdjustedSensibleRecoveryEfficiency]" => one,
       },
 
       ## [MechVentType=CFIS]
@@ -407,10 +415,9 @@ class EnergyPlusValidator
         "../HotWaterDistribution" => one, # See [HotWaterDistribution]
         "../WaterFixture" => one_or_more, # See [WaterFixture]
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump]
-        "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented']" => one,
+        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater' or WaterHeaterType='space-heating boiler with storage tank' or WaterHeaterType='space-heating boiler with tankless coil']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
+        "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented' or Location='other exterior']" => one,
         "FractionDHWLoadServed" => one,
-        "[EnergyFactor | UniformEnergyFactor]" => one,
         "HasDesuperheater" => zero_or_one, # See [Desuperheater]
       },
 
@@ -419,6 +426,8 @@ class EnergyPlusValidator
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one, # If not electricity, see [WHType=FuelTank]
         "TankVolume" => one,
         "HeatingCapacity" => one,
+        "[EnergyFactor | UniformEnergyFactor]" => one,
+        "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
       },
 
       ## [WHType=FuelTank]
@@ -430,12 +439,27 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='instantaneous water heater']" => {
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity']" => one,
         "PerformanceAdjustment" => zero_or_one, # Uses ERI assumption for tankless cycling derate if not provided
+        "[EnergyFactor | UniformEnergyFactor]" => one,
       },
 
       ## [WHType=HeatPump]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='heat pump water heater']" => {
         "[FuelType='electricity']" => one,
         "TankVolume" => one,
+        "[EnergyFactor | UniformEnergyFactor]" => one,
+        "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
+      },
+
+      ## [WHType=Indirect]
+      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with storage tank']" => {
+        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
+        "TankVolume" => one,
+        "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
+      },
+
+      ## [WHType=CombiTankless]
+      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with tankless coil']" => {
+        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
       },
 
       ## [Desuperheater]
@@ -523,7 +547,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/Refrigerator" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
-        "RatedAnnualkWh" => one,
+        "[RatedAnnualkWh | extension/AdjustedAnnualkWh]" => one_or_more,
       },
 
       # [CookingRange]
@@ -607,20 +631,20 @@ class EnergyPlusValidator
     # Check sum of FractionCoolLoadServeds <= 1
     frac_cool_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem/FractionCoolLoadServed/text())"]
     frac_cool_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionCoolLoadServed/text())"]
-    if frac_cool_load > 1
+    if frac_cool_load > 1.01 # Use 1.01 in case of rounding
       errors << "Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is #{frac_cool_load.round(2)}."
     end
 
     # Check sum of FractionHeatLoadServeds <= 1
     frac_heat_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem/FractionHeatLoadServed/text())"]
     frac_heat_load += hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump/FractionHeatLoadServed/text())"]
-    if frac_heat_load > 1
+    if frac_heat_load > 1.01 # Use 1.01 in case of rounding
       errors << "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is #{frac_heat_load.round(2)}."
     end
 
     # Check sum of FractionDHWLoadServed == 1
     frac_dhw_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed/text())"]
-    if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01)
+    if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
 

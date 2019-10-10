@@ -71,6 +71,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -150,6 +151,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "DoubleWoodStud")
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -229,6 +231,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "CMU")
       surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, Float(furring_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -289,6 +292,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "ICF")
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -364,6 +368,8 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SIP")
       surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsThickness, Float(sheathing_thick_in))
     end
 
     return true
@@ -435,6 +441,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SteelStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -451,30 +458,6 @@ class Constructions
     for idx in 0..4
       if thick_ins[idx].nil? != conds[idx].nil? or thick_ins[idx].nil? != denss[idx].nil? or thick_ins[idx].nil? != specheats[idx].nil?
         runner.registerError("Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered.")
-        return false
-      end
-    end
-    thick_ins.each_with_index do |thick_in, idx|
-      if not thick_in.nil? and thick_in <= 0.0
-        runner.registerError("Thickness #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    conds.each_with_index do |cond, idx|
-      if not cond.nil? and cond <= 0.0
-        runner.registerError("Conductivity #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    denss.each_with_index do |dens, idx|
-      if not dens.nil? and dens <= 0.0
-        runner.registerError("Density #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    specheats.each_with_index do |specheat, idx|
-      if not specheat.nil? and specheat <= 0.0
-        runner.registerError("Specific Heat #{idx + 1} must be greater than 0.")
         return false
       end
     end
@@ -537,6 +520,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "Generic")
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -605,6 +589,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -877,11 +862,6 @@ class Constructions
                                  wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                                  wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                                  wall_height, wall_height_above_grade, foundation = nil)
-
-    if wall_surfaces.empty?
-      runner.registerError("No wall surfaces found adjacent to floor surface.")
-      return false
-    end
 
     # Calculate interior wall R-value
     int_wall_rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,

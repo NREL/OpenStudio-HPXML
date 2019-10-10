@@ -27,11 +27,11 @@
           </FuelTypesAvailable>
         </Site>
         <BuildingConstruction>
-          <NumberofConditionedFloors>1</NumberofConditionedFloors>
+          <NumberofConditionedFloors>2</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1</NumberofConditionedFloorsAboveGrade>
           <NumberofBedrooms>3</NumberofBedrooms>
-          <ConditionedFloorArea>1350.0</ConditionedFloorArea>
-          <ConditionedBuildingVolume>10800.0</ConditionedBuildingVolume>
+          <ConditionedFloorArea>2700.0</ConditionedFloorArea>
+          <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -54,7 +54,7 @@
               <UnitofMeasure>ACH</UnitofMeasure>
               <AirLeakage>3.0</AirLeakage>
             </BuildingAirLeakage>
-            <InfiltrationVolume>10800.0</InfiltrationVolume>
+            <InfiltrationVolume>21600.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Roofs>
@@ -72,6 +72,20 @@
             </Insulation>
           </Roof>
         </Roofs>
+        <RimJoists>
+          <RimJoist>
+            <SystemIdentifier id='RimJoistFoundation'/>
+            <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Area>116.0</Area>
+            <SolarAbsorptance>0.7</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
+            <Insulation>
+              <SystemIdentifier id='RimJoistFoundationInsulation'/>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+            </Insulation>
+          </RimJoist>
+        </RimJoists>
         <Walls>
           <Wall>
             <SystemIdentifier id='Wall'/>
@@ -104,6 +118,25 @@
             </Insulation>
           </Wall>
         </Walls>
+        <FoundationWalls>
+          <FoundationWall>
+            <SystemIdentifier id='FoundationWall'/>
+            <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
+            <Height>8.0</Height>
+            <Area>1200.0</Area>
+            <Thickness>8.0</Thickness>
+            <DepthBelowGrade>7.0</DepthBelowGrade>
+            <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+            <Insulation>
+              <SystemIdentifier id='FoundationWallInsulation'/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>8.9</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FoundationWall>
+        </FoundationWalls>
         <FrameFloors>
           <FrameFloor>
             <SystemIdentifier id='FloorBelowAttic'/>
@@ -119,13 +152,12 @@
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab'/>
-            <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Area>1350.0</Area>
             <Thickness>4.0</Thickness>
             <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-            <UnderSlabInsulationSpansEntireSlab>true</UnderSlabInsulationSpansEntireSlab>
-            <DepthBelowGrade>0.0</DepthBelowGrade>
+            <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
@@ -137,12 +169,12 @@
               <SystemIdentifier id='SlabUnderSlabInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
-                <NominalRValue>5.0</NominalRValue>
+                <NominalRValue>0.0</NominalRValue>
               </Layer>
             </UnderSlabInsulation>
             <extension>
-              <CarpetFraction>1.0</CarpetFraction>
-              <CarpetRValue>2.5</CarpetRValue>
+              <CarpetFraction>0.0</CarpetFraction>
+              <CarpetRValue>0.0</CarpetRValue>
             </extension>
           </Slab>
         </Slabs>
@@ -250,26 +282,107 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>0.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>0.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>0.0001</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>0.0001</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution2'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>0.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>0.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>0.0001</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>0.0001</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution3'/>
             <DistributionSystemType>
-              <Other>DSE</Other>
+              <AirDistribution>
+                <DuctLeakageMeasurement>
+                  <DuctType>supply</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>0.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <DuctLeakageMeasurement>
+                  <DuctType>return</DuctType>
+                  <DuctLeakage>
+                    <Units>CFM25</Units>
+                    <Value>0.0</Value>
+                    <TotalOrToOutside>to outside</TotalOrToOutside>
+                  </DuctLeakage>
+                </DuctLeakageMeasurement>
+                <Ducts>
+                  <DuctType>supply</DuctType>
+                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>0.0001</DuctSurfaceArea>
+                </Ducts>
+                <Ducts>
+                  <DuctType>return</DuctType>
+                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
+                  <DuctLocation>attic - unvented</DuctLocation>
+                  <DuctSurfaceArea>0.0001</DuctSurfaceArea>
+                </Ducts>
+              </AirDistribution>
             </DistributionSystemType>
-            <AnnualHeatingDistributionSystemEfficiency>1.0</AnnualHeatingDistributionSystemEfficiency>
-            <AnnualCoolingDistributionSystemEfficiency>1.0</AnnualCoolingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -287,7 +400,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>30.0</PipingLength>
+                <PipingLength>50.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>
@@ -310,38 +423,38 @@
         <ClothesWasher>
           <SystemIdentifier id='ClothesWasher'/>
           <Location>living space</Location>
-          <ModifiedEnergyFactor>1.2</ModifiedEnergyFactor>
-          <RatedAnnualkWh>387.0</RatedAnnualkWh>
-          <LabelElectricRate>0.127</LabelElectricRate>
-          <LabelGasRate>1.003</LabelGasRate>
-          <LabelAnnualGasCost>24.0</LabelAnnualGasCost>
-          <Capacity>3.5</Capacity>
+          <ModifiedEnergyFactor>0.8</ModifiedEnergyFactor>
+          <RatedAnnualkWh>700.0</RatedAnnualkWh>
+          <LabelElectricRate>0.1</LabelElectricRate>
+          <LabelGasRate>0.6</LabelGasRate>
+          <LabelAnnualGasCost>25.0</LabelAnnualGasCost>
+          <Capacity>3.0</Capacity>
         </ClothesWasher>
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
           <Location>living space</Location>
           <FuelType>electricity</FuelType>
-          <EnergyFactor>3.01</EnergyFactor>
+          <EnergyFactor>2.95</EnergyFactor>
           <ControlType>timer</ControlType>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
-          <RatedAnnualkWh>100.0</RatedAnnualkWh>
+          <RatedAnnualkWh>450.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
         <Refrigerator>
           <SystemIdentifier id='Refrigerator'/>
           <Location>living space</Location>
-          <RatedAnnualkWh>609.0</RatedAnnualkWh>
+          <RatedAnnualkWh>650.0</RatedAnnualkWh>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <FuelType>electricity</FuelType>
-          <IsInduction>true</IsInduction>
+          <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>
           <SystemIdentifier id='Oven'/>
-          <IsConvection>true</IsConvection>
+          <IsConvection>false</IsConvection>
         </Oven>
       </Appliances>
       <Lighting>
@@ -382,6 +495,16 @@
           <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
         </LightingGroup>
       </Lighting>
+      <MiscLoads>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc'/>
+          <PlugLoadType>other</PlugLoadType>
+        </PlugLoad>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc2'/>
+          <PlugLoadType>TV other</PlugLoadType>
+        </PlugLoad>
+      </MiscLoads>
     </BuildingDetails>
   </Building>
 </HPXML>
