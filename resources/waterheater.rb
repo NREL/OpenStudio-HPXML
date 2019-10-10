@@ -1,4 +1,3 @@
-# Add classes or functions here than can be used across a variety of our python classes and modules.
 require_relative "constants"
 require_relative "util"
 require_relative "weather"
@@ -10,7 +9,7 @@ require_relative "hotwater_appliances"
 
 class Waterheater
   def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
-                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, jacket_r)
+                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil, jacket_r)
 
     if fuel_type == Constants.FuelTypeElectric
       re = 0.98 # recovery efficiency set by fiat
@@ -36,11 +35,14 @@ class Waterheater
 
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
 
+    if not desuperheater_clg_coil.nil?
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank)
+    end
     return true
   end
 
   def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
-                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
+                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil)
 
     if cd < 0 or cd > 1
       runner.registerError("Cycling derate must be at least 0 and at most 1.")
@@ -69,6 +71,9 @@ class Waterheater
 
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
+    if not desuperheater_clg_coil.nil?
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTankless)
+    end
     return true
   end
 
@@ -688,6 +693,23 @@ class Waterheater
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
 
     return true
+  end
+
+  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type)
+    # Create a schedule for desuperheater control (schedule value - desuperheater deadband = a little bit over tank stp would be good)
+    new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    new_schedule.setName("#{tank.name} desuperheater setpoint schedule")
+    new_schedule.setValue(UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0 + 0.5)
+
+    # create a desuperheater object
+    desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
+    desuperheater.setDeadBandTemperatureDifference(0.2)
+    desuperheater.setRatedHeatReclaimRecoveryEfficiency(0.25)
+    desuperheater.addToHeatRejectionTarget(tank)
+    desuperheater.setWaterPumpPower(0)
+
+    # attach to the clg coil source
+    desuperheater.setHeatingSource(desuperheater_clg_coil)
   end
 
   def self.create_new_hx(model, name)

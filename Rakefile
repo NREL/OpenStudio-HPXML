@@ -40,12 +40,16 @@ def create_hpxmls
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/invalid-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
+    'invalid_files/invalid-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/missing-elements.xml' => 'base.xml',
     'invalid_files/missing-surfaces.xml' => 'base.xml',
     'invalid_files/net-area-negative-roof.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/net-area-negative-wall.xml' => 'base.xml',
     'invalid_files/refrigerator-location.xml' => 'base.xml',
     'invalid_files/refrigerator-location-other.xml' => 'base.xml',
+    'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
+    'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
@@ -53,8 +57,6 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
-    'invalid_files/invalid-idref-dhw-indirect.xml' => 'base-dhw-indirect.xml',
-    'invalid_files/two-repeating-idref-dhw-indirect.xml' => 'base-dhw-indirect.xml',
 
     'base-addenda-exclude-g.xml' => 'base.xml',
     'base-addenda-exclude-g-e.xml' => 'base.xml',
@@ -71,6 +73,11 @@ def create_hpxmls
     'base-atticroof-vented.xml' => 'base.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
+    'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-dhw-desuperheater-tankless.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'base-dhw-desuperheater-2-speed.xml' => 'base-hvac-central-ac-only-2-speed.xml',
+    'base-dhw-desuperheater-var-speed.xml' => 'base-hvac-central-ac-only-var-speed.xml',
+    'base-dhw-desuperheater-gshp.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-dhw-dwhr.xml' => 'base.xml',
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
@@ -2367,6 +2374,25 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-uef.xml'].include? hpxml_file
     water_heating_systems_values[0][:energy_factor] = nil
     water_heating_systems_values[0][:uniform_energy_factor] = 0.93
+  elsif ['base-dhw-desuperheater.xml'].include? hpxml_file
+    water_heating_systems_values[0][:uses_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-tankless.xml'].include? hpxml_file
+    water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
+    water_heating_systems_values[0][:tank_volume] = nil
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 0.99
+    water_heating_systems_values[0][:uses_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-2-speed.xml'].include? hpxml_file
+    water_heating_systems_values[0][:uses_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-var-speed.xml'].include? hpxml_file
+    water_heating_systems_values[0][:uses_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+  elsif ['base-dhw-desuperheater-gshp.xml'].include? hpxml_file
+    water_heating_systems_values[0][:uses_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "HeatPump"
   elsif ['base-dhw-jacket-electric.xml',
          'base-dhw-jacket-indirect.xml',
          'base-dhw-jacket-gas.xml',
@@ -2406,9 +2432,18 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:location] = "crawlspace - vented"
   elsif ['invalid_files/water-heater-location-other.xml'].include? hpxml_file
     water_heating_systems_values[0][:location] = "unconditioned space"
-  elsif ['invalid_files/invalid-idref-dhw-indirect.xml'].include? hpxml_file
-    water_heating_systems_values[0][:related_hvac] = "HeatingSystem-bad"
-  elsif ['invalid_files/two-repeating-idref-dhw-indirect.xml'].include? hpxml_file
+  elsif ['invalid_files/invalid-relatedhvac-desuperheater.xml'].include? hpxml_file
+    water_heating_systems_values[0][:uses_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem_bad"
+  elsif ['invalid_files/repeated-relatedhvac-desuperheater.xml'].include? hpxml_file
+    water_heating_systems_values[0][:fraction_dhw_load_served] = 0.5
+    water_heating_systems_values[0][:uses_desuperheater] = true
+    water_heating_systems_values[0][:related_hvac] = "CoolingSystem"
+    water_heating_systems_values << water_heating_systems_values[0].dup
+    water_heating_systems_values[1][:id] = "WaterHeater2"
+  elsif ['invalid_files/invalid-relatedhvac-dhw-indirect.xml'].include? hpxml_file
+    water_heating_systems_values[0][:related_hvac] = "HeatingSystem_bad"
+  elsif ['invalid_files/repeated-relatedhvac-dhw-indirect.xml'].include? hpxml_file
     water_heating_systems_values[0][:fraction_dhw_load_served] = 0.5
     water_heating_systems_values << water_heating_systems_values[0].dup
     water_heating_systems_values[1][:id] = "WaterHeater2"
