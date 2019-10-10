@@ -118,7 +118,7 @@ class Lighting
     end
 
     # Create schedule
-    sch = HourlyByMonthSchedule.new(model, runner, Constants.ObjectNameLighting + " schedule", lighting_sch, lighting_sch, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    sch = HourlyByMonthSchedule.new(model, runner, "lighting schedule", lighting_sch, lighting_sch, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
     if not sch.validated?
       return false
     end
@@ -130,9 +130,10 @@ class Lighting
       # Add lighting
       ltg_def = OpenStudio::Model::LightsDefinition.new(model)
       ltg = OpenStudio::Model::Lights.new(ltg_def)
-      ltg.setName(Constants.ObjectNameLighting)
+      ltg.setName(Constants.ObjectNameInteriorLighting)
       ltg.setSpace(living_space)
-      ltg_def.setName(Constants.ObjectNameLighting)
+      ltg.setEndUseSubcategory(Constants.ObjectNameInteriorLighting)
+      ltg_def.setName(Constants.ObjectNameInteriorLighting)
       ltg_def.setLightingLevel(space_design_level)
       ltg_def.setFractionRadiant(0.6)
       ltg_def.setFractionVisible(0.2)
@@ -147,9 +148,10 @@ class Lighting
       # Add lighting
       ltg_def = OpenStudio::Model::LightsDefinition.new(model)
       ltg = OpenStudio::Model::Lights.new(ltg_def)
-      ltg.setName(Constants.ObjectNameLighting)
+      ltg.setName(Constants.ObjectNameGarageLighting)
       ltg.setSpace(garage_space)
-      ltg_def.setName(Constants.ObjectNameLighting)
+      ltg.setEndUseSubcategory(Constants.ObjectNameGarageLighting)
+      ltg_def.setName(Constants.ObjectNameGarageLighting)
       ltg_def.setLightingLevel(space_design_level)
       ltg_def.setFractionRadiant(0.6)
       ltg_def.setFractionVisible(0.2)
@@ -159,13 +161,12 @@ class Lighting
 
     if exterior_kwh > 0
       space_design_level = sch.calcDesignLevel(sch.maxval * exterior_kwh)
-      space_obj_name = "#{Constants.ObjectNameLighting} exterior"
 
       # Add exterior lighting
       ltg_def = OpenStudio::Model::ExteriorLightsDefinition.new(model)
       ltg = OpenStudio::Model::ExteriorLights.new(ltg_def)
-      ltg.setName(space_obj_name)
-      ltg_def.setName(space_obj_name)
+      ltg.setName(Constants.ObjectNameExteriorLighting)
+      ltg_def.setName(Constants.ObjectNameExteriorLighting)
       ltg_def.setDesignLevel(space_design_level)
       ltg.setSchedule(sch.schedule)
     end
