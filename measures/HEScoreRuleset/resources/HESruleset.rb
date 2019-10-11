@@ -371,8 +371,8 @@ class HEScoreRuleset
                      perimeter_insulation_depth: 1, # FIXME: Hard-coded
                      under_slab_insulation_width: 0,
                      depth_below_grade: slab_values[:depth_below_grade],
-                     carpet_fraction: 0.5, # FIXME: Hard-coded
-                     carpet_r_value: 2, # FIXME: Hard-coded
+                     carpet_fraction: 1.0,
+                     carpet_r_value: 2.1,
                      perimeter_insulation_r_value: slab_values[:perimeter_insulation_r_value],
                      under_slab_insulation_r_value: 0)
     end
