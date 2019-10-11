@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-23T15:31:02-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-10-10T08:19:57-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -265,8 +265,16 @@
             <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
             <Location>living space</Location>
             <TankVolume>50.0</TankVolume>
-            <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <RelatedHVACSystem idref='HeatingSystem-bad'/>
+            <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
+            <RelatedHVACSystem idref='HeatingSystem'/>
+          </WaterHeatingSystem>
+          <WaterHeatingSystem>
+            <SystemIdentifier id='WaterHeater2'/>
+            <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
+            <Location>living space</Location>
+            <TankVolume>50.0</TankVolume>
+            <FractionDHWLoadServed>0.5</FractionDHWLoadServed>
+            <RelatedHVACSystem idref='HeatingSystem'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>
