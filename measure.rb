@@ -1766,6 +1766,7 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, building, weather, spaces)
+    related_hvac_list = [] # list of hvac systems refered in water heating system "RelatedHvac" element
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1890,11 +1891,26 @@ class OSModel
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
 
+        sys_id = water_heating_system_values[:id]
+        @dhw_map[sys_id] = []
+
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
         jacket_r = water_heating_system_values[:jacket_r_value]
+
+        uses_desuperheater = water_heating_system_values[:uses_desuperheater]
+        relatedhvac = water_heating_system_values[:related_hvac]
+
+        if uses_desuperheater
+          if not related_hvac_list.include? relatedhvac
+            related_hvac_list << relatedhvac
+            desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
+          else
+            fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
+          end
+        end
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1916,9 +1932,6 @@ class OSModel
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
-        sys_id = water_heating_system_values[:id]
-        @dhw_map[sys_id] = []
-
         if wh_type == "storage water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
@@ -1933,7 +1946,7 @@ class OSModel
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj,
-                                           @nbeds, @dhw_map, sys_id, jacket_r)
+                                           @nbeds, @dhw_map, sys_id, desuperheater_clg_coil, jacket_r)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1949,7 +1962,7 @@ class OSModel
           success = Waterheater.apply_tankless(model, runner, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                               @nbeds, @dhw_map, sys_id)
+                                               @nbeds, @dhw_map, sys_id, desuperheater_clg_coil)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -2010,6 +2023,25 @@ class OSModel
     return false if not success
 
     return true
+  end
+
+  def self.get_desuperheatercoil(hvac_map, relatedhvac, wh_id)
+    # search for the related cooling coil object for desuperheater
+
+    # Supported cooling coil options
+    clg_coil_supported = [OpenStudio::Model::CoilCoolingDXSingleSpeed, OpenStudio::Model::CoilCoolingDXMultiSpeed, OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit]
+    if hvac_map.keys.include? relatedhvac
+      hvac_map[relatedhvac].each do |comp|
+        clg_coil_supported.each do |coiltype|
+          if comp.is_a? coiltype
+            return comp
+          end
+        end
+      end
+      fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{wh_id}' is not currently supported for desuperheaters."
+    else
+      fail "RelatedHVACSystem '#{relatedhvac}' not found for water heating system '#{wh_id}'."
+    end
   end
 
   def self.add_cooling_system(runner, model, building)
