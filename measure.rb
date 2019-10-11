@@ -289,9 +289,6 @@ class OSModel
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
 
-    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
-    @living_zone = @living_space.thermalZone.get
-
     success = add_cooling_system(runner, model, building)
     return false if not success
 
@@ -676,9 +673,10 @@ class OSModel
     # zero out solar absorptance in conditioned basement
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       # zero out solar absorptance for some surfaces
-      mat_share = false
       const = cond_bsmnt_surface.construction.get
       exterior_material = const.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
+      # check if target surface is sharing its exterior material object with other surfaces
+      # if so, need to clone the material and make changes there, then reassign it to target surface
       mat_share = if_share_mat(model, cond_bsmnt_surface, exterior_material)
       if mat_share
         # create new construction for these surfaces
@@ -696,21 +694,11 @@ class OSModel
   def self.if_share_mat(model, surface1, mat1)
     # determine if mat1 used by surface1 is shared through model
     const = surface1.construction.get
-    all_surfaces = model.getSurfaces | model.getSubSurfaces | model.getInternalMassDefinitions
-    all_surfaces.each do |surface|
-      next if surface == surface1
-      if surface.construction.get == const
-        return true
-      else
-        surface.construction.get.to_LayeredConstruction.get.layers.each do |layer|
-          layer_mat = layer.to_Material.get
-          if layer_mat == mat1
-            return true
-          end
-        end
-      end
+    if const.directUseCount == 1 and mat1.directUseCount == 1
+      return false
+    else
+      return true
     end
-    return false
   end
 
   def self.create_space_and_zone(model, spaces, space_type)
@@ -3654,6 +3642,7 @@ class OSModel
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+      @cond_bsmnt_surfaces << surface
     elsif ["crawlspace - vented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? exterior_adjacent_to

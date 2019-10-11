@@ -1006,8 +1006,6 @@ class Constructions
   def self.apply_partition_walls(runner, model, surfaces, constr_name,
                                  drywall_thick_in, frac_of_ffa, basement_frac_of_cfa, cond_base_surfaces, living_space)
 
-    return true if living_space.nil?
-
     imdefs = []
 
     # Determine existing partition wall mass in space
@@ -1031,7 +1029,7 @@ class Constructions
     if addtl_surface_area_base > 0
       # Add remaining partition walls within spaces (those without geometric representation)
       # as internal mass object.
-      obj_name = "#{living_space.name.to_s} Base Partition"
+      obj_name = "#{living_space.name.to_s} Basement Partition"
       imdef = create_os_int_mass_and_def(runner, model, obj_name, living_space, addtl_surface_area_base)
       cond_base_surfaces << imdef
       imdefs << imdef
@@ -1103,7 +1101,7 @@ class Constructions
         end
         # basement furniture mass
         if base_surface_area > 0
-          base_obj_name = mass_obj_name_space + " base"
+          base_obj_name = mass_obj_name_space + " basement"
           imdef = create_os_int_mass_and_def(runner, model, base_obj_name, space, base_surface_area)
           cond_base_surfaces << imdef
           imdefs << imdef
