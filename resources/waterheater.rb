@@ -723,8 +723,8 @@ class Waterheater
   end
 
   def self.calc_water_heater_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
-    # Calculate the capacity of the water heater based on the fuel type and number
-    # of bedrooms and bathrooms in a home. Returns the capacity in kBtu/hr.
+    # Calculate the capacity of the water heater based on the fuel type and number of bedrooms and bathrooms in a home
+    # returns the capacity in kBtu/hr
 
     if num_baths.nil?
       num_baths = get_default_num_bathrooms(num_beds)
@@ -734,33 +734,39 @@ class Waterheater
     num_baths /= num_water_heaters.to_f
 
     if fuel != Constants.FuelTypeElectric
-      if num_beds <= 4
-        cap_kbtuh = 40
+      if num_beds <= 3
+        input_power = 36
+      elsif num_beds == 4
+        if num_baths <= 2.5
+          input_power = 36
+        else
+          input_power = 38
+        end
       elsif num_beds == 5
-        cap_kbtuh = 47
+        input_power = 47
       else
-        cap_kbtuh = 50
+        input_power = 50
       end
-      return cap_kbtuh
+      return input_power
     else
       if num_beds == 1
-        cap_kw = 2.5
+        input_power = UnitConversions.convert(2.5, "kW", "kBtu/hr")
       elsif num_beds == 2
         if num_baths <= 1.5
-          cap_kw = 3.5
+          input_power = UnitConversions.convert(3.5, "kW", "kBtu/hr")
         else
-          cap_kw = 4.5
+          input_power = UnitConversions.convert(4.5, "kW", "kBtu/hr")
         end
       elsif num_beds == 3
         if num_baths <= 1.5
-          cap_kw = 4.5
+          input_power = UnitConversions.convert(4.5, "kW", "kBtu/hr")
         else
-          cap_kw = 5.5
+          input_power = UnitConversions.convert(5.5, "kW", "kBtu/hr")
         end
       else
-        cap_kw = 5.5
+        input_power = UnitConversions.convert(5.5, "kW", "kBtu/hr")
       end
-      return UnitConversions.convert(cap_kw, "kW", "kBtu/hr")
+      return input_power # kBtu/hr
     end
   end
 
