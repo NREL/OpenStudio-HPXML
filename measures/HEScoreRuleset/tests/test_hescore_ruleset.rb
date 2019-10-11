@@ -24,7 +24,7 @@ class HEScoreRulesetTest < MiniTest::Test
       _test_schema_validation(this_dir, xml)
       _test_measure(args_hash)
       _test_schema_validation(this_dir, xml.gsub('.xml', '.xml.out'))
-      _test_assembly_efective_rvalues(args_hash)
+      _test_assembly_effective_rvalues(args_hash)
 
       FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
     end
@@ -49,6 +49,8 @@ class HEScoreRulesetTest < MiniTest::Test
       assert([90, 270].include?(neighbor_values[:azimuth]))
       assert_in_epsilon(neighbor_values[:height], 12.0, 0.000001)
     end
+
+    FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
   end
 
   def test_infiltration
@@ -196,14 +198,33 @@ class HEScoreRulesetTest < MiniTest::Test
     xml = File.absolute_path("#{this_dir}/../../../workflow/sample_files/Floor2_conditioned_basement_hpxml.xml")
     hpxml_doc = XMLHelper.parse_file(xml)
     hpxml = hpxml_doc.root
+
+    orig_details = hpxml_doc.elements["/HPXML/Building/BuildingDetails"]
+    hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml_doc.elements["/HPXML"])
+    hpxml_values[:eri_calculation_version] = "2014AEG" # FIXME: Verify
+    hpxml_doc2 = HPXML.create_hpxml(**hpxml_values)
+    hpxml2 = hpxml_doc.elements["HPXML"]
+    HEScoreRuleset.set_summary(orig_details, hpxml2)
+    bldg_length_side = HEScoreRuleset.instance_variable_get(:@bldg_length_side)
+    bldg_length_front = HEScoreRuleset.instance_variable_get(:@bldg_length_front)
+
     slab_foundation = hpxml.elements['//Foundation[1]']
     slab_area = get_foundation_area(slab_foundation)
     assert_in_epsilon(slab_area, 600.0, 0.01)
     basement_foundation = hpxml.elements['//Foundation[2]']
     basement_area = get_foundation_area(basement_foundation)
     assert_in_epsilon(basement_area, 400.0, 0.01)
+
+    slab_perimeter = HEScoreRuleset.get_foundation_perimeter(slab_foundation)
+    basement_perimeter = HEScoreRuleset.get_foundation_perimeter(basement_foundation)
+    total_area = slab_area + basement_area
+    slab_area_frac = slab_area / total_area
+    bsmt_area_frac = basement_area / total_area
+    assert_in_epsilon(slab_perimeter, bldg_length_side + 2 * bldg_length_front * slab_area_frac, 0.01)
+    assert_in_epsilon(basement_perimeter, bldg_length_side + 2 * bldg_length_front * bsmt_area_frac, 0.01)
+    assert_in_epsilon(slab_perimeter + basement_perimeter, HEScoreRuleset.instance_variable_get(:@bldg_perimeter), 0.01)
   end
-  
+
   def test_hvac_lookup
     small_number = 0.00000000001
     eff1 = lookup_hvac_efficiency(2010, "central air conditioner", "electricity", "SEER")
@@ -385,7 +406,7 @@ class HEScoreRulesetTest < MiniTest::Test
     assert_equal(0, errors.size)
   end
 
-  def _test_assembly_efective_rvalues(args_hash)
+  def _test_assembly_effective_rvalues(args_hash)
     in_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
     out_doc = REXML::Document.new(File.read(args_hash['hpxml_output_path']))
 
