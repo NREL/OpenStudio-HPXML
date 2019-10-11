@@ -266,10 +266,8 @@ class HEScoreRuleset
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
         if ["basement - unconditioned", "basement - conditioned"].include? fnd_adjacent
           fndwall_height = 8.0
-          depth_below_grade = fndwall_height - 1.0
         else
           fndwall_height = 2.5
-          depth_below_grade = fndwall_height - 1.0
         end
 
         HPXML.add_foundation_wall(hpxml: hpxml,
@@ -279,7 +277,7 @@ class HEScoreRuleset
                                   height: fndwall_height,
                                   area: fndwall_height * get_foundation_perimeter(orig_foundation),
                                   thickness: 10,
-                                  depth_below_grade: depth_below_grade,
+                                  depth_below_grade: fndwall_height - 1.0,
                                   insulation_r_value: fndwall_values[:insulation_r_value],
                                   insulation_distance_to_bottom: fndwall_height
                                 )
@@ -349,7 +347,6 @@ class HEScoreRuleset
         slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
         slab_values[:area] = framefloor_values[:area]
         slab_values[:perimeter_insulation_r_value] = 0
-        slab_values[:depth_below_grade] = 7  # 8ft basement wall with 1ft above grade.
         slab_values[:thickness] = 4
       elsif fnd_type == "Crawlspace"
         framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
@@ -360,7 +357,6 @@ class HEScoreRuleset
         slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
         slab_values[:area] = framefloor_values[:area]
         slab_values[:perimeter_insulation_r_value] = 0
-        slab_values[:depth_below_grade] = 1
         slab_values[:thickness] = 0
       else
         fail "Unexpected foundation type: #{fnd_type}"
