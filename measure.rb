@@ -1268,6 +1268,8 @@ class OSModel
 
         ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
         ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
+        next if ag_net_area < 0.1
+
         length = ag_net_area / ag_height
         z_origin = -1 * ag_height
         azimuth = @default_azimuth
