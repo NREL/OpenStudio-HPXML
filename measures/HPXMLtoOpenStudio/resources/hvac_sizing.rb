@@ -91,7 +91,7 @@ class HVACSizing
 
       # Display debug info
       if show_debug_info
-        display_hvac_final_values_results(runner, hvac_final_values)
+        display_hvac_final_values_results(runner, hvac_final_values, hvac)
       end
     end
 
@@ -1917,6 +1917,15 @@ class HVACSizing
       hvac_final_values.Heat_Capacity_Supp = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "ton", "Btu/hr")
     end
 
+    # Prevent errors of "has no air flow"
+    min_air_flow = 3.0 # cfm; E+ minimum is 0.001 m^3/s"
+    if hvac_final_values.Heat_Airflow > 0
+      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max
+    end
+    if hvac_final_values.Cool_Airflow > 0
+      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max
+    end
+
     return hvac_final_values
   end
 
@@ -3727,8 +3736,8 @@ class HVACSizing
     end
   end
 
-  def self.display_hvac_final_values_results(runner, hvac_final_values)
-    s = "Final Results:"
+  def self.display_hvac_final_values_results(runner, hvac_final_values, hvac)
+    s = "Final Results for #{hvac.Objects[0].name.to_s}:"
     loads = [
       :Heat_Load, :Heat_Load_Ducts,
       :Cool_Load_Lat, :Cool_Load_Sens,
