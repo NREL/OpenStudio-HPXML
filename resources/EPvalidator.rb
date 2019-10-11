@@ -418,7 +418,7 @@ class EnergyPlusValidator
         "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater' or WaterHeaterType='heat pump water heater' or WaterHeaterType='space-heating boiler with storage tank' or WaterHeaterType='space-heating boiler with tankless coil']" => one, # See [WHType=Tank] or [WHType=Tankless] or [WHType=HeatPump] or [WHType=Indirect] or [WHType=CombiTankless]
         "[Location='living space' or Location='basement - unconditioned' or Location='basement - conditioned' or Location='attic - unvented' or Location='attic - vented' or Location='garage' or Location='crawlspace - unvented' or Location='crawlspace - vented' or Location='other exterior']" => one,
         "FractionDHWLoadServed" => one,
-        "HasDesuperheater" => zero_or_one, # See [Desuperheater]
+        "UsesDesuperheater" => zero_or_one, # See [Desuperheater]
       },
 
       ## [WHType=Tank]
@@ -452,14 +452,19 @@ class EnergyPlusValidator
 
       ## [WHType=Indirect]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with storage tank']" => {
-        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
+        "RelatedHVACSystem" => one, # HeatingSystem (boiler)
         "TankVolume" => one,
         "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
       },
 
       ## [WHType=CombiTankless]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType='space-heating boiler with tankless coil']" => {
-        "RelatedHVACSystem" => one, # Expect HeatingSystem (boiler)
+        "RelatedHVACSystem" => one, # HeatingSystem (boiler)
+      },
+
+      ## [Desuperheater]
+      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[UsesDesuperheater='true']" => {
+        "RelatedHVACSystem" => one, # HeatPump or CoolingSystem
       },
 
       ## [Desuperheater]

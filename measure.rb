@@ -3069,7 +3069,8 @@ class OSModel
                        OutputVars.WaterHeatingNaturalGas,
                        OutputVars.WaterHeatingOtherFuel,
                        OutputVars.WaterHeatingLoad,
-                       OutputVars.WaterHeatingLoadTankLosses]
+                       OutputVars.WaterHeatingLoadTankLosses,
+                       OutputVars.WaterHeaterLoadDesuperheater]
 
     # Remove objects that are not referenced by output vars and are not
     # EMS output vars.
@@ -4031,6 +4032,10 @@ class OutputVars
   def self.WaterHeatingLoadTankLosses
     return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Heat Loss Energy'],
              'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Heat Loss Energy'] }
+  end
+
+  def self.WaterHeaterLoadDesuperheater
+    return { 'OpenStudio::Model::CoilWaterHeatingDesuperheater' => ['Water Heater Heating Energy'] }
   end
 end
 
