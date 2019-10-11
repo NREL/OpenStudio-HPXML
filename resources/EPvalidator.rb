@@ -467,11 +467,6 @@ class EnergyPlusValidator
         "RelatedHVACSystem" => one, # HeatPump or CoolingSystem
       },
 
-      ## [Desuperheater]
-      "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[HasDesuperheater='true']" => {
-        "RelatedHVACSystem" => one, # HeatPump (ground-to-air, air-to-air) or CoolingSystem (central air conditioner)
-      },
-
       # [HotWaterDistribution]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution" => {
         "SystemIdentifier" => one, # Required by HPXML schema
