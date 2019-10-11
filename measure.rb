@@ -635,18 +635,24 @@ class OSModel
     # Check every thermal zone has:
     # 1. At least one floor surface
     # 2. At least one roofceiling surface
-    # 3. At least one surface adjacent to outside/ground
+    # 3. At least one wall surface (except for attics)
+    # 4. At least one surface adjacent to outside/ground/adiabatic
     model.getThermalZones.each do |zone|
       n_floors = 0
       n_roofceilings = 0
+      n_walls = 0
       n_exteriors = 0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
-          if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
+          puts "#{zone.name.to_s} #{surface.surfaceType.downcase}"
+          if ["outdoors", "foundation", "adiabatic"].include? surface.outsideBoundaryCondition.downcase
             n_exteriors += 1
           end
           if surface.surfaceType.downcase == "floor"
             n_floors += 1
+          end
+          if surface.surfaceType.downcase == "wall"
+            n_walls += 1
           end
           if surface.surfaceType.downcase == "roofceiling"
             n_roofceilings += 1
@@ -655,15 +661,19 @@ class OSModel
       end
 
       if n_floors == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one floor surface.")
+        runner.registerError("'#{zone.name}' must have at least one floor surface.")
         return false
       end
       if n_roofceilings == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one roof/ceiling surface.")
+        runner.registerError("'#{zone.name}' must have at least one roof/ceiling surface.")
+        return false
+      end
+      if n_walls == 0 and not [Constants.SpaceTypeUnventedAttic, Constants.SpaceTypeVentedAttic].include? zone.name.to_s
+        runner.registerError("'#{zone.name}' must have at least one wall surface.")
         return false
       end
       if n_exteriors == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one surface adjacent to outside/ground.")
+        runner.registerError("'#{zone.name}' must have at least one surface adjacent to outside/ground.")
         return false
       end
     end
@@ -1101,7 +1111,7 @@ class OSModel
         z_origin = @foundation_top
       end
 
-      if framefloor_values[:exterior_adjacent_to].include? "attic"
+      if framefloor_values[:exterior_adjacent_to].include? "attic" or framefloor_values[:interior_adjacent_to].include? "living space"
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
       else
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
