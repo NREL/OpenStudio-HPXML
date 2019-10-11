@@ -3936,9 +3936,9 @@ def is_adjacent_to_conditioned(adjacent_to)
 end
 
 def hpxml_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
-  if ["attic"].include? floor_interior_adjacent_to
+  if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
     return true
-  elsif ["attic", "other housing unit"].include? floor_exterior_adjacent_to
+  elsif ["attic - vented", "attic - unvented", "other housing unit"].include? floor_exterior_adjacent_to
     # Note: There's no way to know if other housing unit is a floor below this unit
     #       or a ceiling above this unit; we assume the latter.
     return true
