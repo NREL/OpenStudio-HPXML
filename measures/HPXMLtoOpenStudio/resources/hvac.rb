@@ -454,7 +454,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
 
     # _processSystemAir
 
@@ -610,7 +610,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
 
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
@@ -779,7 +779,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
 
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
@@ -982,7 +982,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
 
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
@@ -1309,7 +1309,8 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, pump, [htg_coil, htg_supp_coil], [clg_coil])
 
     air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     air_loop_unitary.setName(obj_name + " unitary system")
@@ -1368,17 +1369,6 @@ class HVAC
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoGSHPUTubeSpacingType, u_tube_spacing_type)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameGroundSourceHeatPump)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameGroundSourceHeatPump)
-
-    htg_objects = []
-    clg_objects = []
-    hvac_map[sys_id].each do |hvac_object|
-      if hvac_object.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
-        htg_objects << hvac_object
-      elsif hvac_object.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
-        clg_objects << hvac_object
-      end
-    end
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, pump, htg_objects, clg_objects)
 
     return true
   end
