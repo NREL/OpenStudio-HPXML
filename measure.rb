@@ -644,7 +644,6 @@ class OSModel
       n_exteriors = 0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
-          puts "#{zone.name.to_s} #{surface.surfaceType.downcase}"
           if ["outdoors", "foundation", "adiabatic"].include? surface.outsideBoundaryCondition.downcase
             n_exteriors += 1
           end
@@ -1111,7 +1110,7 @@ class OSModel
         z_origin = @foundation_top
       end
 
-      if framefloor_values[:exterior_adjacent_to].include? "attic" or framefloor_values[:interior_adjacent_to].include? "living space"
+      if framefloor_values[:exterior_adjacent_to].include? "attic" or framefloor_values[:exterior_adjacent_to].include? "other housing unit"
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
       else
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
@@ -1486,8 +1485,6 @@ class OSModel
 
     addtl_cfa = cfa - model_cfa
     return true unless addtl_cfa > 0
-
-    runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_cfa.to_s} ft^2 to preserve building total conditioned floor area.")
 
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
