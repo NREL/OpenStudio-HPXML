@@ -1110,7 +1110,7 @@ class OSModel
         z_origin = @foundation_top
       end
 
-      if framefloor_values[:exterior_adjacent_to].include? "attic" or framefloor_values[:exterior_adjacent_to].include? "other housing unit"
+      if hpxml_floor_is_ceiling(framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to])
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
       else
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
@@ -3936,9 +3936,11 @@ def is_adjacent_to_conditioned(adjacent_to)
 end
 
 def hpxml_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
-  if floor_interior_adjacent_to.include? "attic"
+  if ["attic"].include? floor_interior_adjacent_to
     return true
-  elsif floor_exterior_adjacent_to.include? "attic"
+  elsif ["attic", "other housing unit"].include? floor_exterior_adjacent_to
+    # Note: There's no way to know if other housing unit is a floor below this unit
+    #       or a ceiling above this unit; we assume the latter.
     return true
   end
 
