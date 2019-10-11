@@ -94,7 +94,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = "2.8.1"
+    os_version = "2.9.0"
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -527,8 +527,11 @@ class OSModel
         min_azimuth_diff = diff2
       end
     end
-    nsides = (360.0 / min_azimuth_diff).ceil
-    nsides = 4 if nsides < 4 # assume rectangle at the minimum
+    if min_azimuth_diff > 0
+      nsides = [(360.0 / min_azimuth_diff).ceil, 4].max # assume rectangle at the minimum
+    else
+      nsides = 4
+    end
     explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, "deg", "rad")))
 
     success = add_neighbors(runner, model, building, max_azimuth_length)
@@ -808,7 +811,7 @@ class OSModel
       net_area -= @subsurface_areas_by_surface[surface_id]
     end
 
-    if net_area <= 0
+    if net_area < 0
       fail "Calculated a negative net surface area for #{surface_type} '#{surface_id}'."
     end
 
@@ -894,6 +897,8 @@ class OSModel
       roof_values = HPXML.get_roof_values(roof: roof)
 
       net_area = net_surface_area(roof_values[:area], roof_values[:id], "Roof")
+      next if net_area < 0.1
+
       width = Math::sqrt(net_area)
       length = net_area / width
       tilt = roof_values[:pitch] / 12.0
@@ -968,6 +973,8 @@ class OSModel
       wall_values = HPXML.get_wall_values(wall: wall)
 
       net_area = net_surface_area(wall_values[:area], wall_values[:id], "Wall")
+      next if net_area < 0.1
+
       height = 8.0 * @ncfl_ag
       length = net_area / height
       z_origin = @foundation_top
@@ -1249,7 +1256,7 @@ class OSModel
       kiva_slabs.each do |kiva_slabs_list|
         # Single combined foundation slab surface
         slab = kiva_slabs_list[0]
-        next unless no_wall_slab_exp_perim[slab] > 0
+        next unless no_wall_slab_exp_perim[slab] > 0.1
 
         slab_values = HPXML.get_slab_values(slab: slab)
         z_origin = 0
@@ -1465,11 +1472,6 @@ class OSModel
 
         model_cfa += UnitConversions.convert(surface.grossArea, "m^2", "ft^2").round(2)
       end
-    end
-
-    if model_cfa > cfa
-      runner.registerError("Sum of conditioned floor surface areas #{model_cfa.to_s} is greater than ConditionedFloorArea specified #{cfa.to_s}.")
-      return false
     end
 
     addtl_cfa = cfa - model_cfa
@@ -1772,6 +1774,7 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, building, weather, spaces)
+    related_hvac_list = [] # list of hvac systems refered in water heating system "RelatedHvac" element
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1896,11 +1899,26 @@ class OSModel
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
 
+        sys_id = water_heating_system_values[:id]
+        @dhw_map[sys_id] = []
+
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
         jacket_r = water_heating_system_values[:jacket_r_value]
+
+        uses_desuperheater = water_heating_system_values[:uses_desuperheater]
+        relatedhvac = water_heating_system_values[:related_hvac]
+
+        if uses_desuperheater
+          if not related_hvac_list.include? relatedhvac
+            related_hvac_list << relatedhvac
+            desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
+          else
+            fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
+          end
+        end
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1916,14 +1934,11 @@ class OSModel
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
         runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
-        if ec_adj != 1
+        if (ec_adj - 1.0).abs > 0.001
           runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
         end
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
-
-        sys_id = water_heating_system_values[:id]
-        @dhw_map[sys_id] = []
 
         if wh_type == "storage water heater"
 
@@ -1939,7 +1954,7 @@ class OSModel
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj,
-                                           @nbeds, @dhw_map, sys_id, jacket_r)
+                                           @nbeds, @dhw_map, sys_id, desuperheater_clg_coil, jacket_r)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1955,7 +1970,7 @@ class OSModel
           success = Waterheater.apply_tankless(model, runner, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                               @nbeds, @dhw_map, sys_id)
+                                               @nbeds, @dhw_map, sys_id, desuperheater_clg_coil)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -2016,6 +2031,25 @@ class OSModel
     return false if not success
 
     return true
+  end
+
+  def self.get_desuperheatercoil(hvac_map, relatedhvac, wh_id)
+    # search for the related cooling coil object for desuperheater
+
+    # Supported cooling coil options
+    clg_coil_supported = [OpenStudio::Model::CoilCoolingDXSingleSpeed, OpenStudio::Model::CoilCoolingDXMultiSpeed, OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit]
+    if hvac_map.keys.include? relatedhvac
+      hvac_map[relatedhvac].each do |comp|
+        clg_coil_supported.each do |coiltype|
+          if comp.is_a? coiltype
+            return comp
+          end
+        end
+      end
+      fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{wh_id}' is not currently supported for desuperheaters."
+    else
+      fail "RelatedHVACSystem '#{relatedhvac}' not found for water heating system '#{wh_id}'."
+    end
   end
 
   def self.add_cooling_system(runner, model, building)
@@ -2197,7 +2231,7 @@ class OSModel
                                                   @hvac_map, sys_id)
           return false if not success
 
-        elsif htg_type == "Stove"
+        elsif htg_type == "Stove" or htg_type == "PortableHeater"
 
           efficiency = heating_system_values[:heating_efficiency_percent]
           airflow_rate = 125.0 # cfm/ton; doesn't affect energy consumption
@@ -3038,11 +3072,13 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
-                       OutputVars.WaterHeatingCombiBoilerHeatExchanger,
-                       OutputVars.WaterHeatingCombiBoiler,
+                       OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
+                       OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingNaturalGas,
                        OutputVars.WaterHeatingOtherFuel,
-                       OutputVars.WaterHeatingLoad]
+                       OutputVars.WaterHeatingLoad,
+                       OutputVars.WaterHeatingLoadTankLosses,
+                       OutputVars.WaterHeaterLoadDesuperheater]
 
     # Remove objects that are not referenced by output vars and are not
     # EMS output vars.
@@ -3516,7 +3552,7 @@ class OSModel
       end
     end
 
-    if (assembly_r - constr_r).abs > 0.01
+    if (assembly_r - constr_r).abs > 0.05
       fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
     end
   end
@@ -3999,6 +4035,15 @@ class OutputVars
 
   def self.WaterHeatingLoad
     return { 'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'] }
+  end
+
+  def self.WaterHeatingLoadTankLosses
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Heat Loss Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Heat Loss Energy'] }
+  end
+
+  def self.WaterHeaterLoadDesuperheater
+    return { 'OpenStudio::Model::CoilWaterHeatingDesuperheater' => ['Water Heater Heating Energy'] }
   end
 end
 
