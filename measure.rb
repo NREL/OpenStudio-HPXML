@@ -678,8 +678,8 @@ class OSModel
       innermost_material = layerd_const.layers[layerd_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       # check if target surface is sharing its exterior material object with other surfaces
       # if so, need to clone the material and make changes there, then reassign it to target surface
-      mat_share = !(innermost_material.directUseCount == 1)
-      const_share = !(const.directUseCount == 1)
+      mat_share = (innermost_material.directUseCount != 1)
+      const_share = (const.directUseCount != 1)
       if const_share
         # create new construction + new material for these surfaces
         new_const = const.clone.to_Construction.get
