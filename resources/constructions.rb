@@ -1531,7 +1531,7 @@ class Constructions
 
       # CoolingShade
       sm = OpenStudio::Model::Shade.new(model)
-      sm.setName("CoolingShade")
+      sm.setName("#{type}CoolingShade")
       sm.setSolarTransmittance(total_shade_trans)
       sm.setSolarReflectance(total_shade_ref)
       sm.setVisibleTransmittance(total_shade_trans)
