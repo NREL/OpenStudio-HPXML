@@ -547,7 +547,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Walls
-    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="outside"]]') do |wall|
+    bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
