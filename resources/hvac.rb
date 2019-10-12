@@ -1450,13 +1450,6 @@ class HVAC
                          attached_cooling_system, control_zone,
                          hvac_map, sys_id)
 
-    # Parasitic Electricity (Source: DOE. (2007). Technical Support Document: Energy Efficiency Program for Consumer Products: "Energy Conservation Standards for Residential Furnaces and Boilers". www.eere.energy.gov/buildings/appliance_standards/residential/furnaces_boilers.html)
-    furnaceParasiticElecDict = { Constants.FuelTypeGas => 76.0, # W during operation
-                                 Constants.FuelTypePropane => 76.0,
-                                 Constants.FuelTypeOil => 220.0,
-                                 Constants.FuelTypeElectric => 0.0 }
-    aux_elec = furnaceParasiticElecDict[fuel_type]
-
     # _processAirSystem
 
     obj_name = Constants.ObjectNameFurnace
@@ -1469,7 +1462,7 @@ class HVAC
     else
       htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
       htg_coil.setGasBurnerEfficiency(afue)
-      htg_coil.setParasiticElectricLoad(aux_elec)
+      htg_coil.setParasiticElectricLoad(0)
       htg_coil.setParasiticGasLoad(0)
       htg_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
     end
@@ -1622,13 +1615,6 @@ class HVAC
       end
     end
 
-    # Parasitic Electricity (Source: DOE. (2007). Technical Support Document: Energy Efficiency Program for Consumer Products: "Energy Conservation Standards for Residential Furnaces and Boilers". www.eere.energy.gov/buildings/appliance_standards/residential/furnaces_boilers.html)
-    boilerParasiticElecDict = { Constants.FuelTypeGas => 76.0, # W during operation
-                                Constants.FuelTypePropane => 76.0,
-                                Constants.FuelTypeOil => 220.0,
-                                Constants.FuelTypeElectric => 0.0 }
-    boiler_aux = boilerParasiticElecDict[fuel_type]
-
     # _processCurvesBoiler
 
     boiler_eff_curve = get_boiler_curve(model, system_type == Constants.BoilerTypeCondensing)
@@ -1693,7 +1679,7 @@ class HVAC
     boiler.setBoilerFlowMode("LeavingSetpointModulated")
     boiler.setOptimumPartLoadRatio(1.0)
     boiler.setWaterOutletUpperTemperatureLimit(99.9)
-    boiler.setParasiticElectricLoad(boiler_aux)
+    boiler.setParasiticElectricLoad(0)
     hvac_map[sys_id] << boiler
 
     if system_type == Constants.BoilerTypeCondensing and oat_reset_enabled
