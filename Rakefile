@@ -108,7 +108,7 @@ def create_hpxmls
     'base-dhw-jacket-hpwh.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-enclosure-2stories.xml' => 'base.xml',
     'base-enclosure-2stories-garage.xml' => 'base-enclosure-2stories.xml',
-    'base-enclosure-adiabatic-surfaces.xml' => 'base.xml',
+    'base-enclosure-adiabatic-surfaces.xml' => 'base-foundation-ambient.xml',
     'base-enclosure-garage.xml' => 'base.xml',
     'base-enclosure-infil-cfm50.xml' => 'base.xml',
     'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
@@ -837,12 +837,6 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :solar_absorptance => 0.7,
                            :emittance => 0.92,
                            :insulation_assembly_r_value => 23.0 }
-  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
-    rim_joists_values << rim_joists_values[0].dup
-    rim_joists_values[0][:area] *= 0.25
-    rim_joists_values[-1][:area] *= 0.75
-    rim_joists_values[-1][:id] += "Adiabatic"
-    rim_joists_values[-1][:exterior_adjacent_to] = "other housing unit"
   end
   return rim_joists_values
 end
@@ -1054,12 +1048,6 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     foundation_walls_values = []
-  elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
-    foundation_walls_values << foundation_walls_values[0].dup
-    foundation_walls_values[0][:area] *= 0.25
-    foundation_walls_values[-1][:area] *= 0.75
-    foundation_walls_values[-1][:id] += "Adiabatic"
-    foundation_walls_values[-1][:exterior_adjacent_to] = "other housing unit"
   elsif ['base-foundation-walkout-basement.xml'].include? hpxml_file
     foundation_walls_values = [{ :id => "FoundationWall1",
                                  :exterior_adjacent_to => "ground",
@@ -1200,7 +1188,12 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :exterior_adjacent_to => "other housing unit",
                             :interior_adjacent_to => "living space",
                             :area => 1350,
-                            :insulation_assembly_r_value => 39.3 }]
+                            :insulation_assembly_r_value => 2.1 },
+                          { :id => "FloorBelowAdiabatic",
+                            :exterior_adjacent_to => "other housing unit",
+                            :interior_adjacent_to => "living space",
+                            :area => 1350,
+                            :insulation_assembly_r_value => 2.1 }]
   end
   return framefloors_values
 end

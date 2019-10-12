@@ -93,7 +93,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                        "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
-                            'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least two floor/roof/ceiling surfaces."],
+                            'missing-surfaces.xml' => ["'garage' must have at least one floor surface."],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'Roof'."],
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
@@ -517,7 +517,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                                     'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
                                     'base-enclosure-garage.xml' => 2,                 # additional instance for garage
                                     'base-enclosure-garage-autosize.xml' => 2,        # additional instance for garage
-                                    'base-enclosure-adiabatic-surfaces.xml' => 2,     # additional instance for adiabatic construction
+                                    'base-enclosure-adiabatic-surfaces.xml' => 0,     # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10 }
 
