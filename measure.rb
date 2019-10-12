@@ -674,31 +674,27 @@ class OSModel
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       # zero out solar absorptance for some surfaces
       const = cond_bsmnt_surface.construction.get
-      exterior_material = const.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
+      layerd_const = const.to_LayeredConstruction.get
+      innermost_material = layerd_const.layers[layerd_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       # check if target surface is sharing its exterior material object with other surfaces
       # if so, need to clone the material and make changes there, then reassign it to target surface
-      mat_share = if_share_mat(model, cond_bsmnt_surface, exterior_material)
-      if mat_share
-        # create new construction for these surfaces
+      mat_share = !(innermost_material.directUseCount == 1)
+      const_share = !(const.directUseCount == 1)
+      if const_share
+        # create new construction + new material for these surfaces
         new_const = const.clone.to_Construction.get
         cond_bsmnt_surface.setConstruction(new_const)
-        exterior_material = exterior_material.clone.to_StandardOpaqueMaterial.get
-        new_const.to_LayeredConstruction.get.setLayer(0, exterior_material)
+        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        new_const.to_LayeredConstruction.get.setLayer(layerd_const.numLayers() - 1, innermost_material)
+      elsif mat_share
+        # create new material for existing unique construction
+        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        const.to_LayeredConstruction.get.setLayer(layerd_const.numLayers() - 1, innermost_material)
       end
-      exterior_material.setSolarAbsorptance(0.0)
-      exterior_material.setVisibleAbsorptance(0.0)
+      innermost_material.setSolarAbsorptance(0.0)
+      innermost_material.setVisibleAbsorptance(0.0)
     end
     return true
-  end
-
-  def self.if_share_mat(model, surface1, mat1)
-    # determine if mat1 used by surface1 is shared through model
-    const = surface1.construction.get
-    if const.directUseCount == 1 and mat1.directUseCount == 1
-      return false
-    else
-      return true
-    end
   end
 
   def self.create_space_and_zone(model, spaces, space_type)
