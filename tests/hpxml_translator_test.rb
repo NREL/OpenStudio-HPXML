@@ -928,6 +928,50 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     assert_equal(bldg_details.elements["Lighting"].nil?, !found_ltg_energy)
 
+    # Natural Gas check
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil?
+      assert(results[["Natural Gas", "Heating", "General", "GJ"]] > 0)
+    else
+      assert(results[["Natural Gas", "Heating", "General", "GJ"]].nil?)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='natural gas']"].nil?
+      assert(results[["Natural Gas", "Water Systems", "General", "GJ"]] > 0)
+    else
+      assert(results[["Natural Gas", "Water Systems", "General", "GJ"]].nil?)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='natural gas']"].nil?
+      assert(results[["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"]] > 0)
+    else
+      assert(results[["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"]].nil?)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='natural gas']"].nil?
+      assert(results[["Natural Gas", "Interior Equipment", "cooking range", "GJ"]] > 0)
+    else
+      assert(results[["Natural Gas", "Interior Equipment", "cooking range", "GJ"]].nil?)
+    end
+
+    # Additional Fuel check
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil?
+      assert(results[["Additional Fuel", "Heating", "General", "GJ"]] > 0)
+    else
+      assert(results[["Additional Fuel", "Heating", "General", "GJ"]].nil?)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert(results[["Additional Fuel", "Water Systems", "General", "GJ"]] > 0)
+    else
+      assert(results[["Additional Fuel", "Water Systems", "General", "GJ"]].nil?)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert(results[["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"]] > 0)
+    else
+      assert(results[["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"]].nil?)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert(results[["Additional Fuel", "Interior Equipment", "cooking range", "GJ"]] > 0)
+    else
+      assert(results[["Additional Fuel", "Interior Equipment", "cooking range", "GJ"]].nil?)
+    end
+
     sqlFile.close
   end
 

@@ -812,7 +812,8 @@ class Waterheater
     ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
                             Constants.FuelTypePropane => "Propane Rate",
                             Constants.FuelTypeOil => "FuelOil#1 Rate",
-                            Constants.FuelTypeGas => "Gas Rate" }[fuel_type]
+                            Constants.FuelTypeGas => "Gas Rate",
+                            Constants.FuelTypeWood => "OtherFuel1 Rate" }[fuel_type]
     if wh_type.include? "boiler"
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fluid Heat Exchanger Heat Transfer Energy")
       ec_adj_sensor_hx.setName("#{combi_hx.name} energy")
