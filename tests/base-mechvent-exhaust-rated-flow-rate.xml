@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-10T08:18:36-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-07-30T17:08:46-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -153,12 +153,11 @@
           <Slab>
             <SystemIdentifier id='Slab'/>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>450.0</Area>
+            <Area>1350.0</Area>
             <Thickness>4.0</Thickness>
-            <ExposedPerimeter>50.0</ExposedPerimeter>
+            <ExposedPerimeter>150.0</ExposedPerimeter>
             <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
             <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='SlabPerimeterInsulation'/>
               <Layer>
@@ -168,34 +167,6 @@
             </PerimeterInsulation>
             <UnderSlabInsulation>
               <SystemIdentifier id='SlabUnderSlabInsulation'/>
-              <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
-            </UnderSlabInsulation>
-            <extension>
-              <CarpetFraction>0.0</CarpetFraction>
-              <CarpetRValue>0.0</CarpetRValue>
-            </extension>
-          </Slab>
-          <Slab>
-            <SystemIdentifier id='Slab2'/>
-            <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
-            <Area>900.0</Area>
-            <Thickness>4.0</Thickness>
-            <ExposedPerimeter>100.0</ExposedPerimeter>
-            <PerimeterInsulationDepth>0.0</PerimeterInsulationDepth>
-            <UnderSlabInsulationWidth>0.0</UnderSlabInsulationWidth>
-            <DepthBelowGrade>7.0</DepthBelowGrade>
-            <PerimeterInsulation>
-              <SystemIdentifier id='Slab2PerimeterInsulation'/>
-              <Layer>
-                <InstallationType>continuous</InstallationType>
-                <NominalRValue>0.0</NominalRValue>
-              </Layer>
-            </PerimeterInsulation>
-            <UnderSlabInsulation>
-              <SystemIdentifier id='Slab2UnderSlabInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
@@ -328,6 +299,18 @@
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
+        <MechanicalVentilation>
+          <VentilationFans>
+            <VentilationFan>
+              <SystemIdentifier id='MechanicalVentilation'/>
+              <FanType>exhaust only</FanType>
+              <RatedFlowRate>110.0</RatedFlowRate>
+              <HoursInOperation>24.0</HoursInOperation>
+              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
+              <FanPower>30.0</FanPower>
+            </VentilationFan>
+          </VentilationFans>
+        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
@@ -343,7 +326,7 @@
             <SystemIdentifier id='HotWaterDstribution'/>
             <SystemType>
               <Standard>
-                <PipingLength>90.0</PipingLength>
+                <PipingLength>50.0</PipingLength>
               </Standard>
             </SystemType>
             <PipeInsulation>
@@ -438,6 +421,16 @@
           <ThirdPartyCertification>ERI Tier II</ThirdPartyCertification>
         </LightingGroup>
       </Lighting>
+      <MiscLoads>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc'/>
+          <PlugLoadType>other</PlugLoadType>
+        </PlugLoad>
+        <PlugLoad>
+          <SystemIdentifier id='PlugLoadMisc2'/>
+          <PlugLoadType>TV other</PlugLoadType>
+        </PlugLoad>
+      </MiscLoads>
     </BuildingDetails>
   </Building>
 </HPXML>
