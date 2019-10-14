@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-09T14:40:34-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-10-10T08:20:01-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -25,19 +25,6 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
-          <extension>
-            <Neighbors>
-              <NeighborBuilding>
-                <Azimuth>145</Azimuth>
-                <Distance>10.0</Distance>
-              </NeighborBuilding>
-              <NeighborBuilding>
-                <Azimuth>180</Azimuth>
-                <Distance>15.0</Distance>
-                <Height>12.0</Height>
-              </NeighborBuilding>
-            </Neighbors>
-          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
@@ -245,20 +232,6 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>64000.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
@@ -322,6 +295,8 @@
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <HeatingCapacity>18767.0</HeatingCapacity>
             <EnergyFactor>0.95</EnergyFactor>
+            <UsesDesuperheater>true</UsesDesuperheater>
+            <RelatedHVACSystem idref='CoolingSystem'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>

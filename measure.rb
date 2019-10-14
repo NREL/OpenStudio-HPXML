@@ -635,27 +635,44 @@ class OSModel
     # Check every thermal zone has:
     # 1. At least one floor surface
     # 2. At least one roofceiling surface
-    # 3. At least one surface adjacent to outside/ground
+    # 3. At least one wall surface (except for attics)
+    # 4. At least one surface adjacent to outside/ground/adiabatic
     model.getThermalZones.each do |zone|
-      n_floorsroofsceilings = 0
+      n_floors = 0
+      n_roofceilings = 0
+      n_walls = 0
       n_exteriors = 0
       zone.spaces.each do |space|
         space.surfaces.each do |surface|
-          if ["outdoors", "foundation"].include? surface.outsideBoundaryCondition.downcase
+          if ["outdoors", "foundation", "adiabatic"].include? surface.outsideBoundaryCondition.downcase
             n_exteriors += 1
           end
-          if ["floor", "roofceiling"].include? surface.surfaceType.downcase
-            n_floorsroofsceilings += 1
+          if surface.surfaceType.downcase == "floor"
+            n_floors += 1
+          end
+          if surface.surfaceType.downcase == "wall"
+            n_walls += 1
+          end
+          if surface.surfaceType.downcase == "roofceiling"
+            n_roofceilings += 1
           end
         end
       end
 
-      if n_floorsroofsceilings < 1
-        runner.registerError("Thermal zone '#{zone.name}' must have at least two floor/roof/ceiling surfaces.")
+      if n_floors == 0
+        runner.registerError("'#{zone.name}' must have at least one floor surface.")
+        return false
+      end
+      if n_roofceilings == 0
+        runner.registerError("'#{zone.name}' must have at least one roof/ceiling surface.")
+        return false
+      end
+      if n_walls == 0 and not [Constants.SpaceTypeUnventedAttic, Constants.SpaceTypeVentedAttic].include? zone.name.to_s
+        runner.registerError("'#{zone.name}' must have at least one wall surface.")
         return false
       end
       if n_exteriors == 0
-        runner.registerError("Thermal zone '#{zone.name}' must have at least one surface adjacent to outside/ground.")
+        runner.registerError("'#{zone.name}' must have at least one surface adjacent to outside/ground.")
         return false
       end
     end
@@ -1093,7 +1110,7 @@ class OSModel
         z_origin = @foundation_top
       end
 
-      if framefloor_values[:exterior_adjacent_to].include? "attic"
+      if hpxml_floor_is_ceiling(framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to])
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
       else
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
@@ -1268,6 +1285,8 @@ class OSModel
 
         ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
         ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
+        next if ag_net_area < 0.1
+
         length = ag_net_area / ag_height
         z_origin = -1 * ag_height
         azimuth = @default_azimuth
@@ -1469,8 +1488,6 @@ class OSModel
     addtl_cfa = cfa - model_cfa
     return true unless addtl_cfa > 0
 
-    runner.registerWarning("Adding adiabatic conditioned floor with #{addtl_cfa.to_s} ft^2 to preserve building total conditioned floor area.")
-
     conditioned_floor_width = Math::sqrt(addtl_cfa)
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
     z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
@@ -1513,19 +1530,19 @@ class OSModel
 
   def self.add_neighbors(runner, model, building, length)
     # Get the max z-value of any model surface
-    height = -9e99
+    default_height = -9e99
     model.getSpaces.each do |space|
       z_origin = space.zOrigin
       space.surfaces.each do |surface|
         surface.vertices.each do |vertex|
           surface_z = vertex.z + z_origin
-          next if surface_z < height
+          next if surface_z < default_height
 
-          height = surface_z
+          default_height = surface_z
         end
       end
     end
-    height = UnitConversions.convert(height, "m", "ft")
+    default_height = UnitConversions.convert(default_height, "m", "ft")
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -1533,6 +1550,7 @@ class OSModel
       neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
       azimuth = neighbor_building_values[:azimuth]
       distance = neighbor_building_values[:distance]
+      height = neighbor_building_values[:height].nil? ? default_height : neighbor_building_values[:height]
 
       shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
       shading_surface.additionalProperties.setFeature("Azimuth", azimuth)
@@ -1766,6 +1784,7 @@ class OSModel
   end
 
   def self.add_hot_water_and_appliances(runner, model, building, weather, spaces)
+    related_hvac_list = [] # list of hvac systems refered in water heating system "RelatedHvac" element
     # Clothes Washer
     clothes_washer_values = HPXML.get_clothes_washer_values(clothes_washer: building.elements["BuildingDetails/Appliances/ClothesWasher"])
     if not clothes_washer_values.nil?
@@ -1890,11 +1909,26 @@ class OSModel
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
 
+        sys_id = water_heating_system_values[:id]
+        @dhw_map[sys_id] = []
+
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
         jacket_r = water_heating_system_values[:jacket_r_value]
+
+        uses_desuperheater = water_heating_system_values[:uses_desuperheater]
+        relatedhvac = water_heating_system_values[:related_hvac]
+
+        if uses_desuperheater
+          if not related_hvac_list.include? relatedhvac
+            related_hvac_list << relatedhvac
+            desuperheater_clg_coil = get_desuperheatercoil(@hvac_map, relatedhvac, sys_id)
+          else
+            fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{sys_id}' is already attached to another water heating system."
+          end
+        end
 
         ef = water_heating_system_values[:energy_factor]
         if ef.nil?
@@ -1916,9 +1950,6 @@ class OSModel
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
-        sys_id = water_heating_system_values[:id]
-        @dhw_map[sys_id] = []
-
         if wh_type == "storage water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
@@ -1933,7 +1964,7 @@ class OSModel
           success = Waterheater.apply_tank(model, runner, space, to_beopt_fuel(fuel),
                                            capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
                                            oncycle_power, offcycle_power, ec_adj,
-                                           @nbeds, @dhw_map, sys_id, jacket_r)
+                                           @nbeds, @dhw_map, sys_id, desuperheater_clg_coil, jacket_r)
           return false if not success
 
         elsif wh_type == "instantaneous water heater"
@@ -1949,7 +1980,7 @@ class OSModel
           success = Waterheater.apply_tankless(model, runner, space, to_beopt_fuel(fuel),
                                                capacity_kbtuh, ef, cycling_derate,
                                                setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                               @nbeds, @dhw_map, sys_id)
+                                               @nbeds, @dhw_map, sys_id, desuperheater_clg_coil)
           return false if not success
 
         elsif wh_type == "heat pump water heater"
@@ -2010,6 +2041,25 @@ class OSModel
     return false if not success
 
     return true
+  end
+
+  def self.get_desuperheatercoil(hvac_map, relatedhvac, wh_id)
+    # search for the related cooling coil object for desuperheater
+
+    # Supported cooling coil options
+    clg_coil_supported = [OpenStudio::Model::CoilCoolingDXSingleSpeed, OpenStudio::Model::CoilCoolingDXMultiSpeed, OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit]
+    if hvac_map.keys.include? relatedhvac
+      hvac_map[relatedhvac].each do |comp|
+        clg_coil_supported.each do |coiltype|
+          if comp.is_a? coiltype
+            return comp
+          end
+        end
+      end
+      fail "RelatedHVACSystem '#{relatedhvac}' for water heating system '#{wh_id}' is not currently supported for desuperheaters."
+    else
+      fail "RelatedHVACSystem '#{relatedhvac}' not found for water heating system '#{wh_id}'."
+    end
   end
 
   def self.add_cooling_system(runner, model, building)
@@ -3032,11 +3082,13 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
-                       OutputVars.WaterHeatingCombiBoilerHeatExchanger,
-                       OutputVars.WaterHeatingCombiBoiler,
+                       OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
+                       OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingNaturalGas,
                        OutputVars.WaterHeatingOtherFuel,
-                       OutputVars.WaterHeatingLoad]
+                       OutputVars.WaterHeatingLoad,
+                       OutputVars.WaterHeatingLoadTankLosses,
+                       OutputVars.WaterHeaterLoadDesuperheater]
 
     # Remove objects that are not referenced by output vars and are not
     # EMS output vars.
@@ -3887,9 +3939,11 @@ def is_adjacent_to_conditioned(adjacent_to)
 end
 
 def hpxml_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
-  if floor_interior_adjacent_to.include? "attic"
+  if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
     return true
-  elsif floor_exterior_adjacent_to.include? "attic"
+  elsif ["attic - vented", "attic - unvented", "other housing unit"].include? floor_exterior_adjacent_to
+    # Note: There's no way to know if other housing unit is a floor below this unit
+    #       or a ceiling above this unit; we assume the latter.
     return true
   end
 
@@ -3993,6 +4047,15 @@ class OutputVars
 
   def self.WaterHeatingLoad
     return { 'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'] }
+  end
+
+  def self.WaterHeatingLoadTankLosses
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Heat Loss Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Heat Loss Energy'] }
+  end
+
+  def self.WaterHeaterLoadDesuperheater
+    return { 'OpenStudio::Model::CoilWaterHeatingDesuperheater' => ['Water Heater Heating Energy'] }
   end
 end
 
