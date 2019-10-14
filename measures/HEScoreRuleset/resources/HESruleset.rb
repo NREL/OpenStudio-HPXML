@@ -235,9 +235,29 @@ class HEScoreRuleset
 
   end
 
+  def self.get_foundation_perimeter(foundation)
+    n_foundations = foundation.parent.elements.size
+    if n_foundations == 1
+      return @bldg_perimeter
+    elsif n_foundations == 2
+      fnd_area = get_foundation_area(foundation)
+      long_side = [@bldg_length_front, @bldg_length_side].max
+      short_side = [@bldg_length_front, @bldg_length_side].min
+      total_foundation_area = 0
+      foundation.parent.elements.each do |a_foundation|
+        total_foundation_area += get_foundation_area(a_foundation)
+      end
+      fnd_frac = fnd_area / total_foundation_area
+      return short_side + 2 * long_side * fnd_frac
+    else
+      fail "Only one or two foundations is allowed."
+    end
+  end
+
   def self.set_enclosure_foundation_walls(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
       fnd_adjacent = get_foundation_adjacent(orig_foundation)
+      fnd_area = get_foundation_area(orig_foundation)
 
       if ["basement - unconditioned", "basement - conditioned", "crawlspace - vented", "crawlspace - unvented"].include? fnd_adjacent
         fndwall_id = HPXML.get_idref(orig_foundation, "AttachedToFoundationWall")
@@ -245,9 +265,9 @@ class HEScoreRuleset
         fndwall_values = HPXML.get_foundation_wall_values(foundation_wall: fndwall)
         # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/doe2-inputs-assumptions-and-calculations/the-doe2-model
         if ["basement - unconditioned", "basement - conditioned"].include? fnd_adjacent
-          fndwall_height = 8.0 # FIXME: Verify
+          fndwall_height = 8.0
         else
-          fndwall_height = 2.5 # FIXME: Verify
+          fndwall_height = 2.5
         end
 
         HPXML.add_foundation_wall(hpxml: hpxml,
@@ -255,10 +275,12 @@ class HEScoreRuleset
                                   exterior_adjacent_to: "ground",
                                   interior_adjacent_to: fnd_adjacent,
                                   height: fndwall_height,
-                                  area: fndwall_height * @bldg_perimeter, # FIXME: Verify
-                                  thickness: 8, # FIXME: Verify
-                                  depth_below_grade: fndwall_height, # FIXME: Verify
-                                  insulation_assembly_r_value: fndwall_values[:insulation_r_value] + 3.0) # FIXME: need to convert from insulation R-value to assembly R-value
+                                  area: fndwall_height * get_foundation_perimeter(orig_foundation),
+                                  thickness: 10,
+                                  depth_below_grade: fndwall_height - 1.0,
+                                  insulation_r_value: fndwall_values[:insulation_r_value],
+                                  insulation_distance_to_bottom: fndwall_height
+                                )
       end
     end
   end
@@ -306,13 +328,17 @@ class HEScoreRuleset
   def self.set_enclosure_slabs(orig_details, hpxml)
     orig_details.elements.each("Enclosure/Foundations/Foundation") do |orig_foundation|
       fnd_adjacent = get_foundation_adjacent(orig_foundation)
+      fnd_type = XMLHelper.get_child_name(orig_foundation, "FoundationType")
+      fnd_area = get_foundation_area(orig_foundation)
 
       # Slab
-      if fnd_adjacent == "living space"
+      if fnd_type == "SlabOnGrade"
         slab_id = HPXML.get_idref(orig_foundation, "AttachedToSlab")
         slab = orig_details.elements["Enclosure/Slabs/Slab[SystemIdentifier[@id='#{slab_id}']]"]
         slab_values = HPXML.get_slab_values(slab: slab)
-      else
+        slab_values[:depth_below_grade] = 0
+        slab_values[:thickness] = 4
+      elsif fnd_type == "Basement"
         framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
         framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
         framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
@@ -321,19 +347,32 @@ class HEScoreRuleset
         slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
         slab_values[:area] = framefloor_values[:area]
         slab_values[:perimeter_insulation_r_value] = 0
+        slab_values[:thickness] = 4
+      elsif fnd_type == "Crawlspace"
+        framefloor_id = HPXML.get_idref(orig_foundation, "AttachedToFrameFloor")
+        framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
+
+        slab_values = {}
+        slab_values[:id] = "#{HPXML.get_id(orig_foundation)}_slab"
+        slab_values[:area] = framefloor_values[:area]
+        slab_values[:perimeter_insulation_r_value] = 0
+        slab_values[:thickness] = 0
+      else
+        fail "Unexpected foundation type: #{fnd_type}"
       end
 
       HPXML.add_slab(hpxml: hpxml,
                      id: slab_values[:id],
                      interior_adjacent_to: fnd_adjacent,
                      area: slab_values[:area],
-                     thickness: 4,
-                     exposed_perimeter: @bldg_perimeter, # FIXME: Verify
+                     thickness: slab_values[:thickness],
+                     exposed_perimeter: get_foundation_perimeter(orig_foundation),
                      perimeter_insulation_depth: 1, # FIXME: Hard-coded
-                     under_slab_insulation_width: 0, # FIXME: Verify
-                     depth_below_grade: 0, # FIXME: Verify
-                     carpet_fraction: 0.5, # FIXME: Hard-coded
-                     carpet_r_value: 2, # FIXME: Hard-coded
+                     under_slab_insulation_width: 0,
+                     depth_below_grade: slab_values[:depth_below_grade],
+                     carpet_fraction: 1.0,
+                     carpet_r_value: 2.1,
                      perimeter_insulation_r_value: slab_values[:perimeter_insulation_r_value],
                      under_slab_insulation_r_value: 0)
     end
@@ -1468,4 +1507,32 @@ def get_foundation_adjacent(foundation)
     fail "Unexpected foundation type."
   end
   return foundation_adjacent
+end
+
+def get_foundation_area(foundation)
+  foundation_type = XMLHelper.get_child_name(foundation, "FoundationType")
+  if foundation_type == "SlabOnGrade"
+    slab_id = foundation.elements["AttachedToSlab/@idref"].value
+    fail "Reference to slab required for SlabOnGrade foundation type." if slab_id.nil?
+    area = REXML::XPath.first(
+      foundation,
+      "//Slab[SystemIdentifier/@id=$slabid]/Area/text()",
+      {"" => foundation.namespace},
+      {"slabid" => slab_id}
+    )
+    fail "Area required for Slab: #{slab_id}." if area.nil?
+  elsif ["Basement", "Crawlspace"].include?(foundation_type)
+    frame_floor_id = foundation.elements["AttachedToFrameFloor/@idref"].value
+    fail "Reference to foundation floor required for #{foundation_type}." if frame_floor_id.nil?
+    area = REXML::XPath.first(
+      foundation,
+      "//FrameFloor[SystemIdentifier/@id=$floorid]/Area/text()",
+      {"" => foundation.namespace},
+      {"floorid" => frame_floor_id}
+    )
+    fail "Area required for FrameFloor: #{frame_floor_id}." if area.nil?
+  else
+    fail "Unexpected foundation type: #{foundation_type}."
+  end
+  return Float(area.value)
 end
