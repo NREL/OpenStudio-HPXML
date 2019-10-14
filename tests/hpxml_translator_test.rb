@@ -464,7 +464,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # R-value
       hpxml_value = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
 
@@ -475,31 +475,31 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Net Area' AND Units='m2'"
+      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
       hpxml_value = Float(XMLHelper.get_value(roof, 'SolarAbsorptance'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Reflectance'"
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Reflectance'"
       sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
       hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Tilt' AND Units='deg'"
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Azimuth
       if XMLHelper.has_element(roof, 'Azimuth') and Float(XMLHelper.get_value(roof, "Pitch")) > 0
         hpxml_value = Float(XMLHelper.get_value(roof, 'Azimuth'))
-        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Azimuth' AND Units='deg'"
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
     end
-
+    
     # Enclosure Foundations
     # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them to end up this way.
     num_kiva_instances = 0
@@ -546,15 +546,17 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # Enclosure Walls
-    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="outside"]]') do |wall|
+    # Enclosure Walls/RimJoists
+    bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"] | Enclosure/RimJoists/RimJoist[ExteriorAdjacentTo="outside"] | Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
-      hpxml_value = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.03)
+      if XMLHelper.has_element(wall, 'Insulation/AssemblyEffectiveRValue')
+        hpxml_value = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+        assert_in_epsilon(hpxml_value, sql_value, 0.03)
+      end
 
       # Net area
       hpxml_value = Float(XMLHelper.get_value(wall, 'Area'))
@@ -563,29 +565,33 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Net Area' AND Units='m2'"
+      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
-      hpxml_value = Float(XMLHelper.get_value(wall, 'SolarAbsorptance'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Reflectance'"
-      sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if XMLHelper.has_element(wall, 'SolarAbsorptance')
+        hpxml_value = Float(XMLHelper.get_value(wall, 'SolarAbsorptance'))
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Reflectance'"
+        sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
 
       # Tilt
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Tilt' AND Units='deg'"
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(90.0, sql_value, 0.01)
 
       # Azimuth
       if XMLHelper.has_element(wall, 'Azimuth')
         hpxml_value = Float(XMLHelper.get_value(wall, 'Azimuth'))
-        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Azimuth' AND Units='deg'"
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
     end
+    
+    # TODO: Enclosure FrameFloors
 
     # Enclosure Windows/Skylights
     bldg_details.elements.each('Enclosure/Windows/Window | Enclosure/Skylights/Skylight') do |subsurface|
