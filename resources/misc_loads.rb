@@ -5,7 +5,7 @@ require_relative "schedules"
 class MiscLoads
   def self.apply_plug(model, runner, misc_kwh, sens_frac, lat_frac,
                       weekday_sch, weekend_sch, monthly_sch, tv_kwh, cfa,
-                      conditioned_spaces)
+                      living_space)
 
     return true if misc_kwh + tv_kwh == 0
 
@@ -31,25 +31,20 @@ class MiscLoads
 
     # Misc plug loads
     if misc_kwh > 0
-      conditioned_spaces.each do |space|
-        space_obj_name = "#{Constants.ObjectNameMiscPlugLoads}|#{space.name.to_s}"
+      space_design_level = sch.calcDesignLevelFromDailykWh(misc_kwh / 365.0)
 
-        space_mel_ann = misc_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
-        space_design_level = sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
-
-        # Add electric equipment for the mel
-        mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-        mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-        mel.setName(space_obj_name)
-        mel.setEndUseSubcategory(Constants.ObjectNameMiscPlugLoads)
-        mel.setSpace(space)
-        mel_def.setName(space_obj_name)
-        mel_def.setDesignLevel(space_design_level)
-        mel_def.setFractionRadiant(0.6 * sens_frac)
-        mel_def.setFractionLatent(lat_frac)
-        mel_def.setFractionLost(1 - sens_frac - lat_frac)
-        mel.setSchedule(sch.schedule)
-      end
+      # Add electric equipment for the mel
+      mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
+      mel.setName(Constants.ObjectNameMiscPlugLoads)
+      mel.setEndUseSubcategory(Constants.ObjectNameMiscPlugLoads)
+      mel.setSpace(living_space)
+      mel_def.setName(Constants.ObjectNameMiscPlugLoads)
+      mel_def.setDesignLevel(space_design_level)
+      mel_def.setFractionRadiant(0.6 * sens_frac)
+      mel_def.setFractionLatent(lat_frac)
+      mel_def.setFractionLost(1 - sens_frac - lat_frac)
+      mel.setSchedule(sch.schedule)
     end
 
     # Television
@@ -57,25 +52,20 @@ class MiscLoads
     tv_lat_frac = 0.0
 
     if tv_kwh > 0
-      conditioned_spaces.each do |space|
-        space_obj_name = "#{Constants.ObjectNameMiscTelevision}|#{space.name.to_s}"
+      space_design_level = sch.calcDesignLevelFromDailykWh(tv_kwh / 365.0)
 
-        space_mel_ann = tv_kwh * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
-        space_design_level = sch.calcDesignLevelFromDailykWh(space_mel_ann / 365.0)
-
-        # Add electric equipment for the television
-        mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-        mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
-        mel.setName(space_obj_name)
-        mel.setEndUseSubcategory(Constants.ObjectNameMiscTelevision)
-        mel.setSpace(space)
-        mel_def.setName(space_obj_name)
-        mel_def.setDesignLevel(space_design_level)
-        mel_def.setFractionRadiant(0.6 * tv_sens_frac)
-        mel_def.setFractionLatent(tv_lat_frac)
-        mel_def.setFractionLost(1 - tv_sens_frac - tv_lat_frac)
-        mel.setSchedule(sch.schedule)
-      end
+      # Add electric equipment for the television
+      mel_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
+      mel = OpenStudio::Model::ElectricEquipment.new(mel_def)
+      mel.setName(Constants.ObjectNameMiscTelevision)
+      mel.setEndUseSubcategory(Constants.ObjectNameMiscTelevision)
+      mel.setSpace(living_space)
+      mel_def.setName(Constants.ObjectNameMiscTelevision)
+      mel_def.setDesignLevel(space_design_level)
+      mel_def.setFractionRadiant(0.6 * tv_sens_frac)
+      mel_def.setFractionLatent(tv_lat_frac)
+      mel_def.setFractionLost(1 - tv_sens_frac - tv_lat_frac)
+      mel.setSchedule(sch.schedule)
     end
 
     return true
