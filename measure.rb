@@ -2300,16 +2300,8 @@ class OSModel
         heat_capacity_btuh = Constants.SizingAuto
       end
 
-      # If SizingAutoMaxLoad is set for either cooling and heating then use it for both
-      if (cool_capacity_btuh == Constants.SizingAutoMaxLoad) ^ (heat_capacity_btuh == Constants.SizingAutoMaxLoad)
-        cool_capacity_btuh = Constants.SizingAutoMaxLoad
-        heat_pump_capacity_heat = Constants.SizingAutoMaxLoad
-        runner.registerWarning("Setting heat pump sizing mode to #{Constants.SizingAutoMaxLoad} for both operation modes since it was entered for one but not two of the modes.")
-      end
-
       # Heating and cooling capacity must either be Autosize or Fixed. All combinations of auto and fixed are not supported.
-      if (cool_capacity_btuh == Constants.SizingAuto || cool_capacity_btuh == Constants.SizingAutoMaxLoad) ^
-         (heat_capacity_btuh == Constants.SizingAuto || heat_capacity_btuh == Constants.SizingAutoMaxLoad)
+      if (cool_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
         runner.registerError("Heat pump cooling and heating capacity should either both be auto-sized or fixed-sized.")
       end
 
@@ -2448,7 +2440,7 @@ class OSModel
           cap_retention_frac = 0.25
           cap_retention_temp = -5.0
         else
-          if heat_capacity_btuh == Constants.SizingAuto || heat_capacity_btuh == Constants.SizingAutoMaxLoad
+          if heat_capacity_btuh == Constants.SizingAuto
             runner.registerError("HeatingCapacity17F is not supported when autosizing.")
           end
           cap_retention_frac = heat_capacity_btuh_17F / heat_capacity_btuh
