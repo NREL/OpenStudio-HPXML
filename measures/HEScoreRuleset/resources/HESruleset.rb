@@ -178,7 +178,7 @@ class HEScoreRuleset
         HPXML.add_roof(hpxml: hpxml,
                        id: "#{roof_values[:id]}_#{idx}",
                        interior_adjacent_to: attic_adjacent,
-                       area: roof_area,
+                       area: roof_area / 2.0,
                        azimuth: sanitize_azimuth(roof_azimuth),
                        solar_absorptance: roof_values[:solar_absorptance],
                        emittance: 0.9, # ERI assumption; TODO get values from method
@@ -436,14 +436,18 @@ class HEScoreRuleset
         skylight_values[:shgc] *= 0.29
       end
 
-      HPXML.add_skylight(hpxml: hpxml,
-                         id: skylight_values[:id],
-                         area: skylight_values[:area],
-                         azimuth: orientation_to_azimuth(@bldg_orient), # FIXME: Hard-coded
-                         ufactor: skylight_values[:ufactor],
-                         shgc: skylight_values[:shgc],
-                         roof_idref: "#{skylight_values[:roof_idref]}_0") # FIXME: Hard-coded
-      # No overhangs
+      hpxml.elements.each('Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
+        roof_values = HPXML.get_roof_values(roof: roof)
+        next unless roof_values[:id].start_with?(skylight_values[:roof_idref])
+        skylight_area = skylight_values[:area] / 2.0
+        HPXML.add_skylight(hpxml: hpxml,
+          id: "#{skylight_values[:id]}_#{roof_values[:id]}",
+          area: skylight_area,
+          azimuth: roof_values[:azimuth],
+          ufactor: skylight_values[:ufactor],
+          shgc: skylight_values[:shgc],
+          roof_idref: roof_values[:id])
+      end
     end
   end
 
