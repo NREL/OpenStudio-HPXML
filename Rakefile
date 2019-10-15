@@ -53,6 +53,7 @@ def create_hpxmls
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
+    'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-room-ac-furnace-gas.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
@@ -1518,7 +1519,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
-         'base-hvac-room-ac-only.xml'].include? hpxml_file
+         'base-hvac-room-ac-only.xml',
+         'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values = []
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"

@@ -2939,6 +2939,7 @@ class OSModel
 
       fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if cooling_systems_attached.size > 1
       fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
+      fail "Distribution system '#{dist_id}' found but no HVAC system attached to it." if cooling_systems_attached.size + heating_systems_attached.size == 0
     end
 
     window_area = 0.0
