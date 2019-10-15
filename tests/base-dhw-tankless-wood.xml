@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-09T14:40:34-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-10-12T12:34:07-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -25,19 +25,6 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
-          <extension>
-            <Neighbors>
-              <NeighborBuilding>
-                <Azimuth>145</Azimuth>
-                <Distance>10.0</Distance>
-              </NeighborBuilding>
-              <NeighborBuilding>
-                <Azimuth>180</Azimuth>
-                <Distance>15.0</Distance>
-                <Height>12.0</Height>
-              </NeighborBuilding>
-            </Neighbors>
-          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
@@ -315,13 +302,11 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <FuelType>wood</FuelType>
+            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>40.0</TankVolume>
             <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
+            <EnergyFactor>0.82</EnergyFactor>
           </WaterHeatingSystem>
           <HotWaterDistribution>
             <SystemIdentifier id='HotWaterDstribution'/>

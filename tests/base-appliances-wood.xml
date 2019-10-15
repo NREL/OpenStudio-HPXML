@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-09T14:40:34-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-07-17T13:57:21-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -25,19 +25,6 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
-          <extension>
-            <Neighbors>
-              <NeighborBuilding>
-                <Azimuth>145</Azimuth>
-                <Distance>10.0</Distance>
-              </NeighborBuilding>
-              <NeighborBuilding>
-                <Azimuth>180</Azimuth>
-                <Distance>15.0</Distance>
-                <Height>12.0</Height>
-              </NeighborBuilding>
-            </Neighbors>
-          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
@@ -360,9 +347,9 @@
         <ClothesDryer>
           <SystemIdentifier id='ClothesDryer'/>
           <Location>living space</Location>
-          <FuelType>electricity</FuelType>
-          <EnergyFactor>2.95</EnergyFactor>
-          <ControlType>timer</ControlType>
+          <FuelType>wood</FuelType>
+          <EnergyFactor>2.67</EnergyFactor>
+          <ControlType>moisture</ControlType>
         </ClothesDryer>
         <Dishwasher>
           <SystemIdentifier id='Dishwasher'/>
@@ -376,7 +363,7 @@
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
-          <FuelType>electricity</FuelType>
+          <FuelType>wood</FuelType>
           <IsInduction>false</IsInduction>
         </CookingRange>
         <Oven>

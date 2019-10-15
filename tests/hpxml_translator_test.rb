@@ -89,22 +89,24 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
                             'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
                                                             "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
+                            'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
+                            'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                        "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
-                            'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least two floor/roof/ceiling surfaces."],
+                            'missing-surfaces.xml' => ["'garage' must have at least one floor surface."],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'Roof'."],
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
+                            'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."],
+                            'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."],
                             'unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for mechanical ventilation 'MechanicalVentilation'."],
                             'unattached-door.xml' => ["Attached wall 'foobar' not found for door 'DoorNorth'."],
                             'unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' cannot be found for HVAC system 'HeatingSystem'."],
                             'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="],
-                            'invalid-idref-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem-bad' not found for water heating system 'WaterHeater'"],
-                            'two-repeating-idref-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."] }
+                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="] }
 
     # Test simulations
     Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -515,7 +517,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                                     'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
                                     'base-enclosure-garage.xml' => 2,                 # additional instance for garage
                                     'base-enclosure-garage-autosize.xml' => 2,        # additional instance for garage
-                                    'base-enclosure-adiabatic-surfaces.xml' => 2,     # additional instance for adiabatic construction
+                                    'base-enclosure-adiabatic-surfaces.xml' => 0,     # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10 }
 
@@ -545,7 +547,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Walls
-    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="outside"]]') do |wall|
+    bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -925,6 +927,58 @@ class HPXMLTranslatorTest < MiniTest::Test
       found_ltg_energy = true
     end
     assert_equal(bldg_details.elements["Lighting"].nil?, !found_ltg_energy)
+
+    # Natural Gas check
+    ng_htg = results.fetch(["Natural Gas", "Heating", "General", "GJ"], 0) + results.fetch(["Natural Gas", "Heating", "Other", "GJ"], 0)
+    ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
+    ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil?
+      assert_operator(ng_htg, :>, 0)
+    else
+      assert_equal(ng_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='natural gas']"].nil?
+      assert_operator(ng_dhw, :>, 0)
+    else
+      assert_equal(ng_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='natural gas']"].nil?
+      assert_operator(ng_cd, :>, 0)
+    else
+      assert_equal(ng_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='natural gas']"].nil?
+      assert_operator(ng_cr, :>, 0)
+    else
+      assert_equal(ng_cr, 0)
+    end
+
+    # Additional Fuel check
+    af_htg = results.fetch(["Additional Fuel", "Heating", "General", "GJ"], 0) + results.fetch(["Additional Fuel", "Heating", "Other", "GJ"], 0)
+    af_dhw = results.fetch(["Additional Fuel", "Water Systems", "General", "GJ"], 0)
+    af_cd = results.fetch(["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    af_cr = results.fetch(["Additional Fuel", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil?
+      assert_operator(af_htg, :>, 0)
+    else
+      assert_equal(af_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_dhw, :>, 0)
+    else
+      assert_equal(af_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cd, :>, 0)
+    else
+      assert_equal(af_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cr, :>, 0)
+    else
+      assert_equal(af_cr, 0)
+    end
 
     sqlFile.close
   end

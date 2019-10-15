@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-09T14:40:34-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-07-17T13:57:27-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -25,19 +25,6 @@
             <Fuel>electricity</Fuel>
             <Fuel>natural gas</Fuel>
           </FuelTypesAvailable>
-          <extension>
-            <Neighbors>
-              <NeighborBuilding>
-                <Azimuth>145</Azimuth>
-                <Distance>10.0</Distance>
-              </NeighborBuilding>
-              <NeighborBuilding>
-                <Azimuth>180</Azimuth>
-                <Distance>15.0</Distance>
-                <Height>12.0</Height>
-              </NeighborBuilding>
-            </Neighbors>
-          </extension>
         </Site>
         <BuildingConstruction>
           <NumberofConditionedFloors>2</NumberofConditionedFloors>
@@ -249,9 +236,9 @@
               <SystemIdentifier id='HeatingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <HeatingSystemType>
-                <Furnace/>
+                <Boiler/>
               </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
+              <HeatingSystemFuel>wood</HeatingSystemFuel>
               <HeatingCapacity>64000.0</HeatingCapacity>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
@@ -259,18 +246,6 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>48000.0</CoolingCapacity>
-              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
-              <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
-              </AnnualCoolingEfficiency>
-            </CoolingSystem>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -279,36 +254,7 @@
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
-              <AirDistribution>
-                <DuctLeakageMeasurement>
-                  <DuctType>supply</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>75.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <DuctLeakageMeasurement>
-                  <DuctType>return</DuctType>
-                  <DuctLeakage>
-                    <Units>CFM25</Units>
-                    <Value>25.0</Value>
-                    <TotalOrToOutside>to outside</TotalOrToOutside>
-                  </DuctLeakage>
-                </DuctLeakageMeasurement>
-                <Ducts>
-                  <DuctType>supply</DuctType>
-                  <DuctInsulationRValue>4.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>150.0</DuctSurfaceArea>
-                </Ducts>
-                <Ducts>
-                  <DuctType>return</DuctType>
-                  <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>attic - unvented</DuctLocation>
-                  <DuctSurfaceArea>50.0</DuctSurfaceArea>
-                </Ducts>
-              </AirDistribution>
+              <HydronicDistribution/>
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
