@@ -674,8 +674,14 @@ class OSModel
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       # zero out solar absorptance for some surfaces
       const = cond_bsmnt_surface.construction.get
-      layerd_const = const.to_LayeredConstruction.get
-      innermost_material = layerd_const.layers[layerd_const.numLayers() - 1].to_StandardOpaqueMaterial.get
+      layered_const = const.to_LayeredConstruction.get
+      if layered_const.numLayers() == 1
+        # split single layer into two in case of influencing exterior solar radiation
+        layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
+        layer_mat.setThickness(layer_mat.thickness / 2)
+        layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
+      end
+      innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       # check if target surface is sharing its exterior material object with other surfaces
       # if so, need to clone the material and make changes there, then reassign it to target surface
       mat_share = (innermost_material.directUseCount != 1)
@@ -685,11 +691,11 @@ class OSModel
         new_const = const.clone.to_Construction.get
         cond_bsmnt_surface.setConstruction(new_const)
         innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
-        new_const.to_LayeredConstruction.get.setLayer(layerd_const.numLayers() - 1, innermost_material)
+        new_const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
       elsif mat_share
         # create new material for existing unique construction
         innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
-        const.to_LayeredConstruction.get.setLayer(layerd_const.numLayers() - 1, innermost_material)
+        const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
       end
       innermost_material.setSolarAbsorptance(0.0)
       innermost_material.setVisibleAbsorptance(0.0)
