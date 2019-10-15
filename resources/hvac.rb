@@ -2710,7 +2710,7 @@ class HVAC
 
     # Update the heating capacity curve
     unless heat_pump_capacity_heat_17F.nil?
-      if (heat_pump_capacity_heat == Constants.SizingAuto
+      if heat_pump_capacity_heat == Constants.SizingAuto
         runner.registerWarning("Heat pump capacity 17F was specified with heat pump sizing mode as #{Constants.SizingAuto}. Heat pump capacity 17F will be ignored.")
         return cap_coeff
       end

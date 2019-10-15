@@ -315,6 +315,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='room air conditioner']" => {
         "DistributionSystem" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
+        "SensibleHeatFraction" => zero_or_one,
       },
 
       # [HeatPump]
