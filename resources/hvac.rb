@@ -2696,7 +2696,7 @@ class HVAC
       iat_intercept = 0.209319129
     end
 
-    if eat_pump_capacity_heat_17F.nil? or heat_pump_capacity_heat == Constants.SizingAuto
+    if heat_pump_capacity_heat.nil? or heat_pump_capacity_heat_17F.nil? or heat_pump_capacity_heat == Constants.SizingAuto
       return cap_coeff
     end
 
