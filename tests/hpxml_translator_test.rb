@@ -928,6 +928,58 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     assert_equal(bldg_details.elements["Lighting"].nil?, !found_ltg_energy)
 
+    # Natural Gas check
+    ng_htg = results.fetch(["Natural Gas", "Heating", "General", "GJ"], 0) + results.fetch(["Natural Gas", "Heating", "Other", "GJ"], 0)
+    ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
+    ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil?
+      assert_operator(ng_htg, :>, 0)
+    else
+      assert_equal(ng_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='natural gas']"].nil?
+      assert_operator(ng_dhw, :>, 0)
+    else
+      assert_equal(ng_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='natural gas']"].nil?
+      assert_operator(ng_cd, :>, 0)
+    else
+      assert_equal(ng_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='natural gas']"].nil?
+      assert_operator(ng_cr, :>, 0)
+    else
+      assert_equal(ng_cr, 0)
+    end
+
+    # Additional Fuel check
+    af_htg = results.fetch(["Additional Fuel", "Heating", "General", "GJ"], 0) + results.fetch(["Additional Fuel", "Heating", "Other", "GJ"], 0)
+    af_dhw = results.fetch(["Additional Fuel", "Water Systems", "General", "GJ"], 0)
+    af_cd = results.fetch(["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    af_cr = results.fetch(["Additional Fuel", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil?
+      assert_operator(af_htg, :>, 0)
+    else
+      assert_equal(af_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_dhw, :>, 0)
+    else
+      assert_equal(af_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cd, :>, 0)
+    else
+      assert_equal(af_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cr, :>, 0)
+    else
+      assert_equal(af_cr, 0)
+    end
+
     sqlFile.close
   end
 

@@ -812,7 +812,8 @@ class Waterheater
     ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
                             Constants.FuelTypePropane => "Propane Rate",
                             Constants.FuelTypeOil => "FuelOil#1 Rate",
-                            Constants.FuelTypeGas => "Gas Rate" }[fuel_type]
+                            Constants.FuelTypeGas => "Gas Rate",
+                            Constants.FuelTypeWood => "OtherFuel1 Rate" }[fuel_type]
     if wh_type.include? "boiler"
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fluid Heat Exchanger Heat Transfer Energy")
       ec_adj_sensor_hx.setName("#{combi_hx.name} energy")
@@ -992,6 +993,9 @@ class Waterheater
     u = ua / surface_area # Btu/hr-ft^2-F
     if eta_c > 1
       runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
+    end
+    if ua < 0
+      runner.registerError("A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.")
     end
 
     return u, ua, eta_c

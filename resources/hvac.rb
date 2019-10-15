@@ -2517,23 +2517,20 @@ class HVAC
 
   def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
     # From ANSI/RESNET/ICC 301 Standard
-    eae = nil
     if htg_type == 'Boiler'
       if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-        eae = 170.0 * load_frac # kWh/yr
+        return 170.0 * load_frac # kWh/yr
       elsif fuel == Constants.FuelTypeOil
-        eae = 330.0 * load_frac # kWh/yr
+        return 330.0 * load_frac # kWh/yr
       end
     elsif htg_type == 'Furnace'
       if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-        eae = (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+        return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       elsif fuel == Constants.FuelTypeOil
-        eae = (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+        return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
-    else
-      eae = 0.0 # FIXME: Is this right?
     end
-    return eae
+    return 0.0
   end
 
   def self.one_speed_capacity_ratios
