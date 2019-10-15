@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-10-14T23:43:24-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-10-15T09:57:40-06:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -235,9 +235,10 @@
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <HeatPumpType>ground-to-air</HeatPumpType>
+              <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
               <HeatingCapacity>42000.0</HeatingCapacity>
+              <HeatingCapacity17F>26460.0</HeatingCapacity17F>
               <CoolingCapacity>48000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -248,12 +249,12 @@
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>EER</Units>
-                <Value>16.6</Value>
+                <Units>SEER</Units>
+                <Value>13.0</Value>
               </AnnualCoolingEfficiency>
               <AnnualHeatingEfficiency>
-                <Units>COP</Units>
-                <Value>3.6</Value>
+                <Units>HSPF</Units>
+                <Value>7.7</Value>
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>

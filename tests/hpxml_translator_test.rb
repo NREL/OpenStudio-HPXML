@@ -729,11 +729,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
-      if XMLHelper.get_value(hp, "HeatingCapacity").nil?
-        hp_cap_htg = hp_cap_clg
-      else
-        hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
-      end
+      hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
       if hp_type == "mini-split"
         hp_cap_clg *= 1.20 # TODO: Generalize this
         hp_cap_htg *= 1.20 # TODO: Generalize this

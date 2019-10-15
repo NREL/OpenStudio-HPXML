@@ -325,7 +325,7 @@ class EnergyPlusValidator
         "[HeatPumpType='air-to-air' or HeatPumpType='mini-split' or HeatPumpType='ground-to-air']" => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP]
         "[HeatPumpFuel='electricity']" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
-        "HeatingCapacity" => zero_or_one, # Use -1 for autosizing
+        "HeatingCapacity" => one, # Use -1 for autosizing
         "CoolingSensibleHeatFraction" => zero_or_one,
         "[BackupSystemFuel='electricity']" => zero_or_one, # See [HeatPumpBackup]
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems

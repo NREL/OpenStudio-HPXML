@@ -2296,9 +2296,7 @@ class OSModel
       end
 
       heat_capacity_btuh = heat_pump_values[:heating_capacity]
-      if heat_capacity_btuh.nil?
-        heat_capacity_btuh = cool_capacity_btuh
-      elsif heat_capacity_btuh < 0
+      if heat_capacity_btuh < 0
         heat_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2442,7 +2440,9 @@ class OSModel
         max_heating_capacity = 1.2
         min_heating_airflow_rate = 200.0
         max_heating_airflow_rate = 400.0
-        if not heat_capacity_btuh.nil?
+        if heat_capacity_btuh == Constants.SizingAuto
+          heating_capacity_offset = 2300.0
+        else
           heating_capacity_offset = heat_capacity_btuh - cool_capacity_btuh
         end
 
