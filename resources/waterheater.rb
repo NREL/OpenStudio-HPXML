@@ -994,6 +994,9 @@ class Waterheater
     if eta_c > 1
       runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
     end
+    if ua < 0
+      runner.registerError("A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.")
+    end
 
     return u, ua, eta_c
   end
