@@ -348,8 +348,20 @@ class Constants
     return "infil"
   end
 
-  def self.ObjectNameLighting
-    return "lighting"
+  def self.ObjectNameERVHRV
+    return "erv or hrv"
+  end
+
+  def self.ObjectNameExteriorLighting
+    return "exterior lighting"
+  end
+
+  def self.ObjectNameGarageLighting
+    return "garage lighting"
+  end
+
+  def self.ObjectNameInteriorLighting
+    return "interior lighting"
   end
 
   def self.ObjectNameMechanicalVentilation
