@@ -923,9 +923,7 @@ class HPXML
       XMLHelper.add_element(annual_efficiency, "Units", units)
       XMLHelper.add_element(annual_efficiency, "Value", Float(value))
     end
-    unless cooling_shr.nil?
-      XMLHelper.add_element(cooling_system, "SensibleHeatFraction", Float(cooling_shr))
-    end
+    XMLHelper.add_element(cooling_system, "SensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
 
     return cooling_system
   end
@@ -984,9 +982,7 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatingCapacity", Float(heating_capacity)) unless heating_capacity.nil?
     XMLHelper.add_element(heat_pump, "HeatingCapacity17F", Float(heating_capacity_17F)) unless heating_capacity_17F.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", Float(cooling_capacity))
-    unless cooling_shr.nil?
-      XMLHelper.add_element(heat_pump, "CoolingSensibleHeatFraction", Float(cooling_shr))
-    end
+    XMLHelper.add_element(heat_pump, "CoolingSensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
     if not backup_heating_fuel.nil?
       XMLHelper.add_element(heat_pump, "BackupSystemFuel", backup_heating_fuel)
       backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")

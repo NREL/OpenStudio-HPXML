@@ -237,7 +237,6 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>50300.0</HeatingCapacity>
               <CoolingCapacity>48000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>

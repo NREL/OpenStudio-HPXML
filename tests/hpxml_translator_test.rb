@@ -34,7 +34,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     hvac_load_fracs_dir = File.absolute_path(File.join(this_dir, "hvac_load_fracs"))
     water_heating_multiple_dir = File.absolute_path(File.join(this_dir, "water_heating_multiple"))
     autosize_dir = File.absolute_path(File.join(this_dir, "hvac_autosizing"))
-    shr_dir = File.absolute_path(File.join(this_dir, "hvac_shr"))
 
     test_dirs = [this_dir,
                  cfis_dir,
@@ -43,8 +42,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                  hvac_partial_dir,
                  hvac_load_fracs_dir,
                  water_heating_multiple_dir,
-                 autosize_dir,
-                 shr_dir]
+                 autosize_dir]
 
     xmls = []
     test_dirs.each do |test_dir|
@@ -727,7 +725,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
-      hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
+      if XMLHelper.get_value(hp, "HeatingCapacity").nil?
+        hp_cap_htg = hp_cap_clg
+      else
+        hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
+      end
       if hp_type == "mini-split"
         hp_cap_clg *= 1.20 # TODO: Generalize this
         hp_cap_htg *= 1.20 # TODO: Generalize this

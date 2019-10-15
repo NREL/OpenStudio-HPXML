@@ -237,7 +237,6 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>16766.666666666668</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -261,7 +260,6 @@
               <DistributionSystem idref='HVACDistribution2'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>16766.666666666668</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -285,7 +283,6 @@
               <DistributionSystem idref='HVACDistribution3'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>16766.666666666668</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>

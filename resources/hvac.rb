@@ -2696,24 +2696,8 @@ class HVAC
       iat_intercept = 0.209319129
     end
 
-    if heat_pump_capacity_heat.nil? or heat_pump_capacity_heat_17F.nil?
+    if eat_pump_capacity_heat_17F.nil? or heat_pump_capacity_heat == Constants.SizingAuto
       return cap_coeff
-    end
-
-    if heat_pump_capacity_heat == Constants.SizingAuto
-      return cap_coeff
-    end
-
-    if heat_pump_capacity_heat <= 0 or heat_pump_capacity_heat <= 0
-      return cap_coeff
-    end
-
-    # Update the heating capacity curve
-    unless heat_pump_capacity_heat_17F.nil?
-      if heat_pump_capacity_heat == Constants.SizingAuto
-        runner.registerWarning("Heat pump capacity 17F was specified with heat pump sizing mode as #{Constants.SizingAuto}. Heat pump capacity 17F will be ignored.")
-        return cap_coeff
-      end
     end
 
     # Derive coefficients from user input for heating capacity at 47F and 17F

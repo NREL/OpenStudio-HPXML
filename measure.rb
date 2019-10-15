@@ -2296,7 +2296,9 @@ class OSModel
       end
 
       heat_capacity_btuh = heat_pump_values[:heating_capacity]
-      if heat_capacity_btuh < 0
+      if heat_capacity_btuh.nil?
+        heat_capacity_btuh = cool_capacity_btuh
+      elsif heat_capacity_btuh < 0
         heat_capacity_btuh = Constants.SizingAuto
       end
 
@@ -2420,8 +2422,6 @@ class OSModel
           shr = heat_pump_values[:cooling_shr]
         end
 
-        heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
-
         min_cooling_capacity = 0.4
         max_cooling_capacity = 1.2
         min_cooling_airflow_rate = 200.0
@@ -2431,17 +2431,18 @@ class OSModel
         min_heating_airflow_rate = 200.0
         max_heating_airflow_rate = 400.0
         if heat_capacity_btuh == Constants.SizingAuto || cool_capacity_btuh == Constants.SizingAuto
-          heating_capacity_offset = 2300.0
+          heating_capacity_offset = 2300.0 # TODO: Change this to zero?
         else
           heating_capacity_offset = heat_capacity_btuh - cool_capacity_btuh
         end
 
+        heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
         if heat_capacity_btuh_17F.nil?
           cap_retention_frac = 0.25
           cap_retention_temp = -5.0
         else
           if heat_capacity_btuh == Constants.SizingAuto
-            runner.registerError("HeatingCapacity17F is not supported when autosizing.")
+            runner.registerError("HeatingCapacity17F is not supported when HeatingCapacity is autosized.")
           end
           cap_retention_frac = heat_capacity_btuh_17F / heat_capacity_btuh
           cap_retention_temp = 17.0
