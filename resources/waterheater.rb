@@ -1073,7 +1073,11 @@ class Waterheater
       # Values used here are based on the average across 10 units originally used when modeling MF buildings
       avg_runtime_frac = [0.0268, 0.0333, 0.0397, 0.0462, 0.0529]
       if nbeds <= 5
-        runtime_frac = avg_runtime_frac[nbeds - 1]
+        if nbeds == 0
+          runtime_frac = avg_runtime_frac[0]
+        else
+          runtime_frac = avg_runtime_frac[nbeds - 1]
+        end
       else
         runtime_frac = avg_runtime_frac[4]
       end
