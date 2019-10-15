@@ -2033,7 +2033,8 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
         ['base-atticroof-conditioned.xml',
          'base-enclosure-adiabatic-surfaces.xml',
          'base-atticroof-cathedral.xml',
-         'base-atticroof-conditioned.xml'].include? hpxml_file
+         'base-atticroof-conditioned.xml',
+         'base-atticroof-flat.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 0.0
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 0.0
   elsif ['base-hvac-ducts-in-conditioned-space.xml'].include? hpxml_file
