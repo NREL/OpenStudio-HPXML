@@ -1072,7 +1072,11 @@ class Waterheater
       # on-cycle and off-cycle parasitics.
       # Values used here are based on the average across 10 units originally used when modeling MF buildings
       avg_runtime_frac = [0.0268, 0.0333, 0.0397, 0.0462, 0.0529]
-      runtime_frac = avg_runtime_frac[nbeds - 1]
+      if nbeds <= 5
+        runtime_frac = avg_runtime_frac[nbeds - 1]
+      else
+        runtime_frac = avg_runtime_frac[4]
+      end
       avg_elec = oncycle_p * runtime_frac + offcycle_p * (1 - runtime_frac)
 
       new_heater.setOnCycleParasiticFuelConsumptionRate(avg_elec)
