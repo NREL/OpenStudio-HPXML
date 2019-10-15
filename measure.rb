@@ -2302,9 +2302,16 @@ class OSModel
         heat_capacity_btuh = Constants.SizingAuto
       end
 
-      # Heating and cooling capacity must either be Autosize or Fixed. All combinations of auto and fixed are not supported.
+      # Heating and cooling capacity must either both be Autosized or Fixed
       if (cool_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
-        runner.registerError("Heat pump cooling and heating capacity should either both be auto-sized or fixed-sized.")
+        runner.registerError("HeatPump '#{heat_pump_values[:id]}' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized.")
+        return false
+      end
+
+      heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
+      if heat_capacity_btuh == Constants.SizingAuto and not heat_capacity_btuh_17F.nil?
+        runner.registerError("HeatPump '#{heat_pump_values[:id]}' has HeatingCapacity17F provided but heating capacity is auto-sized.")
+        return false
       end
 
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
@@ -2330,6 +2337,12 @@ class OSModel
           backup_heat_capacity_btuh = Constants.SizingAuto
         end
         backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
+
+        # Heating and backup heating capacity must either both be Autosized or Fixed
+        if (backup_heat_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
+          runner.registerError("HeatPump '#{heat_pump_values[:id]}' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized.")
+          return false
+        end
       else
         backup_heat_capacity_btuh = 0.0
         backup_heat_efficiency = 1.0
@@ -2342,7 +2355,6 @@ class OSModel
 
         seer = heat_pump_values[:cooling_efficiency_seer]
         hspf = heat_pump_values[:heating_efficiency_hspf]
-        heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
 
         num_speeds = get_ashp_num_speeds_by_seer(seer)
 
@@ -2430,20 +2442,14 @@ class OSModel
         max_heating_capacity = 1.2
         min_heating_airflow_rate = 200.0
         max_heating_airflow_rate = 400.0
-        if heat_capacity_btuh == Constants.SizingAuto || cool_capacity_btuh == Constants.SizingAuto
-          heating_capacity_offset = 2300.0 # TODO: Change this to zero?
-        else
+        if not heat_capacity_btuh.nil?
           heating_capacity_offset = heat_capacity_btuh - cool_capacity_btuh
         end
 
-        heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
         if heat_capacity_btuh_17F.nil?
           cap_retention_frac = 0.25
           cap_retention_temp = -5.0
         else
-          if heat_capacity_btuh == Constants.SizingAuto
-            runner.registerError("HeatingCapacity17F is not supported when HeatingCapacity is autosized.")
-          end
           cap_retention_frac = heat_capacity_btuh_17F / heat_capacity_btuh
           cap_retention_temp = 17.0
         end

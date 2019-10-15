@@ -37,6 +37,10 @@ def create_hpxmls
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-other.xml' => 'base.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
@@ -1874,6 +1878,17 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
          'base-hvac-mini-split-heat-pump-ducted-htg-cap.xml',
          'base-hvac-ground-to-air-heat-pump-htg-cap.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity] = 42000 # Something different than the cooling capacity
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
+    heat_pumps_values[0][:heating_capacity] = -1
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml'].include? hpxml_file
+    heat_pumps_values[0][:cooling_capacity] = -1
+    heat_pumps_values[0][:heating_capacity] = 42000
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml'].include? hpxml_file
+    heat_pumps_values[0][:cooling_capacity] = -1
+    heat_pumps_values[0][:heating_capacity] = -1
+    heat_pumps_values[0][:heating_capacity_17F] = 25000
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml'].include? hpxml_file
+    heat_pumps_values[0][:backup_heating_capacity] = -1
   elsif ['base-hvac-air-to-air-heat-pump-1-speed-htg-cap-17F.xml'].include? hpxml_file
     heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.630 # Based on OAT slope of default curves
   elsif ['base-hvac-air-to-air-heat-pump-2-speed-htg-cap-17F.xml'].include? hpxml_file
