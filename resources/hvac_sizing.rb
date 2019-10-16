@@ -146,6 +146,7 @@ class HVACSizing
 
     @cool_design_temps = {}
     @heat_design_temps = {}
+    @wetbulb_outdoor_cooling = weather.design.CoolingWetbulb
 
     # Outside
     @cool_design_temps[nil] = weather.design.CoolingDrybulb
@@ -1159,6 +1160,16 @@ class HVACSizing
     '''
     return nil if init_loads.nil?
 
+    # evap cooler temperature calculation based on Mannual S Figure 4-7
+    hvac.Objects.each do |equip|
+      if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+        td_potential = @cool_design_temps[nil] - @wetbulb_outdoor_cooling
+        td = td_potential * equip.coolerDesignEffectiveness
+        hvac.LeavingAirTemp = @cool_design_temps[nil] - td
+        return hvac
+      end
+    end
+
     # Calculate Leaving Air Temperature
     shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
     # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
@@ -1652,6 +1663,11 @@ class HVACSizing
         return nil
 
       end
+
+    elsif hvac.has_type(Constants.ObjectNameEvaporativeCooler)
+      hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot
+      hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Load_Sens
+      hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
 
     else
       hvac_final_values.Cool_Capacity = 0
@@ -2374,6 +2390,11 @@ class HVACSizing
           hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(",").map(&:to_f)
         end
 
+        hvac.CoolingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
+        return nil if hvac.CoolingLoadFraction.nil?
+      end
+
+      if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         hvac.CoolingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
         return nil if hvac.CoolingLoadFraction.nil?
       end
@@ -3448,6 +3469,34 @@ class HVACSizing
 
         # Coils
         setCoilsObjectValues(runner, model, hvac, object, hvac_final_values)
+
+      elsif object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+
+        ## Evaporative Cooler ##
+
+        # Air Loop
+        vfr = UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s")
+        object.setPrimaryAirDesignFlowRate(vfr)
+        air_loop = object.airLoopHVAC.get
+        air_loop.setDesignSupplyAirFlowRate(vfr)
+        unitary_sys = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
+        fan = unitary_sys.supplyFan.get.to_FanOnOff.get
+        fan.setMaximumFlowRate(vfr)
+        # Fan pressure rise calculation (based on design cfm)
+        fan_power = [2.79 * (hvac_final_values.Cool_Airflow / @cfa)**(-0.29), 0.6].min
+        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+        fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
+
+        thermal_zones.each do |thermal_zone|
+          thermal_zone.airLoopHVACTerminals.each do |aterm|
+            next if air_loop != aterm.airLoopHVAC.get
+            next unless aterm.to_AirTerminalSingleDuctUncontrolled.is_initialized
+
+            # Air Terminal
+            aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
+            aterm.setMaximumAirFlowRate(vfr)
+          end
+        end
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
 
