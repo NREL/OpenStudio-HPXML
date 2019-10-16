@@ -315,7 +315,7 @@ class Constants
     end
     return "#{fan_or_pump_name} #{s} disaggregate"
   end
-  
+
   def self.ObjectNameFixtures
     return "dhw fixtures"
   end

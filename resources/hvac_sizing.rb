@@ -146,6 +146,7 @@ class HVACSizing
 
     @cool_design_temps = {}
     @heat_design_temps = {}
+    @wetbulb_outdoor_cooling = weather.design.CoolingWetbulb
 
     # Outside
     @cool_design_temps[nil] = weather.design.CoolingDrybulb
@@ -1158,6 +1159,16 @@ class HVACSizing
     HVAC Temperatures
     '''
     return nil if init_loads.nil?
+
+    # evap cooler temperature calculation based on Mannual S Figure 4-7
+    hvac.Objects.each do |equip|
+      if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+        td_potential = @cool_design_temps[nil] - @wetbulb_outdoor_cooling
+        td = td_potential * equip.coolerDesignEffectiveness
+        hvac.LeavingAirTemp = @cool_design_temps[nil] - td
+        return hvac
+      end
+    end
 
     # Calculate Leaving Air Temperature
     shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
@@ -3464,12 +3475,17 @@ class HVACSizing
         ## Evaporative Cooler ##
 
         # Air Loop
-        object.setPrimaryAirDesignFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
+        vfr = UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s")
+        object.setPrimaryAirDesignFlowRate(vfr)
         air_loop = object.airLoopHVAC.get
-        air_loop.setDesignSupplyAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
+        air_loop.setDesignSupplyAirFlowRate(vfr)
         unitary_sys = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
         fan = unitary_sys.supplyFan.get.to_FanOnOff.get
-        fan.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
+        fan.setMaximumFlowRate(vfr)
+        # Fan pressure rise calculation (based on design cfm)
+        fan_power = [2.79 * (hvac_final_values.Cool_Airflow / @cfa)**(-0.29), 0.6].min
+        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+        fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
 
         thermal_zones.each do |thermal_zone|
           thermal_zone.airLoopHVACTerminals.each do |aterm|
@@ -3478,7 +3494,7 @@ class HVACSizing
 
             # Air Terminal
             aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
-            aterm.setMaximumAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
+            aterm.setMaximumAirFlowRate(vfr)
           end
         end
 

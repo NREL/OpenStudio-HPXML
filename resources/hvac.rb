@@ -359,7 +359,7 @@ class HVAC
     return true
   end
 
-  def self.apply_evaporative_cooler(model, runner, capacity, frac_cool_load_served,
+  def self.apply_evaporative_cooler(model, runner, frac_cool_load_served,
                                     sequential_cool_load_frac, control_zone,
                                     hvac_map, sys_id)
 
@@ -374,23 +374,10 @@ class HVAC
     # See https://github.com/NREL/openstudio-standards/blob/49626ee957db63129bb74cfe08b48abd571de759/lib/openstudio-standards/prototypes/common/objects/Prototype.hvac_systems.rb#L3764
     # See 1ZoneEvapCooler.idf
 
-    # adjusted design temperatures for evap cooler
-    dsgn_temps = {}
-    dsgn_temps['clg_dsgn_sup_air_temp_f'] = 70.0
-    dsgn_temps['clg_dsgn_sup_air_temp_c'] = UnitConversions.convert(dsgn_temps['clg_dsgn_sup_air_temp_f'], "f", "c")
-    dsgn_temps['max_clg_dsgn_sup_air_temp_f'] = 78.0
-    dsgn_temps['max_clg_dsgn_sup_air_temp_c'] = UnitConversions.convert(dsgn_temps['max_clg_dsgn_sup_air_temp_f'], "f", "c")
-    dsgn_temps['approach_r'] = 3.0 # wetbulb approach temperature
-    dsgn_temps['approach_k'] = UnitConversions.convert(dsgn_temps['approach_r'], "r", "k")
-
-    # FIXME: Fan power is currently zeroed out, is this correct?
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
     fan.setName(obj_name + " supply fan")
     fan.setEndUseSubcategory("supply fan")
     fan.setFanEfficiency(1)
-    fan_eff = 0.75  # Overall Efficiency of the Fan, Motor and Drive
-    fan_power = 0.0 # FIXME: Need to have assumption for fan?
-    fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
     fan.setMotorEfficiency(1)
     fan.setMotorInAirstreamFraction(0)
     hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [evap_cooler])
@@ -409,23 +396,16 @@ class HVAC
     dummy_clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
     dummy_clg_coil.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
     dummy_clg_coil.setRatedTotalCoolingCapacity(2000) # dummy capacity
-    dummy_clg_coil.setRatedSensibleHeatRatio(0.85)
-    dummy_clg_coil.setEvaporativeCondenserEffectiveness(0.9)
-    dummy_clg_coil.setEvaporativeCondenserAirFlowRate(1.0)
-    dummy_clg_coil.setEvaporativeCondenserPumpRatedPowerConsumption(0.0)
-    dummy_clg_coil.setRatedAirFlowRate(1) # FIXME
+    dummy_clg_coil.setRatedSensibleHeatRatio(0.85) # Set to override autosize
+    dummy_clg_coil.setRatedAirFlowRate(1) # Set to override autosize
     unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     unitary_system.setName("Evap Cooler Cycling Fan")
     unitary_system.setSupplyFan(fan)
     unitary_system.setCoolingCoil(dummy_clg_coil)
     unitary_system.setControllingZoneorThermostatLocation(control_zone)
     unitary_system.setFanPlacement('BlowThrough')
-    unitary_system.setSupplyAirFlowRateDuringCoolingOperation(1.0)  # FIXME
-    unitary_system.setSupplyAirFlowRateDuringHeatingOperation(1.0)  # FIXME
-    unitary_system.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(1.0) # FIXME
+    unitary_system.setSupplyAirFlowRateDuringCoolingOperation(1.0) # Set to override autosize
     unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
-    unitary_system.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
-    unitary_system.setSupplyAirFlowRateMethodWhenNoCoolingorHeatingisRequired('SupplyAirFlowRate')
     unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     unitary_system.addToNode(air_loop.supplyInletNode)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
@@ -433,7 +413,7 @@ class HVAC
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
     oa_intake_controller.setName("#{air_loop.name} OA Controller")
-    oa_intake_controller.setMaximumOutdoorAirFlowRate(1.0) # FIXME
+    oa_intake_controller.setMaximumOutdoorAirFlowRate(10)
     oa_intake_controller.setMinimumLimitType('FixedMinimum')
     oa_intake_controller.resetEconomizerMinimumLimitDryBulbTemperature
     oa_intake_controller.setMinimumFractionofOutdoorAirSchedule(model.alwaysOnDiscreteSchedule)
@@ -448,11 +428,9 @@ class HVAC
     # air handler controls
     # setpoint follows OAT WetBulb
     evap_stpt_manager = OpenStudio::Model::SetpointManagerFollowOutdoorAirTemperature.new(model)
-    evap_stpt_manager.setName("#{dsgn_temps['approach_r']} F above OATwb")
+    evap_stpt_manager.setName("Follow OATwb")
     evap_stpt_manager.setReferenceTemperatureType('OutdoorAirWetBulb')
-    evap_stpt_manager.setMaximumSetpointTemperature(dsgn_temps['max_clg_dsgn_sup_air_temp_c'])
-    evap_stpt_manager.setMinimumSetpointTemperature(dsgn_temps['clg_dsgn_sup_air_temp_c'])
-    evap_stpt_manager.setOffsetTemperatureDifference(dsgn_temps['approach_k'])
+    evap_stpt_manager.setOffsetTemperatureDifference(0.0)
     evap_stpt_manager.addToNode(air_loop.supplyOutletNode)
 
     # Supply Air
@@ -466,17 +444,13 @@ class HVAC
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
     runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
-
-    control_zone.setSequentialCoolingFraction(air_terminal_living, sequential_cool_load_frac.round(5))
-    control_zone.setSequentialHeatingFraction(air_terminal_living, 0)
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, 0))
 
     # Store info for HVAC Sizing measure
     evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
     evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
 
-    # TODO:
-    # 1. Did evap cooler need capacity information? Its cooling potential is based on outdoor air condition. Capacity is not used anywhere in workflow
-    # 2. How to calculate correct air flow rate for evap cooler? (in order to ensure it's meeting setpoint all the time) for some climate(hot humid), it might be impossible.
     return true
   end
 

@@ -2071,8 +2071,10 @@ class OSModel
       clg_type = cooling_system_values[:cooling_system_type]
 
       cool_capacity_btuh = cooling_system_values[:cooling_capacity]
-      if cool_capacity_btuh < 0
-        cool_capacity_btuh = Constants.SizingAuto
+      if not cool_capacity_btuh.nil?
+        if cool_capacity_btuh < 0
+          cool_capacity_btuh = Constants.SizingAuto
+        end
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
@@ -2148,7 +2150,7 @@ class OSModel
 
       elsif clg_type == "evaporative cooler"
 
-        success = HVAC.apply_evaporative_cooler(model, runner, cool_capacity_btuh, load_frac,
+        success = HVAC.apply_evaporative_cooler(model, runner, load_frac,
                                                 sequential_load_frac, @living_zone,
                                                 @hvac_map, sys_id)
         return false if not success

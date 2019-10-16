@@ -717,8 +717,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
       clg_cap = 0 if clg_cap.nil?
-      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
-      clg_cap += clg_sys_cap if clg_sys_cap > 0
+      clg_sys_cap = XMLHelper.get_value(clg_sys, "CoolingCapacity")
+      clg_cap += Float(clg_sys_cap) if (!clg_sys_cap.nil? and Float(clg_sys_cap) > 0)
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
       htg_cap = 0 if htg_cap.nil?

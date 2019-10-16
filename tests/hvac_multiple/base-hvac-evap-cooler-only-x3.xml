@@ -236,21 +236,18 @@
               <SystemIdentifier id='CoolingSystem'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
             </CoolingSystem>
             <CoolingSystem>
               <SystemIdentifier id='SpaceCool_ID2'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
             </CoolingSystem>
             <CoolingSystem>
               <SystemIdentifier id='SpaceCool_ID3'/>
               <CoolingSystemType>evaporative cooler</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>16000.0</CoolingCapacity>
               <FractionCoolLoadServed>0.333</FractionCoolLoadServed>
             </CoolingSystem>
           </HVACPlant>

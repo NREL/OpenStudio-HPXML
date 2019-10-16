@@ -299,7 +299,6 @@ class EnergyPlusValidator
         "../../HVACControl" => one, # See [HVACControl]
         "[CoolingSystemType='central air conditioner' or CoolingSystemType='room air conditioner' or CoolingSystemType='evaporative cooler']" => one, # See [CoolingType=CentralAC] or [CoolingType=RoomAC] or [CoolingType=EvapCooler]
         "[CoolingSystemFuel='electricity']" => one,
-        "CoolingCapacity" => one, # Use -1 for autosizing
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all CoolingSystems and HeatPumps
       },
 
@@ -308,17 +307,20 @@ class EnergyPlusValidator
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
+        "CoolingCapacity" => one, # Use -1 for autosizing
       },
 
       ## [CoolingType=RoomAC]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='room air conditioner']" => {
         "DistributionSystem" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
+        "CoolingCapacity" => one, # Use -1 for autosizing
       },
 
       ## [CoolingType=EvapCooler]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='evaporative cooler']" => {
         "DistributionSystem" => zero,
+        "CoolingCapacity" => zero,
       },
 
       # [HeatPump]
