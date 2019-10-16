@@ -53,6 +53,7 @@ def create_hpxmls
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
+    'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-room-ac-furnace-gas.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
@@ -1525,7 +1526,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
-         'base-hvac-room-ac-only.xml'].include? hpxml_file
+         'base-hvac-room-ac-only.xml',
+         'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values = []
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
@@ -2045,9 +2047,19 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                          { :duct_type => "return",
                                            :duct_leakage_value => duct_leakage_measurements_values[0][1][:duct_leakage_value] }]
   elsif (hpxml_file.include? 'hvac_partial' and not duct_leakage_measurements_values.empty?) or
-        (hpxml_file.include? 'hvac_base' and not duct_leakage_measurements_values.empty?)
+        (hpxml_file.include? 'hvac_base' and not duct_leakage_measurements_values.empty?) or
+        ['base-atticroof-conditioned.xml',
+         'base-enclosure-adiabatic-surfaces.xml',
+         'base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml',
+         'base-atticroof-flat.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 0.0
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 0.0
+  elsif ['base-hvac-ducts-in-conditioned-space.xml'].include? hpxml_file
+    # Test leakage to outside when all ducts in conditioned space
+    # (e.g., ducts may be in floor cavities which have leaky rims)
+    duct_leakage_measurements_values[0][0][:duct_leakage_value] = 1.5
+    duct_leakage_measurements_values[0][1][:duct_leakage_value] = 1.5
   end
   return duct_leakage_measurements_values
 end
@@ -2078,7 +2090,10 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
     ducts_values[0][0][:duct_location] = "attic - vented"
     ducts_values[0][1][:duct_location] = "attic - vented"
   elsif ['base-atticroof-conditioned.xml',
-         'base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+         'base-enclosure-adiabatic-surfaces.xml',
+         'base-hvac-ducts-in-conditioned-space.xml',
+         'base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "living space"
     ducts_values[0][1][:duct_location] = "living space"
   elsif ['base-enclosure-garage.xml',
@@ -2088,11 +2103,6 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['invalid_files/duct-location-other.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "unconditioned space"
     ducts_values[0][1][:duct_location] = "unconditioned space"
-  elsif ['base-hvac-ducts-in-conditioned-space.xml',
-         'base-atticroof-cathedral.xml',
-         'base-atticroof-conditioned.xml'].include? hpxml_file
-    ducts_values[0][0][:duct_location] = "living space"
-    ducts_values[0][1][:duct_location] = "living space"
   elsif ['base-hvac-ducts-outside.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "outside"
     ducts_values[0][1][:duct_location] = "outside"
