@@ -303,6 +303,10 @@ class Constants
     return "baseboard"
   end
 
+  def self.ObjectNameEvaporativeCooler
+    return "evap cooler"
+  end
+
   def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")
     if is_cooling
       s = "cool"

@@ -53,6 +53,7 @@ def create_hpxmls
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
+    'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-room-ac-furnace-gas.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
@@ -64,6 +65,7 @@ def create_hpxmls
     'base-appliances-dishwasher-ef.xml' => 'base.xml',
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
+    'base-appliances-wood.xml' => 'base.xml',
     'base-appliances-none.xml' => 'base.xml',
     'base-appliances-refrigerator-adjusted.xml' => 'base.xml',
     'base-appliances-washer-imef.xml' => 'base.xml',
@@ -94,13 +96,15 @@ def create_hpxmls
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-oil.xml' => 'base.xml',
+    'base-dhw-tank-propane.xml' => 'base.xml',
+    'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
-    'base-dhw-tank-oil.xml' => 'base.xml',
-    'base-dhw-tank-propane.xml' => 'base.xml',
+    'base-dhw-tankless-wood.xml' => 'base.xml',
     'base-dhw-uef.xml' => 'base.xml',
     'base-dhw-jacket-electric.xml' => 'base.xml',
     'base-dhw-jacket-gas.xml' => 'base-dhw-tank-gas.xml',
@@ -144,6 +148,7 @@ def create_hpxmls
     'base-hvac-boiler-gas-only-no-eae.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-hvac-boiler-oil-only.xml' => 'base.xml',
     'base-hvac-boiler-propane-only.xml' => 'base.xml',
+    'base-hvac-boiler-wood-only.xml' => 'base.xml',
     'base-hvac-central-ac-only-1-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
@@ -152,6 +157,8 @@ def create_hpxmls
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
+    'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
+    'base-hvac-evap-cooler-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-var-speed.xml' => 'base.xml',
@@ -160,6 +167,8 @@ def create_hpxmls
     'base-hvac-furnace-gas-room-ac.xml' => 'base.xml',
     'base-hvac-furnace-oil-only.xml' => 'base.xml',
     'base-hvac-furnace-propane-only.xml' => 'base.xml',
+    'base-hvac-furnace-wood-only.xml' => 'base.xml',
+    'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
     'base-hvac-ideal-air.xml' => 'base.xml',
     'base-hvac-mini-split-heat-pump-ducted.xml' => 'base.xml',
@@ -176,10 +185,11 @@ def create_hpxmls
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-oil-only-no-eae.xml' => 'base-hvac-stove-oil-only.xml',
+    'base-hvac-stove-wood-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only-no-eae.xml' => 'base-hvac-wall-furnace-propane-only.xml',
-    'base-hvac-furnace-x3-dse.xml' => 'base.xml',
+    'base-hvac-wall-furnace-wood-only.xml' => 'base.xml',
     'base-infiltration-ach-natural.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
@@ -253,6 +263,7 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-central-ac-plus-air-to-air-heat-pump-heating-autosize.xml' => 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml',
     'hvac_autosizing/base-hvac-ducts-outside-autosize.xml' => 'base-hvac-ducts-outside.xml',
     'hvac_autosizing/base-hvac-elec-resistance-only-autosize.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml' => 'base-hvac-evap-cooler-furnace-gas.xml',
     'hvac_autosizing/base-hvac-furnace-elec-only-autosize.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-2-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_autosizing/base-hvac-furnace-gas-central-ac-var-speed-autosize.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -280,6 +291,7 @@ def create_hpxmls
     'hvac_base/base-hvac-central-ac-only-2-speed-base.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_base/base-hvac-central-ac-only-var-speed-base.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_base/base-hvac-elec-resistance-only-base.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_base/base-hvac-evap-cooler-only-base.xml' => 'base-hvac-evap-cooler-only.xml',
     'hvac_base/base-hvac-furnace-elec-only-base.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_base/base-hvac-furnace-gas-central-ac-2-speed-base.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_base/base-hvac-furnace-gas-central-ac-var-speed-base.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -322,6 +334,7 @@ def create_hpxmls
     'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_multiple/base-hvac-elec-resistance-only-x3.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_multiple/base-hvac-evap-cooler-only-x3.xml' => 'base-hvac-evap-cooler-only.xml',
     'hvac_multiple/base-hvac-furnace-elec-only-x3.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_multiple/base-hvac-furnace-gas-only-x3.xml' => 'base-hvac-furnace-gas-only.xml',
     'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
@@ -342,6 +355,7 @@ def create_hpxmls
     'hvac_partial/base-hvac-central-ac-only-2-speed-33percent.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'hvac_partial/base-hvac-central-ac-only-var-speed-33percent.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_partial/base-hvac-elec-resistance-only-33percent.xml' => 'base-hvac-elec-resistance-only.xml',
+    'hvac_partial/base-hvac-evap-cooler-only-33percent.xml' => 'base-hvac-evap-cooler-only.xml',
     'hvac_partial/base-hvac-furnace-elec-only-33percent.xml' => 'base-hvac-furnace-elec-only.xml',
     'hvac_partial/base-hvac-furnace-gas-central-ac-2-speed-33percent.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'hvac_partial/base-hvac-furnace-gas-central-ac-var-speed-33percent.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
@@ -1506,12 +1520,14 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'base-hvac-central-ac-only-1-speed.xml',
          'base-hvac-central-ac-only-2-speed.xml',
          'base-hvac-central-ac-only-var-speed.xml',
+         'base-hvac-evap-cooler-only.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
-         'base-hvac-room-ac-only.xml'].include? hpxml_file
+         'base-hvac-room-ac-only.xml',
+         'invalid_files/orphaned-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values = []
   elsif ['base-hvac-boiler-elec-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
@@ -1527,6 +1543,9 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
   elsif ['base-hvac-boiler-propane-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:heating_system_fuel] = "propane"
+  elsif ['base-hvac-boiler-wood-only.xml'].include? hpxml_file
+    heating_systems_values[0][:heating_system_type] = "Boiler"
+    heating_systems_values[0][:heating_system_fuel] = "wood"
   elsif ['base-hvac-elec-resistance-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "ElectricResistance"
@@ -1548,6 +1567,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_system_fuel] = "fuel oil"
   elsif ['base-hvac-furnace-propane-only.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_fuel] = "propane"
+  elsif ['base-hvac-furnace-wood-only.xml'].include? hpxml_file
+    heating_systems_values[0][:heating_system_fuel] = "wood"
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     heating_systems_values[0][:heating_system_type] = "Boiler"
     heating_systems_values[0][:heating_system_fuel] = "electricity"
@@ -1612,6 +1633,13 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:heating_efficiency_afue] = nil
     heating_systems_values[0][:heating_efficiency_percent] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
+  elsif ['base-hvac-stove-wood-only.xml'].include? hpxml_file
+    heating_systems_values[0][:distribution_system_idref] = nil
+    heating_systems_values[0][:heating_system_type] = "Stove"
+    heating_systems_values[0][:heating_system_fuel] = "wood"
+    heating_systems_values[0][:heating_efficiency_afue] = nil
+    heating_systems_values[0][:heating_efficiency_percent] = 0.8
+    heating_systems_values[0][:electric_auxiliary_energy] = 200
   elsif ['base-hvac-wall-furnace-elec-only.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "WallFurnace"
@@ -1622,6 +1650,12 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:distribution_system_idref] = nil
     heating_systems_values[0][:heating_system_type] = "WallFurnace"
     heating_systems_values[0][:heating_system_fuel] = "propane"
+    heating_systems_values[0][:heating_efficiency_afue] = 0.8
+    heating_systems_values[0][:electric_auxiliary_energy] = 200
+  elsif ['base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
+    heating_systems_values[0][:distribution_system_idref] = nil
+    heating_systems_values[0][:heating_system_type] = "WallFurnace"
+    heating_systems_values[0][:heating_system_fuel] = "wood"
     heating_systems_values[0][:heating_efficiency_afue] = 0.8
     heating_systems_values[0][:electric_auxiliary_energy] = 200
   elsif ['base-hvac-furnace-x3-dse.xml'].include? hpxml_file
@@ -1673,19 +1707,23 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-boiler-gas-only.xml',
          'base-hvac-boiler-oil-only.xml',
          'base-hvac-boiler-propane-only.xml',
+         'base-hvac-boiler-wood-only.xml',
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-furnace-elec-only.xml',
          'base-hvac-furnace-gas-only.xml',
          'base-hvac-furnace-oil-only.xml',
          'base-hvac-furnace-propane-only.xml',
+         'base-hvac-furnace-wood-only.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
          'base-hvac-stove-oil-only.xml',
+         'base-hvac-stove-wood-only.xml',
          'base-hvac-wall-furnace-elec-only.xml',
-         'base-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
+         'base-hvac-wall-furnace-propane-only.xml',
+         'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
     cooling_systems_values = []
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
@@ -1702,6 +1740,14 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[0][:cooling_system_type] = "room air conditioner"
     cooling_systems_values[0][:cooling_efficiency_seer] = nil
     cooling_systems_values[0][:cooling_efficiency_eer] = 8.5
+  elsif ['base-hvac-evap-cooler-furnace-gas.xml',
+         'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml',
+         'base-hvac-evap-cooler-only.xml'].include? hpxml_file
+    cooling_systems_values[0][:distribution_system_idref] = nil
+    cooling_systems_values[0][:cooling_system_type] = "evaporative cooler"
+    cooling_systems_values[0][:cooling_efficiency_seer] = nil
+    cooling_systems_values[0][:cooling_efficiency_eer] = nil
+    cooling_systems_values[0][:cooling_capacity] = nil
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution4"
     cooling_systems_values[0][:fraction_cool_load_served] = 0.2
@@ -1719,7 +1765,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
   elsif hpxml_file.include? '-zero-cool.xml' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:fraction_cool_load_served] = 0
   elsif hpxml_file.include? 'hvac_multiple' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
-    cooling_systems_values[0][:cooling_capacity] /= 3.0
+    cooling_systems_values[0][:cooling_capacity] /= 3.0 unless cooling_systems_values[0][:cooling_capacity].nil?
     cooling_systems_values[0][:fraction_cool_load_served] = 0.333
     cooling_systems_values << cooling_systems_values[0].dup
     cooling_systems_values[1][:id] = "SpaceCool_ID2"
@@ -1728,7 +1774,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[2][:id] = "SpaceCool_ID3"
     cooling_systems_values[2][:distribution_system_idref] = "HVACDistribution3" unless cooling_systems_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
-    cooling_systems_values[0][:cooling_capacity] /= 3.0
+    cooling_systems_values[0][:cooling_capacity] /= 3.0 unless cooling_systems_values[0][:cooling_capacity].nil?
     cooling_systems_values[0][:fraction_cool_load_served] = 0.333
   end
   return cooling_systems_values
@@ -1900,7 +1946,8 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
   elsif ['base-hvac-boiler-elec-only.xml',
          'base-hvac-boiler-gas-only.xml',
          'base-hvac-boiler-oil-only.xml',
-         'base-hvac-boiler-propane-only.xml'].include? hpxml_file
+         'base-hvac-boiler-propane-only.xml',
+         'base-hvac-boiler-wood-only.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
@@ -1908,12 +1955,15 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
                                    :distribution_system_type => "AirDistribution" }
   elsif ['base-hvac-none.xml',
          'base-hvac-elec-resistance-only.xml',
+         'base-hvac-evap-cooler-only.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-mini-split-heat-pump-ductless.xml',
          'base-hvac-room-ac-only.xml',
          'base-hvac-stove-oil-only.xml',
+         'base-hvac-stove-wood-only.xml',
          'base-hvac-wall-furnace-elec-only.xml',
-         'base-hvac-wall-furnace-propane-only.xml'].include? hpxml_file
+         'base-hvac-wall-furnace-propane-only.xml',
+         'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
     hvac_distributions_values = []
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
@@ -1997,9 +2047,19 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                          { :duct_type => "return",
                                            :duct_leakage_value => duct_leakage_measurements_values[0][1][:duct_leakage_value] }]
   elsif (hpxml_file.include? 'hvac_partial' and not duct_leakage_measurements_values.empty?) or
-        (hpxml_file.include? 'hvac_base' and not duct_leakage_measurements_values.empty?)
+        (hpxml_file.include? 'hvac_base' and not duct_leakage_measurements_values.empty?) or
+        ['base-atticroof-conditioned.xml',
+         'base-enclosure-adiabatic-surfaces.xml',
+         'base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml',
+         'base-atticroof-flat.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 0.0
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 0.0
+  elsif ['base-hvac-ducts-in-conditioned-space.xml'].include? hpxml_file
+    # Test leakage to outside when all ducts in conditioned space
+    # (e.g., ducts may be in floor cavities which have leaky rims)
+    duct_leakage_measurements_values[0][0][:duct_leakage_value] = 1.5
+    duct_leakage_measurements_values[0][1][:duct_leakage_value] = 1.5
   end
   return duct_leakage_measurements_values
 end
@@ -2030,7 +2090,10 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
     ducts_values[0][0][:duct_location] = "attic - vented"
     ducts_values[0][1][:duct_location] = "attic - vented"
   elsif ['base-atticroof-conditioned.xml',
-         'base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
+         'base-enclosure-adiabatic-surfaces.xml',
+         'base-hvac-ducts-in-conditioned-space.xml',
+         'base-atticroof-cathedral.xml',
+         'base-atticroof-conditioned.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "living space"
     ducts_values[0][1][:duct_location] = "living space"
   elsif ['base-enclosure-garage.xml',
@@ -2040,11 +2103,6 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
   elsif ['invalid_files/duct-location-other.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "unconditioned space"
     ducts_values[0][1][:duct_location] = "unconditioned space"
-  elsif ['base-hvac-ducts-in-conditioned-space.xml',
-         'base-atticroof-cathedral.xml',
-         'base-atticroof-conditioned.xml'].include? hpxml_file
-    ducts_values[0][0][:duct_location] = "living space"
-    ducts_values[0][1][:duct_location] = "living space"
   elsif ['base-hvac-ducts-outside.xml'].include? hpxml_file
     ducts_values[0][0][:duct_location] = "outside"
     ducts_values[0][1][:duct_location] = "outside"
@@ -2317,6 +2375,12 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     if hpxml_file == 'base-dhw-tank-gas-outside.xml'
       water_heating_systems_values[0][:location] = "other exterior"
     end
+  elsif ['base-dhw-tank-wood.xml'].include? hpxml_file
+    water_heating_systems_values[0][:fuel_type] = "wood"
+    water_heating_systems_values[0][:tank_volume] = 50
+    water_heating_systems_values[0][:heating_capacity] = 40000
+    water_heating_systems_values[0][:energy_factor] = 0.59
+    water_heating_systems_values[0][:recovery_efficiency] = 0.76
   elsif ['base-dhw-tank-heat-pump.xml',
          'base-dhw-tank-heat-pump-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "heat pump water heater"
@@ -2349,6 +2413,12 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     water_heating_systems_values[0][:energy_factor] = 0.82
   elsif ['base-dhw-tankless-propane.xml'].include? hpxml_file
     water_heating_systems_values[0][:fuel_type] = "propane"
+    water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
+    water_heating_systems_values[0][:tank_volume] = nil
+    water_heating_systems_values[0][:heating_capacity] = nil
+    water_heating_systems_values[0][:energy_factor] = 0.82
+  elsif ['base-dhw-tankless-wood.xml'].include? hpxml_file
+    water_heating_systems_values[0][:fuel_type] = "wood"
     water_heating_systems_values[0][:water_heater_type] = "instantaneous water heater"
     water_heating_systems_values[0][:tank_volume] = nil
     water_heating_systems_values[0][:heating_capacity] = nil
@@ -2662,6 +2732,12 @@ def get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
                              :fuel_type => "natural gas",
                              :energy_factor => 2.67,
                              :control_type => "moisture" }
+  elsif ['base-appliances-wood.xml'].include? hpxml_file
+    clothes_dryer_values = { :id => "ClothesDryer",
+                             :location => "living space",
+                             :fuel_type => "wood",
+                             :energy_factor => 2.67,
+                             :control_type => "moisture" }
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     clothes_dryer_values[:location] = "basement - unconditioned"
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -2721,6 +2797,9 @@ def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
     cooking_range_values = {}
   elsif ['base-appliances-gas.xml'].include? hpxml_file
     cooking_range_values[:fuel_type] = "natural gas"
+    cooking_range_values[:is_induction] = false
+  elsif ['base-appliances-wood.xml'].include? hpxml_file
+    cooking_range_values[:fuel_type] = "wood"
     cooking_range_values[:is_induction] = false
   end
   return cooking_range_values
