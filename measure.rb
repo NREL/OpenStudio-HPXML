@@ -2912,12 +2912,14 @@ class OSModel
 
       # Connect AirLoopHVACs to ducts
       dist_id = hvac_distribution_values[:id]
+      num_attached = 0
       heating_systems_attached = []
       cooling_systems_attached = []
       ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
         building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
           next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
 
+          num_attached += 1
           sys_id = sys.elements["SystemIdentifier"].attributes["id"]
           heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionHeatLoadServed")) > 0
           cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionCoolLoadServed")) > 0
@@ -2939,6 +2941,7 @@ class OSModel
 
       fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if cooling_systems_attached.size > 1
       fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
+      fail "Distribution system '#{dist_id}' found but no HVAC system attached to it." if num_attached == 0
     end
 
     window_area = 0.0
