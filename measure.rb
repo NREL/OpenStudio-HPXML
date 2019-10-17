@@ -2090,7 +2090,6 @@ class OSModel
 
       if clg_type == "central air conditioner"
 
-        # FIXME: Generalize
         seer = cooling_system_values[:cooling_efficiency_seer]
         num_speeds = get_ac_num_speeds(seer)
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
@@ -2116,7 +2115,7 @@ class OSModel
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.71, 0.73]
           else
-            # FIXME: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages
+            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages
             shrs = [cooling_system_values[:cooling_shr] - 0.02, cooling_system_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
@@ -2383,7 +2382,7 @@ class OSModel
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.71, 0.724]
           else
-            # FIXME: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages?
+            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages?
             shrs = [heat_pump_values[:cooling_shr] - 0.014, heat_pump_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
@@ -2422,7 +2421,6 @@ class OSModel
 
       elsif hp_type == "mini-split"
 
-        # FIXME: Generalize
         seer = heat_pump_values[:cooling_efficiency_seer]
         hspf = heat_pump_values[:heating_efficiency_hspf]
 
@@ -2473,7 +2471,6 @@ class OSModel
 
       elsif hp_type == "ground-to-air"
 
-        # FIXME: Generalize
         eer = heat_pump_values[:cooling_efficiency_eer]
         cop = heat_pump_values[:heating_efficiency_cop]
         if heat_pump_values[:cooling_shr].nil?
