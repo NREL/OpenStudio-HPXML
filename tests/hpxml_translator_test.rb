@@ -46,7 +46,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     xmls = []
     test_dirs.each do |test_dir|
-      Dir["#{test_dir}/base*.xml"].sort.each do |xml|
+      Dir["#{test_dir}/base-hvac-evap-cooler-only.xml"].sort.each do |xml|
         xmls << File.absolute_path(xml)
       end
     end
@@ -1118,6 +1118,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         next unless ["Heating", "Cooling"].include? k[1]
         next unless ["General"].include? k[2] # Exclude crankcase/defrost
         next if k[0] == "Load"
+        next if k[0] == "Water" # eg.evap cooler water consumption
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
@@ -1178,6 +1179,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         next unless ["Heating", "Cooling"].include? k[1]
         next unless ["General"].include? k[2] # Exclude crankcase/defrost
         next if k[0] == "Load"
+        next if k[0] == "Water" # eg.evap cooler water consumption
 
         result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f
