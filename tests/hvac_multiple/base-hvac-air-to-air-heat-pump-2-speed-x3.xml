@@ -237,6 +237,7 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>14000.0</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -260,6 +261,7 @@
               <DistributionSystem idref='HVACDistribution2'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>14000.0</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
@@ -283,6 +285,7 @@
               <DistributionSystem idref='HVACDistribution3'/>
               <HeatPumpType>air-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>14000.0</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>

@@ -85,6 +85,10 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'dhw-frac-load-served.xml' => ["Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15."],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
                             'duct-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return'][DuctLocation="],
+                            'heat-pump-mixed-fixed-and-autosize-capacities.xml' => ["HeatPump 'HeatPump' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities2.xml' => ["HeatPump 'HeatPump' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities3.xml' => ["HeatPump 'HeatPump' has HeatingCapacity17F provided but heating capacity is auto-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities4.xml' => ["HeatPump 'HeatPump' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
                             'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
                             'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
                             'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
@@ -725,13 +729,15 @@ class HPXMLTranslatorTest < MiniTest::Test
       htg_cap = 0 if htg_cap.nil?
       clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
-      hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
       if hp_type == "mini-split"
-        hp_cap *= 1.20 # TODO: Generalize this
+        hp_cap_clg *= 1.20 # TODO: Generalize this
+        hp_cap_htg *= 1.20 # TODO: Generalize this
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
-      clg_cap += hp_cap if hp_cap > 0
-      htg_cap += hp_cap if hp_cap > 0
+      clg_cap += hp_cap_clg if hp_cap_clg > 0
+      htg_cap += hp_cap_htg if hp_cap_htg > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
       if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15
         has_multispeed_dx_heating_coil = true

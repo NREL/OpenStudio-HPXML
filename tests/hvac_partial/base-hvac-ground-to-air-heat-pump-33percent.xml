@@ -237,6 +237,7 @@
               <DistributionSystem idref='HVACDistribution'/>
               <HeatPumpType>ground-to-air</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>14000.0</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
