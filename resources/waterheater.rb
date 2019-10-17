@@ -994,6 +994,9 @@ class Waterheater
     if eta_c > 1
       runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
     end
+    if ua < 0
+      runner.registerError("A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.")
+    end
 
     return u, ua, eta_c
   end
@@ -1069,7 +1072,15 @@ class Waterheater
       # on-cycle and off-cycle parasitics.
       # Values used here are based on the average across 10 units originally used when modeling MF buildings
       avg_runtime_frac = [0.0268, 0.0333, 0.0397, 0.0462, 0.0529]
-      runtime_frac = avg_runtime_frac[nbeds - 1]
+      if nbeds <= 5
+        if nbeds == 0
+          runtime_frac = avg_runtime_frac[0]
+        else
+          runtime_frac = avg_runtime_frac[nbeds - 1]
+        end
+      else
+        runtime_frac = avg_runtime_frac[4]
+      end
       avg_elec = oncycle_p * runtime_frac + offcycle_p * (1 - runtime_frac)
 
       new_heater.setOnCycleParasiticFuelConsumptionRate(avg_elec)
