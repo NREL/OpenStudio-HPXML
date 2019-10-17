@@ -1105,6 +1105,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Multiple HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
+      next if xml.include? "evap-cooler" # skip for evap cooler, neither energy nor capacity is linearly scaled for evap cooler
 
       xml_x3 = File.absolute_path(xml)
       xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3.xml", "-base.xml"))
@@ -1118,7 +1119,6 @@ class HPXMLTranslatorTest < MiniTest::Test
         next unless ["Heating", "Cooling"].include? k[1]
         next unless ["General"].include? k[2] # Exclude crankcase/defrost
         next if k[0] == "Load"
-        next if k[0] == "Water" # eg.evap cooler water consumption
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
@@ -1166,6 +1166,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Partial HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
+      next if xml.include? "evap-cooler" # skip for evap cooler, neither energy nor capacity is linearly scaled for evap cooler
 
       xml_33 = File.absolute_path(xml)
       xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-33percent.xml", "-base.xml"))
@@ -1179,7 +1180,6 @@ class HPXMLTranslatorTest < MiniTest::Test
         next unless ["Heating", "Cooling"].include? k[1]
         next unless ["General"].include? k[2] # Exclude crankcase/defrost
         next if k[0] == "Load"
-        next if k[0] == "Water" # eg.evap cooler water consumption
 
         result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f
