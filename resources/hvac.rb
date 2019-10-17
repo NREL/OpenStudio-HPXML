@@ -1450,13 +1450,6 @@ class HVAC
                          attached_cooling_system, control_zone,
                          hvac_map, sys_id)
 
-    # Parasitic Electricity (Source: DOE. (2007). Technical Support Document: Energy Efficiency Program for Consumer Products: "Energy Conservation Standards for Residential Furnaces and Boilers". www.eere.energy.gov/buildings/appliance_standards/residential/furnaces_boilers.html)
-    furnaceParasiticElecDict = { Constants.FuelTypeGas => 76.0, # W during operation
-                                 Constants.FuelTypePropane => 76.0,
-                                 Constants.FuelTypeOil => 220.0,
-                                 Constants.FuelTypeElectric => 0.0 }
-    aux_elec = furnaceParasiticElecDict[fuel_type]
-
     # _processAirSystem
 
     obj_name = Constants.ObjectNameFurnace
@@ -1469,7 +1462,7 @@ class HVAC
     else
       htg_coil = OpenStudio::Model::CoilHeatingGas.new(model)
       htg_coil.setGasBurnerEfficiency(afue)
-      htg_coil.setParasiticElectricLoad(aux_elec)
+      htg_coil.setParasiticElectricLoad(0)
       htg_coil.setParasiticGasLoad(0)
       htg_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
     end
@@ -1622,13 +1615,6 @@ class HVAC
       end
     end
 
-    # Parasitic Electricity (Source: DOE. (2007). Technical Support Document: Energy Efficiency Program for Consumer Products: "Energy Conservation Standards for Residential Furnaces and Boilers". www.eere.energy.gov/buildings/appliance_standards/residential/furnaces_boilers.html)
-    boilerParasiticElecDict = { Constants.FuelTypeGas => 76.0, # W during operation
-                                Constants.FuelTypePropane => 76.0,
-                                Constants.FuelTypeOil => 220.0,
-                                Constants.FuelTypeElectric => 0.0 }
-    boiler_aux = boilerParasiticElecDict[fuel_type]
-
     # _processCurvesBoiler
 
     boiler_eff_curve = get_boiler_curve(model, system_type == Constants.BoilerTypeCondensing)
@@ -1693,7 +1679,7 @@ class HVAC
     boiler.setBoilerFlowMode("LeavingSetpointModulated")
     boiler.setOptimumPartLoadRatio(1.0)
     boiler.setWaterOutletUpperTemperatureLimit(99.9)
-    boiler.setParasiticElectricLoad(boiler_aux)
+    boiler.setParasiticElectricLoad(0)
     hvac_map[sys_id] << boiler
 
     if system_type == Constants.BoilerTypeCondensing and oat_reset_enabled
@@ -1976,22 +1962,30 @@ class HVAC
 
     if not htg_objects.empty?
       fan_or_pump_ems_output_var_heat = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_heat")
-      fan_or_pump_ems_output_var_heat.setName("#{fan_or_pump.name} Heating")
+      fan_or_pump_ems_output_var_heat.setName(Constants.ObjectNameFanPumpDisaggregate(false, fan_or_pump.name.to_s))
       fan_or_pump_ems_output_var_heat.setTypeOfDataInVariable("Summed")
       fan_or_pump_ems_output_var_heat.setUpdateFrequency("SystemTimestep")
       fan_or_pump_ems_output_var_heat.setEMSProgramOrSubroutineName(fan_or_pump_program)
       fan_or_pump_ems_output_var_heat.setUnits("J")
       hvac_objects << fan_or_pump_ems_output_var_heat
+
+      outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var_heat.name.to_s, model)
+      outputVariable.setReportingFrequency('monthly')
+      outputVariable.setKeyValue('*')
     end
 
     if not clg_objects.empty?
       fan_or_pump_ems_output_var_cool = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_cool")
-      fan_or_pump_ems_output_var_cool.setName("#{fan_or_pump.name} Cooling")
+      fan_or_pump_ems_output_var_cool.setName(Constants.ObjectNameFanPumpDisaggregate(true, fan_or_pump.name.to_s))
       fan_or_pump_ems_output_var_cool.setTypeOfDataInVariable("Summed")
       fan_or_pump_ems_output_var_cool.setUpdateFrequency("SystemTimestep")
       fan_or_pump_ems_output_var_cool.setEMSProgramOrSubroutineName(fan_or_pump_program)
       fan_or_pump_ems_output_var_cool.setUnits("J")
       hvac_objects << fan_or_pump_ems_output_var_cool
+
+      outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var_cool.name.to_s, model)
+      outputVariable.setReportingFrequency('monthly')
+      outputVariable.setKeyValue('*')
     end
 
     return hvac_objects
@@ -2523,23 +2517,20 @@ class HVAC
 
   def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
     # From ANSI/RESNET/ICC 301 Standard
-    eae = nil
     if htg_type == 'Boiler'
       if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-        eae = 170.0 * load_frac # kWh/yr
+        return 170.0 * load_frac # kWh/yr
       elsif fuel == Constants.FuelTypeOil
-        eae = 330.0 * load_frac # kWh/yr
+        return 330.0 * load_frac # kWh/yr
       end
     elsif htg_type == 'Furnace'
       if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
-        eae = (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+        return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       elsif fuel == Constants.FuelTypeOil
-        eae = (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
+        return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
-    else
-      eae = 0.0 # FIXME: Is this right?
     end
-    return eae
+    return 0.0
   end
 
   def self.one_speed_capacity_ratios

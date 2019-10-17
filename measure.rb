@@ -1530,19 +1530,19 @@ class OSModel
 
   def self.add_neighbors(runner, model, building, length)
     # Get the max z-value of any model surface
-    height = -9e99
+    default_height = -9e99
     model.getSpaces.each do |space|
       z_origin = space.zOrigin
       space.surfaces.each do |surface|
         surface.vertices.each do |vertex|
           surface_z = vertex.z + z_origin
-          next if surface_z < height
+          next if surface_z < default_height
 
-          height = surface_z
+          default_height = surface_z
         end
       end
     end
-    height = UnitConversions.convert(height, "m", "ft")
+    default_height = UnitConversions.convert(default_height, "m", "ft")
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -1550,6 +1550,7 @@ class OSModel
       neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
       azimuth = neighbor_building_values[:azimuth]
       distance = neighbor_building_values[:distance]
+      height = neighbor_building_values[:height].nil? ? default_height : neighbor_building_values[:height]
 
       shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
       shading_surface.additionalProperties.setFeature("Azimuth", azimuth)
@@ -2911,12 +2912,14 @@ class OSModel
 
       # Connect AirLoopHVACs to ducts
       dist_id = hvac_distribution_values[:id]
+      num_attached = 0
       heating_systems_attached = []
       cooling_systems_attached = []
       ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
         building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
           next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
 
+          num_attached += 1
           sys_id = sys.elements["SystemIdentifier"].attributes["id"]
           heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionHeatLoadServed")) > 0
           cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionCoolLoadServed")) > 0
@@ -2938,6 +2941,7 @@ class OSModel
 
       fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if cooling_systems_attached.size > 1
       fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
+      fail "Distribution system '#{dist_id}' found but no HVAC system attached to it." if num_attached == 0
     end
 
     window_area = 0.0
@@ -2974,8 +2978,8 @@ class OSModel
     end
 
     # Duct location, Rvalue, Area
-    total_duct_area = { Constants.DuctSideSupply => 0.0,
-                        Constants.DuctSideReturn => 0.0 }
+    total_unconditioned_duct_area = { Constants.DuctSideSupply => 0.0,
+                                      Constants.DuctSideReturn => 0.0 }
     air_distribution.elements.each("Ducts") do |ducts|
       ducts_values = HPXML.get_ducts_values(ducts: ducts)
       next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
@@ -2984,9 +2988,10 @@ class OSModel
       duct_side = side_map[ducts_values[:duct_type]]
       next if duct_side.nil?
 
-      total_duct_area[duct_side] += ducts_values[:duct_surface_area]
+      total_unconditioned_duct_area[duct_side] += ducts_values[:duct_surface_area]
     end
 
+    # Create duct objects
     air_distribution.elements.each("Ducts") do |ducts|
       ducts_values = HPXML.get_ducts_values(ducts: ducts)
       next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
@@ -2997,10 +3002,21 @@ class OSModel
       duct_area = ducts_values[:duct_surface_area]
       duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
       # Apportion leakage to individual ducts by surface area
-      duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
-                          duct_area / total_duct_area[duct_side])
+      duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] * duct_area / total_unconditioned_duct_area[duct_side])
 
       air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+    end
+
+    # If all ducts are in conditioned space, model leakage as going to outside
+    [Constants.DuctSideSupply, Constants.DuctSideReturn].each do |duct_side|
+      next unless leakage_to_outside_cfm25[duct_side] > 0 and total_unconditioned_duct_area[duct_side] == 0
+
+      duct_area = 0.0
+      duct_rvalue = 0.0
+      duct_space = nil # outside
+      duct_leakage_cfm = leakage_to_outside_cfm25[duct_side]
+
+      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, duct_rvalue)
     end
 
     return air_ducts
