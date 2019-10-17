@@ -159,6 +159,7 @@ def create_hpxmls
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
+    'base-hvac-evap-cooler-only-ducted.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-var-speed.xml' => 'base.xml',
@@ -1521,6 +1522,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'base-hvac-central-ac-only-2-speed.xml',
          'base-hvac-central-ac-only-var-speed.xml',
          'base-hvac-evap-cooler-only.xml',
+         'base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
@@ -1740,14 +1742,19 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[0][:cooling_system_type] = "room air conditioner"
     cooling_systems_values[0][:cooling_efficiency_seer] = nil
     cooling_systems_values[0][:cooling_efficiency_eer] = 8.5
-  elsif ['base-hvac-evap-cooler-furnace-gas.xml',
-         'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml',
-         'base-hvac-evap-cooler-only.xml'].include? hpxml_file
-    cooling_systems_values[0][:distribution_system_idref] = nil
+  elsif ['base-hvac-evap-cooler-only-ducted.xml',
+         'base-hvac-evap-cooler-furnace-gas.xml',
+         'base-hvac-evap-cooler-only.xml',
+         'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_system_type] = "evaporative cooler"
     cooling_systems_values[0][:cooling_efficiency_seer] = nil
     cooling_systems_values[0][:cooling_efficiency_eer] = nil
     cooling_systems_values[0][:cooling_capacity] = nil
+    if ['base-hvac-evap-cooler-furnace-gas.xml',
+        'hvac_autosizing/base-hvac-evap-cooler-furnace-gas-autosize.xml',
+        'base-hvac-evap-cooler-only.xml'].include? hpxml_file
+      cooling_systems_values[0][:distribution_system_idref] = nil
+    end
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution4"
     cooling_systems_values[0][:fraction_cool_load_served] = 0.2

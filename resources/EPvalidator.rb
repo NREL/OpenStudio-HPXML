@@ -319,7 +319,7 @@ class EnergyPlusValidator
 
       ## [CoolingType=EvapCooler]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='evaporative cooler']" => {
-        "DistributionSystem" => zero,
+        "DistributionSystem" => zero_or_one,
         "CoolingCapacity" => zero,
       },
 

@@ -361,7 +361,7 @@ class HVAC
 
   def self.apply_evaporative_cooler(model, runner, frac_cool_load_served,
                                     sequential_cool_load_frac, control_zone,
-                                    hvac_map, sys_id)
+                                    hvac_map, sys_id, is_ducted)
 
     cooler_effectiveness = 0.72
     obj_name = Constants.ObjectNameEvaporativeCooler
@@ -409,6 +409,7 @@ class HVAC
     unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     unitary_system.addToNode(air_loop.supplyInletNode)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
+    unitary_system.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -4320,7 +4321,7 @@ class HVAC
       return true
     elsif Constants.ObjectNameFurnace == hvac_type_heat
       return true
-    elsif hvac_type_cool == Constants.ObjectNameMiniSplitHeatPump
+    elsif [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
       is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPump).get
       if is_ducted
         return true

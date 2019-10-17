@@ -2150,9 +2150,10 @@ class OSModel
 
       elsif clg_type == "evaporative cooler"
 
+        is_ducted = XMLHelper.has_element(clgsys, "DistributionSystem")
         success = HVAC.apply_evaporative_cooler(model, runner, load_frac,
                                                 sequential_load_frac, @living_zone,
-                                                @hvac_map, sys_id)
+                                                @hvac_map, sys_id, is_ducted)
         return false if not success
 
       end
@@ -4039,7 +4040,7 @@ class OutputVars
     return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
              'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
              'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial' => ['Evaporative Cooler Electric Energy']}
+             'OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial' => ['Evaporative Cooler Electric Energy'] }
   end
 
   def self.WaterHeatingElectricity
