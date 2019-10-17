@@ -1679,6 +1679,7 @@ class HVACSizing
       end
     end
     if not hvac.FixedHeatingCapacity.nil?
+      hvac_final_values.Heat_Capacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
       hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
     end
 
@@ -1714,9 +1715,10 @@ class HVACSizing
       if hvac.FixedCoolingCapacity.nil?
         hvac_final_values = process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac)
         return nil if hvac_final_values.nil?
+
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       end
 
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
       if hvac_final_values.Cool_Capacity > @min_cooling_capacity
@@ -1746,8 +1748,6 @@ class HVACSizing
 
       if hvac.FixedCoolingCapacity.nil?
         hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-      else
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       end
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
@@ -1799,8 +1799,10 @@ class HVACSizing
 
       bore_length *= bore_length_mult
 
-      hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      if hvac.FixedCoolingCapacity.nil?
+        hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      end
       hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
       cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
                                  (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *

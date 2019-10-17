@@ -308,12 +308,14 @@ class EnergyPlusValidator
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
+        "SensibleHeatFraction" => zero_or_one,
       },
 
       ## [CoolingType=RoomAC]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='room air conditioner']" => {
         "DistributionSystem" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
+        "SensibleHeatFraction" => zero_or_one,
       },
 
       # [HeatPump]
@@ -323,6 +325,8 @@ class EnergyPlusValidator
         "[HeatPumpType='air-to-air' or HeatPumpType='mini-split' or HeatPumpType='ground-to-air']" => one, # See [HeatPumpType=ASHP] or [HeatPumpType=MSHP] or [HeatPumpType=GSHP]
         "[HeatPumpFuel='electricity']" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
+        "HeatingCapacity" => one, # Use -1 for autosizing
+        "CoolingSensibleHeatFraction" => zero_or_one,
         "[BackupSystemFuel='electricity']" => zero_or_one, # See [HeatPumpBackup]
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
@@ -334,6 +338,7 @@ class EnergyPlusValidator
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
+        "HeatingCapacity17F" => zero_or_one
       },
 
       ## [HeatPumpType=MSHP]
@@ -342,6 +347,7 @@ class EnergyPlusValidator
         "DistributionSystem" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
+        "HeatingCapacity17F" => zero_or_one
       },
 
       ## [HeatPumpType=GSHP]
