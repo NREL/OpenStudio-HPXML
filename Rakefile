@@ -1211,12 +1211,12 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :insulation_assembly_r_value => 18.7 }
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     framefloors_values = [{ :id => "FloorAboveAdiabatic",
-                            :exterior_adjacent_to => "other housing unit",
+                            :exterior_adjacent_to => "other housing unit below",
                             :interior_adjacent_to => "living space",
                             :area => 1350,
                             :insulation_assembly_r_value => 2.1 },
                           { :id => "FloorBelowAdiabatic",
-                            :exterior_adjacent_to => "other housing unit",
+                            :exterior_adjacent_to => "other housing unit above",
                             :interior_adjacent_to => "living space",
                             :area => 1350,
                             :insulation_assembly_r_value => 2.1 }]
