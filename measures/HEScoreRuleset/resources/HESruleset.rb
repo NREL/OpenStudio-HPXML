@@ -307,7 +307,9 @@ class HEScoreRuleset
     orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
       attic_adjacent = get_attic_adjacent(orig_attic)
 
-      if ["attic - unvented", "attic - vented"].include? attic_adjacent
+      fail "Unvented attics should't exist in HEScore." if attic_adjacent == "attic - unvented"
+
+      if attic_adjacent == "attic - vented"
         framefloor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
         framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
         framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
@@ -317,7 +319,7 @@ class HEScoreRuleset
                              id: framefloor_values[:id],
                              exterior_adjacent_to: attic_adjacent,
                              interior_adjacent_to: "living space",
-                             area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
+                             area: framefloor_values[:area],
                              insulation_assembly_r_value: framefloor_r)
       end
     end
