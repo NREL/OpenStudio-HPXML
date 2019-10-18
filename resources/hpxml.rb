@@ -12,9 +12,9 @@ class HPXML
                         **remainder)
     doc = XMLHelper.create_doc(version = "1.0", encoding = "UTF-8")
     hpxml = XMLHelper.add_element(doc, "HPXML")
-    XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2014/6")
+    XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2019/10")
     XMLHelper.add_attribute(hpxml, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-    XMLHelper.add_attribute(hpxml, "xsi:schemaLocation", "http://hpxmlonline.com/2014/6")
+    XMLHelper.add_attribute(hpxml, "xsi:schemaLocation", "http://hpxmlonline.com/2019/10")
     XMLHelper.add_attribute(hpxml, "schemaVersion", "3.0")
 
     header = XMLHelper.add_element(hpxml, "XMLTransactionHeaderInformation")
