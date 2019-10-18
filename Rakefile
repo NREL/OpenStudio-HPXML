@@ -37,6 +37,10 @@ def create_hpxmls
     'invalid_files/dhw-frac-load-served.xml' => 'base-dhw-multiple.xml',
     'invalid_files/duct-location.xml' => 'base.xml',
     'invalid_files/duct-location-other.xml' => 'base.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
@@ -140,8 +144,14 @@ def create_hpxmls
     'base-foundation-walkout-basement.xml' => 'base.xml',
     'base-foundation-complex.xml' => 'base.xml',
     'base-hvac-air-to-air-heat-pump-1-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-1-speed-17F.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-air-to-air-heat-pump-1-speed-shr.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-air-to-air-heat-pump-2-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-2-speed-17F.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
+    'base-hvac-air-to-air-heat-pump-2-speed-shr.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-air-to-air-heat-pump-var-speed.xml' => 'base.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-17F.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
+    'base-hvac-air-to-air-heat-pump-var-speed-shr.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-boiler-elec-only.xml' => 'base.xml',
     'base-hvac-boiler-gas-central-ac-1-speed.xml' => 'base.xml',
     'base-hvac-boiler-gas-only.xml' => 'base.xml',
@@ -150,8 +160,11 @@ def create_hpxmls
     'base-hvac-boiler-propane-only.xml' => 'base.xml',
     'base-hvac-boiler-wood-only.xml' => 'base.xml',
     'base-hvac-central-ac-only-1-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-only-1-speed-shr.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-central-ac-only-2-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-only-2-speed-shr.xml' => 'base-hvac-central-ac-only-2-speed.xml',
     'base-hvac-central-ac-only-var-speed.xml' => 'base.xml',
+    'base-hvac-central-ac-only-var-speed-shr.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
@@ -171,8 +184,11 @@ def create_hpxmls
     'base-hvac-furnace-wood-only.xml' => 'base.xml',
     'base-hvac-furnace-x3-dse.xml' => 'base.xml',
     'base-hvac-ground-to-air-heat-pump.xml' => 'base.xml',
+    'base-hvac-ground-to-air-heat-pump-shr.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-ideal-air.xml' => 'base.xml',
     'base-hvac-mini-split-heat-pump-ducted.xml' => 'base.xml',
+    'base-hvac-mini-split-heat-pump-ducted-17F.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
+    'base-hvac-mini-split-heat-pump-ducted-shr.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-no-backup.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
@@ -183,6 +199,7 @@ def create_hpxmls
     'base-hvac-programmable-thermostat.xml' => 'base.xml',
     'base-hvac-room-ac-furnace-gas.xml' => 'base.xml',
     'base-hvac-room-ac-only.xml' => 'base.xml',
+    'base-hvac-room-ac-only-shr.xml' => 'base-hvac-room-ac-only.xml',
     'base-hvac-setpoints.xml' => 'base.xml',
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-oil-only-no-eae.xml' => 'base-hvac-stove-oil-only.xml',
@@ -1201,12 +1218,12 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :insulation_assembly_r_value => 18.7 }
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     framefloors_values = [{ :id => "FloorAboveAdiabatic",
-                            :exterior_adjacent_to => "other housing unit",
+                            :exterior_adjacent_to => "other housing unit below",
                             :interior_adjacent_to => "living space",
                             :area => 1350,
                             :insulation_assembly_r_value => 2.1 },
                           { :id => "FloorBelowAdiabatic",
-                            :exterior_adjacent_to => "other housing unit",
+                            :exterior_adjacent_to => "other housing unit above",
                             :interior_adjacent_to => "living space",
                             :area => 1350,
                             :insulation_assembly_r_value => 2.1 }]
@@ -1525,6 +1542,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
          'base-hvac-evap-cooler-only-ducted.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
+         'base-hvac-mini-split-heat-pump-ducted-17F.xml',
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
@@ -1718,6 +1736,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-furnace-wood-only.xml',
          'base-hvac-ground-to-air-heat-pump.xml',
          'base-hvac-mini-split-heat-pump-ducted.xml',
+         'base-hvac-mini-split-heat-pump-ducted-17F.xml',
          'base-hvac-mini-split-heat-pump-ductless-no-backup.xml',
          'base-hvac-ideal-air.xml',
          'base-hvac-none.xml',
@@ -1727,6 +1746,11 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
          'base-hvac-wall-furnace-propane-only.xml',
          'base-hvac-wall-furnace-wood-only.xml'].include? hpxml_file
     cooling_systems_values = []
+  elsif ['base-hvac-central-ac-only-1-speed-shr.xml',
+         'base-hvac-central-ac-only-2-speed-shr.xml',
+         'base-hvac-central-ac-only-var-speed-shr.xml',
+         'base-hvac-room-ac-only-shr.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_shr] = 0.7
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     cooling_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
   elsif ['base-hvac-furnace-gas-central-ac-2-speed.xml',
@@ -1794,6 +1818,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
                            :cooling_capacity => 48000,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
@@ -1810,6 +1835,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
                            :cooling_capacity => 48000,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
@@ -1823,6 +1849,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
                            :cooling_capacity => 48000,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
@@ -1836,6 +1863,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "ground-to-air",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 42000,
                            :cooling_capacity => 48000,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
@@ -1849,6 +1877,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :distribution_system_idref => "HVACDistribution",
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 52000,
                            :cooling_capacity => 48000,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 120000,
@@ -1857,15 +1886,41 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :fraction_cool_load_served => 1,
                            :heating_efficiency_hspf => 10,
                            :cooling_efficiency_seer => 19 }
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-shr.xml',
+         'base-hvac-air-to-air-heat-pump-2-speed-shr.xml',
+         'base-hvac-air-to-air-heat-pump-var-speed-shr.xml',
+         'base-hvac-ground-to-air-heat-pump-shr.xml',
+         'base-hvac-mini-split-heat-pump-ducted-shr.xml'].include? hpxml_file
+    heat_pumps_values[0][:cooling_shr] = 0.7
   elsif ['base-hvac-mini-split-heat-pump-ductless.xml'].include? hpxml_file
     heat_pumps_values[0][:distribution_system_idref] = nil
   elsif ['base-hvac-mini-split-heat-pump-ductless-no-backup.xml'].include? hpxml_file
     heat_pumps_values[0][:backup_heating_fuel] = nil
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities.xml'].include? hpxml_file
+    heat_pumps_values[0][:heating_capacity] = -1
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml'].include? hpxml_file
+    heat_pumps_values[0][:cooling_capacity] = -1
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml'].include? hpxml_file
+    heat_pumps_values[0][:cooling_capacity] = -1
+    heat_pumps_values[0][:heating_capacity] = -1
+    heat_pumps_values[0][:heating_capacity_17F] = 25000
+  elsif ['invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml'].include? hpxml_file
+    heat_pumps_values[0][:backup_heating_capacity] = -1
+  elsif ['base-hvac-air-to-air-heat-pump-1-speed-17F.xml'].include? hpxml_file
+    heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.630 # Based on OAT slope of default curves
+  elsif ['base-hvac-air-to-air-heat-pump-2-speed-17F.xml'].include? hpxml_file
+    heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.590 # Based on OAT slope of default curves
+  elsif ['base-hvac-air-to-air-heat-pump-var-speed-17F.xml'].include? hpxml_file
+    heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * 0.640 # Based on OAT slope of default curves
+  elsif ['base-hvac-mini-split-heat-pump-ducted-17F.xml'].include? hpxml_file
+    f = 1.0 - (1.0 - 0.25) / (47.0 + 5.0) * (47.0 - 17.0)
+    heat_pumps_values[0][:heating_capacity_17F] = heat_pumps_values[0][:heating_capacity] * f
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     heat_pumps_values << { :id => "HeatPump",
                            :distribution_system_idref => "HVACDistribution5",
                            :heat_pump_type => "air-to-air",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 4800,
                            :cooling_capacity => 4800,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
@@ -1878,6 +1933,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
                            :distribution_system_idref => "HVACDistribution6",
                            :heat_pump_type => "ground-to-air",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 4800,
                            :cooling_capacity => 4800,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
@@ -1889,6 +1945,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values << { :id => "HeatPump3",
                            :heat_pump_type => "mini-split",
                            :heat_pump_fuel => "electricity",
+                           :heating_capacity => 4800,
                            :cooling_capacity => 4800,
                            :backup_heating_fuel => "electricity",
                            :backup_heating_capacity => 12000,
@@ -1903,6 +1960,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:distribution_system_idref] = "HVACDistribution4"
   elsif hpxml_file.include? 'hvac_autosizing' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] = -1
+    heat_pumps_values[0][:heating_capacity] = -1
     heat_pumps_values[0][:backup_heating_capacity] = -1
   elsif hpxml_file.include? '-zero-heat-cool.xml' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:fraction_heat_load_served] = 0
@@ -1913,6 +1971,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:fraction_cool_load_served] = 0
   elsif hpxml_file.include? 'hvac_multiple' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] /= 3.0
+    heat_pumps_values[0][:heating_capacity] /= 3.0
     heat_pumps_values[0][:backup_heating_capacity] /= 3.0
     heat_pumps_values[0][:fraction_heat_load_served] = 0.333
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
@@ -1924,10 +1983,12 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[2][:distribution_system_idref] = "HVACDistribution3" unless heat_pumps_values[2][:distribution_system_idref].nil?
   elsif hpxml_file.include? 'hvac_partial' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] /= 3.0
+    heat_pumps_values[0][:heating_capacity] /= 3.0
     heat_pumps_values[0][:backup_heating_capacity] /= 3.0
     heat_pumps_values[0][:fraction_heat_load_served] = 0.333
     heat_pumps_values[0][:fraction_cool_load_served] = 0.333
   end
+
   return heat_pumps_values
 end
 
@@ -2011,7 +2072,9 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
                                            :duct_leakage_value => 25 }]
-  elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
+  elsif ['base-hvac-mini-split-heat-pump-ducted.xml',
+         'base-hvac-mini-split-heat-pump-ducted-shr.xml',
+         'base-hvac-mini-split-heat-pump-ducted-17F.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 15
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 5
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
@@ -2123,7 +2186,9 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]
-  elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
+  elsif ['base-hvac-mini-split-heat-pump-ducted.xml',
+         'base-hvac-mini-split-heat-pump-ducted-shr.xml',
+         'base-hvac-mini-split-heat-pump-ducted-17F.xml'].include? hpxml_file
     ducts_values[0][0][:duct_insulation_r_value] = 0
     ducts_values[0][0][:duct_surface_area] = 30
     ducts_values[0][1][:duct_surface_area] = 10
