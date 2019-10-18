@@ -2014,6 +2014,8 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 15
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 5
+  elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
+    duct_leakage_measurements_values[0][1][:duct_leakage_value] = 0
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     duct_leakage_measurements_values[0] = []
     duct_leakage_measurements_values[1] = []
@@ -2127,6 +2129,8 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
     ducts_values[0][0][:duct_insulation_r_value] = 0
     ducts_values[0][0][:duct_surface_area] = 30
     ducts_values[0][1][:duct_surface_area] = 10
+  elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
+    ducts_values[0][1][:duct_surface_area] = 0
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     ducts_values[0] = []
     ducts_values[1] = []
