@@ -3086,6 +3086,8 @@ class OSModel
       next if duct_side.nil?
 
       duct_area = ducts_values[:duct_surface_area]
+      next if duct_area == 0
+
       duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
       # Apportion leakage to individual ducts by surface area
       duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] * duct_area / total_unconditioned_duct_area[duct_side])
