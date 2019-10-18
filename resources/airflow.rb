@@ -7,12 +7,8 @@ require_relative "psychrometrics"
 require_relative "hvac"
 
 class Airflow
-  def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+  def self.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
                  cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
-    weather = WeatherProcess.new(model, runner)
-    if weather.error?
-      return false
-    end
 
     @infMethodConstantCFM = 'CONSTANT_CFM'
     @infMethodAIM2 = 'AIM2' # aka ASHRAE Enhanced
