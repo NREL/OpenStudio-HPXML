@@ -324,7 +324,7 @@ class OSModel
 
     # Other
 
-    success = add_airflow(runner, model, building, spaces)
+    success = add_airflow(runner, model, building, weather, spaces)
     return false if not success
 
     success = add_hvac_sizing(runner, model, weather)
@@ -894,9 +894,9 @@ class OSModel
       break
     end
     return [default_azimuth,
-            sanitize_azimuth(default_azimuth+90),
-            sanitize_azimuth(default_azimuth+180),
-            sanitize_azimuth(default_azimuth+270)]
+            sanitize_azimuth(default_azimuth + 90),
+            sanitize_azimuth(default_azimuth + 180),
+            sanitize_azimuth(default_azimuth + 270)]
   end
 
   def self.sanitize_azimuth(azimuth)
@@ -909,7 +909,7 @@ class OSModel
     end
     return azimuth
   end
-  
+
   def self.create_or_get_space(model, spaces, spacetype)
     if spaces[spacetype].nil?
       create_space_and_zone(model, spaces, spacetype)
@@ -935,7 +935,7 @@ class OSModel
         length = (net_area / width) / azimuths.size
         tilt = roof_values[:pitch] / 12.0
         z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
-        
+
         surface = OpenStudio::Model::Surface.new(add_roof_polygon(length, width, z_origin, azimuth, tilt), model)
         surface.additionalProperties.setFeature("Length", length)
         surface.additionalProperties.setFeature("Width", width)
@@ -979,7 +979,7 @@ class OSModel
           WoodStudConstructionSet.new(Material.Stud2x4, 0.07, 0.0, 0.5, drywall_thick_in, mat_roofing),       # 2x4, 16" o.c.
           WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, mat_roofing),                    # Fallback
         ]
-        constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, roof_values[:id])
+        match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, roof_values[:id])
 
         install_grade = 1
 
@@ -992,7 +992,7 @@ class OSModel
                                                          constr_set.exterior_material)
         return false if not success
 
-        check_surface_assembly_rvalue(surface, film_r, assembly_r)
+        check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
 
         apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
       end
@@ -1010,7 +1010,7 @@ class OSModel
       else
         azimuths = [wall_values[:azimuth]]
       end
-      
+
       azimuths.each do |azimuth|
         net_area = net_surface_area(wall_values[:area], wall_values[:id], "Wall")
         next if net_area < 0.1
@@ -1071,7 +1071,7 @@ class OSModel
       else
         azimuths = [rim_joist_values[:azimuth]]
       end
-      
+
       azimuths.each do |azimuth|
         height = 1.0
         length = (rim_joist_values[:area] / height) / azimuths.size
@@ -1119,7 +1119,7 @@ class OSModel
           WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.17, 0.0, 2.0, drywall_thick_in, mat_ext_finish),   # 2x4
           WoodStudConstructionSet.new(Material.Stud2x(2.0), 0.01, 0.0, 0.0, 0.0, nil),                           # Fallback
         ]
-        constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, rim_joist_values[:id])
+        match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, rim_joist_values[:id])
         install_grade = 1
 
         success = Constructions.apply_rim_joist(runner, model, [surface], "#{rim_joist_values[:id]} construction",
@@ -1128,7 +1128,7 @@ class OSModel
                                                 constr_set.rigid_r, constr_set.exterior_material)
         return false if not success
 
-        check_surface_assembly_rvalue(surface, film_r, assembly_r)
+        check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
 
         apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
       end
@@ -1150,7 +1150,7 @@ class OSModel
         z_origin = @foundation_top
       end
 
-      if hpxml_floor_is_ceiling(framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to])
+      if hpxml_framefloor_is_ceiling(framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to])
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
       else
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
@@ -1163,11 +1163,6 @@ class OSModel
 
       # Apply construction
 
-      if is_thermal_boundary(framefloor_values)
-        drywall_thick_in = 0.5
-      else
-        drywall_thick_in = 0.0
-      end
       film_r = 2.0 * Material.AirFilmFloorReduced.rvalue
       assembly_r = framefloor_values[:insulation_assembly_r_value]
 
@@ -1177,7 +1172,7 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x4, 0.13, 0.0, 0.5, 0.0, Material.CoveringBare),   # 2x4, 16" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                     # Fallback
       ]
-      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, framefloor_values[:id])
+      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, framefloor_values[:id])
 
       mat_floor_covering = nil
       install_grade = 1
@@ -1190,9 +1185,7 @@ class OSModel
                                           mat_floor_covering, constr_set.exterior_material)
       return false if not success
 
-      if not assembly_r.nil?
-        check_surface_assembly_rvalue(surface, film_r, assembly_r)
-      end
+      check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
     end
 
     return true
@@ -1328,7 +1321,7 @@ class OSModel
         else
           azimuths = [fnd_wall_values[:azimuth]]
         end
-      
+
         azimuths.each do |azimuth|
           ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
           ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
@@ -1386,7 +1379,7 @@ class OSModel
     else
       azimuths = [fnd_wall_values[:azimuth]]
     end
-    
+
     azimuths.each do |azimuth|
       height = fnd_wall_values[:height]
       height_ag = height - fnd_wall_values[:depth_below_grade]
@@ -1439,6 +1432,12 @@ class OSModel
           drywall_thick_in = 0.0
           rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
         end
+        if rigid_r < 0
+          rigid_r = 0.0
+          match = false
+        else
+          match = true
+        end
       else
         rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
         rigid_r = fnd_wall_values[:insulation_r_value]
@@ -1452,12 +1451,12 @@ class OSModel
       return nil if not success
 
       if not assembly_r.nil?
-        check_surface_assembly_rvalue(surface, film_r, assembly_r)
+        check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
       end
 
       kiva_foundation = surface.adjacentFoundation.get
     end
-    
+
     return kiva_foundation
   end
 
@@ -1587,19 +1586,19 @@ class OSModel
 
   def self.add_neighbors(runner, model, building, length)
     # Get the max z-value of any model surface
-    height = -9e99
+    default_height = -9e99
     model.getSpaces.each do |space|
       z_origin = space.zOrigin
       space.surfaces.each do |surface|
         surface.vertices.each do |vertex|
           surface_z = vertex.z + z_origin
-          next if surface_z < height
+          next if surface_z < default_height
 
-          height = surface_z
+          default_height = surface_z
         end
       end
     end
-    height = UnitConversions.convert(height, "m", "ft")
+    default_height = UnitConversions.convert(default_height, "m", "ft")
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -1607,6 +1606,7 @@ class OSModel
       neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
       azimuth = neighbor_building_values[:azimuth]
       distance = neighbor_building_values[:distance]
+      height = neighbor_building_values[:height].nil? ? default_height : neighbor_building_values[:height]
 
       shading_surface = OpenStudio::Model::ShadingSurface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
       shading_surface.additionalProperties.setFeature("Azimuth", azimuth)
@@ -2146,7 +2146,6 @@ class OSModel
 
       if clg_type == "central air conditioner"
 
-        # FIXME: Generalize
         seer = cooling_system_values[:cooling_efficiency_seer]
         num_speeds = get_ac_num_speeds(seer)
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
@@ -2154,7 +2153,11 @@ class OSModel
 
         if num_speeds == "1-Speed"
 
-          shrs = [0.73]
+          if cooling_system_values[:cooling_shr].nil?
+            shrs = [0.73]
+          else
+            shrs = [cooling_system_values[:cooling_shr]]
+          end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
@@ -2165,7 +2168,12 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          shrs = [0.71, 0.73]
+          if cooling_system_values[:cooling_shr].nil?
+            shrs = [0.71, 0.73]
+          else
+            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages
+            shrs = [cooling_system_values[:cooling_shr] - 0.02, cooling_system_values[:cooling_shr]]
+          end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_2speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
@@ -2176,7 +2184,12 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          shrs = [0.87, 0.80, 0.79, 0.78]
+          if cooling_system_values[:cooling_shr].nil?
+            shrs = [0.87, 0.80, 0.79, 0.78]
+          else
+            var_sp_shr_mult = [1.115, 1.026, 1.013, 1.0]
+            shrs = var_sp_shr_mult.map { |m| cooling_system_values[:cooling_shr] * m }
+          end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ac_4speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
@@ -2194,7 +2207,13 @@ class OSModel
       elsif clg_type == "room air conditioner"
 
         eer = cooling_system_values[:cooling_efficiency_eer]
-        shr = 0.65
+
+        if cooling_system_values[:cooling_shr].nil?
+          shr = 0.65
+        else
+          shr = cooling_system_values[:cooling_shr]
+        end
+
         airflow_rate = 350.0
         success = HVAC.apply_room_ac(model, runner, eer, shr,
                                      airflow_rate, cool_capacity_btuh, load_frac,
@@ -2331,6 +2350,23 @@ class OSModel
         cool_capacity_btuh = Constants.SizingAuto
       end
 
+      heat_capacity_btuh = heat_pump_values[:heating_capacity]
+      if heat_capacity_btuh < 0
+        heat_capacity_btuh = Constants.SizingAuto
+      end
+
+      # Heating and cooling capacity must either both be Autosized or Fixed
+      if (cool_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
+        runner.registerError("HeatPump '#{heat_pump_values[:id]}' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized.")
+        return false
+      end
+
+      heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
+      if heat_capacity_btuh == Constants.SizingAuto and not heat_capacity_btuh_17F.nil?
+        runner.registerError("HeatPump '#{heat_pump_values[:id]}' has HeatingCapacity17F provided but heating capacity is auto-sized.")
+        return false
+      end
+
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
       if @total_frac_remaining_heat_load_served > 0
         sequential_load_frac_heat = load_frac_heat / @total_frac_remaining_heat_load_served # Fraction of remaining load served by this system
@@ -2354,6 +2390,12 @@ class OSModel
           backup_heat_capacity_btuh = Constants.SizingAuto
         end
         backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
+
+        # Heating and backup heating capacity must either both be Autosized or Fixed
+        if (backup_heat_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
+          runner.registerError("HeatPump '#{heat_pump_values[:id]}' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized.")
+          return false
+        end
       else
         backup_heat_capacity_btuh = 0.0
         backup_heat_efficiency = 1.0
@@ -2375,12 +2417,17 @@ class OSModel
 
         if num_speeds == "1-Speed"
 
-          shrs = [0.73]
+          if heat_pump_values[:cooling_shr].nil?
+            shrs = [0.73]
+          else
+            shrs = [heat_pump_values[:cooling_shr]]
+          end
+
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh,
+                                                   cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
+                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2388,12 +2435,17 @@ class OSModel
 
         elsif num_speeds == "2-Speed"
 
-          shrs = [0.71, 0.724]
+          if heat_pump_values[:cooling_shr].nil?
+            shrs = [0.71, 0.724]
+          else
+            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages?
+            shrs = [heat_pump_values[:cooling_shr] - 0.014, heat_pump_values[:cooling_shr]]
+          end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh,
+                                                   cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
+                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2401,12 +2453,17 @@ class OSModel
 
         elsif num_speeds == "Variable-Speed"
 
-          shrs = [0.87, 0.80, 0.79, 0.78]
+          if heat_pump_values[:cooling_shr].nil?
+            shrs = [0.87, 0.80, 0.79, 0.78]
+          else
+            var_sp_shr_mult = [1.115, 1.026, 1.013, 1.0]
+            shrs = var_sp_shr_mult.map { |m| heat_pump_values[:cooling_shr] * m }
+          end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
-                                                   cool_capacity_btuh, backup_heat_efficiency,
-                                                   backup_heat_capacity_btuh,
+                                                   cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
+                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2420,10 +2477,15 @@ class OSModel
 
       elsif hp_type == "mini-split"
 
-        # FIXME: Generalize
         seer = heat_pump_values[:cooling_efficiency_seer]
         hspf = heat_pump_values[:heating_efficiency_hspf]
-        shr = 0.73
+
+        if heat_pump_values[:cooling_shr].nil?
+          shr = 0.73
+        else
+          shr = heat_pump_values[:cooling_shr]
+        end
+
         min_cooling_capacity = 0.4
         max_cooling_capacity = 1.2
         min_cooling_airflow_rate = 200.0
@@ -2432,9 +2494,20 @@ class OSModel
         max_heating_capacity = 1.2
         min_heating_airflow_rate = 200.0
         max_heating_airflow_rate = 400.0
-        heating_capacity_offset = 2300.0
-        cap_retention_frac = 0.25
-        cap_retention_temp = -5.0
+        if heat_capacity_btuh == Constants.SizingAuto
+          heating_capacity_offset = 2300.0
+        else
+          heating_capacity_offset = heat_capacity_btuh - cool_capacity_btuh
+        end
+
+        if heat_capacity_btuh_17F.nil?
+          cap_retention_frac = 0.25
+          cap_retention_temp = -5.0
+        else
+          cap_retention_frac = heat_capacity_btuh_17F / heat_capacity_btuh
+          cap_retention_temp = 17.0
+        end
+
         pan_heater_power = 0.0
         fan_power = 0.07
         is_ducted = XMLHelper.has_element(hp, "DistributionSystem")
@@ -2454,10 +2527,13 @@ class OSModel
 
       elsif hp_type == "ground-to-air"
 
-        # FIXME: Generalize
         eer = heat_pump_values[:cooling_efficiency_eer]
         cop = heat_pump_values[:heating_efficiency_cop]
-        shr = 0.732
+        if heat_pump_values[:cooling_shr].nil?
+          shr = 0.732
+        else
+          shr = heat_pump_values[:cooling_shr]
+        end
         ground_conductivity = 0.6
         grout_conductivity = 0.4
         bore_config = Constants.SizingAuto
@@ -2481,8 +2557,8 @@ class OSModel
                                   ground_diffusivity, fluid_type, frac_glycol,
                                   design_delta_t, pump_head,
                                   u_tube_leg_spacing, u_tube_spacing_type,
-                                  fan_power, cool_capacity_btuh, backup_heat_efficiency,
-                                  backup_heat_capacity_btuh,
+                                  fan_power, cool_capacity_btuh, heat_capacity_btuh,
+                                  backup_heat_efficiency, backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @living_zone, @hvac_map, sys_id)
@@ -2748,7 +2824,7 @@ class OSModel
     return true
   end
 
-  def self.add_airflow(runner, model, building, spaces)
+  def self.add_airflow(runner, model, building, weather, spaces)
     # Infiltration
     infil_ach50 = nil
     infil_const_ach = nil
@@ -2968,12 +3044,14 @@ class OSModel
 
       # Connect AirLoopHVACs to ducts
       dist_id = hvac_distribution_values[:id]
+      num_attached = 0
       heating_systems_attached = []
       cooling_systems_attached = []
       ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
         building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
           next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
 
+          num_attached += 1
           sys_id = sys.elements["SystemIdentifier"].attributes["id"]
           heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionHeatLoadServed")) > 0
           cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionCoolLoadServed")) > 0
@@ -2995,6 +3073,7 @@ class OSModel
 
       fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if cooling_systems_attached.size > 1
       fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
+      fail "Distribution system '#{dist_id}' found but no HVAC system attached to it." if num_attached == 0
     end
 
     window_area = 0.0
@@ -3003,7 +3082,7 @@ class OSModel
       window_area += window_values[:area]
     end
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+    success = Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
                             @cfa, @infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
                             @min_neighbor_distance)
     return false if not success
@@ -3031,8 +3110,8 @@ class OSModel
     end
 
     # Duct location, Rvalue, Area
-    total_duct_area = { Constants.DuctSideSupply => 0.0,
-                        Constants.DuctSideReturn => 0.0 }
+    total_unconditioned_duct_area = { Constants.DuctSideSupply => 0.0,
+                                      Constants.DuctSideReturn => 0.0 }
     air_distribution.elements.each("Ducts") do |ducts|
       ducts_values = HPXML.get_ducts_values(ducts: ducts)
       next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
@@ -3041,9 +3120,10 @@ class OSModel
       duct_side = side_map[ducts_values[:duct_type]]
       next if duct_side.nil?
 
-      total_duct_area[duct_side] += ducts_values[:duct_surface_area]
+      total_unconditioned_duct_area[duct_side] += ducts_values[:duct_surface_area]
     end
 
+    # Create duct objects
     air_distribution.elements.each("Ducts") do |ducts|
       ducts_values = HPXML.get_ducts_values(ducts: ducts)
       next if ['living space', 'basement - conditioned'].include? ducts_values[:duct_location]
@@ -3054,10 +3134,21 @@ class OSModel
       duct_area = ducts_values[:duct_surface_area]
       duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
       # Apportion leakage to individual ducts by surface area
-      duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] *
-                          duct_area / total_duct_area[duct_side])
+      duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] * duct_area / total_unconditioned_duct_area[duct_side])
 
       air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+    end
+
+    # If all ducts are in conditioned space, model leakage as going to outside
+    [Constants.DuctSideSupply, Constants.DuctSideReturn].each do |duct_side|
+      next unless leakage_to_outside_cfm25[duct_side] > 0 and total_unconditioned_duct_area[duct_side] == 0
+
+      duct_area = 0.0
+      duct_rvalue = 0.0
+      duct_space = nil # outside
+      duct_leakage_cfm = leakage_to_outside_cfm25[duct_side]
+
+      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, duct_rvalue)
     end
 
     return air_ducts
@@ -3270,7 +3361,7 @@ class OSModel
         WoodStudConstructionSet.new(Material.Stud2x4, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
         WoodStudConstructionSet.new(Material.Stud2x4, 0.01, 0.0, 0.0, 0.0, nil),                          # Fallback
       ]
-      constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, wall_id)
+      match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, wall_id)
 
       success = Constructions.apply_wood_stud_wall(runner, model, [surface], "#{wall_id} construction",
                                                    cavity_r, install_grade, constr_set.stud.thick_in,
@@ -3291,9 +3382,9 @@ class OSModel
         SteelStudConstructionSet.new(3.5, corr_factor, 0.23, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 16" o.c.
         SteelStudConstructionSet.new(3.5, 1.0, 0.01, 0.0, 0.0, 0.0, nil),                                  # Fallback
       ]
-      constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+      match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = Constructions.apply_steel_stud_wall(runner, model, [surface], "WallConstruction",
+      success = Constructions.apply_steel_stud_wall(runner, model, [surface], "#{wall_id} construction",
                                                     cavity_r, install_grade, constr_set.cavity_thick_in,
                                                     cavity_filled, constr_set.framing_factor,
                                                     constr_set.corr_factor, constr_set.drywall_thick_in,
@@ -3309,9 +3400,9 @@ class OSModel
         DoubleStudConstructionSet.new(Material.Stud2x4, 0.23, 24.0, 0.0, 0.5, drywall_thick_in, mat_ext_finish),  # 2x4, 24" o.c.
         DoubleStudConstructionSet.new(Material.Stud2x4, 0.01, 16.0, 0.0, 0.0, 0.0, nil),                          # Fallback
       ]
-      constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+      match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = Constructions.apply_double_stud_wall(runner, model, [surface], "WallConstruction",
+      success = Constructions.apply_double_stud_wall(runner, model, [surface], "#{wall_id} construction",
                                                      cavity_r, install_grade, constr_set.stud.thick_in,
                                                      constr_set.stud.thick_in, constr_set.framing_factor,
                                                      constr_set.framing_spacing, is_staggered,
@@ -3329,9 +3420,9 @@ class OSModel
         CMUConstructionSet.new(8.0, 1.4, 0.08, 0.5, drywall_thick_in, mat_ext_finish),  # 8" perlite-filled CMU
         CMUConstructionSet.new(6.0, 5.29, 0.01, 0.0, 0.0, nil),                         # Fallback (6" hollow CMU)
       ]
-      constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+      match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = Constructions.apply_cmu_wall(runner, model, [surface], "WallConstruction",
+      success = Constructions.apply_cmu_wall(runner, model, [surface], "#{wall_id} construction",
                                              constr_set.thick_in, constr_set.cond_in, density,
                                              constr_set.framing_factor, furring_r,
                                              furring_cavity_depth_in, furring_spacing,
@@ -3348,9 +3439,9 @@ class OSModel
         SIPConstructionSet.new(5.0, 0.16, 0.0, sheathing_thick_in, 0.5, drywall_thick_in, mat_ext_finish),  # 5" SIP core
         SIPConstructionSet.new(1.0, 0.01, 0.0, sheathing_thick_in, 0.0, 0.0, nil),                          # Fallback
       ]
-      constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+      match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = Constructions.apply_sip_wall(runner, model, [surface], "WallConstruction",
+      success = Constructions.apply_sip_wall(runner, model, [surface], "#{wall_id} construction",
                                              cavity_r, constr_set.thick_in, constr_set.framing_factor,
                                              sheathing_type, constr_set.sheath_thick_in,
                                              constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -3362,9 +3453,9 @@ class OSModel
         ICFConstructionSet.new(2.0, 4.0, 0.08, 0.0, 0.5, drywall_thick_in, mat_ext_finish), # ICF w/4" concrete and 2" rigid ins layers
         ICFConstructionSet.new(1.0, 1.0, 0.01, 0.0, 0.0, 0.0, nil),                         # Fallback
       ]
-      constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+      match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      success = Constructions.apply_icf_wall(runner, model, [surface], "WallConstruction",
+      success = Constructions.apply_icf_wall(runner, model, [surface], "#{wall_id} construction",
                                              icf_r, constr_set.ins_thick_in,
                                              constr_set.concrete_thick_in, constr_set.framing_factor,
                                              constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -3377,7 +3468,7 @@ class OSModel
         GenericConstructionSet.new(0.0, 0.5, drywall_thick_in, mat_ext_finish),  # Standard
         GenericConstructionSet.new(0.0, 0.0, 0.0, nil),                          # Fallback
       ]
-      constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
+      match, constr_set, layer_r = pick_generic_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
       if wall_type == "SolidConcrete"
         thick_in = 6.0
@@ -3396,11 +3487,15 @@ class OSModel
         base_mat = BaseMaterial.Wood
       end
       thick_ins = [thick_in]
-      conds = [thick_in / layer_r]
+      if layer_r == 0
+        conds = [999]
+      else
+        conds = [thick_in / layer_r]
+      end
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      success = Constructions.apply_generic_layered_wall(runner, model, [surface], "WallConstruction",
+      success = Constructions.apply_generic_layered_wall(runner, model, [surface], "#{wall_id} construction",
                                                          thick_ins, conds, denss, specheats,
                                                          constr_set.drywall_thick_in, constr_set.osb_thick_in,
                                                          constr_set.rigid_r, constr_set.exterior_material)
@@ -3412,7 +3507,7 @@ class OSModel
 
     end
 
-    check_surface_assembly_rvalue(surface, film_r, assembly_r)
+    check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
 
     apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
   end
@@ -3431,11 +3526,11 @@ class OSModel
       cavity_frac = 1.0 - constr_set.framing_factor
       cavity_r = cavity_frac / (1.0 / assembly_r - constr_set.framing_factor / (constr_set.stud.rvalue + non_cavity_r)) - non_cavity_r
       if cavity_r > 0 # Choose this construction set
-        return constr_set, cavity_r
+        return true, constr_set, cavity_r
       end
     end
 
-    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
   def self.pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, surface_name)
@@ -3451,11 +3546,11 @@ class OSModel
       # Assumes installation quality 1
       cavity_r = (assembly_r - non_cavity_r) / constr_set.corr_factor
       if cavity_r > 0 # Choose this construction set
-        return constr_set, cavity_r
+        return true, constr_set, cavity_r
       end
     end
 
-    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
   def self.pick_double_stud_construction_set(assembly_r, constr_sets, film_r, surface_name)
@@ -3481,11 +3576,11 @@ class OSModel
       cavity_r = ((3 * c + d) * Math.sqrt(4 * a**2 * b**2 + 12 * a**2 * b * e + 4 * a**2 * b + 9 * a**2 * e**2 - 6 * a**2 * e + a**2 - 48 * a * b * c - 16 * a * b * d - 36 * a * c * e + 12 * a * c - 12 * a * d * e + 4 * a * d + 36 * c**2 + 24 * c * d + 4 * d**2) + 6 * a * b * c + 2 * a * b * d + 3 * a * c * e + 3 * a * c + 3 * a * d * e + a * d - 18 * c**2 - 18 * c * d - 4 * d**2) / (2 * (-3 * a * e + 9 * c + 3 * d))
       cavity_r = 3 * cavity_r
       if cavity_r > 0 # Choose this construction set
-        return constr_set, cavity_r
+        return true, constr_set, cavity_r
       end
     end
 
-    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
   def self.pick_sip_construction_set(assembly_r, constr_sets, film_r, surface_name)
@@ -3516,11 +3611,11 @@ class OSModel
       h = constr_set.thick_in
       cavity_r = (Math.sqrt((a * b * c * g - a * b * d * h - 2 * a * b * f * h + a * c * e * g - a * c * e * h - a * c * g + a * d * e * g - a * d * e * h - a * d * g + c * d * g + c * d * h + 2 * c * f * h + d**2 * g + d**2 * h + 2 * d * f * h)**2 - 4 * (-a * b * g + c * g + d * g) * (a * b * c * d * h + 2 * a * b * c * f * h - a * c * d * h + 2 * a * c * e * f * h - 2 * a * c * f * h - a * d**2 * h + 2 * a * d * e * f * h - 2 * a * d * f * h + c * d**2 * h + 2 * c * d * f * h + d**3 * h + 2 * d**2 * f * h)) - a * b * c * g + a * b * d * h + 2 * a * b * f * h - a * c * e * g + a * c * e * h + a * c * g - a * d * e * g + a * d * e * h + a * d * g - c * d * g - c * d * h - 2 * c * f * h - g * d**2 - d**2 * h - 2 * d * f * h) / (2 * (-a * b * g + c * g + d * g))
       if cavity_r > 0 # Choose this construction set
-        return constr_set, cavity_r
+        return true, constr_set, cavity_r
       end
     end
 
-    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
   def self.pick_cmu_construction_set(assembly_r, constr_sets, film_r, surface_name)
@@ -3542,11 +3637,11 @@ class OSModel
       e = non_cavity_r
       rigid_r = 0.5 * (Math.sqrt(a**2 - 4 * a * b * c + 4 * a * b * d + 2 * a * c - 2 * a * d + c**2 - 2 * c * d + d**2) + a - c - d - 2 * e)
       if rigid_r > 0 # Choose this construction set
-        return constr_set, rigid_r
+        return true, constr_set, rigid_r
       end
     end
 
-    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
   def self.pick_icf_construction_set(assembly_r, constr_sets, film_r, surface_name)
@@ -3567,11 +3662,11 @@ class OSModel
       e = non_cavity_r
       icf_r = (a * b * c - a * b * d - a * c - a * e + c * d + c * e + d * e + e**2) / (2 * (a * b - c - e))
       if icf_r > 0 # Choose this construction set
-        return constr_set, icf_r
+        return true, constr_set, icf_r
       end
     end
 
-    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
   def self.pick_generic_construction_set(assembly_r, constr_sets, film_r, surface_name)
@@ -3586,11 +3681,11 @@ class OSModel
       # Calculate effective ins layer R-value
       layer_r = assembly_r - non_cavity_r
       if layer_r > 0 # Choose this construction set
-        return constr_set, layer_r
+        return true, constr_set, layer_r
       end
     end
 
-    fail "Unable to calculate a construction for '#{surface_name}' using the provided assembly R-value (#{assembly_r})."
+    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
   def self.apply_solar_abs_emittance_to_construction(surface, solar_abs, emitt)
@@ -3601,7 +3696,7 @@ class OSModel
     exterior_material.setVisibleAbsorptance(solar_abs)
   end
 
-  def self.check_surface_assembly_rvalue(surface, film_r, assembly_r)
+  def self.check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
     # Verify that the actual OpenStudio construction R-value matches our target assembly R-value
 
     constr_r = UnitConversions.convert(1.0 / surface.construction.get.uFactor(0.0).get, 'm^2*k/w', 'hr*ft^2*f/btu') + film_r
@@ -3618,8 +3713,12 @@ class OSModel
       end
     end
 
-    if (assembly_r - constr_r).abs > 0.05
-      fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
+    if (assembly_r - constr_r).abs > 0.1
+      if match
+        fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}'."
+      else
+        runner.registerWarning("Assembly R-value (#{assembly_r}) for '#{surface.name.to_s}' below minimum expected value. Construction R-value increased to #{constr_r.round(2)}.")
+      end
     end
   end
 
@@ -3685,7 +3784,7 @@ class OSModel
       surface.setOutsideBoundaryCondition("Outdoors")
     elsif ["ground"].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition("Foundation")
-    elsif ["other housing unit"].include? exterior_adjacent_to
+    elsif ["other housing unit", "other housing unit above", "other housing unit below"].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition("Adiabatic")
     elsif ["living space"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
@@ -3977,7 +4076,7 @@ def to_beopt_wh_type(type)
 end
 
 def is_thermal_boundary(surface_values)
-  if surface_values[:exterior_adjacent_to] == "other housing unit"
+  if ["other housing unit", "other housing unit above", "other housing unit below"].include? surface_values[:exterior_adjacent_to]
     return false # adiabatic
   end
 
@@ -3994,12 +4093,10 @@ def is_adjacent_to_conditioned(adjacent_to)
   return false
 end
 
-def hpxml_floor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
+def hpxml_framefloor_is_ceiling(floor_interior_adjacent_to, floor_exterior_adjacent_to)
   if ["attic - vented", "attic - unvented"].include? floor_interior_adjacent_to
     return true
-  elsif ["attic - vented", "attic - unvented", "other housing unit"].include? floor_exterior_adjacent_to
-    # Note: There's no way to know if other housing unit is a floor below this unit
-    #       or a ceiling above this unit; we assume the latter.
+  elsif ["attic - vented", "attic - unvented", "other housing unit above"].include? floor_exterior_adjacent_to
     return true
   end
 

@@ -85,6 +85,10 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'dhw-frac-load-served.xml' => ["Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15."],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
                             'duct-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return'][DuctLocation="],
+                            'heat-pump-mixed-fixed-and-autosize-capacities.xml' => ["HeatPump 'HeatPump' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities2.xml' => ["HeatPump 'HeatPump' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities3.xml' => ["HeatPump 'HeatPump' has HeatingCapacity17F provided but heating capacity is auto-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities4.xml' => ["HeatPump 'HeatPump' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
                             'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
                             'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
                             'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
@@ -96,6 +100,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'missing-surfaces.xml' => ["'garage' must have at least one floor surface."],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'Roof'."],
+                            'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
                             'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."],
@@ -499,17 +504,19 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
     end
-    
+
     # Enclosure Foundations
     # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them to end up this way.
-    num_kiva_instances = 0
+    kiva_instances = []
     File.readlines(File.join(rundir, "eplusout.eio")).each do |eio_line|
       if eio_line.downcase.start_with? "foundation kiva"
         kiva_perim_frac = Float(eio_line.split(",")[5])
-        assert_equal(1.0, kiva_perim_frac)
-        num_kiva_instances += 1
+        assert_equal(0.25, kiva_perim_frac)
+
+        kiva_instances << eio_line.split(",")[0]
       end
     end
+    num_kiva_instances = kiva_instances.uniq.size
 
     num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
                                     'base-foundation-ambient-autosize.xml' => 0,      # no foundation in contact w/ ground
@@ -546,7 +553,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # Enclosure Walls/RimJoists
+    # Enclosure Walls/RimJoists/FoundationWalls
     bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"] | Enclosure/RimJoists/RimJoist[ExteriorAdjacentTo="outside"] | Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
@@ -590,7 +597,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
     end
-    
+
     # TODO: Enclosure FrameFloors
 
     # Enclosure Windows/Skylights
@@ -657,7 +664,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         hpxml_value = Float(door_rvalue)
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+        assert_in_epsilon(hpxml_value, sql_value, 0.02)
       end
     end
 
@@ -730,13 +737,15 @@ class HPXMLTranslatorTest < MiniTest::Test
       htg_cap = 0 if htg_cap.nil?
       clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
-      hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
       if hp_type == "mini-split"
-        hp_cap *= 1.20 # TODO: Generalize this
+        hp_cap_clg *= 1.20 # TODO: Generalize this
+        hp_cap_htg *= 1.20 # TODO: Generalize this
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
-      clg_cap += hp_cap if hp_cap > 0
-      htg_cap += hp_cap if hp_cap > 0
+      clg_cap += hp_cap_clg if hp_cap_clg > 0
+      htg_cap += hp_cap_htg if hp_cap_htg > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
       if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15
         has_multispeed_dx_heating_coil = true
@@ -933,6 +942,58 @@ class HPXMLTranslatorTest < MiniTest::Test
       found_ltg_energy = true
     end
     assert_equal(bldg_details.elements["Lighting"].nil?, !found_ltg_energy)
+
+    # Natural Gas check
+    ng_htg = results.fetch(["Natural Gas", "Heating", "General", "GJ"], 0) + results.fetch(["Natural Gas", "Heating", "Other", "GJ"], 0)
+    ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
+    ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? and not hpxml_path.include? "location-miami"
+      assert_operator(ng_htg, :>, 0)
+    else
+      assert_equal(ng_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='natural gas']"].nil?
+      assert_operator(ng_dhw, :>, 0)
+    else
+      assert_equal(ng_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='natural gas']"].nil?
+      assert_operator(ng_cd, :>, 0)
+    else
+      assert_equal(ng_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='natural gas']"].nil?
+      assert_operator(ng_cr, :>, 0)
+    else
+      assert_equal(ng_cr, 0)
+    end
+
+    # Additional Fuel check
+    af_htg = results.fetch(["Additional Fuel", "Heating", "General", "GJ"], 0) + results.fetch(["Additional Fuel", "Heating", "Other", "GJ"], 0)
+    af_dhw = results.fetch(["Additional Fuel", "Water Systems", "General", "GJ"], 0)
+    af_cd = results.fetch(["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    af_cr = results.fetch(["Additional Fuel", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil? and not hpxml_path.include? "location-miami"
+      assert_operator(af_htg, :>, 0)
+    else
+      assert_equal(af_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_dhw, :>, 0)
+    else
+      assert_equal(af_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cd, :>, 0)
+    else
+      assert_equal(af_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cr, :>, 0)
+    else
+      assert_equal(af_cr, 0)
+    end
 
     sqlFile.close
   end
