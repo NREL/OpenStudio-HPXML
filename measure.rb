@@ -888,10 +888,16 @@ class OSModel
   end
 
   def self.get_default_azimuths(building)
-    default_azimuth = 90 # default
+    azimuth_counts = {}
     building.elements.each("BuildingDetails/Enclosure//Azimuth") do |azimuth|
-      default_azimuth = Integer(azimuth.text)
-      break
+      az = Integer(azimuth.text)
+      azimuth_counts[az] = 0 if azimuth_counts[az].nil?
+      azimuth_counts[az] += 1
+    end
+    if azimuth_counts.empty?
+      default_azimuth = 0
+    else
+      default_azimuth = azimuth_counts.max_by { |k, v| v }[0]
     end
     return [default_azimuth,
             sanitize_azimuth(default_azimuth + 90),
@@ -1316,57 +1322,46 @@ class OSModel
         fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next unless fnd_wall_values[:exterior_adjacent_to] != "ground"
 
-        if fnd_wall_values[:azimuth].nil?
-          azimuths = @default_azimuths
+        ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
+        ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
+        next if ag_net_area < 0.1
+
+        length = ag_net_area / ag_height
+        z_origin = -1 * ag_height
+        azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+
+        surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
+        surface.additionalProperties.setFeature("Length", length)
+        surface.additionalProperties.setFeature("Azimuth", azimuth)
+        surface.additionalProperties.setFeature("Tilt", 90.0)
+        surface.setName(fnd_wall_values[:id])
+        surface.setSurfaceType("Wall")
+        set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
+        set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
+        surface.setSunExposure("NoSun")
+        surface.setWindExposure("NoWind")
+
+        # Apply construction
+
+        wall_type = "SolidConcrete"
+        solar_absorptance = 0.75
+        emittance = 0.9
+        if is_thermal_boundary(fnd_wall_values)
+          drywall_thick_in = 0.5
         else
-          azimuths = [fnd_wall_values[:azimuth]]
+          drywall_thick_in = 0.0
         end
-
-        azimuths.each do |azimuth|
-          ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
-          ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
-          next if ag_net_area < 0.1
-
-          length = (ag_net_area / ag_height) / azimuths.size
-          z_origin = -1 * ag_height
-
-          surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
-          surface.additionalProperties.setFeature("Length", length)
-          surface.additionalProperties.setFeature("Azimuth", azimuth)
-          surface.additionalProperties.setFeature("Tilt", 90.0)
-          if azimuths.size > 1
-            surface.setName("#{fnd_wall_values[:id]}:#{azimuth}")
-          else
-            surface.setName(fnd_wall_values[:id])
-          end
-          surface.setSurfaceType("Wall")
-          set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
-          set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
-          surface.setSunExposure("NoSun")
-          surface.setWindExposure("NoWind")
-
-          # Apply construction
-
-          wall_type = "SolidConcrete"
-          solar_absorptance = 0.75
-          emittance = 0.9
-          if is_thermal_boundary(fnd_wall_values)
-            drywall_thick_in = 0.5
-          else
-            drywall_thick_in = 0.0
-          end
-          film_r = 2.0 * Material.AirFilmVertical.rvalue
-          assembly_r = fnd_wall_values[:insulation_assembly_r_value]
-          if assembly_r.nil?
-            concrete_thick_in = fnd_wall_values[:thickness]
-            assembly_r = fnd_wall_values[:insulation_r_value] + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
-          end
-          mat_ext_finish = nil
-
-          success = apply_wall_construction(runner, model, surface, fnd_wall_values[:id], wall_type, assembly_r,
-                                            drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance)
-          return false if not success
+        film_r = 2.0 * Material.AirFilmVertical.rvalue
+        assembly_r = fnd_wall_values[:insulation_assembly_r_value]
+        if assembly_r.nil?
+          concrete_thick_in = fnd_wall_values[:thickness]
+          assembly_r = fnd_wall_values[:insulation_r_value] + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
         end
+        mat_ext_finish = nil
+
+        success = apply_wall_construction(runner, model, surface, fnd_wall_values[:id], wall_type, assembly_r,
+                                          drywall_thick_in, film_r, mat_ext_finish, solar_absorptance, emittance)
+        return false if not success
       end
     end
   end
@@ -1374,90 +1369,77 @@ class OSModel
   def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area, combined_wall_gross_area,
                                total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
 
-    if fnd_wall_values[:azimuth].nil?
-      azimuths = @default_azimuths
+    height = fnd_wall_values[:height]
+    height_ag = height - fnd_wall_values[:depth_below_grade]
+    z_origin = -1 * fnd_wall_values[:depth_below_grade]
+    length = combined_wall_gross_area / height
+    azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+
+    if total_fnd_wall_length > total_slab_exp_perim
+      # Calculate exposed section of wall based on slab's total exposed perimeter.
+      length *= total_slab_exp_perim / total_fnd_wall_length
+    end
+
+    if combined_wall_gross_area > combined_wall_net_area
+      # Create a "notch" in the wall to account for the subsurfaces. This ensures that
+      # we preserve the appropriate wall height, length, and area for Kiva.
+      subsurface_area = combined_wall_gross_area - combined_wall_net_area
     else
-      azimuths = [fnd_wall_values[:azimuth]]
+      subsurface_area = 0
     end
 
-    azimuths.each do |azimuth|
-      height = fnd_wall_values[:height]
-      height_ag = height - fnd_wall_values[:depth_below_grade]
-      z_origin = -1 * fnd_wall_values[:depth_below_grade]
-      length = (combined_wall_gross_area / height) / azimuths.size
+    surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
+    surface.additionalProperties.setFeature("Length", length)
+    surface.additionalProperties.setFeature("Azimuth", azimuth)
+    surface.additionalProperties.setFeature("Tilt", 90.0)
+    surface.setName(fnd_wall_values[:id])
+    surface.setSurfaceType("Wall")
+    set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
+    set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
 
-      if total_fnd_wall_length > total_slab_exp_perim
-        # Calculate exposed section of wall based on slab's total exposed perimeter.
-        length *= total_slab_exp_perim / total_fnd_wall_length
-      end
-
-      if combined_wall_gross_area > combined_wall_net_area
-        # Create a "notch" in the wall to account for the subsurfaces. This ensures that
-        # we preserve the appropriate wall height, length, and area for Kiva.
-        subsurface_area = (combined_wall_gross_area - combined_wall_net_area) / azimuths.size
-      else
-        subsurface_area = 0
-      end
-
-      surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
-      surface.additionalProperties.setFeature("Length", length)
-      surface.additionalProperties.setFeature("Azimuth", azimuth)
-      surface.additionalProperties.setFeature("Tilt", 90.0)
-      if azimuths.size > 1
-        surface.setName("#{fnd_wall_values[:id]}:#{azimuth}")
-      else
-        surface.setName(fnd_wall_values[:id])
-      end
-      surface.setSurfaceType("Wall")
-      set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
-      set_surface_exterior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:exterior_adjacent_to])
-
-      if is_thermal_boundary(fnd_wall_values)
-        drywall_thick_in = 0.5
-      else
+    if is_thermal_boundary(fnd_wall_values)
+      drywall_thick_in = 0.5
+    else
+      drywall_thick_in = 0.0
+    end
+    filled_cavity = true
+    concrete_thick_in = fnd_wall_values[:thickness]
+    cavity_r = 0.0
+    cavity_depth_in = 0.0
+    install_grade = 1
+    framing_factor = 0.0
+    assembly_r = fnd_wall_values[:insulation_assembly_r_value]
+    if not assembly_r.nil?
+      rigid_height = height
+      film_r = Material.AirFilmVertical.rvalue
+      rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
+      if rigid_r < 0 # Try without drywall
         drywall_thick_in = 0.0
-      end
-      filled_cavity = true
-      concrete_thick_in = fnd_wall_values[:thickness]
-      cavity_r = 0.0
-      cavity_depth_in = 0.0
-      install_grade = 1
-      framing_factor = 0.0
-      assembly_r = fnd_wall_values[:insulation_assembly_r_value]
-      if not assembly_r.nil?
-        rigid_height = height
-        film_r = Material.AirFilmVertical.rvalue
         rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
-        if rigid_r < 0 # Try without drywall
-          drywall_thick_in = 0.0
-          rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
-        end
-        if rigid_r < 0
-          rigid_r = 0.0
-          match = false
-        else
-          match = true
-        end
+      end
+      if rigid_r < 0
+        rigid_r = 0.0
+        match = false
       else
-        rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
-        rigid_r = fnd_wall_values[:insulation_r_value]
+        match = true
       end
-
-      success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
-                                                    rigid_height, cavity_r, install_grade,
-                                                    cavity_depth_in, filled_cavity, framing_factor,
-                                                    rigid_r, drywall_thick_in, concrete_thick_in,
-                                                    height, height_ag, kiva_foundation)
-      return nil if not success
-
-      if not assembly_r.nil?
-        check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
-      end
-
-      kiva_foundation = surface.adjacentFoundation.get
+    else
+      rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
+      rigid_r = fnd_wall_values[:insulation_r_value]
     end
 
-    return kiva_foundation
+    success = Constructions.apply_foundation_wall(runner, model, [surface], "#{fnd_wall_values[:id]} construction",
+                                                  rigid_height, cavity_r, install_grade,
+                                                  cavity_depth_in, filled_cavity, framing_factor,
+                                                  rigid_r, drywall_thick_in, concrete_thick_in,
+                                                  height, height_ag, kiva_foundation)
+    return nil if not success
+
+    if not assembly_r.nil?
+      check_surface_assembly_rvalue(runner, surface, film_r, assembly_r, match)
+    end
+
+    return surface.adjacentFoundation.get
   end
 
   def self.add_foundation_slab(runner, model, spaces, slab_values, slab_exp_perim,
@@ -3930,9 +3912,10 @@ class OSModel
         next if kiva_fnd_walls.flatten.include? fnd_wall2 # Skip if already processed
 
         fnd_wall_values2 = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall2)
+        # Note: Azimuth is intentionally excluded. For Kiva, azimuth does not influence results, so we combine
+        # foundation walls of different azimuths to reduce runtime.
         next unless fnd_wall_values2[:exterior_adjacent_to] == fnd_wall_values[:exterior_adjacent_to]
         next unless fnd_wall_values2[:height] == fnd_wall_values[:height]
-        next unless fnd_wall_values2[:azimuth] == fnd_wall_values[:azimuth]
         next unless fnd_wall_values2[:thickness] == fnd_wall_values[:thickness]
         next unless fnd_wall_values2[:depth_below_grade] == fnd_wall_values[:depth_below_grade]
         next unless fnd_wall_values2[:insulation_distance_to_bottom] == fnd_wall_values[:insulation_distance_to_bottom]

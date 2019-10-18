@@ -507,16 +507,15 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Enclosure Foundations
     # Ensure Kiva instances have perimeter fraction of 1.0 as we explicitly define them to end up this way.
-    kiva_instances = []
+    num_kiva_instances = 0
     File.readlines(File.join(rundir, "eplusout.eio")).each do |eio_line|
       if eio_line.downcase.start_with? "foundation kiva"
         kiva_perim_frac = Float(eio_line.split(",")[5])
-        assert_equal(0.25, kiva_perim_frac)
+        assert_equal(1.0, kiva_perim_frac)
 
-        kiva_instances << eio_line.split(",")[0]
+        num_kiva_instances += 1
       end
     end
-    num_kiva_instances = kiva_instances.uniq.size
 
     num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
                                     'base-foundation-ambient-autosize.xml' => 0,      # no foundation in contact w/ ground
