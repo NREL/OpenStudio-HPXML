@@ -172,7 +172,9 @@ def create_hpxmls
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
+    'base-hvac-ducts-multiple.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
+    'base-hvac-ducts-locations.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -193,7 +195,6 @@ def create_hpxmls
     'base-hvac-mini-split-heat-pump-ductless.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-mini-split-heat-pump-ductless-no-backup.xml' => 'base-hvac-mini-split-heat-pump-ductless.xml',
     'base-hvac-multiple.xml' => 'base.xml',
-    'base-hvac-ducts-multiple.xml' => 'base.xml',
     'base-hvac-none.xml' => 'base.xml',
     'base-hvac-none-no-fuel-access.xml' => 'base-hvac-none.xml',
     'base-hvac-portable-heater-electric-only.xml' => 'base.xml',
@@ -2240,6 +2241,8 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                        :duct_insulation_r_value => 0,
                        :duct_location => "attic - unvented",
                        :duct_surface_area => 50 }]
+  elsif ['base-hvac-ducts-locations.xml'].include? hpxml_file
+    ducts_values[0][1][:duct_location] = "attic - unvented"
   elsif ['base-hvac-ducts-multiple.xml'].include? hpxml_file
     ducts_values[0] << { :duct_type => "supply",
                          :duct_insulation_r_value => 8,
