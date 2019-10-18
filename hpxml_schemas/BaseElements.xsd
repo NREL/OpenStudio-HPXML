@@ -3121,7 +3121,7 @@
 									the fraction of the total duct area. </xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="DuctSurfaceArea" type="SurfaceArea">
+						<xs:element minOccurs="0" name="DuctSurfaceArea" type="DuctSurfaceArea">
 							<xs:annotation>
 								<xs:documentation>[sq.ft.]</xs:documentation>
 							</xs:annotation>
