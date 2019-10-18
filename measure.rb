@@ -324,7 +324,7 @@ class OSModel
 
     # Other
 
-    success = add_airflow(runner, model, building, spaces)
+    success = add_airflow(runner, model, building, weather, spaces)
     return false if not success
 
     success = add_hvac_sizing(runner, model, weather)
@@ -2768,7 +2768,7 @@ class OSModel
     return true
   end
 
-  def self.add_airflow(runner, model, building, spaces)
+  def self.add_airflow(runner, model, building, weather, spaces)
     # Infiltration
     infil_ach50 = nil
     infil_const_ach = nil
@@ -3026,7 +3026,7 @@ class OSModel
       window_area += window_values[:area]
     end
 
-    success = Airflow.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+    success = Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
                             @cfa, @infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
                             @min_neighbor_distance)
     return false if not success
