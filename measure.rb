@@ -928,7 +928,7 @@ class OSModel
       roof_values = HPXML.get_roof_values(roof: roof)
 
       if roof_values[:azimuth].nil?
-        azimuths = @default_azimuths
+        azimuths = @default_azimuths # Model as four directions for average exterior incident solar
       else
         azimuths = [roof_values[:azimuth]]
       end
@@ -1012,7 +1012,11 @@ class OSModel
       wall_values = HPXML.get_wall_values(wall: wall)
 
       if wall_values[:azimuth].nil?
-        azimuths = @default_azimuths
+        if wall_values[:exterior_adjacent_to] == "outside"
+          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+        else
+          azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+        end
       else
         azimuths = [wall_values[:azimuth]]
       end
@@ -1073,7 +1077,11 @@ class OSModel
       rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
 
       if rim_joist_values[:azimuth].nil?
-        azimuths = @default_azimuths
+        if rim_joist_values[:exterior_adjacent_to] == "outside"
+          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+        else
+          azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+        end
       else
         azimuths = [rim_joist_values[:azimuth]]
       end
@@ -1314,7 +1322,7 @@ class OSModel
         return false if kiva_foundation.nil?
       end
 
-      # Interior foundation wall surfaces
+      # Interzonal foundation wall surfaces
       # The above-grade portion of these walls are modeled as EnergyPlus surfaces with standard adjacency.
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
@@ -1329,7 +1337,7 @@ class OSModel
         length = ag_net_area / ag_height
         z_origin = -1 * ag_height
         if fnd_wall_values[:azimuth].nil?
-          azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+          azimuth = @default_azimuths[0] # Arbitrary direction, doesn't receive exterior incident solar
         else
           azimuth = fnd_wall_values[:azimuth]
         end
