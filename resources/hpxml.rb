@@ -12,9 +12,9 @@ class HPXML
                         **remainder)
     doc = XMLHelper.create_doc(version = "1.0", encoding = "UTF-8")
     hpxml = XMLHelper.add_element(doc, "HPXML")
-    XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2014/6")
+    XMLHelper.add_attribute(hpxml, "xmlns", "http://hpxmlonline.com/2019/10")
     XMLHelper.add_attribute(hpxml, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-    XMLHelper.add_attribute(hpxml, "xsi:schemaLocation", "http://hpxmlonline.com/2014/6")
+    XMLHelper.add_attribute(hpxml, "xsi:schemaLocation", "http://hpxmlonline.com/2019/10")
     XMLHelper.add_attribute(hpxml, "schemaVersion", "3.0")
 
     header = XMLHelper.add_element(hpxml, "XMLTransactionHeaderInformation")
@@ -85,11 +85,13 @@ class HPXML
   def self.add_site_neighbor(hpxml:,
                              azimuth:,
                              distance:,
+                             height: nil,
                              **remainder)
     neighbors = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "BuildingSummary", "Site", "extension", "Neighbors"])
     neighbor_building = XMLHelper.add_element(neighbors, "NeighborBuilding")
     XMLHelper.add_element(neighbor_building, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(neighbor_building, "Distance", Float(distance))
+    XMLHelper.add_element(neighbor_building, "Height", Float(height)) unless height.nil?
 
     return neighbor_building
   end
@@ -98,7 +100,8 @@ class HPXML
     return nil if neighbor_building.nil?
 
     return { :azimuth => to_integer_or_nil(XMLHelper.get_value(neighbor_building, "Azimuth")),
-             :distance => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance")) }
+             :distance => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance")),
+             :height => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Height")) }
   end
 
   def self.add_building_occupancy(hpxml:,
@@ -149,7 +152,8 @@ class HPXML
              :number_of_bathrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms")),
              :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
              :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
-             :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) }
+             :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")),
+             :residential_facility_type => XMLHelper.get_value(building_construction, "ResidentialFacilityType") }
   end
 
   def self.add_climate_and_risk_zones(hpxml:,
@@ -879,7 +883,8 @@ class HPXML
              :heating_efficiency_cop => to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='COP']/Value")),
              :heating_efficiency_hspf => to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='HSPF']/Value")),
              :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed")),
-             :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")) }
+             :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")),
+             :energy_star => XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_cooling_system(hpxml:,
@@ -893,6 +898,7 @@ class HPXML
                               cooling_efficiency_cop: nil,
                               cooling_efficiency_eer: nil,
                               cooling_efficiency_seer: nil,
+                              cooling_shr: nil,
                               **remainder)
     hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
@@ -917,6 +923,7 @@ class HPXML
       XMLHelper.add_element(annual_efficiency, "Units", units)
       XMLHelper.add_element(annual_efficiency, "Value", Float(value))
     end
+    XMLHelper.add_element(cooling_system, "SensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
 
     return cooling_system
   end
@@ -934,7 +941,9 @@ class HPXML
              :cooling_efficiency_kw_per_ton => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
              :cooling_efficiency_cop => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='COP']/Value")),
              :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
+             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")),
+             :cooling_shr => to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction")),
+             :energy_star => XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_heat_pump(hpxml:,
@@ -943,7 +952,9 @@ class HPXML
                          heat_pump_type:,
                          heat_pump_fuel:,
                          heating_capacity: nil,
+                         heating_capacity_17F: nil,
                          cooling_capacity:,
+                         cooling_shr: nil,
                          backup_heating_fuel: nil,
                          backup_heating_capacity: nil,
                          backup_heating_efficiency_percent: nil,
@@ -969,7 +980,9 @@ class HPXML
     XMLHelper.add_element(heat_pump, "HeatPumpType", heat_pump_type)
     XMLHelper.add_element(heat_pump, "HeatPumpFuel", heat_pump_fuel)
     XMLHelper.add_element(heat_pump, "HeatingCapacity", Float(heating_capacity)) unless heating_capacity.nil?
+    XMLHelper.add_element(heat_pump, "HeatingCapacity17F", Float(heating_capacity_17F)) unless heating_capacity_17F.nil?
     XMLHelper.add_element(heat_pump, "CoolingCapacity", Float(cooling_capacity))
+    XMLHelper.add_element(heat_pump, "CoolingSensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
     if not backup_heating_fuel.nil?
       XMLHelper.add_element(heat_pump, "BackupSystemFuel", backup_heating_fuel)
       backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
@@ -1014,7 +1027,9 @@ class HPXML
              :heat_pump_type => XMLHelper.get_value(heat_pump, "HeatPumpType"),
              :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
              :heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity")),
+             :heating_capacity_17F => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity17F")),
              :cooling_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity")),
+             :cooling_shr => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingSensibleHeatFraction")),
              :backup_heating_fuel => XMLHelper.get_value(heat_pump, "BackupSystemFuel"),
              :backup_heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")),
              :backup_heating_efficiency_percent => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")),
@@ -1027,7 +1042,8 @@ class HPXML
              :cooling_efficiency_kw_per_ton => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
              :cooling_efficiency_cop => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='COP']/Value")),
              :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")) }
+             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value")),
+             :energy_star => XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_hvac_control(hpxml:,
@@ -1208,6 +1224,7 @@ class HPXML
                                     energy_factor: nil,
                                     uniform_energy_factor: nil,
                                     recovery_efficiency: nil,
+                                    uses_desuperheater: nil,
                                     jacket_r_value: nil,
                                     related_hvac: nil,
                                     **remainder)
@@ -1230,10 +1247,12 @@ class HPXML
       jacket = XMLHelper.add_element(water_heater_insulation, "Jacket")
       XMLHelper.add_element(jacket, "JacketRValue", jacket_r_value)
     end
+    XMLHelper.add_element(water_heating_system, "UsesDesuperheater", Boolean(uses_desuperheater)) unless uses_desuperheater.nil?
     unless related_hvac.nil?
       related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
       XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac)
     end
+
     return water_heating_system
   end
 
@@ -1252,8 +1271,10 @@ class HPXML
              :energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
              :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
              :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
+             :uses_desuperheater => to_bool_or_nil(XMLHelper.get_value(water_heating_system, "UsesDesuperheater")),
              :jacket_r_value => to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")),
-             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem") }
+             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem"),
+             :energy_star => XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
   def self.add_hot_water_distribution(hpxml:,

@@ -280,26 +280,6 @@ class Geometry
     end
   end
 
-  def self.get_unconditioned_basement_spaces(spaces)
-    unconditioned_basement_spaces = []
-    spaces.each do |space|
-      next if not self.is_unconditioned_basement(space)
-
-      unconditioned_basement_spaces << space
-    end
-    return unconditioned_basement_spaces
-  end
-
-  def self.get_garage_spaces(spaces)
-    garage_spaces = []
-    spaces.each do |space|
-      next if not self.is_garage(space)
-
-      garage_spaces << space
-    end
-    return garage_spaces
-  end
-
   def self.get_facade_for_surface(surface)
     tol = 0.001
     n = surface.outwardNormal
@@ -502,27 +482,17 @@ class Geometry
     occ_rad = 0.558 * occ_sens
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
-    # Update number of occupants
-    total_num_occ = 0
-    people_sch = nil
-    activity_sch = nil
-
-    space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
-
+    space_obj_name = "#{Constants.ObjectNameOccupants}"
     space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
 
-    if people_sch.nil?
-      # Create schedule
-      people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
-      if not people_sch.validated?
-        return false
-      end
+    # Create schedule
+    people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    if not people_sch.validated?
+      return false
     end
 
-    if activity_sch.nil?
-      # Create schedule
-      activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
-    end
+    # Create schedule
+    activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
 
     # Add people definition for the occ
     occ_def = OpenStudio::Model::PeopleDefinition.new(model)
@@ -540,11 +510,7 @@ class Geometry
     occ.setActivityLevelSchedule(activity_sch)
     occ.setNumberofPeopleSchedule(people_sch.schedule)
 
-    total_num_occ += space_num_occ
-
     runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
-
-    runner.registerInfo("The building has been assigned #{total_num_occ.round(2)} total occupant(s).")
     return true
   end
 
