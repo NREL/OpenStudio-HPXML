@@ -1328,7 +1328,11 @@ class OSModel
 
         length = ag_net_area / ag_height
         z_origin = -1 * ag_height
-        azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+        if fnd_wall_values[:azimuth].nil?
+          azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+        else
+          azimuth = fnd_wall_values[:azimuth]
+        end
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
         surface.additionalProperties.setFeature("Length", length)
@@ -1373,7 +1377,11 @@ class OSModel
     height_ag = height - fnd_wall_values[:depth_below_grade]
     z_origin = -1 * fnd_wall_values[:depth_below_grade]
     length = combined_wall_gross_area / height
-    azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+    if fnd_wall_values[:azimuth].nil?
+      azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+    else
+      azimuth = fnd_wall_values[:azimuth]
+    end
 
     if total_fnd_wall_length > total_slab_exp_perim
       # Calculate exposed section of wall based on slab's total exposed perimeter.

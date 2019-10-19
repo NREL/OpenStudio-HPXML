@@ -556,8 +556,12 @@ class HPXMLTranslatorTest < MiniTest::Test
     bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"] | Enclosure/RimJoists/RimJoist[ExteriorAdjacentTo="outside"] | Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
+      # This case is complicated because two foundation walls are collapsed into one model wall
+      # so we need to skip some tests.
+      is_complex_fnd_wall = (XMLHelper.get_value(wall, "ExteriorAdjacentTo") == "ground" and hpxml_path.include? "base-foundation-complex.xml")
+
       # R-value
-      if XMLHelper.has_element(wall, 'Insulation/AssemblyEffectiveRValue')
+      if XMLHelper.has_element(wall, 'Insulation/AssemblyEffectiveRValue') and not hpxml_path.include? "base-foundation-unconditioned-basement-assembly-r.xml" # This file uses Foundation:Kiva for insulation, so skip it
         hpxml_value = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
         query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
@@ -572,10 +576,15 @@ class HPXMLTranslatorTest < MiniTest::Test
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
       if XMLHelper.get_value(wall, "ExteriorAdjacentTo") == "ground"
-        # Calculate total length of wall
-        wall_total_length = Float(XMLHelper.get_value(wall, "Area")) / Float(XMLHelper.get_value(wall, "Height"))
+        # Calculate total length of walls
+        wall_total_length = 0
+        bldg_details.elements.each('Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |fwall|
+          next unless XMLHelper.get_value(wall, "InteriorAdjacentTo") == XMLHelper.get_value(fwall, "InteriorAdjacentTo")
 
-        # Calculate slab exposed perimeter
+          wall_total_length += Float(XMLHelper.get_value(fwall, "Area")) / Float(XMLHelper.get_value(fwall, "Height"))
+        end
+
+        # Calculate total slab exposed perimeter
         slab_exposed_length = 0
         bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
           next unless XMLHelper.get_value(wall, "InteriorAdjacentTo") == XMLHelper.get_value(slab, "InteriorAdjacentTo")
@@ -584,11 +593,15 @@ class HPXMLTranslatorTest < MiniTest::Test
         end
 
         # Calculate exposed foundation wall area
-        hpxml_value *= (slab_exposed_length / wall_total_length)
+        if slab_exposed_length < wall_total_length
+          hpxml_value *= (slab_exposed_length / wall_total_length)
+        end
       end
-      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Net Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if not is_complex_fnd_wall
+        query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%' OR RowName LIKE '#{wall_id} %') AND ColumnName='Net Area' AND Units='m2'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
 
       # Solar absorptance
       if XMLHelper.has_element(wall, 'SolarAbsorptance')
@@ -599,9 +612,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       # Tilt
-      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(90.0, sql_value, 0.01)
+      if not is_complex_fnd_wall
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Tilt' AND Units='deg'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(90.0, sql_value, 0.01)
+      end
 
       # Azimuth
       if XMLHelper.has_element(wall, 'Azimuth')
