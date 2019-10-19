@@ -3928,6 +3928,7 @@ class OSModel
     if kiva_fnd_walls.empty? # Handle slab foundation type
       kiva_fnd_walls << []
     end
+
     kiva_slabs = []
     slabs.each_with_index do |slab, slab_idx|
       slab_values = HPXML.get_slab_values(slab: slab)

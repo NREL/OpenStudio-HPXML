@@ -571,6 +571,21 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
+      if XMLHelper.get_value(wall, "ExteriorAdjacentTo") == "ground"
+        # Calculate total length of wall
+        wall_total_length = Float(XMLHelper.get_value(wall, "Area")) / Float(XMLHelper.get_value(wall, "Height"))
+
+        # Calculate slab exposed perimeter
+        slab_exposed_length = 0
+        bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
+          next unless XMLHelper.get_value(wall, "InteriorAdjacentTo") == XMLHelper.get_value(slab, "InteriorAdjacentTo")
+
+          slab_exposed_length += Float(XMLHelper.get_value(slab, "ExposedPerimeter"))
+        end
+
+        # Calculate exposed foundation wall area
+        hpxml_value *= (slab_exposed_length / wall_total_length)
+      end
       query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
