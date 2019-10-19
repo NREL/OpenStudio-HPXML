@@ -183,8 +183,8 @@ class Material
     return self.new(name = "Brick, Medium/Dark", thick_in = 4.0, mat_base = BaseMaterial.Brick, k_in = nil, rho = nil, cp = nil, tAbs = 0.96, sAbs = 0.88, vAbs = 0.88)
   end
 
-  def self.ExtFinishWoodLight
-    return self.new(name = "Wood, Light", thick_in = 1.0, mat_base = nil, k_in = 0.71, rho = 34.0, cp = 0.28, tAbs = 0.82, sAbs = 0.3, vAbs = 0.3)
+  def self.ExtFinishWoodLight(thick_in = 1.0)
+    return self.new(name = "Wood, Light", thick_in, mat_base = nil, k_in = 0.71, rho = 34.0, cp = 0.28, tAbs = 0.82, sAbs = 0.3, vAbs = 0.3)
   end
 
   def self.ExtFinishWoodMedDark
