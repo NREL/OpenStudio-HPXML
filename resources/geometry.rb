@@ -280,26 +280,6 @@ class Geometry
     end
   end
 
-  def self.get_unconditioned_basement_spaces(spaces)
-    unconditioned_basement_spaces = []
-    spaces.each do |space|
-      next if not self.is_unconditioned_basement(space)
-
-      unconditioned_basement_spaces << space
-    end
-    return unconditioned_basement_spaces
-  end
-
-  def self.get_garage_spaces(spaces)
-    garage_spaces = []
-    spaces.each do |space|
-      next if not self.is_garage(space)
-
-      garage_spaces << space
-    end
-    return garage_spaces
-  end
-
   def self.get_facade_for_surface(surface)
     tol = 0.001
     n = surface.outwardNormal

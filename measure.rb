@@ -686,21 +686,20 @@ class OSModel
   end
 
   def self.modify_cond_basement_surface_properties(runner, model)
-    # modify conditioned basement surface properties here
-    # zero out solar absorptance in conditioned basement
+    # modify conditioned basement surface properties
+    # - zero out interior solar absorptance in conditioned basement
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
-      # zero out solar absorptance for some surfaces
       const = cond_bsmnt_surface.construction.get
       layered_const = const.to_LayeredConstruction.get
       if layered_const.numLayers() == 1
-        # split single layer into two in case of influencing exterior solar radiation
+        # split single layer into two to prevent influencing exterior solar radiation
         layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
         layer_mat.setThickness(layer_mat.thickness / 2)
         layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
       end
       innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
-      # check if target surface is sharing its exterior material object with other surfaces
-      # if so, need to clone the material and make changes there, then reassign it to target surface
+      # check if target surface is sharing its interior material/construction object with other surfaces
+      # if so, need to clone the material/construction and make changes there, then reassign it to target surface
       mat_share = (innermost_material.directUseCount != 1)
       const_share = (const.directUseCount != 1)
       if const_share
@@ -1564,20 +1563,18 @@ class OSModel
 
   def self.add_thermal_mass(runner, model, building)
     drywall_thick_in = 0.5
-    partition_frac_of_cfa = 1.0
+    partition_frac_of_cfa = 1.0 # Ratio of partition wall area to conditioned floor area
     basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
-    success = Constructions.apply_partition_walls(runner, model, [],
-                                                  "PartitionWallConstruction",
-                                                  drywall_thick_in, partition_frac_of_cfa, basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+    success = Constructions.apply_partition_walls(runner, model, "PartitionWallConstruction", drywall_thick_in, partition_frac_of_cfa,
+                                                  basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
     return false if not success
 
     # FIXME ?
-    furniture_frac_of_cfa = 1.0
     mass_lb_per_sqft = 8.0
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
-    success = Constructions.apply_furniture(runner, model, furniture_frac_of_cfa,
-                                            mass_lb_per_sqft, density_lb_per_cuft, mat, basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
+    success = Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat,
+                                            basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
     return false if not success
 
     return true
