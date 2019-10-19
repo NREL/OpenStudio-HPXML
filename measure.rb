@@ -263,6 +263,7 @@ class OSModel
     @subsurface_areas_by_surface = calc_subsurface_areas_by_surface(building)
     @default_azimuth = get_default_azimuth(building)
     @min_neighbor_distance = get_min_neighbor_distance(building)
+    @cond_bsmnt_surfaces = [] # list of surfaces in conditioned basement, used for modification of some surface properties, eg. solar absorptance, view factor, etc.
 
     @hvac_map = {} # mapping between HPXML HVAC systems and model objects
     @dhw_map = {}  # mapping between HPXML Water Heating systems and model objects
@@ -287,9 +288,6 @@ class OSModel
 
     @total_frac_remaining_heat_load_served = 1.0
     @total_frac_remaining_cool_load_served = 1.0
-
-    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
-    @living_zone = @living_space.thermalZone.get
 
     success = add_cooling_system(runner, model, building)
     return false if not success
@@ -403,7 +401,14 @@ class OSModel
     success = add_conditioned_floor_area(runner, model, building, spaces)
     return false if not success
 
+    # update living space/zone global variable
+    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+    @living_zone = @living_space.thermalZone.get
+
     success = add_thermal_mass(runner, model, building)
+    return false if not success
+
+    success = modify_cond_basement_surface_properties(runner, model)
     return false if not success
 
     success = check_for_errors(runner, model)
@@ -680,6 +685,40 @@ class OSModel
     return true
   end
 
+  def self.modify_cond_basement_surface_properties(runner, model)
+    # modify conditioned basement surface properties
+    # - zero out interior solar absorptance in conditioned basement
+    @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
+      const = cond_bsmnt_surface.construction.get
+      layered_const = const.to_LayeredConstruction.get
+      if layered_const.numLayers() == 1
+        # split single layer into two to prevent influencing exterior solar radiation
+        layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
+        layer_mat.setThickness(layer_mat.thickness / 2)
+        layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
+      end
+      innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
+      # check if target surface is sharing its interior material/construction object with other surfaces
+      # if so, need to clone the material/construction and make changes there, then reassign it to target surface
+      mat_share = (innermost_material.directUseCount != 1)
+      const_share = (const.directUseCount != 1)
+      if const_share
+        # create new construction + new material for these surfaces
+        new_const = const.clone.to_Construction.get
+        cond_bsmnt_surface.setConstruction(new_const)
+        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        new_const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
+      elsif mat_share
+        # create new material for existing unique construction
+        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
+      end
+      innermost_material.setSolarAbsorptance(0.0)
+      innermost_material.setVisibleAbsorptance(0.0)
+    end
+    return true
+  end
+
   def self.create_space_and_zone(model, spaces, space_type)
     if not spaces.keys.include? space_type
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
@@ -847,7 +886,7 @@ class OSModel
       end
       weekend_sch = weekday_sch
       monthly_sch = "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds)
+      success = Geometry.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch, @cfa, @nbeds, @living_space)
       return false if not success
     end
 
@@ -1500,8 +1539,23 @@ class OSModel
     surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     surface.setOutsideBoundaryCondition("Adiabatic")
 
+    # add ceiling surfaces accordingly
+    ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+
+    ceiling_surface.setSunExposure("NoSun")
+    ceiling_surface.setWindExposure("NoWind")
+    ceiling_surface.setName("inferred conditioned ceiling")
+    ceiling_surface.setSurfaceType("RoofCeiling")
+    ceiling_surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    ceiling_surface.setOutsideBoundaryCondition("Adiabatic")
+
+    if not @cond_bsmnt_surfaces.empty?
+      # assumming added ceiling is in conditioned basement
+      @cond_bsmnt_surfaces << ceiling_surface
+    end
+
     # Apply Construction
-    success = apply_adiabatic_construction(runner, model, [surface], "floor")
+    success = apply_adiabatic_construction(runner, model, [surface, ceiling_surface], "floor")
     return false if not success
 
     return true
@@ -1509,19 +1563,17 @@ class OSModel
 
   def self.add_thermal_mass(runner, model, building)
     drywall_thick_in = 0.5
-    partition_frac_of_cfa = 1.0
-    success = Constructions.apply_partition_walls(runner, model, [],
-                                                  "PartitionWallConstruction",
-                                                  drywall_thick_in, partition_frac_of_cfa)
+    partition_frac_of_cfa = 1.0 # Ratio of partition wall area to conditioned floor area
+    basement_frac_of_cfa = (@cfa - @cfa_ag) / @cfa
+    success = Constructions.apply_partition_walls(runner, model, "PartitionWallConstruction", drywall_thick_in, partition_frac_of_cfa,
+                                                  basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
     return false if not success
 
-    # FIXME ?
-    furniture_frac_of_cfa = 1.0
     mass_lb_per_sqft = 8.0
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
-    success = Constructions.apply_furniture(runner, model, furniture_frac_of_cfa,
-                                            mass_lb_per_sqft, density_lb_per_cuft, mat)
+    success = Constructions.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft, mat,
+                                            basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
     return false if not success
 
     return true
@@ -3098,7 +3150,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, false)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, false, @living_space)
     return false if not success
 
     return true
@@ -3709,6 +3761,7 @@ class OSModel
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+      @cond_bsmnt_surfaces << surface
     elsif ["crawlspace - vented"].include? interior_adjacent_to
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? interior_adjacent_to
@@ -3737,6 +3790,7 @@ class OSModel
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
     elsif ["basement - conditioned"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+      @cond_bsmnt_surfaces << surface
     elsif ["crawlspace - vented"].include? exterior_adjacent_to
       surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
     elsif ["crawlspace - unvented"].include? exterior_adjacent_to
