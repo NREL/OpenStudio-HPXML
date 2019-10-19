@@ -1,4 +1,3 @@
-# Add classes or functions here than can be used across a variety of our python classes and modules.
 require_relative "constants"
 require_relative "util"
 require_relative "weather"
@@ -10,7 +9,7 @@ require_relative "hotwater_appliances"
 
 class Waterheater
   def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
-                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, jacket_r)
+                      re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil, jacket_r)
 
     if fuel_type == Constants.FuelTypeElectric
       re = 0.98 # recovery efficiency set by fiat
@@ -36,11 +35,14 @@ class Waterheater
 
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
 
+    if not desuperheater_clg_coil.nil?
+      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank)
+    end
     return true
   end
 
   def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
-                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id)
+                          cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil)
 
     if cd < 0 or cd > 1
       runner.registerError("Cycling derate must be at least 0 and at most 1.")
@@ -69,6 +71,9 @@ class Waterheater
 
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
+    if not desuperheater_clg_coil.nil?
+      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTankless)
+    end
     return true
   end
 
@@ -690,6 +695,25 @@ class Waterheater
     return true
   end
 
+  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type)
+    # Create a schedule for desuperheater control (schedule value - desuperheater deadband = a little bit over tank stp would be good)
+    new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
+    new_schedule.setName("#{tank.name} desuperheater setpoint schedule")
+    new_schedule.setValue(UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0 + 0.5)
+
+    # create a desuperheater object
+    desuperheater = OpenStudio::Model::CoilWaterHeatingDesuperheater.new(model, new_schedule)
+    desuperheater.setDeadBandTemperatureDifference(0.2)
+    desuperheater.setRatedHeatReclaimRecoveryEfficiency(0.25)
+    desuperheater.addToHeatRejectionTarget(tank)
+    desuperheater.setWaterPumpPower(0)
+
+    # attach to the clg coil source
+    desuperheater.setHeatingSource(desuperheater_clg_coil)
+
+    return desuperheater
+  end
+
   def self.create_new_hx(model, name)
     hx = OpenStudio::Model::HeatExchangerFluidToFluid.new(model)
     hx.setName(name)
@@ -699,8 +723,8 @@ class Waterheater
   end
 
   def self.calc_water_heater_capacity(fuel, num_beds, num_water_heaters, num_baths = nil)
-    # Calculate the capacity of the water heater based on the fuel type and number of bedrooms and bathrooms in a home
-    # returns the capacity in kBtu/hr
+    # Calculate the capacity of the water heater based on the fuel type and number
+    # of bedrooms and bathrooms in a home. Returns the capacity in kBtu/hr.
 
     if num_baths.nil?
       num_baths = get_default_num_bathrooms(num_beds)
@@ -710,39 +734,33 @@ class Waterheater
     num_baths /= num_water_heaters.to_f
 
     if fuel != Constants.FuelTypeElectric
-      if num_beds <= 3
-        input_power = 36
-      elsif num_beds == 4
-        if num_baths <= 2.5
-          input_power = 36
-        else
-          input_power = 38
-        end
+      if num_beds <= 4
+        cap_kbtuh = 40
       elsif num_beds == 5
-        input_power = 47
+        cap_kbtuh = 47
       else
-        input_power = 50
+        cap_kbtuh = 50
       end
-      return input_power
+      return cap_kbtuh
     else
       if num_beds == 1
-        input_power = UnitConversions.convert(2.5, "kW", "kBtu/hr")
+        cap_kw = 2.5
       elsif num_beds == 2
         if num_baths <= 1.5
-          input_power = UnitConversions.convert(3.5, "kW", "kBtu/hr")
+          cap_kw = 3.5
         else
-          input_power = UnitConversions.convert(4.5, "kW", "kBtu/hr")
+          cap_kw = 4.5
         end
       elsif num_beds == 3
         if num_baths <= 1.5
-          input_power = UnitConversions.convert(4.5, "kW", "kBtu/hr")
+          cap_kw = 4.5
         else
-          input_power = UnitConversions.convert(5.5, "kW", "kBtu/hr")
+          cap_kw = 5.5
         end
       else
-        input_power = UnitConversions.convert(5.5, "kW", "kBtu/hr")
+        cap_kw = 5.5
       end
-      return input_power # kBtu/hr
+      return UnitConversions.convert(cap_kw, "kW", "kBtu/hr")
     end
   end
 
@@ -794,7 +812,8 @@ class Waterheater
     ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
                             Constants.FuelTypePropane => "Propane Rate",
                             Constants.FuelTypeOil => "FuelOil#1 Rate",
-                            Constants.FuelTypeGas => "Gas Rate" }[fuel_type]
+                            Constants.FuelTypeGas => "Gas Rate",
+                            Constants.FuelTypeWood => "OtherFuel1 Rate" }[fuel_type]
     if wh_type.include? "boiler"
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fluid Heat Exchanger Heat Transfer Energy")
       ec_adj_sensor_hx.setName("#{combi_hx.name} energy")
@@ -975,6 +994,9 @@ class Waterheater
     if eta_c > 1
       runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
     end
+    if ua < 0
+      runner.registerError("A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.")
+    end
 
     return u, ua, eta_c
   end
@@ -1050,7 +1072,15 @@ class Waterheater
       # on-cycle and off-cycle parasitics.
       # Values used here are based on the average across 10 units originally used when modeling MF buildings
       avg_runtime_frac = [0.0268, 0.0333, 0.0397, 0.0462, 0.0529]
-      runtime_frac = avg_runtime_frac[nbeds - 1]
+      if nbeds <= 5
+        if nbeds == 0
+          runtime_frac = avg_runtime_frac[0]
+        else
+          runtime_frac = avg_runtime_frac[nbeds - 1]
+        end
+      else
+        runtime_frac = avg_runtime_frac[4]
+      end
       avg_elec = oncycle_p * runtime_frac + offcycle_p * (1 - runtime_frac)
 
       new_heater.setOnCycleParasiticFuelConsumptionRate(avg_elec)
