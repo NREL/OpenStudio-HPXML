@@ -1569,7 +1569,6 @@ class OSModel
                                                   basement_frac_of_cfa, @cond_bsmnt_surfaces, @living_space)
     return false if not success
 
-    # FIXME ?
     mass_lb_per_sqft = 8.0
     density_lb_per_cuft = 40.0
     mat = BaseMaterial.Wood
