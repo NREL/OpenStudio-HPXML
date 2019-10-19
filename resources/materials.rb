@@ -227,20 +227,20 @@ class Material
     return self.new(name = "Drywall #{thick_in.to_s} in.", thick_in = thick_in, mat_base = BaseMaterial.Gypsum, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.1)
   end
 
-  def self.RoofingAsphaltShinglesDark
-    return self.RoofMaterial("Asphalt Shingles, Dark", 0.91, 0.92)
+  def self.RoofingAsphaltShinglesDark(emissivity = 0.91, absorptivity = 0.92)
+    return self.RoofMaterial("Asphalt Shingles, Dark", emissivity, absorptivity)
   end
 
-  def self.RoofingAsphaltShinglesMed
-    return self.RoofMaterial("Asphalt Shingles, Medium", 0.91, 0.85)
+  def self.RoofingAsphaltShinglesMed(emissivity = 0.91, absorptivity = 0.85)
+    return self.RoofMaterial("Asphalt Shingles, Medium", emissivity, absorptivity)
   end
 
-  def self.RoofingAsphaltShinglesLight
-    return self.RoofMaterial("Asphalt Shingles, Light", 0.91, 0.8)
+  def self.RoofingAsphaltShinglesLight(emissivity = 0.91, absorptivity = 0.8)
+    return self.RoofMaterial("Asphalt Shingles, Light", emissivity, absorptivity)
   end
 
-  def self.RoofingAsphaltShinglesWhiteCool
-    return self.RoofMaterial("Asphalt Shingles, White or Cool Colors", 0.91, 0.75)
+  def self.RoofingAsphaltShinglesWhiteCool(emissivity = 0.91, absorptivity = 0.75)
+    return self.RoofMaterial("Asphalt Shingles, White or Cool Colors", emissivity, absorptivity)
   end
 
   def self.RoofingTileDark
