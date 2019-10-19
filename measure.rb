@@ -3691,14 +3691,6 @@ class OSModel
     return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
   end
 
-  def self.apply_solar_abs_emittance_to_construction(construction, solar_abs, emitt)
-    # Applies the solar absorptance and emittance to the construction's exterior layer
-    exterior_material = construction.to_LayeredConstruction.get.layers[0].to_StandardOpaqueMaterial.get
-    exterior_material.setThermalAbsorptance(emitt)
-    exterior_material.setSolarAbsorptance(solar_abs)
-    exterior_material.setVisibleAbsorptance(solar_abs)
-  end
-
   def self.check_surface_assembly_rvalue(runner, surfaces, film_r, assembly_r, match)
     # Verify that the actual OpenStudio construction R-value matches our target assembly R-value
 
