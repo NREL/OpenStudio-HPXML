@@ -300,7 +300,7 @@ class Waterheater
     tank.setNode10AdditionalLossCoefficient(0)
     tank.setNode11AdditionalLossCoefficient(0)
     tank.setNode12AdditionalLossCoefficient(0)
-    tank.setUseSideDesignFlowRate((UnitConversions.convert(v_actual, "gal", "m^3")) / 60.1)
+    tank.setUseSideDesignFlowRate((UnitConversions.convert(v_actual, "gal", "m^3")) / 60.1) #Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
     tank.setSourceSideDesignFlowRate(0)
     tank.setSourceSideFlowControlMode("")
     tank.setSourceSideInletHeight(0)
@@ -605,6 +605,7 @@ class Waterheater
 
     plant_loop = OpenStudio::Model::PlantLoop.new(model)
     plant_loop.setName(Constants.PlantLoopSolarHotWater)
+    puts fluid_type
     if fluid_type == Constants.FluidWater
       plant_loop.setFluidType('Water')
     else
@@ -678,6 +679,7 @@ class Waterheater
     collector_performance.setCoefficient1ofEfficiencyEquation(frta)
     collector_performance.setCoefficient2ofEfficiencyEquation(-UnitConversions.convert(frul, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
     collector_performance.setCoefficient2ofIncidentAngleModifier(-iam)
+    collector_performance.setCoefficient3ofIncidentAngleModifier(0)
 
     plant_loop.addSupplyBranchForComponent(collector_plate)
     runner.registerInfo("Added '#{collector_plate.name}' to supply branch of '#{plant_loop.name}'.")
@@ -734,6 +736,8 @@ class Waterheater
     storage_tank.setSourceSideDesignFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
     storage_tank.setOnCycleParasiticFuelConsumptionRate(0)
     storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
+    storage_tank.setUseSideDesignFlowRate((UnitConversions.convert(storage_vol, "gal", "m^3")) / 60.1) #Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
+    
 
     plant_loop.addDemandBranchForComponent(storage_tank)
     runner.registerInfo("Added '#{storage_tank.name}' to demand branch of '#{plant_loop.name}'.")
