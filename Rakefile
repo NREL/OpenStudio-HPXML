@@ -62,6 +62,8 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
+    'invalid_files/base-hvac-return-duct-incomplete1.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
+    'invalid_files/base-hvac-return-duct-incomplete2.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
 
     'base-addenda-exclude-g.xml' => 'base.xml',
     'base-addenda-exclude-g-e.xml' => 'base.xml',
@@ -2115,7 +2117,10 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 15
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 5
   elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
-    duct_leakage_measurements_values[0][1][:duct_leakage_value] = 0
+    duct_leakage_measurements_values[0].pop
+  elsif ['invalid_files/base-hvac-return-duct-incomplete1.xml'].include? hpxml_file
+    duct_leakage_measurements_values[0] << { :duct_type => "return",
+                                             :duct_leakage_value => 25 }
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     duct_leakage_measurements_values[0] = []
     duct_leakage_measurements_values[1] = []
@@ -2232,7 +2237,12 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
     ducts_values[0][0][:duct_surface_area] = 30
     ducts_values[0][1][:duct_surface_area] = 10
   elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
-    ducts_values[0][1][:duct_surface_area] = 0
+    ducts_values[0].pop
+  elsif ['invalid_files/base-hvac-return-duct-incomplete2.xml'].include? hpxml_file
+    ducts_values[0] << { :duct_type => "return",
+                         :duct_insulation_r_value => 0,
+                         :duct_location => "attic - unvented",
+                         :duct_surface_area => 50 }
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     ducts_values[0] = []
     ducts_values[1] = []
