@@ -836,12 +836,12 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Add any combi water heating energy use
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoilerHeatExchanger.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get
+      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoiler.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get
+      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       if combi_htg_load > 0 and combi_hx_load > 0
         results.keys.each do |k|
-          next unless k[1] == "Heating" and k[3] == "GJ"
+          next unless k[0] != "Load" and k[1] == "Heating" and k[3] == "GJ"
 
           water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
         end
