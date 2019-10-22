@@ -289,7 +289,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
-      cooling_crankcase = sql_value.get
+      cooling_crankcase = sql_value.get.round(2)
       if cooling_crankcase > 0
         results[["Electricity", "Cooling", "General", "GJ"]] -= cooling_crankcase
         results[["Electricity", "Cooling", "Crankcase", "GJ"]] = cooling_crankcase
@@ -298,7 +298,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
-      heating_crankcase = sql_value.get
+      heating_crankcase = sql_value.get.round(2)
       if heating_crankcase > 0
         results[["Electricity", "Heating", "General", "GJ"]] -= heating_crankcase
         results[["Electricity", "Heating", "Crankcase", "GJ"]] = heating_crankcase
@@ -307,7 +307,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
-      heating_defrost = sql_value.get
+      heating_defrost = sql_value.get.round(2)
       if heating_defrost > 0
         results[["Electricity", "Heating", "General", "GJ"]] -= heating_defrost
         results[["Electricity", "Heating", "Defrost", "GJ"]] = heating_defrost
@@ -316,17 +316,17 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Obtain HVAC capacities
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%User-Specified%Capacity' AND Description NOT LIKE '%Supplemental%' AND Units='W'"
-    results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
-    results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Obtain Heating/Cooling loads
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Heating:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
-    results[["Load", "Heating", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Load", "Heating", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Cooling:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
-    results[["Load", "Cooling", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Load", "Cooling", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     sqlFile.close
 
