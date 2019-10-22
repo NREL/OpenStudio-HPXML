@@ -748,7 +748,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     if not clg_cap.nil?
       sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-      if clg_cap > 0
+      if clg_cap == 0
+        assert_operator(sql_value, :<, 1)
+      elsif clg_cap > 0
         assert_in_epsilon(clg_cap, sql_value, 0.01)
       else # autosized
         assert_operator(sql_value, :>, 1)
@@ -756,7 +758,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     if not htg_cap.nil? and not (has_multispeed_dx_heating_coil or has_gshp_coil)
       sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
-      if htg_cap > 0
+      if htg_cap == 0
+        assert_operator(sql_value, :<, 1)
+      elsif htg_cap > 0
         assert_in_epsilon(htg_cap, sql_value, 0.01)
       else # autosized
         assert_operator(sql_value, :>, 1)

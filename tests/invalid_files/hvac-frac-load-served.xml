@@ -366,7 +366,7 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>12000.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -390,7 +390,7 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>12000.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
@@ -413,7 +413,7 @@
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>12000.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>3412.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.1</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.2</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
