@@ -967,7 +967,11 @@ class OSModel
       roof_values = HPXML.get_roof_values(roof: roof)
 
       if roof_values[:azimuth].nil?
-        azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+        if roof_values[:pitch] > 0
+          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
+        else
+          azimuths = [90] # Arbitrary azimuth for flat roof
+        end
       else
         azimuths = [roof_values[:azimuth]]
       end
