@@ -112,7 +112,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
                             'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="],
-                            'base-hvac-return-duct-incomplete1.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType='return']/../Ducts[DuctType='return']"],
+                            'base-hvac-return-duct-incomplete1.xml' => ["Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType='return']/../Ducts[DuctType='return']"],
                             'base-hvac-return-duct-incomplete2.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='return']/../DuctLeakageMeasurement[DuctType='return']"] }
 
     # Test simulations

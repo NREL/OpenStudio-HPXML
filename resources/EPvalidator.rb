@@ -400,7 +400,7 @@ class EnergyPlusValidator
 
       ## [HVACDuctLeakageMeasurement]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType='return']" => {
-        "../Ducts[DuctType='return']" => one,
+        "../Ducts[DuctType='return']" => one_or_more,
       },
 
       ## [HVACDuct]
