@@ -3084,8 +3084,6 @@ class OSModel
 
       duct_side = side_map[ducts_values[:duct_type]]
       next if duct_side.nil?
-      # skip implementing 0 area ducts, ducts in conditioned space are already skipped above
-      next if total_unconditioned_duct_area[duct_side] == 0
 
       duct_area = ducts_values[:duct_surface_area]
       duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
