@@ -760,6 +760,8 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
+        next if vf < 0.01 # Exclude tiny numbers
+
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf)
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
         zone_prop.addViewFactor(os_vf)
@@ -775,6 +777,7 @@ class OSModel
     vf_map = {}
     all_surfaces.each do |surface| # surface, subsurface, and internalmass
       if surface.is_a? OpenStudio::Model::InternalMass
+        # Assumed values consistent with EnergyPlus source code
         s_azimuth = 0.0
         s_tilt = 90.0
       else
@@ -812,7 +815,7 @@ class OSModel
 
       all_surfaces.each do |surface2|
         next if surface2 == surface
-        next if surface2.is_a? OpenStudio::Model::SubSurface # handled together with its parant surface
+        next if surface2.is_a? OpenStudio::Model::SubSurface # handled together with its parent surface
 
         if surface2.is_a? OpenStudio::Model::InternalMass
           surface_vf_map[surface2] = surface2.surfaceArea.get / zone_seen_area
@@ -824,7 +827,7 @@ class OSModel
              (s_type == "floor" and surface_type == "roofceiling") or
              (s_azimuth - s2_azimuth).abs > same_ang_limit or
              (s_tilt - s2_tilt).abs > same_ang_limit
-            if not surface2.subSurfaces.size == 0
+            if surface2.subSurfaces.size != 0
               # calculate surface and its sub surfaces view factors
               parent_surface_a = surface2.grossArea
               surface2.subSurfaces.each do |sub_surface|
@@ -1674,7 +1677,7 @@ class OSModel
     ceiling_surface.setOutsideBoundaryCondition("Adiabatic")
 
     if not @cond_bsmnt_surfaces.empty?
-      # assumming added ceiling is in conditioned basement
+      # assuming added ceiling is in conditioned basement
       @cond_bsmnt_surfaces << ceiling_surface
     end
 
