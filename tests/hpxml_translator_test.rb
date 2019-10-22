@@ -716,18 +716,20 @@ class HPXMLTranslatorTest < MiniTest::Test
     has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
-      htg_cap = 0 if htg_cap.nil?
       htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
-      htg_cap += htg_sys_cap if htg_sys_cap > 0
+      if htg_sys_cap > 0
+        htg_cap = 0 if htg_cap.nil?
+        htg_cap += htg_sys_cap
+      end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
-      clg_cap = 0 if clg_cap.nil?
       clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
-      clg_cap += clg_sys_cap if clg_sys_cap > 0
+      if clg_sys_cap > 0
+        clg_cap = 0 if clg_cap.nil?
+        clg_cap += clg_sys_cap
+      end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
-      htg_cap = 0 if htg_cap.nil?
-      clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
       hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
@@ -736,9 +738,18 @@ class HPXMLTranslatorTest < MiniTest::Test
         hp_cap_htg *= 1.20 # TODO: Generalize this
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
-      clg_cap += hp_cap_clg if hp_cap_clg > 0
-      htg_cap += hp_cap_htg if hp_cap_htg > 0
-      htg_cap += supp_hp_cap if supp_hp_cap > 0
+      if hp_cap_clg > 0
+        clg_cap = 0 if clg_cap.nil?
+        clg_cap += hp_cap_clg
+      end
+      if hp_cap_htg > 0
+        htg_cap = 0 if htg_cap.nil?
+        htg_cap += hp_cap_htg
+      end
+      if supp_hp_cap > 0
+        htg_cap = 0 if htg_cap.nil?
+        htg_cap += supp_hp_cap
+      end
       if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15
         has_multispeed_dx_heating_coil = true
       end
