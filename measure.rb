@@ -760,13 +760,13 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
-        next if vf < 0.01 # Exclude tiny numbers
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf)
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
         zone_prop.addViewFactor(os_vf)
       end
     end
+
     return true
   end
 
@@ -832,8 +832,12 @@ class OSModel
               parent_surface_a = surface2.grossArea
               surface2.subSurfaces.each do |sub_surface|
                 parent_surface_a -= sub_surface.grossArea
-                surface_vf_map[surface2] = parent_surface_a / zone_seen_area
-                surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
+                if parent_surface_a < 0.01 # base surface of a sub surface: window/door etc.
+                  surface_vf_map[sub_surface] = surface2.grossArea / zone_seen_area
+                else
+                  surface_vf_map[surface2] = parent_surface_a / zone_seen_area
+                  surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
+                end
               end
             else # no subsurface
               surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
