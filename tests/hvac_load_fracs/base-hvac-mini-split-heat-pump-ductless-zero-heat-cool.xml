@@ -236,14 +236,14 @@
               <SystemIdentifier id='HeatPump'/>
               <HeatPumpType>mini-split</HeatPumpType>
               <HeatPumpFuel>electricity</HeatPumpFuel>
-              <HeatingCapacity>52000.0</HeatingCapacity>
-              <CoolingCapacity>48000.0</CoolingCapacity>
+              <HeatingCapacity>0.0</HeatingCapacity>
+              <CoolingCapacity>0.0</CoolingCapacity>
               <BackupSystemFuel>electricity</BackupSystemFuel>
               <BackupAnnualHeatingEfficiency>
                 <Units>Percent</Units>
                 <Value>1.0</Value>
               </BackupAnnualHeatingEfficiency>
-              <BackupHeatingCapacity>120000.0</BackupHeatingCapacity>
+              <BackupHeatingCapacity>0.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>0.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>

@@ -37,18 +37,18 @@ class HVAC
     clg_coil_stage_data[0].remove
     clg_coil.setName(obj_name + " clg coil")
     if capacity != Constants.SizingAuto
-      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert([capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     clg_coil.setRatedSensibleHeatRatio(shrs_rated_gross[0])
-    clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(1.0 / cooling_eirs[0]))
-    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s")))
-    clg_coil.setNominalTimeForCondensateRemovalToBegin(OpenStudio::OptionalDouble.new(1000.0))
-    clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(OpenStudio::OptionalDouble.new(1.5))
-    clg_coil.setMaximumCyclingRate(OpenStudio::OptionalDouble.new(3.0))
-    clg_coil.setLatentCapacityTimeConstant(OpenStudio::OptionalDouble.new(45.0))
+    clg_coil.setRatedCOP(1.0 / cooling_eirs[0])
+    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s"))
+    clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
+    clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
+    clg_coil.setMaximumCyclingRate(3.0)
+    clg_coil.setLatentCapacityTimeConstant(45.0)
     clg_coil.setCondenserType("AirCooled")
-    clg_coil.setCrankcaseHeaterCapacity(OpenStudio::OptionalDouble.new(UnitConversions.convert(crankcase_kw, "kW", "W")))
-    clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(OpenStudio::OptionalDouble.new(UnitConversions.convert(crankcase_temp, "F", "C")))
+    clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
+    clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
     hvac_map[sys_id] << clg_coil
 
     # _processSystemFan
@@ -403,7 +403,7 @@ class HVAC
     htg_coil_stage_data[0].remove
     htg_coil.setName(obj_name + " htg coil")
     if heat_pump_capacity_heat != Constants.SizingAuto
-      htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(heat_pump_capacity_heat, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert([heat_pump_capacity_heat, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     htg_coil.setRatedCOP(1.0 / heating_eirs[0])
     htg_coil.setRatedSupplyFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s"))
@@ -424,7 +424,7 @@ class HVAC
     htg_supp_coil.setName(obj_name + " supp htg coil")
     htg_supp_coil.setEfficiency(supplemental_efficiency)
     if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     hvac_map[sys_id] << htg_supp_coil
 
@@ -432,15 +432,15 @@ class HVAC
     clg_coil_stage_data[0].remove
     clg_coil.setName(obj_name + " clg coil")
     if heat_pump_capacity_cool != Constants.SizingAuto
-      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump_capacity_cool, "Btu/hr", "W")) # Used by HVACSizing measure
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert([heat_pump_capacity_cool, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     clg_coil.setRatedSensibleHeatRatio(shrs_rated_gross[0])
-    clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(1.0 / cooling_eirs[0]))
-    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s")))
-    clg_coil.setNominalTimeForCondensateRemovalToBegin(OpenStudio::OptionalDouble.new(1000.0))
-    clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(OpenStudio::OptionalDouble.new(1.5))
-    clg_coil.setMaximumCyclingRate(OpenStudio::OptionalDouble.new(3.0))
-    clg_coil.setLatentCapacityTimeConstant(OpenStudio::OptionalDouble.new(45.0))
+    clg_coil.setRatedCOP(1.0 / cooling_eirs[0])
+    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(fan_power_rated / UnitConversions.convert(1.0, "cfm", "m^3/s"))
+    clg_coil.setNominalTimeForCondensateRemovalToBegin(1000.0)
+    clg_coil.setRatioOfInitialMoistureEvaporationRateAndSteadyStateLatentCapacity(1.5)
+    clg_coil.setMaximumCyclingRate(3.0)
+    clg_coil.setLatentCapacityTimeConstant(45.0)
     clg_coil.setCondenserType("AirCooled")
     hvac_map[sys_id] << clg_coil
 
@@ -583,7 +583,7 @@ class HVAC
     htg_supp_coil.setName(obj_name + " supp htg coil")
     htg_supp_coil.setEfficiency(supplemental_efficiency)
     if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     hvac_map[sys_id] << htg_supp_coil
 
@@ -753,7 +753,7 @@ class HVAC
     htg_supp_coil.setName(obj_name + " supp htg coil")
     htg_supp_coil.setEfficiency(supplemental_efficiency)
     if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
 
     clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -954,7 +954,7 @@ class HVAC
     htg_supp_coil.setName(obj_name + " supp htg coil")
     htg_supp_coil.setEfficiency(supplemental_efficiency)
     if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     hvac_map[sys_id] << htg_supp_coil
 
@@ -1077,7 +1077,7 @@ class HVAC
       program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       program.setName(obj_name + " pan heater program")
       if heat_pump_capacity != Constants.SizingAuto
-        num_outdoor_units = (UnitConversions.convert(heat_pump_capacity, "Btu/hr", "ton") / 1.5).ceil # Assume 1.5 tons max per outdoor unit
+        num_outdoor_units = (UnitConversions.convert([heat_pump_capacity, Constants.small].max, "Btu/hr", "ton") / 1.5).ceil # Assume 1.5 tons max per outdoor unit
       else
         num_outdoor_units = 2
       end
@@ -1249,7 +1249,7 @@ class HVAC
     htg_coil = OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit.new(model)
     htg_coil.setName(obj_name + " htg coil")
     if heat_pump_capacity_heat != Constants.SizingAuto
-      htg_coil.setRatedHeatingCapacity(OpenStudio::OptionalDouble.new(UnitConversions.convert(heat_pump_capacity_heat, "Btu/hr", "W"))) # Used by HVACSizing measure
+      htg_coil.setRatedHeatingCapacity(UnitConversions.convert([heat_pump_capacity_heat, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     htg_coil.setRatedHeatingCoefficientofPerformance(1.0 / heatingEIR)
     htg_coil.setHeatingCapacityCoefficient1(gshp_HEAT_CAP_fT_coeff[0])
@@ -1268,14 +1268,14 @@ class HVAC
     htg_supp_coil.setName(obj_name + " supp htg coil")
     htg_supp_coil.setEfficiency(supplemental_efficiency)
     if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert(supplemental_capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit.new(model)
     clg_coil.setName(obj_name + " clg coil")
     if heat_pump_capacity_cool != Constants.SizingAuto
-      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(heat_pump_capacity_cool, "Btu/hr", "W")) # Used by HVACSizing measure
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert([heat_pump_capacity_cool, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     clg_coil.setRatedCoolingCoefficientofPerformance(1.0 / coolingEIR)
     clg_coil.setTotalCoolingCapacityCoefficient1(gshp_COOL_CAP_fT_coeff[0])
@@ -1403,14 +1403,14 @@ class HVAC
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, roomac_cap_ft_curve, roomac_cap_fff_curve, roomac_eir_ft_curve, roomcac_eir_fff_curve, roomac_plf_fplr_curve)
     clg_coil.setName(obj_name + " #{control_zone.name} clg coil")
     if capacity != Constants.SizingAuto
-      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert([capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     clg_coil.setRatedSensibleHeatRatio(shr)
-    clg_coil.setRatedCOP(OpenStudio::OptionalDouble.new(UnitConversions.convert(eer, "Btu/hr", "W")))
-    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(OpenStudio::OptionalDouble.new(773.3))
-    clg_coil.setEvaporativeCondenserEffectiveness(OpenStudio::OptionalDouble.new(0.9))
-    clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(OpenStudio::OptionalDouble.new(10))
-    clg_coil.setBasinHeaterSetpointTemperature(OpenStudio::OptionalDouble.new(2))
+    clg_coil.setRatedCOP(UnitConversions.convert(eer, "Btu/hr", "W"))
+    clg_coil.setRatedEvaporatorFanPowerPerVolumeFlowRate(773.3)
+    clg_coil.setEvaporativeCondenserEffectiveness(0.9)
+    clg_coil.setMaximumOutdoorDryBulbTemperatureForCrankcaseHeaterOperation(10)
+    clg_coil.setBasinHeaterSetpointTemperature(2)
     hvac_map[sys_id] << clg_coil
 
     fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
@@ -1468,7 +1468,7 @@ class HVAC
     end
     htg_coil.setName(obj_name + " htg coil")
     if capacity != Constants.SizingAuto
-      htg_coil.setNominalCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_coil.setNominalCapacity(UnitConversions.convert([capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     hvac_map[sys_id] << htg_coil
 
@@ -1654,7 +1654,7 @@ class HVAC
     boiler.setName(obj_name)
     boiler.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
     if capacity != Constants.SizingAuto
-      boiler.setNominalCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      boiler.setNominalCapacity(UnitConversions.convert([capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     if system_type == Constants.BoilerTypeCondensing
       # Convert Rated Efficiency at 80F and 1.0PLR where the performance curves are derived from to Design condition as input
@@ -1719,7 +1719,7 @@ class HVAC
     baseboard_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
     baseboard_coil.setName(obj_name + " #{control_zone.name} htg coil")
     if capacity != Constants.SizingAuto
-      baseboard_coil.setHeatingDesignCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      baseboard_coil.setHeatingDesignCapacity(UnitConversions.convert([capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     baseboard_coil.setConvergenceTolerance(0.001)
     hvac_map[sys_id] << baseboard_coil
@@ -1759,7 +1759,7 @@ class HVAC
     baseboard_heater = OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric.new(model)
     baseboard_heater.setName(obj_name + " #{control_zone.name}")
     if capacity != Constants.SizingAuto
-      baseboard_heater.setNominalCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      baseboard_heater.setNominalCapacity(UnitConversions.convert([capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     baseboard_heater.setEfficiency(efficiency)
     hvac_map[sys_id] << baseboard_heater
@@ -1804,7 +1804,7 @@ class HVAC
     end
     htg_coil.setName(obj_name + " #{control_zone.name} htg coil")
     if capacity != Constants.SizingAuto
-      htg_coil.setNominalCapacity(UnitConversions.convert(capacity, "Btu/hr", "W")) # Used by HVACSizing measure
+      htg_coil.setNominalCapacity(UnitConversions.convert([capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
     hvac_map[sys_id] << htg_coil
 
@@ -3795,7 +3795,7 @@ class HVAC
                                                                            cool_plf_fplr_curve,
                                                                            const_biquadratic)
       if outputCapacity != Constants.SizingAuto
-        stage_data.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(outputCapacity, "Btu/hr", "W")) # Used by HVACSizing measure
+        stage_data.setGrossRatedTotalCoolingCapacity(UnitConversions.convert([outputCapacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       stage_data.setGrossRatedSensibleHeatRatio(shrs_rated_gross[speed])
       stage_data.setGrossRatedCoolingCOP(1.0 / cooling_eirs[speed])
@@ -3831,7 +3831,7 @@ class HVAC
                                                                            hp_heat_plf_fplr_curve,
                                                                            const_biquadratic)
       if outputCapacity != Constants.SizingAuto
-        stage_data.setGrossRatedHeatingCapacity(UnitConversions.convert(outputCapacity, "Btu/hr", "W")) # Used by HVACSizing measure
+        stage_data.setGrossRatedHeatingCapacity(UnitConversions.convert([outputCapacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
       end
       stage_data.setGrossRatedHeatingCOP(1.0 / heating_eirs[speed])
       stage_data.setRatedWasteHeatFractionofPowerInput(0.2)
