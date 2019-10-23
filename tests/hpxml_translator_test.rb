@@ -289,7 +289,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
-      cooling_crankcase = sql_value.get
+      cooling_crankcase = sql_value.get.round(2)
       if cooling_crankcase > 0
         results[["Electricity", "Cooling", "General", "GJ"]] -= cooling_crankcase
         results[["Electricity", "Cooling", "Crankcase", "GJ"]] = cooling_crankcase
@@ -298,7 +298,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Crankcase Heater Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
-      heating_crankcase = sql_value.get
+      heating_crankcase = sql_value.get.round(2)
       if heating_crankcase > 0
         results[["Electricity", "Heating", "General", "GJ"]] -= heating_crankcase
         results[["Electricity", "Heating", "Crankcase", "GJ"]] = heating_crankcase
@@ -307,7 +307,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Heating Coil Defrost Electric Energy')"
     sql_value = sqlFile.execAndReturnFirstDouble(query)
     if sql_value.is_initialized
-      heating_defrost = sql_value.get
+      heating_defrost = sql_value.get.round(2)
       if heating_defrost > 0
         results[["Electricity", "Heating", "General", "GJ"]] -= heating_defrost
         results[["Electricity", "Heating", "Defrost", "GJ"]] = heating_defrost
@@ -316,17 +316,17 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Obtain HVAC capacities
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%User-Specified%Capacity' AND Description NOT LIKE '%Supplemental%' AND Units='W'"
-    results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
-    results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Obtain Heating/Cooling loads
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Heating:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
-    results[["Load", "Heating", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Load", "Heating", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Cooling:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
-    results[["Load", "Cooling", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+    results[["Load", "Cooling", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     sqlFile.close
 
@@ -469,7 +469,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # R-value
       hpxml_value = Float(XMLHelper.get_value(roof, 'Insulation/AssemblyEffectiveRValue'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
       sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
       assert_in_epsilon(hpxml_value, sql_value, 0.1) # TODO: Higher due to outside air film?
 
@@ -480,26 +480,26 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Net Area' AND Units='m2'"
+      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Net Area' AND Units='m2'"
       sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
       hpxml_value = Float(XMLHelper.get_value(roof, 'SolarAbsorptance'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Reflectance'"
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Reflectance'"
       sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Tilt
       hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Tilt' AND Units='deg'"
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Tilt' AND Units='deg'"
       sql_value = sqlFile.execAndReturnFirstDouble(query).get
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Azimuth
       if XMLHelper.has_element(roof, 'Azimuth') and Float(XMLHelper.get_value(roof, "Pitch")) > 0
         hpxml_value = Float(XMLHelper.get_value(roof, 'Azimuth'))
-        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{roof_id}' AND ColumnName='Azimuth' AND Units='deg'"
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{roof_id}' OR RowName LIKE '#{roof_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
@@ -512,6 +512,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       if eio_line.downcase.start_with? "foundation kiva"
         kiva_perim_frac = Float(eio_line.split(",")[5])
         assert_equal(1.0, kiva_perim_frac)
+
         num_kiva_instances += 1
       end
     end
@@ -551,15 +552,21 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # Enclosure Walls
-    bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"]') do |wall|
+    # Enclosure Walls/RimJoists/FoundationWalls
+    bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"] | Enclosure/RimJoists/RimJoist[ExteriorAdjacentTo="outside"] | Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
+      # This case is complicated because two foundation walls are collapsed into one model wall
+      # so we need to skip some tests.
+      is_complex_fnd_wall = (XMLHelper.get_value(wall, "ExteriorAdjacentTo") == "ground" and hpxml_path.include? "base-foundation-complex.xml")
+
       # R-value
-      hpxml_value = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
-      sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-      assert_in_epsilon(hpxml_value, sql_value, 0.03)
+      if XMLHelper.has_element(wall, 'Insulation/AssemblyEffectiveRValue') and not hpxml_path.include? "base-foundation-unconditioned-basement-assembly-r.xml" # This file uses Foundation:Kiva for insulation, so skip it
+        hpxml_value = Float(XMLHelper.get_value(wall, 'Insulation/AssemblyEffectiveRValue'))
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
+        sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
+        assert_in_epsilon(hpxml_value, sql_value, 0.03)
+      end
 
       # Net area
       hpxml_value = Float(XMLHelper.get_value(wall, 'Area'))
@@ -568,29 +575,59 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
       end
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Net Area' AND Units='m2'"
-      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if XMLHelper.get_value(wall, "ExteriorAdjacentTo") == "ground"
+        # Calculate total length of walls
+        wall_total_length = 0
+        bldg_details.elements.each('Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |fwall|
+          next unless XMLHelper.get_value(wall, "InteriorAdjacentTo") == XMLHelper.get_value(fwall, "InteriorAdjacentTo")
+
+          wall_total_length += Float(XMLHelper.get_value(fwall, "Area")) / Float(XMLHelper.get_value(fwall, "Height"))
+        end
+
+        # Calculate total slab exposed perimeter
+        slab_exposed_length = 0
+        bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
+          next unless XMLHelper.get_value(wall, "InteriorAdjacentTo") == XMLHelper.get_value(slab, "InteriorAdjacentTo")
+
+          slab_exposed_length += Float(XMLHelper.get_value(slab, "ExposedPerimeter"))
+        end
+
+        # Calculate exposed foundation wall area
+        if slab_exposed_length < wall_total_length
+          hpxml_value *= (slab_exposed_length / wall_total_length)
+        end
+      end
+      if not is_complex_fnd_wall
+        query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%' OR RowName LIKE '#{wall_id} %') AND ColumnName='Net Area' AND Units='m2'"
+        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
 
       # Solar absorptance
-      hpxml_value = Float(XMLHelper.get_value(wall, 'SolarAbsorptance'))
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Reflectance'"
-      sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      if XMLHelper.has_element(wall, 'SolarAbsorptance')
+        hpxml_value = Float(XMLHelper.get_value(wall, 'SolarAbsorptance'))
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Reflectance'"
+        sql_value = 1.0 - sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+      end
 
       # Tilt
-      query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Tilt' AND Units='deg'"
-      sql_value = sqlFile.execAndReturnFirstDouble(query).get
-      assert_in_epsilon(90.0, sql_value, 0.01)
+      if not is_complex_fnd_wall
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Tilt' AND Units='deg'"
+        sql_value = sqlFile.execAndReturnFirstDouble(query).get
+        assert_in_epsilon(90.0, sql_value, 0.01)
+      end
 
       # Azimuth
       if XMLHelper.has_element(wall, 'Azimuth')
         hpxml_value = Float(XMLHelper.get_value(wall, 'Azimuth'))
-        query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND RowName='#{wall_id}' AND ColumnName='Azimuth' AND Units='deg'"
+        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Azimuth' AND Units='deg'"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
         assert_in_epsilon(hpxml_value, sql_value, 0.01)
       end
     end
+
+    # TODO: Enclosure FrameFloors
 
     # Enclosure Windows/Skylights
     bldg_details.elements.each('Enclosure/Windows/Window | Enclosure/Skylights/Skylight') do |subsurface|
@@ -716,18 +753,20 @@ class HPXMLTranslatorTest < MiniTest::Test
     has_multispeed_dx_heating_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     has_gshp_coil = false # FIXME: Remove this when https://github.com/NREL/EnergyPlus/issues/7381 is fixed
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
-      htg_cap = 0 if htg_cap.nil?
       htg_sys_cap = Float(XMLHelper.get_value(htg_sys, "HeatingCapacity"))
-      htg_cap += htg_sys_cap if htg_sys_cap > 0
+      if htg_sys_cap > 0
+        htg_cap = 0 if htg_cap.nil?
+        htg_cap += htg_sys_cap
+      end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
-      clg_cap = 0 if clg_cap.nil?
       clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
-      clg_cap += clg_sys_cap if clg_sys_cap > 0
+      if clg_sys_cap > 0
+        clg_cap = 0 if clg_cap.nil?
+        clg_cap += clg_sys_cap
+      end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
-      htg_cap = 0 if htg_cap.nil?
-      clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
       hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
       hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
@@ -736,9 +775,18 @@ class HPXMLTranslatorTest < MiniTest::Test
         hp_cap_htg *= 1.20 # TODO: Generalize this
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
-      clg_cap += hp_cap_clg if hp_cap_clg > 0
-      htg_cap += hp_cap_htg if hp_cap_htg > 0
-      htg_cap += supp_hp_cap if supp_hp_cap > 0
+      if hp_cap_clg > 0
+        clg_cap = 0 if clg_cap.nil?
+        clg_cap += hp_cap_clg
+      end
+      if hp_cap_htg > 0
+        htg_cap = 0 if htg_cap.nil?
+        htg_cap += hp_cap_htg
+      end
+      if supp_hp_cap > 0
+        htg_cap = 0 if htg_cap.nil?
+        htg_cap += supp_hp_cap
+      end
       if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15
         has_multispeed_dx_heating_coil = true
       end
@@ -748,7 +796,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     if not clg_cap.nil?
       sql_value = UnitConversions.convert(results[["Capacity", "Cooling", "General", "W"]], 'W', 'Btu/hr')
-      if clg_cap > 0
+      if clg_cap == 0
+        assert_operator(sql_value, :<, 1)
+      elsif clg_cap > 0
         assert_in_epsilon(clg_cap, sql_value, 0.01)
       else # autosized
         assert_operator(sql_value, :>, 1)
@@ -756,7 +806,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
     if not htg_cap.nil? and not (has_multispeed_dx_heating_coil or has_gshp_coil)
       sql_value = UnitConversions.convert(results[["Capacity", "Heating", "General", "W"]], 'W', 'Btu/hr')
-      if htg_cap > 0
+      if htg_cap == 0
+        assert_operator(sql_value, :<, 1)
+      elsif htg_cap > 0
         assert_in_epsilon(htg_cap, sql_value, 0.01)
       else # autosized
         assert_operator(sql_value, :>, 1)
@@ -821,12 +873,12 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Add any combi water heating energy use
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoilerHeatExchanger.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get
+      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoiler.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get
+      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       if combi_htg_load > 0 and combi_hx_load > 0
         results.keys.each do |k|
-          next unless k[1] == "Heating" and k[3] == "GJ"
+          next unless k[0] != "Load" and k[1] == "Heating" and k[3] == "GJ"
 
           water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
         end
