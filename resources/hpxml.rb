@@ -1364,6 +1364,7 @@ class HPXML
                                     collector_area: nil,
                                     collector_loop_type: nil,
                                     collector_azimuth: nil,
+                                    collector_type: nil,
                                     collector_tilt: nil,
                                     collector_frta: nil,
                                     collector_frul: nil,
@@ -1379,6 +1380,7 @@ class HPXML
     XMLHelper.add_element(solar_thermal_system, "SystemType", system_type)
     XMLHelper.add_element(solar_thermal_system, "CollectorArea", Float(collector_area)) unless collector_area.nil?
     XMLHelper.add_element(solar_thermal_system, "CollectorLoopType", collector_loop_type) unless collector_loop_type.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorType", collector_type) unless collector_type.nil?
     XMLHelper.add_element(solar_thermal_system, "CollectorAzimuth", Integer(collector_azimuth)) unless collector_azimuth.nil?
     XMLHelper.add_element(solar_thermal_system, "CollectorTilt", Float(collector_tilt)) unless collector_tilt.nil?
     XMLHelper.add_element(solar_thermal_system, "CollectorRatedOpticalEfficiency", Float(collector_frta)) unless collector_frta.nil?

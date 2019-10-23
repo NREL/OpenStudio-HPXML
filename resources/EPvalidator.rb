@@ -527,11 +527,12 @@ class EnergyPlusValidator
 
       ## [SolarThermal=Detailed]
       "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[CollectorArea]" => {
-        "[CollectorLoopType='liquid indirect']" => one,
+        "[CollectorLoopType='liquid indirect' or CollectorLoopType='liquid direct' or CollectorLoopType='passive thermosyphon']" => one, # Not allowed BUT in the schema: air direct, air indirect
+        "[CollectorType='evacuated tube' or CollectorType='integrated collector storage' or CollectorType='single glazing black']" => one, # Not allowed BUT in the schema: single glazing selective, double glazing black, double glazing selective
         "CollectorAzimuth" => one,
         "CollectorTilt" => one,
         "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
-        "CollectorRatedThermalLosses" => one, # FRUL (slope); see Directory of SRCC Certified Solar Collector Ratings
+        "CollectorRatedThermalLosses" => one, # FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC Certified Solar Collector Ratings
         "StorageVolume" => one,
       },
 
