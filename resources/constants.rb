@@ -303,6 +303,15 @@ class Constants
     return "baseboard"
   end
 
+  def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")
+    if is_cooling
+      s = "cool"
+    else
+      s = "heat"
+    end
+    return "#{fan_or_pump_name} #{s} disaggregate"
+  end
+
   def self.ObjectNameFixtures
     return "dhw fixtures"
   end
@@ -339,8 +348,20 @@ class Constants
     return "infil"
   end
 
-  def self.ObjectNameLighting
-    return "lighting"
+  def self.ObjectNameERVHRV
+    return "erv or hrv"
+  end
+
+  def self.ObjectNameExteriorLighting
+    return "exterior lighting"
+  end
+
+  def self.ObjectNameGarageLighting
+    return "garage lighting"
+  end
+
+  def self.ObjectNameInteriorLighting
+    return "interior lighting"
   end
 
   def self.ObjectNameMechanicalVentilation
@@ -421,10 +442,6 @@ class Constants
 
   def self.PlantLoopSolarHotWater
     return "solar hot water loop"
-  end
-
-  def self.RADuctZone
-    return 'RA Duct Zone'
   end
 
   def self.RecircTypeTimer
@@ -524,10 +541,6 @@ class Constants
   end
 
   def self.SizingInfoDuctRvalues
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACOtherZoneObject # Link between zonal equipment in control zone and slave zones
     return __method__.to_s
   end
 
@@ -699,10 +712,6 @@ class Constants
     return 'unvented crawlspace'
   end
 
-  def self.SpaceTypeConditionedBasement
-    return 'conditioned basement'
-  end
-
   def self.SpaceTypeGarage
     return 'garage'
   end
@@ -773,13 +782,5 @@ class Constants
 
   def self.WaterHeaterTypeHeatPump
     return 'heatpump'
-  end
-
-  def self.EMSOutputNameHeatingLoad
-    return 'living zone htg load'
-  end
-
-  def self.EMSOutputNameCoolingLoad
-    return 'living zone clg load'
   end
 end

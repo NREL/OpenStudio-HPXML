@@ -1003,37 +1003,30 @@ class Constructions
     return true
   end
 
-  def self.apply_partition_walls(runner, model, surfaces, constr_name,
-                                 drywall_thick_in, frac_of_ffa)
-
-    spaces = Geometry.get_conditioned_spaces(model.getSpaces)
-
-    return true if spaces.empty?
+  def self.apply_partition_walls(runner, model, constr_name, drywall_thick_in, frac_of_ffa,
+                                 basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     imdefs = []
-    spaces.each do |space|
-      # Determine existing partition wall mass in space
-      existing_surface_area = 0
-      surfaces.each do |surface|
-        existing_surface_area += surface.grossArea
-      end
 
-      # Determine additional partition wall mass required
-      addtl_surface_area = frac_of_ffa * space.floorArea - existing_surface_area * 2 / spaces.size.to_f
+    # Determine additional partition wall mass required
+    addtl_surface_area_base = frac_of_ffa * living_space.floorArea * basement_frac_of_cfa
+    addtl_surface_area_lv = frac_of_ffa * living_space.floorArea * (1.0 - basement_frac_of_cfa)
 
-      if addtl_surface_area > 0
-        # Add remaining partition walls within spaces (those without geometric representation)
-        # as internal mass object.
-        imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-        imdef.setName("#{space.name.to_s} Partition")
-        imdef.setSurfaceArea(addtl_surface_area)
-        imdefs << imdef
+    if addtl_surface_area_lv > 0
+      # Add remaining partition walls within spaces (those without geometric representation)
+      # as internal mass object.
+      obj_name = "#{living_space.name.to_s} Living Partition"
+      imdef = create_os_int_mass_and_def(runner, model, obj_name, living_space, addtl_surface_area_lv)
+      imdefs << imdef
+    end
 
-        im = OpenStudio::Model::InternalMass.new(imdef)
-        im.setName("#{space.name.to_s} Partition")
-        im.setSpace(space)
-        runner.registerInfo("Added internal mass object '#{im.name.to_s}' to space '#{space.name.to_s}'")
-      end
+    if addtl_surface_area_base > 0
+      # Add remaining partition walls within spaces (those without geometric representation)
+      # as internal mass object.
+      obj_name = "#{living_space.name.to_s} Basement Partition"
+      imdef = create_os_int_mass_and_def(runner, model, obj_name, living_space, addtl_surface_area_base)
+      cond_base_surfaces << imdef
+      imdefs << imdef
     end
 
     if not Constructions.apply_wood_stud_wall(runner, model, imdefs, constr_name,
@@ -1046,26 +1039,20 @@ class Constructions
     return true
   end
 
-  def self.apply_furniture(runner, model, frac_of_ffa, mass_lb_per_sqft = 8.0,
-                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood)
-
-    model_spaces = model.getSpaces
-
-    conditioned_spaces = Geometry.get_conditioned_spaces(model_spaces)
-    unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
-    garage_spaces = Geometry.get_garage_spaces(model_spaces)
+  def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft,
+                           mat, basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     # Add user-specified furniture mass
-    model_spaces.each do |space|
-      furnAreaFraction = nil
+    model.getSpaces.each do |space|
+      furnAreaFraction = nil # Fraction of conditioned floor area
       furnConductivity = mat.k_in
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if conditioned_spaces.include?(space) or unconditioned_basement_spaces.include?(space)
-        furnAreaFraction = frac_of_ffa
+      if space == living_space or Geometry.is_unconditioned_basement(space)
+        furnAreaFraction = 1.0
         furnMass = mass_lb_per_sqft
-      elsif garage_spaces.include?(space)
+      elsif Geometry.is_garage(space)
         furnAreaFraction = 0.1
         furnMass = 2.0
       end
@@ -1090,23 +1077,50 @@ class Constructions
       constr = Construction.new(constr_obj_name_space, path_fracs)
       constr.add_layer(mat_fm)
 
-      imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-      imdef.setName(mass_obj_name_space)
-      imdef.setSurfaceArea(furnAreaFraction * space.floorArea)
-
-      im = OpenStudio::Model::InternalMass.new(imdef)
-      im.setName(mass_obj_name_space)
-      im.setSpace(space)
-
+      imdefs = []
+      if space == living_space
+        # if living space, judge if includes conditioned basement, create furniture independently
+        living_surface_area = furnAreaFraction * space.floorArea * (1 - basement_frac_of_cfa)
+        base_surface_area = furnAreaFraction * space.floorArea * basement_frac_of_cfa
+        # living furniture mass
+        if living_surface_area > 0
+          living_obj_name = mass_obj_name_space + " living"
+          imdef = create_os_int_mass_and_def(runner, model, living_obj_name, space, living_surface_area)
+          imdefs << imdef
+        end
+        # basement furniture mass
+        if base_surface_area > 0
+          base_obj_name = mass_obj_name_space + " basement"
+          imdef = create_os_int_mass_and_def(runner, model, base_obj_name, space, base_surface_area)
+          cond_base_surfaces << imdef
+          imdefs << imdef
+        end
+      else
+        surface_area = furnAreaFraction * space.floorArea
+        imdef = create_os_int_mass_and_def(runner, model, mass_obj_name_space, space, surface_area)
+        imdefs << imdef
+      end
       # Create and assign construction to surfaces
-      if not constr.create_and_assign_constructions([imdef], runner, model)
+      if not constr.create_and_assign_constructions(imdefs, runner, model)
         return false
       end
-
-      runner.registerInfo("Assigned internal mass object '#{mass_obj_name_space}' to space '#{space.name}'.")
     end
 
     return true
+  end
+
+  def self.create_os_int_mass_and_def(runner, model, object_name, space, area)
+    # create internal mass objects
+    imdef = OpenStudio::Model::InternalMassDefinition.new(model)
+    imdef.setName(object_name)
+    imdef.setSurfaceArea(area)
+
+    im = OpenStudio::Model::InternalMass.new(imdef)
+    im.setName(object_name)
+    im.setSpace(space)
+
+    runner.registerInfo("Assigned internal mass object '#{object_name}' to space '#{space.name}'.")
+    return imdef
   end
 
   def self.get_exterior_finish_materials
@@ -1531,7 +1545,7 @@ class Constructions
 
       # CoolingShade
       sm = OpenStudio::Model::Shade.new(model)
-      sm.setName("CoolingShade")
+      sm.setName("#{type}CoolingShade")
       sm.setSolarTransmittance(total_shade_trans)
       sm.setSolarReflectance(total_shade_ref)
       sm.setVisibleTransmittance(total_shade_trans)

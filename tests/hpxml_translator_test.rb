@@ -65,6 +65,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_multiple_water_heaters(xmls, water_heating_multiple_dir, all_results)
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     _test_hrv_erv_inputs(this_dir, all_results)
+    _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
   end
 
   def test_invalid
@@ -84,17 +85,26 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'dhw-frac-load-served.xml' => ["Expected FractionDHWLoadServed to sum to 1, but calculated sum is 1.15."],
                             'duct-location.xml' => ["Duct location is 'garage' but building does not have this location specified."],
                             'duct-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return'][DuctLocation="],
+                            'heat-pump-mixed-fixed-and-autosize-capacities.xml' => ["HeatPump 'HeatPump' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities2.xml' => ["HeatPump 'HeatPump' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities3.xml' => ["HeatPump 'HeatPump' has HeatingCapacity17F provided but heating capacity is auto-sized."],
+                            'heat-pump-mixed-fixed-and-autosize-capacities4.xml' => ["HeatPump 'HeatPump' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
+                            'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
                             'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
                                                             "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
+                            'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
+                            'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                        "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
-                            'missing-surfaces.xml' => ["Thermal zone 'garage' must have at least two floor/roof/ceiling surfaces."],
-                            'multiple-attached-hvac-distribution-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
-                            'multiple-attached-hvac-distribution-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
+                            'missing-surfaces.xml' => ["'garage' must have at least one floor surface."],
                             'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
                             'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'Roof'."],
+                            'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
+                            'repeated-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."],
+                            'repeated-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."],
                             'unattached-cfis.xml' => ["Attached HVAC distribution system 'foobar' not found for mechanical ventilation 'MechanicalVentilation'."],
                             'unattached-door.xml' => ["Attached wall 'foobar' not found for door 'DoorNorth'."],
                             'unattached-hvac-distribution.xml' => ["Attached HVAC distribution system 'foobar' cannot be found for HVAC system 'HeatingSystem'."],
@@ -102,9 +112,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'unattached-solar-thermal-system.xml' => ["Attached water heating system 'foobar' not found for solar thermal system 'SolarThermalSystem'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="],
-                            'invalid-idref-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem-bad' not found for water heating system 'WaterHeater'"],
-                            'two-repeating-idref-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem' for water heating system 'WaterHeater2' is already attached to another water heating system."] }
+                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="] }
 
     # Test simulations
     Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -314,6 +322,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE CompType LIKE 'Coil:Cooling:%' AND Description LIKE '%User-Specified%Total%Capacity' AND Units='W'"
     results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get
 
+    # Obtain Heating/Cooling loads
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Heating:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    results[["Load", "Heating", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+
+    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Cooling:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    results[["Load", "Cooling", "General", "J"]] = sqlFile.execAndReturnFirstDouble(query).get
+
     sqlFile.close
 
     results[@simulation_runtime_key] = sim_time
@@ -508,7 +523,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                                     'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
                                     'base-enclosure-garage.xml' => 2,                 # additional instance for garage
                                     'base-enclosure-garage-autosize.xml' => 2,        # additional instance for garage
-                                    'base-enclosure-adiabatic-surfaces.xml' => 2,     # additional instance for adiabatic construction
+                                    'base-enclosure-adiabatic-surfaces.xml' => 0,     # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10 }
 
@@ -538,7 +553,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Walls
-    bldg_details.elements.each('Enclosure/Walls/Wall[extension[ExteriorAdjacentTo="outside"]]') do |wall|
+    bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -642,7 +657,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         hpxml_value = Float(door_rvalue)
         query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Exterior Door' AND RowName='#{door_id}' AND ColumnName='U-Factor with Film' AND Units='W/m2-K'"
         sql_value = 1.0 / UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)')
-        assert_in_epsilon(hpxml_value, sql_value, 0.01)
+        assert_in_epsilon(hpxml_value, sql_value, 0.02)
       end
     end
 
@@ -715,15 +730,17 @@ class HPXMLTranslatorTest < MiniTest::Test
       htg_cap = 0 if htg_cap.nil?
       clg_cap = 0 if clg_cap.nil?
       hp_type = XMLHelper.get_value(hp, "HeatPumpType")
-      hp_cap = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_clg = Float(XMLHelper.get_value(hp, "CoolingCapacity"))
+      hp_cap_htg = Float(XMLHelper.get_value(hp, "HeatingCapacity"))
       if hp_type == "mini-split"
-        hp_cap *= 1.20 # TODO: Generalize this
+        hp_cap_clg *= 1.20 # TODO: Generalize this
+        hp_cap_htg *= 1.20 # TODO: Generalize this
       end
       supp_hp_cap = XMLHelper.get_value(hp, "BackupHeatingCapacity").to_f
-      clg_cap += hp_cap if hp_cap > 0
-      htg_cap += hp_cap if hp_cap > 0
+      clg_cap += hp_cap_clg if hp_cap_clg > 0
+      htg_cap += hp_cap_htg if hp_cap_htg > 0
       htg_cap += supp_hp_cap if supp_hp_cap > 0
-      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15 or XMLHelper.get_value(hp, "AnnualHeatingEfficiency[Units='HSPF']/Value").to_f > 8.5
+      if XMLHelper.get_value(hp, "AnnualCoolingEfficiency[Units='SEER']/Value").to_f > 15
         has_multispeed_dx_heating_coil = true
       end
       if hp_type == "ground-to-air"
@@ -763,7 +780,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if htg_load_frac == 0
       found_htg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Heating' and k[0] != 'Capacity'
+        next unless k[1] == 'Heating' and k[0] != 'Capacity' and k[0] != "Load"
 
         found_htg_energy = true
       end
@@ -772,7 +789,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     if clg_load_frac == 0
       found_clg_energy = false
       results.keys.each do |k|
-        next unless k[1] == 'Cooling' and k[0] != 'Capacity'
+        next unless k[1] == 'Cooling' and k[0] != 'Capacity' and k[0] != "Load"
 
         found_clg_energy = true
       end
@@ -872,7 +889,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cw, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
@@ -887,7 +904,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(cd, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
@@ -902,7 +919,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       location = XMLHelper.get_value(refr, "Location")
       hpxml_value = { nil => Constants.SpaceTypeLiving,
                       'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeConditionedBasement,
+                      'basement - conditioned' => Constants.SpaceTypeLiving,
                       'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
                       'garage' => Constants.SpaceTypeGarage }[location].upcase
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
@@ -918,6 +935,58 @@ class HPXMLTranslatorTest < MiniTest::Test
       found_ltg_energy = true
     end
     assert_equal(bldg_details.elements["Lighting"].nil?, !found_ltg_energy)
+
+    # Natural Gas check
+    ng_htg = results.fetch(["Natural Gas", "Heating", "General", "GJ"], 0) + results.fetch(["Natural Gas", "Heating", "Other", "GJ"], 0)
+    ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
+    ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? and not hpxml_path.include? "location-miami"
+      assert_operator(ng_htg, :>, 0)
+    else
+      assert_equal(ng_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='natural gas']"].nil?
+      assert_operator(ng_dhw, :>, 0)
+    else
+      assert_equal(ng_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='natural gas']"].nil?
+      assert_operator(ng_cd, :>, 0)
+    else
+      assert_equal(ng_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='natural gas']"].nil?
+      assert_operator(ng_cr, :>, 0)
+    else
+      assert_equal(ng_cr, 0)
+    end
+
+    # Additional Fuel check
+    af_htg = results.fetch(["Additional Fuel", "Heating", "General", "GJ"], 0) + results.fetch(["Additional Fuel", "Heating", "Other", "GJ"], 0)
+    af_dhw = results.fetch(["Additional Fuel", "Water Systems", "General", "GJ"], 0)
+    af_cd = results.fetch(["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"], 0)
+    af_cr = results.fetch(["Additional Fuel", "Interior Equipment", "cooking range", "GJ"], 0)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil? and not hpxml_path.include? "location-miami"
+      assert_operator(af_htg, :>, 0)
+    else
+      assert_equal(af_htg, 0)
+    end
+    if not bldg_details.elements["Systems/WaterHeating/WaterHeatingSystem[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_dhw, :>, 0)
+    else
+      assert_equal(af_dhw, 0)
+    end
+    if not bldg_details.elements["Appliances/ClothesDryer[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cd, :>, 0)
+    else
+      assert_equal(af_cd, 0)
+    end
+    if not bldg_details.elements["Appliances/CookingRange[FuelType='fuel oil' or FuelType='propane' or FuelType='wood']"].nil?
+      assert_operator(af_cr, :>, 0)
+    else
+      assert_equal(af_cr, 0)
+    end
 
     sqlFile.close
   end
@@ -992,6 +1061,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       Dir["#{test_dir}/base-mechvent-#{mv_type}-*.xml"].sort.each do |xml|
         results = all_results[xml]
+        next if results.nil?
 
         # Compare results
         results_base.keys.each do |k|
@@ -1004,6 +1074,35 @@ class HPXMLTranslatorTest < MiniTest::Test
           _display_result_epsilon(xml, result_base, result, k)
           assert_in_epsilon(result_base, result, 0.01)
         end
+      end
+    end
+  end
+
+  def _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
+    puts "Heating/Cooling Loads test results:"
+
+    base_xml = "#{hvac_base_dir}/base-hvac-ideal-air-base.xml"
+    results_base = all_results[File.absolute_path(base_xml)]
+    return if results_base.nil?
+
+    xmls.sort.each do |xml|
+      next if not xml.include? hvac_base_dir
+
+      xml_compare = File.absolute_path(xml)
+      results_compare = all_results[xml_compare]
+      next if results_compare.nil?
+
+      # Compare results
+      results_compare.keys.each do |k|
+        next if not ["Heating", "Cooling"].include? k[1]
+        next if not ["Load"].include? k[0]
+
+        result_base = results_base[k].to_f
+        result_compare = results_compare[k].to_f
+        next if result_base <= 0.1 or result_compare <= 0.1
+
+        _display_result_delta(xml, result_base, result_compare, k)
+        assert_in_delta(result_base, result_compare, 0.25)
       end
     end
   end
@@ -1023,8 +1122,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       results_x3.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
+        next unless ["Heating", "Cooling"].include? k[1]
+        next unless ["General"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == "Load"
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
@@ -1082,8 +1182,9 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       results_33.keys.each do |k|
-        next if not ["Heating", "Cooling"].include? k[1]
-        next if not ["General"].include? k[2] # Exclude crankcase/defrost
+        next unless ["Heating", "Cooling"].include? k[1]
+        next unless ["General"].include? k[2] # Exclude crankcase/defrost
+        next if k[0] == "Load"
 
         result_33 = results_33[k].to_f
         result_100 = results_100[k].to_f
