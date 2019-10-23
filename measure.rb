@@ -3072,6 +3072,94 @@ class OSModel
     infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
                              vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
 
+    # Natural Ventilation
+    site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
+    disable_nat_vent = site_values[:disable_natural_ventilation]
+    if not disable_nat_vent.nil? and disable_nat_vent
+      nat_vent_htg_offset = 0
+      nat_vent_clg_offset = 0
+      nat_vent_ovlp_offset = 0
+      nat_vent_htg_season = false
+      nat_vent_clg_season = false
+      nat_vent_ovlp_season = false
+      nat_vent_num_weekdays = 0
+      nat_vent_num_weekends = 0
+      nat_vent_frac_windows_open = 0
+      nat_vent_frac_window_area_openable = 0
+      nat_vent_max_oa_hr = 0.0115
+      nat_vent_max_oa_rh = 0.7
+    else
+      nat_vent_htg_offset = 1.0
+      nat_vent_clg_offset = 1.0
+      nat_vent_ovlp_offset = 1.0
+      nat_vent_htg_season = true
+      nat_vent_clg_season = true
+      nat_vent_ovlp_season = true
+      nat_vent_num_weekdays = 5
+      nat_vent_num_weekends = 2
+      # According to 2010 BA Benchmark, 33% of the windows will be open
+      # at any given time and can only be opened to 20% of their area.
+      nat_vent_frac_windows_open = 0.33
+      nat_vent_frac_window_area_openable = 0.2
+      nat_vent_max_oa_hr = 0.0115
+      nat_vent_max_oa_rh = 0.7
+    end
+    nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
+                                      nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
+                                      nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
+                                      nat_vent_max_oa_hr, nat_vent_max_oa_rh)
+
+    # Ducts
+    duct_systems = {}
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
+
+      # Check for errors
+      dist_id = hvac_distribution_values[:id]
+      num_attached = 0
+      num_heating_attached = 0
+      num_cooling_attached = 0
+      ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
+        building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
+          next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
+
+          num_attached += 1
+          num_heating_attached += 1 if ['HeatingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionHeatLoadServed")) > 0
+          num_cooling_attached += 1 if ['CoolingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionCoolLoadServed")) > 0
+        end
+      end
+
+      fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if num_cooling_attached > 1
+      fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if num_heating_attached > 1
+      fail "Distribution system '#{dist_id}' found but no HVAC system attached to it." if num_attached == 0
+
+      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
+      next if air_distribution.nil?
+
+      air_ducts = self.create_ducts(air_distribution, model, spaces)
+
+      # Connect AirLoopHVACs to ducts
+      ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
+        building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
+          next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
+
+          sys_id = sys.elements["SystemIdentifier"].attributes["id"]
+          @hvac_map[sys_id].each do |loop|
+            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
+
+            if duct_systems[air_ducts].nil?
+              duct_systems[air_ducts] = loop
+            elsif duct_systems[air_ducts] != loop
+              # Multiple air loops associated with this duct system, treat
+              # as separate duct systems.
+              air_ducts2 = self.create_ducts(air_distribution, model, spaces)
+              duct_systems[air_ducts2] = loop
+            end
+          end
+        end
+      end
+    end
+
     # Mechanical Ventilation
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
@@ -3184,86 +3272,6 @@ class OSModel
                                           clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
-
-    # Natural Ventilation
-    site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
-    disable_nat_vent = site_values[:disable_natural_ventilation]
-    if not disable_nat_vent.nil? and disable_nat_vent
-      nat_vent_htg_offset = 0
-      nat_vent_clg_offset = 0
-      nat_vent_ovlp_offset = 0
-      nat_vent_htg_season = false
-      nat_vent_clg_season = false
-      nat_vent_ovlp_season = false
-      nat_vent_num_weekdays = 0
-      nat_vent_num_weekends = 0
-      nat_vent_frac_windows_open = 0
-      nat_vent_frac_window_area_openable = 0
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
-    else
-      nat_vent_htg_offset = 1.0
-      nat_vent_clg_offset = 1.0
-      nat_vent_ovlp_offset = 1.0
-      nat_vent_htg_season = true
-      nat_vent_clg_season = true
-      nat_vent_ovlp_season = true
-      nat_vent_num_weekdays = 5
-      nat_vent_num_weekends = 2
-      # According to 2010 BA Benchmark, 33% of the windows will be open
-      # at any given time and can only be opened to 20% of their area.
-      nat_vent_frac_windows_open = 0.33
-      nat_vent_frac_window_area_openable = 0.2
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
-    end
-    nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
-                                      nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
-                                      nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
-                                      nat_vent_max_oa_hr, nat_vent_max_oa_rh)
-
-    # Ducts
-    duct_systems = {}
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
-      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
-      air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
-      next if air_distribution.nil?
-
-      air_ducts = self.create_ducts(air_distribution, model, spaces)
-
-      # Connect AirLoopHVACs to ducts
-      dist_id = hvac_distribution_values[:id]
-      num_attached = 0
-      heating_systems_attached = []
-      cooling_systems_attached = []
-      ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
-        building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/#{hpxml_sys}") do |sys|
-          next if sys.elements["DistributionSystem"].nil? or dist_id != sys.elements["DistributionSystem"].attributes["idref"]
-
-          num_attached += 1
-          sys_id = sys.elements["SystemIdentifier"].attributes["id"]
-          heating_systems_attached << sys_id if ['HeatingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionHeatLoadServed")) > 0
-          cooling_systems_attached << sys_id if ['CoolingSystem', 'HeatPump'].include? hpxml_sys and Float(XMLHelper.get_value(sys, "FractionCoolLoadServed")) > 0
-
-          @hvac_map[sys_id].each do |loop|
-            next unless loop.is_a? OpenStudio::Model::AirLoopHVAC
-
-            if duct_systems[air_ducts].nil?
-              duct_systems[air_ducts] = loop
-            elsif duct_systems[air_ducts] != loop
-              # Multiple air loops associated with this duct system, treat
-              # as separate duct systems.
-              air_ducts2 = self.create_ducts(air_distribution, model, spaces)
-              duct_systems[air_ducts2] = loop
-            end
-          end
-        end
-      end
-
-      fail "Multiple cooling systems found attached to distribution system '#{dist_id}'." if cooling_systems_attached.size > 1
-      fail "Multiple heating systems found attached to distribution system '#{dist_id}'." if heating_systems_attached.size > 1
-      fail "Distribution system '#{dist_id}' found but no HVAC system attached to it." if num_attached == 0
-    end
 
     window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
@@ -3922,17 +3930,6 @@ class OSModel
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clg_sys|
       attached_system_values = HPXML.get_cooling_system_values(cooling_system: clg_sys)
       next unless system_values[:distribution_system_idref] == attached_system_values[:distribution_system_idref]
-
-      # Check that it's an AirDistribution (not DSE)
-      is_air_distribution = false
-      building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
-        hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
-        next unless hvac_distribution_values[:id] == system_values[:distribution_system_idref]
-        next unless hvac_distribution_values[:distribution_system_type] == "AirDistribution"
-
-        is_air_distribution = true
-      end
-      next unless is_air_distribution
 
       @hvac_map[attached_system_values[:id]].each do |hvac_object|
         next unless hvac_object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem

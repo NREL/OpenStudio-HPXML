@@ -91,6 +91,8 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'heat-pump-mixed-fixed-and-autosize-capacities4.xml' => ["HeatPump 'HeatPump' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
                             'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
                             'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
+                            'hvac-dse-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution'."],
+                            'hvac-dse-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution'."],
                             'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
                                                             "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
