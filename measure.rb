@@ -829,15 +829,12 @@ class OSModel
              (s_tilt - s2_tilt).abs > same_ang_limit
             if surface2.subSurfaces.size != 0
               # calculate surface and its sub surfaces view factors
-              parent_surface_a = surface2.grossArea
+              parent_surface_a = surface2.netArea
+              if parent_surface_a > 0.01 # base surface of a sub surface: window/door etc.
+                surface_vf_map[surface2] = parent_surface_a / zone_seen_area
+              end
               surface2.subSurfaces.each do |sub_surface|
-                parent_surface_a -= sub_surface.grossArea
-                if parent_surface_a < 0.01 # base surface of a sub surface: window/door etc.
-                  surface_vf_map[sub_surface] = surface2.grossArea / zone_seen_area
-                else
-                  surface_vf_map[surface2] = parent_surface_a / zone_seen_area
-                  surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
-                end
+                surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
               end
             else # no subsurface
               surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
