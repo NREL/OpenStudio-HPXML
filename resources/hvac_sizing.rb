@@ -6,7 +6,7 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info)
+  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space)
     @model_spaces = model.getSpaces
     @nbeds = nbeds
     @cfa = cfa
@@ -32,7 +32,7 @@ class HVACSizing
     end
 
     # Get shelter class
-    @shelter_class = get_shelter_class(model, min_neighbor_distance)
+    @shelter_class = get_shelter_class(model, min_neighbor_distance, living_space)
 
     # Calculate loads for each conditioned thermal zone
     zones_loads = process_zone_loads(runner, model, weather)
@@ -1679,6 +1679,7 @@ class HVACSizing
       end
     end
     if not hvac.FixedHeatingCapacity.nil?
+      hvac_final_values.Heat_Capacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
       hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
     end
 
@@ -1714,9 +1715,10 @@ class HVACSizing
       if hvac.FixedCoolingCapacity.nil?
         hvac_final_values = process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac)
         return nil if hvac_final_values.nil?
+
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       end
 
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
       if hvac_final_values.Cool_Capacity > @min_cooling_capacity
@@ -1732,7 +1734,7 @@ class HVACSizing
         return nil if hvac_final_values.nil?
       end
 
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
+      hvac_final_values.Heat_Capacity = [hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset, Constants.small].max
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
       hvac_final_values.Heat_Airflow = hvac.HeatingCFMs[-1] * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") # Maximum air flow under heating operation
@@ -1746,8 +1748,6 @@ class HVACSizing
 
       if hvac.FixedCoolingCapacity.nil?
         hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-      else
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       end
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
@@ -1799,8 +1799,10 @@ class HVACSizing
 
       bore_length *= bore_length_mult
 
-      hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      if hvac.FixedCoolingCapacity.nil?
+        hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      end
       hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
       cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
                                  (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *
@@ -1945,7 +1947,7 @@ class HVACSizing
       if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
         hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
+        hvac_final_values.Heat_Capacity = [hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset, Constants.small].max
       end
     else
       cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
@@ -1962,15 +1964,15 @@ class HVACSizing
         hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
         hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
+        hvac_final_values.Heat_Capacity = [hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset, Constants.small].max
       end
     end
 
     return hvac_final_values
   end
 
-  def self.get_shelter_class(model, min_neighbor_distance)
-    height_ft = Geometry.get_height_of_spaces(Geometry.get_conditioned_spaces(@model_spaces))
+  def self.get_shelter_class(model, min_neighbor_distance, living_space)
+    height_ft = Geometry.get_height_of_spaces([living_space])
     exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
                          Geometry.calculate_above_grade_wall_area(@model_spaces)
 
