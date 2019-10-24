@@ -1015,10 +1015,11 @@ end
 
 def get_default_water_heater_re(fuel)
   # Water Heater Recovery Efficiency by fuel
+  # FIXME: Gas/propane/oil values increased to temporarily avoid simulation errors
   val = { "electricity" => 0.98,
-          "natural gas" => 0.76,
-          "propane" => 0.76,
-          "fuel oil" => 0.76 }[fuel]
+          "natural gas" => 0.96,
+          "propane" => 0.96,
+          "fuel oil" => 0.96 }[fuel]
   return val if not val.nil?
 
   fail "Could not get default water heater RE for fuel '#{fuel}'"
