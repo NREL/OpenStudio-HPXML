@@ -776,7 +776,7 @@ class HEScoreRuleset
       end
       wh_recovery_efficiency = nil
       if wh_sys_values[:water_heater_type] == "storage water heater" and wh_sys_values[:fuel_type] != "electricity"
-        wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type])
+        wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type], wh_sys_values[:energy_factor])
       end
       wh_tank_volume = nil
       if wh_sys_values[:water_heater_type] == "space-heating boiler with storage tank"
@@ -1013,12 +1013,19 @@ def get_default_water_heater_volume(fuel)
   fail "Could not get default water heater volume for fuel '#{fuel}'"
 end
 
-def get_default_water_heater_re(fuel)
-  # Water Heater Recovery Efficiency by fuel
-  val = { "electricity" => 0.98,
-          "natural gas" => 0.76,
-          "propane" => 0.76,
-          "fuel oil" => 0.76 }[fuel]
+def get_default_water_heater_re(fuel, ef)
+  # Water Heater Recovery Efficiency by fuel and energy factor
+  if ["natural gas", "propane"].include?(fuel)
+    if ef < 0.75
+      val = 0.251211 * ef + 0.608671
+    else
+      val = 0.778114 * ef + 0.276679
+    end
+  elsif fuel == "fuel oil"
+    val = 1.27605 * ef - 0.0728183
+  elsif fuel == "electricity"
+    val = 0.98
+  end
   return val if not val.nil?
 
   fail "Could not get default water heater RE for fuel '#{fuel}'"
