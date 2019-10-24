@@ -363,7 +363,7 @@ class HVAC
                                     sequential_cool_load_frac, control_zone,
                                     hvac_map, sys_id, is_ducted)
 
-    cooler_effectiveness = 0.72
+    cooler_effectiveness = Constants.AssumedEvapCoolerEffectiveness
     obj_name = Constants.ObjectNameEvaporativeCooler
 
     evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
@@ -397,24 +397,22 @@ class HVAC
     dummy_clg_coil.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
     dummy_clg_coil.setRatedTotalCoolingCapacity(2000) # dummy capacity
     dummy_clg_coil.setRatedSensibleHeatRatio(0.85) # Set to override autosize
-    dummy_clg_coil.setRatedAirFlowRate(1) # Set to override autosize
     unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     unitary_system.setName("Evap Cooler Cycling Fan")
     unitary_system.setSupplyFan(fan)
     unitary_system.setCoolingCoil(dummy_clg_coil)
     unitary_system.setControllingZoneorThermostatLocation(control_zone)
     unitary_system.setFanPlacement('BlowThrough')
-    unitary_system.setSupplyAirFlowRateDuringCoolingOperation(1.0) # Set to override autosize
     unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
     unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     unitary_system.addToNode(air_loop.supplyInletNode)
     unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
-    unitary_system.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
+    unitary_system.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler, is_ducted)
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
     oa_intake_controller.setName("#{air_loop.name} OA Controller")
-    oa_intake_controller.setMaximumOutdoorAirFlowRate(10)
+    oa_intake_controller.setMaximumOutdoorAirFlowRate(10) # Set an extreme large value here, will be reset by E+ using sized value
     oa_intake_controller.setMinimumLimitType('FixedMinimum')
     oa_intake_controller.resetEconomizerMinimumLimitDryBulbTemperature
     oa_intake_controller.setMinimumFractionofOutdoorAirSchedule(model.alwaysOnDiscreteSchedule)
@@ -1205,7 +1203,7 @@ class HVAC
       cfms_cooling_4 << cfms_cooling[mshp_index]
       shrs_rated_4 << shrs_rated[mshp_index]
     end
-    air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
+    air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler, is_ducted)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, cfms_heating_4.join(","))
@@ -4357,7 +4355,7 @@ class HVAC
     elsif Constants.ObjectNameFurnace == hvac_type_heat
       return true
     elsif [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
-      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPump).get
+      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler).get
       if is_ducted
         return true
       end
