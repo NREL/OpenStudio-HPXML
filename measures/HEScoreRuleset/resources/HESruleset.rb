@@ -605,6 +605,7 @@ class HEScoreRuleset
       hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
       hp_values[:heat_pump_fuel] = "electricity"
       hp_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
+      hp_values[:heating_capacity] = -1 # Use Manual J auto-sizing
       hp_values[:backup_heating_fuel] = "electricity"
       hp_values[:backup_heating_capacity] = -1 # Use Manual J auto-sizing
       hp_values[:backup_heating_efficiency_percent] = 1.0
