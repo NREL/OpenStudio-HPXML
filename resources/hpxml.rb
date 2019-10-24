@@ -1113,12 +1113,13 @@ class HPXML
 
   def self.add_duct_leakage_measurement(air_distribution:,
                                         duct_type:,
+                                        duct_leakage_units:,
                                         duct_leakage_value:,
                                         **remainder)
     duct_leakage_measurement = XMLHelper.add_element(air_distribution, "DuctLeakageMeasurement")
     XMLHelper.add_element(duct_leakage_measurement, "DuctType", duct_type)
     duct_leakage = XMLHelper.add_element(duct_leakage_measurement, "DuctLeakage")
-    XMLHelper.add_element(duct_leakage, "Units", "CFM25")
+    XMLHelper.add_element(duct_leakage, "Units", duct_leakage_units)
     XMLHelper.add_element(duct_leakage, "Value", Float(duct_leakage_value))
     XMLHelper.add_element(duct_leakage, "TotalOrToOutside", "to outside")
 
