@@ -53,6 +53,48 @@ class HEScoreRulesetTest < MiniTest::Test
     FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
   end
 
+  def test_ducts
+    # Base_hpxml.xml
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = true
+    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
+    assert_in_epsilon(0.0375, leak_s, 0.00001)
+    assert_in_epsilon(0.0375, leak_r, 0.00001)
+    assert_in_epsilon(405.0, area_s, 0.00001)
+    assert_in_epsilon(150.0, area_r, 0.00001)
+
+    # Floors_1_hpxml.xml (change # stories)
+    cfa = 2000.0
+    ncfl_ag = 1
+    sealed = true
+    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
+    assert_in_epsilon(0.05, leak_s, 0.00001)
+    assert_in_epsilon(0.05, leak_r, 0.00001)
+    assert_in_epsilon(540.0, area_s, 0.00001)
+    assert_in_epsilon(100.0, area_r, 0.00001)
+
+    # Duct_uninsulated_and_unsealed_hpxml.xml (change sealed)
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = false
+    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
+    assert_in_epsilon(0.09375, leak_s, 0.00001)
+    assert_in_epsilon(0.09375, leak_r, 0.00001)
+    assert_in_epsilon(405.0, area_s, 0.00001)
+    assert_in_epsilon(150.0, area_r, 0.00001)
+
+    # Floor_area_25000_hpxml.xml (change CFA)
+    cfa = 25000.0
+    ncfl_ag = 2
+    sealed = true
+    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
+    assert_in_epsilon(0.0375, leak_s, 0.00001)
+    assert_in_epsilon(0.0375, leak_r, 0.00001)
+    assert_in_epsilon(5062.5, area_s, 0.00001)
+    assert_in_epsilon(1875.0, area_r, 0.00001)
+  end
+
   def test_infiltration
     # Tests from ResDB.Infiltration.Model.v2.xlsx
 
