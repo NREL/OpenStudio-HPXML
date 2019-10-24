@@ -248,7 +248,7 @@
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem2'/>
-              <DistributionSystem idref='HVACDistribution'/>
+              <DistributionSystem idref='HVACDistribution2'/>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -262,7 +262,7 @@
             </HeatingSystem>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem3'/>
-              <DistributionSystem idref='HVACDistribution'/>
+              <DistributionSystem idref='HVACDistribution3'/>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -298,6 +298,20 @@
             </DistributionSystemType>
             <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
             <AnnualCoolingDistributionSystemEfficiency>0.7</AnnualCoolingDistributionSystemEfficiency>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
+            <DistributionSystemType>
+              <Other>DSE</Other>
+            </DistributionSystemType>
+            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution3'/>
+            <DistributionSystemType>
+              <Other>DSE</Other>
+            </DistributionSystemType>
+            <AnnualHeatingDistributionSystemEfficiency>0.8</AnnualHeatingDistributionSystemEfficiency>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

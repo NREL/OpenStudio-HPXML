@@ -1715,7 +1715,9 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values << heating_systems_values[1].dup
     heating_systems_values[1][:id] = "HeatingSystem2"
+    heating_systems_values[1][:distribution_system_idref] = "HVACDistribution2"
     heating_systems_values[2][:id] = "HeatingSystem3"
+    heating_systems_values[2][:distribution_system_idref] = "HVACDistribution3"
     for i in 0..2
       heating_systems_values[i][:heating_capacity] /= 3.0
       heating_systems_values[i][:fraction_heat_load_served] = 0.333
@@ -2081,11 +2083,20 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
     hvac_distributions_values << { :id => "HVACDistribution6",
                                    :distribution_system_type => "AirDistribution" }
   elsif ['base-hvac-dse.xml',
-         'base-hvac-furnace-x3-dse.xml',
          'base-dhw-indirect-dse.xml'].include? hpxml_file
     hvac_distributions_values[0][:distribution_system_type] = "DSE"
     hvac_distributions_values[0][:annual_heating_dse] = 0.8
     hvac_distributions_values[0][:annual_cooling_dse] = 0.7
+  elsif ['base-hvac-furnace-x3-dse.xml'].include? hpxml_file
+    hvac_distributions_values[0][:distribution_system_type] = "DSE"
+    hvac_distributions_values[0][:annual_heating_dse] = 0.8
+    hvac_distributions_values[0][:annual_cooling_dse] = 0.7
+    hvac_distributions_values << hvac_distributions_values[0].dup
+    hvac_distributions_values[1][:id] = "HVACDistribution2"
+    hvac_distributions_values[1][:annual_cooling_dse] = nil
+    hvac_distributions_values << hvac_distributions_values[0].dup
+    hvac_distributions_values[2][:id] = "HVACDistribution3"
+    hvac_distributions_values[2][:annual_cooling_dse] = nil
   elsif hpxml_file.include? 'hvac_multiple' and not hvac_distributions_values.empty?
     hvac_distributions_values << hvac_distributions_values[0].dup
     hvac_distributions_values[1][:id] = "HVACDistribution2"
