@@ -752,7 +752,7 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/WaterHeating/WaterHeatingSystem") do |orig_wh_sys|
       wh_sys_values = HPXML.get_water_heating_system_values(water_heating_system: orig_wh_sys)
 
-      if not wh_sys_values[:energy_factor].nil?
+      if not wh_sys_values[:energy_factor].nil? or not wh_sys_values[:uniform_energy_factor].nil?
         # Do nothing, we already have the energy factor
       elsif wh_sys_values[:energy_star]
         wh_sys_values[:energy_factor] = lookup_water_heater_efficiency(
@@ -776,7 +776,11 @@ class HEScoreRuleset
       end
       wh_recovery_efficiency = nil
       if wh_sys_values[:water_heater_type] == "storage water heater" and wh_sys_values[:fuel_type] != "electricity"
-        wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type], wh_sys_values[:energy_factor])
+        ef = wh_sys_values[:energy_factor]
+        if ef.nil?
+          ef = 0.9066 * wh_sys_values[:uniform_energy_factor] + 0.0711 # RESNET equation for Consumer Gas-Fired Water Heater
+        end
+        wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type], ef)
       end
       wh_tank_volume = nil
       if wh_sys_values[:water_heater_type] == "space-heating boiler with storage tank"
