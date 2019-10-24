@@ -7,12 +7,8 @@ require_relative "psychrometrics"
 require_relative "hvac"
 
 class Airflow
-  def self.apply(model, runner, infil, mech_vent, nat_vent, duct_systems,
+  def self.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
                  cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
-    weather = WeatherProcess.new(model, runner)
-    if weather.error?
-      return false
-    end
 
     @infMethodConstantCFM = 'CONSTANT_CFM'
     @infMethodAIM2 = 'AIM2' # aka ASHRAE Enhanced
@@ -1049,7 +1045,7 @@ class Airflow
   def self.create_ducts_objects(model, runner, building, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loop, duct_programs, duct_lks, air_loop_objects)
     return true if ducts.size == 0 # No ducts
 
-    duct_zones = ducts.map { |duct| duct.zone }.uniq!
+    duct_zones = ducts.map { |duct| duct.zone }.uniq
     living_space = building.living.zone.spaces[0]
 
     # All duct zones are in living space?
@@ -1310,10 +1306,17 @@ class Airflow
 
         if not leakage_fracs[Constants.DuctSideSupply].nil?
           duct_subroutine.addLine("  Set f_sup = #{leakage_fracs[Constants.DuctSideSupply]}") # frac
-          duct_subroutine.addLine("  Set f_ret = #{leakage_fracs[Constants.DuctSideReturn]}") # frac
         elsif not leakage_cfm25s[Constants.DuctSideSupply].nil?
           duct_subroutine.addLine("  Set f_sup = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideSupply], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} * 1.0135)") # frac
+        else
+          duct_subroutine.addLine("  Set f_sup = 0.0") # frac
+        end
+        if not leakage_fracs[Constants.DuctSideReturn].nil?
+          duct_subroutine.addLine("  Set f_ret = #{leakage_fracs[Constants.DuctSideReturn]}") # frac
+        elsif not leakage_cfm25s[Constants.DuctSideReturn].nil?
           duct_subroutine.addLine("  Set f_ret = #{UnitConversions.convert(leakage_cfm25s[Constants.DuctSideReturn], "cfm", "m^3/s").round(6)} / (#{fan_mfr_max_var.name} * 1.0135)") # frac
+        else
+          duct_subroutine.addLine("  Set f_ret = 0.0") # frac
         end
         duct_subroutine.addLine("  Set sup_lk_mfr = f_sup * AH_MFR") # kg/s
         duct_subroutine.addLine("  Set ret_lk_mfr = f_ret * AH_MFR") # kg/s
