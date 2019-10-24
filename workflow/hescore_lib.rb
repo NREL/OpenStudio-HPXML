@@ -31,14 +31,15 @@ def get_output_meter_requests
     [:hot_water, :fuel_oil] => ["WaterSystems:FuelOil#1"],
 
     # Large Appliances Energy
+    # Note: All large appliances in the HEScore model are currently assumed to be electric.
+    # Note: These appliances (intentionally excluding range/oven) are later subtracted out from small appliances.
     [:large_appliance, :electric] => ["#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
                                       "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
-                                      "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity",
-                                      "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Electricity"],
+                                      "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity"],
 
     # Small Appliances Energy
-    [:small_appliance, :electric] => ["InteriorEquipment:Electricity"], # Note: large appliances are later subtracted out from small appliances later
+    [:small_appliance, :electric] => ["InteriorEquipment:Electricity"],
 
     # Lighting Energy
     [:lighting, :electric] => ["InteriorLights:Electricity",

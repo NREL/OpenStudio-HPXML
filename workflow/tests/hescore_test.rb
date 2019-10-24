@@ -176,11 +176,10 @@ class HEScoreTest < Minitest::Unit::TestCase
       # Check large_appliance end use matches ERI calculation
       if end_use == "large_appliance" and resource_type == "electric" and units == "kWh"
         eri_fridge = 637.0 + 18.0 * nbr
-        eri_range_oven = 331.0 + 39.0 * nbr
         eri_clothes_dryer = 524.0 + 149.0 * nbr
         eri_clothes_washer = 38.0 + 10.0 * nbr
         eri_dishwasher = 78.0 + 31.0 * nbr
-        eri_large_appl = eri_fridge + eri_range_oven + eri_clothes_dryer + eri_clothes_washer + eri_dishwasher
+        eri_large_appl = eri_fridge + eri_clothes_dryer + eri_clothes_washer + eri_dishwasher
         assert_in_epsilon(eri_large_appl, value, 0.01)
         tested_end_uses << end_use
       end
@@ -189,7 +188,8 @@ class HEScoreTest < Minitest::Unit::TestCase
       if end_use == "small_appliance" and resource_type == "electric" and units == "kWh"
         eri_mels = 0.91 * cfa
         eri_tv = 413.0 + 69.0 * nbr
-        eri_small_appl = eri_mels + eri_tv
+        eri_range_oven = 331.0 + 39.0 * nbr
+        eri_small_appl = eri_mels + eri_tv + eri_range_oven
         assert_in_epsilon(eri_small_appl, value, 0.01)
         tested_end_uses << end_use
       end

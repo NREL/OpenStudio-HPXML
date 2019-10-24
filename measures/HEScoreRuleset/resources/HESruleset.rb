@@ -232,7 +232,6 @@ class HEScoreRuleset
                      emittance: 0.9, # ERI assumption; TODO get values from method
                      insulation_assembly_r_value: wall_r)
     end
-
   end
 
   def self.get_foundation_perimeter(foundation)
@@ -279,8 +278,7 @@ class HEScoreRuleset
                                   thickness: 10,
                                   depth_below_grade: fndwall_height - 1.0,
                                   insulation_r_value: fndwall_values[:insulation_r_value],
-                                  insulation_distance_to_bottom: fndwall_height
-                                )
+                                  insulation_distance_to_bottom: fndwall_height)
       end
     end
   end
@@ -309,7 +307,9 @@ class HEScoreRuleset
     orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
       attic_adjacent = get_attic_adjacent(orig_attic)
 
-      if ["attic - unvented", "attic - vented"].include? attic_adjacent
+      fail "Unvented attics should't exist in HEScore." if attic_adjacent == "attic - unvented"
+
+      if attic_adjacent == "attic - vented"
         framefloor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
         framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
         framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
@@ -319,7 +319,7 @@ class HEScoreRuleset
                              id: framefloor_values[:id],
                              exterior_adjacent_to: attic_adjacent,
                              interior_adjacent_to: "living space",
-                             area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
+                             area: framefloor_values[:area],
                              insulation_assembly_r_value: framefloor_r)
       end
     end
@@ -439,14 +439,15 @@ class HEScoreRuleset
       hpxml.elements.each('Building/BuildingDetails/Enclosure/Roofs/Roof') do |roof|
         roof_values = HPXML.get_roof_values(roof: roof)
         next unless roof_values[:id].start_with?(skylight_values[:roof_idref])
+
         skylight_area = skylight_values[:area] / 2.0
         HPXML.add_skylight(hpxml: hpxml,
-          id: "#{skylight_values[:id]}_#{roof_values[:id]}",
-          area: skylight_area,
-          azimuth: roof_values[:azimuth],
-          ufactor: skylight_values[:ufactor],
-          shgc: skylight_values[:shgc],
-          roof_idref: roof_values[:id])
+                           id: "#{skylight_values[:id]}_#{roof_values[:id]}",
+                           area: skylight_area,
+                           azimuth: roof_values[:azimuth],
+                           ufactor: skylight_values[:ufactor],
+                           shgc: skylight_values[:shgc],
+                           roof_idref: roof_values[:id])
       end
     end
   end
@@ -1514,21 +1515,23 @@ def get_foundation_area(foundation)
   if foundation_type == "SlabOnGrade"
     slab_id = foundation.elements["AttachedToSlab/@idref"].value
     fail "Reference to slab required for SlabOnGrade foundation type." if slab_id.nil?
+
     area = REXML::XPath.first(
       foundation,
       "//Slab[SystemIdentifier/@id=$slabid]/Area/text()",
-      {"" => foundation.namespace},
-      {"slabid" => slab_id}
+      { "" => foundation.namespace },
+      { "slabid" => slab_id }
     )
     fail "Area required for Slab: #{slab_id}." if area.nil?
   elsif ["Basement", "Crawlspace"].include?(foundation_type)
     frame_floor_id = foundation.elements["AttachedToFrameFloor/@idref"].value
     fail "Reference to foundation floor required for #{foundation_type}." if frame_floor_id.nil?
+
     area = REXML::XPath.first(
       foundation,
       "//FrameFloor[SystemIdentifier/@id=$floorid]/Area/text()",
-      {"" => foundation.namespace},
-      {"floorid" => frame_floor_id}
+      { "" => foundation.namespace },
+      { "floorid" => frame_floor_id }
     )
     fail "Area required for FrameFloor: #{frame_floor_id}." if area.nil?
   else
