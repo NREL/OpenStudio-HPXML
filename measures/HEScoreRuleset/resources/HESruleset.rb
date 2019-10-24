@@ -1015,16 +1015,10 @@ end
 
 def get_default_water_heater_re(fuel, ef)
   # Water Heater Recovery Efficiency by fuel and energy factor
-  if ["natural gas", "propane"].include?(fuel)
-    if ef < 0.75
-      val = 0.251211 * ef + 0.608671
-    else
-      val = 0.778114 * ef + 0.276679
-    end
-  elsif fuel == "fuel oil"
-    val = 1.27605 * ef - 0.0728183
-  elsif fuel == "electricity"
+  if fuel == "electricity"
     val = 0.98
+  else
+    val = 0.779819 * ef + 0.270972
   end
   return val if not val.nil?
 
