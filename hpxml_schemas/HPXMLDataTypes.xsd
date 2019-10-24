@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2014/6"
-	targetNamespace="http://hpxmlonline.com/2014/6" elementFormDefault="qualified" version="3.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2019/10" targetNamespace="http://hpxmlonline.com/2019/10" elementFormDefault="qualified" version="3.0">
 	<!-- Value Lists -->
 	<!--Address Information Below-->
 	<xs:simpleType name="schemaVersionType">
@@ -608,6 +607,8 @@
 			<xs:enumeration value="living space"/>
 			<xs:enumeration value="other"/>
 			<xs:enumeration value="other housing unit"/>
+			<xs:enumeration value="other housing unit above"/>
+			<xs:enumeration value="other housing unit below"/>
 			<xs:enumeration value="outside"/>
 			<xs:enumeration value="unconditioned space"/>
 		</xs:restriction>
@@ -808,6 +809,7 @@
 			<xs:enumeration value="advanced power strip for AV"/>
 			<xs:enumeration value="advanced power strip for IT"/>
 			<xs:enumeration value="whole-house energy management system"/>
+			<xs:enumeration value="smart plug"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -1086,6 +1088,7 @@
 			<xs:enumeration value="CFM50"/>
 			<xs:enumeration value="CFM25"/>
 			<xs:enumeration value="CFM per Std 152"/>
+			<xs:enumeration value="Percent"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="LeakinessObservedVisualInspection">
@@ -2076,7 +2079,8 @@
 	</xs:simpleType>
 	<xs:simpleType name="WeatherStationUse">
 		<xs:annotation>
-			<xs:documentation>By leaving this field empty, the weather station is assumed used for all functions such as utility bill regression analysis and energy model simulations. If different weather stations are used for the different functions, use this field to specify the usage of each weather station.</xs:documentation>
+			<xs:documentation>By leaving this field empty, the weather station is assumed used for all functions such as utility bill regression analysis and energy model simulations. If different
+				weather stations are used for the different functions, use this field to specify the usage of each weather station.</xs:documentation>
 		</xs:annotation>
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="billing analysis"/>
@@ -2177,6 +2181,25 @@
 			<xs:enumeration value="SLA"/>
 			<xs:enumeration value="ACHnatural"/>
 			<xs:enumeration value="CFM per sq.ft."/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DiameterDimension">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="inner"/>
+			<xs:enumeration value="outer"/>
+			<xs:enumeration value="nominal"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ConnectedDeviceCommunicationProtocol">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Wi-Fi"/>
+			<xs:enumeration value="Zigbee"/>
+			<xs:enumeration value="Z-wave"/>
+			<xs:enumeration value="Ethernet"/>
+			<xs:enumeration value="Bluetooth"/>
+			<xs:enumeration value="LTE"/>
+			<xs:enumeration value="cellular modem"/>
+			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

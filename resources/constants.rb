@@ -303,6 +303,15 @@ class Constants
     return "baseboard"
   end
 
+  def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")
+    if is_cooling
+      s = "cool"
+    else
+      s = "heat"
+    end
+    return "#{fan_or_pump_name} #{s} disaggregate"
+  end
+
   def self.ObjectNameFixtures
     return "dhw fixtures"
   end
@@ -433,10 +442,6 @@ class Constants
 
   def self.PlantLoopSolarHotWater
     return "solar hot water loop"
-  end
-
-  def self.RADuctZone
-    return 'RA Duct Zone'
   end
 
   def self.RecircTypeTimer

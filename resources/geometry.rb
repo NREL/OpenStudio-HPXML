@@ -280,36 +280,6 @@ class Geometry
     end
   end
 
-  def self.get_conditioned_spaces(spaces)
-    conditioned_spaces = []
-    spaces.each do |space|
-      next if self.space_is_unconditioned(space)
-
-      conditioned_spaces << space
-    end
-    return conditioned_spaces
-  end
-
-  def self.get_unconditioned_basement_spaces(spaces)
-    unconditioned_basement_spaces = []
-    spaces.each do |space|
-      next if not self.is_unconditioned_basement(space)
-
-      unconditioned_basement_spaces << space
-    end
-    return unconditioned_basement_spaces
-  end
-
-  def self.get_garage_spaces(spaces)
-    garage_spaces = []
-    spaces.each do |space|
-      next if not self.is_garage(space)
-
-      garage_spaces << space
-    end
-    return garage_spaces
-  end
-
   def self.get_facade_for_surface(surface)
     tol = 0.001
     n = surface.outwardNormal
@@ -487,7 +457,7 @@ class Geometry
   end
 
   def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             cfa, nbeds)
+                             cfa, nbeds, space)
 
     # Error checking
     if sens_frac < 0 or sens_frac > 1
@@ -512,54 +482,35 @@ class Geometry
     occ_rad = 0.558 * occ_sens
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
-    # Update number of occupants
-    total_num_occ = 0
-    people_sch = nil
-    activity_sch = nil
+    space_obj_name = "#{Constants.ObjectNameOccupants}"
+    space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
 
-    # Get spaces
-    ffa_spaces = self.get_conditioned_spaces(model.getSpaces)
-
-    ffa_spaces.each do |space|
-      space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
-
-      space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
-
-      if people_sch.nil?
-        # Create schedule
-        people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
-        if not people_sch.validated?
-          return false
-        end
-      end
-
-      if activity_sch.nil?
-        # Create schedule
-        activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
-      end
-
-      # Add people definition for the occ
-      occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-      occ = OpenStudio::Model::People.new(occ_def)
-      occ.setName(space_obj_name)
-      occ.setSpace(space)
-      occ_def.setName(space_obj_name)
-      occ_def.setNumberOfPeopleCalculationMethod("People", 1)
-      occ_def.setNumberofPeople(space_num_occ)
-      occ_def.setFractionRadiant(occ_rad)
-      occ_def.setSensibleHeatFraction(occ_sens)
-      occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
-      occ_def.setCarbonDioxideGenerationRate(0)
-      occ_def.setEnableASHRAE55ComfortWarnings(false)
-      occ.setActivityLevelSchedule(activity_sch)
-      occ.setNumberofPeopleSchedule(people_sch.schedule)
-
-      total_num_occ += space_num_occ
-
-      runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
+    # Create schedule
+    people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    if not people_sch.validated?
+      return false
     end
 
-    runner.registerInfo("The building has been assigned #{total_num_occ.round(2)} total occupant(s).")
+    # Create schedule
+    activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
+
+    # Add people definition for the occ
+    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
+    occ = OpenStudio::Model::People.new(occ_def)
+    occ.setName(space_obj_name)
+    occ.setSpace(space)
+    occ_def.setName(space_obj_name)
+    occ_def.setNumberOfPeopleCalculationMethod("People", 1)
+    occ_def.setNumberofPeople(space_num_occ)
+    occ_def.setFractionRadiant(occ_rad)
+    occ_def.setSensibleHeatFraction(occ_sens)
+    occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
+    occ_def.setCarbonDioxideGenerationRate(0)
+    occ_def.setEnableASHRAE55ComfortWarnings(false)
+    occ.setActivityLevelSchedule(activity_sch)
+    occ.setNumberofPeopleSchedule(people_sch.schedule)
+
+    runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
     return true
   end
 
