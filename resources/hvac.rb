@@ -1995,7 +1995,7 @@ class HVAC
     clg_object_sensors = []
     clg_objects.each do |clg_object|
       if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
-        var = "Evaporative Cooler Electric Energy"
+        var = "Evaporative Cooler Water Volume"
       else
         var = "Cooling Coil Electric Energy"
       end
