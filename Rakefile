@@ -176,9 +176,10 @@ def create_hpxmls
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
+    'base-hvac-ducts-leakage-percent.xml' => 'base.xml',
+    'base-hvac-ducts-locations.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-hvac-ducts-multiple.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
-    'base-hvac-ducts-locations.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
@@ -2109,14 +2110,18 @@ end
 def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_measurements_values)
   if ['base.xml'].include? hpxml_file
     duct_leakage_measurements_values = [[{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 25 }]]
   elsif ['base-hvac-boiler-gas-central-ac-1-speed.xml'].include? hpxml_file
     duct_leakage_measurements_values[0] = []
     duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 25 }]
   elsif ['base-hvac-mini-split-heat-pump-ducted.xml',
          'base-hvac-mini-split-heat-pump-ducted-shr.xml',
@@ -2127,20 +2132,28 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
     duct_leakage_measurements_values[0] = []
     duct_leakage_measurements_values[1] = []
     duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 25 }]
     duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 25 }]
     duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 25 }]
     duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 75 },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => 25 }]
   elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
          'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',
@@ -2155,12 +2168,16 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 0.0
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 0.0
     duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => duct_leakage_measurements_values[0][0][:duct_leakage_value] },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => duct_leakage_measurements_values[0][1][:duct_leakage_value] }]
     duct_leakage_measurements_values << [{ :duct_type => "supply",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => duct_leakage_measurements_values[0][0][:duct_leakage_value] },
                                          { :duct_type => "return",
+                                           :duct_leakage_units => "CFM25",
                                            :duct_leakage_value => duct_leakage_measurements_values[0][1][:duct_leakage_value] }]
   elsif (hpxml_file.include? 'hvac_partial' and not duct_leakage_measurements_values.empty?) or
         (hpxml_file.include? 'hvac_base' and not duct_leakage_measurements_values.empty?) or
@@ -2176,6 +2193,13 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
     # (e.g., ducts may be in floor cavities which have leaky rims)
     duct_leakage_measurements_values[0][0][:duct_leakage_value] = 1.5
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 1.5
+  elsif ['base-hvac-ducts-leakage-percent.xml'].include? hpxml_file
+    duct_leakage_measurements_values = [[{ :duct_type => "supply",
+                                           :duct_leakage_units => "Percent",
+                                           :duct_leakage_value => 0.1 },
+                                         { :duct_type => "return",
+                                           :duct_leakage_units => "Percent",
+                                           :duct_leakage_value => 0.05 }]]
   end
   return duct_leakage_measurements_values
 end

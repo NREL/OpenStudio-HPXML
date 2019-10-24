@@ -3293,20 +3293,20 @@ class OSModel
     side_map = { 'supply' => Constants.DuctSideSupply,
                  'return' => Constants.DuctSideReturn }
 
-    # Duct leakage
-    leakage_to_outside_cfm25 = { Constants.DuctSideSupply => 0.0,
-                                 Constants.DuctSideReturn => 0.0 }
+    # Duct leakage (supply/return => [value, units])
+    leakage_to_outside = { Constants.DuctSideSupply => [0.0, nil],
+                           Constants.DuctSideReturn => [0.0, nil] }
     air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
       duct_leakage_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
-      next unless duct_leakage_values[:duct_leakage_units] == "CFM25" and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
+      next unless ['CFM25', 'Percent'].include? duct_leakage_values[:duct_leakage_units] and duct_leakage_values[:duct_leakage_total_or_to_outside] == "to outside"
 
       duct_side = side_map[duct_leakage_values[:duct_type]]
       next if duct_side.nil?
 
-      leakage_to_outside_cfm25[duct_side] = duct_leakage_values[:duct_leakage_value]
+      leakage_to_outside[duct_side] = [duct_leakage_values[:duct_leakage_value], duct_leakage_values[:duct_leakage_units]]
     end
 
-    # Duct location, Rvalue, Area
+    # Duct location, R-value, Area
     total_unconditioned_duct_area = { Constants.DuctSideSupply => 0.0,
                                       Constants.DuctSideReturn => 0.0 }
     air_distribution.elements.each("Ducts") do |ducts|
@@ -3331,21 +3331,39 @@ class OSModel
       duct_area = ducts_values[:duct_surface_area]
       duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
       # Apportion leakage to individual ducts by surface area
-      duct_leakage_cfm = (leakage_to_outside_cfm25[duct_side] * duct_area / total_unconditioned_duct_area[duct_side])
+      duct_leakage_value = leakage_to_outside[duct_side][0] * duct_area / total_unconditioned_duct_area[duct_side]
+      duct_leakage_units = leakage_to_outside[duct_side][1]
 
-      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+      duct_leakage_cfm = nil
+      duct_leakage_frac = nil
+      if duct_leakage_units == 'CFM25'
+        duct_leakage_cfm = duct_leakage_value
+      elsif duct_leakage_units == 'Percent'
+        duct_leakage_frac = duct_leakage_value
+      end
+
+      air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
     [Constants.DuctSideSupply, Constants.DuctSideReturn].each do |duct_side|
-      next unless leakage_to_outside_cfm25[duct_side] > 0 and total_unconditioned_duct_area[duct_side] == 0
+      next unless leakage_to_outside[duct_side][0] > 0 and total_unconditioned_duct_area[duct_side] == 0
 
       duct_area = 0.0
       duct_rvalue = 0.0
       duct_space = nil # outside
-      duct_leakage_cfm = leakage_to_outside_cfm25[duct_side]
+      duct_leakage_value = leakage_to_outside[duct_side][0]
+      duct_leakage_units = leakage_to_outside[duct_side][1]
 
-      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, duct_rvalue)
+      duct_leakage_cfm = nil
+      duct_leakage_frac = nil
+      if duct_leakage_units == 'CFM25'
+        duct_leakage_cfm = duct_leakage_value
+      elsif duct_leakage_units == 'Percent'
+        duct_leakage_frac = duct_leakage_value
+      end
+
+      air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
     end
 
     return air_ducts
