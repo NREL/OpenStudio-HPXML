@@ -1161,26 +1161,23 @@ class HVACSizing
     return nil if init_loads.nil?
 
     # evap cooler temperature calculation based on Mannual S Figure 4-7
-    hvac.Objects.each do |equip|
-      if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
-        td_potential = @cool_design_temps[nil] - @wetbulb_outdoor_cooling
-        td = td_potential * equip.coolerDesignEffectiveness
-        hvac.LeavingAirTemp = @cool_design_temps[nil] - td
-        return hvac
-      end
-    end
-
-    # Calculate Leaving Air Temperature
-    shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
-    # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
-    if shr < 0.80
-      hvac.LeavingAirTemp = 54 # F
-    elsif shr < 0.85
-      # MJ8 says to use 56 degF in this SHR range. Linear interpolation provides a more
-      # continuous supply air flow rate across building efficiency levels.
-      hvac.LeavingAirTemp = ((58 - 54) / (0.85 - 0.80)) * (shr - 0.8) + 54 # F
+    if hvac.has_type(Constants.ObjectNameEvaporativeCooler)
+      td_potential = @cool_design_temps[nil] - @wetbulb_outdoor_cooling
+      td = td_potential * Constants.AssumedEvapCoolerEffectiveness
+      hvac.LeavingAirTemp = @cool_design_temps[nil] - td
     else
-      hvac.LeavingAirTemp = 58 # F
+      # Calculate Leaving Air Temperature
+      shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
+      # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
+      if shr < 0.80
+        hvac.LeavingAirTemp = 54 # F
+      elsif shr < 0.85
+        # MJ8 says to use 56 degF in this SHR range. Linear interpolation provides a more
+        # continuous supply air flow rate across building efficiency levels.
+        hvac.LeavingAirTemp = ((58 - 54) / (0.85 - 0.80)) * (shr - 0.8) + 54 # F
+      else
+        hvac.LeavingAirTemp = 58 # F
+      end
     end
 
     # Calculate Supply Air Temperature
@@ -1667,7 +1664,11 @@ class HVACSizing
     elsif hvac.has_type(Constants.ObjectNameEvaporativeCooler)
       hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot
       hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Load_Sens
-      hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+      if @cool_setpoint - hvac.LeavingAirTemp > 0
+        hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+      else
+        hvac_final_values.Cool_Airflow = @cfa * 2 # Use industry rule of thumb sizing method adopted by HEScore
+      end
 
     else
       hvac_final_values.Cool_Capacity = 0
@@ -1695,6 +1696,7 @@ class HVACSizing
       end
     end
     if not hvac.FixedHeatingCapacity.nil?
+      hvac_final_values.Heat_Capacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
       hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
     end
 
@@ -1730,9 +1732,10 @@ class HVACSizing
       if hvac.FixedCoolingCapacity.nil?
         hvac_final_values = process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac)
         return nil if hvac_final_values.nil?
+
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       end
 
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
       if hvac_final_values.Cool_Capacity > @min_cooling_capacity
@@ -1762,8 +1765,6 @@ class HVACSizing
 
       if hvac.FixedCoolingCapacity.nil?
         hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-      else
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       end
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
@@ -1815,8 +1816,10 @@ class HVACSizing
 
       bore_length *= bore_length_mult
 
-      hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      if hvac.FixedCoolingCapacity.nil?
+        hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      end
       hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
       cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
                                  (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *
@@ -2396,6 +2399,11 @@ class HVACSizing
 
       if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         hvac.CoolingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
+        air_loop = equip.airLoopHVAC.get
+        fan_unit_sys = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
+        if fan_unit_sys.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler).get
+          hvac.Ducts = get_ducts_for_air_loop(runner, air_loop)
+        end
         return nil if hvac.CoolingLoadFraction.nil?
       end
 
@@ -3480,10 +3488,12 @@ class HVACSizing
         air_loop = object.airLoopHVAC.get
         air_loop.setDesignSupplyAirFlowRate(vfr)
         unitary_sys = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
+        unitary_sys.setSupplyAirFlowRateDuringCoolingOperation(vfr)
+        unitary_sys.coolingCoil.get.to_CoilCoolingDXSingleSpeed.get.setRatedAirFlowRate(vfr)
         fan = unitary_sys.supplyFan.get.to_FanOnOff.get
         fan.setMaximumFlowRate(vfr)
         # Fan pressure rise calculation (based on design cfm)
-        fan_power = [2.79 * (hvac_final_values.Cool_Airflow / @cfa)**(-0.29), 0.6].min
+        fan_power = [2.79 * (hvac_final_values.Cool_Airflow)**(-0.29), 0.6].min
         fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
         fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
 
