@@ -1251,12 +1251,11 @@ end
 def get_roof_solar_absorptance(roof_color)
   # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
-  val = { "reflective" => 0.40,
-          "white" => 0.50,
-          "light" => 0.65,
-          "medium" => 0.75,
-          "medium dark" => 0.85,
-          "dark" => 0.95 }[roof_color]
+  val = { "white" => 0.35,
+          "light" => 0.55,
+          "medium" => 0.7,
+          "medium dark" => 0.8,
+          "dark" => 0.9 }[roof_color]
   return val if not val.nil?
 
   fail "Could not get roof absorptance for color '#{roof_color}'"
