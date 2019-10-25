@@ -477,9 +477,9 @@ def create_hpxmls
         foundation_walls_values = get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
         framefloors_values = get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
         slabs_values = get_hpxml_file_slabs_values(hpxml_file, slabs_values)
-        windows_values = get_hpxml_file_windows_values(hpxml_file, windows_values)
+        windows_values = get_hpxml_file_windows_values(hpxml_file, windows_values, walls_values, foundation_walls_values)
         skylights_values = get_hpxml_file_skylights_values(hpxml_file, skylights_values)
-        doors_values = get_hpxml_file_doors_values(hpxml_file, doors_values)
+        doors_values = get_hpxml_file_doors_values(hpxml_file, doors_values, walls_values, foundation_walls_values)
         heating_systems_values = get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
         cooling_systems_values = get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
         heat_pumps_values = get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
@@ -1432,7 +1432,7 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
   return slabs_values
 end
 
-def get_hpxml_file_windows_values(hpxml_file, windows_values)
+def get_hpxml_file_windows_values(hpxml_file, windows_values, walls_values, foundation_walls_values)
   if ['base.xml'].include? hpxml_file
     windows_values = [{ :id => "WindowNorth",
                         :area => 54,
@@ -1559,13 +1559,29 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
   elsif ['invalid_files/unattached-window.xml'].include? hpxml_file
     windows_values[0][:wall_idref] = "foobar"
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    area_adjustments = []
     for n in 1..windows_values.size
       windows_values[n - 1][:area] /= 10.0
       for i in 2..10
         windows_values << windows_values[n - 1].dup
         windows_values[-1][:id] += i.to_s
-        windows_values[-1][:wall_idref] += i.to_s if i % 2 == 0
+        windows_values[-1][:wall_idref] += i.to_s
+        if i < 4
+          # nop
+        elsif i < 7 # Move to another Wall
+          new_idref = "WallAtticGable#{i}"
+          area_adjustments << [windows_values[-1][:wall_idref], new_idref, windows_values[-1][:area]]
+          windows_values[-1][:wall_idref] = new_idref
+        else # Move to a FoundationWall
+          new_idref = "FoundationWall#{i}"
+          area_adjustments << [windows_values[-1][:wall_idref], new_idref, windows_values[-1][:area]]
+          windows_values[-1][:wall_idref] = new_idref
+        end
       end
+    end
+    # Moved subsurface; preserve original net wall areas
+    area_adjustments.each do |area_adjustment|
+      update_areas(area_adjustment[0], area_adjustment[1], area_adjustment[2], walls_values, foundation_walls_values)
     end
   end
   return windows_values
@@ -1602,7 +1618,7 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
   return skylights_values
 end
 
-def get_hpxml_file_doors_values(hpxml_file, doors_values)
+def get_hpxml_file_doors_values(hpxml_file, doors_values, walls_values, foundation_walls_values)
   if ['base.xml'].include? hpxml_file
     doors_values = [{ :id => "DoorNorth",
                       :wall_idref => "Wall",
@@ -1624,13 +1640,29 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     doors_values[0][:wall_idref] = "foobar"
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    area_adjustments = []
     for n in 1..doors_values.size
       doors_values[n - 1][:area] /= 10.0
       for i in 2..10
         doors_values << doors_values[n - 1].dup
         doors_values[-1][:id] += i.to_s
-        doors_values[-1][:wall_idref] += i.to_s if i % 2 == 0
+        doors_values[-1][:wall_idref] += i.to_s
+        if i < 4
+          # nop
+        elsif i < 7 # Move to another Wall
+          new_idref = "WallAtticGable#{i}"
+          area_adjustments << [doors_values[-1][:wall_idref], new_idref, doors_values[-1][:area]]
+          doors_values[-1][:wall_idref] = new_idref
+        else # Move to a FoundationWall
+          new_idref = "FoundationWall#{i}"
+          area_adjustments << [doors_values[-1][:wall_idref], new_idref, doors_values[-1][:area]]
+          doors_values[-1][:wall_idref] = new_idref
+        end
       end
+    end
+    # Moved subsurface; preserve original net wall areas
+    area_adjustments.each do |area_adjustment|
+      update_areas(area_adjustment[0], area_adjustment[1], area_adjustment[2], walls_values, foundation_walls_values)
     end
   end
   return doors_values
@@ -3099,4 +3131,14 @@ def get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_valu
                                   :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" }
   end
   return misc_load_schedule_values
+end
+
+def update_areas(old_idref, new_idref, area, walls_values1, walls_values2)
+  (walls_values1 + walls_values2).each do |walls_values|
+    if walls_values[:id] == old_idref
+      walls_values[:area] -= area
+    elsif walls_values[:id] == new_idref
+      walls_values[:area] += area
+    end
+  end
 end

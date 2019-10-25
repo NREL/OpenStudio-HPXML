@@ -227,6 +227,8 @@ class HPXML
                       :insulation_id,
                       :perimeter_insulation_id,
                       :under_slab_insulation_id,
+                      :wall_idref,
+                      :roof_idref,
                       :area,
                       :exposed_perimeter]
 
@@ -260,20 +262,19 @@ class HPXML
     end
 
     # Look for pairs of surfaces that can be collapsed
+    area_adjustments = {}
+    exposed_perimeter_adjustments = {}
     surf_types.each do |surf_type|
       for i in 0..surf_type_values[surf_type].size - 1
         surf_values = surf_type_values[surf_type][i]
         next if surf_values.nil?
 
-        surf = surfs[surf_values[:id]]
+        area_adjustments[surf_values[:id]] = 0
+        exposed_perimeter_adjustments[surf_values[:id]] = 0
 
         for j in (surf_type_values[surf_type].size - 1).downto(i + 1)
           surf_values2 = surf_type_values[surf_type][j]
           next if surf_values2.nil?
-
-          surf2 = surfs[surf_values2[:id]]
-
-          next if surf_values.nil? or surf_values2.nil?
           next unless surf_values.keys.sort == surf_values2.keys.sort
 
           match = true
@@ -288,12 +289,18 @@ class HPXML
 
           # Update Area/ExposedPerimeter
           if not surf_values[:area].nil?
-            surf_values[:area] += surf_values2[:area]
-            surf.elements["Area"].text = surf_values[:area]
+            area_adjustments[surf_values[:id]] += surf_values2[:area]
           end
           if not surf_values[:exposed_perimeter].nil?
-            surf_values[:exposed_perimeter] += surf_values2[:exposed_perimeter]
-            surf.elements["ExposedPerimeter"].text = surf_values[:exposed_perimeter]
+            exposed_perimeter_adjustments[surf_values[:id]] += surf_values2[:exposed_perimeter]
+          end
+          if surf_values[:wall_idref] != surf_values2[:wall_idref] # Moving subsurface to a different wall
+            area_adjustments[surf_values[:wall_idref]] += surf_values2[:area]
+            area_adjustments[surf_values2[:wall_idref]] -= surf_values2[:area]
+          end
+          if surf_values[:roof_idref] != surf_values2[:roof_idref] # Moving subsurface to a different roof
+            area_adjustments[surf_values[:roof_idref]] += surf_values2[:area]
+            area_adjustments[surf_values2[:roof_idref]] -= surf_values2[:area]
           end
 
           # Update subsurface idrefs as appropriate
@@ -320,10 +327,24 @@ class HPXML
           end
 
           # Remove old surface
+          surf2 = surfs[surf_values2[:id]]
           surf2.parent.elements.delete surf2
           surf_type_values[surf_type].delete_at(j)
         end
       end
+    end
+
+    area_adjustments.each do |surf_id, area_adjustment|
+      next unless area_adjustment > 0
+
+      surf = surfs[surf_id]
+      surf.elements["Area"].text = Float(surf.elements["Area"].text) + area_adjustment
+    end
+    exposed_perimeter_adjustments.each do |surf_id, exposed_perimeter_adjustment|
+      next unless exposed_perimeter_adjustment > 0
+
+      surf = surfs[surf_id]
+      surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
     end
 
     return true
