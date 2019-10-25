@@ -605,6 +605,7 @@ class HEScoreRuleset
       hp_values = HPXML.get_heat_pump_values(heat_pump: orig_hp)
       hp_values[:heat_pump_fuel] = "electricity"
       hp_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
+      hp_values[:heating_capacity] = -1 # Use Manual J auto-sizing
       hp_values[:backup_heating_fuel] = "electricity"
       hp_values[:backup_heating_capacity] = -1 # Use Manual J auto-sizing
       hp_values[:backup_heating_efficiency_percent] = 1.0
@@ -697,15 +698,28 @@ class HEScoreRuleset
                                              distribution_system_type: "AirDistribution")
       new_air_dist = new_dist.elements["DistributionSystemType/AirDistribution"]
 
+      # FIXME: This code is to maintain the previous logic about duct leakage
+      # until the HVAC distribution inputs are formally addressed.
+      duct_leakage = 100 # FIXME: hard-coded
+      all_ducts_in_conditioned_space = true
+      @ducts.each do |hvac_frac, duct_frac, duct_location|
+        if duct_location != "living space" and duct_frac > 0
+          all_ducts_in_conditioned_space = false
+        end
+      end
+      if all_ducts_in_conditioned_space
+        duct_leakage = 0
+      end
+
       # Supply duct leakage
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "supply",
-                                         duct_leakage_value: 100) # FIXME: Hard-coded
+                                         duct_leakage_value: duct_leakage)
 
       # Return duct leakage
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "return",
-                                         duct_leakage_value: 100) # FIXME: Hard-coded
+                                         duct_leakage_value: duct_leakage)
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
         duct_values = HPXML.get_ducts_values(ducts: orig_duct)
