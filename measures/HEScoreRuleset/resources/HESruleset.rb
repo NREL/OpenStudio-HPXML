@@ -1022,12 +1022,10 @@ def get_default_water_heater_re(fuel, ef)
   val = nil
   if fuel == "electricity"
     val = 0.98
-  elsif ef > 0.75
+  elsif ef >= 0.75
     val = 0.778114 * ef + 0.276679
-  elsif ["natural gas", "propane"].include?(fuel)
-    val = 0.251211 * ef + 0.608671
-  elsif fuel == "fuel oil"
-    val = 1.65453 * ef - 0.337637
+  else
+    val = 0.252117 * ef + 0.607997
   end
   return val if not val.nil?
 
