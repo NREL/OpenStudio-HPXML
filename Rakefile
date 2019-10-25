@@ -130,6 +130,7 @@ def create_hpxmls
     'base-enclosure-no-natural-ventilation.xml' => 'base.xml',
     'base-enclosure-overhangs.xml' => 'base.xml',
     'base-enclosure-skylights.xml' => 'base.xml',
+    'base-enclosure-split-surfaces.xml' => 'base-enclosure-skylights.xml',
     'base-enclosure-walltype-cmu.xml' => 'base.xml',
     'base-enclosure-walltype-doublestud.xml' => 'base.xml',
     'base-enclosure-walltype-icf.xml' => 'base.xml',
@@ -859,6 +860,14 @@ def get_hpxml_file_roofs_values(hpxml_file, roofs_values)
                       :insulation_assembly_r_value => 2.3 }
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     roofs_values = []
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..roofs_values.size
+      roofs_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        roofs_values << roofs_values[n - 1].dup
+        roofs_values[-1][:id] += i.to_s
+      end
+    end
   end
   return roofs_values
 end
@@ -906,6 +915,14 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :solar_absorptance => 0.7,
                            :emittance => 0.92,
                            :insulation_assembly_r_value => 23.0 }
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..rim_joists_values.size
+      rim_joists_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        rim_joists_values << rim_joists_values[n - 1].dup
+        rim_joists_values[-1][:id] += i.to_s
+      end
+    end
   end
   return rim_joists_values
 end
@@ -1059,6 +1076,14 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
     walls_values[-1][:area] *= 0.75
     walls_values[-1][:id] += "Adiabatic"
     walls_values[-1][:exterior_adjacent_to] = "other housing unit"
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..walls_values.size
+      walls_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        walls_values << walls_values[n - 1].dup
+        walls_values[-1][:id] += i.to_s
+      end
+    end
   end
   return walls_values
 end
@@ -1191,6 +1216,14 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :depth_below_grade => 3,
                                  :insulation_distance_to_bottom => 4,
                                  :insulation_r_value => 8.9 }]
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..foundation_walls_values.size
+      foundation_walls_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        foundation_walls_values << foundation_walls_values[n - 1].dup
+        foundation_walls_values[-1][:id] += i.to_s
+      end
+    end
   end
   return foundation_walls_values
 end
@@ -1263,6 +1296,14 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :interior_adjacent_to => "living space",
                             :area => 1350,
                             :insulation_assembly_r_value => 2.1 }]
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..framefloors_values.size
+      framefloors_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        framefloors_values << framefloors_values[n - 1].dup
+        framefloors_values[-1][:id] += i.to_s
+      end
+    end
   end
   return framefloors_values
 end
@@ -1378,6 +1419,15 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :under_slab_insulation_r_value => 0,
                       :carpet_fraction => 0,
                       :carpet_r_value => 0 }]
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..slabs_values.size
+      slabs_values[n - 1][:area] /= 10.0
+      slabs_values[n - 1][:exposed_perimeter] /= 10.0
+      for i in 2..10
+        slabs_values << slabs_values[n - 1].dup
+        slabs_values[-1][:id] += i.to_s
+      end
+    end
   end
   return slabs_values
 end
@@ -1508,6 +1558,15 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :wall_idref => "FoundationWall" }
   elsif ['invalid_files/unattached-window.xml'].include? hpxml_file
     windows_values[0][:wall_idref] = "foobar"
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..windows_values.size
+      windows_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        windows_values << windows_values[n - 1].dup
+        windows_values[-1][:id] += i.to_s
+        windows_values[-1][:wall_idref] += i.to_s
+      end
+    end
   end
   return windows_values
 end
@@ -1530,6 +1589,15 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
     skylights_values[0][:area] = 4000
   elsif ['invalid_files/unattached-skylight.xml'].include? hpxml_file
     skylights_values[0][:roof_idref] = "foobar"
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..skylights_values.size
+      skylights_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        skylights_values << skylights_values[n - 1].dup
+        skylights_values[-1][:id] += i.to_s
+        skylights_values[-1][:roof_idref] += i.to_s
+      end
+    end
   end
   return skylights_values
 end
@@ -1555,6 +1623,15 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
                       :r_value => 4.4 }
   elsif ['invalid_files/unattached-door.xml'].include? hpxml_file
     doors_values[0][:wall_idref] = "foobar"
+  elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
+    for n in 1..doors_values.size
+      doors_values[n - 1][:area] /= 10.0
+      for i in 2..10
+        doors_values << doors_values[n - 1].dup
+        doors_values[-1][:id] += i.to_s
+        doors_values[-1][:wall_idref] += i.to_s
+      end
+    end
   end
   return doors_values
 end

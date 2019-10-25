@@ -66,6 +66,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     _test_hrv_erv_inputs(this_dir, all_results)
     _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
+    _test_collapsed_surfaces(all_results, this_dir)
   end
 
   def test_invalid
@@ -434,6 +435,8 @@ class HPXMLTranslatorTest < MiniTest::Test
   end
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
+    return if hpxml_path.include? "base-enclosure-split-surfaces.xml"
+
     # Check that eplusout.err has no lines that include "Blank Schedule Type Limits Name input"
     File.readlines(File.join(rundir, "eplusout.err")).each do |err_line|
       next if err_line.include? 'Schedule:Constant="ALWAYS ON CONTINUOUS", Blank Schedule Type Limits Name input'
@@ -1250,6 +1253,19 @@ class HPXMLTranslatorTest < MiniTest::Test
           assert_in_delta(result_33, result_100 / 3.0, 0.1)
         end
       end
+    end
+  end
+
+  def _test_collapsed_surfaces(all_results, this_dir)
+    results_base = all_results[File.absolute_path("#{this_dir}/base-enclosure-skylights.xml")]
+    results_collapsed = all_results[File.absolute_path("#{this_dir}/base-enclosure-split-surfaces.xml")]
+    return if results_base.nil? or results_collapsed.nil?
+
+    # Compare results
+    results_base.keys.each do |k|
+      next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+
+      assert_equal(results_base[k].to_f, results_collapsed[k].to_f)
     end
   end
 
