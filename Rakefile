@@ -1564,7 +1564,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
       for i in 2..10
         windows_values << windows_values[n - 1].dup
         windows_values[-1][:id] += i.to_s
-        windows_values[-1][:wall_idref] += i.to_s
+        windows_values[-1][:wall_idref] += i.to_s if i % 2 == 0
       end
     end
   end
@@ -1595,7 +1595,7 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
       for i in 2..10
         skylights_values << skylights_values[n - 1].dup
         skylights_values[-1][:id] += i.to_s
-        skylights_values[-1][:roof_idref] += i.to_s
+        skylights_values[-1][:roof_idref] += i.to_s if i % 2 == 0
       end
     end
   end
@@ -1629,7 +1629,7 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values)
       for i in 2..10
         doors_values << doors_values[n - 1].dup
         doors_values[-1][:id] += i.to_s
-        doors_values[-1][:wall_idref] += i.to_s
+        doors_values[-1][:wall_idref] += i.to_s if i % 2 == 0
       end
     end
   end
