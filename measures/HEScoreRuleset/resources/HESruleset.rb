@@ -307,7 +307,9 @@ class HEScoreRuleset
     orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
       attic_adjacent = get_attic_adjacent(orig_attic)
 
-      if ["attic - unvented", "attic - vented"].include? attic_adjacent
+      fail "Unvented attics should't exist in HEScore." if attic_adjacent == "attic - unvented"
+
+      if attic_adjacent == "attic - vented"
         framefloor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
         framefloor = orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier[@id='#{framefloor_id}']]"]
         framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
@@ -317,7 +319,7 @@ class HEScoreRuleset
                              id: framefloor_values[:id],
                              exterior_adjacent_to: attic_adjacent,
                              interior_adjacent_to: "living space",
-                             area: 1000.0, # FIXME: Hard-coded. Use input if vented attic, otherwise calculate default?
+                             area: framefloor_values[:area],
                              insulation_assembly_r_value: framefloor_r)
       end
     end
@@ -750,7 +752,7 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/WaterHeating/WaterHeatingSystem") do |orig_wh_sys|
       wh_sys_values = HPXML.get_water_heating_system_values(water_heating_system: orig_wh_sys)
 
-      if not wh_sys_values[:energy_factor].nil?
+      if not wh_sys_values[:energy_factor].nil? or not wh_sys_values[:uniform_energy_factor].nil?
         # Do nothing, we already have the energy factor
       elsif wh_sys_values[:energy_star]
         wh_sys_values[:energy_factor] = lookup_water_heater_efficiency(
@@ -774,7 +776,11 @@ class HEScoreRuleset
       end
       wh_recovery_efficiency = nil
       if wh_sys_values[:water_heater_type] == "storage water heater" and wh_sys_values[:fuel_type] != "electricity"
-        wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type])
+        ef = wh_sys_values[:energy_factor]
+        if ef.nil?
+          ef = 0.9066 * wh_sys_values[:uniform_energy_factor] + 0.0711 # RESNET equation for Consumer Gas-Fired Water Heater
+        end
+        wh_recovery_efficiency = get_default_water_heater_re(wh_sys_values[:fuel_type], ef)
       end
       wh_tank_volume = nil
       if wh_sys_values[:water_heater_type] == "space-heating boiler with storage tank"
@@ -1011,12 +1017,16 @@ def get_default_water_heater_volume(fuel)
   fail "Could not get default water heater volume for fuel '#{fuel}'"
 end
 
-def get_default_water_heater_re(fuel)
-  # Water Heater Recovery Efficiency by fuel
-  val = { "electricity" => 0.98,
-          "natural gas" => 0.76,
-          "propane" => 0.76,
-          "fuel oil" => 0.76 }[fuel]
+def get_default_water_heater_re(fuel, ef)
+  # Water Heater Recovery Efficiency by fuel and energy factor
+  val = nil
+  if fuel == "electricity"
+    val = 0.98
+  elsif ef >= 0.75
+    val = 0.778114 * ef + 0.276679
+  else
+    val = 0.252117 * ef + 0.607997
+  end
   return val if not val.nil?
 
   fail "Could not get default water heater RE for fuel '#{fuel}'"
