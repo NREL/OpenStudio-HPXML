@@ -1065,7 +1065,6 @@ $siding_map = {
 
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
-  # FIXME: Need values below where nil
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   has_r_cont = !r_cont.nil?
   if not has_r_cont and not ove
