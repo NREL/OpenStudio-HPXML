@@ -111,7 +111,7 @@ class EnergyPlusValidator
       },
 
       # [AirInfiltration]
-      "BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement" => {
+      "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement" => {
         "SystemIdentifier" => one, # Required by HPXML schema
       },
 
@@ -386,8 +386,8 @@ class EnergyPlusValidator
 
       ## [HVACDistType=Air]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution" => {
-        "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value" => one,
-        "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value" => zero_or_one, # See [HVACDuctLeakageMeasurement]
+        "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => one,
+        "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => zero_or_one, # See [HVACDuctLeakageMeasurement]
         "Ducts[DuctType='supply']" => one_or_more, # See [HVACDuct]
         "Ducts[DuctType='return']" => zero_or_more, # return ducts are optional for eg. evap cooler, See [HVACDuct]
       },

@@ -809,6 +809,7 @@
 			<xs:enumeration value="advanced power strip for AV"/>
 			<xs:enumeration value="advanced power strip for IT"/>
 			<xs:enumeration value="whole-house energy management system"/>
+			<xs:enumeration value="smart plug"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -1087,6 +1088,7 @@
 			<xs:enumeration value="CFM50"/>
 			<xs:enumeration value="CFM25"/>
 			<xs:enumeration value="CFM per Std 152"/>
+			<xs:enumeration value="Percent"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="LeakinessObservedVisualInspection">
@@ -2186,6 +2188,18 @@
 			<xs:enumeration value="inner"/>
 			<xs:enumeration value="outer"/>
 			<xs:enumeration value="nominal"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ConnectedDeviceCommunicationProtocol">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Wi-Fi"/>
+			<xs:enumeration value="Zigbee"/>
+			<xs:enumeration value="Z-wave"/>
+			<xs:enumeration value="Ethernet"/>
+			<xs:enumeration value="Bluetooth"/>
+			<xs:enumeration value="LTE"/>
+			<xs:enumeration value="cellular modem"/>
+			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

@@ -206,6 +206,7 @@
 	<xs:complexType name="ApplianceTypeSummaryInfo">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
+			<xs:element minOccurs="0" ref="ConnectedDevice"/>
 			<xs:element minOccurs="0" ref="AttachedToSpace"/>
 			<xs:element name="NumberofUnits" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
 			<xs:element name="Manufacturer" type="Manufacturer" minOccurs="0"/>
@@ -1171,6 +1172,7 @@
 										<xs:complexType>
 											<xs:sequence>
 												<xs:group ref="SystemInfo"/>
+												<xs:element minOccurs="0" ref="ConnectedDevice"/>
 												<xs:element minOccurs="0" name="Manufacturer" type="xs:string"/>
 												<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
 												<xs:element minOccurs="0" name="FanType" type="VentilationFanType"/>
@@ -1295,6 +1297,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
 									<xs:element minOccurs="0" ref="AttachedToZone"/>
 									<xs:element minOccurs="0" name="AttachedToCAZ" type="LocalReference"/>
 									<xs:element name="FuelType" type="FuelType" minOccurs="0"/>
@@ -1564,6 +1567,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
 									<xs:element minOccurs="0" name="Manufacturer" type="xs:string"/>
 									<xs:element minOccurs="0" name="ModelNumber" type="xs:string"/>
 									<xs:element minOccurs="0" ref="AttachedToZone"/>
@@ -1650,6 +1654,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
 									<xs:element minOccurs="0" name="Location" type="PVSystemLocation"/>
 									<xs:element minOccurs="0" name="Ownership" type="PVSystemOwnership"/>
 									<xs:element minOccurs="0" name="ModuleType">
@@ -1693,7 +1698,7 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="NumberOfPanels" type="IntegerGreaterThanZero"/>
-									<xs:element minOccurs="0" name="InverterEfficiency" type="Efficiency"/>
+									<xs:element minOccurs="0" name="InverterEfficiency" type="Fraction"/>
 									<xs:element minOccurs="0" name="SystemLossesFraction" type="Fraction">
 										<xs:annotation>
 											<xs:documentation>System losses can be due to soiling, shading, snow, mismatch, wiring, electrical connections, light-induced degradation, nameplate rating
@@ -1804,6 +1809,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
 						<xs:element minOccurs="0" name="Fixture" type="LocalReference">
 							<xs:annotation>
 								<xs:documentation>The LightingFixture that this is attached to</xs:documentation>
@@ -1855,6 +1861,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="LightingFixtureThirdPartyCertification"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
@@ -1864,6 +1871,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
 						<xs:element minOccurs="0" name="AttachedToLightingGroup" type="LocalReference"/>
 						<xs:element name="LightingControlType" type="LightingControls" minOccurs="0"> </xs:element>
 						<xs:element name="NumberofLightingControls" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
@@ -1876,6 +1884,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
 						<xs:element maxOccurs="3" minOccurs="0" name="Airflow">
 							<xs:annotation>
 								<xs:documentation/>
@@ -2039,6 +2048,7 @@
 										<xs:complexType>
 											<xs:sequence>
 												<xs:group ref="SystemInfo"/>
+												<xs:element minOccurs="0" ref="ConnectedDevice"/>
 												<xs:element minOccurs="0" name="Type" type="PoolPumpType"/>
 												<xs:element minOccurs="0" name="Manufacturer" type="xs:string">
 													<xs:annotation>
@@ -2135,6 +2145,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
 									<xs:element minOccurs="0" name="Type" type="PoolCleanerType">
 										<xs:annotation>
 											<xs:documentation>Type of pool cleaner used, if any.</xs:documentation>
@@ -2145,6 +2156,7 @@
 											<xs:documentation>Hours per day pool cleaner is used. </xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -2152,6 +2164,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
 									<xs:element minOccurs="0" name="Type" type="PoolHeaterType">
 										<xs:annotation>
 											<xs:documentation>Type of heater used to heat pool, if any.</xs:documentation>
@@ -2162,6 +2175,7 @@
 											<xs:documentation>Hours per day pool heater is used.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -2177,6 +2191,8 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
+						<xs:element minOccurs="0" name="ControlsPlugLoad" type="LocalReference"/>
 						<xs:element minOccurs="0" ref="AttachedToSpace"/>
 						<xs:element name="Count" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
 						<xs:element name="PlugLoadControlType" minOccurs="0" type="PlugLoadControlType"/>
@@ -2188,6 +2204,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" ref="ConnectedDevice"/>
 						<xs:element minOccurs="0" ref="AttachedToSpace"/>
 						<xs:element name="PlugLoadType" type="PlugLoadType" minOccurs="0"/>
 						<xs:element minOccurs="0" name="Location" type="PlugLoadLocation"/>
@@ -3464,7 +3481,6 @@
 	</xs:complexType>
 	<xs:complexType name="ProjectDetailsType">
 		<xs:sequence>
-			<xs:element maxOccurs="unbounded" name="ProjectSystemIdentifiers" type="RemoteReference"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" ref="ExternalResource"/>
 			<xs:element name="ProgramName" type="ProgramName" minOccurs="0"/>
 			<xs:element maxOccurs="1" minOccurs="0" ref="ContractorSystemIdentifiers"/>
@@ -3703,7 +3719,11 @@
 			<xs:element minOccurs="0" name="DuctLeakage">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Units" type="DuctLeakageTestUnitofMeasure" minOccurs="0"/>
+						<xs:element name="Units" type="DuctLeakageTestUnitofMeasure" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>For Percent enter values as a fractional number, i.e. 30% = 0.3</xs:documentation>
+							</xs:annotation>
+						</xs:element>
 						<xs:element name="Value" type="MeasuredDuctLeakage" minOccurs="0"/>
 						<xs:element minOccurs="0" name="TotalOrToOutside" type="DuctLeakageTotalOrToOutside"/>
 					</xs:sequence>
@@ -4417,6 +4437,7 @@
 	<xs:complexType name="HVACControlType">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
+			<xs:element minOccurs="0" ref="ConnectedDevice"/>
 			<xs:element minOccurs="0" ref="AttachedToZone"/>
 			<xs:element name="ControlType" type="ThermostatType" minOccurs="0"/>
 			<xs:element name="SetpointTempHeatingSeason" type="Temperature" minOccurs="0">
@@ -4618,8 +4639,9 @@
 	</xs:complexType>
 	<xs:complexType name="Project">
 		<xs:sequence>
-			<xs:element name="BuildingID" type="RemoteReference"/>
-			<xs:element minOccurs="0" name="ProjectID" type="SystemIdentifiersInfoType"/>
+			<xs:element name="ProjectID" type="SystemIdentifiersInfoType"/>
+			<xs:element name="PreBuildingID" type="RemoteReference"/>
+			<xs:element name="PostBuildingID" type="RemoteReference"/>
 			<xs:element name="ProjectDetails" type="ProjectDetailsType"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
@@ -4828,6 +4850,19 @@
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
 			<xs:attribute name="id" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ConnectedDevice">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:group ref="SystemInfo"/>
+				<xs:element name="IsConnected" type="xs:boolean"/>
+				<xs:element maxOccurs="unbounded" minOccurs="0" name="CommunicatesWith" type="LocalReference"/>
+				<xs:element minOccurs="0" name="CommunicationProtocol" type="ConnectedDeviceCommunicationProtocol" maxOccurs="unbounded"/>
+				<xs:element minOccurs="0" name="DemandResponseCapability" type="xs:boolean"/>
+				<xs:element minOccurs="0" name="OccupancySensor" type="xs:boolean"/>
+				<xs:element minOccurs="0" ref="extension"/>
+			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>
