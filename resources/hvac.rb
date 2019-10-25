@@ -4056,15 +4056,6 @@ class HVAC
     return pump_eff * pump_power / UnitConversions.convert(1.0, "gal/min", "m^3/s") # Pa
   end
 
-  def self.get_control_zone(thermal_zones)
-    thermal_zones.each do |zone|
-      next unless Geometry.zone_is_conditioned(zone)
-
-      return zone
-    end
-    return nil
-  end
-
   def self.existing_equipment(model, runner, thermal_zone)
     # Returns a list of equipment objects
 
