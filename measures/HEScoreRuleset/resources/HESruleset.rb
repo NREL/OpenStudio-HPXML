@@ -105,19 +105,21 @@ class HEScoreRuleset
         roof_values = HPXML.get_roof_values(roof: roof)
 
         # Half of the length of short side of the house
-        length_gable_side = 0.5 * [@bldg_length_front, @bldg_length_side].min
-
+        a = 0.5 * [@bldg_length_front, @bldg_length_side].min
+        # Ridge height
+        b = a * Math.tan(@roof_angle_rad)
+        # The hypotenuse
+        c = a / Math.cos(@roof_angle_rad)
         # The depth this attic area goes back on the non-gable side
-        depth = 0.5 * roof_values[:area] / (length_gable_side / Math.cos(@roof_angle_rad))
+        d = 0.5 * roof_values[:area] / c
 
         if is_conditioned_attic
           # Remove erroneous full height volume from the conditioned volume
-          conditioned_attic_floor_area = 2 * length_gable_side * depth
-          @cvolume -= @ceil_height * conditioned_attic_floor_area
+          @cvolume -= @ceil_height * 2 * a * d
         end
 
         # Add the volume under the roof and above the "ceiling"
-        @cvolume += depth * length_gable_side * length_gable_side * Math.tan(@roof_angle_rad)
+        @cvolume += d * a * a * Math.tan(@roof_angle_rad)
       end
     end
 
