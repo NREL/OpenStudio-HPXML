@@ -55,7 +55,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     xmls.each do |xml|
-      next if File.basename(xml) != "base-dhw-tank-heat-pump.xml"
+      #next if File.basename(xml) != "base-dhw-tank-heat-pump.xml"
 
       all_results[xml] = _run_xml(xml, this_dir, args.dup)
     end
