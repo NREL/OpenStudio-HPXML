@@ -1566,22 +1566,7 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values, walls_values, foun
         windows_values << windows_values[n - 1].dup
         windows_values[-1][:id] += i.to_s
         windows_values[-1][:wall_idref] += i.to_s
-        if i < 4
-          # nop
-        elsif i < 7 # Move to another Wall
-          new_idref = "WallAtticGable#{i}"
-          area_adjustments << [windows_values[-1][:wall_idref], new_idref, windows_values[-1][:area]]
-          windows_values[-1][:wall_idref] = new_idref
-        else # Move to a FoundationWall
-          new_idref = "FoundationWall#{i}"
-          area_adjustments << [windows_values[-1][:wall_idref], new_idref, windows_values[-1][:area]]
-          windows_values[-1][:wall_idref] = new_idref
-        end
       end
-    end
-    # Moved subsurface; preserve original net wall areas
-    area_adjustments.each do |area_adjustment|
-      update_areas(area_adjustment[0], area_adjustment[1], area_adjustment[2], walls_values, foundation_walls_values)
     end
   end
   return windows_values
@@ -1647,22 +1632,7 @@ def get_hpxml_file_doors_values(hpxml_file, doors_values, walls_values, foundati
         doors_values << doors_values[n - 1].dup
         doors_values[-1][:id] += i.to_s
         doors_values[-1][:wall_idref] += i.to_s
-        if i < 4
-          # nop
-        elsif i < 7 # Move to another Wall
-          new_idref = "WallAtticGable#{i}"
-          area_adjustments << [doors_values[-1][:wall_idref], new_idref, doors_values[-1][:area]]
-          doors_values[-1][:wall_idref] = new_idref
-        else # Move to a FoundationWall
-          new_idref = "FoundationWall#{i}"
-          area_adjustments << [doors_values[-1][:wall_idref], new_idref, doors_values[-1][:area]]
-          doors_values[-1][:wall_idref] = new_idref
-        end
       end
-    end
-    # Moved subsurface; preserve original net wall areas
-    area_adjustments.each do |area_adjustment|
-      update_areas(area_adjustment[0], area_adjustment[1], area_adjustment[2], walls_values, foundation_walls_values)
     end
   end
   return doors_values
@@ -3131,14 +3101,4 @@ def get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_valu
                                   :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" }
   end
   return misc_load_schedule_values
-end
-
-def update_areas(old_idref, new_idref, area, walls_values1, walls_values2)
-  (walls_values1 + walls_values2).each do |walls_values|
-    if walls_values[:id] == old_idref
-      walls_values[:area] -= area
-    elsif walls_values[:id] == new_idref
-      walls_values[:area] += area
-    end
-  end
 end

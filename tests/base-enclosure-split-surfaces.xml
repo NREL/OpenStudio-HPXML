@@ -379,7 +379,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>94.0</Area>
+            <Area>120.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -394,7 +394,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>94.0</Area>
+            <Area>120.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -409,7 +409,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>94.0</Area>
+            <Area>120.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -424,7 +424,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>94.0</Area>
+            <Area>120.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -439,7 +439,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>94.0</Area>
+            <Area>120.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -454,7 +454,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>94.0</Area>
+            <Area>120.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -469,7 +469,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>94.0</Area>
+            <Area>120.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -514,7 +514,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>55.0</Area>
+            <Area>29.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -529,7 +529,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>55.0</Area>
+            <Area>29.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -544,7 +544,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>55.0</Area>
+            <Area>29.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -721,7 +721,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
-            <Area>146.0</Area>
+            <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
@@ -738,7 +738,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
-            <Area>146.0</Area>
+            <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
@@ -755,7 +755,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
-            <Area>146.0</Area>
+            <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
@@ -772,7 +772,7 @@
             <ExteriorAdjacentTo>ground</ExteriorAdjacentTo>
             <InteriorAdjacentTo>basement - conditioned</InteriorAdjacentTo>
             <Height>8.0</Height>
-            <Area>146.0</Area>
+            <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
@@ -1214,7 +1214,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable4'/>
+            <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowNorth5'/>
@@ -1222,7 +1222,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable5'/>
+            <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowNorth6'/>
@@ -1230,7 +1230,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable6'/>
+            <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowNorth7'/>
@@ -1238,7 +1238,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall7'/>
+            <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowNorth8'/>
@@ -1246,7 +1246,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall8'/>
+            <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowNorth9'/>
@@ -1254,7 +1254,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall9'/>
+            <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowNorth10'/>
@@ -1262,7 +1262,7 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall10'/>
+            <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth2'/>
@@ -1286,7 +1286,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable4'/>
+            <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth5'/>
@@ -1294,7 +1294,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable5'/>
+            <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth6'/>
@@ -1302,7 +1302,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable6'/>
+            <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth7'/>
@@ -1310,7 +1310,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall7'/>
+            <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth8'/>
@@ -1318,7 +1318,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall8'/>
+            <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth9'/>
@@ -1326,7 +1326,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall9'/>
+            <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowSouth10'/>
@@ -1334,7 +1334,7 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall10'/>
+            <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast2'/>
@@ -1358,7 +1358,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable4'/>
+            <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast5'/>
@@ -1366,7 +1366,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable5'/>
+            <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast6'/>
@@ -1374,7 +1374,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable6'/>
+            <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast7'/>
@@ -1382,7 +1382,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall7'/>
+            <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast8'/>
@@ -1390,7 +1390,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall8'/>
+            <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast9'/>
@@ -1398,7 +1398,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall9'/>
+            <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowEast10'/>
@@ -1406,7 +1406,7 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall10'/>
+            <AttachedToWall idref='Wall10'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest2'/>
@@ -1430,7 +1430,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable4'/>
+            <AttachedToWall idref='Wall4'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest5'/>
@@ -1438,7 +1438,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable5'/>
+            <AttachedToWall idref='Wall5'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest6'/>
@@ -1446,7 +1446,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='WallAtticGable6'/>
+            <AttachedToWall idref='Wall6'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest7'/>
@@ -1454,7 +1454,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall7'/>
+            <AttachedToWall idref='Wall7'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest8'/>
@@ -1462,7 +1462,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall8'/>
+            <AttachedToWall idref='Wall8'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest9'/>
@@ -1470,7 +1470,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall9'/>
+            <AttachedToWall idref='Wall9'/>
           </Window>
           <Window>
             <SystemIdentifier id='WindowWest10'/>
@@ -1478,7 +1478,7 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <AttachedToWall idref='FoundationWall10'/>
+            <AttachedToWall idref='Wall10'/>
           </Window>
         </Windows>
         <Skylights>
@@ -1674,49 +1674,49 @@
           </Door>
           <Door>
             <SystemIdentifier id='DoorNorth4'/>
-            <AttachedToWall idref='WallAtticGable4'/>
+            <AttachedToWall idref='Wall4'/>
             <Area>4.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorNorth5'/>
-            <AttachedToWall idref='WallAtticGable5'/>
+            <AttachedToWall idref='Wall5'/>
             <Area>4.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorNorth6'/>
-            <AttachedToWall idref='WallAtticGable6'/>
+            <AttachedToWall idref='Wall6'/>
             <Area>4.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorNorth7'/>
-            <AttachedToWall idref='FoundationWall7'/>
+            <AttachedToWall idref='Wall7'/>
             <Area>4.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorNorth8'/>
-            <AttachedToWall idref='FoundationWall8'/>
+            <AttachedToWall idref='Wall8'/>
             <Area>4.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorNorth9'/>
-            <AttachedToWall idref='FoundationWall9'/>
+            <AttachedToWall idref='Wall9'/>
             <Area>4.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorNorth10'/>
-            <AttachedToWall idref='FoundationWall10'/>
+            <AttachedToWall idref='Wall10'/>
             <Area>4.0</Area>
             <Azimuth>0</Azimuth>
             <RValue>4.4</RValue>
@@ -1737,49 +1737,49 @@
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth4'/>
-            <AttachedToWall idref='WallAtticGable4'/>
+            <AttachedToWall idref='Wall4'/>
             <Area>4.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth5'/>
-            <AttachedToWall idref='WallAtticGable5'/>
+            <AttachedToWall idref='Wall5'/>
             <Area>4.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth6'/>
-            <AttachedToWall idref='WallAtticGable6'/>
+            <AttachedToWall idref='Wall6'/>
             <Area>4.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth7'/>
-            <AttachedToWall idref='FoundationWall7'/>
+            <AttachedToWall idref='Wall7'/>
             <Area>4.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth8'/>
-            <AttachedToWall idref='FoundationWall8'/>
+            <AttachedToWall idref='Wall8'/>
             <Area>4.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth9'/>
-            <AttachedToWall idref='FoundationWall9'/>
+            <AttachedToWall idref='Wall9'/>
             <Area>4.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
           </Door>
           <Door>
             <SystemIdentifier id='DoorSouth10'/>
-            <AttachedToWall idref='FoundationWall10'/>
+            <AttachedToWall idref='Wall10'/>
             <Area>4.0</Area>
             <Azimuth>180</Azimuth>
             <RValue>4.4</RValue>
