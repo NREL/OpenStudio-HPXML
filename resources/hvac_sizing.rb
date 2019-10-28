@@ -3475,7 +3475,10 @@ class HVACSizing
         # Fan pressure rise calculation (based on design cfm)
         fan_power = [2.79 * (hvac_final_values.Cool_Airflow)**(-0.29), 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
         fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+        fan.setFanEfficiency(fan_eff)
         fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
+        #fan.setPressureRise(0)
+        #object.setRecirculatingWaterPumpPowerConsumption([2.79 * (hvac_final_values.Cool_Airflow)**(-0.29), 0.6].min * hvac_final_values.Cool_Airflow)
 
         @cond_zone.airLoopHVACTerminals.each do |aterm|
           next if air_loop != aterm.airLoopHVAC.get
