@@ -119,7 +119,7 @@ class HEScoreRuleset
         end
 
         # Add the volume under the roof and above the "ceiling"
-        @cvolume += d * a * a * Math.tan(@roof_angle_rad)
+        @cvolume += d * a * b
       end
     end
 
