@@ -182,6 +182,7 @@ def create_hpxmls
     'base-hvac-ducts-locations.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-hvac-ducts-multiple.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
+    'base-hvac-ducts-locations.xml' => 'base-foundation-vented-crawlspace.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
     'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
     'base-hvac-evap-cooler-only.xml' => 'base.xml',
