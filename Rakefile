@@ -906,7 +906,7 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
                            :area => 81,
                            :solar_absorptance => 0.7,
                            :emittance => 0.92,
-                           :insulation_assembly_r_value => 23.0 }
+                           :insulation_assembly_r_value => 2.3 }
   elsif ['base-enclosure-2stories.xml'].include? hpxml_file
     rim_joists_values << { :id => "RimJoist2ndStory",
                            :exterior_adjacent_to => "outside",
