@@ -812,7 +812,8 @@ class Waterheater
     ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
                             Constants.FuelTypePropane => "Propane Rate",
                             Constants.FuelTypeOil => "FuelOil#1 Rate",
-                            Constants.FuelTypeGas => "Gas Rate" }[fuel_type]
+                            Constants.FuelTypeGas => "Gas Rate",
+                            Constants.FuelTypeWood => "OtherFuel1 Rate" }[fuel_type]
     if wh_type.include? "boiler"
       ec_adj_sensor_hx = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fluid Heat Exchanger Heat Transfer Energy")
       ec_adj_sensor_hx.setName("#{combi_hx.name} energy")
@@ -1071,7 +1072,15 @@ class Waterheater
       # on-cycle and off-cycle parasitics.
       # Values used here are based on the average across 10 units originally used when modeling MF buildings
       avg_runtime_frac = [0.0268, 0.0333, 0.0397, 0.0462, 0.0529]
-      runtime_frac = avg_runtime_frac[nbeds - 1]
+      if nbeds <= 5
+        if nbeds == 0
+          runtime_frac = avg_runtime_frac[0]
+        else
+          runtime_frac = avg_runtime_frac[nbeds - 1]
+        end
+      else
+        runtime_frac = avg_runtime_frac[4]
+      end
       avg_elec = oncycle_p * runtime_frac + offcycle_p * (1 - runtime_frac)
 
       new_heater.setOnCycleParasiticFuelConsumptionRate(avg_elec)
