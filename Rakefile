@@ -1072,8 +1072,8 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     walls_values.delete_at(1)
     walls_values << walls_values[0].dup
-    walls_values[0][:area] *= 0.25
-    walls_values[-1][:area] *= 0.75
+    walls_values[0][:area] *= 0.35
+    walls_values[-1][:area] *= 0.65
     walls_values[-1][:id] += "Adiabatic"
     walls_values[-1][:exterior_adjacent_to] = "other housing unit"
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
