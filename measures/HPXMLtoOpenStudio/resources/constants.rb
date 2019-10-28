@@ -444,10 +444,6 @@ class Constants
     return "solar hot water loop"
   end
 
-  def self.RADuctZone
-    return 'RA Duct Zone'
-  end
-
   def self.RecircTypeTimer
     return 'timer'
   end
