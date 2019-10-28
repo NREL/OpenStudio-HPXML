@@ -257,6 +257,26 @@ class HPXML
         elsif surf_type == 'Door'
           surf_type_values[surf_type] << HPXML.get_door_values(door: surf)
         end
+
+        # Add parent wall/roof AdjacentTo values to hash so that they're included in the logic
+        # regarding whether a pair of surfaces can be collapsed.
+        if ['Window', 'Skylight', 'Door'].include? surf_type
+          parent_id = surf_type_values[surf_type][-1][:wall_idref]
+          if parent_id.nil?
+            parent_id = surf_type_values[surf_type][-1][:roof_idref]
+          end
+          ['Wall', 'FoundationWall', 'Roof'].each do |parent_surf_type|
+            surf_type_values[parent_surf_type].each do |parent_surf_values|
+              next unless parent_surf_values[:id] == parent_id
+
+              surf_type_values[surf_type][-1][:interior_adjacent_to] = parent_surf_values[:interior_adjacent_to]
+              surf_type_values[surf_type][-1][:exterior_adjacent_to] = parent_surf_values[:exterior_adjacent_to]
+            end
+          end
+          fail "Could not obtain parent surface interior adjacent to." if surf_type_values[surf_type][-1][:interior_adjacent_to].nil?
+          fail "Could not obtain parent surface exterior adjacent to." if surf_type_values[surf_type][-1][:exterior_adjacent_to].nil?
+        end
+
         surfs[surf_type_values[surf_type][-1][:id]] = surf
       end
     end
