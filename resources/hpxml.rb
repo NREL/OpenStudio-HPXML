@@ -273,8 +273,6 @@ class HPXML
               surf_type_values[surf_type][-1][:exterior_adjacent_to] = parent_surf_values[:exterior_adjacent_to]
             end
           end
-          fail "Could not obtain parent surface interior adjacent to." if surf_type_values[surf_type][-1][:interior_adjacent_to].nil?
-          fail "Could not obtain parent surface exterior adjacent to." if surf_type_values[surf_type][-1][:exterior_adjacent_to].nil?
         end
 
         surfs[surf_type_values[surf_type][-1][:id]] = surf
