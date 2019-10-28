@@ -763,6 +763,7 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
+        next if vf < 0.01 # TODO: Review
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf)
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
@@ -776,42 +777,49 @@ class OSModel
   def self.calc_approximate_view_factor(runner, model, all_surfaces)
     # calculate approximate view factor using E+ approach
     # used for recalculating single thermal zone view factor matrix
+    s_azimuths = {}
+    s_tilts = {}
+    s_types = {}
+    all_surfaces.each do |surface|
+      if surface.is_a? OpenStudio::Model::InternalMass
+        # Assumed values consistent with EnergyPlus source code
+        s_azimuths[surface] = 0.0
+        s_tilts[surface] = 90.0
+      else
+        s_azimuths[surface] = UnitConversions.convert(surface.azimuth, "rad", "deg")
+        s_tilts[surface] = UnitConversions.convert(surface.tilt, "rad", "deg")
+        if surface.is_a? OpenStudio::Model::SubSurface
+          s_types[surface] = surface.surface.get.surfaceType.downcase
+        else
+          s_types[surface] = surface.surfaceType.downcase
+        end
+      end
+    end
+
     same_ang_limit = 10.0
     vf_map = {}
     all_surfaces.each do |surface| # surface, subsurface, and internalmass
-      if surface.is_a? OpenStudio::Model::InternalMass
-        # Assumed values consistent with EnergyPlus source code
-        s_azimuth = 0.0
-        s_tilt = 90.0
-      else
-        s_azimuth = UnitConversions.convert(surface.azimuth, "rad", "deg")
-        s_tilt = UnitConversions.convert(surface.tilt, "rad", "deg")
-        if surface.is_a? OpenStudio::Model::SubSurface
-          s_type = surface.surface.get.surfaceType.downcase
-        else
-          s_type = surface.surfaceType.downcase
-        end
-      end
-      zone_seen_area = 0.0
       surface_vf_map = {}
 
       # sum all the surface area that could be seen by surface1 up
+      zone_seen_area = 0.0
+      seen_surface = {}
       all_surfaces.each do |surface2|
         next if surface2 == surface
         next if surface2.is_a? OpenStudio::Model::SubSurface
 
+        seen_surface[surface2] = false
         if surface2.is_a? OpenStudio::Model::InternalMass
           # all surfaces see internal mass
           zone_seen_area += surface2.surfaceArea.get
+          seen_surface[surface2] = true
         else
-          s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
-          s2_tilt = UnitConversions.convert(surface2.tilt, "rad", "deg")
-          surface_type = surface2.surfaceType.downcase
-          if (surface_type == "floor") or
-             (s_type == "floor" and surface_type == "roofceiling") or
-             (s_azimuth - s2_azimuth).abs > same_ang_limit or
-             (s_tilt - s2_tilt).abs > same_ang_limit
+          if (s_types[surface2] == "floor") or
+             (s_types[surface] == "floor" and s_types[surface2] == "roofceiling") or
+             (s_azimuths[surface] - s_azimuths[surface2]).abs > same_ang_limit or
+             (s_tilts[surface] - s_tilts[surface2]).abs > same_ang_limit
             zone_seen_area += surface2.grossArea # include subsurface area
+            seen_surface[surface2] = true
           end
         end
       end
@@ -819,29 +827,22 @@ class OSModel
       all_surfaces.each do |surface2|
         next if surface2 == surface
         next if surface2.is_a? OpenStudio::Model::SubSurface # handled together with its parent surface
+        next unless seen_surface[surface2]
 
         if surface2.is_a? OpenStudio::Model::InternalMass
           surface_vf_map[surface2] = surface2.surfaceArea.get / zone_seen_area
         else # surfaces
-          s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
-          s2_tilt = UnitConversions.convert(surface2.tilt, "rad", "deg")
-          surface_type = surface2.surfaceType.downcase
-          if (surface_type == "floor") or
-             (s_type == "floor" and surface_type == "roofceiling") or
-             (s_azimuth - s2_azimuth).abs > same_ang_limit or
-             (s_tilt - s2_tilt).abs > same_ang_limit
-            if surface2.subSurfaces.size != 0
-              # calculate surface and its sub surfaces view factors
-              parent_surface_a = surface2.netArea
-              if parent_surface_a > 0.01 # base surface of a sub surface: window/door etc.
-                surface_vf_map[surface2] = parent_surface_a / zone_seen_area
-              end
-              surface2.subSurfaces.each do |sub_surface|
-                surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
-              end
-            else # no subsurface
-              surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
+          if surface2.subSurfaces.size > 0
+            # calculate surface and its sub surfaces view factors
+            if surface2.netArea > 0.01 # base surface of a sub surface: window/door etc.
+              fail "Unexpected net area for surface '#{surface2.name}'."
             end
+
+            surface2.subSurfaces.each do |sub_surface|
+              surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
+            end
+          else # no subsurface
+            surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
           end
         end
       end
@@ -1829,7 +1830,7 @@ class OSModel
 
       # Create parent surface slightly bigger than window
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window_azimuth, [0, 0.001, 0.001, 0.001]), model)
+                                                                window_azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
       surface.additionalProperties.setFeature("Length", window_width)
       surface.additionalProperties.setFeature("Azimuth", window_azimuth)
@@ -1841,7 +1842,7 @@ class OSModel
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window_azimuth, [-0.001, 0, 0.001, 0]), model)
+                                                                       window_azimuth, [-0.0001, 0, 0.0001, 0]), model)
       sub_surface.setName(window_id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType("FixedWindow")
@@ -1905,7 +1906,7 @@ class OSModel
       skylight_azimuth = skylight_values[:azimuth]
 
       # Create parent surface slightly bigger than skylight
-      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.001, skylight_height + 0.001, z_origin,
+      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.0001, skylight_height + 0.0001, z_origin,
                                                                 skylight_azimuth, skylight_tilt), model)
 
       surface.additionalProperties.setFeature("Length", skylight_width)
@@ -1957,7 +1958,7 @@ class OSModel
 
       # Create parent surface slightly bigger than door
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                door_azimuth, [0, 0.001, 0.001, 0.001]), model)
+                                                                door_azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
       surface.additionalProperties.setFeature("Length", door_width)
       surface.additionalProperties.setFeature("Azimuth", door_azimuth)
