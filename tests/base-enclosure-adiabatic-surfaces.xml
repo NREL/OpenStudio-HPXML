@@ -85,7 +85,7 @@
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallAdiabaticInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>

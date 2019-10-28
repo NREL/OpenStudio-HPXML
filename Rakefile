@@ -1076,6 +1076,7 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
     walls_values[-1][:area] *= 0.65
     walls_values[-1][:id] += "Adiabatic"
     walls_values[-1][:exterior_adjacent_to] = "other housing unit"
+    walls_values[-1][:insulation_assembly_r_value] = 4
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..walls_values.size
       walls_values[n - 1][:area] /= 10.0
