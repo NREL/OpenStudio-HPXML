@@ -3376,18 +3376,6 @@ class OSModel
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
     end
 
-    # If all ducts are in conditioned space, model leakage as going to outside
-    [Constants.DuctSideSupply, Constants.DuctSideReturn].each do |duct_side|
-      next unless leakage_to_outside_cfm25[duct_side] > 0 and total_unconditioned_duct_area[duct_side] == 0
-
-      duct_area = 0.0
-      duct_rvalue = 0.0
-      duct_space = nil # outside
-      duct_leakage_cfm = leakage_to_outside_cfm25[duct_side]
-
-      air_ducts << Duct.new(duct_side, duct_space, nil, duct_leakage_cfm, duct_area, duct_rvalue)
-    end
-
     return air_ducts
   end
 
