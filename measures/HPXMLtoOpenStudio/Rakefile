@@ -2157,6 +2157,7 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
     duct_leakage_measurements_values[0].pop
   elsif ['invalid_files/base-hvac-return-duct-incomplete1.xml'].include? hpxml_file
     duct_leakage_measurements_values[0] << { :duct_type => "return",
+                                             :duct_leakage_units => "CFM25",
                                              :duct_leakage_value => 25 }
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     duct_leakage_measurements_values[0] = []

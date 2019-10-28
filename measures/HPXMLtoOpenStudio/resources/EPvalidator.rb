@@ -410,7 +410,7 @@ class EnergyPlusValidator
         "DuctSurfaceArea" => one,
       },
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='return']" => {
-        "../DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value" => one,
+        "../DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25'or Units='Percent'][TotalOrToOutside='to outside']/Value" => one,
       },
 
       # [MechanicalVentilation]
