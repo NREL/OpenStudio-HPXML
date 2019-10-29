@@ -81,6 +81,7 @@ def create_hpxmls
     'base-atticroof-conditioned.xml' => 'base.xml',
     'base-atticroof-flat.xml' => 'base.xml',
     'base-atticroof-vented.xml' => 'base.xml',
+    'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
     'base-dhw-combi-tankless-outside.xml' => 'base-dhw-combi-tankless.xml',
     'base-dhw-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
@@ -857,6 +858,8 @@ def get_hpxml_file_roofs_values(hpxml_file, roofs_values)
                       :pitch => 6,
                       :radiant_barrier => false,
                       :insulation_assembly_r_value => 2.3 }
+  elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
+    roofs_values[0][:insulation_assembly_r_value] = 25.8
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     roofs_values = []
   end
@@ -1052,6 +1055,8 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :solar_absorptance => 0.7,
                       :emittance => 0.92,
                       :insulation_assembly_r_value => 4 }]
+  elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
+    walls_values[1][:insulation_assembly_r_value] = 23
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     walls_values.delete_at(1)
     walls_values << walls_values[0].dup
@@ -1252,6 +1257,8 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :interior_adjacent_to => "living space",
                             :area => 400,
                             :insulation_assembly_r_value => 18.7 }
+  elsif ['base-atticroof-unvented-insulated-roof.xml'].include? hpxml_file
+    framefloors_values[0][:insulation_assembly_r_value] = 2.1
   elsif ['base-enclosure-adiabatic-surfaces.xml'].include? hpxml_file
     framefloors_values = [{ :id => "FloorAboveAdiabatic",
                             :exterior_adjacent_to => "other housing unit below",
