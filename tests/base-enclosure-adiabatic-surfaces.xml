@@ -65,7 +65,7 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>420.0</Area>
+            <Area>300.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
@@ -80,12 +80,12 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>780.0</Area>
+            <Area>900.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallAdiabaticInsulation'/>
-              <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
