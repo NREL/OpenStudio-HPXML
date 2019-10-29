@@ -763,7 +763,7 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
-        next if vf < 0.01 # TODO: Review
+        next if vf < 0.01 # TODO: Remove this when https://github.com/NREL/OpenStudio/issues/3737 is resolved
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf)
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName

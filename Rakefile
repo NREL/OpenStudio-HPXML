@@ -477,9 +477,9 @@ def create_hpxmls
         foundation_walls_values = get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
         framefloors_values = get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
         slabs_values = get_hpxml_file_slabs_values(hpxml_file, slabs_values)
-        windows_values = get_hpxml_file_windows_values(hpxml_file, windows_values, walls_values, foundation_walls_values)
+        windows_values = get_hpxml_file_windows_values(hpxml_file, windows_values)
         skylights_values = get_hpxml_file_skylights_values(hpxml_file, skylights_values)
-        doors_values = get_hpxml_file_doors_values(hpxml_file, doors_values, walls_values, foundation_walls_values)
+        doors_values = get_hpxml_file_doors_values(hpxml_file, doors_values)
         heating_systems_values = get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
         cooling_systems_values = get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
         heat_pumps_values = get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
@@ -1433,7 +1433,7 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
   return slabs_values
 end
 
-def get_hpxml_file_windows_values(hpxml_file, windows_values, walls_values, foundation_walls_values)
+def get_hpxml_file_windows_values(hpxml_file, windows_values)
   if ['base.xml'].include? hpxml_file
     windows_values = [{ :id => "WindowNorth",
                         :area => 54,
@@ -1604,7 +1604,7 @@ def get_hpxml_file_skylights_values(hpxml_file, skylights_values)
   return skylights_values
 end
 
-def get_hpxml_file_doors_values(hpxml_file, doors_values, walls_values, foundation_walls_values)
+def get_hpxml_file_doors_values(hpxml_file, doors_values)
   if ['base.xml'].include? hpxml_file
     doors_values = [{ :id => "DoorNorth",
                       :wall_idref => "Wall",
