@@ -1056,7 +1056,7 @@ class OSModel
 
   def self.get_default_azimuths(building)
     azimuth_counts = {}
-    building.elements.each("BuildingDetails/Enclosure//Azimuth") do |azimuth|
+    building.elements.each("BuildingDetails/Enclosure/*/*/Azimuth") do |azimuth|
       az = Integer(azimuth.text)
       azimuth_counts[az] = 0 if azimuth_counts[az].nil?
       azimuth_counts[az] += 1
