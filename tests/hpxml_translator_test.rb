@@ -317,6 +317,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
+    # Obtain hot water use
+    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3')"
+    results[["Volume", "Hot Water", "General", "gal"]] = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3", "gal").round(2)
+
     # Obtain HVAC capacities
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%User-Specified%Capacity' AND Description NOT LIKE '%Supplemental%' AND Units='W'"
     results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
@@ -411,6 +415,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     @cfis_flow_rate_output_var = OpenStudio::Model::OutputVariable.new("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(" ", "_"), model)
     @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
     @cfis_flow_rate_output_var.setKeyValue('EMS')
+
+    # Add output variables for hot water volume
+    output_var = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
@@ -1211,7 +1220,12 @@ class HPXMLTranslatorTest < MiniTest::Test
         next if result_x1 == 0.0 and result_x3 == 0.0
 
         _display_result_delta(xml, result_x1, result_x3, k)
-        assert_in_delta(result_x1, result_x3, 0.1)
+        if k[0] == "Volume"
+          # Annual hot water volumes are large, use epsilon
+          assert_in_epsilon(result_x1, result_x3, 0.001)
+        else
+          assert_in_delta(result_x1, result_x3, 0.1)
+        end
       end
     end
   end
