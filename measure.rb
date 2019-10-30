@@ -989,7 +989,7 @@ class OSModel
     net_area = gross_area
     if not @subsurface_areas_by_surface[surface_id].nil?
       if azimuth.nil?
-        net_area -= @subsurface_areas_by_surface[surface_id].values.inject(:+)
+        net_area -= @subsurface_areas_by_surface[surface_id].values.inject(0, :+)
       elsif not @subsurface_areas_by_surface[surface_id][azimuth].nil?
         net_area -= @subsurface_areas_by_surface[surface_id][azimuth]
       end
@@ -1015,7 +1015,7 @@ class OSModel
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
-      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject(:+)
+      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject(0, :+)
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
         runner.registerError("Occupancy schedule inconsistent with hrs_per_day.")
         return false
@@ -1437,9 +1437,9 @@ class OSModel
         slab_exp_perims[slab] = slab_values[:exposed_perimeter]
         slab_areas[slab] = slab_values[:area]
       end
-      total_slab_exp_perim = slab_exp_perims.values.inject(:+)
-      total_slab_area = slab_areas.values.inject(:+)
-      total_fnd_wall_length = fnd_wall_lengths.values.inject(:+)
+      total_slab_exp_perim = slab_exp_perims.values.inject(0, :+)
+      total_slab_area = slab_areas.values.inject(0, :+)
+      total_fnd_wall_length = fnd_wall_lengths.values.inject(0, :+)
 
       no_wall_slab_exp_perim = {}
 
@@ -2870,7 +2870,7 @@ class OSModel
     medium_cfm = 3000.0
     weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     weekend_sch = weekday_sch
-    hrs_per_day = weekday_sch.inject(:+)
+    hrs_per_day = weekday_sch.inject(0, :+)
 
     cfm_per_w = ceiling_fan_values[:efficiency]
     if cfm_per_w.nil?
