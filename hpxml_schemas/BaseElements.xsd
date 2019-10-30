@@ -1398,6 +1398,7 @@
 											<xs:documentation>[deg F]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
+									<xs:element minOccurs="0" name="HasMixingValve" type="xs:boolean"/>
 									<xs:element minOccurs="0" name="UsesDesuperheater" type="xs:boolean">
 										<xs:annotation>
 											<xs:documentation>Indicates whether this water heater uses a desuperheater. The attached heat pump or air conditioner can be referenced in the
@@ -1425,6 +1426,20 @@
 									</xs:element>
 									<xs:element minOccurs="0" name="WaterHeaterImprovement" type="WaterHeaterImprovementInfo"/>
 									<xs:element ref="extension" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="WaterHeatingControl">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element ref="ConnectedDevice"/>
+									<xs:element minOccurs="0" name="Model" type="xs:string"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="xs:string"/>
+									<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
+									<xs:element minOccurs="0" name="ControlTechnology" type="DHWControllerTechnology"/>
+									<xs:element minOccurs="0" name="TemperatureControl" type="DHWTemperatureControl"/>
+									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -1721,6 +1736,104 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="Batteries">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="Battery">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="Manufacturer"/>
+									<xs:element minOccurs="0" name="ModelNumber" type="Model"/>
+									<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
+									<xs:element minOccurs="0" name="Location" type="BatteryLocation"/>
+									<xs:element minOccurs="0" name="GridConnected" type="xs:boolean">
+										<xs:annotation>
+											<xs:documentation>Has the ability to feed electricity back on to the grid.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="BatteryType" type="BatteryType"/>
+									<xs:element minOccurs="0" name="CoolingStrategy" type="BatteryCoolingStrategy"/>
+									<xs:element minOccurs="0" name="NominalCapacity" type="BatteryCapacity">
+										<xs:annotation>
+											<xs:documentation>[Ah] The total Ampere hours available when the battery is discharged starting from 100% state of charge until it reaches the cut-off voltage. Capacity is computed by multiplying the discharge current (Amps) by the discharge time (hours).</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="UsableCapacity" type="BatteryCapacity">
+										<xs:annotation>
+											<xs:documentation>[Ah] The stored energy that can actually be used. In most cases usable capacity is less than the nominal capacity.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="RatedPowerOutput" type="Power">
+										<xs:annotation>
+											<xs:documentation>[W] The amount of power the battery typically generates under non-peak conditions.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="PeakPowerOutput" type="Power" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>[W] The peak power that the battery can generate for a short period of time.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="NominalVoltage" type="xs:decimal">
+										<xs:annotation>
+											<xs:documentation>[V] The nominal voltage is the battery voltage when the state of charge is 0.5 (midway between being fully charged, and fully discharged) with a 0.2C discharge current.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="RoundTripEfficiency" type="Fraction">
+										<xs:annotation>
+											<xs:documentation>Not all the power that is used to charge the battery is available during discharge. Round trip efficiency is the ratio of the energy put in to the energy retrieved from storage.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="ElectricVehicleChargers">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="ElectricVehicleCharger">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" name="NumberofUnits" type="IntegerGreaterThanOrEqualToZero"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="Manufacturer"/>
+									<xs:element maxOccurs="1" minOccurs="0" name="ModelNumber" type="Model"/>
+									<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
+									<xs:element minOccurs="0" name="ChargingLevel" type="EVChargingLevel"/>
+									<xs:element minOccurs="0" name="ChargingConnector" type="EVChargingConnector"/>
+									<xs:element maxOccurs="1" minOccurs="0" name="ModelYear" type="Year"/>
+									<xs:element minOccurs="0" name="ACPowerSourceVoltage" type="Voltage">
+										<xs:annotation>
+											<xs:documentation>[V] Voltage of the AC power source</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="Amperage" minOccurs="0" type="Current">
+										<xs:annotation>
+											<xs:documentation>[A] Max current to electric vehicle</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="ChargingPower" type="Power">
+										<xs:annotation>
+											<xs:documentation>[W] Maximum charging rate</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="StandbyPower" type="Power">
+										<xs:annotation>
+											<xs:documentation>[W] Power used by charger when vehicle is not charging</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -3433,7 +3546,6 @@
 									<xs:element minOccurs="0" name="GaragePresent" type="xs:boolean"/>
 									<xs:element minOccurs="0" name="GarageLocation" type="GarageLocation"/>
 									<xs:element minOccurs="0" name="SpaceAboveGarage" type="SpaceAboveGarage"/>
-									<xs:element maxOccurs="unbounded" minOccurs="0" name="EnergyScore" type="EnergyScoreType"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
 							</xs:complexType>
@@ -3468,6 +3580,73 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
+			<xs:element minOccurs="0" name="GreenBuildingVerifications">
+				<xs:annotation>
+					<xs:documentation>A listing of Green Building Verifications from the RESO Data Dictionary</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="GreenBuildingVerification">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element name="Type" type="GreenBuildingVerificationType">
+										<xs:annotation>
+											<xs:documentation>The name of the verification or certification awarded to a new or pre-existing residential or commercial structure. For example: LEED, Energy Star, ICC-700. In cases where more than one certification have been awarded, leverage multiple iterations of the green verification fields via the repeating element method.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="OtherType" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>If "other" is selected for GreenBuildingVerification/Type, fill in type here.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Body" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>The name of the body or group providing the verification/certification/rating named in the GreenBuildingVerificationType field. There is almost always a direct correlation between bodies and programs.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Metric" type="xs:integer">
+										<xs:annotation>
+											<xs:documentation>A final score indicating the performance of energy efficiency design and measures in the home as tested by a third-party rater. Points achieved to earn a certification in the GreenVerificationRating field do not apply to this field. HERS Index is most common with new homes and runs with a lower number being more efficient. A net-zero home uses zero energy and has a HERS score of 0. A home that produces more energy than it uses has a negative score. Home Energy Score is a tool more common for existing homes and runs with a higher number being more efficient. It takes square footage into account and caps with 10 as the highest number of points.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Rating" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>Many verifications or certifications have a rating system that provides an indication of the structure's level of energy efficiency. When expressed in a numeric value, please use the GreenVerificationMetric field. Verifications and Certifications can also be a name, such as Gold or Silver, which is the purpose of this field.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Source" type="GreenBuildingVerificationSource">
+										<xs:annotation>
+											<xs:documentation>The source of the green data. May address photovoltaic characteristics, or a verified score, certification, label, etc. This may be a pick list of options showing the source. i.e. Program Sponsor, Program Verifier, Public Record, Assessor, etc.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Status" type="GreenBuildingVerificationStatus">
+										<xs:annotation>
+											<xs:documentation>Many verification programs include a multi-step process that may begin with plans and specs, involve testing and/or submission of building specifications along the way and include a final verification step. When ratings are involved it is not uncommon for the final rating to be either higher or lower than the target preliminary rating. Sometimes the final approval is not available until after sale and occupancy. Status indicates what the target was at the time of listing and may be updated when verification is complete. To limit liability concerns this field reflects information that was available at the time of listing or updated later and should be confirmed by the buyer.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="URL" type="xs:anyURI">
+										<xs:annotation>
+											<xs:documentation>Provides a link to the specific property’s high-performance rating or scoring details directly from and hosted by the sponsoring body of the program. Typically provides thorough details, for example, which points where achieved and how, or in the case of a score what specifically was tested and the results.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Version" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>The version of the certification or verification that was awarded. Some rating programs have a year, a version, or possibly both.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Year" type="Year">
+										<xs:annotation>
+											<xs:documentation>The year the certification or verification was awarded.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element minOccurs="0" name="Zones" type="Zones"/>
 			<xs:element name="Enclosure" type="Enclosure" minOccurs="0"/>
 			<xs:element name="Systems" type="Systems" minOccurs="0"/>
@@ -3485,11 +3664,6 @@
 			<xs:element name="ProgramName" type="ProgramName" minOccurs="0"/>
 			<xs:element maxOccurs="1" minOccurs="0" ref="ContractorSystemIdentifiers"/>
 			<xs:element minOccurs="0" name="ProgramSponsor" type="ProgramSponsor"/>
-			<xs:element minOccurs="0" name="CertifyingOrganization" type="CertifyingOrganization"/>
-			<xs:element minOccurs="0" name="CertifyingOrganizationURL" type="xs:string"/>
-			<xs:element minOccurs="0" name="YearCertified" type="Year"/>
-			<xs:element minOccurs="0" name="ProgramCertificate" maxOccurs="unbounded" type="ProgramCertificate"/>
-			<xs:element minOccurs="0" name="EnergyStarHomeVersion" type="xs:string"/>
 			<xs:element name="ProjectType" type="ProjectType" minOccurs="0"/>
 			<xs:element name="Title" type="Title" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="ProjectStatus"/>
@@ -3541,33 +3715,6 @@
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
-		</xs:sequence>
-	</xs:complexType>
-	<xs:complexType name="EnergyScoreType">
-		<xs:sequence>
-			<xs:element name="ScoreType">
-				<xs:annotation>
-					<xs:documentation>The Home Energy Score is an asset rating for homes, developed and administered by the U.S. Department of Energy. After conducting a brief walk thru of a home, a
-						qualified assessor calculates a home's score on a 10 point scale using a standard scoring tool, with 10 reflecting homes that use the least amount of energy assuming standard
-						operating conditions (US DOE). The Home Energy Rating System (HERS) index is a measure of a home's energy efficiency. It can also be used to inspect and calculate a home's
-						energy performance. The lower a home's HERS Index Score, the better its efficiency.</xs:documentation>
-				</xs:annotation>
-				<xs:simpleType>
-					<xs:restriction base="xs:string">
-						<xs:enumeration value="RESNET HERS"/>
-						<xs:enumeration value="US DOE Home Energy Score"/>
-						<xs:enumeration value="other"/>
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
-			<xs:element minOccurs="0" name="OtherScoreType">
-				<xs:annotation>
-					<xs:documentation>Name of the score type if "other" is selected in ScoreType.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="ScoreDate" type="xs:date"/>
-			<xs:element name="Score" type="xs:integer"/>
-			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="TotalCostType">
@@ -4046,78 +4193,96 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" name="Orientation" type="OrientationType"/>
-			<xs:element name="FrameType" minOccurs="0">
-				<xs:complexType>
-					<xs:choice>
-						<xs:element name="Aluminum">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" name="ThermalBreak" type="xs:boolean"/>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Composite">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Fiberglass">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Metal">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" name="ThermalBreak" type="xs:boolean"/>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Vinyl">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Wood">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Other">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" name="Description"/>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
+			<xs:element name="FrameType" minOccurs="0" type="WindowFrameType"> </xs:element>
 			<xs:element minOccurs="0" name="GlassLayers" type="GlassLayers"/>
 			<xs:element minOccurs="0" name="GlassType" type="GlassType"/>
 			<xs:element minOccurs="0" name="GasFill" type="GasFill"/>
-			<xs:element name="Treatments" type="Treatments" minOccurs="0"/>
 			<xs:element name="Condition" type="WindowCondition" minOccurs="0"/>
 			<xs:element name="UFactor" type="UFactor" minOccurs="0"/>
 			<xs:element name="SHGC" type="SHGC" minOccurs="0"/>
+			<xs:element minOccurs="0" name="VisibleTransmittance" type="Fraction"/>
 			<xs:element name="NFRCCertified" type="xs:boolean" minOccurs="0"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="WindowThirdPartyCertification"/>
-			<xs:element minOccurs="0" name="VisibleTransmittance" type="Fraction"/>
-			<xs:element minOccurs="0" name="InteriorShading" type="InteriorShading"/>
-			<xs:element minOccurs="0" name="InteriorShadingFactorSummer" type="Fraction"/>
-			<xs:element minOccurs="0" name="InteriorShadingFactorWinter" type="Fraction"/>
-			<xs:element minOccurs="0" name="ExteriorShading" type="ExteriorShading"/>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="WindowFilm">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="ShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="ExteriorShading">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="Type" type="ExteriorShading"/>
+						<xs:element minOccurs="0" name="SummerShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the summer months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="WinterShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the winter months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="InteriorShading">
+				<xs:annotation>
+					<xs:documentation>Used to describe drapes, blinds, etc. 
+
+If moveable insulation also provides shading, the shading should be documented here. </xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="Type" type="InteriorShading"/>
+						<xs:element minOccurs="0" name="SummerShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the summer months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="WinterShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the winter months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="StormWindow">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="GlassType" type="GlassType"/>
+						<xs:element minOccurs="0" name="FrameType" type="WindowFrameType"/>
+						<xs:element minOccurs="0" name="Operable" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="Condition" type="WindowCondition"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="MoveableInsulation">
+				<xs:annotation>
+					<xs:documentation>Rigid opaque foam panels (permanently installed or not) or cellular shades that provide insulation. </xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="RValue" type="RValue"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
 			<xs:element minOccurs="0" name="Overhangs">
 				<xs:complexType>
 					<xs:sequence>
@@ -4141,14 +4306,65 @@
 			</xs:element>
 			<xs:element minOccurs="0" name="WeatherStripping" type="xs:boolean"/>
 			<xs:element minOccurs="0" name="Operable" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="MovableInsulationRValue" type="RValue">
-				<xs:annotation>
-					<xs:documentation>Rigid opaque foam panels (permanently installed or not) or cellular shades that provide insulation. </xs:documentation>
-				</xs:annotation>
-			</xs:element>
 			<xs:element minOccurs="0" name="LeakinessDescription" type="BuildingLeakiness"/>
 		</xs:sequence>
 	</xs:group>
+	<xs:complexType name="WindowFrameType">
+		<xs:choice>
+			<xs:element name="Aluminum">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="ThermalBreak" type="xs:boolean"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Composite">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Fiberglass">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Metal">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="ThermalBreak" type="xs:boolean"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Vinyl">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Wood">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Other">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="Description"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
 	<xs:complexType name="AssociationsType">
 		<xs:all minOccurs="0">
 			<xs:element name="Job" minOccurs="0">

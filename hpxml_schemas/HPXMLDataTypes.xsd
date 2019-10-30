@@ -853,8 +853,6 @@
 			<xs:enumeration value="double-pane"/>
 			<xs:enumeration value="triple-pane"/>
 			<xs:enumeration value="multi-layered"/>
-			<xs:enumeration value="single-paned with storms"/>
-			<xs:enumeration value="single-paned with low-e storms"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -892,13 +890,6 @@
 			<xs:enumeration value="building"/>
 			<xs:enumeration value="other"/>
 			<xs:enumeration value="none"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:simpleType name="Treatments">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="window film"/>
-			<xs:enumeration value="solar screen"/>
-			<xs:enumeration value="shading"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="UFactor">
@@ -1830,6 +1821,30 @@
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
+	<xs:simpleType name="EVChargingLevel">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1"/>
+			<xs:maxInclusive value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="EVChargingConnector">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SAE J1772"/>
+			<xs:enumeration value="CHAdeMO"/>
+			<xs:enumeration value="Tesla"/>
+			<xs:enumeration value="Combined Charging System"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Current">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Voltage">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
 	<xs:simpleType name="Power">
 		<xs:restriction base="xs:double">
 			<xs:minInclusive value="0"/>
@@ -1932,23 +1947,46 @@
 	<xs:simpleType name="ProgramSponsor">
 		<xs:restriction base="xs:string"/>
 	</xs:simpleType>
-	<xs:simpleType name="CertifyingOrganization">
+	<xs:simpleType name="GreenBuildingVerificationType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="USGBC"/>
-			<xs:enumeration value="NAHB"/>
-			<xs:enumeration value="Energy Star Home"/>
-			<xs:enumeration value="local program"/>
+			<xs:enumeration value="BPI-2101-compliant Certificate of Residential Energy Efficiency Features and Performance"/>
+			<xs:enumeration value="Certified Passive House"/>
+			<xs:enumeration value="ENERGY STAR Certified Homes"/>
+			<xs:enumeration value="EnerPHit"/>
+			<xs:enumeration value="HERS Index Score"/>
+			<xs:enumeration value="Home Energy Score"/>
+			<xs:enumeration value="Home Performance with ENERGY STAR"/>
+			<xs:enumeration value="Indoor airPLUS"/>
+			<xs:enumeration value="LEED For Homes"/>
+			<xs:enumeration value="Living Building Challenge"/>
+			<xs:enumeration value="NGBS New Construction"/>
+			<xs:enumeration value="NGBS Small Projects Remodel"/>
+			<xs:enumeration value="NGBS Whole-Home Remodel"/>
+			<xs:enumeration value="Pearl Home Certification"/>
+			<xs:enumeration value="PHIUS+"/>
+			<xs:enumeration value="WaterSense"/>
+			<xs:enumeration value="Zero Energy Ready Home"/>
 			<xs:enumeration value="other"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:simpleType name="ProgramCertificate">
+	<xs:simpleType name="GreenBuildingVerificationSource">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="Home Performance with Energy Star"/>
-			<xs:enumeration value="LEED Certified"/>
-			<xs:enumeration value="LEED Silver"/>
-			<xs:enumeration value="LEED Gold"/>
-			<xs:enumeration value="LEED Platinum"/>
-			<xs:enumeration value="other"/>
+			<xs:enumeration value="Administrator"/>
+			<xs:enumeration value="Assessor"/>
+			<xs:enumeration value="Builder"/>
+			<xs:enumeration value="Contractor or Installer"/>
+			<xs:enumeration value="Other"/>
+			<xs:enumeration value="Owner"/>
+			<xs:enumeration value="Program Sponsor"/>
+			<xs:enumeration value="Program Verifier"/>
+			<xs:enumeration value="Public Records"/>
+			<xs:enumeration value="See Remarks"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="GreenBuildingVerificationStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="complete"/>
+			<xs:enumeration value="in process"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="BoilerType">
@@ -2183,6 +2221,52 @@
 			<xs:enumeration value="CFM per sq.ft."/>
 		</xs:restriction>
 	</xs:simpleType>
+	<xs:simpleType name="BatteryType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Li-ion"/>
+			<xs:enumeration value="lead acid"/>
+			<xs:enumeration value="Ni-Cd"/>
+			<xs:enumeration value="salt water"/>
+			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BatteryCapacity">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BatteryCoolingStrategy">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="passive"/>
+			<xs:enumeration value="active air cooling"/>
+			<xs:enumeration value="liquid cooling"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BatteryLocation">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="attic"/>
+			<xs:enumeration value="attic - conditioned"/>
+			<xs:enumeration value="attic - unconditioned"/>
+			<xs:enumeration value="attic - unvented"/>
+			<xs:enumeration value="attic - vented"/>
+			<xs:enumeration value="basement"/>
+			<xs:enumeration value="basement - conditioned"/>
+			<xs:enumeration value="basement - unconditioned"/>
+			<xs:enumeration value="crawlspace"/>
+			<xs:enumeration value="crawlspace - conditioned"/>
+			<xs:enumeration value="crawlspace - unconditioned"/>
+			<xs:enumeration value="crawlspace - unvented"/>
+			<xs:enumeration value="crawlspace - vented"/>
+			<xs:enumeration value="exterior wall"/>
+			<xs:enumeration value="garage"/>
+			<xs:enumeration value="garage - conditioned"/>
+			<xs:enumeration value="garage - unconditioned"/>
+			<xs:enumeration value="living space"/>
+			<xs:enumeration value="outside"/>
+			<xs:enumeration value="roof deck"/>
+			<xs:enumeration value="unconditioned space"/>
+		</xs:restriction>
+	</xs:simpleType>
 	<xs:simpleType name="DiameterDimension">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="inner"/>
@@ -2200,6 +2284,18 @@
 			<xs:enumeration value="LTE"/>
 			<xs:enumeration value="cellular modem"/>
 			<xs:enumeration value="other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DHWControllerTechnology">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="smart"/>
+			<xs:enumeration value="timer"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DHWTemperatureControl">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="fixed"/>
+			<xs:enumeration value="variable"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>
