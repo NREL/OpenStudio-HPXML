@@ -972,7 +972,7 @@ def get_hpxml_file_walls_values(hpxml_file, walls_values)
                       :area => 240,
                       :solar_absorptance => 0.7,
                       :emittance => 0.92,
-                      :insulation_assembly_r_value => 23.0 }
+                      :insulation_assembly_r_value => 22.3 }
     walls_values << { :id => "WallAtticGableUncond",
                       :exterior_adjacent_to => "outside",
                       :interior_adjacent_to => "attic - unvented",
@@ -1499,9 +1499,9 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
                         :shgc => 0.45,
                         :wall_idref => "WallAtticGableCond" }
     windows_values << { :id => "AtticGableWindowWest",
-                        :area => 12,
+                        :area => 62,
                         :azimuth => 270,
-                        :ufactor => 0.33,
+                        :ufactor => 0.3,
                         :shgc => 0.45,
                         :wall_idref => "WallAtticGableCond" }
   elsif ['base-atticroof-cathedral.xml'].include? hpxml_file
