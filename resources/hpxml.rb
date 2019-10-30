@@ -208,6 +208,166 @@ class HPXML
              :weather_station_wmo => XMLHelper.get_value(weather_station, "WMO") }
   end
 
+  def self.collapse_enclosure(enclosure)
+    # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
+    # This can significantly speed up performance for HPXML files with lots of individual
+    # surfaces (e.g., windows).
+
+    surf_types = ['Roof',
+                  'Wall',
+                  'RimJoist',
+                  'FoundationWall',
+                  'FrameFloor',
+                  'Slab',
+                  'Window',
+                  'Skylight',
+                  'Door']
+
+    keys_to_ignore = [:id,
+                      :insulation_id,
+                      :perimeter_insulation_id,
+                      :under_slab_insulation_id,
+                      :wall_idref,
+                      :roof_idref,
+                      :area,
+                      :exposed_perimeter]
+
+    # Populate surf_type_values
+    surf_type_values = {} # Surface values (hashes)
+    surfs = {} # Surface objects
+    surf_types.each do |surf_type|
+      surf_type_values[surf_type] = []
+      enclosure.elements.each("#{surf_type}s/#{surf_type}") do |surf|
+        if surf_type == 'Roof'
+          surf_type_values[surf_type] << HPXML.get_roof_values(roof: surf)
+        elsif surf_type == 'Wall'
+          surf_type_values[surf_type] << HPXML.get_wall_values(wall: surf)
+        elsif surf_type == 'RimJoist'
+          surf_type_values[surf_type] << HPXML.get_rim_joist_values(rim_joist: surf)
+        elsif surf_type == 'FoundationWall'
+          surf_type_values[surf_type] << HPXML.get_foundation_wall_values(foundation_wall: surf)
+        elsif surf_type == 'FrameFloor'
+          surf_type_values[surf_type] << HPXML.get_framefloor_values(framefloor: surf)
+        elsif surf_type == 'Slab'
+          surf_type_values[surf_type] << HPXML.get_slab_values(slab: surf)
+        elsif surf_type == 'Window'
+          surf_type_values[surf_type] << HPXML.get_window_values(window: surf)
+        elsif surf_type == 'Skylight'
+          surf_type_values[surf_type] << HPXML.get_skylight_values(skylight: surf)
+        elsif surf_type == 'Door'
+          surf_type_values[surf_type] << HPXML.get_door_values(door: surf)
+        end
+
+        # Add parent wall/roof AdjacentTo values to hash so that they're included in the logic
+        # regarding whether a pair of surfaces can be collapsed.
+        if ['Window', 'Skylight', 'Door'].include? surf_type
+          parent_id = surf_type_values[surf_type][-1][:wall_idref]
+          if parent_id.nil?
+            parent_id = surf_type_values[surf_type][-1][:roof_idref]
+          end
+          ['Wall', 'FoundationWall', 'Roof'].each do |parent_surf_type|
+            surf_type_values[parent_surf_type].each do |parent_surf_values|
+              next unless parent_surf_values[:id] == parent_id
+
+              surf_type_values[surf_type][-1][:interior_adjacent_to] = parent_surf_values[:interior_adjacent_to]
+              surf_type_values[surf_type][-1][:exterior_adjacent_to] = parent_surf_values[:exterior_adjacent_to]
+            end
+          end
+        end
+
+        surfs[surf_type_values[surf_type][-1][:id]] = surf
+      end
+    end
+
+    # Look for pairs of surfaces that can be collapsed
+    area_adjustments = {}
+    exposed_perimeter_adjustments = {}
+    surf_types.each do |surf_type|
+      for i in 0..surf_type_values[surf_type].size - 1
+        surf_values = surf_type_values[surf_type][i]
+        next if surf_values.nil?
+
+        area_adjustments[surf_values[:id]] = 0
+        exposed_perimeter_adjustments[surf_values[:id]] = 0
+
+        for j in (surf_type_values[surf_type].size - 1).downto(i + 1)
+          surf_values2 = surf_type_values[surf_type][j]
+          next if surf_values2.nil?
+          next unless surf_values.keys.sort == surf_values2.keys.sort
+
+          match = true
+          surf_values.keys.each do |key|
+            next if keys_to_ignore.include? key
+            next if surf_type == 'FoundationWall' and key == :azimuth # Azimuth of foundation walls is irrelevant
+            next if surf_values[key] == surf_values2[key]
+
+            match = false
+          end
+          next unless match
+
+          # Update Area/ExposedPerimeter
+          if not surf_values[:area].nil?
+            area_adjustments[surf_values[:id]] += surf_values2[:area]
+          end
+          if not surf_values[:exposed_perimeter].nil?
+            exposed_perimeter_adjustments[surf_values[:id]] += surf_values2[:exposed_perimeter]
+          end
+          if surf_values[:wall_idref] != surf_values2[:wall_idref] # Moving subsurface to a different wall
+            area_adjustments[surf_values[:wall_idref]] += surf_values2[:area]
+            area_adjustments[surf_values2[:wall_idref]] -= surf_values2[:area]
+          end
+          if surf_values[:roof_idref] != surf_values2[:roof_idref] # Moving subsurface to a different roof
+            area_adjustments[surf_values[:roof_idref]] += surf_values2[:area]
+            area_adjustments[surf_values2[:roof_idref]] -= surf_values2[:area]
+          end
+
+          # Update subsurface idrefs as appropriate
+          if ['Wall', 'FoundationWall'].include? surf_type
+            ['Window', 'Door'].each do |subsurf_type|
+              surf_type_values[subsurf_type].each do |subsurf_values|
+                subsurf = surfs[subsurf_values[:id]]
+                next unless subsurf_values[:wall_idref] == surf_values2[:id]
+
+                subsurf_values[:wall_idref] = surf_values[:id]
+                subsurf.elements["AttachedToWall"].attributes["idref"] = surf_values[:id]
+              end
+            end
+          elsif ['Roof'].include? surf_type
+            ['Skylight'].each do |subsurf_type|
+              surf_type_values[subsurf_type].each do |subsurf_values|
+                subsurf = surfs[subsurf_values[:id]]
+                next unless subsurf_values[:roof_idref] == surf_values2[:id]
+
+                subsurf_values[:roof_idref] = surf_values[:id]
+                subsurf.elements["AttachedToRoof"].attributes["idref"] = surf_values[:id]
+              end
+            end
+          end
+
+          # Remove old surface
+          surf2 = surfs[surf_values2[:id]]
+          surf2.parent.elements.delete surf2
+          surf_type_values[surf_type].delete_at(j)
+        end
+      end
+    end
+
+    area_adjustments.each do |surf_id, area_adjustment|
+      next unless area_adjustment > 0
+
+      surf = surfs[surf_id]
+      surf.elements["Area"].text = Float(surf.elements["Area"].text) + area_adjustment
+    end
+    exposed_perimeter_adjustments.each do |surf_id, exposed_perimeter_adjustment|
+      next unless exposed_perimeter_adjustment > 0
+
+      surf = surfs[surf_id]
+      surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
+    end
+
+    return true
+  end
+
   def self.add_air_infiltration_measurement(hpxml:,
                                             id:,
                                             house_pressure: nil,
