@@ -84,9 +84,6 @@ class Waterheater
     int_factor = 1.0 # unitless
     temp_depress = 0.0 # F
     ducting = "none"
-    
-    #Code for testing out the number of nodes
-    reduced_nodes = true #Reduced nodes = true gives a 6 node tank instead of 12
 
     # Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
     if vol <= 58
@@ -296,11 +293,7 @@ class Waterheater
     else
       tank.setAmbientTemperatureSchedule(hpwh_tamb)
     end
-    if reduced_nodes
-      tank.setNumberofNodes(6)
-    else
-      tank.setNumberofNodes(12)
-    end
+    tank.setNumberofNodes(6)
     tank.setAdditionalDestratificationConductivity(0)
     tank.setNode1AdditionalLossCoefficient(0)
     tank.setNode2AdditionalLossCoefficient(0)
