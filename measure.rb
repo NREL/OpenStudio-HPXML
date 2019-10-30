@@ -158,7 +158,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       return false if not success
 
       # Create OpenStudio model
-      if not OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir)
+      if not OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
         runner.registerError("Unsuccessful creation of OpenStudio model.")
         return false
       end
@@ -222,7 +222,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml_doc, runner, model, weather, map_tsv_dir)
+  def self.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
+    @hpxml_path = hpxml_path
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
     building = hpxml_doc.elements["/HPXML/Building"]
@@ -985,18 +986,14 @@ class OSModel
     return OpenStudio::reverse(add_floor_polygon(x, y, z))
   end
 
-  def self.net_surface_area(gross_area, surface_id, azimuth, surface_type)
+  def self.net_surface_area(gross_area, surface_id)
     net_area = gross_area
     if not @subsurface_areas_by_surface[surface_id].nil?
-      if azimuth.nil?
-        net_area -= @subsurface_areas_by_surface[surface_id].values.inject(0, :+)
-      elsif not @subsurface_areas_by_surface[surface_id][azimuth].nil?
-        net_area -= @subsurface_areas_by_surface[surface_id][azimuth]
-      end
+      net_area -= @subsurface_areas_by_surface[surface_id]
     end
 
     if net_area < 0
-      fail "Calculated a negative net surface area for #{surface_type} '#{surface_id}'."
+      fail "Calculated a negative net surface area for surface '#{surface_id}'."
     end
 
     return net_area
@@ -1031,7 +1028,7 @@ class OSModel
 
   def self.calc_subsurface_areas_by_surface(building)
     # Returns a hash with the amount of subsurface (window/skylight/door)
-    # area by azimuth for each surface. Used to convert gross surface area to net surface
+    # area for each surface. Used to convert gross surface area to net surface
     # area for a given surface.
     subsurface_areas = {}
 
@@ -1039,30 +1036,24 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
       wall_id = window_values[:wall_idref]
-      azimuth = window_values[:azimuth]
-      subsurface_areas[wall_id] = {} if subsurface_areas[wall_id].nil?
-      subsurface_areas[wall_id][azimuth] = 0 if subsurface_areas[wall_id][azimuth].nil?
-      subsurface_areas[wall_id][azimuth] += window_values[:area]
+      subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
+      subsurface_areas[wall_id] += window_values[:area]
     end
 
     # Skylights
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_values = HPXML.get_skylight_values(skylight: skylight)
       roof_id = skylight_values[:roof_idref]
-      azimuth = skylight_values[:azimuth]
-      subsurface_areas[roof_id] = {} if subsurface_areas[roof_id].nil?
-      subsurface_areas[roof_id][azimuth] = 0 if subsurface_areas[roof_id][azimuth].nil?
-      subsurface_areas[roof_id][azimuth] += skylight_values[:area]
+      subsurface_areas[roof_id] = 0 if subsurface_areas[roof_id].nil?
+      subsurface_areas[roof_id] += skylight_values[:area]
     end
 
     # Doors
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
       door_values = HPXML.get_door_values(door: door)
       wall_id = door_values[:wall_idref]
-      azimuth = door_values[:azimuth]
-      subsurface_areas[wall_id] = {} if subsurface_areas[wall_id].nil?
-      subsurface_areas[wall_id][azimuth] = 0 if subsurface_areas[wall_id][azimuth].nil?
-      subsurface_areas[wall_id][azimuth] += door_values[:area]
+      subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
+      subsurface_areas[wall_id] += door_values[:area]
     end
 
     return subsurface_areas
@@ -1121,11 +1112,11 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        net_area = net_surface_area(roof_values[:area] / azimuths.size, roof_values[:id], azimuth, "Roof")
+        net_area = net_surface_area(roof_values[:area], roof_values[:id])
         next if net_area < 0.1
 
         width = Math::sqrt(net_area)
-        length = net_area / width
+        length = (net_area / width) / azimuths.size
         tilt = roof_values[:pitch] / 12.0
         z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
@@ -1210,11 +1201,11 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        net_area = net_surface_area(wall_values[:area] / azimuths.size, wall_values[:id], azimuth, "Wall")
+        net_area = net_surface_area(wall_values[:area], wall_values[:id])
         next if net_area < 0.1
 
         height = 8.0 * @ncfl_ag
-        length = net_area / height
+        length = (net_area / height) / azimuths.size
         z_origin = @foundation_top
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth), model)
@@ -1510,7 +1501,7 @@ class OSModel
         next unless fnd_wall_values[:exterior_adjacent_to] != "ground"
 
         ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
-        ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], fnd_wall_values[:azimuth], "Wall") * ag_height / fnd_wall_values[:height]
+        ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id]) * ag_height / fnd_wall_values[:height]
         next if ag_net_area < 0.1
 
         length = ag_net_area / ag_height
@@ -1558,7 +1549,7 @@ class OSModel
   def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
                                total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
 
-    net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], fnd_wall_values[:azimuth], "Wall") * slab_frac
+    net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id]) * slab_frac
     gross_area = fnd_wall_values[:area] * slab_frac
     height = fnd_wall_values[:height]
     height_ag = height - fnd_wall_values[:depth_below_grade]
