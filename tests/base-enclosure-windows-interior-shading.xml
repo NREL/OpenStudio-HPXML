@@ -185,8 +185,11 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <InteriorShadingFactorSummer>0.7</InteriorShadingFactorSummer>
-            <InteriorShadingFactorWinter>0.85</InteriorShadingFactorWinter>
+            <InteriorShading>
+              <SystemIdentifier id='WindowNorthInteriorShading'/>
+              <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
+            </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -195,8 +198,11 @@
             <Azimuth>180</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <InteriorShadingFactorSummer>0.01</InteriorShadingFactorSummer>
-            <InteriorShadingFactorWinter>0.99</InteriorShadingFactorWinter>
+            <InteriorShading>
+              <SystemIdentifier id='WindowSouthInteriorShading'/>
+              <SummerShadingCoefficient>0.01</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.99</WinterShadingCoefficient>
+            </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -205,8 +211,11 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <InteriorShadingFactorSummer>0.99</InteriorShadingFactorSummer>
-            <InteriorShadingFactorWinter>0.01</InteriorShadingFactorWinter>
+            <InteriorShading>
+              <SystemIdentifier id='WindowEastInteriorShading'/>
+              <SummerShadingCoefficient>0.99</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.01</WinterShadingCoefficient>
+            </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -215,8 +224,11 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <InteriorShadingFactorSummer>0.85</InteriorShadingFactorSummer>
-            <InteriorShadingFactorWinter>0.7</InteriorShadingFactorWinter>
+            <InteriorShading>
+              <SystemIdentifier id='WindowWestInteriorShading'/>
+              <SummerShadingCoefficient>0.85</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.7</WinterShadingCoefficient>
+            </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
