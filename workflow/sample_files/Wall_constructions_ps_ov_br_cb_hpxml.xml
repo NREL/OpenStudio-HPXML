@@ -211,7 +211,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="front_window_interior_shading"/>
+              <SystemIdentifier id="front_window_exterior_shading"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
@@ -229,7 +229,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="back_window_interior_shading"/>
+              <SystemIdentifier id="back_window_exterior_shading"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
@@ -247,7 +247,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_interior_shading"/>
+              <SystemIdentifier id="right_window_exterior_shading"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
@@ -265,7 +265,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_interior_shading"/>
+              <SystemIdentifier id="right_window_exterior_shading"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
