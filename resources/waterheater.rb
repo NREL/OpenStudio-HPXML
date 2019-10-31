@@ -293,7 +293,7 @@ class Waterheater
     else
       tank.setAmbientTemperatureSchedule(hpwh_tamb)
     end
-    tank.setNumberofNodes(12)
+    tank.setNumberofNodes(6)
     tank.setAdditionalDestratificationConductivity(0)
     tank.setNode1AdditionalLossCoefficient(0)
     tank.setNode2AdditionalLossCoefficient(0)
