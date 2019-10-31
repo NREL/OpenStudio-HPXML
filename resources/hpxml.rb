@@ -881,7 +881,7 @@ class HPXML
              :shgc => to_float_or_nil(XMLHelper.get_value(window, "SHGC")),
              :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/SummerShadingCoefficient")),
              :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/WinterShadingCoefficient")),
-             :exterior_shading => XMLHelper.get_value(window, "ExteriorShading"),
+             :exterior_shading => XMLHelper.get_value(window, "ExteriorShading/Type"),
              :overhangs_depth => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth")),
              :overhangs_distance_to_top_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow")),
              :overhangs_distance_to_bottom_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow")),
@@ -929,7 +929,7 @@ class HPXML
              :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(skylight, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(skylight, "SHGC")),
-             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading"),
+             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading/Type"),
              :roof_idref => HPXML.get_idref(skylight, "AttachedToRoof") }
   end
 
