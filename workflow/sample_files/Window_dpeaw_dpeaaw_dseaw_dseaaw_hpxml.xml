@@ -270,7 +270,7 @@
             <GlassType>reflective</GlassType>
             <GasFill>argon</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_exterior_shading"/>
+              <SystemIdentifier id="left_window_exterior_shading"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>

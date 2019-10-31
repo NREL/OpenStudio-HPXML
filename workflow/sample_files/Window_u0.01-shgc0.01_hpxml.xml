@@ -245,7 +245,7 @@
             <UFactor>0.01</UFactor>
             <SHGC>0.01</SHGC>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_exterior_shading"/>
+              <SystemIdentifier id="left_window_exterior_shading"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
