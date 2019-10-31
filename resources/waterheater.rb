@@ -580,10 +580,10 @@ class Waterheater
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
-      recovery_time = 0.2 # This variable is used for E+ autosizing source heat transfer. Default value 0.2 works well for indirect systems even tested with more spiky draw profile.
+      recovery_time = 0.1 # This variable is used for E+ autosizing source heat transfer. Value 0.1 shows good resilience tested with 1bd, 2bds, 3bds, 4bds and 5bds water use profiles.
     else
       tank_type = Constants.WaterHeaterTypeTankless
-      recovery_time = 0.005 # This variable is used for E+ autosizing source heat transfer. Default value 0.05 works well for combi tankless systems even tested with more spiky draw profile. The recovery time must be smaller for tankless system because of higher sensitivity to load caused by smaller volume.
+      recovery_time = 0.001 # This variable is used for E+ autosizing source heat transfer. Value 0.001 shows good resilience tested with 1bd, 2bds, 3bds, 4bds and 5bds water use profiles.
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
@@ -606,8 +606,8 @@ class Waterheater
     hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
     alternate_stp_sch.setName("#{obj_name_indirect} Alt Spt")
     hx_stp_sch.setName("#{obj_name_indirect} HX Spt")
-    alt_temp = 54
-    hx_temp = 54 # 54C is more reasonable for highest desired hot water temperature, with 2C deadband, it would be expected to be controlled between 52C - 54C
+    alt_temp = UnitConversions.convert(t_set, "F", "C") + deadband(tank_type) / 2.0
+    hx_temp = alt_temp
     alternate_stp_sch.setValue(alt_temp)
     hx_stp_sch.setValue(hx_temp)
     new_heater.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
@@ -623,6 +623,7 @@ class Waterheater
     temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
     source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), tank_type)
     source_loop.setPlantLoopVolume(0.0) # After checking node temperatures and energy results, set plant volume to be zero delivers water system load better to boiler through heat exchanger. Might need to discuss whether an issue should be raised up in E+ repo
+    source_loop.autosizeMaximumLoopFlowRate()
 
     # Create heat exchanger
     indirect_hx = create_new_hx(model, Constants.ObjectNameTankHX)
@@ -637,6 +638,7 @@ class Waterheater
     source_loop.addSupplyBranchForComponent(indirect_hx)
 
     new_pump = create_new_pump(model)
+    new_pump.autosizeRatedFlowRate()
     new_pump.addToNode(source_loop.supplyInletNode)
 
     new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
@@ -667,10 +669,6 @@ class Waterheater
     wh_loss_sensor.setName("#{obj_name_indirect} Loss Energy")
     wh_loss_sensor.setKeyName("#{obj_name_indirect}")
 
-    tank_volume_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Water Volume")
-    tank_volume_sensor.setName("#{obj_name_indirect} Volume")
-    tank_volume_sensor.setKeyName("#{obj_name_indirect}")
-
     # Actuators
     altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alternate_stp_sch, "Schedule:Constant", "Schedule Value")
     altsch_actuator.setName("#{obj_name_indirect} AltSchedOverride")
@@ -678,7 +676,9 @@ class Waterheater
     # Program
     indirect_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     indirect_ctrl_program.setName("#{obj_name_indirect} Source Control")
-    indirect_ctrl_program.addLine("If - #{use_heat_sensor.name} -  #{wh_loss_sensor.name}> (#{tank_temp_sensor.name} - #{stp_temp_sensor.name}) * #{tank_volume_sensor.name} * (@RhoH2O #{tank_temp_sensor.name}) * (@CpHW #{tank_temp_sensor.name})")
+    indirect_ctrl_program.addLine("Set WH_use = - #{use_heat_sensor.name} -  #{wh_loss_sensor.name}")
+    indirect_ctrl_program.addLine("Set WH_Volume = #{new_heater.tankVolume.get}")
+    indirect_ctrl_program.addLine("If WH_use > (#{tank_temp_sensor.name} - #{stp_temp_sensor.name} + #{deadband(tank_type)}) * WH_Volume * (@RhoH2O #{tank_temp_sensor.name}) * (@CpHW #{tank_temp_sensor.name})")
     indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
     indirect_ctrl_program.addLine("Else")
     indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = #{alternate_stp_sch.value}")
