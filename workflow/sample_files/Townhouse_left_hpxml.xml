@@ -191,7 +191,10 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="front_window_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
             <extension>
               <hescore_window_code>dcaw</hescore_window_code>
@@ -206,7 +209,10 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="back_window_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
             <extension>
               <hescore_window_code>dcaw</hescore_window_code>
@@ -221,7 +227,10 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="right_window_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
             <extension>
               <hescore_window_code>dcaw</hescore_window_code>

@@ -251,7 +251,10 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="front_window_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
             <extension>
               <hescore_window_code>dcaw</hescore_window_code>
@@ -266,7 +269,10 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="back_window_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
             <extension>
               <hescore_window_code>dcaw</hescore_window_code>
@@ -281,7 +287,10 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="right_window_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
             <extension>
               <hescore_window_code>dcaw</hescore_window_code>
@@ -296,7 +305,10 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="right_window_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
             <extension>
               <hescore_window_code>dcaw</hescore_window_code>
@@ -311,8 +323,11 @@
               <Wood/>
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
-            <ExteriorShading>none</ExteriorShading>
-            <AttachedToRoof idref="roof1"/>
+            <ExteriorShading>
+              <SystemIdentifier id="roof1_skylight_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
+            <AttachedToWall idref="roof1"/>
             <extension>
               <hescore_skylight_code>scnw</hescore_skylight_code>
             </extension>
@@ -325,8 +340,11 @@
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
             <GlassType>tinted/reflective</GlassType>
-            <ExteriorShading>none</ExteriorShading>
-            <AttachedToRoof idref="roof2"/>
+            <ExteriorShading>
+              <SystemIdentifier id="roof2_skylight_interior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
+            <AttachedToWall idref="roof2"/>
             <extension>
               <hescore_skylight_code>stnw</hescore_skylight_code>
             </extension>
