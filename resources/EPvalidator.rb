@@ -207,8 +207,8 @@ class EnergyPlusValidator
         "Azimuth" => one,
         "UFactor" => one,
         "SHGC" => one,
-        "InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
-        "InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
+        "InteriorShading/SummerShadingCoefficient" => zero_or_one, # Uses ERI assumption if not provided
+        "InteriorShading/WinterShadingCoefficient" => zero_or_one, # Uses ERI assumption if not provided
         "Overhangs" => zero_or_one, # See [WindowOverhang]
         "AttachedToWall" => one,
       },
@@ -379,8 +379,8 @@ class EnergyPlusValidator
 
       ## [HVACDistType=Air]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution" => {
-        "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value" => one,
-        "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' and TotalOrToOutside='to outside']/Value" => one,
+        "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => one,
+        "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => one,
         "Ducts[DuctType='supply']" => one_or_more, # See [HVACDuct]
         "Ducts[DuctType='return']" => one_or_more, # See [HVACDuct]
       },

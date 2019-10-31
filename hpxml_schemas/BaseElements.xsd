@@ -1,6 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2019/10" targetNamespace="http://hpxmlonline.com/2019/10" elementFormDefault="qualified" version="3.0">
 	<xs:include schemaLocation="HPXMLDataTypes.xsd"/>
+	<xs:attribute name="dataSource" type="DataSource"/>
 	<xs:element name="XMLTransactionHeaderInformation">
 		<xs:annotation>
 			<xs:documentation>These are a series of elements that indicate the type of XML and basic descriptive data about the XML.</xs:documentation>
@@ -13,6 +14,7 @@
 				<xs:element name="Transaction" type="TransactionType"/>
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="AddressInformation">
@@ -21,14 +23,15 @@
 		</xs:annotation>
 		<xs:sequence>
 			<xs:element name="AddressType" type="AddressTypeCode" minOccurs="0"/>
-			<xs:element name="Address1" type="xs:string" minOccurs="0"/>
-			<xs:element name="Address2" type="xs:string" minOccurs="0"/>
-			<xs:element name="CityMunicipality" type="xs:string" minOccurs="0"/>
+			<xs:element name="Address1" type="HPXMLString" minOccurs="0"/>
+			<xs:element name="Address2" type="HPXMLString" minOccurs="0"/>
+			<xs:element name="CityMunicipality" type="HPXMLString" minOccurs="0"/>
 			<xs:element name="StateCode" type="StateCode" minOccurs="0"/>
 			<xs:element name="ZipCode" type="ZipCode" minOccurs="0"/>
 			<xs:element name="USPSBarCode" type="USPSBarCode" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="SystemIdentifiersInfoType">
 		<xs:annotation>
@@ -51,9 +54,11 @@
 				<xs:documentation>Use to reference the id of the same object on the base building where the object has not been replaced.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="LocalReference">
 		<xs:attribute name="idref" type="xs:IDREF"/>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="RemoteReference">
 		<xs:annotation>
@@ -71,6 +76,7 @@
 				<xs:documentation>Id reference in the current document. Optional. If the element isn't available in the current document, don't use this.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:element name="ContractorSystemIdentifiers">
 		<xs:annotation>
@@ -80,12 +86,14 @@
 			<xs:sequence>
 				<xs:element maxOccurs="unbounded" ref="SystemIdentifiersInfo"/>
 			</xs:sequence>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="extensionType">
 		<xs:sequence>
 			<xs:any maxOccurs="unbounded" minOccurs="0" namespace="##any" processContents="skip"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:element name="extension" type="extensionType"> </xs:element>
 	<xs:element name="ProjectStatus">
@@ -97,9 +105,10 @@
 							system and to provide feedback that may result in quality improvements (BPI, 2006). </xs:documentation>
 					</xs:annotation>
 				</xs:element>
-				<xs:element minOccurs="0" name="Date" type="xs:date"/>
+				<xs:element minOccurs="0" name="Date" type="HPXMLDate"/>
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="IndividualInfo">
@@ -109,12 +118,13 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="PrefixName" type="PrefixName" minOccurs="0"/>
-						<xs:element name="FirstName" type="xs:string"/>
-						<xs:element name="MiddleName" type="xs:string" minOccurs="0"/>
-						<xs:element name="LastName" type="xs:string"/>
+						<xs:element name="FirstName" type="HPXMLString"/>
+						<xs:element name="MiddleName" type="HPXMLString" minOccurs="0"/>
+						<xs:element name="LastName" type="HPXMLString"/>
 						<xs:element name="SuffixName" type="SuffixName" minOccurs="0"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="IndividualType" type="IndividualType"/>
@@ -122,6 +132,7 @@
 			<xs:element minOccurs="0" maxOccurs="unbounded" name="Email" type="EmailInfoType"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:element name="UtilityFuelProvider">
 		<xs:annotation>
@@ -130,15 +141,16 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:group ref="SystemInfo"/>
-				<xs:element name="UtilityName" type="xs:string" minOccurs="0"/>
-				<xs:element minOccurs="0" name="MeterNumber" type="xs:string"/>
-				<xs:element name="UtilityAccountNumber" type="xs:string" minOccurs="0"/>
-				<xs:element minOccurs="0" name="Permission" type="xs:boolean"/>
+				<xs:element name="UtilityName" type="HPXMLString" minOccurs="0"/>
+				<xs:element minOccurs="0" name="MeterNumber" type="HPXMLString"/>
+				<xs:element name="UtilityAccountNumber" type="HPXMLString" minOccurs="0"/>
+				<xs:element minOccurs="0" name="Permission" type="HPXMLBoolean"/>
 				<xs:element name="UtilityServiceTypeProvided" type="ConsumptionType" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element minOccurs="0" name="BusinessInfo" type="BusinessInfoType"/>
 				<xs:element maxOccurs="unbounded" minOccurs="0" name="BusinessContactInfo" type="BusinessContactInfoType"/>
 				<xs:element ref="extension" minOccurs="0"/>
 			</xs:sequence>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="IECCClimateZoneType">
@@ -147,6 +159,7 @@
 			<xs:element name="ClimateZone" type="ClimateZoneIECC"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="InsulationMaterial">
 		<xs:choice>
@@ -154,7 +167,7 @@
 			<xs:element name="LooseFill" type="InsulationLooseFillType"/>
 			<xs:element name="Rigid" type="InsulationRigidType"/>
 			<xs:element name="SprayFoam" type="InsulationSprayFoamType"/>
-			<xs:element name="Other" type="xs:string">
+			<xs:element name="Other" type="HPXMLString">
 				<xs:annotation>
 					<xs:documentation>Describe</xs:documentation>
 				</xs:annotation>
@@ -170,6 +183,7 @@
 				</xs:annotation>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="InsulationInfo">
 		<xs:sequence>
@@ -181,7 +195,7 @@
 					<xs:documentation>This should indicate the effective R-value of the complete assembly including any air films or other treatments.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="MisalignedInsulation" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="MisalignedInsulation" type="HPXMLBoolean"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="Layer">
 				<xs:complexType>
 					<xs:sequence maxOccurs="1">
@@ -195,10 +209,12 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:element name="CoolingSystemInfo" type="CoolingSystemInfoType"/>
 	<xs:element name="HeatPumpInfo" type="HeatPumpInfoType"/>
@@ -211,11 +227,12 @@
 			<xs:element name="NumberofUnits" type="IntegerGreaterThanOrEqualToZero" minOccurs="0"/>
 			<xs:element name="Manufacturer" type="Manufacturer" minOccurs="0"/>
 			<xs:element name="ModelNumber" type="Model" minOccurs="0"/>
-			<xs:element minOccurs="0" name="AHRINumber" type="xs:string"/>
-			<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
+			<xs:element minOccurs="0" name="AHRINumber" type="HPXMLString"/>
+			<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
 			<xs:element name="ModelYear" type="Year" minOccurs="0"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="ApplianceThirdPartyCertifications"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ClothesDryerInfoType">
 		<xs:complexContent>
@@ -224,32 +241,24 @@
 					<xs:element minOccurs="0" name="Type" type="ClothesDryerType"/>
 					<xs:element minOccurs="0" name="Location" type="LaundryMachineLocation"/>
 					<xs:element name="FuelType" type="FuelType" minOccurs="0"/>
-					<xs:element minOccurs="0" name="Usage" type="xs:double">
+					<xs:element minOccurs="0" name="Usage" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>loads/week</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="EnergyFactor" type="xs:double">
+					<xs:element minOccurs="0" name="EnergyFactor" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>[lbs dry clothes/kWh] The energy performance metric for ENERGY STAR certified residential clothes dryers prior to September 13, 2013. The new metric is
 								Combined Energy Factor.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="CombinedEnergyFactor" type="xs:double">
+					<xs:element minOccurs="0" name="CombinedEnergyFactor" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>[lbs dry clothes/kWh] The energy performance metric for ENERGY STAR certified residential clothes dryers as of September 13, 2013, it includes the active
 								drying cycle energy as well as energy consumed during Stand-by and Off modes.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element maxOccurs="unbounded" minOccurs="0" name="ControlType">
-						<xs:simpleType>
-							<xs:restriction base="xs:string">
-								<xs:enumeration value="timer"/>
-								<xs:enumeration value="moisture"/>
-								<xs:enumeration value="temperature"/>
-							</xs:restriction>
-						</xs:simpleType>
-					</xs:element>
+					<xs:element maxOccurs="unbounded" minOccurs="0" name="ControlType" type="ClothesDryerControlType"> </xs:element>
 					<xs:element ref="extension" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
@@ -262,29 +271,29 @@
 				<xs:sequence>
 					<xs:element name="Type" type="ClothesWasherType" minOccurs="0"/>
 					<xs:element minOccurs="0" name="Location" type="LaundryMachineLocation"/>
-					<xs:element name="ModifiedEnergyFactor" type="xs:double" minOccurs="0">
+					<xs:element name="ModifiedEnergyFactor" type="HPXMLDouble" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>The energy performance metric for ENERGY STAR certified residential clothes washers prior to March 7, 2015. The new metric is Integrated Modified Energy
 								Factor.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element name="IntegratedModifiedEnergyFactor" type="xs:double" minOccurs="0">
+					<xs:element name="IntegratedModifiedEnergyFactor" type="HPXMLDouble" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element name="WaterFactor" type="xs:double" minOccurs="0">
+					<xs:element name="WaterFactor" type="HPXMLDouble" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>The water performance metric for ENERGY STAR certified residential clothes washers prior to March 7, 2015. The new metric is Integrated Water
 								Factor.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element name="IntegratedWaterFactor" type="xs:double" minOccurs="0">
+					<xs:element name="IntegratedWaterFactor" type="HPXMLDouble" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>The water performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="Usage" type="xs:double">
+					<xs:element minOccurs="0" name="Usage" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>loads/week</xs:documentation>
 						</xs:annotation>
@@ -294,22 +303,22 @@
 							<xs:documentation>kWh/yr</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="LabelElectricRate" type="xs:double">
+					<xs:element minOccurs="0" name="LabelElectricRate" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>$/kWh</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="LabelGasRate" type="xs:double">
+					<xs:element minOccurs="0" name="LabelGasRate" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>$/therm</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="LabelAnnualGasCost" type="xs:double">
+					<xs:element minOccurs="0" name="LabelAnnualGasCost" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>$</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="Capacity" type="xs:double">
+					<xs:element minOccurs="0" name="Capacity" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>ft^3</xs:documentation>
 						</xs:annotation>
@@ -327,13 +336,13 @@
 				<xs:sequence>
 					<xs:element minOccurs="0" name="Type" type="DishwasherType"/>
 					<xs:element minOccurs="0" name="Fuel" type="FuelType"/>
-					<xs:element name="HeatDryDefaultOff" type="xs:boolean" minOccurs="0"/>
-					<xs:element name="AuxillaryWaterHeaterDefaultOff" type="xs:boolean" minOccurs="0"/>
+					<xs:element name="HeatDryDefaultOff" type="HPXMLBoolean" minOccurs="0"/>
+					<xs:element name="AuxillaryWaterHeaterDefaultOff" type="HPXMLBoolean" minOccurs="0"/>
 					<xs:element minOccurs="0" name="RatedAnnualkWh" type="RatedAnnualkWh"/>
 					<xs:element minOccurs="0" name="EnergyFactor" type="EnergyFactor"/>
 					<xs:element minOccurs="0" name="RatedWaterGalPerCycle" type="RatedWaterGalPerCycle"/>
 					<xs:element minOccurs="0" name="PlaceSettingCapacity" type="IntegerGreaterThanZero"/>
-					<xs:element minOccurs="0" name="Usage" type="xs:double">
+					<xs:element minOccurs="0" name="Usage" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>loads/week</xs:documentation>
 						</xs:annotation>
@@ -367,7 +376,7 @@
 					<xs:element name="Type" type="RefrigeratorStyle" minOccurs="0"/>
 					<xs:element minOccurs="0" name="Location" type="RefrigeratorLocation"/>
 					<xs:element name="RatedAnnualkWh" type="RatedAnnualkWh" minOccurs="0"/>
-					<xs:element name="PrimaryIndicator" type="xs:boolean" minOccurs="0">
+					<xs:element name="PrimaryIndicator" type="HPXMLBoolean" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>True if it is the primary refrigerator</xs:documentation>
 						</xs:annotation>
@@ -397,7 +406,7 @@
 			<xs:extension base="ApplianceTypeSummaryInfo">
 				<xs:sequence>
 					<xs:element minOccurs="0" name="Location" type="DehumidifierLocation"/>
-					<xs:element minOccurs="0" name="Efficiency" type="xs:double">
+					<xs:element minOccurs="0" name="Efficiency" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>[L/kWh]</xs:documentation>
 						</xs:annotation>
@@ -412,7 +421,7 @@
 			<xs:extension base="ApplianceTypeSummaryInfo">
 				<xs:sequence>
 					<xs:element name="FuelType" type="FuelType" minOccurs="0"/>
-					<xs:element minOccurs="0" name="IsInduction" type="xs:boolean"/>
+					<xs:element minOccurs="0" name="IsInduction" type="HPXMLBoolean"/>
 					<xs:element ref="extension" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
@@ -423,7 +432,7 @@
 			<xs:extension base="ApplianceTypeSummaryInfo">
 				<xs:sequence>
 					<xs:element name="FuelType" type="FuelType" minOccurs="0"/>
-					<xs:element minOccurs="0" name="IsConvection" type="xs:boolean"/>
+					<xs:element minOccurs="0" name="IsConvection" type="HPXMLBoolean"/>
 					<xs:element ref="extension" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
@@ -436,6 +445,7 @@
 				<xs:element name="SoftwareProgramVersion" type="SoftwareProgramVersion" minOccurs="0"/>
 				<xs:element ref="extension" minOccurs="0"/>
 			</xs:sequence>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="BusinessContactType">
@@ -445,6 +455,7 @@
 					<xs:sequence>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Auditor">
@@ -455,6 +466,7 @@
 						<xs:element minOccurs="0" name="YearsExperience" type="IntegerGreaterThanOrEqualToZero"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Implementer">
@@ -464,17 +476,20 @@
 						<xs:element minOccurs="0" name="StateWhereQualificationHeld" type="StateCode"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Description" type="xs:string"/>
+						<xs:element minOccurs="0" name="Description" type="HPXMLString"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ContractorType">
 		<xs:sequence>
@@ -483,6 +498,7 @@
 			<xs:element name="SubContractor" type="ContractorType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:element name="AttachedToSpace" type="LocalReference"/>
 	<xs:element name="AttachedToZone" type="LocalReference"/>
@@ -492,7 +508,7 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
-						<xs:element name="SpaceName" type="xs:string" minOccurs="0"/>
+						<xs:element name="SpaceName" type="HPXMLString" minOccurs="0"/>
 						<xs:element minOccurs="0" name="NumberOfBedrooms" type="IntegerGreaterThanOrEqualToZero"/>
 						<xs:element minOccurs="0" name="FloorArea" type="SurfaceArea">
 							<xs:annotation>
@@ -511,9 +527,11 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Zones">
 		<xs:sequence>
@@ -521,14 +539,16 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:group ref="SystemInfo"/>
-						<xs:element name="ZoneName" type="xs:string" minOccurs="0"/>
+						<xs:element name="ZoneName" type="HPXMLString" minOccurs="0"/>
 						<xs:element name="ZoneType" type="ZoneType" minOccurs="0"> </xs:element>
 						<xs:element name="Spaces" type="Spaces" minOccurs="0"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Enclosure">
 		<xs:sequence>
@@ -548,9 +568,11 @@
 												<xs:element maxOccurs="unbounded" minOccurs="0" name="BasementCrawlspace" type="BasementCrawlspaceComponentsAirSealed"/>
 												<xs:element maxOccurs="unbounded" minOccurs="0" name="LivingSpace" type="LivingSpaceComponentsAirSealed"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -558,10 +580,12 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Attics">
@@ -589,13 +613,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Foundations" minOccurs="0">
@@ -622,13 +649,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Garages">
@@ -649,11 +679,12 @@
 									<xs:element minOccurs="1" name="GarageType">
 										<xs:complexType>
 											<xs:sequence>
-												<xs:element minOccurs="0" name="AttachedtoHouse" type="xs:boolean"/>
-												<xs:element minOccurs="0" name="Vented" type="xs:boolean"/>
-												<xs:element minOccurs="0" name="Conditioned" type="xs:boolean"/>
+												<xs:element minOccurs="0" name="AttachedtoHouse" type="HPXMLBoolean"/>
+												<xs:element minOccurs="0" name="Vented" type="HPXMLBoolean"/>
+												<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="AttachedToRoof" type="LocalReference" maxOccurs="unbounded"/>
@@ -666,13 +697,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Roofs">
@@ -709,14 +743,16 @@
 											<xs:documentation>Pitch of roof ?/12</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element name="RadiantBarrier" type="xs:boolean" minOccurs="0"/>
+									<xs:element name="RadiantBarrier" type="HPXMLBoolean" minOccurs="0"/>
 									<xs:element name="RadiantBarrierLocation" type="RadiantBarrierLocation" minOccurs="0"/>
 									<xs:element minOccurs="0" name="Insulation" type="InsulationInfo"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="RimJoists">
@@ -754,13 +790,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Walls" minOccurs="0">
@@ -802,13 +841,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="FoundationWalls">
@@ -872,9 +914,11 @@
 									<xs:element maxOccurs="1" minOccurs="0" name="Insulation" type="InsulationInfo"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="FrameFloors">
@@ -902,9 +946,11 @@
 									<xs:element minOccurs="0" maxOccurs="1" name="Insulation" type="InsulationInfo"> </xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Slabs">
@@ -949,7 +995,7 @@
 											<xs:documentation>[ft] Width from slab edge inward of horizontal under-slab insulation</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="UnderSlabInsulationSpansEntireSlab" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="UnderSlabInsulationSpansEntireSlab" type="HPXMLBoolean"/>
 									<xs:element minOccurs="0" name="OnGradeExposedPerimeter" type="LengthMeasurement">
 										<xs:annotation>
 											<xs:documentation>[ft] Perimeter of slab measured in feet that is on-grade (2 ft. below grade or less) and exposed to ambient conditions.</xs:documentation>
@@ -965,9 +1011,11 @@
 									<xs:element minOccurs="0" name="UnderSlabInsulation" type="InsulationInfo"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Windows" minOccurs="0">
@@ -988,13 +1036,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Skylights">
@@ -1008,7 +1059,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="WindowInfo"/>
-									<xs:element minOccurs="0" name="SolarTube" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="SolarTube" type="HPXMLBoolean"/>
 									<xs:element minOccurs="0" name="Pitch" type="Pitch">
 										<xs:annotation>
 											<xs:documentation>Pitch of skylight ?/12</xs:documentation>
@@ -1020,13 +1071,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Doors" minOccurs="0">
@@ -1051,8 +1105,8 @@
 									<xs:element minOccurs="0" name="Orientation" type="OrientationType"/>
 									<xs:element minOccurs="0" name="DoorType" type="DoorType"/>
 									<xs:element name="DoorMaterial" type="DoorMaterial" minOccurs="0"/>
-									<xs:element minOccurs="0" name="WeatherStripping" type="xs:boolean"/>
-									<xs:element name="StormDoor" type="xs:boolean" minOccurs="0"/>
+									<xs:element minOccurs="0" name="WeatherStripping" type="HPXMLBoolean"/>
+									<xs:element name="StormDoor" type="HPXMLBoolean" minOccurs="0"/>
 									<xs:element name="RValue" type="RValue" minOccurs="0"/>
 									<xs:element minOccurs="0" name="LeakinessDescription" type="BuildingLeakiness"/>
 									<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="DoorThirdPartyCertifications"/>
@@ -1061,17 +1115,21 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Systems">
 		<xs:sequence>
@@ -1090,6 +1148,7 @@
 												<xs:element minOccurs="0" name="PrimaryHeatingSystem" type="LocalReference"/>
 												<xs:element minOccurs="0" name="PrimaryCoolingSystem" type="LocalReference"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" maxOccurs="unbounded" name="HeatingSystem" type="HeatingSystemInfoType"/>
@@ -1097,6 +1156,7 @@
 									<xs:element minOccurs="0" maxOccurs="unbounded" name="HeatPump" type="HeatPumpInfoType"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="HVACControl" type="HVACControlType"> </xs:element>
@@ -1110,12 +1170,13 @@
 											<xs:choice>
 												<xs:element name="AirDistribution" type="AirDistributionInfo"/>
 												<xs:element name="HydronicDistribution" type="HydronicDistributionInfo"/>
-												<xs:element name="Other" type="xs:string">
+												<xs:element name="Other" type="HPXMLString">
 													<xs:annotation>
 														<xs:documentation>describe</xs:documentation>
 													</xs:annotation>
 												</xs:element>
 											</xs:choice>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="ConditionedFloorAreaServed" type="SurfaceArea">
@@ -1123,14 +1184,14 @@
 											<xs:documentation>[sq.ft.] Conditioned floor area that this distribution system serves.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="AnnualHeatingDistributionSystemEfficiency" type="xs:double">
+									<xs:element minOccurs="0" name="AnnualHeatingDistributionSystemEfficiency" type="HPXMLDouble">
 										<xs:annotation>
 											<xs:documentation>For software that does not calculate an annual distribution system efficiency (DSE) for heating, the DSE may be approximated by equation
 												3.4.i in ANSI/BPI-2400-S-2012: Standard Practice for Standardized Qualification of Whole-House Energy Savings, Predictions by Calibration to Energy Use
 												History.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="AnnualCoolingDistributionSystemEfficiency" type="xs:double">
+									<xs:element minOccurs="0" name="AnnualCoolingDistributionSystemEfficiency" type="HPXMLDouble">
 										<xs:annotation>
 											<xs:documentation>For software that does not calculate an annual distribution system efficiency (DSE) for cooling, the DSE may be approximated by equation
 												3.4.i in ANSI/BPI-2400-S-2012: Standard Practice for Standardized Qualification of Whole-House Energy Savings, Predictions by Calibration to Energy Use
@@ -1140,15 +1201,17 @@
 									<xs:element minOccurs="0" name="HVACDistributionImprovement" type="HVACDistributionImprovementInfo"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="Maintenance">
 							<xs:complexType>
 								<xs:sequence>
 									<xs:element minOccurs="0" name="Schedule" type="HVACMaintenanceSchedule"/>
-									<xs:element minOccurs="0" name="ACReplacedinLastTenYears" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="ACReplacedinLastTenYears" type="HPXMLBoolean"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -1156,10 +1219,12 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType" maxOccurs="unbounded"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="MechanicalVentilation">
@@ -1173,20 +1238,20 @@
 											<xs:sequence>
 												<xs:group ref="SystemInfo"/>
 												<xs:element minOccurs="0" ref="ConnectedDevice"/>
-												<xs:element minOccurs="0" name="Manufacturer" type="xs:string"/>
-												<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
+												<xs:element minOccurs="0" name="Manufacturer" type="HPXMLString"/>
+												<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
 												<xs:element minOccurs="0" name="FanType" type="VentilationFanType"/>
-												<xs:element minOccurs="0" name="RatedFlowRate" type="xs:double">
+												<xs:element minOccurs="0" name="RatedFlowRate" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>[CFM] as rated by manufacturer</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="CalculatedFlowRate" type="xs:double">
+												<xs:element minOccurs="0" name="CalculatedFlowRate" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>[CFM] as calculated using duct size, prescriptive approach</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="TestedFlowRate" type="xs:double">
+												<xs:element minOccurs="0" name="TestedFlowRate" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>[CFM] as tested by assessor/auditor/inspector</xs:documentation>
 													</xs:annotation>
@@ -1196,7 +1261,7 @@
 														<xs:documentation>24 = continuous, less than 24 = intermittent</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="DeliveredVentilation" type="xs:double">
+												<xs:element minOccurs="0" name="DeliveredVentilation" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>[CFM]</xs:documentation>
 													</xs:annotation>
@@ -1204,16 +1269,16 @@
 												<xs:element minOccurs="0" name="FanControlProperlyLabeled" type="BooleanWithNA"/>
 												<xs:element minOccurs="0" name="ProperlyVented" type="BooleanWithNA"/>
 												<xs:element minOccurs="0" name="FanLocation" type="VentilationFanLocation"/>
-												<xs:element minOccurs="0" name="UsedForLocalVentilation" type="xs:boolean"/>
-												<xs:element minOccurs="0" name="UsedForWholeBuildingVentilation" type="xs:boolean"/>
-												<xs:element minOccurs="0" name="UsedForSeasonalCoolingLoadReduction" type="xs:boolean"/>
-												<xs:element minOccurs="0" name="UsedForGarageVentilation" type="xs:boolean"/>
-												<xs:element minOccurs="0" name="RatedNoise" type="xs:double">
+												<xs:element minOccurs="0" name="UsedForLocalVentilation" type="HPXMLBoolean"/>
+												<xs:element minOccurs="0" name="UsedForWholeBuildingVentilation" type="HPXMLBoolean"/>
+												<xs:element minOccurs="0" name="UsedForSeasonalCoolingLoadReduction" type="HPXMLBoolean"/>
+												<xs:element minOccurs="0" name="UsedForGarageVentilation" type="HPXMLBoolean"/>
+												<xs:element minOccurs="0" name="RatedNoise" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>[sones] from manufacturer's info</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="TestedNoise" type="xs:double">
+												<xs:element minOccurs="0" name="TestedNoise" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>[sones] as tested in field</xs:documentation>
 													</xs:annotation>
@@ -1251,7 +1316,7 @@
 															accounted for in the energy model. Values for some products can be found at the Home Ventilating Institute (hvi.org).</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="FanPower" type="xs:double">
+												<xs:element minOccurs="0" name="FanPower" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>[W]</xs:documentation>
 													</xs:annotation>
@@ -1265,13 +1330,16 @@
 												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="CombustionVentilation">
@@ -1285,9 +1353,11 @@
 									<xs:element minOccurs="0" ref="AttachedToZone"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="WaterHeating" minOccurs="0">
@@ -1307,8 +1377,8 @@
 									<xs:element name="ModelYear" type="Year" minOccurs="0"/>
 									<xs:element name="Manufacturer" type="Manufacturer" minOccurs="0"/>
 									<xs:element name="ModelNumber" type="Model" minOccurs="0"/>
-									<xs:element minOccurs="0" name="AHRINumber" type="xs:string"/>
-									<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
+									<xs:element minOccurs="0" name="AHRINumber" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
 									<xs:element minOccurs="0" name="PerformanceAdjustment" type="Fraction"/>
 									<xs:element minOccurs="0" name="ThirdPartyCertification" type="DHWThirdPartyCertification" maxOccurs="unbounded"/>
 									<xs:element name="TankVolume" type="Volume" minOccurs="0">
@@ -1369,6 +1439,7 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
+														<xs:attribute ref="dataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element minOccurs="0" name="TankWall">
@@ -1387,29 +1458,32 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
+														<xs:attribute ref="dataSource"/>
 													</xs:complexType>
 												</xs:element>
-                      </xs:sequence>
+											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
-									<xs:element name="MeetsACCA5QIHVACSpecification" type="xs:boolean" minOccurs="0"/>
+									<xs:element name="MeetsACCA5QIHVACSpecification" type="HPXMLBoolean" minOccurs="0"/>
 									<xs:element name="HotWaterTemperature" type="Temperature" minOccurs="0">
 										<xs:annotation>
 											<xs:documentation>[deg F]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="UsesDesuperheater" type="xs:boolean">
+									<xs:element minOccurs="0" name="HasMixingValve" type="HPXMLBoolean"/>
+									<xs:element minOccurs="0" name="UsesDesuperheater" type="HPXMLBoolean">
 										<xs:annotation>
 											<xs:documentation>Indicates whether this water heater uses a desuperheater. The attached heat pump or air conditioner can be referenced in the
 												RelatedHVACSystem element.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="HasSharedCombustionVentilation" type="xs:boolean"/>
-									<xs:element minOccurs="0" name="CombustionVentilationOrphaned" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="HasSharedCombustionVentilation" type="HPXMLBoolean"/>
+									<xs:element minOccurs="0" name="CombustionVentilationOrphaned" type="HPXMLBoolean"/>
 									<xs:element name="CombustionVentingSystem" minOccurs="0" type="LocalReference"> </xs:element>
-									<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
-									<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
-									<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
+									<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
+									<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
 									<xs:element name="RelatedHVACSystem" type="LocalReference" minOccurs="0">
 										<xs:annotation>
 											<xs:documentation>Reference a HeatingSystem, HeatPump, or CoolingSystem.</xs:documentation>
@@ -1421,11 +1495,28 @@
 												<xs:element minOccurs="0" name="Standard" type="HVACInstallationStandard"/>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="WaterHeaterImprovement" type="WaterHeaterImprovementInfo"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="WaterHeatingControl">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element ref="ConnectedDevice"/>
+									<xs:element minOccurs="0" name="Model" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="ControlTechnology" type="DHWControllerTechnology"/>
+									<xs:element minOccurs="0" name="TemperatureControl" type="DHWTemperatureControl"/>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="HotWaterDistribution">
@@ -1452,6 +1543,7 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
+														<xs:attribute ref="dataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element name="Recirculation">
@@ -1478,9 +1570,11 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
+														<xs:attribute ref="dataSource"/>
 													</xs:complexType>
 												</xs:element>
 											</xs:choice>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="PipeInsulation" type="PipeInsulationType"/>
@@ -1488,7 +1582,7 @@
 										<xs:complexType>
 											<xs:sequence>
 												<xs:element minOccurs="0" name="FacilitiesConnected" type="DrainWaterHeatRecoveryFacilitiesConnected"/>
-												<xs:element minOccurs="0" name="EqualFlow" type="xs:boolean"/>
+												<xs:element minOccurs="0" name="EqualFlow" type="HPXMLBoolean"/>
 												<xs:element minOccurs="0" name="Efficiency" type="Fraction">
 													<xs:annotation>
 														<xs:documentation>Efficiency percent expressed as a fraction from 0-1.</xs:documentation>
@@ -1496,10 +1590,12 @@
 												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="WaterFixture">
@@ -1516,17 +1612,17 @@
 											<xs:documentation>Number of similar water fixtures.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="FlowRate" type="xs:double">
+									<xs:element minOccurs="0" name="FlowRate" type="HPXMLDouble">
 										<xs:annotation>
 											<xs:documentation>[gallons per minute] flow rate of water</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="LowFlow" type="xs:boolean">
+									<xs:element minOccurs="0" name="LowFlow" type="HPXMLBoolean">
 										<xs:annotation>
 											<xs:documentation>Is the fixture considered low-flow?</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="FaucetAerator" type="xs:boolean">
+									<xs:element minOccurs="0" name="FaucetAerator" type="HPXMLBoolean">
 										<xs:annotation>
 											<xs:documentation>Does this faucet have an aerator?</xs:documentation>
 										</xs:annotation>
@@ -1536,7 +1632,7 @@
 											<xs:documentation>[minutes] Number of minutes per day a water fixture operates.</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="TemperatureInitiatedShowerFlowRestrictionValve" type="xs:boolean">
+									<xs:element minOccurs="0" name="TemperatureInitiatedShowerFlowRestrictionValve" type="HPXMLBoolean">
 										<xs:annotation>
 											<xs:documentation>Does the shower have a device that restricts the flow of water automatically once it has reached temperature?</xs:documentation>
 										</xs:annotation>
@@ -1548,6 +1644,7 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -1555,9 +1652,11 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="SolarThermal">
@@ -1568,8 +1667,8 @@
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
 									<xs:element minOccurs="0" ref="ConnectedDevice"/>
-									<xs:element minOccurs="0" name="Manufacturer" type="xs:string"/>
-									<xs:element minOccurs="0" name="ModelNumber" type="xs:string"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="HPXMLString"/>
+									<xs:element minOccurs="0" name="ModelNumber" type="HPXMLString"/>
 									<xs:element minOccurs="0" ref="AttachedToZone"/>
 									<xs:element name="SystemType" minOccurs="0" type="SolarThermalSystemType"/>
 									<xs:element name="CollectorArea" type="SurfaceArea" minOccurs="0">
@@ -1586,28 +1685,17 @@
 											<xs:documentation>[deg]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="CollectorRatedOpticalEfficiency">
+									<xs:element minOccurs="0" name="CollectorRatedOpticalEfficiency" type="CollectorRatedOpticalEfficiency">
 										<xs:annotation>
 											<xs:documentation>Often referred to as Fr-tau-alpha (FRta), this describes the optical efficiency portion of the overall collector efficiency. In the OG-100
 												SRCC Certified Solar Thermal Collector Directory, this is the y-intercept of the efficiency curve.</xs:documentation>
 										</xs:annotation>
-										<xs:simpleType>
-											<xs:restriction base="xs:double">
-												<xs:minExclusive value="0"/>
-												<xs:maxExclusive value="1"/>
-											</xs:restriction>
-										</xs:simpleType>
 									</xs:element>
-									<xs:element minOccurs="0" name="CollectorRatedThermalLosses">
+									<xs:element minOccurs="0" name="CollectorRatedThermalLosses" type="CollectorRatedThermalLosses">
 										<xs:annotation>
 											<xs:documentation>Often referred to as Fr-Ul (FRUl), this describes the collector thermal losses portion of the overall collector efficiency. In the OG-100
 												SRCC Certified Solar Thermal Collector Directory, this is the slope of the efficiency curve.</xs:documentation>
 										</xs:annotation>
-										<xs:simpleType>
-											<xs:restriction base="xs:double">
-												<xs:minExclusive value="0"/>
-											</xs:restriction>
-										</xs:simpleType>
 									</xs:element>
 									<xs:element minOccurs="0" name="StorageVolume" type="Volume">
 										<xs:annotation>
@@ -1615,36 +1703,27 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element minOccurs="0" name="ConnectedTo" type="LocalReference"/>
-									<xs:element minOccurs="0" name="SolarFraction">
+									<xs:element minOccurs="0" name="SolarFraction" type="SolarFraction">
 										<xs:annotation>
 											<xs:documentation>The Solar Fraction is the portion of the total conventional hot water heating load (delivered energy and tank standby losses). The higher
 												the solar fraction, the greater the solar contribution to water heating, which reduces the energy required by the backup water heater. This value can be
 												found in the OG-300 SRCC Certified Solar Water Heating System Directory.</xs:documentation>
 										</xs:annotation>
-										<xs:simpleType>
-											<xs:restriction base="xs:double">
-												<xs:minExclusive value="0"/>
-												<xs:maxInclusive value="1"/>
-											</xs:restriction>
-										</xs:simpleType>
 									</xs:element>
-									<xs:element minOccurs="0" name="SolarEnergyFactor">
+									<xs:element minOccurs="0" name="SolarEnergyFactor" type="SolarThermalSystemEnergyFactor">
 										<xs:annotation>
 											<xs:documentation>The Solar Energy Factor is defined as the energy delivered by the system divided by the electrical or gas energy put into the system. The
 												higher the number, the more energy efficient. This value can be found in the OG-300 SRCC Certified Solar Water Heating System
 												Directory.</xs:documentation>
 										</xs:annotation>
-										<xs:simpleType>
-											<xs:restriction base="xs:double">
-												<xs:minExclusive value="0"/>
-											</xs:restriction>
-										</xs:simpleType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Photovoltaics">
@@ -1657,25 +1736,8 @@
 									<xs:element minOccurs="0" ref="ConnectedDevice"/>
 									<xs:element minOccurs="0" name="Location" type="PVSystemLocation"/>
 									<xs:element minOccurs="0" name="Ownership" type="PVSystemOwnership"/>
-									<xs:element minOccurs="0" name="ModuleType">
-										<xs:simpleType>
-											<xs:restriction base="xs:string">
-												<xs:enumeration value="standard"/>
-												<xs:enumeration value="premium"/>
-												<xs:enumeration value="thin film"/>
-											</xs:restriction>
-										</xs:simpleType>
-									</xs:element>
-									<xs:element maxOccurs="1" minOccurs="0" name="Tracking">
-										<xs:simpleType>
-											<xs:restriction base="xs:string">
-												<xs:enumeration value="fixed"/>
-												<xs:enumeration value="1-axis"/>
-												<xs:enumeration value="1-axis backtracked"/>
-												<xs:enumeration value="2-axis"/>
-											</xs:restriction>
-										</xs:simpleType>
-									</xs:element>
+									<xs:element minOccurs="0" name="ModuleType" type="PVModuleType"> </xs:element>
+									<xs:element maxOccurs="1" minOccurs="0" name="Tracking" type="PVTracking"> </xs:element>
 									<xs:element minOccurs="0" name="ArrayOrientation" type="OrientationType"/>
 									<xs:element minOccurs="0" name="ArrayAzimuth" type="AzimuthType">
 										<xs:annotation>
@@ -1722,9 +1784,116 @@
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="Batteries">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="Battery">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="Manufacturer"/>
+									<xs:element minOccurs="0" name="ModelNumber" type="Model"/>
+									<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
+									<xs:element minOccurs="0" name="Location" type="BatteryLocation"/>
+									<xs:element minOccurs="0" name="GridConnected" type="HPXMLBoolean">
+										<xs:annotation>
+											<xs:documentation>Has the ability to feed electricity back on to the grid.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="BatteryType" type="BatteryType"/>
+									<xs:element minOccurs="0" name="CoolingStrategy" type="BatteryCoolingStrategy"/>
+									<xs:element minOccurs="0" name="NominalCapacity" type="BatteryCapacity">
+										<xs:annotation>
+											<xs:documentation>[Ah] The total Ampere hours available when the battery is discharged starting from 100% state of charge until it reaches the cut-off
+												voltage. Capacity is computed by multiplying the discharge current (Amps) by the discharge time (hours).</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="UsableCapacity" type="BatteryCapacity">
+										<xs:annotation>
+											<xs:documentation>[Ah] The stored energy that can actually be used. In most cases usable capacity is less than the nominal capacity.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="RatedPowerOutput" type="Power">
+										<xs:annotation>
+											<xs:documentation>[W] The amount of power the battery typically generates under non-peak conditions.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="PeakPowerOutput" type="Power" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>[W] The peak power that the battery can generate for a short period of time.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="NominalVoltage" type="HPXMLDecimal">
+										<xs:annotation>
+											<xs:documentation>[V] The nominal voltage is the battery voltage when the state of charge is 0.5 (midway between being fully charged, and fully discharged)
+												with a 0.2C discharge current.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="RoundTripEfficiency" type="Fraction">
+										<xs:annotation>
+											<xs:documentation>Not all the power that is used to charge the battery is available during discharge. Round trip efficiency is the ratio of the energy put
+												in to the energy retrieved from storage.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="ElectricVehicleChargers">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="ElectricVehicleCharger">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element minOccurs="0" name="NumberofUnits" type="IntegerGreaterThanOrEqualToZero"/>
+									<xs:element minOccurs="0" name="Manufacturer" type="Manufacturer"/>
+									<xs:element maxOccurs="1" minOccurs="0" name="ModelNumber" type="Model"/>
+									<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
+									<xs:element minOccurs="0" ref="ConnectedDevice"/>
+									<xs:element minOccurs="0" name="ChargingLevel" type="EVChargingLevel"/>
+									<xs:element minOccurs="0" name="ChargingConnector" type="EVChargingConnector"/>
+									<xs:element maxOccurs="1" minOccurs="0" name="ModelYear" type="Year"/>
+									<xs:element minOccurs="0" name="ACPowerSourceVoltage" type="Voltage">
+										<xs:annotation>
+											<xs:documentation>[V] Voltage of the AC power source</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element name="Amperage" minOccurs="0" type="Current">
+										<xs:annotation>
+											<xs:documentation>[A] Max current to electric vehicle</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="ChargingPower" type="Power">
+										<xs:annotation>
+											<xs:documentation>[W] Maximum charging rate</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="StandbyPower" type="Power">
+										<xs:annotation>
+											<xs:documentation>[W] Power used by charger when vehicle is not charging</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Wind">
@@ -1734,7 +1903,7 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
-									<xs:element minOccurs="0" name="Model" type="xs:string"/>
+									<xs:element minOccurs="0" name="Model" type="HPXMLString"/>
 									<xs:element minOccurs="0" name="YearInstalled" type="Year"/>
 									<xs:element minOccurs="0" name="ThirdPartyCertification" maxOccurs="unbounded" type="WindThirdPartyCertification"/>
 									<xs:element minOccurs="0" name="AWEARatedAnnualEnergy" type="RatedAnnualkWh">
@@ -1743,7 +1912,7 @@
 												mph)</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="AWEARatedSoundLevel" type="xs:double">
+									<xs:element minOccurs="0" name="AWEARatedSoundLevel" type="HPXMLDouble">
 										<xs:annotation>
 											<xs:documentation>[dBA] the sound pressure level not exceeded by the wind turbine 95% of the time at a distance of 60 meters from the rotor with an average
 												wind speed of 5 m/s (11.2 mph). </xs:documentation>
@@ -1779,13 +1948,16 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Appliances">
 		<xs:sequence>
@@ -1799,6 +1971,7 @@
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="Oven" type="OvenInfoType"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Lighting">
 		<xs:sequence>
@@ -1817,7 +1990,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="AttachedToSpace"/>
 						<xs:element minOccurs="0" name="Location" type="LightingLocation"/>
-						<xs:element name="NumberofUnits" type="xs:integer" minOccurs="0"/>
+						<xs:element name="NumberofUnits" type="HPXMLInteger" minOccurs="0"/>
 						<xs:element minOccurs="0" name="FractionofUnitsInLocation" type="Fraction">
 							<xs:annotation>
 								<xs:documentation>The fraction of lighting units in the specified Location, where all the fractions for the Location sum to 1. If a Location is not specified, fractions
@@ -1825,14 +1998,14 @@
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" name="LightingType" type="LightingType"/>
-						<xs:element minOccurs="0" name="AverageLumens" type="xs:double">
+						<xs:element minOccurs="0" name="AverageLumens" type="HPXMLDouble">
 							<xs:annotation>
 								<xs:documentation>Lumens is a measure of light output (brightness) as opposed to watts, which measures energy consumption. The EPA and DOE encourages people to
 									determine the amount of light they need (or brightness) first before purchasing a light bulb. Once brightness is determined, you can look for the bulb with the
 									lowest watts.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element name="AverageWattage" type="xs:double" minOccurs="0">
+						<xs:element name="AverageWattage" type="HPXMLDouble" minOccurs="0">
 							<xs:annotation>
 								<xs:documentation>[W] per unit</xs:documentation>
 							</xs:annotation>
@@ -1855,6 +2028,7 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="LightingFixture">
@@ -1865,6 +2039,7 @@
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="LightingFixtureThirdPartyCertification"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="LightingControl" minOccurs="0" maxOccurs="unbounded">
@@ -1878,6 +2053,7 @@
 						<xs:element name="Location" type="LightingLocation" minOccurs="0"> </xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="CeilingFan">
@@ -1891,21 +2067,13 @@
 							</xs:annotation>
 							<xs:complexType>
 								<xs:sequence>
-									<xs:element minOccurs="0" name="FanSpeed">
-										<xs:simpleType>
-											<xs:restriction base="xs:string">
-												<xs:enumeration value="low"/>
-												<xs:enumeration value="medium"/>
-												<xs:enumeration value="high"/>
-											</xs:restriction>
-										</xs:simpleType>
-									</xs:element>
-									<xs:element minOccurs="0" name="Airflow" type="xs:double">
+									<xs:element minOccurs="0" name="FanSpeed" type="FanSpeed"> </xs:element>
+									<xs:element minOccurs="0" name="Airflow" type="HPXMLDouble">
 										<xs:annotation>
 											<xs:documentation>[CFM]</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="Efficiency" type="xs:double">
+									<xs:element minOccurs="0" name="Efficiency" type="HPXMLDouble">
 										<xs:annotation>
 											<xs:documentation>[CFM/watt] The efficiency rating of a ceiling fan as determined by the test procedure defined by the Environmental Protection Agency's
 												ENERGY STAR Testing Facility Guidance Manual: Building a Testing Facility and Performing the Solid State Test Method for ENERGY STAR Qualified Ceiling
@@ -1913,6 +2081,7 @@
 										</xs:annotation>
 									</xs:element>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="ThirdPartyCertification" type="ApplianceThirdPartyCertifications" maxOccurs="unbounded"/>
@@ -1923,19 +2092,22 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="LightingType">
 		<xs:choice>
 			<xs:element name="Incandescent">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Halogen" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="Halogen" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="FluorescentTube">
@@ -1945,6 +2117,7 @@
 						<xs:element minOccurs="0" name="BallastType" type="FluorescentBallastType"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="CompactFluorescent">
@@ -1952,6 +2125,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="LightEmittingDiode">
@@ -1959,6 +2133,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="HighIntensityDischarge">
@@ -1971,35 +2146,33 @@
 									<xs:element name="Sodium">
 										<xs:complexType>
 											<xs:sequence>
-												<xs:element minOccurs="0" name="Pressure">
-													<xs:simpleType>
-														<xs:restriction base="xs:string">
-															<xs:enumeration value="high"/>
-															<xs:enumeration value="low"/>
-														</xs:restriction>
-													</xs:simpleType>
-												</xs:element>
+												<xs:element minOccurs="0" name="Pressure" type="SodiumLight_Pressure"> </xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element name="MetalHalide"/>
 								</xs:choice>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Description" type="xs:string"/>
+						<xs:element minOccurs="0" name="Description" type="HPXMLString"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Pools">
 		<xs:sequence>
@@ -2050,17 +2223,17 @@
 												<xs:group ref="SystemInfo"/>
 												<xs:element minOccurs="0" ref="ConnectedDevice"/>
 												<xs:element minOccurs="0" name="Type" type="PoolPumpType"/>
-												<xs:element minOccurs="0" name="Manufacturer" type="xs:string">
+												<xs:element minOccurs="0" name="Manufacturer" type="HPXMLString">
 													<xs:annotation>
 														<xs:documentation>Manufacturer of pool pump.</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="SerialNumber" type="xs:string">
+												<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString">
 													<xs:annotation>
 														<xs:documentation>Serial number of pool pump.</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="ModelNumber" type="xs:string">
+												<xs:element minOccurs="0" name="ModelNumber" type="HPXMLString">
 													<xs:annotation>
 														<xs:documentation>Model number of pool pump.</xs:documentation>
 													</xs:annotation>
@@ -2097,7 +2270,7 @@
 															(e.g., total horsepower = rated horsepower * service factor) (ANSI/APSP/ICC-15 2011).</xs:documentation>
 													</xs:annotation>
 												</xs:element>
-												<xs:element minOccurs="0" name="ServiceFactor" type="xs:double">
+												<xs:element minOccurs="0" name="ServiceFactor" type="HPXMLDouble">
 													<xs:annotation>
 														<xs:documentation>A multiplier applied to the rated horsepower of a pump motor to indicate the percent above nameplate horsepower at which the
 															motor can operate continuously without exceeding its allowable insulation class temperature limit, provided that other design parameters,
@@ -2132,13 +2305,16 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
+														<xs:attribute ref="dataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="Cleaner">
@@ -2158,6 +2334,7 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="Heater">
@@ -2177,13 +2354,16 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MiscLoads">
 		<xs:sequence>
@@ -2198,6 +2378,7 @@
 						<xs:element name="PlugLoadControlType" minOccurs="0" type="PlugLoadControlType"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="PlugLoad" minOccurs="0" maxOccurs="unbounded">
@@ -2213,25 +2394,29 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:element name="Units" type="PlugLoadUnits"/>
-									<xs:element name="Value" type="xs:double"/>
+									<xs:element name="Value" type="HPXMLDouble"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HealthAndSafety">
 		<xs:sequence>
 			<xs:element minOccurs="0" name="General">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="TestsCompleted" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="TestsPassed" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="TestsCompleted" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="TestsPassed" type="HPXMLBoolean"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Ventilation" minOccurs="0">
@@ -2243,6 +2428,7 @@
 						<xs:element minOccurs="0" name="VentilationImprovement" type="VentilationImprovementInfo"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="MoistureControl" minOccurs="0">
@@ -2252,6 +2438,7 @@
 						<xs:element minOccurs="0" name="MoistureControlImprovement" type="MoistureControlImprovementInfo"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="CombustionAppliances">
@@ -2286,12 +2473,12 @@
 										</xs:annotation>
 									</xs:element>
 									<xs:element name="DepressurizationFindingPoorCase" type="DepressurizationFindingPoorCase" minOccurs="0"/>
-									<xs:element name="AmountAmbientCOinCAZduringTesting" type="xs:double" minOccurs="0">
+									<xs:element name="AmountAmbientCOinCAZduringTesting" type="HPXMLDouble" minOccurs="0">
 										<xs:annotation>
 											<xs:documentation>parts per million (ppm)</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element name="AmbientCOinCAZExceeded35ppmduringTesting" type="xs:boolean" minOccurs="0"/>
+									<xs:element name="AmbientCOinCAZExceeded35ppmduringTesting" type="HPXMLBoolean" minOccurs="0"/>
 									<xs:element minOccurs="0" name="CombustionApplianceTest" maxOccurs="unbounded">
 										<xs:complexType>
 											<xs:sequence minOccurs="0">
@@ -2302,7 +2489,7 @@
 												</xs:element>
 												<xs:element minOccurs="0" name="CombustionVentingSystem" type="RemoteReference"/>
 												<xs:element name="FlueVisualCondition" type="FlueCondition" minOccurs="0"/>
-												<xs:element minOccurs="0" name="FlueConditionNotes" type="xs:string"/>
+												<xs:element minOccurs="0" name="FlueConditionNotes" type="HPXMLString"/>
 												<xs:element name="OutsideTemperatureFlueDraftTest" type="Temperature" minOccurs="0">
 													<xs:annotation>
 														<xs:documentation>[deg F]</xs:documentation>
@@ -2344,12 +2531,12 @@
 														<xs:complexContent>
 															<xs:extension base="CAZApplianceReading">
 																<xs:sequence>
-																	<xs:element name="MaxAmbientCOinLivingSpaceDuringAudit" minOccurs="0" type="xs:double">
+																	<xs:element name="MaxAmbientCOinLivingSpaceDuringAudit" minOccurs="0" type="HPXMLDouble">
 																		<xs:annotation>
 																			<xs:documentation>Monitored throughout assessment, not just appliance testing</xs:documentation>
 																		</xs:annotation>
 																	</xs:element>
-																	<xs:element minOccurs="0" name="AmbientCOActionDuringCAZTesting" type="xs:string">
+																	<xs:element minOccurs="0" name="AmbientCOActionDuringCAZTesting" type="HPXMLString">
 																		<xs:annotation>
 																			<xs:documentation>BPI Gold Sheet is one example that shows action levels based upon decision logic</xs:documentation>
 																		</xs:annotation>
@@ -2369,23 +2556,27 @@
 													<xs:complexType>
 														<xs:sequence>
 															<xs:element name="FuelType" type="FuelType"/>
-															<xs:element name="LeaksIdentified" type="xs:boolean"/>
-															<xs:element name="LeaksAddressed" type="xs:boolean"/>
-															<xs:element minOccurs="0" name="Notes" type="xs:string"/>
+															<xs:element name="LeaksIdentified" type="HPXMLBoolean"/>
+															<xs:element name="LeaksAddressed" type="HPXMLBoolean"/>
+															<xs:element minOccurs="0" name="Notes" type="HPXMLString"/>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
+														<xs:attribute ref="dataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element ref="extension" minOccurs="0"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
-									<xs:element minOccurs="0" name="Notes" type="xs:string"/>
+									<xs:element minOccurs="0" name="Notes" type="HPXMLString"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="StoveTest">
@@ -2393,54 +2584,56 @@
 					<xs:sequence>
 						<xs:element name="StoveID" type="SystemIdentifiersInfoType"/>
 						<xs:element minOccurs="0" name="StoveFuel" type="FuelType"/>
-						<xs:element name="HeatingStoveProperlyVented" type="xs:boolean" minOccurs="0"/>
+						<xs:element name="HeatingStoveProperlyVented" type="HPXMLBoolean" minOccurs="0"/>
 						<xs:element name="COReading" type="COReading" minOccurs="0"/>
-						<xs:element minOccurs="0" name="TimeofCOReading" type="xs:dateTime"/>
-						<xs:element name="GasLeaksIdentified" type="xs:boolean" minOccurs="0"/>
-						<xs:element name="ActionsTaken" type="xs:string" minOccurs="0"/>
+						<xs:element minOccurs="0" name="TimeofCOReading" type="HPXMLDateTime"/>
+						<xs:element name="GasLeaksIdentified" type="HPXMLBoolean" minOccurs="0"/>
+						<xs:element name="ActionsTaken" type="HPXMLString" minOccurs="0"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="LeadPaint">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Disturbed6SqFtIntPaint" type="xs:boolean" minOccurs="0">
+						<xs:element name="Disturbed6SqFtIntPaint" type="HPXMLBoolean" minOccurs="0">
 							<xs:annotation>
 								<xs:documentation>For a home built before 1978, did the contracted scope of work disturb greater than 6 sq.ft. of interior painted surfaces? </xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="Disturbed20SqFtExtPaint" type="xs:boolean">
+						<xs:element minOccurs="0" name="Disturbed20SqFtExtPaint" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>For a home built before 1978, did the contracted scope of work disturb greater than 20 sf of exterior painted surfaces?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="WindowReplacement" type="xs:boolean">
+						<xs:element minOccurs="0" name="WindowReplacement" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Did the contracted scope of work include window replacement?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="LeadSafeCertificationNumber" type="xs:string">
+						<xs:element minOccurs="0" name="LeadSafeCertificationNumber" type="HPXMLString">
 							<xs:annotation>
 								<xs:documentation>Certification Number of the EPA Lead-Safe Certified firm that performed the work.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Radon">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="RadonTested" type="xs:boolean" minOccurs="0"/>
+						<xs:element name="RadonTested" type="HPXMLBoolean" minOccurs="0"/>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="RadonTest">
 							<xs:complexType>
 								<xs:sequence>
 									<xs:group ref="SystemInfo"/>
-									<xs:element minOccurs="0" name="StartDateTime" type="xs:dateTime"/>
-									<xs:element minOccurs="0" name="EndDateTime" type="xs:dateTime"/>
+									<xs:element minOccurs="0" name="StartDateTime" type="HPXMLDateTime"/>
+									<xs:element minOccurs="0" name="EndDateTime" type="HPXMLDateTime"/>
 									<xs:element minOccurs="0" name="TestLocation" type="RadonTestLocation"/>
-									<xs:element name="RadonTestResults" type="xs:double" minOccurs="0">
+									<xs:element name="RadonTestResults" type="HPXMLDouble" minOccurs="0">
 										<xs:annotation>
 											<xs:documentation>in pCi/L</xs:documentation>
 										</xs:annotation>
@@ -2448,15 +2641,16 @@
 									<xs:element minOccurs="0" name="RadonTestMethod" type="RadonTestTypes"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
-						<xs:element minOccurs="0" name="EducationMaterialProvided" type="xs:boolean">
+						<xs:element minOccurs="0" name="EducationMaterialProvided" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Was the homeowner provided with educational material?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="ActionsTaken" type="xs:string"/>
-						<xs:element minOccurs="0" name="ActionsMeetIndustrySpecs" type="xs:boolean">
+						<xs:element minOccurs="0" name="ActionsTaken" type="HPXMLString"/>
+						<xs:element minOccurs="0" name="ActionsMeetIndustrySpecs" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>If moisture management of a crawlspace (e.g., installation of polyethylene sheeting) or radon mitigation measures were a part of the scope of
 									work,were measures installed to be compliant with one of the following: - Specifications of EPA’s Indoor airPLUS program - Techniques detailed in EPA's
@@ -2464,66 +2658,68 @@
 									7.3)</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="ResultBelowActionLevel" type="xs:boolean">
+						<xs:element minOccurs="0" name="ResultBelowActionLevel" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Was the result less than 4 pCi/L</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="SourcePollutants">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="UnventedCombustionAppliancesinLivingArea" type="xs:boolean">
+						<xs:element minOccurs="0" name="UnventedCombustionAppliancesinLivingArea" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Are there unvented combustion heating or hearth appliances present in the living area?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="ConformanceWithANSIZ21_11_2" type="xs:boolean">
+						<xs:element minOccurs="0" name="ConformanceWithANSIZ21_11_2" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>If yes, does the appliance conform with ANSI Z21.11.2? </xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="PrimaryHeatingSource" type="xs:boolean">
+						<xs:element minOccurs="0" name="PrimaryHeatingSource" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>If yes, is the appliance used as a primary source of heating?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="AttachedGarage" type="xs:boolean">
+						<xs:element minOccurs="0" name="AttachedGarage" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Does home have attached garage?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="GarageContinuousAirBarrier" type="xs:boolean">
+						<xs:element minOccurs="0" name="GarageContinuousAirBarrier" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>If yes, is there a continuous air barrier between garage and living space?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="GarageExhaustFan" type="xs:boolean">
+						<xs:element minOccurs="0" name="GarageExhaustFan" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>If yes, is there an exhaust fan in garage?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Pests">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="IndicationsofPests" type="xs:boolean">
+						<xs:element minOccurs="0" name="IndicationsofPests" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Indications of pest entry or damage?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="EvidenceofPesticide" type="xs:boolean">
+						<xs:element minOccurs="0" name="EvidenceofPesticide" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Evidence of pesticide, insecticide use?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="IndustryStandardCompliance" type="xs:boolean">
+						<xs:element minOccurs="0" name="IndustryStandardCompliance" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Do measures comply with industry standards to prevent pest entry? NOTE: This is for ALL measures that may create entry points for vermin. For example,
 									air sealing measures identified to reduce infiltration should have proper sealants - even if those measures were not recommended/installed for pest control
@@ -2532,37 +2728,39 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Asbestos">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="AsbestosSuspected" type="xs:boolean">
+						<xs:element minOccurs="0" name="AsbestosSuspected" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Was asbestos suspected?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="TestedForAsbestos" type="xs:boolean">
+						<xs:element minOccurs="0" name="TestedForAsbestos" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Was substance tested for asbestos?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="AsbestosFound" type="xs:boolean">
+						<xs:element minOccurs="0" name="AsbestosFound" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Was asbestos found?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" name="TypeofBlowerDoorTest" type="TypeofBlowerDoorTest"/>
-						<xs:element minOccurs="0" name="ActionsTaken" type="xs:string"/>
-						<xs:element minOccurs="0" name="ActionsMeetIndustrySpecifications" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="ActionsTaken" type="HPXMLString"/>
+						<xs:element minOccurs="0" name="ActionsMeetIndustrySpecifications" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="SprayFoam">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="SprayFoamInstalled" type="xs:boolean">
+						<xs:element minOccurs="0" name="SprayFoamInstalled" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Was spray foam polyurethane foam and / or other potential sources of indoor pollutants installed or applied as part of the scope of
 									work?</xs:documentation>
@@ -2570,15 +2768,17 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="CAZApplianceReading">
 		<xs:sequence>
-			<xs:element minOccurs="0" name="PoorScenario" type="xs:double"/>
-			<xs:element minOccurs="0" name="CurrentCondition" type="xs:double">
+			<xs:element minOccurs="0" name="PoorScenario" type="HPXMLDouble"/>
+			<xs:element minOccurs="0" name="CurrentCondition" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>This element is formerly known as "spillage, draft, and CO readings under natural conditions" as explained in BPI's Gold Sheet "Combustion Safety Test Procedure
 						for Vented Appliances."</xs:documentation>
@@ -2586,18 +2786,20 @@
 			</xs:element>
 			<xs:element minOccurs="0" name="TestResult" type="TestResultType"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="CAZTestConfiguration">
 		<xs:sequence>
 			<xs:element minOccurs="0" name="ItemsRunning">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="BathExhaustFan" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="KitchenExhaustFan" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="ClothesDryer" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="CentralVacuum" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="AirHandler" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="BathExhaustFan" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="KitchenExhaustFan" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="ClothesDryer" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="CentralVacuum" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="AirHandler" type="HPXMLBoolean"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="DoorsOpenClosed">
@@ -2606,15 +2808,17 @@
 						<xs:element minOccurs="0" name="BasementDoors" type="OpenClosed"/>
 						<xs:element minOccurs="0" name="OtherDoors" type="OpenClosed"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element minOccurs="0" name="Pressure" type="xs:double">
+			<xs:element minOccurs="0" name="Pressure" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>[Pa]</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="YesNoRecommendInstall">
 		<xs:choice>
@@ -2628,6 +2832,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="No">
@@ -2640,6 +2845,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="NA">
@@ -2647,9 +2853,11 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WholeBldgVentDesignInfo">
 		<xs:sequence>
@@ -2660,15 +2868,15 @@
 					<xs:documentation>ASHRAE 62.2-2010 has an infiltration credit. ASHRAE 62-89 and 62.2-2013 do not have infiltration credits.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="LocalWeatherFactor" type="xs:double"/>
-			<xs:element minOccurs="0" name="NFactor" type="xs:double"/>
-			<xs:element minOccurs="0" name="InfiltrationCreditCFMnat" type="xs:integer">
+			<xs:element minOccurs="0" name="LocalWeatherFactor" type="HPXMLDouble"/>
+			<xs:element minOccurs="0" name="NFactor" type="HPXMLDouble"/>
+			<xs:element minOccurs="0" name="InfiltrationCreditCFMnat" type="HPXMLInteger">
 				<xs:annotation>
 					<xs:documentation>This is just the # of the calculated infiltration credit.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:sequence minOccurs="0">
-				<xs:element name="RequiredVentilationRate" type="xs:double">
+				<xs:element name="RequiredVentilationRate" type="HPXMLDouble">
 					<xs:annotation>
 						<xs:documentation>This is the net amount of continuous ventilation needed AFTER infiltration credit is applied (if any)</xs:documentation>
 					</xs:annotation>
@@ -2678,37 +2886,38 @@
 			<xs:element minOccurs="0" name="VentilationImprovementRecommendation" type="Recommendation"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="SpotVentDesignInfo">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
 			<xs:element minOccurs="0" name="Location" type="SpotVentilationLocation"/>
-			<xs:element minOccurs="0" name="IntermittentExhaustRate" type="xs:double">
+			<xs:element minOccurs="0" name="IntermittentExhaustRate" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>This is amount without taking into consideration any infiltration credit</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="ContinuousExhaustRate" type="xs:double">
+			<xs:element minOccurs="0" name="ContinuousExhaustRate" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>This is amount without taking into consideration any infiltration credit</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="WindowOpeningCredit" type="xs:double">
+			<xs:element minOccurs="0" name="WindowOpeningCredit" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Should be 20 cfm, if the local AHJ permits windows to be used for local exhaust</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="RequiredIntermittentExhaustRate" type="xs:double">
+			<xs:element minOccurs="0" name="RequiredIntermittentExhaustRate" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>This is the net amount of continuous ventilation needed AFTER window credit is applied (if any)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="RequiredContinuousExhaustRate" type="xs:double">
+			<xs:element minOccurs="0" name="RequiredContinuousExhaustRate" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>This is the net amount of continuous ventilation needed AFTER window credit is applied (if any)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="InitialAirflorDeficit" type="xs:double">
+			<xs:element minOccurs="0" name="InitialAirflorDeficit" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>The airflow deficit for each bathroom or kitchen is the required airflow less the airflow rating of the exhaust equipment. If there is no exhaust device or if the
 						existing device cannot be measured nor read it, the exhaust device airflow is assumed to be zero.</xs:documentation>
@@ -2717,6 +2926,7 @@
 			<xs:element minOccurs="0" name="AirflowRateUnits" type="SpotVentilationUnits"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="OtherVentIssues">
 		<xs:sequence>
@@ -2739,29 +2949,32 @@
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="OtherVentilationIssue">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Description" type="xs:string"/>
+						<xs:element name="Description" type="HPXMLString"/>
 						<xs:element name="Answer" type="YesNoRecommendInstall"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="StatusMessage">
 		<xs:sequence>
-			<xs:element name="MessageType" type="xs:string"/>
-			<xs:element name="MessageID" type="xs:string"/>
-			<xs:element name="Message" type="xs:string"/>
+			<xs:element name="MessageType" type="HPXMLString"/>
+			<xs:element name="MessageID" type="HPXMLString"/>
+			<xs:element name="Message" type="HPXMLString"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="FuelSavingsType">
 		<xs:sequence>
 			<xs:element name="Fuel" type="FuelType"/>
 			<xs:element name="Units" type="energyUnitType" minOccurs="0"/>
-			<xs:element name="TotalSavings" type="xs:double" minOccurs="0"/>
-			<xs:element name="TotalDollarSavings" type="xs:double" minOccurs="0"/>
-			<xs:element minOccurs="0" name="PctReduction" type="xs:double">
+			<xs:element name="TotalSavings" type="HPXMLDouble" minOccurs="0"/>
+			<xs:element name="TotalDollarSavings" type="HPXMLDouble" minOccurs="0"/>
+			<xs:element minOccurs="0" name="PctReduction" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>should be represented as a fraction (ie 0.5 instead of 50%)</xs:documentation>
 				</xs:annotation>
@@ -2769,17 +2982,19 @@
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="EndUseSavings" type="EndUseInfoType"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EndUseInfoType">
 		<xs:sequence>
 			<xs:element name="EndUse" type="endUseType"/>
-			<xs:element name="EndUseValue" type="xs:double">
+			<xs:element name="EndUseValue" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Energy use will be negative for energy producing end uses such as PV and SolarThermal.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:group name="SystemInfo">
 		<xs:sequence>
@@ -2797,11 +3012,11 @@
 			<xs:element name="ModelYear" type="Year" minOccurs="0"/>
 			<xs:element name="Manufacturer" type="Manufacturer" minOccurs="0"/>
 			<xs:element name="ModelNumber" type="Model" minOccurs="0"/>
-			<xs:element minOccurs="0" name="SerialNumber" type="xs:string"/>
-			<xs:element minOccurs="0" name="AHRINumber" type="xs:string"/>
+			<xs:element minOccurs="0" name="SerialNumber" type="HPXMLString"/>
+			<xs:element minOccurs="0" name="AHRINumber" type="HPXMLString"/>
 			<xs:element minOccurs="0" name="PerformanceAdjustment" type="Fraction"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="HVACThirdPartyCertification"/>
-			<xs:element minOccurs="0" name="HasSharedCombustionVentilation" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="HasSharedCombustionVentilation" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" name="CombustionVentingSystem" type="LocalReference"/>
 			<xs:element name="DistributionSystem" type="LocalReference" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element minOccurs="0" name="Installation">
@@ -2809,13 +3024,14 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" name="Standard" type="HVACInstallationStandard"/>
 						<xs:element minOccurs="0" name="SizingCalculation" type="HVACSizingCalcs"/>
-						<xs:element minOccurs="0" name="EnvelopeImprovementsUsedinSizing" type="xs:boolean">
+						<xs:element minOccurs="0" name="EnvelopeImprovementsUsedinSizing" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Air sealing and insulation implemented prior to replacement and used in calculations for sizing new / replacement system?</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="AnnualEnergyUse">
@@ -2823,10 +3039,12 @@
 					<xs:sequence>
 						<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="HVACMaintenance" type="HVACMaintenance"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HeatingSystemInfoType">
 		<xs:complexContent>
@@ -2846,7 +3064,7 @@
 							<xs:documentation>[sq.ft.]</xs:documentation>
 						</xs:annotation>
 					</xs:element>
-					<xs:element minOccurs="0" name="ElectricAuxiliaryEnergy" type="xs:double">
+					<xs:element minOccurs="0" name="ElectricAuxiliaryEnergy" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>The average annual auxiliary electrical energy consumption for, e.g., a gas furnace or boiler, in kilowatt-hours per year. Published in the AHRI
 								Consumer’s Directory of Certified Efficiency Ratings.</xs:documentation>
@@ -2862,16 +3080,17 @@
 			<xs:element name="Furnace">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="SealedCombustion" type="xs:boolean"/>
-						<xs:element name="CondensingSystem" type="xs:boolean" minOccurs="0"/>
-						<xs:element minOccurs="0" name="AtmosphericBurner" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="PowerBurner" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="RetentionHead" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="SealedCombustion" type="HPXMLBoolean"/>
+						<xs:element name="CondensingSystem" type="HPXMLBoolean" minOccurs="0"/>
+						<xs:element minOccurs="0" name="AtmosphericBurner" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="PowerBurner" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="RetentionHead" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="WallFurnace" type="WallAndFloorFurnace"> </xs:element>
@@ -2880,17 +3099,18 @@
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element minOccurs="0" name="BoilerType" type="BoilerType"/>
-						<xs:element minOccurs="0" name="SealedCombustion" type="xs:boolean"/>
-						<xs:element name="CondensingSystem" type="xs:boolean" minOccurs="0"/>
-						<xs:element minOccurs="0" name="AtmosphericBurner" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="PowerBurner" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="RotaryCup" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="RetentionHead" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="SealedCombustion" type="HPXMLBoolean"/>
+						<xs:element name="CondensingSystem" type="HPXMLBoolean" minOccurs="0"/>
+						<xs:element minOccurs="0" name="AtmosphericBurner" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="PowerBurner" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="RotaryCup" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="RetentionHead" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ElectricResistance">
@@ -2899,36 +3119,39 @@
 						<xs:element name="ElectricDistribution" type="ElectricDistributionType" minOccurs="0"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Fireplace">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="SmokeEmissionRate" type="xs:double">
+						<xs:element minOccurs="0" name="SmokeEmissionRate" type="HPXMLDouble">
 							<xs:annotation>
 								<xs:documentation>[grams per hour] from EPA label http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Stove">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="SmokeEmissionRate" type="xs:double">
+						<xs:element minOccurs="0" name="SmokeEmissionRate" type="HPXMLDouble">
 							<xs:annotation>
 								<xs:documentation>[grams per hour] from EPA label http://www.epa.gov/compliance/monitoring/programs/caa/woodheaters.html</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="PortableHeater">
@@ -2936,6 +3159,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SolarThermal">
@@ -2944,6 +3168,7 @@
 						<xs:element minOccurs="0" name="SolarThermalSystem" type="LocalReference"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="DistrictSteam">
@@ -2952,17 +3177,20 @@
 						<xs:element minOccurs="0" name="DistrictSteamType" type="DistrictSteamType"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Description" type="xs:string"/>
+						<xs:element minOccurs="0" name="Description" type="HPXMLString"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HeatPumpInfoType">
 		<xs:complexContent>
@@ -2987,17 +3215,11 @@
 					</xs:element>
 					<xs:element minOccurs="0" name="CoolingSensibleHeatFraction" type="Fraction"/>
 					<xs:element name="GeothermalLoop" type="GeothermalLoop" minOccurs="0"/>
-					<xs:element minOccurs="0" name="BackupType">
+					<xs:element minOccurs="0" name="BackupType" type="HeatPumpBackupType">
 						<xs:annotation>
 							<xs:documentation>Whether the heat pump backup is integrated into the unit (describe in BackupSystemFuel, BackupAnnualHeatingEfficiency, BackupHeatingCapacity), or a
 								separate heating system (add reference in BackupSystem).</xs:documentation>
 						</xs:annotation>
-						<xs:simpleType>
-							<xs:restriction base="xs:string">
-								<xs:enumeration value="integrated"/>
-								<xs:enumeration value="separate"/>
-							</xs:restriction>
-						</xs:simpleType>
 					</xs:element>
 					<xs:element minOccurs="0" name="BackupSystem" type="LocalReference">
 						<xs:annotation>
@@ -3036,7 +3258,7 @@
 				<xs:sequence>
 					<xs:element name="CoolingSystemType" type="CoolingSystemType" minOccurs="0"/>
 					<xs:element minOccurs="0" name="CoolingSystemFuel" type="FuelType"/>
-					<xs:element minOccurs="0" name="CoolingCapacity" type="xs:double">
+					<xs:element minOccurs="0" name="CoolingCapacity" type="HPXMLDouble">
 						<xs:annotation>
 							<xs:documentation>[Btuh]</xs:documentation>
 						</xs:annotation>
@@ -3059,6 +3281,7 @@
 			<xs:element name="Units" type="CoolingEfficiencyUnits"/>
 			<xs:element name="Value" type="Efficiency"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HeatingEfficiencyType">
 		<xs:sequence>
@@ -3069,6 +3292,7 @@
 			</xs:element>
 			<xs:element name="Value" type="Efficiency"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HydronicDistributionInfo">
 		<xs:sequence>
@@ -3099,25 +3323,27 @@
 			<xs:element minOccurs="0" name="PumpandZoneValve">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="ValveCorrections" type="xs:boolean">
+						<xs:element minOccurs="0" name="ValveCorrections" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>System Pump and Zone Valve Corrections made</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="ThermostaticRadiatorValves" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="VariableSpeedPump" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="ThermostaticRadiatorValves" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="VariableSpeedPump" type="HPXMLBoolean"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="AirDistributionInfo">
 		<xs:sequence>
 			<xs:element name="AirDistributionType" type="AirDistributionType" minOccurs="0"/>
 			<xs:element name="AirHandlerMotorType" type="AirHandlerMotorType" minOccurs="0"/>
 			<xs:element minOccurs="0" name="DuctLeakageMeasurement" type="DuctLeakageMeasurementType" maxOccurs="unbounded"/>
-			<xs:element minOccurs="0" name="DuctSystemSizingAppropriate" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="DuctSystemSizingAppropriate" type="HPXMLBoolean"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="Ducts">
 				<xs:complexType>
 					<xs:sequence>
@@ -3145,6 +3371,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="NumberofReturnRegisters" type="IntegerGreaterThanOrEqualToZero"/>
@@ -3154,10 +3381,12 @@
 						<xs:element minOccurs="0" name="Supply" type="TotalExternalStaticPressureMeasurement"/>
 						<xs:element minOccurs="0" name="Return" type="TotalExternalStaticPressureMeasurement"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:element name="BuildingSystemIdentifiers">
 		<xs:annotation>
@@ -3168,6 +3397,7 @@
 			<xs:sequence>
 				<xs:element ref="SystemIdentifiersInfo"/>
 			</xs:sequence>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="Associations" type="AssociationsType"> </xs:element>
@@ -3185,6 +3415,7 @@
 			<xs:element name="IncentiveAmount" type="IncentiveAmount" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BuildingDetailsType">
 		<xs:sequence>
@@ -3230,10 +3461,11 @@
 													</xs:annotation>
 												</xs:element>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="WalkingScore" type="IntegerGreaterThanOrEqualToZero"/>
-									<xs:element minOccurs="0" name="WalkingScoreSource" type="xs:string"/>
+									<xs:element minOccurs="0" name="WalkingScoreSource" type="HPXMLString"/>
 									<xs:element minOccurs="0" name="FuelTypesAvailable">
 										<xs:annotation>
 											<xs:documentation>Fuels available on site via utility lines/pipes or delivery.</xs:documentation>
@@ -3242,10 +3474,12 @@
 											<xs:sequence>
 												<xs:element maxOccurs="unbounded" name="Fuel" type="FuelType"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="BuildingOccupancy">
@@ -3270,8 +3504,8 @@
 											<xs:documentation>less than 18 years old</xs:documentation>
 										</xs:annotation>
 									</xs:element>
-									<xs:element minOccurs="0" name="PubliclySubsidized" type="xs:boolean"/>
-									<xs:element minOccurs="0" name="LowIncome" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="PubliclySubsidized" type="HPXMLBoolean"/>
+									<xs:element minOccurs="0" name="LowIncome" type="HPXMLBoolean"/>
 									<xs:element minOccurs="0" name="OccupantIncomeRange" type="FractionGreaterThanOne">
 										<xs:annotation>
 											<xs:documentation>Percentage as a fraction (50% = 0.5)</xs:documentation>
@@ -3285,6 +3519,7 @@
 									<xs:element minOccurs="0" name="HighestLevelofOccupantEducation" type="EducationLevels"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="BuildingConstruction">
@@ -3294,7 +3529,7 @@
 									<xs:element minOccurs="0" name="YearBuiltKnownOrEstimated" type="KnownOrEstimated"/>
 									<xs:element minOccurs="0" name="YearofLastRemodel" type="Year"/>
 									<xs:element name="ResidentialFacilityType" type="ResidentialFacilityType" minOccurs="0"/>
-									<xs:element minOccurs="0" name="PassiveSolar" type="xs:boolean">
+									<xs:element minOccurs="0" name="PassiveSolar" type="HPXMLBoolean">
 										<xs:annotation>
 											<xs:documentation>Passive solar design—also known as climatic design—involves using a building's windows, walls, and floors to collect, store, and
 												distribute solar energy in the form of heat in the winter and reject solar heat in the summer. (source:
@@ -3430,12 +3665,12 @@
 									<xs:element name="AverageWallRValue" type="RValue" minOccurs="0"/>
 									<xs:element name="AverageFloorRValue" type="RValue" minOccurs="0"/>
 									<xs:element name="AverageDuctRValue" type="RValue" minOccurs="0"/>
-									<xs:element minOccurs="0" name="GaragePresent" type="xs:boolean"/>
+									<xs:element minOccurs="0" name="GaragePresent" type="HPXMLBoolean"/>
 									<xs:element minOccurs="0" name="GarageLocation" type="GarageLocation"/>
 									<xs:element minOccurs="0" name="SpaceAboveGarage" type="SpaceAboveGarage"/>
-									<xs:element maxOccurs="unbounded" minOccurs="0" name="EnergyScore" type="EnergyScoreType"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -3443,10 +3678,12 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType" maxOccurs="unbounded"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ClimateandRiskZones" minOccurs="0">
@@ -3456,8 +3693,8 @@
 						<xs:element name="ClimateZoneIECC" minOccurs="0" type="IECCClimateZoneType" maxOccurs="unbounded"/>
 						<xs:element name="RadonZone" type="RadonZone" minOccurs="0"/>
 						<xs:element name="TermiteZone" type="TermiteZone" minOccurs="0"/>
-						<xs:element name="HurricaneZone" type="xs:boolean" minOccurs="0"/>
-						<xs:element name="FloodZone" type="xs:boolean" minOccurs="0"/>
+						<xs:element name="HurricaneZone" type="HPXMLBoolean" minOccurs="0"/>
+						<xs:element name="FloodZone" type="HPXMLBoolean" minOccurs="0"/>
 						<xs:element name="EarthquakeZone" type="EarthquakeZone" minOccurs="0"/>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="WeatherStation" type="WeatherStation">
 							<xs:annotation>
@@ -3466,6 +3703,93 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="GreenBuildingVerifications">
+				<xs:annotation>
+					<xs:documentation>A listing of Green Building Verifications from the RESO Data Dictionary</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="GreenBuildingVerification">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:group ref="SystemInfo"/>
+									<xs:element name="Type" type="GreenBuildingVerificationType">
+										<xs:annotation>
+											<xs:documentation>The name of the verification or certification awarded to a new or pre-existing residential or commercial structure. For example: LEED,
+												Energy Star, ICC-700. In cases where more than one certification have been awarded, leverage multiple iterations of the green verification fields via
+												the repeating element method.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="OtherType" type="HPXMLString">
+										<xs:annotation>
+											<xs:documentation>If "other" is selected for GreenBuildingVerification/Type, fill in type here.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Body" type="HPXMLString">
+										<xs:annotation>
+											<xs:documentation>The name of the body or group providing the verification/certification/rating named in the GreenBuildingVerificationType field. There is
+												almost always a direct correlation between bodies and programs.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Metric" type="HPXMLInteger">
+										<xs:annotation>
+											<xs:documentation>A final score indicating the performance of energy efficiency design and measures in the home as tested by a third-party rater. Points
+												achieved to earn a certification in the GreenVerificationRating field do not apply to this field. HERS Index is most common with new homes and runs with
+												a lower number being more efficient. A net-zero home uses zero energy and has a HERS score of 0. A home that produces more energy than it uses has a
+												negative score. Home Energy Score is a tool more common for existing homes and runs with a higher number being more efficient. It takes square footage
+												into account and caps with 10 as the highest number of points.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Rating" type="HPXMLString">
+										<xs:annotation>
+											<xs:documentation>Many verifications or certifications have a rating system that provides an indication of the structure's level of energy efficiency. When
+												expressed in a numeric value, please use the GreenVerificationMetric field. Verifications and Certifications can also be a name, such as Gold or Silver,
+												which is the purpose of this field.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Source" type="GreenBuildingVerificationSource">
+										<xs:annotation>
+											<xs:documentation>The source of the green data. May address photovoltaic characteristics, or a verified score, certification, label, etc. This may be a pick
+												list of options showing the source. i.e. Program Sponsor, Program Verifier, Public Record, Assessor, etc.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Status" type="GreenBuildingVerificationStatus">
+										<xs:annotation>
+											<xs:documentation>Many verification programs include a multi-step process that may begin with plans and specs, involve testing and/or submission of building
+												specifications along the way and include a final verification step. When ratings are involved it is not uncommon for the final rating to be either
+												higher or lower than the target preliminary rating. Sometimes the final approval is not available until after sale and occupancy. Status indicates what
+												the target was at the time of listing and may be updated when verification is complete. To limit liability concerns this field reflects information that
+												was available at the time of listing or updated later and should be confirmed by the buyer.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="URL" type="xs:anyURI">
+										<xs:annotation>
+											<xs:documentation>Provides a link to the specific property’s high-performance rating or scoring details directly from and hosted by the sponsoring body of
+												the program. Typically provides thorough details, for example, which points where achieved and how, or in the case of a score what specifically was
+												tested and the results.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Version" type="HPXMLString">
+										<xs:annotation>
+											<xs:documentation>The version of the certification or verification that was awarded. Some rating programs have a year, a version, or possibly
+												both.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" name="Year" type="Year">
+										<xs:annotation>
+											<xs:documentation>The year the certification or verification was awarded.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
+									<xs:element minOccurs="0" ref="extension"/>
+								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Zones" type="Zones"/>
@@ -3478,6 +3802,7 @@
 			<xs:element minOccurs="0" name="HealthAndSafety" type="HealthAndSafety"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ProjectDetailsType">
 		<xs:sequence>
@@ -3485,11 +3810,6 @@
 			<xs:element name="ProgramName" type="ProgramName" minOccurs="0"/>
 			<xs:element maxOccurs="1" minOccurs="0" ref="ContractorSystemIdentifiers"/>
 			<xs:element minOccurs="0" name="ProgramSponsor" type="ProgramSponsor"/>
-			<xs:element minOccurs="0" name="CertifyingOrganization" type="CertifyingOrganization"/>
-			<xs:element minOccurs="0" name="CertifyingOrganizationURL" type="xs:string"/>
-			<xs:element minOccurs="0" name="YearCertified" type="Year"/>
-			<xs:element minOccurs="0" name="ProgramCertificate" maxOccurs="unbounded" type="ProgramCertificate"/>
-			<xs:element minOccurs="0" name="EnergyStarHomeVersion" type="xs:string"/>
 			<xs:element name="ProjectType" type="ProjectType" minOccurs="0"/>
 			<xs:element name="Title" type="Title" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="ProjectStatus"/>
@@ -3529,6 +3849,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Incentive" type="IncentiveDetailsType"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="EnergySavingsInfo" type="EnergySavingsType" maxOccurs="2"/>
@@ -3538,43 +3859,19 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Measure" type="MeasureDetailsType"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-	</xs:complexType>
-	<xs:complexType name="EnergyScoreType">
-		<xs:sequence>
-			<xs:element name="ScoreType">
-				<xs:annotation>
-					<xs:documentation>The Home Energy Score is an asset rating for homes, developed and administered by the U.S. Department of Energy. After conducting a brief walk thru of a home, a
-						qualified assessor calculates a home's score on a 10 point scale using a standard scoring tool, with 10 reflecting homes that use the least amount of energy assuming standard
-						operating conditions (US DOE). The Home Energy Rating System (HERS) index is a measure of a home's energy efficiency. It can also be used to inspect and calculate a home's
-						energy performance. The lower a home's HERS Index Score, the better its efficiency.</xs:documentation>
-				</xs:annotation>
-				<xs:simpleType>
-					<xs:restriction base="xs:string">
-						<xs:enumeration value="RESNET HERS"/>
-						<xs:enumeration value="US DOE Home Energy Score"/>
-						<xs:enumeration value="other"/>
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
-			<xs:element minOccurs="0" name="OtherScoreType">
-				<xs:annotation>
-					<xs:documentation>Name of the score type if "other" is selected in ScoreType.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element minOccurs="0" name="ScoreDate" type="xs:date"/>
-			<xs:element name="Score" type="xs:integer"/>
-			<xs:element minOccurs="0" ref="extension"/>
-		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="TotalCostType">
 		<xs:sequence>
 			<xs:element name="TotalCostHealthSafetyMeasures" type="TotalCostHealthSafetyMeasures" minOccurs="1"/>
 			<xs:element name="TotalCostQualEnergyMeasures" type="TotalCostQualEnergyMeasures" minOccurs="1"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MeasureDetailsType">
 		<xs:sequence>
@@ -3586,6 +3883,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" ref="SystemIdentifiersInfo"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" ref="ExternalResource"/>
@@ -3594,21 +3892,23 @@
 			<xs:element minOccurs="0" name="Quantity">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Units" type="xs:string"/>
+						<xs:element name="Units" type="HPXMLString"/>
 						<xs:element name="Value" type="Quantity"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Location" type="UnitLocation" minOccurs="0"/>
 			<xs:element name="EstimatedLife" type="EstimatedLife" minOccurs="0"/>
 			<xs:element name="InstallationDate" type="InstallationDate" minOccurs="0"/>
 			<xs:element name="Cost" type="Cost" minOccurs="0"/>
-			<xs:element name="UnitPricingIndicator" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="UnitPricingIndicator" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" name="Incentives">
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Incentive" type="IncentiveDetailsType"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ResourceSavingsInfo">
@@ -3628,9 +3928,11 @@
 									<xs:element name="AnnualAmount" type="AnnualAmount" minOccurs="0"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="EnergySavingsInfo" type="EnergySavingsType" maxOccurs="2"/>
@@ -3638,7 +3940,7 @@
 			<xs:element minOccurs="0" name="CustomerNotes" type="Notes"/>
 			<xs:element minOccurs="0" name="WorkscopeNotes" type="Notes"/>
 			<xs:element minOccurs="0" name="Status" type="ImprovementStatusType"/>
-			<xs:element minOccurs="0" name="NotInstalledReasonCode" type="xs:string"/>
+			<xs:element minOccurs="0" name="NotInstalledReasonCode" type="HPXMLString"/>
 			<xs:element minOccurs="0" name="InstallingContractor" type="RemoteReference"/>
 			<xs:element minOccurs="0" name="QA">
 				<xs:annotation>
@@ -3651,6 +3953,7 @@
 						<xs:element name="QAComments" type="Notes"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ReplacedComponents">
@@ -3661,6 +3964,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="ReplacedComponent" type="RemoteReference"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="InstalledComponents">
@@ -3668,10 +3972,12 @@
 					<xs:sequence>
 						<xs:element minOccurs="1" name="InstalledComponent" type="RemoteReference" maxOccurs="unbounded"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EnergySavingsType">
 		<xs:sequence>
@@ -3682,34 +3988,36 @@
 			</xs:element>
 			<xs:element minOccurs="0" name="EnergySavingsReported" type="GrossOrNet"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="FuelSavings" type="FuelSavingsType"/>
-			<xs:element name="DemandSavings" minOccurs="0" type="xs:double">
+			<xs:element name="DemandSavings" minOccurs="0" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>[kW] Demand savings from energy efficiency programs</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="AnnualPercentReduction" type="xs:double" minOccurs="0">
+			<xs:element name="AnnualPercentReduction" type="HPXMLDouble" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>should be represented as a fraction (ie 0.5 instead of 50%)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WaterSavingsType">
 		<xs:sequence>
 			<xs:element minOccurs="0" name="WaterSavingsType" type="MeasuredOrEstimated"/>
 			<xs:element minOccurs="0" name="Units" type="waterUnitType"/>
-			<xs:element minOccurs="0" name="TotalSavings" type="xs:double"/>
-			<xs:element minOccurs="0" name="TotalDollarSavings" type="xs:double"/>
-			<xs:element minOccurs="0" name="PctReduction" type="xs:double">
+			<xs:element minOccurs="0" name="TotalSavings" type="HPXMLDouble"/>
+			<xs:element minOccurs="0" name="TotalDollarSavings" type="HPXMLDouble"/>
+			<xs:element minOccurs="0" name="PctReduction" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>should be represented as a fraction (ie 0.5 instead of 50%)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="RainBarrels" type="xs:double"/>
-			<xs:element minOccurs="0" name="ReclaimedWaterSystem" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="RainBarrels" type="HPXMLDouble"/>
+			<xs:element minOccurs="0" name="ReclaimedWaterSystem" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="DuctLeakageMeasurementType">
 		<xs:sequence>
@@ -3727,6 +4035,7 @@
 						<xs:element name="Value" type="MeasuredDuctLeakage" minOccurs="0"/>
 						<xs:element minOccurs="0" name="TotalOrToOutside" type="DuctLeakageTotalOrToOutside"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="EffectiveLeakageArea" type="SurfaceArea">
@@ -3737,6 +4046,7 @@
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ConsumptionInfoType">
 		<xs:sequence>
@@ -3749,29 +4059,30 @@
 				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="Consumption" type="xs:double">
+						<xs:element name="Consumption" type="HPXMLDouble">
 							<xs:annotation>
 								<xs:documentation>Negative number for renewable generation. Positive number for consumption.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element name="StartDateTime" type="xs:dateTime" minOccurs="0">
+						<xs:element name="StartDateTime" type="HPXMLDateTime" minOccurs="0">
 							<xs:annotation>
 								<xs:documentation>Date/time stamp in the ISO 8601 format when the usage measured began.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element name="EndDateTime" type="xs:dateTime" minOccurs="0">
+						<xs:element name="EndDateTime" type="HPXMLDateTime" minOccurs="0">
 							<xs:annotation>
 								<xs:documentation>Date/time stamp of the meter reading.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" name="ReadingType" type="MeterReadingType"/>
-						<xs:element name="ConsumptionCost" type="xs:double" minOccurs="0"/>
+						<xs:element name="ConsumptionCost" type="HPXMLDouble" minOccurs="0"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="MarginalRate" type="xs:double" minOccurs="0"/>
-			<xs:element minOccurs="0" name="BaseLoad" type="xs:double">
+			<xs:element name="MarginalRate" type="HPXMLDouble" minOccurs="0"/>
+			<xs:element minOccurs="0" name="BaseLoad" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Baseload power is the energy consumed for the day-to-day operation of a home that is not used as a response to outside weather (i.e. excludes heating and cooling)
 						(Krigger and Dorsi, 2009).</xs:documentation>
@@ -3784,86 +4095,87 @@
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BPI2400Inputs">
 		<xs:sequence>
-			<xs:element minOccurs="0" name="WeatherRegressionBeginDate" type="xs:date"/>
-			<xs:element minOccurs="0" name="WeatherRegressionEndDate" type="xs:date"/>
+			<xs:element minOccurs="0" name="WeatherRegressionBeginDate" type="HPXMLDate"/>
+			<xs:element minOccurs="0" name="WeatherRegressionEndDate" type="HPXMLDate"/>
 			<xs:element minOccurs="0" name="CalibrationQualification" type="BPI2400CalibrationQualification">
 				<xs:annotation>
 					<xs:documentation>This identifies which data quality requirements (if any) were met by the bills for the relevant energy source and therefore which calibration metrics (if any) are
 						used to determine whether the calibrated model is accepted.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="CalibrationWeatherRegressionCVRMSE" type="xs:double">
+			<xs:element minOccurs="0" name="CalibrationWeatherRegressionCVRMSE" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Detailed Calibration Weather Regression CV-RMSE. Eqn. 3.2.2.G.i of BPI-2400. Percentage expressed as a fraction (ie 10% = 0.1)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="WeatherNormalizedHeatingUsage" type="xs:double">
+			<xs:element minOccurs="0" name="WeatherNormalizedHeatingUsage" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Weather Normalized Annual Heating Usage</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="WeatherNormalizedCoolingUsage" type="xs:double">
+			<xs:element minOccurs="0" name="WeatherNormalizedCoolingUsage" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Weather Normalized Annual Cooling Usage</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="WeatherNormalizedBaseloadUsage" type="xs:double">
+			<xs:element minOccurs="0" name="WeatherNormalizedBaseloadUsage" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Weather Normalized Annual Baseload Usage</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="DetailedModelCalibrationHeatingBiasError" type="xs:double">
+			<xs:element minOccurs="0" name="DetailedModelCalibrationHeatingBiasError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Eqn. 3.2.3.A.i of BPI-2400. Percentage expressed as a fraction (ie 10% = 0.1)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="DetailedModelCalibrationHeatingAbsoluteError" type="xs:double">
+			<xs:element minOccurs="0" name="DetailedModelCalibrationHeatingAbsoluteError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Eqn. 3.2.3.A.ii of BPI-2400. In either kWh for electricity or MMBTU for all other fuels.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="DetailedModelCalibrationCoolingBiasError" type="xs:double">
+			<xs:element minOccurs="0" name="DetailedModelCalibrationCoolingBiasError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Percentage expressed as a fraction (ie 10% = 0.1)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="DetailedModelCalibrationCoolingAbsoluteError" type="xs:double">
+			<xs:element minOccurs="0" name="DetailedModelCalibrationCoolingAbsoluteError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>In either kWh for electricity or MMBTU for all other fuels.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="DetailedModelCalibrationBaseloadBiasError" type="xs:double">
+			<xs:element minOccurs="0" name="DetailedModelCalibrationBaseloadBiasError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Percentage expressed as a fraction (ie 10% = 0.1)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="DetailedModelCalibrationBaseloadAbsoluteError" type="xs:double">
+			<xs:element minOccurs="0" name="DetailedModelCalibrationBaseloadAbsoluteError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>In either kWh for electricity or MMBTU for all other fuels.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="SimplifiedModelCalibrationHeatingBiasError" nillable="true" type="xs:double">
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationHeatingBiasError" nillable="true" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. Percentage expressed as a fraction (ie 10% =
 						0.1)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="SimplifiedModelCalibrationCoolingBiasError" type="xs:double">
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationCoolingBiasError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. Percentage expressed as a fraction (ie 10% =
 						0.1)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="SimplifiedModelCalibrationBaseloadBiasError" nillable="true" type="xs:double">
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationBaseloadBiasError" nillable="true" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. Percentage expressed as a fraction (ie 10% =
 						0.1)</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="SimplifiedModelCalibrationTotalBiasError" type="xs:double">
+			<xs:element minOccurs="0" name="SimplifiedModelCalibrationTotalBiasError" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Used to determine model calibration acceptance when bills fail Detailed criteria, but meet simple criteria. Percentage expressed as a fraction (ie 10% =
 						0.1)</xs:documentation>
@@ -3871,6 +4183,7 @@
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EnergyAndWaterUseTypeDescription">
 		<xs:choice>
@@ -3897,23 +4210,25 @@
 											<xs:sequence>
 												<xs:element name="EmissionType" type="EmissionType"/>
 												<xs:element name="EmissionUnits" type="EmissionUnits"/>
-												<xs:element name="Emissions" type="xs:double"/>
+												<xs:element name="Emissions" type="HPXMLDouble"/>
 											</xs:sequence>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="FuelInterruptibility" type="FuelInterruptibility"/>
 						<xs:element minOccurs="0" name="SharedEnergySystem" type="SharedEnergySystem"/>
 						<xs:element minOccurs="0" name="IntervalType" type="IntervalType"/>
-						<xs:element minOccurs="0" name="ReadingTimeZone" type="xs:string"/>
-						<xs:element minOccurs="0" name="MarginalEnergyCostRate" type="xs:double">
+						<xs:element minOccurs="0" name="ReadingTimeZone" type="HPXMLString"/>
+						<xs:element minOccurs="0" name="MarginalEnergyCostRate" type="HPXMLDouble">
 							<xs:annotation>
 								<xs:documentation>[$/energy unit] The cost of providing an additional unit of output</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="EnergyUseIntensity" type="xs:double">
+						<xs:element minOccurs="0" name="EnergyUseIntensity" type="HPXMLDouble">
 							<xs:annotation>
 								<xs:documentation>[kBtu/ft^2] Energy use intensity (EUI) is a unit of measurement that describes a building's energy use. EUI represents the energy consumed by a
 									building relative to its size.</xs:documentation>
@@ -3926,6 +4241,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Water">
@@ -3933,7 +4249,7 @@
 					<xs:sequence>
 						<xs:element name="WaterType" type="WaterType"/>
 						<xs:element name="UnitofMeasure" type="waterUnitType"/>
-						<xs:element minOccurs="0" name="MarginalWaterCostRate" type="xs:double"/>
+						<xs:element minOccurs="0" name="MarginalWaterCostRate" type="HPXMLDouble"/>
 						<xs:element minOccurs="0" name="WaterUseIntensity">
 							<xs:annotation>
 								<xs:documentation>Water use intensity is defined as annual water use divided by total gross square footage of facility space reported in gallons per square foot (DOE,
@@ -3942,15 +4258,18 @@
 							<xs:complexType>
 								<xs:sequence>
 									<xs:element name="Units" type="WaterUseIntensityUnits"/>
-									<xs:element name="Value" type="xs:double"/>
+									<xs:element name="Value" type="HPXMLDouble"/>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ModeledUsageType">
 		<xs:sequence>
@@ -3960,18 +4279,19 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="UnitofMeasure" type="energyUnitType"/>
-			<xs:element minOccurs="0" name="AnnualConsumption" type="xs:double"/>
-			<xs:element minOccurs="0" name="AnnualFuelCost" type="xs:double"/>
+			<xs:element minOccurs="0" name="AnnualConsumption" type="HPXMLDouble"/>
+			<xs:element minOccurs="0" name="AnnualFuelCost" type="HPXMLDouble"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="ConsumptionByEndUse" type="EndUseInfoType"/>
-			<xs:element minOccurs="0" name="BaseLoad" type="xs:double">
+			<xs:element minOccurs="0" name="BaseLoad" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>Baseload power is the energy consumed for the day-to-day operation of a home that is not used as a response to outside weather (i.e. excludes heating and cooling)
 						(Krigger and Dorsi, 2009).</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="ElectricityDemandKW" type="xs:double"/>
+			<xs:element minOccurs="0" name="ElectricityDemandKW" type="HPXMLDouble"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="StudProperties">
 		<xs:sequence>
@@ -3989,28 +4309,31 @@
 			<xs:element minOccurs="0" name="Material" type="StudMaterial"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="TelephoneInfoType">
 		<xs:sequence>
 			<xs:element name="TelephoneType" type="TelephoneTypeCode" minOccurs="0"/>
 			<xs:element name="TelephoneNumber" type="TelephoneNumber"/>
-			<xs:element minOccurs="0" name="PreferredContactMethod" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="PreferredContactMethod" type="HPXMLBoolean"/>
 			<xs:element name="TelephoneExtension" type="TelephoneExtension" minOccurs="0"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EmailInfoType">
 		<xs:sequence>
 			<xs:element name="EmailType" type="EmailTypeCode" minOccurs="0"/>
 			<xs:element name="EmailAddress" type="EmailAddress"/>
-			<xs:element minOccurs="0" name="PreferredContactMethod" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="PreferredContactMethod" type="HPXMLBoolean"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BusinessInfoType">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
-			<xs:element name="BusinessName" type="xs:string"/>
+			<xs:element name="BusinessName" type="HPXMLString"/>
 			<xs:element name="BusinessType" type="BusinessType" minOccurs="0"/>
 			<xs:element name="BusinessSpecialization" type="BusinessSpecialization" minOccurs="0"/>
 			<xs:element name="Certification" type="BusinessCertification" minOccurs="0" maxOccurs="unbounded"/>
@@ -4019,6 +4342,7 @@
 			<xs:element minOccurs="0" maxOccurs="unbounded" name="EmailInfo" type="EmailInfoType"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BusinessContactInfoType">
 		<xs:sequence>
@@ -4026,6 +4350,7 @@
 			<xs:element minOccurs="0" name="Person" type="IndividualInfo"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:group name="WindowInfo">
 		<xs:sequence>
@@ -4046,78 +4371,103 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" name="Orientation" type="OrientationType"/>
-			<xs:element name="FrameType" minOccurs="0">
-				<xs:complexType>
-					<xs:choice>
-						<xs:element name="Aluminum">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" name="ThermalBreak" type="xs:boolean"/>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Composite">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Fiberglass">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Metal">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" name="ThermalBreak" type="xs:boolean"/>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Vinyl">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Wood">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="Other">
-							<xs:complexType>
-								<xs:sequence>
-									<xs:element minOccurs="0" name="Description"/>
-									<xs:element minOccurs="0" ref="extension"/>
-								</xs:sequence>
-							</xs:complexType>
-						</xs:element>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
+			<xs:element name="FrameType" minOccurs="0" type="WindowFrameType"> </xs:element>
 			<xs:element minOccurs="0" name="GlassLayers" type="GlassLayers"/>
 			<xs:element minOccurs="0" name="GlassType" type="GlassType"/>
 			<xs:element minOccurs="0" name="GasFill" type="GasFill"/>
-			<xs:element name="Treatments" type="Treatments" minOccurs="0"/>
 			<xs:element name="Condition" type="WindowCondition" minOccurs="0"/>
 			<xs:element name="UFactor" type="UFactor" minOccurs="0"/>
 			<xs:element name="SHGC" type="SHGC" minOccurs="0"/>
-			<xs:element name="NFRCCertified" type="xs:boolean" minOccurs="0"/>
-			<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="WindowThirdPartyCertification"/>
 			<xs:element minOccurs="0" name="VisibleTransmittance" type="Fraction"/>
-			<xs:element minOccurs="0" name="InteriorShading" type="InteriorShading"/>
-			<xs:element minOccurs="0" name="InteriorShadingFactorSummer" type="Fraction"/>
-			<xs:element minOccurs="0" name="InteriorShadingFactorWinter" type="Fraction"/>
-			<xs:element minOccurs="0" name="ExteriorShading" type="ExteriorShading"/>
+			<xs:element name="NFRCCertified" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="WindowThirdPartyCertification"/>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="WindowFilm">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="ShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="ExteriorShading">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="Type" type="ExteriorShading"/>
+						<xs:element minOccurs="0" name="SummerShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the summer months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is
+									opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="WinterShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the winter months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is
+									opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="InteriorShading">
+				<xs:annotation>
+					<xs:documentation>Used to describe drapes, blinds, etc. If moveable insulation also provides shading, the shading should be documented here. </xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="Type" type="InteriorShading"/>
+						<xs:element minOccurs="0" name="SummerShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the summer months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is
+									opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" name="WinterShadingCoefficient" type="Fraction">
+							<xs:annotation>
+								<xs:documentation>The shading coefficient to apply during the winter months. Shading coefficients are defined as a multiplier on transmittance: 1 is transparent, 0 is
+									opaque. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="StormWindow">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="GlassType" type="GlassType"/>
+						<xs:element minOccurs="0" name="FrameType" type="WindowFrameType"/>
+						<xs:element minOccurs="0" name="Operable" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="Condition" type="WindowCondition"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element minOccurs="0" name="MoveableInsulation">
+				<xs:annotation>
+					<xs:documentation>Rigid opaque foam panels (permanently installed or not) or cellular shades that provide insulation. </xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:group ref="SystemInfo"/>
+						<xs:element minOccurs="0" name="RValue" type="RValue"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
 			<xs:element minOccurs="0" name="Overhangs">
 				<xs:complexType>
 					<xs:sequence>
@@ -4137,18 +4487,78 @@
 							</xs:annotation>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element minOccurs="0" name="WeatherStripping" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="Operable" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="MovableInsulationRValue" type="RValue">
-				<xs:annotation>
-					<xs:documentation>Rigid opaque foam panels (permanently installed or not) or cellular shades that provide insulation. </xs:documentation>
-				</xs:annotation>
-			</xs:element>
+			<xs:element minOccurs="0" name="WeatherStripping" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="Operable" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" name="LeakinessDescription" type="BuildingLeakiness"/>
 		</xs:sequence>
 	</xs:group>
+	<xs:complexType name="WindowFrameType">
+		<xs:choice>
+			<xs:element name="Aluminum">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="ThermalBreak" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Composite">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Fiberglass">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Metal">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="ThermalBreak" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Vinyl">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Wood">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Other">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element minOccurs="0" name="Description"/>
+						<xs:element minOccurs="0" ref="extension"/>
+					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:choice>
+		<xs:attribute ref="dataSource"/>
+	</xs:complexType>
 	<xs:complexType name="AssociationsType">
 		<xs:all minOccurs="0">
 			<xs:element name="Job" minOccurs="0">
@@ -4160,14 +4570,17 @@
 									<xs:element name="Measure" minOccurs="0" maxOccurs="unbounded">
 										<xs:complexType>
 											<xs:attribute name="ID" type="xs:int" use="required"/>
+											<xs:attribute ref="dataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="JobRole" type="JobRole" minOccurs="0"/>
 					</xs:sequence>
 					<xs:attribute name="ID" type="xs:int" use="required"/>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Locations" minOccurs="0">
@@ -4176,22 +4589,26 @@
 						<xs:element name="Location" minOccurs="0" maxOccurs="unbounded">
 							<xs:complexType>
 								<xs:attribute name="ID" type="xs:int" use="required"/>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Contractor" minOccurs="0">
 				<xs:complexType>
 					<xs:attribute name="ID" type="xs:int"/>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:all>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="AirInfiltrationMeasurementType">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
-			<xs:element minOccurs="0" name="Date" type="xs:date"/>
+			<xs:element minOccurs="0" name="Date" type="HPXMLDate"/>
 			<xs:element minOccurs="0" name="BusinessConductingTest" type="RemoteReference"/>
 			<xs:element minOccurs="0" name="IndividualConductingTest" type="RemoteReference"/>
 			<xs:element minOccurs="0" name="OutsideTemperature" type="Temperature">
@@ -4220,15 +4637,16 @@
 						<xs:element name="UnitofMeasure" type="BuildingAirLeakageUnit" minOccurs="0"/>
 						<xs:element name="AirLeakage" type="BuildingAirLeakage" minOccurs="0"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
-			<xs:element minOccurs="0" name="EffectiveLeakageArea" type="xs:double">
+			<xs:element minOccurs="0" name="EffectiveLeakageArea" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>[sq.in.] The Effective Leakage Area is defined as the area of a special nozzle-shaped hole (similar to the inlet of a blower door fan) that would leak the same
 						amount of air as the building does at a pressure of 4 Pascals.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element minOccurs="0" name="InfiltrationVolume" type="xs:double">
+			<xs:element minOccurs="0" name="InfiltrationVolume" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>[sq. ft.] The volume of the building that is applicable to the air infiltration measurement test. The volume can be defined as the conditioned building volume
 						plus the volume of crawlspaces, attics, and/or basements that are connected to the building's conditioned space via open doors or hatches.</xs:documentation>
@@ -4236,6 +4654,7 @@
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MoistureControlInfoType">
 		<xs:sequence>
@@ -4244,25 +4663,28 @@
 			<xs:element name="InteriorLocationsofWaterLeaksorDamage" type="InteriorLocationsofWaterLeaksorDamage" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="FoundationType">
 		<xs:choice>
 			<xs:element name="Basement">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Finished" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="Conditioned" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="Finished" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Crawlspace">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Vented" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="Conditioned" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="Vented" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SlabOnGrade">
@@ -4270,14 +4692,16 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Garage">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Conditioned" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="AboveApartment">
@@ -4288,6 +4712,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Combination">
@@ -4295,6 +4720,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Ambient">
@@ -4305,6 +4731,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="RubbleStone">
@@ -4312,6 +4739,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -4319,9 +4747,11 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WallType">
 		<xs:annotation>
@@ -4331,26 +4761,28 @@
 			<xs:element name="WoodStud">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="ExpandedPolystyreneSheathing" type="xs:boolean">
+						<xs:element minOccurs="0" name="ExpandedPolystyreneSheathing" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Sheathing insulation should be specified in the Insulation element as well.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
-						<xs:element minOccurs="0" name="OptimumValueEngineering" type="xs:boolean">
+						<xs:element minOccurs="0" name="OptimumValueEngineering" type="HPXMLBoolean">
 							<xs:annotation>
 								<xs:documentation>Please specify stud spacing and framing factor in the appropriate places as well.</xs:documentation>
 							</xs:annotation>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="DoubleWoodStud">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Staggered" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="Staggered" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ConcreteMasonryUnit">
@@ -4361,6 +4793,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="StructurallyInsulatedPanel">
@@ -4371,6 +4804,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="InsulatedConcreteForms">
@@ -4381,6 +4815,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SteelFrame">
@@ -4388,6 +4823,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SolidConcrete">
@@ -4395,6 +4831,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="StructuralBrick">
@@ -4402,6 +4839,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="StrawBale">
@@ -4409,6 +4847,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Stone">
@@ -4416,6 +4855,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="LogWall">
@@ -4423,6 +4863,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -4430,9 +4871,11 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACControlType">
 		<xs:sequence>
@@ -4486,41 +4929,45 @@
 			<xs:element name="HVACSystemsServed" type="LocalReference" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACControlTypeAdjustments">
 		<xs:sequence>
-			<xs:element minOccurs="0" name="Day" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="Night" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="Day" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="Night" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MoistureControlImprovementInfo">
 		<xs:sequence>
-			<xs:element name="VaporRetardersInstalled" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="GuttersInstalledorRepaired" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="FlashingInstalledorRepaired" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="FoundationGradingImproved" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="OtherMeasuresImplementedDescription" type="xs:string" minOccurs="0"/>
+			<xs:element name="VaporRetardersInstalled" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element name="GuttersInstalledorRepaired" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element name="FlashingInstalledorRepaired" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element name="FoundationGradingImproved" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element name="OtherMeasuresImplementedDescription" type="HPXMLString" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACDistributionImprovementInfo">
 		<xs:sequence>
-			<xs:element name="DuctSystemSealed" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="DuctSystemSealed" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" name="DuctSystemSealedYearMonth" type="xs:gYearMonth">
 				<xs:annotation>
 					<xs:documentation>The year and month the duct system was sealed.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="DuctOutsideEnvelopeInsulatedaspartofRetrofit" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="DuctSystemReplaced" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="SystemPumpandZoneValveCorrectionsMade" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="DuctOutsideEnvelopeInsulatedaspartofRetrofit" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element name="DuctSystemReplaced" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element name="SystemPumpandZoneValveCorrectionsMade" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACMaintenance">
 		<xs:sequence>
-			<xs:element minOccurs="0" name="TuneAndRepair" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="TuneAndRepair" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" name="TuneAndRepairYearMonth" type="xs:gYearMonth">
 				<xs:annotation>
 					<xs:documentation>Year and month of the last tune and repair for this HVAC equipment.</xs:documentation>
@@ -4554,6 +5001,7 @@
 										</xs:annotation>
 									</xs:element>
 								</xs:sequence>
+								<xs:attribute ref="dataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="MERVRating" type="MERV">
@@ -4569,16 +5017,18 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WaterHeaterImprovementInfo">
 		<xs:sequence>
-			<xs:element name="JacketInstalledIndicator" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="JacketInstalledIndicator" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element name="DispositionofExistingSystem" type="DispositionofExistingSystem" minOccurs="0"/>
-			<xs:element name="RepairsDescription" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="RepairsDescription" type="HPXMLString" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="PipeInsulated" type="PipeInsulated" minOccurs="0"/>
 			<xs:element name="LengthofPipeInsulated" type="LengthMeasurement" minOccurs="0">
 				<xs:annotation>
@@ -4586,16 +5036,18 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" name="DiameterofPipeInsulated" type="PipeDiameterType"/>
-			<xs:element name="SystemReplaced" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="SystemReplaced" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="VentilationImprovementInfo">
 		<xs:sequence>
-			<xs:element name="GarageDuctsandAirHandlersAirSealed" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="MechanicalVentilationInstalled" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="GarageDuctsandAirHandlersAirSealed" type="HPXMLBoolean" minOccurs="0"/>
+			<xs:element name="MechanicalVentilationInstalled" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Building">
 		<xs:sequence>
@@ -4608,10 +5060,11 @@
 						<xs:element name="SiteID" type="SystemIdentifiersInfoType"/>
 						<xs:element maxOccurs="unbounded" minOccurs="0" ref="ExternalResource"/>
 						<xs:element name="Address" type="AddressInformation"/>
-						<xs:element minOccurs="0" name="SchoolDistrict" type="xs:string"/>
+						<xs:element minOccurs="0" name="SchoolDistrict" type="HPXMLString"/>
 						<xs:element minOccurs="0" name="eGridRegion" type="eGridRegions"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ContractorID" type="RemoteReference"/>
@@ -4632,10 +5085,12 @@
 						</xs:element>
 						<xs:element maxOccurs="unbounded" name="ModeledUsage" type="ModeledUsageType"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Project">
 		<xs:sequence>
@@ -4645,12 +5100,14 @@
 			<xs:element name="ProjectDetails" type="ProjectDetailsType"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Contractor">
 		<xs:sequence>
 			<xs:element name="ContractorDetails" type="ContractorType"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Customer">
 		<xs:sequence>
@@ -4665,6 +5122,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Comments">
@@ -4673,8 +5131,9 @@
 				</xs:annotation>
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element maxOccurs="unbounded" name="Comment" type="xs:string"/>
+						<xs:element maxOccurs="unbounded" name="Comment" type="HPXMLString"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="OtherContact">
@@ -4684,10 +5143,12 @@
 						<xs:element name="Address" type="AddressInformation"> </xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Utility">
 		<xs:sequence>
@@ -4699,10 +5160,12 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" ref="UtilityFuelProvider"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Consumption">
 		<xs:sequence>
@@ -4713,23 +5176,26 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="ConsumptionInfo" type="ConsumptionInfoType"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WeatherStation">
 		<xs:sequence>
 			<xs:group ref="SystemInfo"/>
-			<xs:element name="Name" type="xs:string"/>
-			<xs:element minOccurs="0" name="City" nillable="true" type="xs:string"/>
+			<xs:element name="Name" type="HPXMLString"/>
+			<xs:element minOccurs="0" name="City" nillable="true" type="HPXMLString"/>
 			<xs:element minOccurs="0" name="State" type="StateCode"/>
-			<xs:element minOccurs="0" name="WBAN" type="xs:string"/>
-			<xs:element minOccurs="0" name="WMO" type="xs:string"/>
+			<xs:element minOccurs="0" name="WBAN" type="HPXMLString"/>
+			<xs:element minOccurs="0" name="WMO" type="HPXMLString"/>
 			<xs:element minOccurs="0" name="Type" type="WeatherStationType"/>
 			<xs:element minOccurs="0" name="Use" nillable="true" type="WeatherStationUse"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="PipeInsulationType">
 		<xs:sequence>
@@ -4747,42 +5213,46 @@
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="TotalExternalStaticPressureMeasurement">
 		<xs:sequence>
-			<xs:element name="StaticPressure" type="xs:double">
+			<xs:element name="StaticPressure" type="HPXMLDouble">
 				<xs:annotation>
 					<xs:documentation>[Pa] positive for supply side measurements, negative for return side.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element minOccurs="0" name="MeasurementLocation" type="AirHandlerStaticPressureMeasurementLocation"/>
-			<xs:element minOccurs="0" name="LocationDescription" type="xs:string"/>
+			<xs:element minOccurs="0" name="LocationDescription" type="HPXMLString"/>
 			<xs:element minOccurs="0" name="StaticPressureSource" type="StaticPressureSource"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WallAndFloorFurnace">
 		<xs:sequence>
-			<xs:element minOccurs="0" name="SealedCombustion" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="AtmosphericBurner" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="PowerBurner" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="AutomaticVentDamper" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="PilotLight" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="xs:boolean"/>
-			<xs:element minOccurs="0" name="RetentionHead" type="xs:boolean"/>
+			<xs:element minOccurs="0" name="SealedCombustion" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="AtmosphericBurner" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="PowerBurner" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="AutomaticVentDamper" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="PilotLight" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
+			<xs:element minOccurs="0" name="RetentionHead" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="AtticType">
 		<xs:choice>
 			<xs:element name="Attic">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element minOccurs="0" name="Vented" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="Conditioned" type="xs:boolean"/>
-						<xs:element minOccurs="0" name="CapeCod" type="xs:boolean"/>
+						<xs:element minOccurs="0" name="Vented" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
+						<xs:element minOccurs="0" name="CapeCod" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="CathedralCeiling">
@@ -4790,6 +5260,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="FlatRoof">
@@ -4797,6 +5268,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -4804,15 +5276,18 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="VentilationType">
 		<xs:sequence>
 			<xs:element name="UnitofMeasure" type="VentilationUnit" minOccurs="0"/>
 			<xs:element name="Value" type="BuildingAirLeakage" minOccurs="0"/>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:complexType name="PipeDiameterType">
 		<xs:sequence>
@@ -4826,43 +5301,36 @@
 							</xs:annotation>
 						</xs:element>
 					</xs:sequence>
+					<xs:attribute ref="dataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
+		<xs:attribute ref="dataSource"/>
 	</xs:complexType>
 	<xs:element name="ExternalResource">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="URL" type="xs:anyURI"/>
-				<xs:element name="Type">
-					<xs:simpleType>
-						<xs:restriction base="xs:string">
-							<xs:enumeration value="photo"/>
-							<xs:enumeration value="illustration"/>
-							<xs:enumeration value="document"/>
-							<xs:enumeration value="spreadsheet"/>
-							<xs:enumeration value="website"/>
-							<xs:enumeration value="other"/>
-						</xs:restriction>
-					</xs:simpleType>
-				</xs:element>
-				<xs:element name="Description" type="xs:string"/>
+				<xs:element name="Type" type="ExternalResourceType"> </xs:element>
+				<xs:element name="Description" type="HPXMLString"/>
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
 			<xs:attribute name="id" use="required"/>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ConnectedDevice">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:group ref="SystemInfo"/>
-				<xs:element name="IsConnected" type="xs:boolean"/>
+				<xs:element name="IsConnected" type="HPXMLBoolean"/>
 				<xs:element maxOccurs="unbounded" minOccurs="0" name="CommunicatesWith" type="LocalReference"/>
 				<xs:element minOccurs="0" name="CommunicationProtocol" type="ConnectedDeviceCommunicationProtocol" maxOccurs="unbounded"/>
-				<xs:element minOccurs="0" name="DemandResponseCapability" type="xs:boolean"/>
-				<xs:element minOccurs="0" name="OccupancySensor" type="xs:boolean"/>
+				<xs:element minOccurs="0" name="DemandResponseCapability" type="HPXMLBoolean"/>
+				<xs:element minOccurs="0" name="OccupancySensor" type="HPXMLBoolean"/>
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
+			<xs:attribute ref="dataSource"/>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>
