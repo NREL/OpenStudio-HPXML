@@ -929,7 +929,7 @@ class HPXML
              :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(skylight, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(skylight, "SHGC")),
-             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading"),
+             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading/Type"),
              :roof_idref => HPXML.get_idref(skylight, "AttachedToRoof") }
   end
 
