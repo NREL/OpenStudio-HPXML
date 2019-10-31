@@ -227,8 +227,6 @@ class HPXML
                       :insulation_id,
                       :perimeter_insulation_id,
                       :under_slab_insulation_id,
-                      :wall_idref,
-                      :roof_idref,
                       :area,
                       :exposed_perimeter]
 
@@ -256,23 +254,6 @@ class HPXML
           surf_type_values[surf_type] << HPXML.get_skylight_values(skylight: surf)
         elsif surf_type == 'Door'
           surf_type_values[surf_type] << HPXML.get_door_values(door: surf)
-        end
-
-        # Add parent wall/roof AdjacentTo values to hash so that they're included in the logic
-        # regarding whether a pair of surfaces can be collapsed.
-        if ['Window', 'Skylight', 'Door'].include? surf_type
-          parent_id = surf_type_values[surf_type][-1][:wall_idref]
-          if parent_id.nil?
-            parent_id = surf_type_values[surf_type][-1][:roof_idref]
-          end
-          ['Wall', 'FoundationWall', 'Roof'].each do |parent_surf_type|
-            surf_type_values[parent_surf_type].each do |parent_surf_values|
-              next unless parent_surf_values[:id] == parent_id
-
-              surf_type_values[surf_type][-1][:interior_adjacent_to] = parent_surf_values[:interior_adjacent_to]
-              surf_type_values[surf_type][-1][:exterior_adjacent_to] = parent_surf_values[:exterior_adjacent_to]
-            end
-          end
         end
 
         surfs[surf_type_values[surf_type][-1][:id]] = surf
@@ -306,19 +287,9 @@ class HPXML
           next unless match
 
           # Update Area/ExposedPerimeter
-          if not surf_values[:area].nil?
-            area_adjustments[surf_values[:id]] += surf_values2[:area]
-          end
+          area_adjustments[surf_values[:id]] += surf_values2[:area]
           if not surf_values[:exposed_perimeter].nil?
             exposed_perimeter_adjustments[surf_values[:id]] += surf_values2[:exposed_perimeter]
-          end
-          if surf_values[:wall_idref] != surf_values2[:wall_idref] # Moving subsurface to a different wall
-            area_adjustments[surf_values[:wall_idref]] += surf_values2[:area]
-            area_adjustments[surf_values2[:wall_idref]] -= surf_values2[:area]
-          end
-          if surf_values[:roof_idref] != surf_values2[:roof_idref] # Moving subsurface to a different roof
-            area_adjustments[surf_values[:roof_idref]] += surf_values2[:area]
-            area_adjustments[surf_values2[:roof_idref]] -= surf_values2[:area]
           end
 
           # Update subsurface idrefs as appropriate
