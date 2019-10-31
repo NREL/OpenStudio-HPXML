@@ -16,6 +16,7 @@
                 <xs:element maxOccurs="unbounded" minOccurs="0" name="Consumption" nillable="true" type="Consumption"/>
             </xs:sequence>
             <xs:attribute name="schemaVersion" type="schemaVersionType" use="required"/>
+            <xs:attribute ref="dataSource"/>
         </xs:complexType>
     </xs:element>
 </xs:schema>
