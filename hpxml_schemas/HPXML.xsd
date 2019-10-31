@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2019/10" targetNamespace="http://hpxmlonline.com/2019/10" elementFormDefault="qualified" version="3.0">
     <xs:include schemaLocation="BaseElements.xsd"/>
 
@@ -16,7 +16,7 @@
                 <xs:element maxOccurs="unbounded" minOccurs="0" name="Consumption" nillable="true" type="Consumption"/>
             </xs:sequence>
             <xs:attribute name="schemaVersion" type="schemaVersionType" use="required"/>
-            <xs:attribute ref="dataSource"/>
+            <xs:attribute name="dataSource" type="DataSource"/>
         </xs:complexType>
     </xs:element>
 </xs:schema>
