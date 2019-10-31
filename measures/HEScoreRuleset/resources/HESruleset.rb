@@ -741,11 +741,13 @@ class HEScoreRuleset
       # Supply duct leakage
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "supply",
+                                         duct_leakage_units: "CFM25",
                                          duct_leakage_value: duct_leakage)
 
       # Return duct leakage
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "return",
+                                         duct_leakage_units: "CFM25",
                                          duct_leakage_value: duct_leakage)
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
