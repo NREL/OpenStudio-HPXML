@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hpxmlonline.com/2019/10" targetNamespace="http://hpxmlonline.com/2019/10" elementFormDefault="qualified" version="3.0">
 	<xs:include schemaLocation="HPXMLDataTypes.xsd"/>
-	<xs:attribute name="dataSource" type="DataSource"/>
 	<xs:element name="XMLTransactionHeaderInformation">
 		<xs:annotation>
 			<xs:documentation>These are a series of elements that indicate the type of XML and basic descriptive data about the XML.</xs:documentation>
@@ -14,7 +13,7 @@
 				<xs:element name="Transaction" type="TransactionType"/>
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="AddressInformation">
@@ -31,7 +30,7 @@
 			<xs:element name="USPSBarCode" type="USPSBarCode" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="SystemIdentifiersInfoType">
 		<xs:annotation>
@@ -54,11 +53,11 @@
 				<xs:documentation>Use to reference the id of the same object on the base building where the object has not been replaced.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="LocalReference">
 		<xs:attribute name="idref" type="xs:IDREF"/>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="RemoteReference">
 		<xs:annotation>
@@ -76,7 +75,7 @@
 				<xs:documentation>Id reference in the current document. Optional. If the element isn't available in the current document, don't use this.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:element name="ContractorSystemIdentifiers">
 		<xs:annotation>
@@ -86,14 +85,14 @@
 			<xs:sequence>
 				<xs:element maxOccurs="unbounded" ref="SystemIdentifiersInfo"/>
 			</xs:sequence>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="extensionType">
 		<xs:sequence>
 			<xs:any maxOccurs="unbounded" minOccurs="0" namespace="##any" processContents="skip"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:element name="extension" type="extensionType"> </xs:element>
 	<xs:element name="ProjectStatus">
@@ -108,7 +107,7 @@
 				<xs:element minOccurs="0" name="Date" type="HPXMLDate"/>
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="IndividualInfo">
@@ -124,7 +123,7 @@
 						<xs:element name="SuffixName" type="SuffixName" minOccurs="0"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="IndividualType" type="IndividualType"/>
@@ -132,7 +131,7 @@
 			<xs:element minOccurs="0" maxOccurs="unbounded" name="Email" type="EmailInfoType"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:element name="UtilityFuelProvider">
 		<xs:annotation>
@@ -150,7 +149,7 @@
 				<xs:element maxOccurs="unbounded" minOccurs="0" name="BusinessContactInfo" type="BusinessContactInfoType"/>
 				<xs:element ref="extension" minOccurs="0"/>
 			</xs:sequence>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="IECCClimateZoneType">
@@ -159,7 +158,7 @@
 			<xs:element name="ClimateZone" type="ClimateZoneIECC"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="InsulationMaterial">
 		<xs:choice>
@@ -183,7 +182,7 @@
 				</xs:annotation>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="InsulationInfo">
 		<xs:sequence>
@@ -209,12 +208,12 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:element name="CoolingSystemInfo" type="CoolingSystemInfoType"/>
 	<xs:element name="HeatPumpInfo" type="HeatPumpInfoType"/>
@@ -232,7 +231,7 @@
 			<xs:element name="ModelYear" type="Year" minOccurs="0"/>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="ApplianceThirdPartyCertifications"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ClothesDryerInfoType">
 		<xs:complexContent>
@@ -445,7 +444,7 @@
 				<xs:element name="SoftwareProgramVersion" type="SoftwareProgramVersion" minOccurs="0"/>
 				<xs:element ref="extension" minOccurs="0"/>
 			</xs:sequence>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="BusinessContactType">
@@ -455,7 +454,7 @@
 					<xs:sequence>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Auditor">
@@ -466,7 +465,7 @@
 						<xs:element minOccurs="0" name="YearsExperience" type="IntegerGreaterThanOrEqualToZero"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Implementer">
@@ -476,7 +475,7 @@
 						<xs:element minOccurs="0" name="StateWhereQualificationHeld" type="StateCode"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -485,11 +484,11 @@
 						<xs:element minOccurs="0" name="Description" type="HPXMLString"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ContractorType">
 		<xs:sequence>
@@ -498,7 +497,7 @@
 			<xs:element name="SubContractor" type="ContractorType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:element name="AttachedToSpace" type="LocalReference"/>
 	<xs:element name="AttachedToZone" type="LocalReference"/>
@@ -527,11 +526,11 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Zones">
 		<xs:sequence>
@@ -544,11 +543,11 @@
 						<xs:element name="Spaces" type="Spaces" minOccurs="0"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Enclosure">
 		<xs:sequence>
@@ -568,11 +567,11 @@
 												<xs:element maxOccurs="unbounded" minOccurs="0" name="BasementCrawlspace" type="BasementCrawlspaceComponentsAirSealed"/>
 												<xs:element maxOccurs="unbounded" minOccurs="0" name="LivingSpace" type="LivingSpaceComponentsAirSealed"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -580,12 +579,12 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Attics">
@@ -613,16 +612,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Foundations" minOccurs="0">
@@ -649,16 +648,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Garages">
@@ -684,7 +683,7 @@
 												<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="AttachedToRoof" type="LocalReference" maxOccurs="unbounded"/>
@@ -697,16 +696,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Roofs">
@@ -748,11 +747,11 @@
 									<xs:element minOccurs="0" name="Insulation" type="InsulationInfo"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="RimJoists">
@@ -790,16 +789,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Walls" minOccurs="0">
@@ -841,16 +840,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="FoundationWalls">
@@ -914,11 +913,11 @@
 									<xs:element maxOccurs="1" minOccurs="0" name="Insulation" type="InsulationInfo"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="FrameFloors">
@@ -946,11 +945,11 @@
 									<xs:element minOccurs="0" maxOccurs="1" name="Insulation" type="InsulationInfo"> </xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Slabs">
@@ -1011,11 +1010,11 @@
 									<xs:element minOccurs="0" name="UnderSlabInsulation" type="InsulationInfo"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Windows" minOccurs="0">
@@ -1036,16 +1035,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Skylights">
@@ -1071,16 +1070,16 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Doors" minOccurs="0">
@@ -1115,21 +1114,21 @@
 											<xs:sequence>
 												<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Systems">
 		<xs:sequence>
@@ -1148,7 +1147,7 @@
 												<xs:element minOccurs="0" name="PrimaryHeatingSystem" type="LocalReference"/>
 												<xs:element minOccurs="0" name="PrimaryCoolingSystem" type="LocalReference"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" maxOccurs="unbounded" name="HeatingSystem" type="HeatingSystemInfoType"/>
@@ -1156,7 +1155,7 @@
 									<xs:element minOccurs="0" maxOccurs="unbounded" name="HeatPump" type="HeatPumpInfoType"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="HVACControl" type="HVACControlType"> </xs:element>
@@ -1176,7 +1175,7 @@
 													</xs:annotation>
 												</xs:element>
 											</xs:choice>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="ConditionedFloorAreaServed" type="SurfaceArea">
@@ -1201,7 +1200,7 @@
 									<xs:element minOccurs="0" name="HVACDistributionImprovement" type="HVACDistributionImprovementInfo"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="Maintenance">
@@ -1211,7 +1210,7 @@
 									<xs:element minOccurs="0" name="ACReplacedinLastTenYears" type="HPXMLBoolean"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -1219,12 +1218,12 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType" maxOccurs="unbounded"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="MechanicalVentilation">
@@ -1330,16 +1329,16 @@
 												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="CombustionVentilation">
@@ -1353,11 +1352,11 @@
 									<xs:element minOccurs="0" ref="AttachedToZone"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="WaterHeating" minOccurs="0">
@@ -1439,7 +1438,7 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
-														<xs:attribute ref="dataSource"/>
+														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element minOccurs="0" name="TankWall">
@@ -1458,11 +1457,11 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
-														<xs:attribute ref="dataSource"/>
+														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element name="MeetsACCA5QIHVACSpecification" type="HPXMLBoolean" minOccurs="0"/>
@@ -1495,13 +1494,13 @@
 												<xs:element minOccurs="0" name="Standard" type="HVACInstallationStandard"/>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="WaterHeaterImprovement" type="WaterHeaterImprovementInfo"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="WaterHeatingControl">
@@ -1516,7 +1515,7 @@
 									<xs:element minOccurs="0" name="TemperatureControl" type="DHWTemperatureControl"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="HotWaterDistribution">
@@ -1543,7 +1542,7 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
-														<xs:attribute ref="dataSource"/>
+														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element name="Recirculation">
@@ -1570,11 +1569,11 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
-														<xs:attribute ref="dataSource"/>
+														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
 											</xs:choice>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="PipeInsulation" type="PipeInsulationType"/>
@@ -1590,12 +1589,12 @@
 												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="WaterFixture">
@@ -1644,7 +1643,7 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -1652,11 +1651,11 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="SolarThermal">
@@ -1719,11 +1718,11 @@
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Photovoltaics">
@@ -1784,11 +1783,11 @@
 									</xs:element>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Batteries">
@@ -1845,11 +1844,11 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ElectricVehicleChargers">
@@ -1889,11 +1888,11 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Wind">
@@ -1948,16 +1947,16 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Appliances">
 		<xs:sequence>
@@ -1971,7 +1970,7 @@
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="Oven" type="OvenInfoType"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Lighting">
 		<xs:sequence>
@@ -2028,7 +2027,7 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="LightingFixture">
@@ -2039,7 +2038,7 @@
 						<xs:element maxOccurs="unbounded" minOccurs="0" name="ThirdPartyCertification" type="LightingFixtureThirdPartyCertification"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="LightingControl" minOccurs="0" maxOccurs="unbounded">
@@ -2053,7 +2052,7 @@
 						<xs:element name="Location" type="LightingLocation" minOccurs="0"> </xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="CeilingFan">
@@ -2081,7 +2080,7 @@
 										</xs:annotation>
 									</xs:element>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="ThirdPartyCertification" type="ApplianceThirdPartyCertifications" maxOccurs="unbounded"/>
@@ -2092,12 +2091,12 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="LightingType">
 		<xs:choice>
@@ -2107,7 +2106,7 @@
 						<xs:element minOccurs="0" name="Halogen" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="FluorescentTube">
@@ -2117,7 +2116,7 @@
 						<xs:element minOccurs="0" name="BallastType" type="FluorescentBallastType"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="CompactFluorescent">
@@ -2125,7 +2124,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="LightEmittingDiode">
@@ -2133,7 +2132,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="HighIntensityDischarge">
@@ -2149,17 +2148,17 @@
 												<xs:element minOccurs="0" name="Pressure" type="SodiumLight_Pressure"> </xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element name="MetalHalide"/>
 								</xs:choice>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -2168,11 +2167,11 @@
 						<xs:element minOccurs="0" name="Description" type="HPXMLString"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Pools">
 		<xs:sequence>
@@ -2305,16 +2304,16 @@
 															</xs:element>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
-														<xs:attribute ref="dataSource"/>
+														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element minOccurs="0" ref="extension"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="Cleaner">
@@ -2334,7 +2333,7 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="Heater">
@@ -2354,16 +2353,16 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MiscLoads">
 		<xs:sequence>
@@ -2378,7 +2377,7 @@
 						<xs:element name="PlugLoadControlType" minOccurs="0" type="PlugLoadControlType"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="PlugLoad" minOccurs="0" maxOccurs="unbounded">
@@ -2396,17 +2395,17 @@
 									<xs:element name="Units" type="PlugLoadUnits"/>
 									<xs:element name="Value" type="HPXMLDouble"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HealthAndSafety">
 		<xs:sequence>
@@ -2416,7 +2415,7 @@
 						<xs:element minOccurs="0" name="TestsCompleted" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="TestsPassed" type="HPXMLBoolean"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Ventilation" minOccurs="0">
@@ -2428,7 +2427,7 @@
 						<xs:element minOccurs="0" name="VentilationImprovement" type="VentilationImprovementInfo"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="MoistureControl" minOccurs="0">
@@ -2438,7 +2437,7 @@
 						<xs:element minOccurs="0" name="MoistureControlImprovement" type="MoistureControlImprovementInfo"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="CombustionAppliances">
@@ -2561,22 +2560,22 @@
 															<xs:element minOccurs="0" name="Notes" type="HPXMLString"/>
 															<xs:element minOccurs="0" ref="extension"/>
 														</xs:sequence>
-														<xs:attribute ref="dataSource"/>
+														<xs:attribute name="dataSource" type="DataSource"/>
 													</xs:complexType>
 												</xs:element>
 												<xs:element ref="extension" minOccurs="0"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="Notes" type="HPXMLString"/>
 									<xs:element ref="extension" minOccurs="0"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="StoveTest">
@@ -2591,7 +2590,7 @@
 						<xs:element name="ActionsTaken" type="HPXMLString" minOccurs="0"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="LeadPaint">
@@ -2619,7 +2618,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Radon">
@@ -2641,7 +2640,7 @@
 									<xs:element minOccurs="0" name="RadonTestMethod" type="RadonTestTypes"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="EducationMaterialProvided" type="HPXMLBoolean">
@@ -2665,7 +2664,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="SourcePollutants">
@@ -2703,7 +2702,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Pests">
@@ -2728,7 +2727,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Asbestos">
@@ -2754,7 +2753,7 @@
 						<xs:element minOccurs="0" name="ActionsMeetIndustrySpecifications" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="SprayFoam">
@@ -2768,12 +2767,12 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="CAZApplianceReading">
 		<xs:sequence>
@@ -2786,7 +2785,7 @@
 			</xs:element>
 			<xs:element minOccurs="0" name="TestResult" type="TestResultType"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="CAZTestConfiguration">
 		<xs:sequence>
@@ -2799,7 +2798,7 @@
 						<xs:element minOccurs="0" name="CentralVacuum" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="AirHandler" type="HPXMLBoolean"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="DoorsOpenClosed">
@@ -2808,7 +2807,7 @@
 						<xs:element minOccurs="0" name="BasementDoors" type="OpenClosed"/>
 						<xs:element minOccurs="0" name="OtherDoors" type="OpenClosed"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Pressure" type="HPXMLDouble">
@@ -2818,7 +2817,7 @@
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="YesNoRecommendInstall">
 		<xs:choice>
@@ -2832,7 +2831,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="No">
@@ -2845,7 +2844,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="NA">
@@ -2853,11 +2852,11 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WholeBldgVentDesignInfo">
 		<xs:sequence>
@@ -2886,7 +2885,7 @@
 			<xs:element minOccurs="0" name="VentilationImprovementRecommendation" type="Recommendation"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="SpotVentDesignInfo">
 		<xs:sequence>
@@ -2926,7 +2925,7 @@
 			<xs:element minOccurs="0" name="AirflowRateUnits" type="SpotVentilationUnits"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="OtherVentIssues">
 		<xs:sequence>
@@ -2952,12 +2951,12 @@
 						<xs:element name="Description" type="HPXMLString"/>
 						<xs:element name="Answer" type="YesNoRecommendInstall"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="StatusMessage">
 		<xs:sequence>
@@ -2966,7 +2965,7 @@
 			<xs:element name="Message" type="HPXMLString"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="FuelSavingsType">
 		<xs:sequence>
@@ -2982,7 +2981,7 @@
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="EndUseSavings" type="EndUseInfoType"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EndUseInfoType">
 		<xs:sequence>
@@ -2994,7 +2993,7 @@
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:group name="SystemInfo">
 		<xs:sequence>
@@ -3031,7 +3030,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="AnnualEnergyUse">
@@ -3039,12 +3038,12 @@
 					<xs:sequence>
 						<xs:element name="ConsumptionInfo" type="ConsumptionInfoType"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="HVACMaintenance" type="HVACMaintenance"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HeatingSystemInfoType">
 		<xs:complexContent>
@@ -3090,7 +3089,7 @@
 						<xs:element minOccurs="0" name="RetentionHead" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="WallFurnace" type="WallAndFloorFurnace"> </xs:element>
@@ -3110,7 +3109,7 @@
 						<xs:element minOccurs="0" name="RetentionHead" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ElectricResistance">
@@ -3119,7 +3118,7 @@
 						<xs:element name="ElectricDistribution" type="ElectricDistributionType" minOccurs="0"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Fireplace">
@@ -3135,7 +3134,7 @@
 						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Stove">
@@ -3151,7 +3150,7 @@
 						<xs:element minOccurs="0" name="IntermittentIgnitionDevice" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="PortableHeater">
@@ -3159,7 +3158,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SolarThermal">
@@ -3168,7 +3167,7 @@
 						<xs:element minOccurs="0" name="SolarThermalSystem" type="LocalReference"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="DistrictSteam">
@@ -3177,7 +3176,7 @@
 						<xs:element minOccurs="0" name="DistrictSteamType" type="DistrictSteamType"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -3186,11 +3185,11 @@
 						<xs:element minOccurs="0" name="Description" type="HPXMLString"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HeatPumpInfoType">
 		<xs:complexContent>
@@ -3281,7 +3280,7 @@
 			<xs:element name="Units" type="CoolingEfficiencyUnits"/>
 			<xs:element name="Value" type="Efficiency"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HeatingEfficiencyType">
 		<xs:sequence>
@@ -3292,7 +3291,7 @@
 			</xs:element>
 			<xs:element name="Value" type="Efficiency"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HydronicDistributionInfo">
 		<xs:sequence>
@@ -3331,12 +3330,12 @@
 						<xs:element minOccurs="0" name="ThermostaticRadiatorValves" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" name="VariableSpeedPump" type="HPXMLBoolean"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="AirDistributionInfo">
 		<xs:sequence>
@@ -3371,7 +3370,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="NumberofReturnRegisters" type="IntegerGreaterThanOrEqualToZero"/>
@@ -3381,12 +3380,12 @@
 						<xs:element minOccurs="0" name="Supply" type="TotalExternalStaticPressureMeasurement"/>
 						<xs:element minOccurs="0" name="Return" type="TotalExternalStaticPressureMeasurement"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:element name="BuildingSystemIdentifiers">
 		<xs:annotation>
@@ -3397,7 +3396,7 @@
 			<xs:sequence>
 				<xs:element ref="SystemIdentifiersInfo"/>
 			</xs:sequence>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="Associations" type="AssociationsType"> </xs:element>
@@ -3415,7 +3414,7 @@
 			<xs:element name="IncentiveAmount" type="IncentiveAmount" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BuildingDetailsType">
 		<xs:sequence>
@@ -3461,7 +3460,7 @@
 													</xs:annotation>
 												</xs:element>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" name="WalkingScore" type="IntegerGreaterThanOrEqualToZero"/>
@@ -3474,12 +3473,12 @@
 											<xs:sequence>
 												<xs:element maxOccurs="unbounded" name="Fuel" type="FuelType"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="BuildingOccupancy">
@@ -3519,7 +3518,7 @@
 									<xs:element minOccurs="0" name="HighestLevelofOccupantEducation" type="EducationLevels"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="BuildingConstruction">
@@ -3670,7 +3669,7 @@
 									<xs:element minOccurs="0" name="SpaceAboveGarage" type="SpaceAboveGarage"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="AnnualEnergyUse" minOccurs="0">
@@ -3678,12 +3677,12 @@
 								<xs:sequence>
 									<xs:element name="ConsumptionInfo" type="ConsumptionInfoType" maxOccurs="unbounded"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ClimateandRiskZones" minOccurs="0">
@@ -3703,7 +3702,7 @@
 						</xs:element>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="GreenBuildingVerifications">
@@ -3785,11 +3784,11 @@
 									</xs:element>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Zones" type="Zones"/>
@@ -3802,7 +3801,7 @@
 			<xs:element minOccurs="0" name="HealthAndSafety" type="HealthAndSafety"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ProjectDetailsType">
 		<xs:sequence>
@@ -3849,7 +3848,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Incentive" type="IncentiveDetailsType"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="EnergySavingsInfo" type="EnergySavingsType" maxOccurs="2"/>
@@ -3859,19 +3858,19 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Measure" type="MeasureDetailsType"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="TotalCostType">
 		<xs:sequence>
 			<xs:element name="TotalCostHealthSafetyMeasures" type="TotalCostHealthSafetyMeasures" minOccurs="1"/>
 			<xs:element name="TotalCostQualEnergyMeasures" type="TotalCostQualEnergyMeasures" minOccurs="1"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MeasureDetailsType">
 		<xs:sequence>
@@ -3883,7 +3882,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" ref="SystemIdentifiersInfo"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" ref="ExternalResource"/>
@@ -3895,7 +3894,7 @@
 						<xs:element name="Units" type="HPXMLString"/>
 						<xs:element name="Value" type="Quantity"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Location" type="UnitLocation" minOccurs="0"/>
@@ -3908,7 +3907,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Incentive" type="IncentiveDetailsType"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ResourceSavingsInfo">
@@ -3928,11 +3927,11 @@
 									<xs:element name="AnnualAmount" type="AnnualAmount" minOccurs="0"/>
 									<xs:element minOccurs="0" ref="extension"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="EnergySavingsInfo" type="EnergySavingsType" maxOccurs="2"/>
@@ -3953,7 +3952,7 @@
 						<xs:element name="QAComments" type="Notes"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ReplacedComponents">
@@ -3964,7 +3963,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="ReplacedComponent" type="RemoteReference"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="InstalledComponents">
@@ -3972,12 +3971,12 @@
 					<xs:sequence>
 						<xs:element minOccurs="1" name="InstalledComponent" type="RemoteReference" maxOccurs="unbounded"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EnergySavingsType">
 		<xs:sequence>
@@ -4000,7 +3999,7 @@
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WaterSavingsType">
 		<xs:sequence>
@@ -4017,7 +4016,7 @@
 			<xs:element minOccurs="0" name="ReclaimedWaterSystem" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="DuctLeakageMeasurementType">
 		<xs:sequence>
@@ -4035,7 +4034,7 @@
 						<xs:element name="Value" type="MeasuredDuctLeakage" minOccurs="0"/>
 						<xs:element minOccurs="0" name="TotalOrToOutside" type="DuctLeakageTotalOrToOutside"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="EffectiveLeakageArea" type="SurfaceArea">
@@ -4046,7 +4045,7 @@
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ConsumptionInfoType">
 		<xs:sequence>
@@ -4078,7 +4077,7 @@
 						<xs:element name="ConsumptionCost" type="HPXMLDouble" minOccurs="0"/>
 						<xs:element ref="extension" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="MarginalRate" type="HPXMLDouble" minOccurs="0"/>
@@ -4095,7 +4094,7 @@
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BPI2400Inputs">
 		<xs:sequence>
@@ -4183,7 +4182,7 @@
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EnergyAndWaterUseTypeDescription">
 		<xs:choice>
@@ -4212,11 +4211,11 @@
 												<xs:element name="EmissionUnits" type="EmissionUnits"/>
 												<xs:element name="Emissions" type="HPXMLDouble"/>
 											</xs:sequence>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="FuelInterruptibility" type="FuelInterruptibility"/>
@@ -4241,7 +4240,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Water">
@@ -4260,16 +4259,16 @@
 									<xs:element name="Units" type="WaterUseIntensityUnits"/>
 									<xs:element name="Value" type="HPXMLDouble"/>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="ModeledUsageType">
 		<xs:sequence>
@@ -4291,7 +4290,7 @@
 			<xs:element minOccurs="0" name="ElectricityDemandKW" type="HPXMLDouble"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="StudProperties">
 		<xs:sequence>
@@ -4309,7 +4308,7 @@
 			<xs:element minOccurs="0" name="Material" type="StudMaterial"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="TelephoneInfoType">
 		<xs:sequence>
@@ -4319,7 +4318,7 @@
 			<xs:element name="TelephoneExtension" type="TelephoneExtension" minOccurs="0"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="EmailInfoType">
 		<xs:sequence>
@@ -4328,7 +4327,7 @@
 			<xs:element minOccurs="0" name="PreferredContactMethod" type="HPXMLBoolean"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BusinessInfoType">
 		<xs:sequence>
@@ -4342,7 +4341,7 @@
 			<xs:element minOccurs="0" maxOccurs="unbounded" name="EmailInfo" type="EmailInfoType"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="BusinessContactInfoType">
 		<xs:sequence>
@@ -4350,7 +4349,7 @@
 			<xs:element minOccurs="0" name="Person" type="IndividualInfo"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:group name="WindowInfo">
 		<xs:sequence>
@@ -4392,7 +4391,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="ExteriorShading">
@@ -4414,7 +4413,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="InteriorShading">
@@ -4439,7 +4438,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="StormWindow">
@@ -4452,7 +4451,7 @@
 						<xs:element minOccurs="0" name="Condition" type="WindowCondition"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="MoveableInsulation">
@@ -4465,7 +4464,7 @@
 						<xs:element minOccurs="0" name="RValue" type="RValue"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Overhangs">
@@ -4487,7 +4486,7 @@
 							</xs:annotation>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="WeatherStripping" type="HPXMLBoolean"/>
@@ -4503,7 +4502,7 @@
 						<xs:element minOccurs="0" name="ThermalBreak" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Composite">
@@ -4511,7 +4510,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Fiberglass">
@@ -4519,7 +4518,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Metal">
@@ -4528,7 +4527,7 @@
 						<xs:element minOccurs="0" name="ThermalBreak" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Vinyl">
@@ -4536,7 +4535,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Wood">
@@ -4544,7 +4543,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -4553,11 +4552,11 @@
 						<xs:element minOccurs="0" name="Description"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="AssociationsType">
 		<xs:all minOccurs="0">
@@ -4570,17 +4569,17 @@
 									<xs:element name="Measure" minOccurs="0" maxOccurs="unbounded">
 										<xs:complexType>
 											<xs:attribute name="ID" type="xs:int" use="required"/>
-											<xs:attribute ref="dataSource"/>
+											<xs:attribute name="dataSource" type="DataSource"/>
 										</xs:complexType>
 									</xs:element>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element name="JobRole" type="JobRole" minOccurs="0"/>
 					</xs:sequence>
 					<xs:attribute name="ID" type="xs:int" use="required"/>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Locations" minOccurs="0">
@@ -4589,21 +4588,21 @@
 						<xs:element name="Location" minOccurs="0" maxOccurs="unbounded">
 							<xs:complexType>
 								<xs:attribute name="ID" type="xs:int" use="required"/>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Contractor" minOccurs="0">
 				<xs:complexType>
 					<xs:attribute name="ID" type="xs:int"/>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:all>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="AirInfiltrationMeasurementType">
 		<xs:sequence>
@@ -4637,7 +4636,7 @@
 						<xs:element name="UnitofMeasure" type="BuildingAirLeakageUnit" minOccurs="0"/>
 						<xs:element name="AirLeakage" type="BuildingAirLeakage" minOccurs="0"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="EffectiveLeakageArea" type="HPXMLDouble">
@@ -4654,7 +4653,7 @@
 			</xs:element>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MoistureControlInfoType">
 		<xs:sequence>
@@ -4663,7 +4662,7 @@
 			<xs:element name="InteriorLocationsofWaterLeaksorDamage" type="InteriorLocationsofWaterLeaksorDamage" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="FoundationType">
 		<xs:choice>
@@ -4674,7 +4673,7 @@
 						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Crawlspace">
@@ -4684,7 +4683,7 @@
 						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SlabOnGrade">
@@ -4692,7 +4691,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Garage">
@@ -4701,7 +4700,7 @@
 						<xs:element minOccurs="0" name="Conditioned" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="AboveApartment">
@@ -4712,7 +4711,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Combination">
@@ -4720,7 +4719,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Ambient">
@@ -4731,7 +4730,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="RubbleStone">
@@ -4739,7 +4738,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -4747,11 +4746,11 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WallType">
 		<xs:annotation>
@@ -4773,7 +4772,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="DoubleWoodStud">
@@ -4782,7 +4781,7 @@
 						<xs:element minOccurs="0" name="Staggered" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ConcreteMasonryUnit">
@@ -4793,7 +4792,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="StructurallyInsulatedPanel">
@@ -4804,7 +4803,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="InsulatedConcreteForms">
@@ -4815,7 +4814,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SteelFrame">
@@ -4823,7 +4822,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="SolidConcrete">
@@ -4831,7 +4830,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="StructuralBrick">
@@ -4839,7 +4838,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="StrawBale">
@@ -4847,7 +4846,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Stone">
@@ -4855,7 +4854,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="LogWall">
@@ -4863,7 +4862,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -4871,11 +4870,11 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACControlType">
 		<xs:sequence>
@@ -4929,7 +4928,7 @@
 			<xs:element name="HVACSystemsServed" type="LocalReference" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element ref="extension" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACControlTypeAdjustments">
 		<xs:sequence>
@@ -4937,7 +4936,7 @@
 			<xs:element minOccurs="0" name="Night" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="MoistureControlImprovementInfo">
 		<xs:sequence>
@@ -4948,7 +4947,7 @@
 			<xs:element name="OtherMeasuresImplementedDescription" type="HPXMLString" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACDistributionImprovementInfo">
 		<xs:sequence>
@@ -4963,7 +4962,7 @@
 			<xs:element name="SystemPumpandZoneValveCorrectionsMade" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="HVACMaintenance">
 		<xs:sequence>
@@ -5001,7 +5000,7 @@
 										</xs:annotation>
 									</xs:element>
 								</xs:sequence>
-								<xs:attribute ref="dataSource"/>
+								<xs:attribute name="dataSource" type="DataSource"/>
 							</xs:complexType>
 						</xs:element>
 						<xs:element minOccurs="0" name="MERVRating" type="MERV">
@@ -5017,12 +5016,12 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WaterHeaterImprovementInfo">
 		<xs:sequence>
@@ -5039,7 +5038,7 @@
 			<xs:element name="SystemReplaced" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="VentilationImprovementInfo">
 		<xs:sequence>
@@ -5047,7 +5046,7 @@
 			<xs:element name="MechanicalVentilationInstalled" type="HPXMLBoolean" minOccurs="0"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Building">
 		<xs:sequence>
@@ -5064,7 +5063,7 @@
 						<xs:element minOccurs="0" name="eGridRegion" type="eGridRegions"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="ContractorID" type="RemoteReference"/>
@@ -5085,12 +5084,12 @@
 						</xs:element>
 						<xs:element maxOccurs="unbounded" name="ModeledUsage" type="ModeledUsageType"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Project">
 		<xs:sequence>
@@ -5100,14 +5099,14 @@
 			<xs:element name="ProjectDetails" type="ProjectDetailsType"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Contractor">
 		<xs:sequence>
 			<xs:element name="ContractorDetails" type="ContractorType"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Customer">
 		<xs:sequence>
@@ -5122,7 +5121,7 @@
 						</xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" name="Comments">
@@ -5133,7 +5132,7 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="Comment" type="HPXMLString"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element maxOccurs="unbounded" minOccurs="0" name="OtherContact">
@@ -5143,12 +5142,12 @@
 						<xs:element name="Address" type="AddressInformation"> </xs:element>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Utility">
 		<xs:sequence>
@@ -5160,12 +5159,12 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" ref="UtilityFuelProvider"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="Consumption">
 		<xs:sequence>
@@ -5176,12 +5175,12 @@
 					<xs:sequence>
 						<xs:element maxOccurs="unbounded" name="ConsumptionInfo" type="ConsumptionInfoType"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WeatherStation">
 		<xs:sequence>
@@ -5195,7 +5194,7 @@
 			<xs:element minOccurs="0" name="Use" nillable="true" type="WeatherStationUse"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="PipeInsulationType">
 		<xs:sequence>
@@ -5213,7 +5212,7 @@
 			</xs:element>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="TotalExternalStaticPressureMeasurement">
 		<xs:sequence>
@@ -5227,7 +5226,7 @@
 			<xs:element minOccurs="0" name="StaticPressureSource" type="StaticPressureSource"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="WallAndFloorFurnace">
 		<xs:sequence>
@@ -5240,7 +5239,7 @@
 			<xs:element minOccurs="0" name="RetentionHead" type="HPXMLBoolean"/>
 			<xs:element minOccurs="0" ref="extension"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="AtticType">
 		<xs:choice>
@@ -5252,7 +5251,7 @@
 						<xs:element minOccurs="0" name="CapeCod" type="HPXMLBoolean"/>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="CathedralCeiling">
@@ -5260,7 +5259,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="FlatRoof">
@@ -5268,7 +5267,7 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="Other">
@@ -5276,18 +5275,18 @@
 					<xs:sequence>
 						<xs:element minOccurs="0" ref="extension"/>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="VentilationType">
 		<xs:sequence>
 			<xs:element name="UnitofMeasure" type="VentilationUnit" minOccurs="0"/>
 			<xs:element name="Value" type="BuildingAirLeakage" minOccurs="0"/>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:complexType name="PipeDiameterType">
 		<xs:sequence>
@@ -5301,11 +5300,11 @@
 							</xs:annotation>
 						</xs:element>
 					</xs:sequence>
-					<xs:attribute ref="dataSource"/>
+					<xs:attribute name="dataSource" type="DataSource"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute ref="dataSource"/>
+		<xs:attribute name="dataSource" type="DataSource"/>
 	</xs:complexType>
 	<xs:element name="ExternalResource">
 		<xs:complexType>
@@ -5316,7 +5315,7 @@
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
 			<xs:attribute name="id" use="required"/>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ConnectedDevice">
@@ -5330,7 +5329,7 @@
 				<xs:element minOccurs="0" name="OccupancySensor" type="HPXMLBoolean"/>
 				<xs:element minOccurs="0" ref="extension"/>
 			</xs:sequence>
-			<xs:attribute ref="dataSource"/>
+			<xs:attribute name="dataSource" type="DataSource"/>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>
