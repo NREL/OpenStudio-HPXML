@@ -841,8 +841,13 @@ class HPXML
     XMLHelper.add_element(window, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(window, "UFactor", Float(ufactor))
     XMLHelper.add_element(window, "SHGC", Float(shgc))
-    XMLHelper.add_element(window, "InteriorShadingFactorSummer", Float(interior_shading_factor_summer)) unless interior_shading_factor_summer.nil?
-    XMLHelper.add_element(window, "InteriorShadingFactorWinter", Float(interior_shading_factor_winter)) unless interior_shading_factor_winter.nil?
+    if not interior_shading_factor_summer.nil? or not interior_shading_factor_winter.nil?
+      interior_shading = XMLHelper.add_element(window, "InteriorShading")
+      sys_id = XMLHelper.add_element(interior_shading, "SystemIdentifier")
+      XMLHelper.add_attribute(sys_id, "id", "#{id}InteriorShading")
+      XMLHelper.add_element(interior_shading, "SummerShadingCoefficient", Float(interior_shading_factor_summer)) unless interior_shading_factor_summer.nil?
+      XMLHelper.add_element(interior_shading, "WinterShadingCoefficient", Float(interior_shading_factor_winter)) unless interior_shading_factor_winter.nil?
+    end
     if not overhangs_depth.nil? or not overhangs_distance_to_top_of_window.nil? or not overhangs_distance_to_bottom_of_window.nil?
       overhangs = XMLHelper.add_element(window, "Overhangs")
       XMLHelper.add_element(overhangs, "Depth", Float(overhangs_depth))
@@ -874,9 +879,9 @@ class HPXML
              :gas_fill => XMLHelper.get_value(window, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(window, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(window, "SHGC")),
-             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "InteriorShadingFactorSummer")),
-             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "InteriorShadingFactorWinter")),
-             :exterior_shading => XMLHelper.get_value(window, "ExteriorShading"),
+             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/SummerShadingCoefficient")),
+             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/WinterShadingCoefficient")),
+             :exterior_shading => XMLHelper.get_value(window, "ExteriorShading/Type"),
              :overhangs_depth => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth")),
              :overhangs_distance_to_top_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow")),
              :overhangs_distance_to_bottom_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow")),
@@ -924,7 +929,7 @@ class HPXML
              :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(skylight, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(skylight, "SHGC")),
-             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading"),
+             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading/Type"),
              :roof_idref => HPXML.get_idref(skylight, "AttachedToRoof") }
   end
 
