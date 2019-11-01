@@ -183,7 +183,7 @@ class HEScoreRuleset
                        solar_absorptance: roof_values[:solar_absorptance],
                        emittance: 0.9, # ERI assumption; TODO get values from method
                        pitch: Math.tan(UnitConversions.convert(@roof_angle, "deg", "rad")) * 12,
-                       radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
+                       radiant_barrier: false,
                        insulation_assembly_r_value: roof_r)
       end
     end
@@ -368,7 +368,7 @@ class HEScoreRuleset
                      area: slab_values[:area],
                      thickness: slab_values[:thickness],
                      exposed_perimeter: get_foundation_perimeter(orig_foundation),
-                     perimeter_insulation_depth: 1, # FIXME: Hard-coded
+                     perimeter_insulation_depth: 2,
                      under_slab_insulation_width: 0,
                      depth_below_grade: slab_values[:depth_below_grade],
                      carpet_fraction: 1.0,
@@ -1007,16 +1007,13 @@ end
 
 def get_default_water_heater_re(fuel, ef)
   # Water Heater Recovery Efficiency by fuel and energy factor
-  if ["natural gas", "propane"].include?(fuel)
-    if ef < 0.75
-      val = 0.251211 * ef + 0.608671
-    else
-      val = 0.778114 * ef + 0.276679
-    end
-  elsif fuel == "fuel oil"
-    val = 1.27605 * ef - 0.0728183
-  elsif fuel == "electricity"
+  val = nil
+  if fuel == "electricity"
     val = 0.98
+  elsif ef >= 0.75
+    val = 0.778114 * ef + 0.276679
+  else
+    val = 0.252117 * ef + 0.607997
   end
   return val if not val.nil?
 
@@ -1056,7 +1053,6 @@ $siding_map = {
 
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
-  # FIXME: Need values below where nil
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   has_r_cont = !r_cont.nil?
   if not has_r_cont and not ove
@@ -1149,8 +1145,6 @@ end
 
 def get_ceiling_assembly_r(r_cavity)
   # Ceiling Assembly R-value
-  # FIXME: Verify
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/ceiling-construction-types
   val = { 0.0 => 2.2,              # ecwf00
           3.0 => 5.0,              # ecwf03
@@ -1172,8 +1166,6 @@ end
 
 def get_floor_assembly_r(r_cavity)
   # Floor Assembly R-value
-  # FIXME: Verify
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/floor-construction-types
   val = { 0.0 => 5.9,              # efwf00ca
           11.0 => 15.6,            # efwf11ca
@@ -1190,8 +1182,6 @@ def get_floor_assembly_r(r_cavity)
 end
 
 def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
-  # Window U-factor/SHGC
-  # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, glass_layers, glass_type, gas_fill]
   vals = { ["Aluminum", "single-pane", nil, nil] => [1.27, 0.75],                               # scna
@@ -1248,12 +1238,11 @@ end
 def get_roof_solar_absorptance(roof_color)
   # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
-  val = { "reflective" => 0.40,
-          "white" => 0.50,
-          "light" => 0.65,
-          "medium" => 0.75,
-          "medium dark" => 0.85,
-          "dark" => 0.95 }[roof_color]
+  val = { "reflective" => 0.35,
+          "light" => 0.55,
+          "medium" => 0.7,
+          "medium dark" => 0.8,
+          "dark" => 0.9 }[roof_color]
   return val if not val.nil?
 
   fail "Could not get roof absorptance for color '#{roof_color}'"
