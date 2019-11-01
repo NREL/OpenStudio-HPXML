@@ -142,7 +142,7 @@
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallAtticGableCondInsulation'/>
-              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>22.3</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -264,9 +264,9 @@
           </Window>
           <Window>
             <SystemIdentifier id='AtticGableWindowWest'/>
-            <Area>12.0</Area>
+            <Area>62.0</Area>
             <Azimuth>270</Azimuth>
-            <UFactor>0.33</UFactor>
+            <UFactor>0.3</UFactor>
             <SHGC>0.45</SHGC>
             <AttachedToWall idref='WallAtticGableCond'/>
           </Window>
