@@ -93,8 +93,35 @@ class HEScoreRuleset
       @bldg_length_front, @bldg_length_side = @bldg_length_side, @bldg_length_front
     end
     @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
-    @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
     @roof_angle = 30.0 # deg
+    @roof_angle_rad = UnitConversions.convert(@roof_angle, "deg", "rad") # radians
+    @cvolume = @cfa * @ceil_height
+    orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
+      is_conditioned_attic = XMLHelper.has_element(orig_attic, "AtticType/Attic[Conditioned='true']")
+      is_cathedral_ceiling = XMLHelper.has_element(orig_attic, "AtticType/CathedralCeiling")
+      if is_conditioned_attic or is_cathedral_ceiling
+        roof_id = HPXML.get_idref(orig_attic, "AttachedToRoof")
+        roof = orig_details.elements["Enclosure/Roofs/Roof[SystemIdentifier[@id='#{roof_id}']]"]
+        roof_values = HPXML.get_roof_values(roof: roof)
+
+        # Half of the length of short side of the house
+        a = 0.5 * [@bldg_length_front, @bldg_length_side].min
+        # Ridge height
+        b = a * Math.tan(@roof_angle_rad)
+        # The hypotenuse
+        c = a / Math.cos(@roof_angle_rad)
+        # The depth this attic area goes back on the non-gable side
+        d = 0.5 * roof_values[:area] / c
+
+        if is_conditioned_attic
+          # Remove erroneous full height volume from the conditioned volume
+          @cvolume -= @ceil_height * 2 * a * d
+        end
+
+        # Add the volume under the roof and above the "ceiling"
+        @cvolume += d * a * b
+      end
+    end
 
     HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
@@ -167,7 +194,7 @@ class HEScoreRuleset
       if roof_area.nil?
         floor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
         frame_floor_area = Float(orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier/@id='#{floor_id}']/Area/text()"].to_s)
-        roof_area = frame_floor_area / (2. * Math.cos(UnitConversions.convert(@roof_angle, "deg", "rad"))) if roof_area.nil?
+        roof_area = frame_floor_area / (2. * Math.cos(@roof_angle_rad)) if roof_area.nil?
       end
       if @is_townhouse
         roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
@@ -182,7 +209,7 @@ class HEScoreRuleset
                        azimuth: sanitize_azimuth(roof_azimuth),
                        solar_absorptance: roof_values[:solar_absorptance],
                        emittance: 0.9, # ERI assumption; TODO get values from method
-                       pitch: Math.tan(UnitConversions.convert(@roof_angle, "deg", "rad")) * 12,
+                       pitch: Math.tan(@roof_angle_rad) * 12,
                        radiant_barrier: false,
                        insulation_assembly_r_value: roof_r)
       end

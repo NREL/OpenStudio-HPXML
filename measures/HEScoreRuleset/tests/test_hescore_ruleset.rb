@@ -25,6 +25,7 @@ class HEScoreRulesetTest < MiniTest::Test
       _test_measure(args_hash)
       _test_schema_validation(this_dir, xml.gsub('.xml', '.xml.out'))
       _test_assembly_effective_rvalues(args_hash)
+      _test_conditioned_building_volume(args_hash)
 
       FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
     end
@@ -477,6 +478,26 @@ class HEScoreRulesetTest < MiniTest::Test
       roofid = roof.elements["SystemIdentifier"].attribute('id').value
       eff_rvalue = Float(XMLHelper.get_value(roof, "Insulation/AssemblyEffectiveRValue"))
       assert_in_epsilon(eff_rvalue, get_roof_effective_r_from_doe2code(roof_code_by_id[roofid.split('_')[0]]), 0.01)
+    end
+  end
+
+  def _test_conditioned_building_volume(args_hash)
+    in_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
+    out_doc = REXML::Document.new(File.read(args_hash['hpxml_output_path']))
+
+    cfa = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
+    ceil_height = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight'))
+    cbv = Float(XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume'))
+    
+    has_conditioned_attic = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic[Conditioned='true']")
+    has_cathedral_ceiling = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/CathedralCeiling")
+
+    if not (has_cathedral_ceiling or has_conditioned_attic)
+      assert_in_epsilon(cfa * ceil_height, cbv, 0.01)
+    elsif has_cathedral_ceiling and not has_conditioned_attic
+      assert(cfa * ceil_height < cbv)
+    elsif not has_cathedral_ceiling and has_conditioned_attic
+      assert(cfa * ceil_height > cbv)
     end
   end
 end
