@@ -746,8 +746,8 @@ class HEScoreRuleset
         end
 
         if duct_values[:duct_location] == "living space"
-          supply_duct_surface_area = 0.0
-          return_duct_surface_area = 0.0
+          supply_duct_surface_area = 0.001 # Arbitrary; can't be zero
+          return_duct_surface_area = 0.001 # Arbitrary; can't be zero
         else
           supply_duct_surface_area = uncond_area_s * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
           return_duct_surface_area = uncond_area_r * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
