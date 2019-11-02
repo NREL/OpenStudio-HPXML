@@ -55,45 +55,71 @@ class HEScoreRulesetTest < MiniTest::Test
   end
 
   def test_ducts
-    # Base_hpxml.xml
+    # Base (No ducts in conditioned space)
     cfa = 2000.0
     ncfl_ag = 2
     sealed = true
-    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
-    assert_in_epsilon(0.0375, leak_s, 0.00001)
-    assert_in_epsilon(0.0375, leak_r, 0.00001)
-    assert_in_epsilon(405.0, area_s, 0.00001)
-    assert_in_epsilon(150.0, area_r, 0.00001)
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.0325, lto_s, 0.00001)
+    assert_in_epsilon(0.0500, lto_r, 0.00001)
+    assert_in_epsilon(351, uncond_area_s, 0.00001)
+    assert_in_epsilon(200, uncond_area_r, 0.00001)
 
-    # Floors_1_hpxml.xml (change # stories)
+    # Base w/ ducts completely in conditioned space
     cfa = 2000.0
-    ncfl_ag = 1
+    ncfl_ag = 2
     sealed = true
-    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
-    assert_in_epsilon(0.05, leak_s, 0.00001)
-    assert_in_epsilon(0.05, leak_r, 0.00001)
-    assert_in_epsilon(540.0, area_s, 0.00001)
-    assert_in_epsilon(100.0, area_r, 0.00001)
+    frac_inside = 1.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0, lto_s, 0.00001)
+    assert_in_epsilon(0, lto_r, 0.00001)
+    assert_in_epsilon(0, uncond_area_s, 0.00001)
+    assert_in_epsilon(0, uncond_area_r, 0.00001)
 
-    # Duct_uninsulated_and_unsealed_hpxml.xml (change sealed)
+    # Base w/ ducts half in conditioned space
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = true
+    frac_inside = 0.5
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.025, lto_s, 0.00001)
+    assert_in_epsilon(0.050, lto_r, 0.00001)
+    assert_in_epsilon(270, uncond_area_s, 0.00001)
+    assert_in_epsilon(200, uncond_area_r, 0.00001)
+
+    # Base w/ unsealed ducts
     cfa = 2000.0
     ncfl_ag = 2
     sealed = false
-    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
-    assert_in_epsilon(0.09375, leak_s, 0.00001)
-    assert_in_epsilon(0.09375, leak_r, 0.00001)
-    assert_in_epsilon(405.0, area_s, 0.00001)
-    assert_in_epsilon(150.0, area_r, 0.00001)
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.08125, lto_s, 0.00001)
+    assert_in_epsilon(0.12500, lto_r, 0.00001)
+    assert_in_epsilon(351, uncond_area_s, 0.00001)
+    assert_in_epsilon(200, uncond_area_r, 0.00001)
 
-    # Floor_area_25000_hpxml.xml (change CFA)
-    cfa = 25000.0
+    # Base w/ 1 story home
+    cfa = 2000.0
+    ncfl_ag = 1
+    sealed = true
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.05, lto_s, 0.00001)
+    assert_in_epsilon(0.05, lto_r, 0.00001)
+    assert_in_epsilon(540, uncond_area_s, 0.00001)
+    assert_in_epsilon(100, uncond_area_r, 0.00001)
+
+    # Base w/ 20000 sqft
+    cfa = 20000.0
     ncfl_ag = 2
     sealed = true
-    leak_s, leak_r, area_s, area_r = calc_duct_values(ncfl_ag, cfa, sealed)
-    assert_in_epsilon(0.0375, leak_s, 0.00001)
-    assert_in_epsilon(0.0375, leak_r, 0.00001)
-    assert_in_epsilon(5062.5, area_s, 0.00001)
-    assert_in_epsilon(1875.0, area_r, 0.00001)
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.0325, lto_s, 0.00001)
+    assert_in_epsilon(0.0500, lto_r, 0.00001)
+    assert_in_epsilon(3510, uncond_area_s, 0.00001)
+    assert_in_epsilon(2000, uncond_area_r, 0.00001)
   end
 
   def test_infiltration
@@ -488,7 +514,7 @@ class HEScoreRulesetTest < MiniTest::Test
     cfa = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
     ceil_height = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight'))
     cbv = Float(XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume'))
-    
+
     has_conditioned_attic = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic[Conditioned='true']")
     has_cathedral_ceiling = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/CathedralCeiling")
 
