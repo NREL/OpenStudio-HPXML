@@ -224,6 +224,7 @@ def create_hpxmls
     'base-location-miami-fl.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
+    'base-mechvent-cfis-24hrs.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-erv.xml' => 'base.xml',
     'base-mechvent-erv-atre.xml' => 'base.xml',
     'base-mechvent-erv-asre.xml' => 'base.xml',
@@ -2474,6 +2475,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
     if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
       ventilation_fans_values[0][:distribution_system_idref] = "foobar"
     end
+  elsif ['base-mechvent-cfis-24hrs.xml'].include? hpxml_file
+    ventilation_fans_values[0][:hours_in_operation] = 24
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
