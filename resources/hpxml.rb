@@ -1184,17 +1184,32 @@ class HPXML
 
   def self.add_hvac_control(hpxml:,
                             id:,
-                            control_type:,
-                            setpoint_temp_heating_season: nil,
-                            setpoint_temp_cooling_season: nil,
+                            control_type: nil,
+                            heating_setpoint_temp: nil,
+                            heating_setback_temp: nil,
+                            heating_setback_hours_per_week: nil,
+                            heating_setback_start_hour: nil,
+                            cooling_setpoint_temp: nil,
+                            cooling_setup_temp: nil,
+                            cooling_setup_hours_per_week: nil,
+                            cooling_setup_start_hour: nil,
+                            ceiling_fan_cooling_setpoint_temp_offset: nil,
                             **remainder)
     hvac = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC"])
     hvac_control = XMLHelper.add_element(hvac, "HVACControl")
     sys_id = XMLHelper.add_element(hvac_control, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(hvac_control, "ControlType", control_type)
-    XMLHelper.add_element(hvac_control, "SetpointTempHeatingSeason", Float(setpoint_temp_heating_season)) unless setpoint_temp_heating_season.nil?
-    XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", Float(setpoint_temp_cooling_season)) unless setpoint_temp_cooling_season.nil?
+    XMLHelper.add_element(hvac_control, "ControlType", control_type) unless control_type.nil?
+    XMLHelper.add_element(hvac_control, "SetpointTempHeatingSeason", Float(heating_setpoint_temp)) unless heating_setpoint_temp.nil?
+    XMLHelper.add_element(hvac_control, "SetbackTempHeatingSeason", Float(heating_setback_temp)) unless heating_setback_temp.nil?
+    XMLHelper.add_element(hvac_control, "TotalSetbackHoursperWeekHeating", Float(heating_setback_hours_per_week)) unless heating_setback_hours_per_week.nil?
+    XMLHelper.add_element(hvac_control, "SetupTempCoolingSeason", Float(cooling_setup_temp)) unless cooling_setup_temp.nil?
+    XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", Float(cooling_setpoint_temp)) unless cooling_setpoint_temp.nil?
+    XMLHelper.add_element(hvac_control, "TotalSetupHoursperWeekCooling", Float(cooling_setup_hours_per_week)) unless cooling_setup_hours_per_week.nil?
+    HPXML.add_extension(parent: hvac_control,
+                        extensions: { "SetbackStartHourHeating": to_integer_or_nil(heating_setback_start_hour),
+                                      "SetupStartHourCooling": to_integer_or_nil(cooling_setup_start_hour),
+                                      "CeilingFanSetpointTempCoolingSeasonOffset": to_float_or_nil(ceiling_fan_cooling_setpoint_temp_offset) })
 
     return hvac_control
   end
@@ -1204,8 +1219,15 @@ class HPXML
 
     return { :id => HPXML.get_id(hvac_control),
              :control_type => XMLHelper.get_value(hvac_control, "ControlType"),
-             :setpoint_temp_heating_season => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason")),
-             :setpoint_temp_cooling_season => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason")) }
+             :heating_setpoint_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason")),
+             :heating_setback_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetbackTempHeatingSeason")),
+             :heating_setback_hours_per_week => to_float_or_nil(XMLHelper.get_value(hvac_control, "TotalSetbackHoursperWeekHeating")),
+             :heating_setback_start_hour => to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetbackStartHourHeating")),
+             :cooling_setpoint_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason")),
+             :cooling_setup_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetupTempCoolingSeason")),
+             :cooling_setup_hours_per_week => to_float_or_nil(XMLHelper.get_value(hvac_control, "TotalSetupHoursperWeekCooling")),
+             :cooling_setup_start_hour => to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetupStartHourCooling")),
+             :ceiling_fan_cooling_setpoint_temp_offset => to_float_or_nil(XMLHelper.get_value(hvac_control, "extension/CeilingFanSetpointTempCoolingSeasonOffset")) }
   end
 
   def self.add_hvac_distribution(hpxml:,
