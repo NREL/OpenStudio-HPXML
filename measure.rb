@@ -2873,6 +2873,7 @@ class OSModel
       quantity = HVAC.get_default_ceiling_fan_quantity(@nbeds)
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
+    annual_kwh *= monthly_sch.inject(:+) / 12.0
 
     success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, monthly_sch,
                                       @cfa, @living_space)
