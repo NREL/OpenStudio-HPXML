@@ -270,26 +270,20 @@ class HPXMLTranslatorTest < MiniTest::Test
     starting_index = sqlFile.execAndReturnFirstInt(query).get
 
     # TabularDataWithStrings table is positional, so we access results by position.
-    ec_adj_fuel = nil
     results = {}
     fueltypes.zip(full_categories, subcategories, units).each_with_index do |(fueltype, category, subcategory, fuel_units), index|
       next if ['District Cooling', 'District Heating'].include? fueltype # Exclude ideal loads results
+      next if subcategory.end_with? Constants.ObjectNameWaterHeaterAdjustment(nil) # Exclude water heater EC_adj, will retrieve later with higher precision
 
       query = "SELECT Value FROM #{tdws} WHERE ReportName='#{abups}' AND ReportForString='#{ef}' AND TableName='#{eubs}' AND TabularDataIndex='#{starting_index + index}'"
       val = sqlFile.execAndReturnFirstDouble(query).get
       next if val == 0
 
-      if subcategory.end_with? Constants.ObjectNameWaterHeaterAdjustment(nil) and val != 0
-        # Exclude water heater EC_adj, will retrieve later. Just store fuel type.
-        ec_adj_fuel = fueltype
-        next
-      end
-
       results[[fueltype, category, subcategory, fuel_units]] = val
     end
 
     # Obtain water heater EC_adj
-    new_key = [ec_adj_fuel, "Water Systems", "EC_adj", "GJ"]
+    new_key = ["Any", "Water Systems", "EC_adj", "GJ"]
     query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName LIKE '%#{Constants.ObjectNameWaterHeaterAdjustment(nil)}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
     results[new_key] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
