@@ -1292,7 +1292,7 @@ class HPXML
 
     return { :duct_type => XMLHelper.get_value(ducts, "DuctType"),
              :duct_insulation_r_value => to_float_or_nil(XMLHelper.get_value(ducts, "DuctInsulationRValue")),
-             :duct_insulation_material => XMLHelper.get_value(ducts, "DuctInsulationMaterial"),
+             :duct_insulation_material => XMLHelper.get_child_name(ducts, "DuctInsulationMaterial"),
              :duct_location => XMLHelper.get_value(ducts, "DuctLocation"),
              :duct_fraction_area => to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea")),
              :duct_surface_area => to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea")) }

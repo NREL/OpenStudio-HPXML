@@ -739,10 +739,12 @@ class HEScoreRuleset
           duct_values[:duct_location] = "attic - vented"
         end
 
-        if duct_values[:duct_insulation_present]
+        if duct_values[:duct_insulation_material] == "Unknown"
           duct_rvalue = 6
-        else
+        elsif duct_values[:duct_insulation_material] == "None"
           duct_rvalue = 0
+        else
+          fail "Unexpected duct insulation material '#{duct_values[:duct_insulation_material]}'."
         end
 
         if duct_values[:duct_location] == "living space"
