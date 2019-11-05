@@ -208,6 +208,137 @@ class HPXML
              :weather_station_wmo => XMLHelper.get_value(weather_station, "WMO") }
   end
 
+  def self.collapse_enclosure(enclosure)
+    # Collapses like surfaces into a single surface with, e.g., aggregate surface area.
+    # This can significantly speed up performance for HPXML files with lots of individual
+    # surfaces (e.g., windows).
+
+    surf_types = ['Roof',
+                  'Wall',
+                  'RimJoist',
+                  'FoundationWall',
+                  'FrameFloor',
+                  'Slab',
+                  'Window',
+                  'Skylight',
+                  'Door']
+
+    keys_to_ignore = [:id,
+                      :insulation_id,
+                      :perimeter_insulation_id,
+                      :under_slab_insulation_id,
+                      :area,
+                      :exposed_perimeter]
+
+    # Populate surf_type_values
+    surf_type_values = {} # Surface values (hashes)
+    surfs = {} # Surface objects
+    surf_types.each do |surf_type|
+      surf_type_values[surf_type] = []
+      enclosure.elements.each("#{surf_type}s/#{surf_type}") do |surf|
+        if surf_type == 'Roof'
+          surf_type_values[surf_type] << HPXML.get_roof_values(roof: surf)
+        elsif surf_type == 'Wall'
+          surf_type_values[surf_type] << HPXML.get_wall_values(wall: surf)
+        elsif surf_type == 'RimJoist'
+          surf_type_values[surf_type] << HPXML.get_rim_joist_values(rim_joist: surf)
+        elsif surf_type == 'FoundationWall'
+          surf_type_values[surf_type] << HPXML.get_foundation_wall_values(foundation_wall: surf)
+        elsif surf_type == 'FrameFloor'
+          surf_type_values[surf_type] << HPXML.get_framefloor_values(framefloor: surf)
+        elsif surf_type == 'Slab'
+          surf_type_values[surf_type] << HPXML.get_slab_values(slab: surf)
+        elsif surf_type == 'Window'
+          surf_type_values[surf_type] << HPXML.get_window_values(window: surf)
+        elsif surf_type == 'Skylight'
+          surf_type_values[surf_type] << HPXML.get_skylight_values(skylight: surf)
+        elsif surf_type == 'Door'
+          surf_type_values[surf_type] << HPXML.get_door_values(door: surf)
+        end
+
+        surfs[surf_type_values[surf_type][-1][:id]] = surf
+      end
+    end
+
+    # Look for pairs of surfaces that can be collapsed
+    area_adjustments = {}
+    exposed_perimeter_adjustments = {}
+    surf_types.each do |surf_type|
+      for i in 0..surf_type_values[surf_type].size - 1
+        surf_values = surf_type_values[surf_type][i]
+        next if surf_values.nil?
+
+        area_adjustments[surf_values[:id]] = 0
+        exposed_perimeter_adjustments[surf_values[:id]] = 0
+
+        for j in (surf_type_values[surf_type].size - 1).downto(i + 1)
+          surf_values2 = surf_type_values[surf_type][j]
+          next if surf_values2.nil?
+          next unless surf_values.keys.sort == surf_values2.keys.sort
+
+          match = true
+          surf_values.keys.each do |key|
+            next if keys_to_ignore.include? key
+            next if surf_type == 'FoundationWall' and key == :azimuth # Azimuth of foundation walls is irrelevant
+            next if surf_values[key] == surf_values2[key]
+
+            match = false
+          end
+          next unless match
+
+          # Update Area/ExposedPerimeter
+          area_adjustments[surf_values[:id]] += surf_values2[:area]
+          if not surf_values[:exposed_perimeter].nil?
+            exposed_perimeter_adjustments[surf_values[:id]] += surf_values2[:exposed_perimeter]
+          end
+
+          # Update subsurface idrefs as appropriate
+          if ['Wall', 'FoundationWall'].include? surf_type
+            ['Window', 'Door'].each do |subsurf_type|
+              surf_type_values[subsurf_type].each do |subsurf_values|
+                subsurf = surfs[subsurf_values[:id]]
+                next unless subsurf_values[:wall_idref] == surf_values2[:id]
+
+                subsurf_values[:wall_idref] = surf_values[:id]
+                subsurf.elements["AttachedToWall"].attributes["idref"] = surf_values[:id]
+              end
+            end
+          elsif ['Roof'].include? surf_type
+            ['Skylight'].each do |subsurf_type|
+              surf_type_values[subsurf_type].each do |subsurf_values|
+                subsurf = surfs[subsurf_values[:id]]
+                next unless subsurf_values[:roof_idref] == surf_values2[:id]
+
+                subsurf_values[:roof_idref] = surf_values[:id]
+                subsurf.elements["AttachedToRoof"].attributes["idref"] = surf_values[:id]
+              end
+            end
+          end
+
+          # Remove old surface
+          surf2 = surfs[surf_values2[:id]]
+          surf2.parent.elements.delete surf2
+          surf_type_values[surf_type].delete_at(j)
+        end
+      end
+    end
+
+    area_adjustments.each do |surf_id, area_adjustment|
+      next unless area_adjustment > 0
+
+      surf = surfs[surf_id]
+      surf.elements["Area"].text = Float(surf.elements["Area"].text) + area_adjustment
+    end
+    exposed_perimeter_adjustments.each do |surf_id, exposed_perimeter_adjustment|
+      next unless exposed_perimeter_adjustment > 0
+
+      surf = surfs[surf_id]
+      surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
+    end
+
+    return true
+  end
+
   def self.add_air_infiltration_measurement(hpxml:,
                                             id:,
                                             house_pressure: nil,
@@ -710,8 +841,13 @@ class HPXML
     XMLHelper.add_element(window, "Azimuth", Integer(azimuth))
     XMLHelper.add_element(window, "UFactor", Float(ufactor))
     XMLHelper.add_element(window, "SHGC", Float(shgc))
-    XMLHelper.add_element(window, "InteriorShadingFactorSummer", Float(interior_shading_factor_summer)) unless interior_shading_factor_summer.nil?
-    XMLHelper.add_element(window, "InteriorShadingFactorWinter", Float(interior_shading_factor_winter)) unless interior_shading_factor_winter.nil?
+    if not interior_shading_factor_summer.nil? or not interior_shading_factor_winter.nil?
+      interior_shading = XMLHelper.add_element(window, "InteriorShading")
+      sys_id = XMLHelper.add_element(interior_shading, "SystemIdentifier")
+      XMLHelper.add_attribute(sys_id, "id", "#{id}InteriorShading")
+      XMLHelper.add_element(interior_shading, "SummerShadingCoefficient", Float(interior_shading_factor_summer)) unless interior_shading_factor_summer.nil?
+      XMLHelper.add_element(interior_shading, "WinterShadingCoefficient", Float(interior_shading_factor_winter)) unless interior_shading_factor_winter.nil?
+    end
     if not overhangs_depth.nil? or not overhangs_distance_to_top_of_window.nil? or not overhangs_distance_to_bottom_of_window.nil?
       overhangs = XMLHelper.add_element(window, "Overhangs")
       XMLHelper.add_element(overhangs, "Depth", Float(overhangs_depth))
@@ -743,9 +879,9 @@ class HPXML
              :gas_fill => XMLHelper.get_value(window, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(window, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(window, "SHGC")),
-             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "InteriorShadingFactorSummer")),
-             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "InteriorShadingFactorWinter")),
-             :exterior_shading => XMLHelper.get_value(window, "ExteriorShading"),
+             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/SummerShadingCoefficient")),
+             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/WinterShadingCoefficient")),
+             :exterior_shading => XMLHelper.get_value(window, "ExteriorShading/Type"),
              :overhangs_depth => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth")),
              :overhangs_distance_to_top_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow")),
              :overhangs_distance_to_bottom_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow")),
@@ -793,7 +929,7 @@ class HPXML
              :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
              :ufactor => to_float_or_nil(XMLHelper.get_value(skylight, "UFactor")),
              :shgc => to_float_or_nil(XMLHelper.get_value(skylight, "SHGC")),
-             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading"),
+             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading/Type"),
              :roof_idref => HPXML.get_idref(skylight, "AttachedToRoof") }
   end
 
@@ -1048,17 +1184,32 @@ class HPXML
 
   def self.add_hvac_control(hpxml:,
                             id:,
-                            control_type:,
-                            setpoint_temp_heating_season: nil,
-                            setpoint_temp_cooling_season: nil,
+                            control_type: nil,
+                            heating_setpoint_temp: nil,
+                            heating_setback_temp: nil,
+                            heating_setback_hours_per_week: nil,
+                            heating_setback_start_hour: nil,
+                            cooling_setpoint_temp: nil,
+                            cooling_setup_temp: nil,
+                            cooling_setup_hours_per_week: nil,
+                            cooling_setup_start_hour: nil,
+                            ceiling_fan_cooling_setpoint_temp_offset: nil,
                             **remainder)
     hvac = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC"])
     hvac_control = XMLHelper.add_element(hvac, "HVACControl")
     sys_id = XMLHelper.add_element(hvac_control, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(hvac_control, "ControlType", control_type)
-    XMLHelper.add_element(hvac_control, "SetpointTempHeatingSeason", Float(setpoint_temp_heating_season)) unless setpoint_temp_heating_season.nil?
-    XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", Float(setpoint_temp_cooling_season)) unless setpoint_temp_cooling_season.nil?
+    XMLHelper.add_element(hvac_control, "ControlType", control_type) unless control_type.nil?
+    XMLHelper.add_element(hvac_control, "SetpointTempHeatingSeason", Float(heating_setpoint_temp)) unless heating_setpoint_temp.nil?
+    XMLHelper.add_element(hvac_control, "SetbackTempHeatingSeason", Float(heating_setback_temp)) unless heating_setback_temp.nil?
+    XMLHelper.add_element(hvac_control, "TotalSetbackHoursperWeekHeating", Integer(heating_setback_hours_per_week)) unless heating_setback_hours_per_week.nil?
+    XMLHelper.add_element(hvac_control, "SetupTempCoolingSeason", Float(cooling_setup_temp)) unless cooling_setup_temp.nil?
+    XMLHelper.add_element(hvac_control, "SetpointTempCoolingSeason", Float(cooling_setpoint_temp)) unless cooling_setpoint_temp.nil?
+    XMLHelper.add_element(hvac_control, "TotalSetupHoursperWeekCooling", Integer(cooling_setup_hours_per_week)) unless cooling_setup_hours_per_week.nil?
+    HPXML.add_extension(parent: hvac_control,
+                        extensions: { "SetbackStartHourHeating": to_integer_or_nil(heating_setback_start_hour),
+                                      "SetupStartHourCooling": to_integer_or_nil(cooling_setup_start_hour),
+                                      "CeilingFanSetpointTempCoolingSeasonOffset": to_float_or_nil(ceiling_fan_cooling_setpoint_temp_offset) })
 
     return hvac_control
   end
@@ -1068,8 +1219,15 @@ class HPXML
 
     return { :id => HPXML.get_id(hvac_control),
              :control_type => XMLHelper.get_value(hvac_control, "ControlType"),
-             :setpoint_temp_heating_season => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason")),
-             :setpoint_temp_cooling_season => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason")) }
+             :heating_setpoint_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason")),
+             :heating_setback_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetbackTempHeatingSeason")),
+             :heating_setback_hours_per_week => to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetbackHoursperWeekHeating")),
+             :heating_setback_start_hour => to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetbackStartHourHeating")),
+             :cooling_setpoint_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason")),
+             :cooling_setup_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetupTempCoolingSeason")),
+             :cooling_setup_hours_per_week => to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetupHoursperWeekCooling")),
+             :cooling_setup_start_hour => to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetupStartHourCooling")),
+             :ceiling_fan_cooling_setpoint_temp_offset => to_float_or_nil(XMLHelper.get_value(hvac_control, "extension/CeilingFanSetpointTempCoolingSeasonOffset")) }
   end
 
   def self.add_hvac_distribution(hpxml:,
@@ -1113,12 +1271,13 @@ class HPXML
 
   def self.add_duct_leakage_measurement(air_distribution:,
                                         duct_type:,
+                                        duct_leakage_units:,
                                         duct_leakage_value:,
                                         **remainder)
     duct_leakage_measurement = XMLHelper.add_element(air_distribution, "DuctLeakageMeasurement")
     XMLHelper.add_element(duct_leakage_measurement, "DuctType", duct_type)
     duct_leakage = XMLHelper.add_element(duct_leakage_measurement, "DuctLeakage")
-    XMLHelper.add_element(duct_leakage, "Units", "CFM25")
+    XMLHelper.add_element(duct_leakage, "Units", duct_leakage_units)
     XMLHelper.add_element(duct_leakage, "Value", Float(duct_leakage_value))
     XMLHelper.add_element(duct_leakage, "TotalOrToOutside", "to outside")
 
