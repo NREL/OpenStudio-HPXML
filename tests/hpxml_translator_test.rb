@@ -55,7 +55,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     xmls.each do |xml|
-      #next if File.basename(xml) != "base-dhw-tank-heat-pump.xml"
+      # next if File.basename(xml) != "base-dhw-tank-heat-pump.xml"
 
       all_results[xml] = _run_xml(xml, this_dir, args.dup)
     end
@@ -267,6 +267,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     starting_index = sqlFile.execAndReturnFirstInt(query).get
 
     # TabularDataWithStrings table is positional, so we access results by position.
+    ec_adj_fuel = nil
     results = {}
     fueltypes.zip(full_categories, subcategories, units).each_with_index do |(fueltype, category, subcategory, fuel_units), index|
       next if ['District Cooling', 'District Heating'].include? fueltype # Exclude ideal loads results
@@ -275,18 +276,19 @@ class HPXMLTranslatorTest < MiniTest::Test
       val = sqlFile.execAndReturnFirstDouble(query).get
       next if val == 0
 
+      if subcategory.end_with? Constants.ObjectNameWaterHeaterAdjustment(nil) and val != 0
+        # Exclude water heater EC_adj, will retrieve later. Just store fuel type.
+        ec_adj_fuel = fueltype
+        next
+      end
+
       results[[fueltype, category, subcategory, fuel_units]] = val
     end
 
-    # Move EC_adj from Interior Equipment category to a single EC_adj subcategory in Water Systems
-    results.keys.each do |k|
-      if k[1] == "Interior Equipment" and k[2].end_with? Constants.ObjectNameWaterHeaterAdjustment(nil)
-        new_key = [k[0], "Water Systems", "EC_adj", k[3]]
-        results[new_key] = 0 if results[new_key].nil?
-        results[new_key] += results[k]
-        results.delete(k)
-      end
-    end
+    # Obtain water heater EC_adj
+    new_key = [ec_adj_fuel, "Water Systems", "EC_adj", "GJ"]
+    query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName LIKE '%#{Constants.ObjectNameWaterHeaterAdjustment(nil)}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    results[new_key] = -sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Disaggregate any crankcase and defrost energy from results
     query = "SELECT SUM(Value)/1000000000 FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name='Cooling Coil Crankcase Heater Electric Energy')"
