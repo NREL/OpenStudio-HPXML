@@ -1793,7 +1793,7 @@ class Airflow
       ems_output_var.setTypeOfDataInVariable("Averaged")
       ems_output_var.setUpdateFrequency("ZoneTimestep")
       ems_output_var.setEMSProgramOrSubroutineName(infil_program)
-      ems_output_var.setUnits("W/cfm")
+      ems_output_var.setUnits("W")
 
       ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "QWHV")
       ems_output_var.setName("#{Constants.ObjectNameMechanicalVentilation} cfis flow rate".gsub(" ", "_"))
