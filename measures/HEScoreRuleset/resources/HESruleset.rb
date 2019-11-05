@@ -696,9 +696,14 @@ class HEScoreRuleset
     end
 
     # HVACControl
+    control_type = "manual thermostat"
+    htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
+    clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
     HPXML.add_hvac_control(hpxml: hpxml,
                            id: "HVACControl",
-                           control_type: "manual thermostat")
+                           control_type: control_type,
+                           heating_setpoint_temp: htg_sp,
+                           cooling_setpoint_temp: clg_sp)
 
     # HVACDistribution
     orig_details.elements.each("Systems/HVAC/HVACDistribution") do |orig_dist|
