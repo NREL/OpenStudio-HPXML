@@ -308,7 +308,7 @@ class OSModel
     success = add_setpoints(runner, model, building, weather)
     return false if not success
 
-    success = add_ceiling_fans(runner, model, building, spaces)
+    success = add_ceiling_fans(runner, model, building, weather)
     return false if not success
 
     # Hot Water
@@ -2834,9 +2834,8 @@ class OSModel
     # Apply cooling setpoint offset due to ceiling fan?
     clg_ceiling_fan_offset = hvac_control_values[:ceiling_fan_cooling_setpoint_temp_offset]
     if not clg_ceiling_fan_offset.nil?
-      monthly_avg_temp_control = 63.0 # deg-F
-      weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
-        next unless val > monthly_avg_temp_control
+      HVAC.get_ceiling_fan_operation_months(weather).each_with_index do |operation, m|
+        next unless operation == 1
 
         clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
       end
@@ -2854,10 +2853,11 @@ class OSModel
     return true
   end
 
-  def self.add_ceiling_fans(runner, model, building, spaces)
+  def self.add_ceiling_fans(runner, model, building, weather)
     ceiling_fan_values = HPXML.get_ceiling_fan_values(ceiling_fan: building.elements["BuildingDetails/Lighting/CeilingFan"])
     return true if ceiling_fan_values.nil?
 
+    monthly_sch = HVAC.get_ceiling_fan_operation_months(weather)
     medium_cfm = 3000.0
     weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     weekend_sch = weekday_sch
@@ -2873,8 +2873,9 @@ class OSModel
       quantity = HVAC.get_default_ceiling_fan_quantity(@nbeds)
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
+    annual_kwh *= monthly_sch.inject(:+) / 12.0
 
-    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
+    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, monthly_sch,
                                       @cfa, @living_space)
     return false if not success
 
