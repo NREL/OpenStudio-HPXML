@@ -2566,20 +2566,31 @@ class OSModel
 
       backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
       if not backup_heat_fuel.nil?
+
         backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
         if backup_heat_capacity_btuh < 0
           backup_heat_capacity_btuh = Constants.SizingAuto
         end
-        backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
         # Heating and backup heating capacity must either both be Autosized or Fixed
         if (backup_heat_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
           runner.registerError("HeatPump '#{heat_pump_values[:id]}' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized.")
           return false
         end
+
+        # FIXME: Does it make sense to treat them the same?
+        if not heat_pump_values[:backup_heating_efficiency_percent].nil?
+          backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
+        else
+          backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_afue]
+        end
+
+        backup_switchover_temp = heat_pump_values[:backup_heating_switchover_temp]
+
       else
         backup_heat_capacity_btuh = 0.0
         backup_heat_efficiency = 1.0
+        backup_switchover_temp = nil
       end
 
       sys_id = heat_pump_values[:id]
