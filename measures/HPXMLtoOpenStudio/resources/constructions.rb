@@ -1484,8 +1484,8 @@ class Constructions
     settings.setFarFieldWidth(40) # TODO: Set based on neighbor distances
     settings.setDeepGroundBoundaryCondition('ZeroFlux')
     settings.setDeepGroundDepth(40)
-    settings.setMinimumCellDimension(0.02)
-    settings.setMaximumCellGrowthCoefficient(1.5)
+    settings.setMinimumCellDimension(0.2)
+    settings.setMaximumCellGrowthCoefficient(3.0)
     settings.setSimulationTimestep("Hourly")
   end
 
