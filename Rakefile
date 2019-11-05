@@ -224,6 +224,7 @@ def create_hpxmls
     'base-location-miami-fl.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
+    'base-mechvent-cfis-24hrs.xml' => 'base-mechvent-cfis.xml',
     'base-mechvent-erv.xml' => 'base.xml',
     'base-mechvent-erv-atre.xml' => 'base.xml',
     'base-mechvent-erv-asre.xml' => 'base.xml',
@@ -2121,14 +2122,24 @@ end
 def get_hpxml_file_hvac_control_values(hpxml_file, hvac_control_values)
   if ['base.xml'].include? hpxml_file
     hvac_control_values = { :id => "HVACControl",
-                            :control_type => "manual thermostat" }
+                            :control_type => "manual thermostat",
+                            :heating_setpoint_temp => 68,
+                            :cooling_setpoint_temp => 78 }
   elsif ['base-hvac-none.xml'].include? hpxml_file
     hvac_control_values = {}
   elsif ['base-hvac-programmable-thermostat.xml'].include? hpxml_file
     hvac_control_values[:control_type] = "programmable thermostat"
+    hvac_control_values[:heating_setback_temp] = 66
+    hvac_control_values[:heating_setback_hours_per_week] = 7 * 7
+    hvac_control_values[:heating_setback_start_hour] = 23 # 11pm
+    hvac_control_values[:cooling_setup_temp] = 80
+    hvac_control_values[:cooling_setup_hours_per_week] = 6 * 7
+    hvac_control_values[:cooling_setup_start_hour] = 9 # 9am
   elsif ['base-hvac-setpoints.xml'].include? hpxml_file
-    hvac_control_values[:setpoint_temp_heating_season] = 60
-    hvac_control_values[:setpoint_temp_cooling_season] = 80
+    hvac_control_values[:heating_setpoint_temp] = 60
+    hvac_control_values[:cooling_setpoint_temp] = 80
+  elsif ['base-misc-ceiling-fans.xml'].include? hpxml_file
+    hvac_control_values[:ceiling_fan_cooling_setpoint_temp_offset] = 0.5
   end
   return hvac_control_values
 end
@@ -2474,6 +2485,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
     if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
       ventilation_fans_values[0][:distribution_system_idref] = "foobar"
     end
+  elsif ['base-mechvent-cfis-24hrs.xml'].include? hpxml_file
+    ventilation_fans_values[0][:hours_in_operation] = 24
   elsif ['base-mechvent-erv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",

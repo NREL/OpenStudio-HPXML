@@ -2408,11 +2408,11 @@ class HVAC
     return true
   end
 
-  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch,
+  def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, monthly_sch,
                               cfa, living_space)
     obj_name = Constants.ObjectNameCeilingFan
 
-    ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, runner, obj_name + " schedule", weekday_sch, weekend_sch, [1] * 12, mult_weekday = 1.0, mult_weekend = 1.0, normalized_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    ceiling_fan_sch = MonthWeekdayWeekendSchedule.new(model, runner, obj_name + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalized_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
     if not ceiling_fan_sch.validated?
       return false
     end
@@ -2440,6 +2440,16 @@ class HVAC
 
   def self.get_default_ceiling_fan_quantity(nbeds)
     return nbeds + 1
+  end
+
+  def self.get_ceiling_fan_operation_months(weather)
+    months = [0] * 12
+    weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
+      next unless val > 63.0 # deg-F
+
+      months[m] = 1
+    end
+    return months
   end
 
   def self.apply_eae_to_heating_fan(runner, eae_hvacs, eae, fuel, load_frac, htg_type)
