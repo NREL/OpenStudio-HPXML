@@ -2834,7 +2834,7 @@ class OSModel
     # Apply cooling setpoint offset due to ceiling fan?
     clg_ceiling_fan_offset = hvac_control_values[:ceiling_fan_cooling_setpoint_temp_offset]
     if not clg_ceiling_fan_offset.nil?
-      HVAC.get_ceiling_fan_operation_months(weather).each_with_index do |m, operation|
+      HVAC.get_ceiling_fan_operation_months(weather).each_with_index do |operation, m|
         next unless operation == 1
 
         clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
