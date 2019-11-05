@@ -262,6 +262,16 @@
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
             <ControlType>programmable thermostat</ControlType>
+            <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
+            <SetbackTempHeatingSeason>66.0</SetbackTempHeatingSeason>
+            <TotalSetbackHoursperWeekHeating>49</TotalSetbackHoursperWeekHeating>
+            <SetupTempCoolingSeason>80.0</SetupTempCoolingSeason>
+            <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
+            <TotalSetupHoursperWeekCooling>42</TotalSetupHoursperWeekCooling>
+            <extension>
+              <SetbackStartHourHeating>23</SetbackStartHourHeating>
+              <SetupStartHourCooling>9</SetupStartHourCooling>
+            </extension>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>

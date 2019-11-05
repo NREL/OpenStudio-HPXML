@@ -308,7 +308,7 @@ class OSModel
     success = add_setpoints(runner, model, building, weather)
     return false if not success
 
-    success = add_ceiling_fans(runner, model, building, spaces)
+    success = add_ceiling_fans(runner, model, building, weather)
     return false if not success
 
     # Hot Water
@@ -2790,23 +2790,22 @@ class OSModel
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
 
-    control_type = hvac_control_values[:control_type]
-    heating_temp = hvac_control_values[:setpoint_temp_heating_season]
-    if not heating_temp.nil? # Use provided value
-      htg_weekday_setpoints = [[heating_temp] * 24] * 12
-    else # Use ERI default
-      htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
-      if htg_setback_sp.nil?
-        htg_weekday_setpoints = [[htg_sp] * 24] * 12
-      else
-        htg_weekday_setpoints = [[htg_sp] * 24] * 12
-        (0..11).to_a.each do |m|
-          for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-            htg_weekday_setpoints[m][hr % 24] = htg_setback_sp
-          end
+    # Base heating setpoint
+    htg_setpoint = hvac_control_values[:heating_setpoint_temp]
+    htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
+
+    # Apply heating setback?
+    htg_setback = hvac_control_values[:heating_setback_temp]
+    if not htg_setback.nil?
+      htg_setback_hrs_per_week = hvac_control_values[:heating_setback_hours_per_week]
+      htg_setback_start_hr = hvac_control_values[:heating_setback_start_hour]
+      for m in 1..12
+        for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
+          htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
         end
       end
     end
+
     htg_weekend_setpoints = htg_weekday_setpoints
     htg_use_auto_season = false
     htg_season_start_month = 1
@@ -2816,32 +2815,32 @@ class OSModel
                                            @living_zone)
     return false if not success
 
-    cooling_temp = hvac_control_values[:setpoint_temp_cooling_season]
-    if not cooling_temp.nil? # Use provided value
-      clg_weekday_setpoints = [[cooling_temp] * 24] * 12
-    else # Use ERI default
-      clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
-      if clg_setup_sp.nil?
-        clg_weekday_setpoints = [[clg_sp] * 24] * 12
-      else
-        clg_weekday_setpoints = [[clg_sp] * 24] * 12
-        (0..11).to_a.each do |m|
-          for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-            clg_weekday_setpoints[m][hr % 24] = clg_setup_sp
-          end
+    # Base cooling setpoint
+    clg_setpoint = hvac_control_values[:cooling_setpoint_temp]
+    clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
+
+    # Apply cooling setup?
+    clg_setup = hvac_control_values[:cooling_setup_temp]
+    if not clg_setup.nil?
+      clg_setup_hrs_per_week = hvac_control_values[:cooling_setup_hours_per_week]
+      clg_setup_start_hr = hvac_control_values[:cooling_setup_start_hour]
+      for m in 1..12
+        for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
+          clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
         end
       end
     end
-    # Apply ceiling fan offset?
-    if not building.elements["BuildingDetails/Lighting/CeilingFan"].nil?
-      cooling_setpoint_offset = 0.5 # deg-F
-      monthly_avg_temp_control = 63.0 # deg-F
-      weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
-        next unless val > monthly_avg_temp_control
 
-        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, cooling_setpoint_offset)].transpose.map { |i| i.reduce(:+) }
+    # Apply cooling setpoint offset due to ceiling fan?
+    clg_ceiling_fan_offset = hvac_control_values[:ceiling_fan_cooling_setpoint_temp_offset]
+    if not clg_ceiling_fan_offset.nil?
+      HVAC.get_ceiling_fan_operation_months(weather).each_with_index do |operation, m|
+        next unless operation == 1
+
+        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
       end
     end
+
     clg_weekend_setpoints = clg_weekday_setpoints
     clg_use_auto_season = false
     clg_season_start_month = 1
@@ -2854,10 +2853,11 @@ class OSModel
     return true
   end
 
-  def self.add_ceiling_fans(runner, model, building, spaces)
+  def self.add_ceiling_fans(runner, model, building, weather)
     ceiling_fan_values = HPXML.get_ceiling_fan_values(ceiling_fan: building.elements["BuildingDetails/Lighting/CeilingFan"])
     return true if ceiling_fan_values.nil?
 
+    monthly_sch = HVAC.get_ceiling_fan_operation_months(weather)
     medium_cfm = 3000.0
     weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     weekend_sch = weekday_sch
@@ -2873,8 +2873,9 @@ class OSModel
       quantity = HVAC.get_default_ceiling_fan_quantity(@nbeds)
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
+    annual_kwh *= monthly_sch.inject(:+) / 12.0
 
-    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
+    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, monthly_sch,
                                       @cfa, @living_space)
     return false if not success
 
@@ -3201,7 +3202,7 @@ class OSModel
       mech_vent_fan_w = whole_house_fan_values[:fan_power]
       if mech_vent_type == Constants.VentTypeCFIS
         # CFIS: Specify minimum open time in minutes
-        cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
+        cfis_open_time = [whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0, 59.999].min
       else
         # Other: Adjust constant CFM/power based on hours per day of operation
         mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
