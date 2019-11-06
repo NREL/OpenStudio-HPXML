@@ -358,6 +358,11 @@
           <RatedAnnualkWh>450.0</RatedAnnualkWh>
           <PlaceSettingCapacity>12</PlaceSettingCapacity>
         </Dishwasher>
+        <Refrigerator>
+          <SystemIdentifier id='Refrigerator'/>
+          <Location>living space</Location>
+          <RatedAnnualkWh>650.0</RatedAnnualkWh>
+        </Refrigerator>
         <Dehumidifier>
           <SystemIdentifier id='Dehumidifier'/>
           <extension>
@@ -366,11 +371,6 @@
             <DehumidistatSetpoint>0.6</DehumidistatSetpoint>
           </extension>
         </Dehumidifier>
-        <Refrigerator>
-          <SystemIdentifier id='Refrigerator'/>
-          <Location>living space</Location>
-          <RatedAnnualkWh>650.0</RatedAnnualkWh>
-        </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='Range'/>
           <FuelType>electricity</FuelType>

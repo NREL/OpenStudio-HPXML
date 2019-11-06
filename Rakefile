@@ -593,8 +593,8 @@ def create_hpxmls
       HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values) unless clothes_washer_values.empty?
       HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values) unless clothes_dryer_values.empty?
       HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values) unless dishwasher_values.empty?
-      HPXML.add_dehumidifier(hpxml: hpxml, **dehumidifier_values) unless dehumidifier_values.empty?
       HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values) unless refrigerator_values.empty?
+      HPXML.add_dehumidifier(hpxml: hpxml, **dehumidifier_values) unless dehumidifier_values.empty?
       HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values) unless cooking_range_values.empty?
       HPXML.add_oven(hpxml: hpxml, **oven_values) unless oven_values.empty?
       HPXML.add_lighting(hpxml: hpxml, **lighting_values) unless lighting_values.empty?
