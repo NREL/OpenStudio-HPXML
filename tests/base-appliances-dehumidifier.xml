@@ -368,7 +368,7 @@
           <extension>
             <Capacity>65.0</Capacity>
             <EnergyFactor>1.8</EnergyFactor>
-            <DehumidistatSetpoint>0.6</DehumidistatSetpoint>
+            <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
           </extension>
         </Dehumidifier>
         <CookingRange>

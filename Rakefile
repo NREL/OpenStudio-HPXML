@@ -3052,7 +3052,7 @@ def get_hpxml_file_dehumidifier_values(hpxml_file, dehumidifier_values)
     dehumidifier_values = { :id => "Dehumidifier",
                             :capacity => 65,
                             :energy_factor => 1.8,
-                            :rh_setpoint => 0.6 }
+                            :rh_setpoint => 0.5 }
   end
   return dehumidifier_values
 end
