@@ -884,7 +884,7 @@ class Waterheater
 
     # EMS Output Variable for reporting
     ec_adj_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, ec_adj_object_sensor)
-    ec_adj_output_var.setName(Constants.ObjectNameWaterHeaterAdjustment(heater.name))
+    ec_adj_output_var.setName("#{Constants.ObjectNameWaterHeaterAdjustment(heater.name)} outvar")
     ec_adj_output_var.setTypeOfDataInVariable("Summed")
     ec_adj_output_var.setUpdateFrequency("SystemTimestep")
     ec_adj_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
