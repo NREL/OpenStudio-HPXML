@@ -709,51 +709,33 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACDistribution") do |orig_dist|
       dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: orig_dist)
 
-      # Leakage fraction of total air handler flow
-      # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/thermal-distribution-efficiency/thermal-distribution-efficiency
-      # FIXME: Verify. Total or to the outside?
-      # FIXME: Or 10%/25%? See https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI/edit#gid=1042407563
-      if dist_values[:duct_system_sealed]
-        leakage_frac = 0.03
-      else
-        leakage_frac = 0.15
-      end
-
-      # FIXME: Verify
-      # Surface areas outside conditioned space
-      # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/thermal-distribution-efficiency/thermal-distribution-efficiency
-      supply_duct_area = 0.27 * @cfa
-      return_duct_area = 0.05 * @nfl * @cfa
-
       new_dist = HPXML.add_hvac_distribution(hpxml: hpxml,
                                              id: dist_values[:id],
                                              distribution_system_type: "AirDistribution")
       new_air_dist = new_dist.elements["DistributionSystemType/AirDistribution"]
 
-      # FIXME: This code is to maintain the previous logic about duct leakage
-      # until the HVAC distribution inputs are formally addressed.
-      duct_leakage = 100 # FIXME: hard-coded
-      all_ducts_in_conditioned_space = true
-      @ducts.each do |hvac_frac, duct_frac, duct_location|
-        if duct_location != "living space" and duct_frac > 0
-          all_ducts_in_conditioned_space = false
-        end
-      end
-      if all_ducts_in_conditioned_space
-        duct_leakage = 0
+      frac_inside = 0.0
+      orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
+        duct_values = HPXML.get_ducts_values(ducts: orig_duct)
+        next unless duct_values[:duct_location] == "living space"
+
+        frac_inside += duct_values[:duct_fraction_area]
       end
 
-      # Supply duct leakage
+      sealed = dist_values[:duct_system_sealed]
+      lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
+
+      # Supply duct leakage to the outside
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "supply",
-                                         duct_leakage_units: "CFM25",
-                                         duct_leakage_value: duct_leakage)
+                                         duct_leakage_units: "Percent",
+                                         duct_leakage_value: lto_s)
 
-      # Return duct leakage
+      # Return duct leakage to the outside
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "return",
-                                         duct_leakage_units: "CFM25",
-                                         duct_leakage_value: duct_leakage)
+                                         duct_leakage_units: "Percent",
+                                         duct_leakage_value: lto_r)
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
         duct_values = HPXML.get_ducts_values(ducts: orig_duct)
@@ -762,11 +744,20 @@ class HEScoreRuleset
           duct_values[:duct_location] = "attic - vented"
         end
 
-        # FIXME: Verify nominal insulation and not assembly
-        if duct_values[:duct_insulation_present]
+        if duct_values[:duct_insulation_material] == "Unknown"
           duct_rvalue = 6
-        else
+        elsif duct_values[:duct_insulation_material] == "None"
           duct_rvalue = 0
+        else
+          fail "Unexpected duct insulation material '#{duct_values[:duct_insulation_material]}'."
+        end
+
+        if duct_values[:duct_location] == "living space"
+          supply_duct_surface_area = 0.001 # Arbitrary; can't be zero
+          return_duct_surface_area = 0.001 # Arbitrary; can't be zero
+        else
+          supply_duct_surface_area = uncond_area_s * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
+          return_duct_surface_area = uncond_area_r * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
         end
 
         # Supply duct
@@ -774,14 +765,14 @@ class HEScoreRuleset
                         duct_type: "supply",
                         duct_insulation_r_value: duct_rvalue,
                         duct_location: duct_values[:duct_location],
-                        duct_surface_area: duct_values[:duct_fraction_area] * supply_duct_area)
+                        duct_surface_area: supply_duct_surface_area)
 
         # Return duct
         HPXML.add_ducts(air_distribution: new_air_dist,
                         duct_type: "return",
                         duct_insulation_r_value: duct_rvalue,
                         duct_location: duct_values[:duct_location],
-                        duct_surface_area: duct_values[:duct_fraction_area] * return_duct_area)
+                        duct_surface_area: return_duct_surface_area)
       end
     end
 
@@ -1306,6 +1297,42 @@ def get_roof_solar_absorptance(roof_color)
   return val if not val.nil?
 
   fail "Could not get roof absorptance for color '#{roof_color}'"
+end
+
+def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside)
+  # Total leakage fraction of air handler flow
+  if is_sealed
+    total_leakage_frac = 0.10
+  else
+    total_leakage_frac = 0.25
+  end
+
+  # Fraction of ducts that are outside conditioned space
+  if frac_inside > 0
+    f_out_s = 1.0 - frac_inside
+  else
+    # Make assumption
+    if ncfl_ag == 1
+      f_out_s = 1.0
+    else
+      f_out_s = 0.65
+    end
+  end
+  if frac_inside == 1
+    f_out_r = 0.0
+  else
+    f_out_r = 1.0
+  end
+
+  # Duct leakages to the outside (assume total leakage equally split between supply/return)
+  lto_s = total_leakage_frac / 2.0 * f_out_s
+  lto_r = total_leakage_frac / 2.0 * f_out_r
+
+  # Duct surface areas that are outside conditioned space
+  uncond_area_s = 0.27 * f_out_s * cfa
+  uncond_area_r = 0.05 * ncfl_ag * f_out_r * cfa
+
+  return lto_s.round(5), lto_r.round(5), uncond_area_s.round(2), uncond_area_r.round(2)
 end
 
 def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)
