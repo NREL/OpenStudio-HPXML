@@ -1702,6 +1702,31 @@ class HPXML
              :adjusted_annual_kwh => to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh")) }
   end
 
+  def self.add_dehumidifier(hpxml:,
+                            id:,
+                            capacity:,
+                            energy_factor:,
+                            rh_setpoint:,
+                            **remainder)
+    appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
+    dehumidifier = XMLHelper.add_element(appliances, "Dehumidifier")
+    sys_id = XMLHelper.add_element(dehumidifier, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    HPXML.add_extension(parent: dehumidifier,
+                        extensions: { "Capacity": to_float_or_nil(capacity),
+                                      "EnergyFactor": to_float_or_nil(energy_factor),
+                                      "DehumidistatSetpoint": to_float_or_nil(rh_setpoint) })
+  end
+
+  def self.get_dehumidifier_values(dehumidifier:)
+    return nil if dehumidifier.nil?
+
+    return { :id => HPXML.get_id(dehumidifier),
+             :capacity => to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/Capacity")),
+             :energy_factor => to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/EnergyFactor")),
+             :rh_setpoint => to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/DehumidistatSetpoint")) }
+  end
+
   def self.add_cooking_range(hpxml:,
                              id:,
                              fuel_type:,

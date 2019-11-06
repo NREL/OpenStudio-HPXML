@@ -311,6 +311,9 @@ class OSModel
     success = add_ceiling_fans(runner, model, building, weather)
     return false if not success
 
+    success = add_dehumidifier(runner, model, building)
+    return false if not success
+
     # Hot Water
 
     success = add_hot_water_and_appliances(runner, model, building, weather, spaces)
@@ -754,8 +757,8 @@ class OSModel
     vf_map_lv = calc_approximate_view_factor(runner, model, lv_surfaces)
     vf_map_cb = calc_approximate_view_factor(runner, model, cond_base_surfaces)
 
-    all_surfaces.each do |from_surface|
-      all_surfaces.each do |to_surface|
+    all_surfaces.sort.each do |from_surface|
+      all_surfaces.sort.each do |to_surface|
         next if (vf_map_lv[from_surface].nil? or vf_map_lv[from_surface][to_surface].nil?) and
                 (vf_map_cb[from_surface].nil? or vf_map_cb[from_surface][to_surface].nil?)
 
@@ -2877,6 +2880,24 @@ class OSModel
 
     success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, monthly_sch,
                                       @cfa, @living_space)
+    return false if not success
+
+    return true
+  end
+
+  def self.add_dehumidifier(runner, model, building)
+    dehumidifier_values = HPXML.get_dehumidifier_values(dehumidifier: building.elements["BuildingDetails/Appliances/Dehumidifier"])
+    return true if dehumidifier_values.nil?
+
+    water_removal_rate = dehumidifier_values[:capacity]
+    energy_factor = dehumidifier_values[:energy_factor]
+    humidity_setpoint = dehumidifier_values[:rh_setpoint]
+
+    # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
+    air_flow_rate = 2.75 * water_removal_rate
+
+    success = HVAC.apply_dehumidifier(model, runner, energy_factor, water_removal_rate,
+                                      air_flow_rate, humidity_setpoint, @living_zone)
     return false if not success
 
     return true

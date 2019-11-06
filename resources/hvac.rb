@@ -2342,24 +2342,6 @@ class HVAC
   def self.apply_dehumidifier(model, runner, energy_factor, water_removal_rate,
                               air_flow_rate, humidity_setpoint, control_zone)
 
-    # error checking
-    if humidity_setpoint < 0 or humidity_setpoint > 1
-      runner.registerError("Invalid humidity setpoint value entered.")
-      return false
-    end
-    if water_removal_rate != Constants.Auto and water_removal_rate.to_f <= 0
-      runner.registerError("Invalid water removal rate value entered.")
-      return false
-    end
-    if energy_factor != Constants.Auto and energy_factor.to_f < 0
-      runner.registerError("Invalid energy factor value entered.")
-      return false
-    end
-    if air_flow_rate != Constants.Auto and air_flow_rate.to_f < 0
-      runner.registerError("Invalid air flow rate value entered.")
-      return false
-    end
-
     obj_name = Constants.ObjectNameDehumidifier
 
     avg_rh_setpoint = humidity_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
@@ -2373,37 +2355,23 @@ class HVAC
     energy_factor_curve = create_curve_biquadratic(model, [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722], "DXDH-EnergyFactor-fT", -100, 100, -100, 100)
     part_load_frac_curve = create_curve_quadratic(model, [0.90, 0.10, 0.0], "DXDH-PLF-fPLR", 0, 1, 0.7, 1)
 
-    control_zone.each do |control_zone, slave_zones|
-      humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
-      humidistat.setName(obj_name + " #{control_zone.name} humidistat")
-      humidistat.setHumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
-      humidistat.setDehumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
-      control_zone.setZoneControlHumidistat(humidistat)
+    humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
+    humidistat.setName(obj_name + " #{control_zone.name} humidistat")
+    humidistat.setHumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
+    humidistat.setDehumidifyingRelativeHumiditySetpointSchedule(relative_humidity_setpoint_sch)
+    control_zone.setZoneControlHumidistat(humidistat)
 
-      zone_hvac = OpenStudio::Model::ZoneHVACDehumidifierDX.new(model, water_removal_curve, energy_factor_curve, part_load_frac_curve)
-      zone_hvac.setName(obj_name + " #{control_zone.name} dx")
-      zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-      if water_removal_rate != Constants.Auto
-        zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate.to_f, "pint", "L"))
-      else
-        zone_hvac.setRatedWaterRemoval(Constants.small) # Autosize flag for HVACSizing measure
-      end
-      if energy_factor != Constants.Auto
-        zone_hvac.setRatedEnergyFactor(energy_factor.to_f)
-      else
-        zone_hvac.setRatedEnergyFactor(Constants.small) # Autosize flag for HVACSizing measure
-      end
-      if air_flow_rate != Constants.Auto
-        zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate.to_f, "cfm", "m^3/s"))
-      else
-        zone_hvac.setRatedAirFlowRate(Constants.small) # Autosize flag for HVACSizing measure
-      end
-      zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
-      zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
+    zone_hvac = OpenStudio::Model::ZoneHVACDehumidifierDX.new(model, water_removal_curve, energy_factor_curve, part_load_frac_curve)
+    zone_hvac.setName(obj_name + " #{control_zone.name} dx")
+    zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate, "pint", "L"))
+    zone_hvac.setRatedEnergyFactor(energy_factor)
+    zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate, "cfm", "m^3/s"))
+    zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
+    zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
 
-      zone_hvac.addToThermalZone(control_zone)
-      runner.registerInfo("Added '#{zone_hvac.name}' to '#{control_zone.name}'")
-    end
+    zone_hvac.addToThermalZone(control_zone)
+    runner.registerInfo("Added '#{zone_hvac.name}' to '#{control_zone.name}'")
 
     return true
   end

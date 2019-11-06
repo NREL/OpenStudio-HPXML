@@ -68,6 +68,7 @@ def create_hpxmls
     'base-addenda-exclude-g.xml' => 'base.xml',
     'base-addenda-exclude-g-e.xml' => 'base.xml',
     'base-addenda-exclude-g-e-a.xml' => 'base.xml',
+    'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dishwasher-ef.xml' => 'base.xml',
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
@@ -457,6 +458,7 @@ def create_hpxmls
       clothes_dryer_values = {}
       dishwasher_values = {}
       refrigerator_values = {}
+      dehumidifier_values = {}
       cooking_range_values = {}
       oven_values = {}
       lighting_values = {}
@@ -498,6 +500,7 @@ def create_hpxmls
         clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
         dishwasher_values = get_hpxml_file_dishwasher_values(hpxml_file, dishwasher_values)
         refrigerator_values = get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
+        dehumidifier_values = get_hpxml_file_dehumidifier_values(hpxml_file, dehumidifier_values)
         cooking_range_values = get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)
         oven_values = get_hpxml_file_oven_values(hpxml_file, oven_values)
         lighting_values = get_hpxml_file_lighting_values(hpxml_file, lighting_values)
@@ -590,6 +593,7 @@ def create_hpxmls
       HPXML.add_clothes_washer(hpxml: hpxml, **clothes_washer_values) unless clothes_washer_values.empty?
       HPXML.add_clothes_dryer(hpxml: hpxml, **clothes_dryer_values) unless clothes_dryer_values.empty?
       HPXML.add_dishwasher(hpxml: hpxml, **dishwasher_values) unless dishwasher_values.empty?
+      HPXML.add_dehumidifier(hpxml: hpxml, **dehumidifier_values) unless dehumidifier_values.empty?
       HPXML.add_refrigerator(hpxml: hpxml, **refrigerator_values) unless refrigerator_values.empty?
       HPXML.add_cooking_range(hpxml: hpxml, **cooking_range_values) unless cooking_range_values.empty?
       HPXML.add_oven(hpxml: hpxml, **oven_values) unless oven_values.empty?
@@ -3039,6 +3043,18 @@ def get_hpxml_file_refrigerator_values(hpxml_file, refrigerator_values)
     refrigerator_values[:location] = "other"
   end
   return refrigerator_values
+end
+
+def get_hpxml_file_dehumidifier_values(hpxml_file, dehumidifier_values)
+  if ['base.xml'].include? hpxml_file
+    dehumidifier_values = {}
+  elsif ['base-appliances-dehumidifier.xml'].include? hpxml_file
+    dehumidifier_values = { :id => "Dehumidifier",
+                            :capacity => 65,
+                            :energy_factor => 1.8,
+                            :rh_setpoint => 0.6 }
+  end
+  return dehumidifier_values
 end
 
 def get_hpxml_file_cooking_range_values(hpxml_file, cooking_range_values)

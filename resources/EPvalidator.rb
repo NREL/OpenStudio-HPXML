@@ -82,6 +82,7 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/Appliances/ClothesDryer" => zero_or_one, # See [ClothesDryer]
         "/HPXML/Building/BuildingDetails/Appliances/Dishwasher" => zero_or_one, # See [Dishwasher]
         "/HPXML/Building/BuildingDetails/Appliances/Refrigerator" => zero_or_one, # See [Refrigerator]
+        "/HPXML/Building/BuildingDetails/Appliances/Dehumidifier" => zero_or_one, # See [Dehumidifier]
         "/HPXML/Building/BuildingDetails/Appliances/CookingRange" => zero_or_one, # See [CookingRange]
 
         "/HPXML/Building/BuildingDetails/Lighting" => zero_or_one, # See [Lighting]
@@ -576,6 +577,15 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
         "[RatedAnnualkWh | extension/AdjustedAnnualkWh]" => one_or_more,
+      },
+
+      # [Dehumidifier]
+      "/HPXML/Building/BuildingDetails/Appliances/Dehumidifier" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        # TODO: "[Location='living space' or Location='basement']" => one,
+        "extension/Capacity" => one, # pints/day
+        "extension/EnergyFactor" => one, # liters/kWh
+        "extension/DehumidistatSetpoint" => one, # RH, fraction
       },
 
       # [CookingRange]
