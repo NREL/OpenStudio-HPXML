@@ -668,17 +668,17 @@ class Waterheater
     dhw_map[combi_sys_id].each do |object|
       if object.is_a? OpenStudio::Model::WaterUseConnections
         object.waterUseEquipment.each do |wu|
-          if wu.name.get == Constants.ObjectNameDishwasher
+          if wu.name.get.include? Constants.ObjectNameDishwasher
             dw_peak = wu.waterUseEquipmentDefinition.peakFlowRate
             dw_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
             dw_sch_sensor.setName("#{Constants.ObjectNameDishwasher} sch value")
             dw_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
-          elsif wu.name.get == Constants.ObjectNameClothesWasher
+          elsif wu.name.get.include? Constants.ObjectNameClothesWasher
             cw_peak = wu.waterUseEquipmentDefinition.peakFlowRate
             cw_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
             cw_sch_sensor.setName("#{Constants.ObjectNameClothesWasher} sch value")
             cw_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
-          elsif wu.name.get == Constants.ObjectNameFixtures
+          elsif wu.name.get.include? Constants.ObjectNameFixtures
             # disaggregate_sinks_showers_baths situation?
             fixture_peak = wu.waterUseEquipmentDefinition.peakFlowRate
             fixture_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
