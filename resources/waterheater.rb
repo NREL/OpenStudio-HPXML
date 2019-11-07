@@ -577,13 +577,13 @@ class Waterheater
   def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj,
                           nbeds, boiler, boiler_plant_loop, boiler_fuel_type, dhw_map, sys_id, wh_type, jacket_r)
     obj_name_indirect = Constants.ObjectNameWaterHeater
+    convlim = model.getConvergenceLimits
+    convlim.setMinimumPlantIterations(3)
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
-      recovery_time = 0.1 # This variable is used for E+ autosizing source heat transfer. Value 0.1 shows good resilience tested with 1bd, 2bds, 3bds, 4bds and 5bds water use profiles.
     else
       tank_type = Constants.WaterHeaterTypeTankless
-      recovery_time = 0.001 # This variable is used for E+ autosizing source heat transfer. Value 0.001 shows good resilience tested with 1bd, 2bds, 3bds, 4bds and 5bds water use profiles.
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
@@ -598,20 +598,22 @@ class Waterheater
     assumed_ef = get_indirect_assumed_ef_for_tank_losses()
     assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
     new_heater = create_new_heater(obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
-    new_heater.setIndirectWaterHeatingRecoveryTime(recovery_time) # used for autosizing source side mass flow rate properly
+    new_heater.setSourceSideDesignFlowRate(100) # set one large number, override by EMS
     dhw_map[sys_id] << new_heater
 
-    # Create alternate setpoint schedule for source side flow control
+    # Create alternate setpoint schedule for source side flow request
     alternate_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
-    hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
     alternate_stp_sch.setName("#{obj_name_indirect} Alt Spt")
-    hx_stp_sch.setName("#{obj_name_indirect} HX Spt")
     alt_temp = UnitConversions.convert(t_set, "F", "C") + deadband(tank_type) / 2.0
-    hx_temp = alt_temp
     alternate_stp_sch.setValue(alt_temp)
-    hx_stp_sch.setValue(hx_temp)
     new_heater.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
-    new_heater.setIndirectAlternateSetpointTemperatureSchedule (alternate_stp_sch)
+    new_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
+
+    # Create hx setpoint schedule to specify source side temperature
+    hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    hx_stp_sch.setName("#{obj_name_indirect} HX Spt")
+    hx_temp = Constants.Combi_system_source_temp # degree C
+    hx_stp_sch.setValue(hx_temp)
 
     # change loop equipment operation scheme to heating load
     scheme_dhw = OpenStudio::Model::PlantEquipmentOperationHeatingLoad.new(model)
@@ -620,9 +622,7 @@ class Waterheater
     dhw_map[sys_id] << loop
 
     # Create loop for source side
-    temp_for_sizing = 58 # Because of an issue in E+: https://github.com/NREL/EnergyPlus/issues/4792 , it couldn't run without achieving 58C plant supply exiting temperature
-    source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(temp_for_sizing, "C", "F"), tank_type)
-    source_loop.setPlantLoopVolume(0.0) # After checking node temperatures and energy results, set plant volume to be zero delivers water system load better to boiler through heat exchanger. Might need to discuss whether an issue should be raised up in E+ repo
+    source_loop = create_new_loop(model, 'dhw source loop', UnitConversions.convert(hx_temp, "C", "F"), tank_type)
     source_loop.autosizeMaximumLoopFlowRate()
 
     # Create heat exchanger
@@ -640,6 +640,7 @@ class Waterheater
     new_pump = create_new_pump(model)
     new_pump.autosizeRatedFlowRate()
     new_pump.addToNode(source_loop.supplyInletNode)
+    dhw_map[sys_id] << new_pump
 
     new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
     new_source_manager.addToNode(source_loop.supplyOutletNode)
@@ -648,51 +649,131 @@ class Waterheater
 
     # Add heat exchanger to boiler loop
     boiler_plant_loop.addDemandBranchForComponent(indirect_hx)
+    boiler_plant_loop.setPlantLoopVolume(0.001) # Cannot be autocalculated because of large default tank source side mfr(set to be overwritten by EMS)
 
     loop.addSupplyBranchForComponent(new_heater)
-
-    # EMS for offsetting reaction lag and recover tank temperature
-    # Sensors
-    use_heat_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Use Side Heat Transfer Energy")
-    use_heat_sensor.setName("#{obj_name_indirect} Use Side Energy")
-    use_heat_sensor.setKeyName("#{obj_name_indirect}")
-
-    tank_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Tank Temperature")
-    tank_temp_sensor.setName("#{obj_name_indirect} Tank Temp")
-    tank_temp_sensor.setKeyName("#{obj_name_indirect}")
-
-    stp_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    stp_temp_sensor.setName("#{obj_name_indirect} Setpoint Temperature")
-    stp_temp_sensor.setKeyName("WH Setpoint Temp")
-
-    wh_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Heat Loss Energy")
-    wh_loss_sensor.setName("#{obj_name_indirect} Loss Energy")
-    wh_loss_sensor.setKeyName("#{obj_name_indirect}")
-
-    # Actuators
-    altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alternate_stp_sch, "Schedule:Constant", "Schedule Value")
-    altsch_actuator.setName("#{obj_name_indirect} AltSchedOverride")
-
-    # Program
-    indirect_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    indirect_ctrl_program.setName("#{obj_name_indirect} Source Control")
-    indirect_ctrl_program.addLine("Set WH_use = - #{use_heat_sensor.name} -  #{wh_loss_sensor.name}")
-    indirect_ctrl_program.addLine("Set WH_Volume = #{new_heater.tankVolume.get}")
-    indirect_ctrl_program.addLine("If WH_use > (#{tank_temp_sensor.name} - #{stp_temp_sensor.name} + #{deadband(tank_type)}) * WH_Volume * (@RhoH2O #{tank_temp_sensor.name}) * (@CpHW #{tank_temp_sensor.name})")
-    indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
-    indirect_ctrl_program.addLine("Else")
-    indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = #{alternate_stp_sch.value}")
-    indirect_ctrl_program.addLine("EndIf")
-
-    # ProgramCallingManagers
-    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("#{obj_name_indirect} ProgramManager")
-    program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
-    program_calling_manager.addProgram(indirect_ctrl_program)
 
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
 
     return true
+  end
+
+  def self.apply_combi_system_EMS(model, runner, combi_sys_id, dhw_map)
+    # EMS for modulate source side mass flow rate
+    # Initialization
+    dw_peak, cw_peak, fixture_peak, lossCoefficient, tank_volume, deadband = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    dw_sch_sensor, cw_sch_sensor, fixture_sch_sensor, fixture_target_temp_sensor, tank_temp_sensor, tank_spt_sensor, alt_spt_sch, altsch_actuator, wh_ambient_temp_sensor, pump_actuator = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
+
+    # Create sensors and actuators by dhw map information
+    dhw_map[combi_sys_id].each do |object|
+      if object.is_a? OpenStudio::Model::WaterUseConnections
+        object.waterUseEquipment.each do |wu|
+          if wu.name.get == Constants.ObjectNameDishwasher
+            dw_peak = wu.waterUseEquipmentDefinition.peakFlowRate
+            dw_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+            dw_sch_sensor.setName("#{Constants.ObjectNameDishwasher} sch value")
+            dw_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
+          elsif wu.name.get == Constants.ObjectNameClothesWasher
+            cw_peak = wu.waterUseEquipmentDefinition.peakFlowRate
+            cw_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+            cw_sch_sensor.setName("#{Constants.ObjectNameClothesWasher} sch value")
+            cw_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
+          elsif wu.name.get == Constants.ObjectNameFixtures
+            # disaggregate_sinks_showers_baths situation?
+            fixture_peak = wu.waterUseEquipmentDefinition.peakFlowRate
+            fixture_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+            fixture_sch_sensor.setName("#{Constants.ObjectNameFixtures} sch value")
+            fixture_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
+            # only fixtures have different target temperature than tank temperature
+            fixture_target_temp_sch = wu.waterUseEquipmentDefinition.targetTemperatureSchedule.get
+            fixture_target_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+            fixture_target_temp_sensor.setName("#{Constants.ObjectNameFixtures} target temp")
+            fixture_target_temp_sensor.setKeyName(fixture_target_temp_sch.name.to_s)
+          else
+            fail "unexpected water use equipment type for combi-system EMS program."
+          end
+        end
+      elsif object.is_a? OpenStudio::Model::WaterHeaterMixed
+        # Some parameters to use
+        lossCoefficient = object.onCycleLossCoefficienttoAmbientTemperature.get
+        tank_volume = object.tankVolume.get
+        deadband = object.deadbandTemperatureDifference
+        # Sensors and actuators related to OS water heater object
+        tank_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Tank Temperature")
+        tank_temp_sensor.setName("#{combi_sys_id} Tank Temp")
+        tank_temp_sensor.setKeyName(object.name.to_s)
+        tank_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+        tank_spt_sensor.setName("#{combi_sys_id} Setpoint Temperature")
+        tank_spt_sensor.setKeyName(object.setpointTemperatureSchedule.get.name.to_s)
+        alt_spt_sch = object.indirectAlternateSetpointTemperatureSchedule.get
+        altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, "Schedule:Constant", "Schedule Value")
+        altsch_actuator.setName("#{combi_sys_id} AltSchedOverride")
+        if object.ambientTemperatureIndicator == "ThermalZone"
+          zone = object.ambientTemperatureThermalZone.get
+          wh_ambient_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Temperature")
+          wh_ambient_temp_sensor.setName("#{combi_sys_id} Amb Temperature")
+          wh_ambient_temp_sensor.setKeyName(zone.name.to_s)
+        elsif object.ambientTemperatureIndicator == "Outdoors"
+          wh_ambient_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Drybulb Temperature")
+          wh_ambient_temp_sensor.setName("#{combi_sys_id} Amb Temperature")
+          wh_ambient_temp_sensor.setKeyName("*")
+        end
+      elsif object.is_a? OpenStudio::Model::PumpVariableSpeed
+        pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(object, "Pump", "Pump Mass Flow Rate")
+        pump_actuator.setName("#{combi_sys_id} Pump MFR")
+      end
+    end
+
+    mains_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Mains Water Temperature")
+    mains_temp_sensor.setName("Mains Temperature")
+    mains_temp_sensor.setKeyName("*")
+
+    # Program
+    indirect_ctrl_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    indirect_ctrl_program.setName("#{combi_sys_id} Source MFR Control")
+    indirect_ctrl_program.addLine("Set Rho = @RhoH2O #{tank_temp_sensor.name}")
+    indirect_ctrl_program.addLine("Set Cp = @CpHW #{tank_temp_sensor.name}")
+    indirect_ctrl_program.addLine("Set Tank_Water_Mass = #{tank_volume} * Rho")
+    indirect_ctrl_program.addLine("Set DeltaT = #{Constants.Combi_system_source_temp} - #{tank_spt_sensor.name}")
+    if not dw_peak.nil?
+      indirect_ctrl_program.addLine("Set DW_Peak = #{dw_peak}")
+      indirect_ctrl_program.addLine("Set DW_MFR = DW_Peak * #{dw_sch_sensor.name} * Rho")
+    else
+      indirect_ctrl_program.addLine("Set DW_MFR = 0")
+    end
+    if not cw_peak.nil?
+      indirect_ctrl_program.addLine("Set CW_Peak = #{cw_peak}")
+      indirect_ctrl_program.addLine("Set CW_MFR = DW_Peak * #{cw_sch_sensor.name} * Rho")
+    else
+      indirect_ctrl_program.addLine("Set CW_MFR = 0")
+    end
+    if not fixture_peak.nil?
+      indirect_ctrl_program.addLine("Set Fixture_Peak = #{fixture_peak}")
+      indirect_ctrl_program.addLine("Set Fixture_MFR_Total = Fixture_Peak * #{fixture_sch_sensor.name} * Rho")
+      indirect_ctrl_program.addLine("Set Fixture_Hot_Temp = #{tank_temp_sensor.name}")
+      indirect_ctrl_program.addLine("Set Fixture_Cold_Temp = #{mains_temp_sensor.name}")
+      indirect_ctrl_program.addLine("Set Fixture_Hot_MFR = Fixture_MFR_Total * (#{fixture_target_temp_sensor.name} - Fixture_Cold_Temp)/(Fixture_Hot_Temp - Fixture_Cold_Temp)")
+    else
+      indirect_ctrl_program.addLine("Set Fixture_Hot_MFR = 0")
+    end
+    indirect_ctrl_program.addLine("Set Tank_Use_Total_MFR = Fixture_Hot_MFR + CW_MFR + DW_MFR")
+    indirect_ctrl_program.addLine("Set WH_Loss = #{lossCoefficient} * ZoneTimeStep * 3600 * (#{tank_temp_sensor.name} - #{wh_ambient_temp_sensor.name})")
+    indirect_ctrl_program.addLine("Set WH_Use = Tank_Use_Total_MFR * Cp * (#{tank_temp_sensor.name} - #{mains_temp_sensor.name}) * ZoneTimeStep * 3600")
+    indirect_ctrl_program.addLine("Set WH_HeatToLowSetpoint = Tank_Water_Mass * Cp * (#{tank_temp_sensor.name} - #{tank_spt_sensor.name} + #{deadband})")
+    indirect_ctrl_program.addLine("Set WH_Energy_Demand = WH_Use + WH_Loss - WH_HeatToLowSetpoint")
+    indirect_ctrl_program.addLine("If WH_Energy_Demand > 0")
+    indirect_ctrl_program.addLine("Set #{pump_actuator.name} = WH_Energy_Demand / (Cp * DeltaT * 3600 * ZoneTimeStep)")
+    indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = 100") # Set the alternate setpoint temperature to highest level to ensure maximum source side flow rate
+    indirect_ctrl_program.addLine("Else")
+    indirect_ctrl_program.addLine("Set #{pump_actuator.name} = 0")
+    indirect_ctrl_program.addLine("Set #{altsch_actuator.name} = #{alt_spt_sch.to_ScheduleConstant.get.value}")
+    indirect_ctrl_program.addLine("EndIf")
+
+    # ProgramCallingManagers
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{combi_sys_id} ProgramManager")
+    program_calling_manager.setCallingPoint("BeginTimestepBeforePredictor")
+    program_calling_manager.addProgram(indirect_ctrl_program)
   end
 
   def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type)

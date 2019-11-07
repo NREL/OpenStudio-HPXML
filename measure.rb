@@ -2142,6 +2142,7 @@ class OSModel
     # Water Heater
     related_hvac_list = [] # list of heating systems referred in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
+    combi_sys_id_list = []
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
         water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
@@ -2229,6 +2230,7 @@ class OSModel
 
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
           # Check tank type to default tank volume for tankless coil
+          combi_sys_id_list << sys_id
           if wh_type == "space-heating boiler with tankless coil"
             tank_vol = 1.0
           else
@@ -2276,6 +2278,13 @@ class OSModel
                                           dwhr_efficiency, dhw_loop_fracs, @eri_version,
                                           @dhw_map)
     return false if not success
+
+    # Add combi-system EMS program with water use equipment information
+    @dhw_map.keys.each do |sys_id|
+      next unless combi_sys_id_list.include? sys_id
+
+      Waterheater.apply_combi_system_EMS(model, runner, sys_id, @dhw_map)
+    end
 
     return true
   end

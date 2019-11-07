@@ -37,6 +37,10 @@ class Constants
     return 1e-9
   end
 
+  def self.Combi_system_source_temp
+    return 55 # C
+  end
+
   # Strings --------------------
 
   def self.AirFilm
