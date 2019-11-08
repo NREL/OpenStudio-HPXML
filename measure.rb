@@ -3593,7 +3593,6 @@ class OSModel
   end
 
   def self.add_component_loads_output(runner, model)
-    
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
     htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer")
     htg_sensor.setName("heating_energy")
@@ -3689,14 +3688,14 @@ class OSModel
       mechvent_sensor.setKeyName(oe.name.to_s)
       mechvent_sensors << mechvent_sensor
     end
-    
+
     # EMS Sensors: Internal Gains
 
     intgains_sensors = []
 
     model.getElectricEquipments.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
-      
+
       intgains_elec_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Electric Equipment Convective Heating Energy")
       intgains_elec_equip_sensor.setName("intgains_elec_equip")
       intgains_elec_equip_sensor.setKeyName(@living_zone.name.to_s)
@@ -3706,7 +3705,7 @@ class OSModel
 
     model.getGasEquipments.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
-      
+
       intgains_gas_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Gas Equipment Convective Heating Energy")
       intgains_gas_equip_sensor.setName("intgains_gas_equip")
       intgains_gas_equip_sensor.setKeyName(@living_zone.name.to_s)
@@ -3716,7 +3715,7 @@ class OSModel
 
     model.getOtherEquipments.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
-            
+
       intgains_other_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
       intgains_other_equip_sensor.setName("intgains_other_equip")
       intgains_other_equip_sensor.setKeyName(@living_zone.name.to_s)
@@ -3726,7 +3725,7 @@ class OSModel
 
     model.getLightss.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
-            
+
       intgains_lights_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Lights Convective Heating Energy")
       intgains_lights_sensor.setName("intgains_lights")
       intgains_lights_sensor.setKeyName(@living_zone.name.to_s)
@@ -3736,24 +3735,24 @@ class OSModel
 
     model.getPeoples.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
-            
+
       intgains_people = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone People Convective Heating Energy")
       intgains_people.setName("intgains_people")
       intgains_people.setKeyName(@living_zone.name.to_s)
       intgains_sensors << intgains_people
       break
     end
-    
+
     intgains_dhw_sensors = {}
-    
+
     (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each_with_index do |wh, idx|
       next unless wh.ambientTemperatureThermalZone.is_initialized
       next unless wh.ambientTemperatureThermalZone.get.name.to_s == @living_zone.name.to_s
-      
+
       dhw_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Heat Loss Energy")
       dhw_sensor.setName("dhw_mixed_tank#{idx}")
       dhw_sensor.setKeyName(wh.name.to_s)
-      
+
       if wh.is_a? OpenStudio::Model::WaterHeaterMixed
         oncycle_loss = wh.onCycleLossFractiontoThermalZone
         offcycle_loss = wh.offCycleLossFractiontoThermalZone
@@ -3761,38 +3760,38 @@ class OSModel
         oncycle_loss = wh.skinLossFractiontoZone
         offcycle_loss = wh.offCycleFlueLossFractiontoZone
       end
-      
+
       dhw_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Runtime Fraction")
       dhw_rtf_sensor.setName("dhw_rtf#{idx}")
       dhw_rtf_sensor.setKeyName(wh.name.to_s)
-      
+
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
-    
+
     # EMS Sensors: Ducts
-    
+
     ducts_plenum_sensors = {}
     ducts_sensors = []
-    
+
     model.getThermalZones.each do |zone|
       next unless zone.isPlenum
-      
+
       ducts_plenum_htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air System Sensible Heating Energy")
       ducts_plenum_htg_sensor.setName("ducts_plenum_heating")
       ducts_plenum_htg_sensor.setKeyName(zone.name.to_s)
       ducts_plenum_sensors["htg"] = ducts_plenum_htg_sensor
-      
+
       ducts_plenum_clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air System Sensible Cooling Energy")
       ducts_plenum_clg_sensor.setName("ducts_plenum_cooling")
       ducts_plenum_clg_sensor.setKeyName(zone.name.to_s)
       ducts_plenum_sensors["clg"] = ducts_plenum_clg_sensor
-    
+
       idx = 0
       @living_zone.airLoopHVACs.each do |airloop|
         model.getOtherEquipments.each do |e|
           next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
           next unless e.name.to_s.start_with? airloop.name.to_s
-          
+
           idx += 1
           ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment Convective Heating Energy")
           ducts_sensor.setName("ducts_other_equip#{idx}")
