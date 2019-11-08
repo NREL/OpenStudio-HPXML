@@ -1026,7 +1026,7 @@ class Airflow
   def self.create_sens_lat_load_actuator_and_equipment(model, name, space, is_latent, is_outside = false)
     var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, name.gsub(" ", "_"))
     other_equip_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
-    other_equip_def.setName("#{var.name} equip")
+    other_equip_def.setName("#{name} equip")
     other_equip = OpenStudio::Model::OtherEquipment.new(other_equip_def)
     other_equip.setName(other_equip_def.name.to_s)
     other_equip.setFuelType("None")
@@ -1641,6 +1641,13 @@ class Airflow
     infil_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(infil_flow, "Zone Infiltration", "Air Exchange Flow Rate")
     infil_flow_actuator.setName("#{infil_flow.name} act")
 
+    imbal_mechvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+    imbal_mechvent_flow.setName(Constants.ObjectNameMechanicalVentilation + " flow")
+    imbal_mechvent_flow.setSchedule(model.alwaysOnDiscreteSchedule)
+    imbal_mechvent_flow.setSpace(living_space)
+    imbal_mechvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(imbal_mechvent_flow, "Zone Infiltration", "Air Exchange Flow Rate")
+    imbal_mechvent_flow_actuator.setName("#{imbal_mechvent_flow.name} act")
+
     # Program
 
     infil_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -1670,9 +1677,10 @@ class Airflow
       infil_program.addLine("Set Qn = #{building.living.ACH * UnitConversions.convert(building.infilvolume, "ft^3", "m^3") / UnitConversions.convert(1.0, "hr", "s")}")
     end
 
-    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness > 0 and mech_vent.whole_house_cfm > 0
-      # ERV/HRV EMS load model; balanced systems without energy recovery are modeled via EMS airflow
-      # E+ ERV model is using standard density for MFR calculation, caused discrepancy with our current workflow; E+ ERV model has a bug not meeting setpoint perfectly
+    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.whole_house_cfm > 0
+      # ERV/HRV/Balanced EMS load model
+      # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
+      # E+ ERV model also does not meet setpoint perfectly.
       # Therefore ERV is modeled within EMS infiltration program
 
       balanced_flow_rate = UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s")
@@ -1821,21 +1829,14 @@ class Airflow
       infil_program.addLine("Set QductsOut = QductsOut+#{duct_lk_exhaust_fan_equiv_var.name}")
       infil_program.addLine("Set QductsIn = QductsIn+#{duct_lk_supply_fan_equiv_var.name}")
     end
-    if mech_vent.type == Constants.VentTypeBalanced
-      infil_program.addLine("Set Qout = Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
-      infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
-      infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
-    else
-      if mech_vent.type == Constants.VentTypeExhaust
-        infil_program.addLine("Set Qout = QWHV+Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
-        infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
-        infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
-      else # mech_vent.type == Constants.VentTypeSupply
-        infil_program.addLine("Set Qout = Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
-        infil_program.addLine("Set Qin = QWHV+QhpwhIn+QductsIn")
-        infil_program.addLine("Set Qu = @Abs (Qout- Qin)")
-      end
+    infil_program.addLine("Set Qout = Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
+    infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
+    if mech_vent.type == Constants.VentTypeExhaust
+      infil_program.addLine("Set Qout = Qout+QWHV")
+    elsif mech_vent.type == Constants.VentTypeSupply or mech_vent.type == Constants.VentTypeCFIS
+      infil_program.addLine("Set Qin = Qin+QWHV")
     end
+    infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
     if mech_vent.type != Constants.VentTypeCFIS
       if mech_vent.whole_house_cfm > 0
         infil_program.addLine("Set #{whole_house_fan_actuator.name} = QWHV * #{mech_vent.fan_power_w} / #{UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s")}")
@@ -1847,13 +1848,23 @@ class Airflow
     infil_program.addLine("Set #{range_hood_fan_actuator.name} = Qrange * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
     infil_program.addLine("Set #{bath_exhaust_sch_fan_actuator.name} = Qbath * #{mech_vent.spot_fan_w_per_cfm / UnitConversions.convert(1.0, "cfm", "m^3/s")}")
     infil_program.addLine("Set Q_acctd_for_elsewhere = QhpwhOut+QhpwhIn+QductsOut+QductsIn")
-    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.sensible_effectiveness == 0 and mech_vent.whole_house_cfm > 0
-      # Balanced system without energy recovery, account for airflow here
-      infil_program.addLine("Set #{infil_flow_actuator.name} = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere+QWHV")
+    infil_program.addLine("Set Q_tot_flow = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere")
+    infil_program.addLine("Set Q_tot_flow = (@Max Q_tot_flow 0)")
+    if mech_vent.type != Constants.VentTypeBalanced
+      infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow - QWHV")
+      infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = QWHV")
+      infil_program.addLine("If Q_tot_flow > 0")
+      infil_program.addLine("  Set infil_flow_ratio = #{infil_flow_actuator.name} / Q_tot_flow")
+      infil_program.addLine("Else")
+      infil_program.addLine("  Set infil_flow_ratio = 0")
+      infil_program.addLine("EndIf")
     else
-      infil_program.addLine("Set #{infil_flow_actuator.name} = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere")
+      infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow")
+      infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = 0")
+      infil_program.addLine("Set infil_flow_ratio = 1")
     end
-    infil_program.addLine("Set #{infil_flow_actuator.name} = (@Max #{infil_flow_actuator.name} 0)")
+
+    infil_flow_ratio_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "infil_flow_ratio")
 
     return infil_program
   end

@@ -338,7 +338,7 @@ class OSModel
     success = add_photovoltaics(runner, model, building)
     return false if not success
 
-    success = add_building_output_variables(runner, model, map_tsv_dir)
+    success = add_outputs(runner, model, map_tsv_dir)
     return false if not success
 
     return true
@@ -3429,7 +3429,20 @@ class OSModel
     return true
   end
 
-  def self.add_building_output_variables(runner, model, map_tsv_dir)
+  def self.add_outputs(runner, model, map_tsv_dir)
+    success = add_output_variables(runner, model, map_tsv_dir)
+    return false if not success
+
+    success = add_output_meters(runner, model)
+    return false if not success
+
+    success = add_component_loads_output(runner, model)
+    return false if not success
+
+    return true
+  end
+
+  def self.add_output_variables(runner, model, map_tsv_dir)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
                         OutputVars.SpaceHeatingNaturalGas,
                         OutputVars.SpaceHeatingOtherFuel,
@@ -3536,6 +3549,268 @@ class OSModel
         tsv << out_data if out_data.size > 1
       end
     end
+  end
+
+  def self.add_output_meters(runner, model)
+    # Add annual output meters to increase precision of outputs relative to, e.g., ABUPS report
+    meter_names = ["Electricity:Facility",
+                   "Gas:Facility",
+                   "FuelOil#1:Facility",
+                   "Propane:Facility",
+                   "Heating:EnergyTransfer",
+                   "Cooling:EnergyTransfer",
+                   "Heating:DistrictHeating",
+                   "Cooling:DistrictCooling",
+                   "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity",
+                   "#{Constants.ObjectNameGarageLighting}:InteriorLights:Electricity",
+                   "ExteriorLights:Electricity",
+                   "InteriorEquipment:Electricity",
+                   "InteriorEquipment:Gas",
+                   "InteriorEquipment:FuelOil#1",
+                   "InteriorEquipment:Propane",
+                   "#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Gas",
+                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:FuelOil#1",
+                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Propane",
+                   "#{Constants.ObjectNameMiscPlugLoads}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameMiscTelevision}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Gas",
+                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:FuelOil#1",
+                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Propane",
+                   "#{Constants.ObjectNameCeilingFan}:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameMechanicalVentilation} house fan:InteriorEquipment:Electricity",
+                   "ElectricityProduced:Facility"]
+
+    meter_names.each do |meter_name|
+      output_meter = OpenStudio::Model::OutputMeter.new(model)
+      output_meter.setName(meter_name)
+      output_meter.setReportingFrequency('runperiod')
+    end
+  end
+
+  def self.add_component_loads_output(runner, model)
+    # EMS Sensors: Surfaces, SubSurfaces, InternalMass
+    htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer")
+    htg_sensor.setName("heating_energy")
+
+    clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer")
+    clg_sensor.setName("cooling_energy")
+
+    surface_sensors = { :walls => [],
+                        :foundation_walls => [],
+                        :floors => [],
+                        :slabs => [],
+                        :ceilings_roofs => [],
+                        :windows => [],
+                        :doors => [],
+                        :skylights => [],
+                        :internal_mass => [] }
+
+    model.getSurfaces.each_with_index do |s, idx|
+      sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Convection Heat Gain Energy")
+      sensor.setName("surface#{idx}_convection")
+      sensor.setKeyName(s.name.to_s)
+
+      next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
+      if s.surfaceType == 'Wall'
+        if s.outsideBoundaryCondition == 'Foundation' or s.outsideBoundaryCondition == 'Ground'
+          surface_sensors[:foundation_walls] << sensor
+        else
+          surface_sensors[:walls] << sensor
+        end
+      elsif s.surfaceType == 'Floor'
+        if s.outsideBoundaryCondition == 'Foundation' or s.outsideBoundaryCondition == 'Ground'
+          surface_sensors[:slabs] << sensor
+        else
+          surface_sensors[:floors] << sensor
+        end
+      elsif s.surfaceType == 'RoofCeiling'
+        surface_sensors[:ceilings_roofs] << sensor
+      else
+        fail "Unexpected surface for component loads: '#{s.name}'."
+      end
+
+      s.subSurfaces.each_with_index do |ss, idx|
+        sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Convection Heat Gain Energy")
+        sensor.setName("subsurface#{idx}_convection")
+        sensor.setKeyName(ss.name.to_s)
+
+        if ss.subSurfaceType.downcase.include? 'window'
+          surface_sensors[:windows] << sensor
+        elsif ss.subSurfaceType.downcase.include? 'door'
+          surface_sensors[:doors] << sensor
+        elsif ss.subSurfaceType.downcase.include? 'skylight'
+          surface_sensors[:skylights] << sensor
+        else
+          fail "Unexpected subsurface for component loads: '#{ss.name}'."
+        end
+      end
+    end
+
+    model.getInternalMasss.each_with_index do |m, idx|
+      next unless m.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
+      sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Convection Heat Gain Energy")
+      sensor.setName("intmass#{idx}_convection")
+      sensor.setKeyName(m.name.to_s)
+      surface_sensors[:internal_mass] << sensor
+    end
+
+    # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation
+
+    air_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Infiltration Sensible Heat Gain Energy")
+    air_gain_sensor.setName("airflow_gain")
+    air_gain_sensor.setKeyName(@living_zone.name.to_s)
+
+    air_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Infiltration Sensible Heat Loss Energy")
+    air_loss_sensor.setName("airflow_loss")
+    air_loss_sensor.setKeyName(@living_zone.name.to_s)
+
+    mechvent_sensors = []
+    model.getElectricEquipments.each_with_index do |ee, idx|
+      next unless ee.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation
+
+      mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Electric Equipment Convective Heating Energy")
+      mechvent_sensor.setName("mechvent_elec_equip#{idx}")
+      mechvent_sensor.setKeyName(ee.name.to_s)
+      mechvent_sensors << mechvent_sensor
+    end
+    model.getOtherEquipments.each_with_index do |oe, idx|
+      next unless oe.name.to_s.start_with? Constants.ObjectNameERVHRV
+
+      mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment Convective Heating Energy")
+      mechvent_sensor.setName("mechvent_other_equip#{idx}")
+      mechvent_sensor.setKeyName(oe.name.to_s)
+      mechvent_sensors << mechvent_sensor
+    end
+
+    # EMS Sensors: Internal Gains
+
+    intgains_sensors = []
+
+    if model.getElectricEquipments.size > 0
+      intgains_elec_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Electric Equipment Convective Heating Energy")
+      intgains_elec_equip_sensor.setName("intgains_elec_equip")
+      intgains_elec_equip_sensor.setKeyName(@living_zone.name.to_s)
+      intgains_sensors << intgains_elec_equip_sensor
+    end
+
+    if model.getGasEquipments.size > 0
+      intgains_gas_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Gas Equipment Convective Heating Energy")
+      intgains_gas_equip_sensor.setName("intgains_gas_equip")
+      intgains_gas_equip_sensor.setKeyName(@living_zone.name.to_s)
+      intgains_sensors << intgains_gas_equip_sensor
+    end
+
+    if model.getOtherEquipments.size > 0
+      intgains_other_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
+      intgains_other_equip_sensor.setName("intgains_other_equip")
+      intgains_other_equip_sensor.setKeyName(@living_zone.name.to_s)
+      intgains_sensors << intgains_other_equip_sensor
+
+      # model.getThermalZones.each do |zone|
+      #  next unless zone.isPlenum # Add duct losses from plenum
+
+      #  intgains_other_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
+      #  intgains_other_equip_sensor.setName("intgains_plenum_equip")
+      #  intgains_other_equip_sensor.setKeyName(zone.name.to_s)
+      #  intgains_sensors << intgains_other_equip_sensor
+      # end
+    end
+
+    if model.getLightss.size > 0
+      intgains_lights_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Lights Convective Heating Energy")
+      intgains_lights_sensor.setName("intgains_lights")
+      intgains_lights_sensor.setKeyName(@living_zone.name.to_s)
+      intgains_sensors << intgains_lights_sensor
+    end
+
+    if model.getPeoples.size > 0
+      intgains_people = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone People Convective Heating Energy")
+      intgains_people.setName("intgains_people")
+      intgains_people.setKeyName(@living_zone.name.to_s)
+      intgains_sensors << intgains_people
+    end
+
+    # EMS program
+    program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    program.setName("component loads program")
+    ["htg", "clg"].each do |mode|
+      surface_sensors.keys.each do |k|
+        program.addLine("Set #{k.to_s}_#{mode} = 0")
+      end
+      program.addLine("Set intgains_#{mode} = 0")
+      program.addLine("Set infil_#{mode} = 0")
+      program.addLine("Set mechvent_#{mode} = 0")
+    end
+    ["htg", "clg"].each do |mode|
+      if mode == "htg"
+        program.addLine("If #{htg_sensor.name} > 0")
+        sign = "+"
+        opp_sign = "-"
+      elsif mode == "clg"
+        program.addLine("ElseIf #{clg_sensor.name} > 0")
+        sign = "-"
+        opp_sign = "+"
+      end
+      surface_sensors.keys.each do |k|
+        surface_sensors[k].each do |sensor|
+          program.addLine("  Set #{k.to_s}_#{mode} = #{k.to_s}_#{mode} #{sign} #{sensor.name}")
+        end
+      end
+      intgains_sensors.each do |sensor|
+        program.addLine("  Set intgains_#{mode} = intgains_#{mode} #{opp_sign} #{sensor.name}")
+      end
+      program.addLine("  Set infil_#{mode} = infil_#{mode} #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * infil_flow_ratio)") # Airflow heat attributed to infiltration
+      mechvent_sensors.each do |sensor|
+        program.addLine("  Set mechvent_#{mode} = mechvent_#{mode} #{opp_sign} #{sensor.name}") # Balanced mech vent load + imbalanced mech vent fan heat
+        program.addLine("  Set intgains_#{mode} = intgains_#{mode} #{sign} #{sensor.name}") # Remove it from zone internal gains
+      end
+      program.addLine("  Set mechvent_#{mode} = mechvent_#{mode} #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * (1.0 - infil_flow_ratio))") # Airflow heat attributed to imbalanced mech vent
+    end
+    program.addLine("EndIf")
+
+    # EMS output variables
+    ["htg", "clg"].each do |mode|
+      surface_sensors.keys.each do |k|
+        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{k.to_s}_#{mode}")
+        ems_output_var.setName("#{k.to_s}_#{mode}_outvar")
+        ems_output_var.setTypeOfDataInVariable("Summed")
+        ems_output_var.setUpdateFrequency("ZoneTimestep")
+        ems_output_var.setEMSProgramOrSubroutineName(program)
+        ems_output_var.setUnits("J")
+
+        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+        output_var.setReportingFrequency('runperiod')
+        output_var.setKeyValue('*')
+      end
+
+      ["infil", "intgains", "mechvent"].each do |k|
+        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{k}_#{mode}")
+        ems_output_var.setName("#{k}_#{mode}_outvar")
+        ems_output_var.setTypeOfDataInVariable("Summed")
+        ems_output_var.setUpdateFrequency("ZoneTimestep")
+        ems_output_var.setEMSProgramOrSubroutineName(program)
+        ems_output_var.setUnits("J")
+
+        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+        output_var.setReportingFrequency('runperiod')
+        output_var.setKeyValue('*')
+      end
+    end
+
+    # EMS calling manager
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("component loads program calling manager")
+    program_calling_manager.setCallingPoint("EndOfZoneTimestepAfterZoneReporting")
+    program_calling_manager.addProgram(program)
+
+    return true
   end
 
   def self.calc_non_cavity_r(film_r, constr_set)
