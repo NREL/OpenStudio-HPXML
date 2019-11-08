@@ -3693,48 +3693,112 @@ class OSModel
 
     intgains_sensors = []
 
-    if model.getElectricEquipments.size > 0
+    model.getElectricEquipments.each do |e|
+      next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
       intgains_elec_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Electric Equipment Convective Heating Energy")
       intgains_elec_equip_sensor.setName("intgains_elec_equip")
       intgains_elec_equip_sensor.setKeyName(@living_zone.name.to_s)
       intgains_sensors << intgains_elec_equip_sensor
+      break
     end
 
-    if model.getGasEquipments.size > 0
+    model.getGasEquipments.each do |e|
+      next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
       intgains_gas_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Gas Equipment Convective Heating Energy")
       intgains_gas_equip_sensor.setName("intgains_gas_equip")
       intgains_gas_equip_sensor.setKeyName(@living_zone.name.to_s)
       intgains_sensors << intgains_gas_equip_sensor
+      break
     end
 
-    if model.getOtherEquipments.size > 0
+    model.getOtherEquipments.each do |e|
+      next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
       intgains_other_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
       intgains_other_equip_sensor.setName("intgains_other_equip")
       intgains_other_equip_sensor.setKeyName(@living_zone.name.to_s)
       intgains_sensors << intgains_other_equip_sensor
-
-      # model.getThermalZones.each do |zone|
-      #  next unless zone.isPlenum # Add duct losses from plenum
-
-      #  intgains_other_equip_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
-      #  intgains_other_equip_sensor.setName("intgains_plenum_equip")
-      #  intgains_other_equip_sensor.setKeyName(zone.name.to_s)
-      #  intgains_sensors << intgains_other_equip_sensor
-      # end
+      break
     end
 
-    if model.getLightss.size > 0
+    model.getLightss.each do |e|
+      next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
       intgains_lights_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Lights Convective Heating Energy")
       intgains_lights_sensor.setName("intgains_lights")
       intgains_lights_sensor.setKeyName(@living_zone.name.to_s)
       intgains_sensors << intgains_lights_sensor
+      break
     end
 
-    if model.getPeoples.size > 0
+    model.getPeoples.each do |e|
+      next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
       intgains_people = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone People Convective Heating Energy")
       intgains_people.setName("intgains_people")
       intgains_people.setKeyName(@living_zone.name.to_s)
       intgains_sensors << intgains_people
+      break
+    end
+
+    intgains_dhw_sensors = {}
+
+    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each_with_index do |wh, idx|
+      next unless wh.ambientTemperatureThermalZone.is_initialized
+      next unless wh.ambientTemperatureThermalZone.get.name.to_s == @living_zone.name.to_s
+
+      dhw_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Heat Loss Energy")
+      dhw_sensor.setName("dhw_mixed_tank#{idx}")
+      dhw_sensor.setKeyName(wh.name.to_s)
+
+      if wh.is_a? OpenStudio::Model::WaterHeaterMixed
+        oncycle_loss = wh.onCycleLossFractiontoThermalZone
+        offcycle_loss = wh.offCycleLossFractiontoThermalZone
+      else
+        oncycle_loss = wh.skinLossFractiontoZone
+        offcycle_loss = wh.offCycleFlueLossFractiontoZone
+      end
+
+      dhw_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Runtime Fraction")
+      dhw_rtf_sensor.setName("dhw_rtf#{idx}")
+      dhw_rtf_sensor.setKeyName(wh.name.to_s)
+
+      intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
+    end
+
+    # EMS Sensors: Ducts
+
+    ducts_plenum_sensors = {}
+    ducts_sensors = []
+
+    model.getThermalZones.each do |zone|
+      next unless zone.isPlenum
+
+      ducts_plenum_htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air System Sensible Heating Energy")
+      ducts_plenum_htg_sensor.setName("ducts_plenum_heating")
+      ducts_plenum_htg_sensor.setKeyName(zone.name.to_s)
+      ducts_plenum_sensors["htg"] = ducts_plenum_htg_sensor
+
+      ducts_plenum_clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air System Sensible Cooling Energy")
+      ducts_plenum_clg_sensor.setName("ducts_plenum_cooling")
+      ducts_plenum_clg_sensor.setKeyName(zone.name.to_s)
+      ducts_plenum_sensors["clg"] = ducts_plenum_clg_sensor
+
+      idx = 0
+      @living_zone.airLoopHVACs.each do |airloop|
+        model.getOtherEquipments.each do |e|
+          next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+          next unless e.name.to_s.start_with? airloop.name.to_s
+
+          idx += 1
+          ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment Convective Heating Energy")
+          ducts_sensor.setName("ducts_other_equip#{idx}")
+          ducts_sensor.setKeyName(e.name.to_s)
+          ducts_sensors << ducts_sensor
+        end
+      end
     end
 
     # EMS program
@@ -3747,14 +3811,15 @@ class OSModel
       program.addLine("Set intgains_#{mode} = 0")
       program.addLine("Set infil_#{mode} = 0")
       program.addLine("Set mechvent_#{mode} = 0")
+      program.addLine("Set ducts_#{mode} = 0")
     end
     ["htg", "clg"].each do |mode|
       if mode == "htg"
-        program.addLine("If #{htg_sensor.name} > 0")
+        program.addLine("If #{htg_sensor.name} > #{clg_sensor.name}")
         sign = "+"
         opp_sign = "-"
       elsif mode == "clg"
-        program.addLine("ElseIf #{clg_sensor.name} > 0")
+        program.addLine("Else")
         sign = "-"
         opp_sign = "+"
       end
@@ -3766,7 +3831,16 @@ class OSModel
       intgains_sensors.each do |sensor|
         program.addLine("  Set intgains_#{mode} = intgains_#{mode} #{opp_sign} #{sensor.name}")
       end
+      intgains_dhw_sensors.each do |sensor, vals|
+        offcycle_loss, oncycle_loss, dhw_rtf_sensor = vals
+        program.addLine("  Set dhw_loss_frac = #{offcycle_loss} * (1-#{dhw_rtf_sensor.name}) + #{oncycle_loss}*#{dhw_rtf_sensor.name}")
+        program.addLine("  Set intgains_#{mode} = intgains_#{mode} #{sign} #{sensor.name} * dhw_loss_frac")
+      end
       program.addLine("  Set infil_#{mode} = infil_#{mode} #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * infil_flow_ratio)") # Airflow heat attributed to infiltration
+      ducts_sensors.each do |sensor|
+        program.addLine("  Set ducts_#{mode} = ducts_#{mode} #{opp_sign} #{sensor.name}")
+        program.addLine("  Set intgains_#{mode} = intgains_#{mode} #{sign} #{sensor.name}")
+      end
       mechvent_sensors.each do |sensor|
         program.addLine("  Set mechvent_#{mode} = mechvent_#{mode} #{opp_sign} #{sensor.name}") # Balanced mech vent load + imbalanced mech vent fan heat
         program.addLine("  Set intgains_#{mode} = intgains_#{mode} #{sign} #{sensor.name}") # Remove it from zone internal gains
@@ -3774,6 +3848,11 @@ class OSModel
       program.addLine("  Set mechvent_#{mode} = mechvent_#{mode} #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * (1.0 - infil_flow_ratio))") # Airflow heat attributed to imbalanced mech vent
     end
     program.addLine("EndIf")
+    ["htg", "clg"].each do |mode|
+      if not ducts_plenum_sensors[mode].nil?
+        program.addLine("Set ducts_#{mode} = ducts_#{mode} + #{ducts_plenum_sensors[mode].name}")
+      end
+    end
 
     # EMS output variables
     ["htg", "clg"].each do |mode|
@@ -3790,7 +3869,7 @@ class OSModel
         output_var.setKeyValue('*')
       end
 
-      ["infil", "intgains", "mechvent"].each do |k|
+      ["infil", "intgains", "mechvent", "ducts"].each do |k|
         ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{k}_#{mode}")
         ems_output_var.setName("#{k}_#{mode}_outvar")
         ems_output_var.setTypeOfDataInVariable("Summed")

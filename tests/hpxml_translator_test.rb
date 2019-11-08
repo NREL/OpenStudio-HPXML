@@ -54,11 +54,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Test simulations
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
+    all_compload_results = {}
     xmls.each do |xml|
-      all_results[xml] = _run_xml(xml, this_dir, args.dup)
+      all_results[xml], all_compload_results[xml] = _run_xml(xml, this_dir, args.dup)
     end
 
+    Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
+    write_component_load_results(results_dir, all_compload_results)
 
     # Cross simulation tests
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
@@ -222,8 +225,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['hpxml_path'] = xml
     args['map_tsv_dir'] = rundir
     _test_schema_validation(this_dir, xml)
-    results = _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
-    return results
+    results, compload_results = _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
+    return results, compload_results
   end
 
   def _get_results(rundir, sim_time, workflow_time)
@@ -336,106 +339,100 @@ class HPXMLTranslatorTest < MiniTest::Test
     results[["Load", "Cooling", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Obtain component loads
-    design_output = {}
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='ceilings_roofs_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingCeilingsRoofs] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='walls_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingWallsRimJoists] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='foundation_walls_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingFoundWalls] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='doors_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingDoors] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='windows_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingWindows] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='skylights_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingSkylights] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='floors_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingFloors] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='slabs_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingSlabs] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='internal_mass_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingInternalMass] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='infil_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingInfilNatVent] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='mechvent_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingMechVent] = sqlFile.execAndReturnFirstDouble(query).get
-    design_output[:componentHeatingDucts] = 0
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='intgains_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentHeatingInternalGains] = sqlFile.execAndReturnFirstDouble(query).get
-
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='ceilings_roofs_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingCeilingsRoofs] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='walls_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingWallsRimJoists] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='foundation_walls_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingFoundWalls] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='doors_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingDoors] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='windows_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingWindows] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='skylights_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingSkylights] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='floors_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingFloors] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='slabs_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingSlabs] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='internal_mass_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingInternalMass] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='infil_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingInfilNatVent] = sqlFile.execAndReturnFirstDouble(query).get
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='mechvent_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingMechVent] = sqlFile.execAndReturnFirstDouble(query).get
-    design_output[:componentCoolingDucts] = 0
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='intgains_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:componentCoolingInternalGains] = sqlFile.execAndReturnFirstDouble(query).get
-
-    sum_heating_component_loads = 0.0
-    sum_cooling_component_loads = 0.0
-    design_output.keys.each do |k|
-      if k.to_s.include? "componentHeating"
-        sum_heating_component_loads += design_output[k]
-      elsif k.to_s.include? "componentCooling"
-        sum_cooling_component_loads += design_output[k]
-      end
-    end
+    compload_results = {}
 
     query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='Heating:EnergyTransfer' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:loadHeatingBldg] = sqlFile.execAndReturnFirstDouble(query).get
+    compload_results["Heating - Total"] = sqlFile.execAndReturnFirstDouble(query).get
     query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='Cooling:EnergyTransfer' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:loadCoolingBldg] = sqlFile.execAndReturnFirstDouble(query).get
+    compload_results["Cooling - Total"] = sqlFile.execAndReturnFirstDouble(query).get
 
     query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='Heating:DistrictHeating' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:unmetLoadHeatingBldg] = sqlFile.execAndReturnFirstDouble(query).get
+    compload_results["Heating - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
     query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex IN (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='Cooling:DistrictCooling' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-    design_output[:unmetLoadCoolingBldg] = sqlFile.execAndReturnFirstDouble(query).get
+    compload_results["Cooling - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
 
-    # design_output.each do |k, v|
-    #   puts "#{k}: #{v.round(3)}"
-    # end
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='ceilings_roofs_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Ceilings/Roofs"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='walls_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Walls/Rim Joists"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='foundation_walls_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Foundation Walls"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='doors_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Doors"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='windows_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Windows"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='skylights_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Skylights"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='floors_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Floors"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='slabs_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Slabs"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='internal_mass_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Internal Mass"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='infil_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Infiltration/Natural Ventilation"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='mechvent_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Mechanical Ventilation"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='ducts_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Ducts"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='intgains_htg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Heating - Internal Gains"] = sqlFile.execAndReturnFirstDouble(query).get
 
-    tolerance = 0.1
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='ceilings_roofs_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Ceilings/Roofs"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='walls_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Walls/Rim Joists"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='foundation_walls_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Foundation Walls"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='doors_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Doors"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='windows_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Windows"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='skylights_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Skylights"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='floors_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Floors"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='slabs_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Slabs"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='internal_mass_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Internal Mass"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='infil_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Infiltration/Natural Ventilation"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='mechvent_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Mechanical Ventilation"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='ducts_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Ducts"] = sqlFile.execAndReturnFirstDouble(query).get
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='intgains_clg_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    compload_results["Cooling - Internal Gains"] = sqlFile.execAndReturnFirstDouble(query).get
 
-    success = true
-    if (design_output[:loadHeatingBldg] - sum_heating_component_loads).abs > tolerance
-      puts "FAIL: Heating component loads (#{sum_heating_component_loads}) do not sum to total (#{design_output[:loadHeatingBldg]})."
-      success = false
-    else
-      puts "SUCCESS: Heating component loads (#{sum_heating_component_loads}) sum to total (#{design_output[:loadHeatingBldg]})."
+    htg_sum = 0.0
+    clg_sum = 0.0
+    compload_results.keys.each do |k|
+      next if k.include? "Total" or k.include? "Unmet"
+
+      if k.include? "Heating"
+        htg_sum += compload_results[k]
+      elsif k.include? "Cooling"
+        clg_sum += compload_results[k]
+      end
     end
-    if (design_output[:loadCoolingBldg] - sum_cooling_component_loads).abs > tolerance
-      puts "FAIL: Cooling component loads (#{sum_cooling_component_loads}) do not sum to total (#{design_output[:loadCoolingBldg]})."
-      success = false
-    else
-      puts "SUCCESS: Cooling component loads (#{sum_cooling_component_loads}) sum to total (#{design_output[:loadCoolingBldg]})."
-    end
-    # fail if not success
+    compload_results["Heating - Sum"] = htg_sum
+    compload_results["Cooling - Sum"] = clg_sum
+
+    # Discrepancy between total and sum of components
+    compload_results["Heating - Residual"] = (compload_results["Heating - Total"] - compload_results["Heating - Sum"]).abs
+    compload_results["Cooling - Residual"] = (compload_results["Cooling - Total"] - compload_results["Cooling - Sum"]).abs
 
     sqlFile.close
+
+    # FIXME: Uncomment when all buildings pass
+    # assert_operator(compload_results["Heating - Residual"], :<, 0.1)
+    # assert_operator(compload_results["Cooling - Residual"], :<, 0.1)
 
     results[@simulation_runtime_key] = sim_time
     results[@workflow_runtime_key] = workflow_time
 
-    return results
+    return results, compload_results
   end
 
   def _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
@@ -530,12 +527,12 @@ class HPXMLTranslatorTest < MiniTest::Test
     workflow_time = (Time.now - workflow_start).round(1)
     puts "Completed #{File.basename(args['hpxml_path'])} simulation in #{sim_time}, workflow in #{workflow_time}s."
 
-    results = _get_results(rundir, sim_time, workflow_time)
+    results, compload_results = _get_results(rundir, sim_time, workflow_time)
 
     # Verify simulation outputs
     _verify_simulation_outputs(runner, rundir, args['hpxml_path'], results)
 
-    return results
+    return results, compload_results
   end
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
@@ -1145,7 +1142,7 @@ class HPXMLTranslatorTest < MiniTest::Test
   end
 
   def _write_summary_results(results_dir, results)
-    Dir.mkdir(results_dir)
+    require 'csv'
     csv_out = File.join(results_dir, 'results.csv')
 
     # Get all keys across simulations for output columns
@@ -1173,7 +1170,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    require 'csv'
     CSV.open(csv_out, 'w') do |csv|
       csv << column_headers
       results.sort.each do |xml, xml_results|
@@ -1189,7 +1185,31 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    puts "Wrote results to #{csv_out}."
+    puts "Wrote summary results to #{csv_out}."
+  end
+
+  def write_component_load_results(results_dir, all_compload_results)
+    require 'csv'
+    csv_out = File.join(results_dir, 'results_component_loads.csv')
+
+    output_keys = nil
+    all_compload_results.each do |xml, xml_results|
+      output_keys = xml_results.keys
+      break
+    end
+
+    CSV.open(csv_out, 'w') do |csv|
+      csv << ['HPXML'] + output_keys
+      all_compload_results.sort.each do |xml, xml_results|
+        csv_row = [xml]
+        output_keys.each do |key|
+          csv_row << xml_results[key]
+        end
+        csv << csv_row
+      end
+    end
+
+    puts "Wrote component load results to #{csv_out}."
   end
 
   def _test_schema_validation(this_dir, xml)
