@@ -421,6 +421,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('*')
 
+    # Add output variables for combi system energy check
+    output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
+    output_var = OpenStudio::Model::OutputVariable.new('Baseboard Total Heating Energy', model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
+
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     model_idf = forward_translator.translateModel(model)
@@ -893,6 +901,18 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
       assert_in_epsilon(calculated_ec_adj, simulated_ec_adj, 0.02)
+
+      # check_combi_system_energy_balance
+      if combi_htg_load > 0 and combi_hx_load > 0
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
+        combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+        assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
+
+        # Check boiler, hx, pump, heating coil energy balance
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
+        boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+        assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
+      end
     end
 
     # Mechanical Ventilation
