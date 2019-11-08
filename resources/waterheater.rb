@@ -734,7 +734,7 @@ class Waterheater
       indirect_ctrl_program.addLine("Else")
       indirect_ctrl_program.addLine("Set #{wu_id}_MFR_Hot = #{wu_id}_MFR_Total * (#{equipment_target_temp_sensors[wu_name].name} - WU_Cold_Temp)/(WU_Hot_Temp - WU_Cold_Temp)")
       indirect_ctrl_program.addLine("EndIf")
-      indirect_ctrl_program.addLine("Set Tank_Use_Total_MFR += #{wu_id}_MFR_Hot")
+      indirect_ctrl_program.addLine("Set Tank_Use_Total_MFR = Tank_Use_Total_MFR + #{wu_id}_MFR_Hot")
     end
     indirect_ctrl_program.addLine("Set WH_Loss = - #{tank_loss_energy_sensor.name}")
     indirect_ctrl_program.addLine("Set WH_Use = Tank_Use_Total_MFR * Cp * (#{tank_temp_sensor.name} - #{mains_temp_sensor.name}) * ZoneTimeStep * 3600")
