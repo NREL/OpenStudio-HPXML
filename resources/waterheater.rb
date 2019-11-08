@@ -661,63 +661,50 @@ class Waterheater
   def self.apply_combi_system_EMS(model, runner, combi_sys_id, dhw_map)
     # EMS for modulate source side mass flow rate
     # Initialization
-    dw_peak, cw_peak, fixture_peak, lossCoefficient, tank_volume, deadband = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-    dw_sch_sensor, cw_sch_sensor, fixture_sch_sensor, fixture_target_temp_sensor, tank_temp_sensor, tank_spt_sensor, alt_spt_sch, altsch_actuator, wh_ambient_temp_sensor, pump_actuator = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
+    equipment_peaks = {}
+    equipment_sch_sensors = {}
+    equipment_target_temp_sensors = {}
+    tank_volume, deadband = 0.0, 0.0
+    alt_spt_sch = nil
+    tank_temp_sensor, tank_spt_sensor, tank_loss_energy_sensor = nil, nil, nil
+    altsch_actuator, pump_actuator = nil, nil
 
     # Create sensors and actuators by dhw map information
     dhw_map[combi_sys_id].each do |object|
       if object.is_a? OpenStudio::Model::WaterUseConnections
         object.waterUseEquipment.each do |wu|
-          if wu.name.get.include? Constants.ObjectNameDishwasher
-            dw_peak = wu.waterUseEquipmentDefinition.peakFlowRate
-            dw_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-            dw_sch_sensor.setName("#{Constants.ObjectNameDishwasher} sch value")
-            dw_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
-          elsif wu.name.get.include? Constants.ObjectNameClothesWasher
-            cw_peak = wu.waterUseEquipmentDefinition.peakFlowRate
-            cw_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-            cw_sch_sensor.setName("#{Constants.ObjectNameClothesWasher} sch value")
-            cw_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
-          elsif wu.name.get.include? Constants.ObjectNameFixtures
-            # disaggregate_sinks_showers_baths situation?
-            fixture_peak = wu.waterUseEquipmentDefinition.peakFlowRate
-            fixture_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-            fixture_sch_sensor.setName("#{Constants.ObjectNameFixtures} sch value")
-            fixture_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
-            # only fixtures have different target temperature than tank temperature
-            fixture_target_temp_sch = wu.waterUseEquipmentDefinition.targetTemperatureSchedule.get
-            fixture_target_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-            fixture_target_temp_sensor.setName("#{Constants.ObjectNameFixtures} target temp")
-            fixture_target_temp_sensor.setKeyName(fixture_target_temp_sch.name.to_s)
-          else
-            fail "unexpected water use equipment type for combi-system EMS program."
-          end
+          # water use equipment peak mass flow rate
+          wu_peak = wu.waterUseEquipmentDefinition.peakFlowRate
+          equipment_peaks[wu.name.to_s] = wu_peak
+          # mfr fraction schedule sensors
+          wu_sch_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+          wu_sch_sensor.setName("#{wu.name.to_s} sch value")
+          wu_sch_sensor.setKeyName(wu.flowRateFractionSchedule.get.name.to_s)
+          equipment_sch_sensors[wu.name.to_s] = wu_sch_sensor
+          # water use equipment target temperature schedule sensors
+          target_temp_sch = wu.waterUseEquipmentDefinition.targetTemperatureSchedule.get
+          target_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+          target_temp_sensor.setName("#{wu.name.to_s} target temp")
+          target_temp_sensor.setKeyName(target_temp_sch.name.to_s)
+          equipment_target_temp_sensors[wu.name.to_s] = target_temp_sensor
         end
       elsif object.is_a? OpenStudio::Model::WaterHeaterMixed
         # Some parameters to use
-        lossCoefficient = object.onCycleLossCoefficienttoAmbientTemperature.get
         tank_volume = object.tankVolume.get
         deadband = object.deadbandTemperatureDifference
         # Sensors and actuators related to OS water heater object
         tank_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Tank Temperature")
         tank_temp_sensor.setName("#{combi_sys_id} Tank Temp")
         tank_temp_sensor.setKeyName(object.name.to_s)
+        tank_loss_energy_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Heat Loss Energy")
+        tank_loss_energy_sensor.setName("#{combi_sys_id} Tank Loss Energy")
+        tank_loss_energy_sensor.setKeyName(object.name.to_s)
         tank_spt_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
         tank_spt_sensor.setName("#{combi_sys_id} Setpoint Temperature")
         tank_spt_sensor.setKeyName(object.setpointTemperatureSchedule.get.name.to_s)
         alt_spt_sch = object.indirectAlternateSetpointTemperatureSchedule.get
         altsch_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(alt_spt_sch, "Schedule:Constant", "Schedule Value")
         altsch_actuator.setName("#{combi_sys_id} AltSchedOverride")
-        if object.ambientTemperatureIndicator == "ThermalZone"
-          zone = object.ambientTemperatureThermalZone.get
-          wh_ambient_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Temperature")
-          wh_ambient_temp_sensor.setName("#{combi_sys_id} Amb Temperature")
-          wh_ambient_temp_sensor.setKeyName(zone.name.to_s)
-        elsif object.ambientTemperatureIndicator == "Outdoors"
-          wh_ambient_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Site Outdoor Air Drybulb Temperature")
-          wh_ambient_temp_sensor.setName("#{combi_sys_id} Amb Temperature")
-          wh_ambient_temp_sensor.setKeyName("*")
-        end
       elsif object.is_a? OpenStudio::Model::PumpVariableSpeed
         pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(object, "Pump", "Pump Mass Flow Rate")
         pump_actuator.setName("#{combi_sys_id} Pump MFR")
@@ -735,29 +722,21 @@ class Waterheater
     indirect_ctrl_program.addLine("Set Cp = @CpHW #{tank_temp_sensor.name}")
     indirect_ctrl_program.addLine("Set Tank_Water_Mass = #{tank_volume} * Rho")
     indirect_ctrl_program.addLine("Set DeltaT = #{Constants.Combi_system_source_temp} - #{tank_spt_sensor.name}")
-    if not dw_peak.nil?
-      indirect_ctrl_program.addLine("Set DW_Peak = #{dw_peak}")
-      indirect_ctrl_program.addLine("Set DW_MFR = DW_Peak * #{dw_sch_sensor.name} * Rho")
-    else
-      indirect_ctrl_program.addLine("Set DW_MFR = 0")
+    indirect_ctrl_program.addLine("Set WU_Hot_Temp = #{tank_temp_sensor.name}")
+    indirect_ctrl_program.addLine("Set WU_Cold_Temp = #{mains_temp_sensor.name}")
+    indirect_ctrl_program.addLine("Set Tank_Use_Total_MFR = 0.0")
+    equipment_peaks.each do |wu_name, peak|
+      wu_id = wu_name.gsub(' ', '_')
+      indirect_ctrl_program.addLine("Set #{wu_id}_Peak = #{peak}")
+      indirect_ctrl_program.addLine("Set #{wu_id}_MFR_Total = #{wu_id}_Peak * #{equipment_sch_sensors[wu_name].name} * Rho")
+      indirect_ctrl_program.addLine("If #{equipment_target_temp_sensors[wu_name].name} > WU_Hot_Temp")
+      indirect_ctrl_program.addLine("Set #{wu_id}_MFR_Hot = #{wu_id}_MFR_Total")
+      indirect_ctrl_program.addLine("Else")
+      indirect_ctrl_program.addLine("Set #{wu_id}_MFR_Hot = #{wu_id}_MFR_Total * (#{equipment_target_temp_sensors[wu_name].name} - WU_Cold_Temp)/(WU_Hot_Temp - WU_Cold_Temp)")
+      indirect_ctrl_program.addLine("EndIf")
+      indirect_ctrl_program.addLine("Set Tank_Use_Total_MFR += #{wu_id}_MFR_Hot")
     end
-    if not cw_peak.nil?
-      indirect_ctrl_program.addLine("Set CW_Peak = #{cw_peak}")
-      indirect_ctrl_program.addLine("Set CW_MFR = DW_Peak * #{cw_sch_sensor.name} * Rho")
-    else
-      indirect_ctrl_program.addLine("Set CW_MFR = 0")
-    end
-    if not fixture_peak.nil?
-      indirect_ctrl_program.addLine("Set Fixture_Peak = #{fixture_peak}")
-      indirect_ctrl_program.addLine("Set Fixture_MFR_Total = Fixture_Peak * #{fixture_sch_sensor.name} * Rho")
-      indirect_ctrl_program.addLine("Set Fixture_Hot_Temp = #{tank_temp_sensor.name}")
-      indirect_ctrl_program.addLine("Set Fixture_Cold_Temp = #{mains_temp_sensor.name}")
-      indirect_ctrl_program.addLine("Set Fixture_Hot_MFR = Fixture_MFR_Total * (#{fixture_target_temp_sensor.name} - Fixture_Cold_Temp)/(Fixture_Hot_Temp - Fixture_Cold_Temp)")
-    else
-      indirect_ctrl_program.addLine("Set Fixture_Hot_MFR = 0")
-    end
-    indirect_ctrl_program.addLine("Set Tank_Use_Total_MFR = Fixture_Hot_MFR + CW_MFR + DW_MFR")
-    indirect_ctrl_program.addLine("Set WH_Loss = #{lossCoefficient} * ZoneTimeStep * 3600 * (#{tank_temp_sensor.name} - #{wh_ambient_temp_sensor.name})")
+    indirect_ctrl_program.addLine("Set WH_Loss = - #{tank_loss_energy_sensor.name}")
     indirect_ctrl_program.addLine("Set WH_Use = Tank_Use_Total_MFR * Cp * (#{tank_temp_sensor.name} - #{mains_temp_sensor.name}) * ZoneTimeStep * 3600")
     indirect_ctrl_program.addLine("Set WH_HeatToLowSetpoint = Tank_Water_Mass * Cp * (#{tank_temp_sensor.name} - #{tank_spt_sensor.name} + #{deadband})")
     indirect_ctrl_program.addLine("Set WH_Energy_Demand = WH_Use + WH_Loss - WH_HeatToLowSetpoint")
