@@ -158,7 +158,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       return false if not success
 
       # Create OpenStudio model
-      if not OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir)
+      if not OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
         runner.registerError("Unsuccessful creation of OpenStudio model.")
         return false
       end
@@ -222,11 +222,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml_doc, runner, model, weather, map_tsv_dir)
-    # Simulation parameters
-    success = add_simulation_params(runner, model)
-    return false if not success
-
+  def self.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
+    @hpxml_path = hpxml_path
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
     building = hpxml_doc.elements["/HPXML/Building"]
@@ -234,6 +231,8 @@ class OSModel
 
     @eri_version = hpxml_values[:eri_calculation_version]
     fail "Could not find ERI Version" if @eri_version.nil?
+
+    HPXML.collapse_enclosure(enclosure)
 
     # Global variables
     construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
@@ -273,6 +272,11 @@ class OSModel
       @use_only_ideal_air = construction_values[:use_only_ideal_air_system]
     end
 
+    # Simulation parameters
+
+    success = add_simulation_params(runner, model)
+    return false if not success
+
     # Geometry/Envelope
 
     spaces = {}
@@ -304,7 +308,7 @@ class OSModel
     success = add_setpoints(runner, model, building, weather)
     return false if not success
 
-    success = add_ceiling_fans(runner, model, building, spaces)
+    success = add_ceiling_fans(runner, model, building, weather)
     return false if not success
 
     # Hot Water
@@ -760,6 +764,7 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
+        next if vf < 0.01 # TODO: Remove this when https://github.com/NREL/OpenStudio/issues/3737 is resolved
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf)
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
@@ -773,42 +778,49 @@ class OSModel
   def self.calc_approximate_view_factor(runner, model, all_surfaces)
     # calculate approximate view factor using E+ approach
     # used for recalculating single thermal zone view factor matrix
+    s_azimuths = {}
+    s_tilts = {}
+    s_types = {}
+    all_surfaces.each do |surface|
+      if surface.is_a? OpenStudio::Model::InternalMass
+        # Assumed values consistent with EnergyPlus source code
+        s_azimuths[surface] = 0.0
+        s_tilts[surface] = 90.0
+      else
+        s_azimuths[surface] = UnitConversions.convert(surface.azimuth, "rad", "deg")
+        s_tilts[surface] = UnitConversions.convert(surface.tilt, "rad", "deg")
+        if surface.is_a? OpenStudio::Model::SubSurface
+          s_types[surface] = surface.surface.get.surfaceType.downcase
+        else
+          s_types[surface] = surface.surfaceType.downcase
+        end
+      end
+    end
+
     same_ang_limit = 10.0
     vf_map = {}
     all_surfaces.each do |surface| # surface, subsurface, and internalmass
-      if surface.is_a? OpenStudio::Model::InternalMass
-        # Assumed values consistent with EnergyPlus source code
-        s_azimuth = 0.0
-        s_tilt = 90.0
-      else
-        s_azimuth = UnitConversions.convert(surface.azimuth, "rad", "deg")
-        s_tilt = UnitConversions.convert(surface.tilt, "rad", "deg")
-        if surface.is_a? OpenStudio::Model::SubSurface
-          s_type = surface.surface.get.surfaceType.downcase
-        else
-          s_type = surface.surfaceType.downcase
-        end
-      end
-      zone_seen_area = 0.0
       surface_vf_map = {}
 
       # sum all the surface area that could be seen by surface1 up
+      zone_seen_area = 0.0
+      seen_surface = {}
       all_surfaces.each do |surface2|
         next if surface2 == surface
         next if surface2.is_a? OpenStudio::Model::SubSurface
 
+        seen_surface[surface2] = false
         if surface2.is_a? OpenStudio::Model::InternalMass
           # all surfaces see internal mass
           zone_seen_area += surface2.surfaceArea.get
+          seen_surface[surface2] = true
         else
-          s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
-          s2_tilt = UnitConversions.convert(surface2.tilt, "rad", "deg")
-          surface_type = surface2.surfaceType.downcase
-          if (surface_type == "floor") or
-             (s_type == "floor" and surface_type == "roofceiling") or
-             (s_azimuth - s2_azimuth).abs > same_ang_limit or
-             (s_tilt - s2_tilt).abs > same_ang_limit
+          if (s_types[surface2] == "floor") or
+             (s_types[surface] == "floor" and s_types[surface2] == "roofceiling") or
+             (s_azimuths[surface] - s_azimuths[surface2]).abs > same_ang_limit or
+             (s_tilts[surface] - s_tilts[surface2]).abs > same_ang_limit
             zone_seen_area += surface2.grossArea # include subsurface area
+            seen_surface[surface2] = true
           end
         end
       end
@@ -816,29 +828,22 @@ class OSModel
       all_surfaces.each do |surface2|
         next if surface2 == surface
         next if surface2.is_a? OpenStudio::Model::SubSurface # handled together with its parent surface
+        next unless seen_surface[surface2]
 
         if surface2.is_a? OpenStudio::Model::InternalMass
           surface_vf_map[surface2] = surface2.surfaceArea.get / zone_seen_area
         else # surfaces
-          s2_azimuth = UnitConversions.convert(surface2.azimuth, "rad", "deg")
-          s2_tilt = UnitConversions.convert(surface2.tilt, "rad", "deg")
-          surface_type = surface2.surfaceType.downcase
-          if (surface_type == "floor") or
-             (s_type == "floor" and surface_type == "roofceiling") or
-             (s_azimuth - s2_azimuth).abs > same_ang_limit or
-             (s_tilt - s2_tilt).abs > same_ang_limit
-            if surface2.subSurfaces.size != 0
-              # calculate surface and its sub surfaces view factors
-              parent_surface_a = surface2.netArea
-              if parent_surface_a > 0.01 # base surface of a sub surface: window/door etc.
-                surface_vf_map[surface2] = parent_surface_a / zone_seen_area
-              end
-              surface2.subSurfaces.each do |sub_surface|
-                surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
-              end
-            else # no subsurface
-              surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
+          if surface2.subSurfaces.size > 0
+            # calculate surface and its sub surfaces view factors
+            if surface2.netArea > 0.01 # base surface of a sub surface: window/door etc.
+              fail "Unexpected net area for surface '#{surface2.name}'."
             end
+
+            surface2.subSurfaces.each do |sub_surface|
+              surface_vf_map[sub_surface] = sub_surface.grossArea / zone_seen_area
+            end
+          else # no subsurface
+            surface_vf_map[surface2] = surface2.grossArea / zone_seen_area
           end
         end
       end
@@ -981,14 +986,14 @@ class OSModel
     return OpenStudio::reverse(add_floor_polygon(x, y, z))
   end
 
-  def self.net_surface_area(gross_area, surface_id, surface_type)
+  def self.net_surface_area(gross_area, surface_id)
     net_area = gross_area
-    if @subsurface_areas_by_surface.keys.include? surface_id
+    if not @subsurface_areas_by_surface[surface_id].nil?
       net_area -= @subsurface_areas_by_surface[surface_id]
     end
 
     if net_area < 0
-      fail "Calculated a negative net surface area for #{surface_type} '#{surface_id}'."
+      fail "Calculated a negative net surface area for surface '#{surface_id}'."
     end
 
     return net_area
@@ -1007,7 +1012,7 @@ class OSModel
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
       weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
-      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject { |sum, n| sum + n }
+      weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject(0, :+)
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
         runner.registerError("Occupancy schedule inconsistent with hrs_per_day.")
         return false
@@ -1031,7 +1036,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
       wall_id = window_values[:wall_idref]
-      subsurface_areas[wall_id] = 0.0 if subsurface_areas[wall_id].nil?
+      subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
       subsurface_areas[wall_id] += window_values[:area]
     end
 
@@ -1039,7 +1044,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_values = HPXML.get_skylight_values(skylight: skylight)
       roof_id = skylight_values[:roof_idref]
-      subsurface_areas[roof_id] = 0.0 if subsurface_areas[roof_id].nil?
+      subsurface_areas[roof_id] = 0 if subsurface_areas[roof_id].nil?
       subsurface_areas[roof_id] += skylight_values[:area]
     end
 
@@ -1047,7 +1052,7 @@ class OSModel
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
       door_values = HPXML.get_door_values(door: door)
       wall_id = door_values[:wall_idref]
-      subsurface_areas[wall_id] = 0.0 if subsurface_areas[wall_id].nil?
+      subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
       subsurface_areas[wall_id] += door_values[:area]
     end
 
@@ -1056,7 +1061,7 @@ class OSModel
 
   def self.get_default_azimuths(building)
     azimuth_counts = {}
-    building.elements.each("BuildingDetails/Enclosure//Azimuth") do |azimuth|
+    building.elements.each("BuildingDetails/Enclosure/*/*/Azimuth") do |azimuth|
       az = Integer(azimuth.text)
       azimuth_counts[az] = 0 if azimuth_counts[az].nil?
       azimuth_counts[az] += 1
@@ -1107,7 +1112,7 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        net_area = net_surface_area(roof_values[:area], roof_values[:id], "Roof")
+        net_area = net_surface_area(roof_values[:area], roof_values[:id])
         next if net_area < 0.1
 
         width = Math::sqrt(net_area)
@@ -1196,7 +1201,7 @@ class OSModel
       surfaces = []
 
       azimuths.each do |azimuth|
-        net_area = net_surface_area(wall_values[:area], wall_values[:id], "Wall")
+        net_area = net_surface_area(wall_values[:area], wall_values[:id])
         next if net_area < 0.1
 
         height = 8.0 * @ncfl_ag
@@ -1406,19 +1411,15 @@ class OSModel
       end
 
       # Calculate combinations of slabs/walls for each Kiva instance
-      kiva_instances, kiva_slabs = get_kiva_instances(fnd_walls, slabs)
+      kiva_instances = get_kiva_instances(fnd_walls, slabs)
 
       # Obtain some wall/slab information
-      fnd_wall_gross_areas = {}
-      fnd_wall_net_areas = {}
       fnd_wall_lengths = {}
       fnd_walls.each_with_index do |fnd_wall, fnd_wall_idx|
         fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
-        fnd_wall_gross_areas[fnd_wall] = fnd_wall_values[:area]
-        fnd_wall_net_areas[fnd_wall] = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall")
-        fnd_wall_lengths[fnd_wall] = fnd_wall_gross_areas[fnd_wall] / fnd_wall_values[:height]
+        fnd_wall_lengths[fnd_wall] = fnd_wall_values[:area] / fnd_wall_values[:height]
       end
       slab_exp_perims = {}
       slab_areas = {}
@@ -1433,72 +1434,61 @@ class OSModel
 
       no_wall_slab_exp_perim = {}
 
-      kiva_instances.each do |fnd_walls_list, kiva_slabs_list|
+      kiva_instances.each do |fnd_wall, slab|
         kiva_foundation = nil
 
         # Apportion referenced walls/slabs for this Kiva instance
-        kiva_slab_exp_perim = kiva_slabs_list.flatten.map { |e| slab_exp_perims[e] }.inject(0, :+)
-        kiva_slab_area = kiva_slabs_list.flatten.map { |e| slab_areas[e] }.inject(0, :+)
-        kiva_fnd_wall_length = fnd_walls_list.flatten.map { |e| fnd_wall_lengths[e] }.inject(0, :+)
-        kiva_fnd_wall_net_area = fnd_walls_list.flatten.map { |e| fnd_wall_net_areas[e] }.inject(0, :+)
-        kiva_fnd_wall_gross_area = fnd_walls_list.flatten.map { |e| fnd_wall_gross_areas[e] }.inject(0, :+)
-        slab_frac = kiva_slab_exp_perim / total_slab_exp_perim
+        slab_frac = slab_exp_perims[slab] / total_slab_exp_perim
         if total_fnd_wall_length > 0
-          fnd_wall_frac = kiva_fnd_wall_length / total_fnd_wall_length
+          fnd_wall_frac = fnd_wall_lengths[fnd_wall] / total_fnd_wall_length
         else
           fnd_wall_frac = 1.0 # Handle slab foundation type
         end
 
-        if not fnd_walls_list.empty?
-          # Add single combined exterior foundation wall surface (for similar surfaces)
-          fnd_wall = fnd_walls_list[0]
+        if not fnd_wall.nil?
+          # Add exterior foundation wall surface
           fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-          combined_wall_net_area = kiva_fnd_wall_net_area * slab_frac
-          combined_wall_gross_area = kiva_fnd_wall_gross_area * slab_frac
-          kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area, combined_wall_gross_area,
+          kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
                                                 total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
           return false if kiva_foundation.nil?
         end
 
         # Add single combined foundation slab surface (for similar surfaces)
-        slab = kiva_slabs_list[0]
         slab_values = HPXML.get_slab_values(slab: slab)
-        combined_slab_exp_perim = kiva_slab_exp_perim * fnd_wall_frac
-        combined_slab_area = kiva_slab_area * fnd_wall_frac
+        slab_exp_perim = slab_exp_perims[slab] * fnd_wall_frac
+        slab_area = slab_areas[slab] * fnd_wall_frac
         no_wall_slab_exp_perim[slab] = 0.0 if no_wall_slab_exp_perim[slab].nil?
-        if not fnd_walls_list.empty? and combined_slab_exp_perim > kiva_fnd_wall_length * slab_frac
+        if not fnd_wall.nil? and slab_exp_perim > fnd_wall_lengths[fnd_wall] * slab_frac
           # Keep track of no-wall slab exposed perimeter
-          no_wall_slab_exp_perim[slab] += (combined_slab_exp_perim - kiva_fnd_wall_length * slab_frac)
+          no_wall_slab_exp_perim[slab] += (slab_exp_perim - fnd_wall_lengths[fnd_wall] * slab_frac)
 
           # Reduce this slab's exposed perimeter so that EnergyPlus does not automatically
           # create a second no-wall Kiva instance for each of our Kiva instances.
           # Instead, we will later create our own Kiva instance to account for it.
           # This reduces the number of Kiva instances we end up with.
-          exp_perim_frac = (kiva_fnd_wall_length * slab_frac) / combined_slab_exp_perim
-          combined_slab_exp_perim *= exp_perim_frac
-          combined_slab_area *= exp_perim_frac
+          exp_perim_frac = (fnd_wall_lengths[fnd_wall] * slab_frac) / slab_exp_perim
+          slab_exp_perim *= exp_perim_frac
+          slab_area *= exp_perim_frac
         end
-        if not fnd_walls_list.empty?
+        if not fnd_wall.nil?
           z_origin = -1 * fnd_wall_values[:depth_below_grade] # Position based on adjacent foundation walls
         else
           z_origin = -1 * slab_values[:depth_below_grade]
         end
-        kiva_foundation = add_foundation_slab(runner, model, spaces, slab_values, combined_slab_exp_perim,
-                                              combined_slab_area, z_origin, kiva_foundation)
+        kiva_foundation = add_foundation_slab(runner, model, spaces, slab_values, slab_exp_perim,
+                                              slab_area, z_origin, kiva_foundation)
         return false if kiva_foundation.nil?
       end
 
-      # For each slab list, create a no-wall Kiva slab instance if needed.
-      kiva_slabs.each do |kiva_slabs_list|
-        # Single combined foundation slab surface
-        slab = kiva_slabs_list[0]
+      # For each slab, create a no-wall Kiva slab instance if needed.
+      slabs.each do |slab|
         next unless no_wall_slab_exp_perim[slab] > 0.1
 
         slab_values = HPXML.get_slab_values(slab: slab)
         z_origin = 0
-        combined_slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
+        slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
         kiva_foundation = add_foundation_slab(runner, model, spaces, slab_values, no_wall_slab_exp_perim[slab],
-                                              combined_slab_area, z_origin, nil)
+                                              slab_area, z_origin, nil)
         return false if kiva_foundation.nil?
       end
 
@@ -1511,7 +1501,7 @@ class OSModel
         next unless fnd_wall_values[:exterior_adjacent_to] != "ground"
 
         ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
-        ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id], "Wall") * ag_height / fnd_wall_values[:height]
+        ag_net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id]) * ag_height / fnd_wall_values[:height]
         next if ag_net_area < 0.1
 
         length = ag_net_area / ag_height
@@ -1556,13 +1546,15 @@ class OSModel
     end
   end
 
-  def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, combined_wall_net_area, combined_wall_gross_area,
+  def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
                                total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
 
+    net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id]) * slab_frac
+    gross_area = fnd_wall_values[:area] * slab_frac
     height = fnd_wall_values[:height]
     height_ag = height - fnd_wall_values[:depth_below_grade]
     z_origin = -1 * fnd_wall_values[:depth_below_grade]
-    length = combined_wall_gross_area / height
+    length = gross_area / height
     if fnd_wall_values[:azimuth].nil?
       azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
     else
@@ -1574,10 +1566,10 @@ class OSModel
       length *= total_slab_exp_perim / total_fnd_wall_length
     end
 
-    if combined_wall_gross_area > combined_wall_net_area
+    if gross_area > net_area
       # Create a "notch" in the wall to account for the subsurfaces. This ensures that
       # we preserve the appropriate wall height, length, and area for Kiva.
-      subsurface_area = combined_wall_gross_area - combined_wall_net_area
+      subsurface_area = gross_area - net_area
     else
       subsurface_area = 0
     end
@@ -1637,15 +1629,15 @@ class OSModel
   end
 
   def self.add_foundation_slab(runner, model, spaces, slab_values, slab_exp_perim,
-                               combined_slab_area, z_origin, kiva_foundation)
+                               slab_area, z_origin, kiva_foundation)
 
     slab_tot_perim = slab_exp_perim
-    if slab_tot_perim**2 - 16.0 * combined_slab_area <= 0
+    if slab_tot_perim**2 - 16.0 * slab_area <= 0
       # Cannot construct rectangle with this perimeter/area. Some of the
       # perimeter is presumably not exposed, so bump up perimeter value.
-      slab_tot_perim = Math.sqrt(16.0 * combined_slab_area)
+      slab_tot_perim = Math.sqrt(16.0 * slab_area)
     end
-    sqrt_term = [slab_tot_perim**2 - 16.0 * combined_slab_area, 0.0].max
+    sqrt_term = [slab_tot_perim**2 - 16.0 * slab_area, 0.0].max
     slab_length = slab_tot_perim / 4.0 + Math.sqrt(sqrt_term) / 4.0
     slab_width = slab_tot_perim / 4.0 - Math.sqrt(sqrt_term) / 4.0
 
@@ -1839,7 +1831,7 @@ class OSModel
 
       # Create parent surface slightly bigger than window
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                window_azimuth, [0, 0.001, 0.001, 0.001]), model)
+                                                                window_azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
       surface.additionalProperties.setFeature("Length", window_width)
       surface.additionalProperties.setFeature("Azimuth", window_azimuth)
@@ -1851,7 +1843,7 @@ class OSModel
       surfaces << surface
 
       sub_surface = OpenStudio::Model::SubSurface.new(add_wall_polygon(window_width, window_height, z_origin,
-                                                                       window_azimuth, [-0.001, 0, 0.001, 0]), model)
+                                                                       window_azimuth, [-0.0001, 0, 0.0001, 0]), model)
       sub_surface.setName(window_id)
       sub_surface.setSurface(surface)
       sub_surface.setSubSurfaceType("FixedWindow")
@@ -1915,7 +1907,7 @@ class OSModel
       skylight_azimuth = skylight_values[:azimuth]
 
       # Create parent surface slightly bigger than skylight
-      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.001, skylight_height + 0.001, z_origin,
+      surface = OpenStudio::Model::Surface.new(add_roof_polygon(skylight_width + 0.0001, skylight_height + 0.0001, z_origin,
                                                                 skylight_azimuth, skylight_tilt), model)
 
       surface.additionalProperties.setFeature("Length", skylight_width)
@@ -1967,7 +1959,7 @@ class OSModel
 
       # Create parent surface slightly bigger than door
       surface = OpenStudio::Model::Surface.new(add_wall_polygon(door_width, door_height, z_origin,
-                                                                door_azimuth, [0, 0.001, 0.001, 0.001]), model)
+                                                                door_azimuth, [0, 0.0001, 0.0001, 0.0001]), model)
 
       surface.additionalProperties.setFeature("Length", door_width)
       surface.additionalProperties.setFeature("Azimuth", door_azimuth)
@@ -2808,23 +2800,22 @@ class OSModel
     hvac_control_values = HPXML.get_hvac_control_values(hvac_control: building.elements["BuildingDetails/Systems/HVAC/HVACControl"])
     return true if hvac_control_values.nil?
 
-    control_type = hvac_control_values[:control_type]
-    heating_temp = hvac_control_values[:setpoint_temp_heating_season]
-    if not heating_temp.nil? # Use provided value
-      htg_weekday_setpoints = [[heating_temp] * 24] * 12
-    else # Use ERI default
-      htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
-      if htg_setback_sp.nil?
-        htg_weekday_setpoints = [[htg_sp] * 24] * 12
-      else
-        htg_weekday_setpoints = [[htg_sp] * 24] * 12
-        (0..11).to_a.each do |m|
-          for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-            htg_weekday_setpoints[m][hr % 24] = htg_setback_sp
-          end
+    # Base heating setpoint
+    htg_setpoint = hvac_control_values[:heating_setpoint_temp]
+    htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
+
+    # Apply heating setback?
+    htg_setback = hvac_control_values[:heating_setback_temp]
+    if not htg_setback.nil?
+      htg_setback_hrs_per_week = hvac_control_values[:heating_setback_hours_per_week]
+      htg_setback_start_hr = hvac_control_values[:heating_setback_start_hour]
+      for m in 1..12
+        for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
+          htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
         end
       end
     end
+
     htg_weekend_setpoints = htg_weekday_setpoints
     htg_use_auto_season = false
     htg_season_start_month = 1
@@ -2834,32 +2825,32 @@ class OSModel
                                            @living_zone)
     return false if not success
 
-    cooling_temp = hvac_control_values[:setpoint_temp_cooling_season]
-    if not cooling_temp.nil? # Use provided value
-      clg_weekday_setpoints = [[cooling_temp] * 24] * 12
-    else # Use ERI default
-      clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
-      if clg_setup_sp.nil?
-        clg_weekday_setpoints = [[clg_sp] * 24] * 12
-      else
-        clg_weekday_setpoints = [[clg_sp] * 24] * 12
-        (0..11).to_a.each do |m|
-          for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-            clg_weekday_setpoints[m][hr % 24] = clg_setup_sp
-          end
+    # Base cooling setpoint
+    clg_setpoint = hvac_control_values[:cooling_setpoint_temp]
+    clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
+
+    # Apply cooling setup?
+    clg_setup = hvac_control_values[:cooling_setup_temp]
+    if not clg_setup.nil?
+      clg_setup_hrs_per_week = hvac_control_values[:cooling_setup_hours_per_week]
+      clg_setup_start_hr = hvac_control_values[:cooling_setup_start_hour]
+      for m in 1..12
+        for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
+          clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
         end
       end
     end
-    # Apply ceiling fan offset?
-    if not building.elements["BuildingDetails/Lighting/CeilingFan"].nil?
-      cooling_setpoint_offset = 0.5 # deg-F
-      monthly_avg_temp_control = 63.0 # deg-F
-      weather.data.MonthlyAvgDrybulbs.each_with_index do |val, m|
-        next unless val > monthly_avg_temp_control
 
-        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, cooling_setpoint_offset)].transpose.map { |i| i.reduce(:+) }
+    # Apply cooling setpoint offset due to ceiling fan?
+    clg_ceiling_fan_offset = hvac_control_values[:ceiling_fan_cooling_setpoint_temp_offset]
+    if not clg_ceiling_fan_offset.nil?
+      HVAC.get_ceiling_fan_operation_months(weather).each_with_index do |operation, m|
+        next unless operation == 1
+
+        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
       end
     end
+
     clg_weekend_setpoints = clg_weekday_setpoints
     clg_use_auto_season = false
     clg_season_start_month = 1
@@ -2872,14 +2863,15 @@ class OSModel
     return true
   end
 
-  def self.add_ceiling_fans(runner, model, building, spaces)
+  def self.add_ceiling_fans(runner, model, building, weather)
     ceiling_fan_values = HPXML.get_ceiling_fan_values(ceiling_fan: building.elements["BuildingDetails/Lighting/CeilingFan"])
     return true if ceiling_fan_values.nil?
 
+    monthly_sch = HVAC.get_ceiling_fan_operation_months(weather)
     medium_cfm = 3000.0
     weekday_sch = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     weekend_sch = weekday_sch
-    hrs_per_day = weekday_sch.inject { |sum, n| sum + n }
+    hrs_per_day = weekday_sch.inject(0, :+)
 
     cfm_per_w = ceiling_fan_values[:efficiency]
     if cfm_per_w.nil?
@@ -2891,8 +2883,9 @@ class OSModel
       quantity = HVAC.get_default_ceiling_fan_quantity(@nbeds)
     end
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, "Wh", "kWh")
+    annual_kwh *= monthly_sch.inject(:+) / 12.0
 
-    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch,
+    success = HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, monthly_sch,
                                       @cfa, @living_space)
     return false if not success
 
@@ -3219,7 +3212,7 @@ class OSModel
       mech_vent_fan_w = whole_house_fan_values[:fan_power]
       if mech_vent_type == Constants.VentTypeCFIS
         # CFIS: Specify minimum open time in minutes
-        cfis_open_time = whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0
+        cfis_open_time = [whole_house_fan_values[:hours_in_operation] / 24.0 * 60.0, 59.999].min
       else
         # Other: Adjust constant CFM/power based on hours per day of operation
         mech_vent_cfm *= (whole_house_fan_values[:hours_in_operation] / 24.0)
@@ -3449,7 +3442,8 @@ class OSModel
   def self.add_building_output_variables(runner, model, map_tsv_dir)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
                         OutputVars.SpaceHeatingNaturalGas,
-                        OutputVars.SpaceHeatingOtherFuel,
+                        OutputVars.SpaceHeatingFuelOil,
+                        OutputVars.SpaceHeatingPropane,
                         OutputVars.SpaceCoolingElectricity]
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
@@ -3457,7 +3451,8 @@ class OSModel
                        OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingNaturalGas,
-                       OutputVars.WaterHeatingOtherFuel,
+                       OutputVars.WaterHeatingFuelOil,
+                       OutputVars.WaterHeatingPropane,
                        OutputVars.WaterHeatingLoad,
                        OutputVars.WaterHeatingLoadTankLosses,
                        OutputVars.WaterHeaterLoadDesuperheater]
@@ -4134,62 +4129,23 @@ class OSModel
 
   def self.get_kiva_instances(fnd_walls, slabs)
     # Identify unique Kiva foundations that are required.
-    # Some foundation walls or slabs with similar properties can share a Kiva foundation instance.
     kiva_fnd_walls = []
     fnd_walls.each_with_index do |fnd_wall, fnd_wall_idx|
       fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
       next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
-      next if kiva_fnd_walls.flatten.include? fnd_wall # Skip if already processed
 
-      kiva_fnd_walls << [fnd_wall]
-
-      # Identify any other foundation walls that can share the Kiva foundation.
-      fnd_walls[fnd_wall_idx + 1..-1].each do |fnd_wall2|
-        next if kiva_fnd_walls.flatten.include? fnd_wall2 # Skip if already processed
-
-        fnd_wall_values2 = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall2)
-        # Note: Azimuth is intentionally excluded. For Kiva, azimuth does not influence results, so we combine
-        # foundation walls of different azimuths to reduce runtime.
-        next unless fnd_wall_values2[:exterior_adjacent_to] == fnd_wall_values[:exterior_adjacent_to]
-        next unless fnd_wall_values2[:height] == fnd_wall_values[:height]
-        next unless fnd_wall_values2[:thickness] == fnd_wall_values[:thickness]
-        next unless fnd_wall_values2[:depth_below_grade] == fnd_wall_values[:depth_below_grade]
-        next unless fnd_wall_values2[:insulation_distance_to_bottom] == fnd_wall_values[:insulation_distance_to_bottom]
-        next unless fnd_wall_values2[:insulation_r_value] == fnd_wall_values[:insulation_r_value]
-        next unless fnd_wall_values2[:insulation_assembly_r_value] == fnd_wall_values[:insulation_assembly_r_value]
-
-        kiva_fnd_walls[-1] << fnd_wall2
-      end
+      kiva_fnd_walls << fnd_wall
     end
     if kiva_fnd_walls.empty? # Handle slab foundation type
-      kiva_fnd_walls << []
+      kiva_fnd_walls << nil
     end
 
     kiva_slabs = []
     slabs.each_with_index do |slab, slab_idx|
       slab_values = HPXML.get_slab_values(slab: slab)
-      next if kiva_slabs.flatten.include? slab # Skip if already processed
-
-      kiva_slabs << [slab]
-
-      # Identify any other foundation slabs that can share the Kiva foundation.
-      slabs[slab_idx + 1..-1].each do |slab2|
-        next if kiva_slabs.flatten.include? slab2 # Skip if already processed
-
-        slab_values2 = HPXML.get_slab_values(slab: slab2)
-        next unless slab_values2[:thickness] == slab_values[:thickness]
-        next unless slab_values2[:perimeter_insulation_depth] == slab_values[:perimeter_insulation_depth]
-        next unless slab_values2[:under_slab_insulation_width] == slab_values[:under_slab_insulation_width]
-        next unless slab_values2[:under_slab_insulation_spans_entire_slab] == slab_values[:under_slab_insulation_spans_entire_slab]
-        next unless slab_values2[:carpet_fraction] == slab_values[:carpet_fraction]
-        next unless slab_values2[:carpet_r_value] == slab_values[:carpet_r_value]
-        next unless slab_values2[:perimeter_insulation_r_value] == slab_values[:perimeter_insulation_r_value]
-        next unless slab_values2[:under_slab_insulation_r_value] == slab_values[:under_slab_insulation_r_value]
-
-        kiva_slabs[-1] << slab2
-      end
+      kiva_slabs << slab
     end
-    return kiva_fnd_walls.product(kiva_slabs), kiva_slabs
+    return kiva_fnd_walls.product(kiva_slabs)
   end
 end
 
@@ -4378,10 +4334,16 @@ class OutputVars
              'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy'] }
   end
 
-  def self.SpaceHeatingOtherFuel
-    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy', 'Boiler FuelOil#1 Energy'] }
+  def self.SpaceHeatingFuelOil
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil FuelOil#1 Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard FuelOil#1 Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler FuelOil#1 Energy'] }
+  end
+
+  def self.SpaceHeatingPropane
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
   end
 
   def self.SpaceCoolingElectricity
@@ -4414,9 +4376,14 @@ class OutputVars
              'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy'] }
   end
 
-  def self.WaterHeatingOtherFuel
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'] }
+  def self.WaterHeatingFuelOil
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater FuelOil#1 Energy'] }
+  end
+
+  def self.WaterHeatingPropane
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy'] }
   end
 
   def self.WaterHeatingLoad
