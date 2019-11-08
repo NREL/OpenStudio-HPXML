@@ -2274,7 +2274,7 @@ class OSModel
                                           recirc_pump_power, dwhr_present,
                                           dwhr_facilities_connected, dwhr_is_equal_flow,
                                           dwhr_efficiency, dhw_loop_fracs, @eri_version,
-                                          @dhw_map)
+                                          @dhw_map, @hpxml_path)
     return false if not success
 
     return true
