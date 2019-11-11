@@ -2564,8 +2564,10 @@ class OSModel
       end
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
-      if not backup_heat_fuel.nil?
+      backup_heat_fuel_xml = heat_pump_values[:backup_heating_fuel]
+      if not backup_heat_fuel_xml.nil?
+
+        backup_heat_fuel = to_beopt_fuel(backup_heat_fuel_xml)
 
         backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
         if backup_heat_capacity_btuh < 0
@@ -2588,6 +2590,7 @@ class OSModel
         backup_switchover_temp = heat_pump_values[:backup_heating_switchover_temp]
 
       else
+        backup_heat_fuel = Constants.FuelTypeElectric
         backup_heat_capacity_btuh = 0.0
         backup_heat_efficiency = 1.0
         backup_switchover_temp = nil
@@ -2605,7 +2608,12 @@ class OSModel
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
-        min_temp = 0.0 # FIXME
+
+        if not backup_switchover_temp.nil?
+          min_temp = backup_switchover_temp
+        else
+          min_temp = 0.0 # FIXME
+        end
 
         if num_speeds == "1-Speed"
 
@@ -2619,7 +2627,7 @@ class OSModel
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2637,7 +2645,7 @@ class OSModel
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2655,7 +2663,7 @@ class OSModel
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                                    fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2711,7 +2719,7 @@ class OSModel
                                   heating_capacity_offset, cap_retention_frac,
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
-                                  backup_heat_efficiency, backup_heat_capacity_btuh,
+                                  backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @living_zone, @hvac_map, sys_id)

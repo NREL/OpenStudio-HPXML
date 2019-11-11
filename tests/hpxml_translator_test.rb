@@ -999,7 +999,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
     ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
     ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
-    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? and not hpxml_path.include? "location-miami"
+    if (not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? or not bldg_details.elements["Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel='natural gas']"].nil?) and not hpxml_path.include? "location-miami"
       assert_operator(ng_htg, :>, 0)
     else
       assert_equal(ng_htg, 0)

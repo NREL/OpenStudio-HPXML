@@ -359,10 +359,28 @@ class HVAC
     return true
   end
 
+  def self.apply_supplemental_htg_coil(model, obj_name, fuel_type, supplemental_efficiency, supplemental_capacity)
+    if fuel_type == Constants.FuelTypeElectric
+      htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
+      htg_supp_coil.setEfficiency(supplemental_efficiency)
+    else
+      htg_supp_coil = OpenStudio::Model::CoilHeatingGas.new(model)
+      htg_supp_coil.setGasBurnerEfficiency(supplemental_efficiency)
+      htg_supp_coil.setParasiticElectricLoad(0)
+      htg_supp_coil.setParasiticGasLoad(0)
+      htg_supp_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
+    end
+    htg_supp_coil.setName(obj_name + " supp htg coil")
+    if supplemental_capacity != Constants.SizingAuto
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
+    end
+    return htg_supp_coil
+  end
+
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -420,12 +438,7 @@ class HVAC
     htg_coil.setDefrostControl("OnDemand")
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
     hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, clg_coil_stage_data[0].totalCoolingCapacityFunctionofTemperatureCurve, clg_coil_stage_data[0].totalCoolingCapacityFunctionofFlowFractionCurve, clg_coil_stage_data[0].energyInputRatioFunctionofTemperatureCurve, clg_coil_stage_data[0].energyInputRatioFunctionofFlowFractionCurve, clg_coil_stage_data[0].partLoadFractionCorrelationCurve)
@@ -521,7 +534,7 @@ class HVAC
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -579,12 +592,7 @@ class HVAC
     end
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
     hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -687,7 +695,7 @@ class HVAC
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -749,12 +757,8 @@ class HVAC
     end
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
+    hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
     clg_coil.setName(obj_name + " clg coil")
@@ -860,7 +864,7 @@ class HVAC
                       min_heating_airflow_rate, max_heating_airflow_rate,
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
-                      heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
+                      heat_pump_capacity, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_zone, hvac_map, sys_id)
@@ -950,12 +954,7 @@ class HVAC
     end
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
     hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)

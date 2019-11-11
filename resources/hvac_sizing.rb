@@ -2611,7 +2611,7 @@ class HVACSizing
       end
 
       # Supplemental heating
-      if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
+      if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric or supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingGas
         if supp_htg_coil.nominalCapacity.is_initialized
           hvac.FixedSuppHeatingCapacity = UnitConversions.convert(supp_htg_coil.nominalCapacity.get, "W", "ton")
         end
