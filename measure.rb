@@ -3627,6 +3627,13 @@ class OSModel
                         :skylights => [],
                         :internal_mass => [] }
 
+    surface_solar_sensors = { :walls => [],
+                              :foundation_walls => [],
+                              :floors => [],
+                              :slabs => [],
+                              :ceilings_roofs => [],
+                              :internal_mass => [] }
+
     model.getSurfaces.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
@@ -3646,26 +3653,33 @@ class OSModel
         end
       end
 
-      next if s.netArea < 0.01 # Skip parent surfaces (of subsurfaces) that have near zero net area
-
       sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Convection Heat Gain Energy")
       sensor.setName("surface#{idx}_convection")
       sensor.setKeyName(s.name.to_s)
 
+      solar_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Solar Radiation Heat Gain Energy")
+      solar_sensor.setName("surface#{idx}_solar")
+      solar_sensor.setKeyName(s.name.to_s)
+
       if s.surfaceType == 'Wall'
         if s.outsideBoundaryCondition == 'Foundation' or s.outsideBoundaryCondition == 'Ground'
           surface_sensors[:foundation_walls] << sensor
+          surface_solar_sensors[:foundation_walls] << solar_sensor
         else
           surface_sensors[:walls] << sensor
+          surface_solar_sensors[:walls] << solar_sensor
         end
       elsif s.surfaceType == 'Floor'
         if s.outsideBoundaryCondition == 'Foundation' or s.outsideBoundaryCondition == 'Ground'
           surface_sensors[:slabs] << sensor
+          surface_solar_sensors[:slabs] << solar_sensor
         else
           surface_sensors[:floors] << sensor
+          surface_solar_sensors[:floors] << solar_sensor
         end
       elsif s.surfaceType == 'RoofCeiling'
         surface_sensors[:ceilings_roofs] << sensor
+        surface_solar_sensors[:ceilings_roofs] << solar_sensor
       else
         fail "Unexpected surface for component loads: '#{s.name}'."
       end
@@ -3678,7 +3692,16 @@ class OSModel
       sensor.setName("intmass#{idx}_convection")
       sensor.setKeyName(m.name.to_s)
       surface_sensors[:internal_mass] << sensor
+
+      solar_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Solar Radiation Heat Gain Energy")
+      solar_sensor.setName("intmass#{idx}_solar")
+      solar_sensor.setKeyName(m.name.to_s)
+      surface_solar_sensors[:internal_mass] << solar_sensor
     end
+
+    windows_solar_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Windows Total Transmitted Solar Radiation Energy")
+    windows_solar_sensor.setName("windows_solar")
+    windows_solar_sensor.setKeyName(@living_zone.name.to_s)
 
     # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation
 
@@ -3867,9 +3890,16 @@ class OSModel
         opp_sensor = htg_sensor
       end
       # Surfaces
-      surface_sensors.keys.each do |k|
-        surface_sensors[k].each do |sensor|
+      surface_sensors.each do |k, sensors|
+        sensors.each do |sensor|
           program.addLine("  Set #{mode}_#{k.to_s} = #{mode}_#{k.to_s} #{sign} #{sensor.name} * #{mode}_load_ratio")
+        end
+      end
+      # Shift solar gains to the windows category
+      program.addLine("  Set #{mode}_windows = #{mode}_windows #{opp_sign} #{windows_solar_sensor.name} * #{mode}_load_ratio")
+      surface_solar_sensors.each do |solar_k, solar_sensors|
+        solar_sensors.each do |solar_sensor|
+          program.addLine("  Set #{mode}_#{solar_k.to_s} = #{mode}_#{solar_k.to_s} #{sign} #{solar_sensor.name} * #{mode}_load_ratio")
         end
       end
       # Internal gains
