@@ -3653,6 +3653,8 @@ class OSModel
         end
       end
 
+      next if s.netArea < 0.01 # Skip parent surfaces (of subsurfaces) that have near zero net area
+
       sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Convection Heat Gain Energy")
       sensor.setName("surface#{idx}_convection")
       sensor.setKeyName(s.name.to_s)
