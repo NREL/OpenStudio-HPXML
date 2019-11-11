@@ -3730,13 +3730,15 @@ class OSModel
       ducts_plenum_sensor.setName("ducts_plenum_other_equip")
       ducts_plenum_sensor.setKeyName(plenum_zone.name.to_s)
 
-      ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Gain Energy")
-      ducts_mix_gain_sensor.setName("duct_mix_gain")
-      ducts_mix_gain_sensor.setKeyName(@living_zone.name.to_s)
+      if @living_zone.zoneMixing.size > 0
+        ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Gain Energy")
+        ducts_mix_gain_sensor.setName("duct_mix_gain")
+        ducts_mix_gain_sensor.setKeyName(@living_zone.name.to_s)
 
-      ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Loss Energy")
-      ducts_mix_loss_sensor.setName("duct_mix_loss")
-      ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
+        ducts_mix_loss_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Loss Energy")
+        ducts_mix_loss_sensor.setName("duct_mix_loss")
+        ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
+      end
 
       idx = 0
       @living_zone.airLoopHVACs.each do |airloop|
