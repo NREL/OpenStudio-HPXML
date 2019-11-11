@@ -302,6 +302,9 @@ class OSModel
     success = add_heat_pump(runner, model, building, weather)
     return false if not success
 
+    success = add_dehumidifier(runner, model, building)
+    return false if not success
+
     success = add_residual_hvac(runner, model, building)
     return false if not success
 
@@ -309,9 +312,6 @@ class OSModel
     return false if not success
 
     success = add_ceiling_fans(runner, model, building, weather)
-    return false if not success
-
-    success = add_dehumidifier(runner, model, building)
     return false if not success
 
     # Hot Water
