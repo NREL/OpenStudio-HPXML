@@ -361,7 +361,8 @@ class HPXMLTranslatorTest < MiniTest::Test
                    "Infiltration/Natural Ventilation" => "infil",
                    "Mechanical Ventilation" => "mechvent",
                    "Ducts" => "ducts",
-                   "Internal Gains" => "intgains" }
+                   "Internal Gains" => "intgains",
+                   "Setpoint Change" => "setpoint" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       components.each do |component, component_var|
         query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
@@ -1153,6 +1154,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       output_keys = xml_results.keys
       break
     end
+    return if output_keys.nil?
 
     CSV.open(csv_out, 'w') do |csv|
       csv << ['HPXML'] + output_keys
