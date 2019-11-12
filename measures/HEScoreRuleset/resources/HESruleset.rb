@@ -93,8 +93,35 @@ class HEScoreRuleset
       @bldg_length_front, @bldg_length_side = @bldg_length_side, @bldg_length_front
     end
     @bldg_perimeter = 2.0 * @bldg_length_front + 2.0 * @bldg_length_side # ft
-    @cvolume = @cfa * @ceil_height # ft^3 FIXME: Verify. Should this change for cathedral ceiling, conditioned basement, etc.?
     @roof_angle = 30.0 # deg
+    @roof_angle_rad = UnitConversions.convert(@roof_angle, "deg", "rad") # radians
+    @cvolume = @cfa * @ceil_height
+    orig_details.elements.each("Enclosure/Attics/Attic") do |orig_attic|
+      is_conditioned_attic = XMLHelper.has_element(orig_attic, "AtticType/Attic[Conditioned='true']")
+      is_cathedral_ceiling = XMLHelper.has_element(orig_attic, "AtticType/CathedralCeiling")
+      if is_conditioned_attic or is_cathedral_ceiling
+        roof_id = HPXML.get_idref(orig_attic, "AttachedToRoof")
+        roof = orig_details.elements["Enclosure/Roofs/Roof[SystemIdentifier[@id='#{roof_id}']]"]
+        roof_values = HPXML.get_roof_values(roof: roof)
+
+        # Half of the length of short side of the house
+        a = 0.5 * [@bldg_length_front, @bldg_length_side].min
+        # Ridge height
+        b = a * Math.tan(@roof_angle_rad)
+        # The hypotenuse
+        c = a / Math.cos(@roof_angle_rad)
+        # The depth this attic area goes back on the non-gable side
+        d = 0.5 * roof_values[:area] / c
+
+        if is_conditioned_attic
+          # Remove erroneous full height volume from the conditioned volume
+          @cvolume -= @ceil_height * 2 * a * d
+        end
+
+        # Add the volume under the roof and above the "ceiling"
+        @cvolume += d * a * b
+      end
+    end
 
     HPXML.add_site(hpxml: hpxml,
                    fuels: ["electricity"], # TODO Check if changing this would ever influence results; if it does, talk to Leo
@@ -167,7 +194,7 @@ class HEScoreRuleset
       if roof_area.nil?
         floor_id = HPXML.get_idref(orig_attic, "AttachedToFrameFloor")
         frame_floor_area = Float(orig_details.elements["Enclosure/FrameFloors/FrameFloor[SystemIdentifier/@id='#{floor_id}']/Area/text()"].to_s)
-        roof_area = frame_floor_area / (2. * Math.cos(UnitConversions.convert(@roof_angle, "deg", "rad"))) if roof_area.nil?
+        roof_area = frame_floor_area / (2. * Math.cos(@roof_angle_rad)) if roof_area.nil?
       end
       if @is_townhouse
         roof_azimuths = [@bldg_azimuth + 90, @bldg_azimuth + 270]
@@ -182,8 +209,8 @@ class HEScoreRuleset
                        azimuth: sanitize_azimuth(roof_azimuth),
                        solar_absorptance: roof_values[:solar_absorptance],
                        emittance: 0.9, # ERI assumption; TODO get values from method
-                       pitch: Math.tan(UnitConversions.convert(@roof_angle, "deg", "rad")) * 12,
-                       radiant_barrier: false, # FIXME: Verify. Setting to false because it's included in the assembly R-value
+                       pitch: Math.tan(@roof_angle_rad) * 12,
+                       radiant_barrier: false,
                        insulation_assembly_r_value: roof_r)
       end
     end
@@ -368,7 +395,7 @@ class HEScoreRuleset
                      area: slab_values[:area],
                      thickness: slab_values[:thickness],
                      exposed_perimeter: get_foundation_perimeter(orig_foundation),
-                     perimeter_insulation_depth: 1, # FIXME: Hard-coded
+                     perimeter_insulation_depth: 2,
                      under_slab_insulation_width: 0,
                      depth_below_grade: slab_values[:depth_below_grade],
                      carpet_fraction: 1.0,
@@ -671,59 +698,46 @@ class HEScoreRuleset
     end
 
     # HVACControl
+    control_type = "manual thermostat"
+    htg_sp, htg_setback_sp, htg_setback_hrs_per_week, htg_setback_start_hr = HVAC.get_default_heating_setpoint(control_type)
+    clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr = HVAC.get_default_cooling_setpoint(control_type)
     HPXML.add_hvac_control(hpxml: hpxml,
                            id: "HVACControl",
-                           control_type: "manual thermostat")
+                           control_type: control_type,
+                           heating_setpoint_temp: htg_sp,
+                           cooling_setpoint_temp: clg_sp)
 
     # HVACDistribution
     orig_details.elements.each("Systems/HVAC/HVACDistribution") do |orig_dist|
       dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: orig_dist)
-
-      # Leakage fraction of total air handler flow
-      # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/thermal-distribution-efficiency/thermal-distribution-efficiency
-      # FIXME: Verify. Total or to the outside?
-      # FIXME: Or 10%/25%? See https://docs.google.com/spreadsheets/d/1YeoVOwu9DU-50fxtT_KRh_BJLlchF7nls85Ebe9fDkI/edit#gid=1042407563
-      if dist_values[:duct_system_sealed]
-        leakage_frac = 0.03
-      else
-        leakage_frac = 0.15
-      end
-
-      # FIXME: Verify
-      # Surface areas outside conditioned space
-      # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/thermal-distribution-efficiency/thermal-distribution-efficiency
-      supply_duct_area = 0.27 * @cfa
-      return_duct_area = 0.05 * @nfl * @cfa
 
       new_dist = HPXML.add_hvac_distribution(hpxml: hpxml,
                                              id: dist_values[:id],
                                              distribution_system_type: "AirDistribution")
       new_air_dist = new_dist.elements["DistributionSystemType/AirDistribution"]
 
-      # FIXME: This code is to maintain the previous logic about duct leakage
-      # until the HVAC distribution inputs are formally addressed.
-      duct_leakage = 100 # FIXME: hard-coded
-      all_ducts_in_conditioned_space = true
-      @ducts.each do |hvac_frac, duct_frac, duct_location|
-        if duct_location != "living space" and duct_frac > 0
-          all_ducts_in_conditioned_space = false
-        end
-      end
-      if all_ducts_in_conditioned_space
-        duct_leakage = 0
+      frac_inside = 0.0
+      orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
+        duct_values = HPXML.get_ducts_values(ducts: orig_duct)
+        next unless duct_values[:duct_location] == "living space"
+
+        frac_inside += duct_values[:duct_fraction_area]
       end
 
-      # Supply duct leakage
+      sealed = dist_values[:duct_system_sealed]
+      lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(@ncfl_ag, @cfa, sealed, frac_inside)
+
+      # Supply duct leakage to the outside
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "supply",
-                                         duct_leakage_units: "CFM25",
-                                         duct_leakage_value: duct_leakage)
+                                         duct_leakage_units: "Percent",
+                                         duct_leakage_value: lto_s)
 
-      # Return duct leakage
+      # Return duct leakage to the outside
       HPXML.add_duct_leakage_measurement(air_distribution: new_air_dist,
                                          duct_type: "return",
-                                         duct_leakage_units: "CFM25",
-                                         duct_leakage_value: duct_leakage)
+                                         duct_leakage_units: "Percent",
+                                         duct_leakage_value: lto_r)
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
         duct_values = HPXML.get_ducts_values(ducts: orig_duct)
@@ -732,11 +746,20 @@ class HEScoreRuleset
           duct_values[:duct_location] = "attic - vented"
         end
 
-        # FIXME: Verify nominal insulation and not assembly
-        if duct_values[:duct_insulation_present]
+        if duct_values[:duct_insulation_material] == "Unknown"
           duct_rvalue = 6
-        else
+        elsif duct_values[:duct_insulation_material] == "None"
           duct_rvalue = 0
+        else
+          fail "Unexpected duct insulation material '#{duct_values[:duct_insulation_material]}'."
+        end
+
+        if duct_values[:duct_location] == "living space"
+          supply_duct_surface_area = 0.001 # Arbitrary; can't be zero
+          return_duct_surface_area = 0.001 # Arbitrary; can't be zero
+        else
+          supply_duct_surface_area = uncond_area_s * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
+          return_duct_surface_area = uncond_area_r * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
         end
 
         # Supply duct
@@ -744,14 +767,14 @@ class HEScoreRuleset
                         duct_type: "supply",
                         duct_insulation_r_value: duct_rvalue,
                         duct_location: duct_values[:duct_location],
-                        duct_surface_area: duct_values[:duct_fraction_area] * supply_duct_area)
+                        duct_surface_area: supply_duct_surface_area)
 
         # Return duct
         HPXML.add_ducts(air_distribution: new_air_dist,
                         duct_type: "return",
                         duct_insulation_r_value: duct_rvalue,
                         duct_location: duct_values[:duct_location],
-                        duct_surface_area: duct_values[:duct_fraction_area] * return_duct_area)
+                        duct_surface_area: return_duct_surface_area)
       end
     end
 
@@ -1083,7 +1106,6 @@ $siding_map = {
 
 def get_wood_stud_wall_assembly_r(r_cavity, r_cont, siding, ove)
   # Walls Wood Stud Assembly R-value
-  # FIXME: Need values below where nil
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/wall-construction-types
   has_r_cont = !r_cont.nil?
   if not has_r_cont and not ove
@@ -1176,8 +1198,6 @@ end
 
 def get_ceiling_assembly_r(r_cavity)
   # Ceiling Assembly R-value
-  # FIXME: Verify
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/ceiling-construction-types
   val = { 0.0 => 2.2,              # ecwf00
           3.0 => 5.0,              # ecwf03
@@ -1199,8 +1219,6 @@ end
 
 def get_floor_assembly_r(r_cavity)
   # Floor Assembly R-value
-  # FIXME: Verify
-  # FIXME: Does this include air films?
   # http://hes-documentation.lbl.gov/calculation-methodology/calculation-of-energy-consumption/heating-and-cooling-calculation/building-envelope/floor-construction-types
   val = { 0.0 => 5.9,              # efwf00ca
           11.0 => 15.6,            # efwf11ca
@@ -1217,8 +1235,6 @@ def get_floor_assembly_r(r_cavity)
 end
 
 def get_window_ufactor_shgc(frame_type, glass_layers, glass_type, gas_fill)
-  # Window U-factor/SHGC
-  # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=909262753
   key = [frame_type, glass_layers, glass_type, gas_fill]
   vals = { ["Aluminum", "single-pane", nil, nil] => [1.27, 0.75],                               # scna
@@ -1275,15 +1291,50 @@ end
 def get_roof_solar_absorptance(roof_color)
   # FIXME: Verify
   # https://docs.google.com/spreadsheets/d/1joG39BeiRj1mV0Lge91P_dkL-0-94lSEY5tJzGvpc2A/edit#gid=1325866208
-  val = { "reflective" => 0.40,
-          "white" => 0.50,
-          "light" => 0.65,
-          "medium" => 0.75,
-          "medium dark" => 0.85,
-          "dark" => 0.95 }[roof_color]
+  val = { "reflective" => 0.35,
+          "light" => 0.55,
+          "medium" => 0.7,
+          "medium dark" => 0.8,
+          "dark" => 0.9 }[roof_color]
   return val if not val.nil?
 
   fail "Could not get roof absorptance for color '#{roof_color}'"
+end
+
+def calc_duct_values(ncfl_ag, cfa, is_sealed, frac_inside)
+  # Total leakage fraction of air handler flow
+  if is_sealed
+    total_leakage_frac = 0.10
+  else
+    total_leakage_frac = 0.25
+  end
+
+  # Fraction of ducts that are outside conditioned space
+  if frac_inside > 0
+    f_out_s = 1.0 - frac_inside
+  else
+    # Make assumption
+    if ncfl_ag == 1
+      f_out_s = 1.0
+    else
+      f_out_s = 0.65
+    end
+  end
+  if frac_inside == 1
+    f_out_r = 0.0
+  else
+    f_out_r = 1.0
+  end
+
+  # Duct leakages to the outside (assume total leakage equally split between supply/return)
+  lto_s = total_leakage_frac / 2.0 * f_out_s
+  lto_r = total_leakage_frac / 2.0 * f_out_r
+
+  # Duct surface areas that are outside conditioned space
+  uncond_area_s = 0.27 * f_out_s * cfa
+  uncond_area_r = 0.05 * ncfl_ag * f_out_r * cfa
+
+  return lto_s.round(5), lto_r.round(5), uncond_area_s.round(2), uncond_area_r.round(2)
 end
 
 def calc_ach50(ncfl_ag, cfa, ceil_height, cvolume, desc, year_built, iecc_cz, fnd_types, ducts)

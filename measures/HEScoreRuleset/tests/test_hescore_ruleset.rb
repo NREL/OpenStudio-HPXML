@@ -25,6 +25,7 @@ class HEScoreRulesetTest < MiniTest::Test
       _test_measure(args_hash)
       _test_schema_validation(this_dir, xml.gsub('.xml', '.xml.out'))
       _test_assembly_effective_rvalues(args_hash)
+      _test_conditioned_building_volume(args_hash)
 
       FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
     end
@@ -51,6 +52,74 @@ class HEScoreRulesetTest < MiniTest::Test
     end
 
     FileUtils.rm_f(args_hash['hpxml_output_path']) # Cleanup
+  end
+
+  def test_ducts
+    # Base (No ducts in conditioned space)
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = true
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.0325, lto_s, 0.00001)
+    assert_in_epsilon(0.0500, lto_r, 0.00001)
+    assert_in_epsilon(351, uncond_area_s, 0.00001)
+    assert_in_epsilon(200, uncond_area_r, 0.00001)
+
+    # Base w/ ducts completely in conditioned space
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = true
+    frac_inside = 1.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0, lto_s, 0.00001)
+    assert_in_epsilon(0, lto_r, 0.00001)
+    assert_in_epsilon(0, uncond_area_s, 0.00001)
+    assert_in_epsilon(0, uncond_area_r, 0.00001)
+
+    # Base w/ ducts half in conditioned space
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = true
+    frac_inside = 0.5
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.025, lto_s, 0.00001)
+    assert_in_epsilon(0.050, lto_r, 0.00001)
+    assert_in_epsilon(270, uncond_area_s, 0.00001)
+    assert_in_epsilon(200, uncond_area_r, 0.00001)
+
+    # Base w/ unsealed ducts
+    cfa = 2000.0
+    ncfl_ag = 2
+    sealed = false
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.08125, lto_s, 0.00001)
+    assert_in_epsilon(0.12500, lto_r, 0.00001)
+    assert_in_epsilon(351, uncond_area_s, 0.00001)
+    assert_in_epsilon(200, uncond_area_r, 0.00001)
+
+    # Base w/ 1 story home
+    cfa = 2000.0
+    ncfl_ag = 1
+    sealed = true
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.05, lto_s, 0.00001)
+    assert_in_epsilon(0.05, lto_r, 0.00001)
+    assert_in_epsilon(540, uncond_area_s, 0.00001)
+    assert_in_epsilon(100, uncond_area_r, 0.00001)
+
+    # Base w/ 20000 sqft
+    cfa = 20000.0
+    ncfl_ag = 2
+    sealed = true
+    frac_inside = 0.0
+    lto_s, lto_r, uncond_area_s, uncond_area_r = calc_duct_values(ncfl_ag, cfa, sealed, frac_inside)
+    assert_in_epsilon(0.0325, lto_s, 0.00001)
+    assert_in_epsilon(0.0500, lto_r, 0.00001)
+    assert_in_epsilon(3510, uncond_area_s, 0.00001)
+    assert_in_epsilon(2000, uncond_area_r, 0.00001)
   end
 
   def test_infiltration
@@ -435,6 +504,26 @@ class HEScoreRulesetTest < MiniTest::Test
       roofid = roof.elements["SystemIdentifier"].attribute('id').value
       eff_rvalue = Float(XMLHelper.get_value(roof, "Insulation/AssemblyEffectiveRValue"))
       assert_in_epsilon(eff_rvalue, get_roof_effective_r_from_doe2code(roof_code_by_id[roofid.split('_')[0]]), 0.01)
+    end
+  end
+
+  def _test_conditioned_building_volume(args_hash)
+    in_doc = REXML::Document.new(File.read(args_hash['hpxml_path']))
+    out_doc = REXML::Document.new(File.read(args_hash['hpxml_output_path']))
+
+    cfa = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea'))
+    ceil_height = Float(XMLHelper.get_value(in_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/AverageCeilingHeight'))
+    cbv = Float(XMLHelper.get_value(out_doc, 'HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedBuildingVolume'))
+
+    has_conditioned_attic = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/Attic[Conditioned='true']")
+    has_cathedral_ceiling = XMLHelper.has_element(in_doc, "HPXML/Building/BuildingDetails/Enclosure/Attics/Attic/AtticType/CathedralCeiling")
+
+    if not (has_cathedral_ceiling or has_conditioned_attic)
+      assert_in_epsilon(cfa * ceil_height, cbv, 0.01)
+    elsif has_cathedral_ceiling and not has_conditioned_attic
+      assert(cfa * ceil_height < cbv)
+    elsif not has_cathedral_ceiling and has_conditioned_attic
+      assert(cfa * ceil_height > cbv)
     end
   end
 end

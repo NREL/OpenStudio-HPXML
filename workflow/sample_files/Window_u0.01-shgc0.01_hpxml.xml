@@ -208,7 +208,10 @@
             <Orientation>north</Orientation>
             <UFactor>0.01</UFactor>
             <SHGC>0.01</SHGC>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="front_window_exterior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
           </Window>
           <Window>
@@ -217,7 +220,10 @@
             <Orientation>south</Orientation>
             <UFactor>0.01</UFactor>
             <SHGC>0.01</SHGC>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="back_window_exterior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
           </Window>
           <Window>
@@ -226,7 +232,10 @@
             <Orientation>west</Orientation>
             <UFactor>0.01</UFactor>
             <SHGC>0.01</SHGC>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="right_window_exterior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
           </Window>
           <Window>
@@ -235,7 +244,10 @@
             <Orientation>east</Orientation>
             <UFactor>0.01</UFactor>
             <SHGC>0.01</SHGC>
-            <ExteriorShading>none</ExteriorShading>
+            <ExteriorShading>
+              <SystemIdentifier id="left_window_exterior_shading"/>
+              <Type>none</Type>
+            </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
           </Window>
         </Windows>
