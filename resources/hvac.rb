@@ -374,17 +374,11 @@ class HVAC
     # See https://github.com/NREL/openstudio-standards/blob/49626ee957db63129bb74cfe08b48abd571de759/lib/openstudio-standards/prototypes/common/objects/Prototype.hvac_systems.rb#L3764
     # See 1ZoneEvapCooler.idf
 
-    fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
-    fan.setName(obj_name + " supply fan")
-    fan.setEndUseSubcategory("supply fan")
-    fan.setFanEfficiency(1)
-    fan.setMotorEfficiency(1)
-    fan.setMotorInAirstreamFraction(0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [evap_cooler])
-
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop.setName(obj_name + " airloop")
+    air_loop.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler, is_ducted)
+    air_loop.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
     air_supply_inlet_node = air_loop.supplyInletNode
     air_supply_outlet_node = air_loop.supplyOutletNode
     air_demand_inlet_node = air_loop.demandInletNode
@@ -392,22 +386,19 @@ class HVAC
     evap_cooler.addToNode(air_supply_inlet_node)
     hvac_map[sys_id] << air_loop
 
-    # Dummy zero-capacity cooling coil
-    dummy_clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model)
-    dummy_clg_coil.setAvailabilitySchedule(model.alwaysOffDiscreteSchedule)
-    dummy_clg_coil.setRatedTotalCoolingCapacity(2000) # dummy capacity
-    dummy_clg_coil.setRatedSensibleHeatRatio(0.85) # Set to override autosize
-    unitary_system = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
-    unitary_system.setName("Evap Cooler Cycling Fan")
-    unitary_system.setSupplyFan(fan)
-    unitary_system.setCoolingCoil(dummy_clg_coil)
-    unitary_system.setControllingZoneorThermostatLocation(control_zone)
-    unitary_system.setFanPlacement('BlowThrough')
-    unitary_system.setSupplyAirFlowRateMethodDuringCoolingOperation('SupplyAirFlowRate')
-    unitary_system.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
-    unitary_system.addToNode(air_loop.supplyInletNode)
-    unitary_system.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
-    unitary_system.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler, is_ducted)
+    fan = OpenStudio::Model::FanVariableVolume.new(model, model.alwaysOnDiscreteSchedule)
+    fan.setName(obj_name + " supply fan")
+    fan.setEndUseSubcategory("supply fan")
+    fan.setFanEfficiency(1)
+    fan.setMotorEfficiency(1)
+    fan.setMotorInAirstreamFraction(0)
+    fan.setFanPowerCoefficient1(0)
+    fan.setFanPowerCoefficient2(1)
+    fan.setFanPowerCoefficient3(0)
+    fan.setFanPowerCoefficient4(0)
+    fan.setFanPowerCoefficient5(0)
+    fan.addToNode(air_loop.supplyInletNode)
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [evap_cooler])
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -439,8 +430,9 @@ class HVAC
     zone_mixer = air_loop.zoneMixer
     zone_mixer.setName(obj_name + " zone mixer")
 
-    air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctUncontrolled.new(model, model.alwaysOnDiscreteSchedule)
+    air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctVAVNoReheat.new(model, model.alwaysOnDiscreteSchedule)
     air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
+    air_terminal_living.setConstantMinimumAirFlowFraction(0)
     air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
     runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
     control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
@@ -1981,7 +1973,7 @@ class HVAC
 
     hvac_objects = []
 
-    if fan_or_pump.is_a? OpenStudio::Model::FanOnOff
+    if fan_or_pump.is_a? OpenStudio::Model::FanOnOff or fan_or_pump.is_a? OpenStudio::Model::FanVariableVolume
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Electric Energy')
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Pump Electric Energy')
@@ -4342,7 +4334,11 @@ class HVAC
   end
 
   def self.has_ducted_equipment(model, runner, air_loop)
-    system = get_unitary_system_from_air_loop_hvac(air_loop)
+    if air_loop.name.to_s.include? Constants.ObjectNameEvaporativeCooler
+      system = air_loop
+    else
+      system = get_unitary_system_from_air_loop_hvac(air_loop)
+    end
 
     hvac_type_cool = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType)
     hvac_type_cool = hvac_type_cool.get if hvac_type_cool.is_initialized
