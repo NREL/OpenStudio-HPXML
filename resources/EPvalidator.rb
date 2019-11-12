@@ -207,8 +207,8 @@ class EnergyPlusValidator
         "Azimuth" => one,
         "UFactor" => one,
         "SHGC" => one,
-        "InteriorShadingFactorSummer" => zero_or_one, # Uses ERI assumption if not provided
-        "InteriorShadingFactorWinter" => zero_or_one, # Uses ERI assumption if not provided
+        "InteriorShading/SummerShadingCoefficient" => zero_or_one, # Uses ERI assumption if not provided
+        "InteriorShading/WinterShadingCoefficient" => zero_or_one, # Uses ERI assumption if not provided
         "Overhangs" => zero_or_one, # See [WindowOverhang]
         "AttachedToWall" => one,
       },
@@ -373,9 +373,23 @@ class EnergyPlusValidator
       # [HVACControl]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[ControlType='manual thermostat' or ControlType='programmable thermostat']" => one,
-        "SetpointTempHeatingSeason" => zero_or_one, # Uses ERI assumption if not provided
-        "SetpointTempCoolingSeason" => zero_or_one, # Uses ERI assumption if not provided
+        "SetpointTempHeatingSeason" => one,
+        "SetbackTempHeatingSeason" => zero_or_one, # See [HVACControlType=HeatingSetback]
+        "SetupTempCoolingSeason" => zero_or_one, # See [HVACControlType=CoolingSetback]
+        "SetpointTempCoolingSeason" => one,
+        "extension/CeilingFanSetpointTempCoolingSeasonOffset" => zero_or_one,
+      },
+
+      ## [HVACControlType=HeatingSetback]
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl[SetbackTempHeatingSeason]" => {
+        "TotalSetbackHoursperWeekHeating" => one,
+        "extension/SetbackStartHourHeating" => one, # 0 = midnight. 12 = noon
+      },
+
+      ## [HVACControlType=CoolingSetback]
+      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl[SetupTempCoolingSeason]" => {
+        "TotalSetupHoursperWeekCooling" => one,
+        "extension/SetupStartHourCooling" => one, # 0 = midnight, 12 = noon
       },
 
       # [HVACDistribution]

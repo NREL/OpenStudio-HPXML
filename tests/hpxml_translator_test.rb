@@ -66,6 +66,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_partial_hvac(xmls, hvac_partial_dir, hvac_base_dir, all_results)
     _test_hrv_erv_inputs(this_dir, all_results)
     _test_heating_cooling_loads(xmls, hvac_base_dir, all_results)
+    _test_collapsed_surfaces(all_results, this_dir)
   end
 
   def test_invalid
@@ -100,8 +101,8 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                        "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
                             'missing-surfaces.xml' => ["'garage' must have at least one floor surface."],
-                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for Wall 'Wall'."],
-                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for Roof 'Roof'."],
+                            'net-area-negative-wall.xml' => ["Calculated a negative net surface area for surface 'Wall'."],
+                            'net-area-negative-roof.xml' => ["Calculated a negative net surface area for surface 'Roof'."],
                             'orphaned-hvac-distribution.xml' => ["Distribution system 'HVACDistribution' found but no HVAC system attached to it."],
                             'refrigerator-location.xml' => ["Refrigerator location is 'garage' but building does not have this location specified."],
                             'refrigerator-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Appliances/Refrigerator[Location="],
@@ -318,6 +319,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
+    # Obtain hot water use
+    query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND VariableUnits='m3')"
+    results[["Volume", "Hot Water", "General", "gal"]] = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3", "gal").round(2)
+
     # Obtain HVAC capacities
     query = "SELECT SUM(Value) FROM ComponentSizes WHERE (CompType LIKE 'Coil:Heating:%' OR CompType LIKE 'Boiler:%' OR CompType LIKE 'ZONEHVAC:BASEBOARD:%') AND Description LIKE '%User-Specified%Capacity' AND Description NOT LIKE '%Supplemental%' AND Units='W'"
     results[["Capacity", "Heating", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
@@ -413,6 +418,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     @cfis_flow_rate_output_var.setReportingFrequency('runperiod')
     @cfis_flow_rate_output_var.setKeyValue('EMS')
 
+    # Add output variables for hot water volume
+    output_var = OpenStudio::Model::OutputVariable.new('Water Use Equipment Hot Water Volume', model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
+
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     model_idf = forward_translator.translateModel(model)
@@ -467,8 +477,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       assert_in_epsilon(hpxml_value, sql_value, 0.01)
     end
 
+    enclosure = bldg_details.elements["Enclosure"]
+    HPXML.collapse_enclosure(enclosure)
+
     # Enclosure Roofs
-    bldg_details.elements.each('Enclosure/Roofs/Roof') do |roof|
+    enclosure.elements.each('Roofs/Roof') do |roof|
       roof_id = roof.elements["SystemIdentifier"].attributes["id"].upcase
 
       # R-value
@@ -479,7 +492,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Net area
       hpxml_value = Float(XMLHelper.get_value(roof, 'Area'))
-      bldg_details.elements.each('Enclosure/Skylights/Skylight') do |subsurface|
+      enclosure.elements.each('Skylights/Skylight') do |subsurface|
         next if subsurface.elements["AttachedToRoof"].attributes["idref"].upcase != roof_id
 
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
@@ -538,9 +551,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Foundation Slabs
-    num_slabs = bldg_details.elements['count(Enclosure/Slabs/Slab)']
+    num_slabs = enclosure.elements['count(Slabs/Slab)']
     if num_slabs <= 1 and num_kiva_instances <= 1 # The slab surfaces may be combined in these situations, so skip tests
-      bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
+      enclosure.elements.each('Slabs/Slab') do |slab|
         slab_id = slab.elements["SystemIdentifier"].attributes["id"].upcase
 
         # Exposed Area
@@ -557,12 +570,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Walls/RimJoists/FoundationWalls
-    bldg_details.elements.each('Enclosure/Walls/Wall[ExteriorAdjacentTo="outside"] | Enclosure/RimJoists/RimJoist[ExteriorAdjacentTo="outside"] | Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |wall|
+    enclosure.elements.each('Walls/Wall[ExteriorAdjacentTo="outside"] | RimJoists/RimJoist[ExteriorAdjacentTo="outside"] | FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |wall|
       wall_id = wall.elements["SystemIdentifier"].attributes["id"].upcase
-
-      # This case is complicated because two foundation walls are collapsed into one model wall
-      # so we need to skip some tests.
-      is_complex_fnd_wall = (XMLHelper.get_value(wall, "ExteriorAdjacentTo") == "ground" and hpxml_path.include? "base-foundation-complex.xml")
 
       # R-value
       if XMLHelper.has_element(wall, 'Insulation/AssemblyEffectiveRValue') and not hpxml_path.include? "base-foundation-unconditioned-basement-assembly-r.xml" # This file uses Foundation:Kiva for insulation, so skip it
@@ -574,7 +583,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Net area
       hpxml_value = Float(XMLHelper.get_value(wall, 'Area'))
-      bldg_details.elements.each('Enclosure/Windows/Window | Enclosure/Doors/Door') do |subsurface|
+      enclosure.elements.each('Windows/Window | Doors/Door') do |subsurface|
         next if subsurface.elements["AttachedToWall"].attributes["idref"].upcase != wall_id
 
         hpxml_value -= Float(XMLHelper.get_value(subsurface, 'Area'))
@@ -582,7 +591,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       if XMLHelper.get_value(wall, "ExteriorAdjacentTo") == "ground"
         # Calculate total length of walls
         wall_total_length = 0
-        bldg_details.elements.each('Enclosure/FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |fwall|
+        enclosure.elements.each('FoundationWalls/FoundationWall[ExteriorAdjacentTo="ground"]') do |fwall|
           next unless XMLHelper.get_value(wall, "InteriorAdjacentTo") == XMLHelper.get_value(fwall, "InteriorAdjacentTo")
 
           wall_total_length += Float(XMLHelper.get_value(fwall, "Area")) / Float(XMLHelper.get_value(fwall, "Height"))
@@ -590,7 +599,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         # Calculate total slab exposed perimeter
         slab_exposed_length = 0
-        bldg_details.elements.each('Enclosure/Slabs/Slab') do |slab|
+        enclosure.elements.each('Slabs/Slab') do |slab|
           next unless XMLHelper.get_value(wall, "InteriorAdjacentTo") == XMLHelper.get_value(slab, "InteriorAdjacentTo")
 
           slab_exposed_length += Float(XMLHelper.get_value(slab, "ExposedPerimeter"))
@@ -601,11 +610,9 @@ class HPXMLTranslatorTest < MiniTest::Test
           hpxml_value *= (slab_exposed_length / wall_total_length)
         end
       end
-      if not is_complex_fnd_wall
-        query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%' OR RowName LIKE '#{wall_id} %') AND ColumnName='Net Area' AND Units='m2'"
-        sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
-        assert_in_epsilon(hpxml_value, sql_value, 0.01)
-      end
+      query = "SELECT SUM(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%' OR RowName LIKE '#{wall_id} %') AND ColumnName='Net Area' AND Units='m2'"
+      sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, 'm^2', 'ft^2')
+      assert_in_epsilon(hpxml_value, sql_value, 0.01)
 
       # Solar absorptance
       if XMLHelper.has_element(wall, 'SolarAbsorptance')
@@ -616,11 +623,9 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       # Tilt
-      if not is_complex_fnd_wall
-        query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Tilt' AND Units='deg'"
-        sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        assert_in_epsilon(90.0, sql_value, 0.01)
-      end
+      query = "SELECT AVG(Value) FROM TabularDataWithStrings WHERE ReportName='EnvelopeSummary' AND ReportForString='Entire Facility' AND TableName='Opaque Exterior' AND (RowName='#{wall_id}' OR RowName LIKE '#{wall_id}:%') AND ColumnName='Tilt' AND Units='deg'"
+      sql_value = sqlFile.execAndReturnFirstDouble(query).get
+      assert_in_epsilon(90.0, sql_value, 0.01)
 
       # Azimuth
       if XMLHelper.has_element(wall, 'Azimuth')
@@ -634,7 +639,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     # TODO: Enclosure FrameFloors
 
     # Enclosure Windows/Skylights
-    bldg_details.elements.each('Enclosure/Windows/Window | Enclosure/Skylights/Skylight') do |subsurface|
+    enclosure.elements.each('Windows/Window | Skylights/Skylight') do |subsurface|
       subsurface_id = subsurface.elements["SystemIdentifier"].attributes["id"].upcase
 
       # Area
@@ -665,7 +670,7 @@ class HPXMLTranslatorTest < MiniTest::Test
         assert_in_epsilon(90.0, sql_value, 0.01)
       elsif XMLHelper.has_element(subsurface, "AttachedToRoof")
         hpxml_value = nil
-        bldg_details.elements.each('Enclosure/Roofs/Roof') do |roof|
+        enclosure.elements.each('Roofs/Roof') do |roof|
           next if roof.elements["SystemIdentifier"].attributes["id"] != subsurface.elements["AttachedToRoof"].attributes["idref"]
 
           hpxml_value = UnitConversions.convert(Math.atan(Float(XMLHelper.get_value(roof, "Pitch")) / 12.0), "rad", "deg")
@@ -679,7 +684,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     # Enclosure Doors
-    bldg_details.elements.each('Enclosure/Doors/Door') do |door|
+    enclosure.elements.each('Doors/Door') do |door|
       door_id = door.elements["SystemIdentifier"].attributes["id"].upcase
 
       # Area
@@ -926,13 +931,13 @@ class HPXMLTranslatorTest < MiniTest::Test
         hpxml_value = Float(XMLHelper.get_value(mv, "FanPower"))
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_fan_power_output_var.variableName}')"
         sql_value = sqlFile.execAndReturnFirstDouble(query).get
-        assert_in_delta(hpxml_value, sql_value, 0.001)
+        assert_in_delta(hpxml_value, sql_value, 0.01)
 
         # Flow rate
         hpxml_value = Float(XMLHelper.get_value(mv, "TestedFlowRate")) * Float(XMLHelper.get_value(mv, "HoursInOperation")) / 24.0
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_flow_rate_output_var.variableName}')"
         sql_value = UnitConversions.convert(sqlFile.execAndReturnFirstDouble(query).get, "m^3/s", "cfm")
-        assert_in_delta(hpxml_value, sql_value, 0.001)
+        assert_in_delta(hpxml_value, sql_value, 0.01)
       end
 
     end
@@ -1218,7 +1223,12 @@ class HPXMLTranslatorTest < MiniTest::Test
         next if result_x1 == 0.0 and result_x3 == 0.0
 
         _display_result_delta(xml, result_x1, result_x3, k)
-        assert_in_delta(result_x1, result_x3, 0.1)
+        if k[0] == "Volume"
+          # Annual hot water volumes are large, use epsilon
+          assert_in_epsilon(result_x1, result_x3, 0.001)
+        else
+          assert_in_delta(result_x1, result_x3, 0.1)
+        end
       end
     end
   end
@@ -1254,6 +1264,19 @@ class HPXMLTranslatorTest < MiniTest::Test
           assert_in_delta(result_33, result_100 / 3.0, 0.1)
         end
       end
+    end
+  end
+
+  def _test_collapsed_surfaces(all_results, this_dir)
+    results_base = all_results[File.absolute_path("#{this_dir}/base-enclosure-skylights.xml")]
+    results_collapsed = all_results[File.absolute_path("#{this_dir}/base-enclosure-split-surfaces.xml")]
+    return if results_base.nil? or results_collapsed.nil?
+
+    # Compare results
+    results_base.keys.each do |k|
+      next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+
+      assert_equal(results_base[k].to_f, results_collapsed[k].to_f)
     end
   end
 
