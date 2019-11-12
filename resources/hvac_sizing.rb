@@ -2372,8 +2372,7 @@ class HVACSizing
         return nil if hvac.CoolingLoadFraction.nil?
 
         air_loop = equip.airLoopHVAC.get
-        fan_unit_sys = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
-        if fan_unit_sys.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler).get
+        if air_loop.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler).get
           hvac.Ducts = get_ducts_for_air_loop(runner, air_loop)
         end
       end
@@ -3466,10 +3465,7 @@ class HVACSizing
         # air loop object design flow rates
         air_loop = object.airLoopHVAC.get
         air_loop.setDesignSupplyAirFlowRate(vfr)
-        unitary_sys = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
-        unitary_sys.setSupplyAirFlowRateDuringCoolingOperation(vfr)
-        unitary_sys.coolingCoil.get.to_CoilCoolingDXSingleSpeed.get.setRatedAirFlowRate(vfr)
-        fan = unitary_sys.supplyFan.get.to_FanOnOff.get
+        fan = air_loop.supplyFan.get.to_FanVariableVolume.get
         fan.setMaximumFlowRate(vfr)
 
         # Fan pressure rise calculation (based on design cfm)
@@ -3477,15 +3473,15 @@ class HVACSizing
         fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
         fan.setFanEfficiency(fan_eff)
         fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
-        #fan.setPressureRise(0)
-        #object.setRecirculatingWaterPumpPowerConsumption([2.79 * (hvac_final_values.Cool_Airflow)**(-0.29), 0.6].min * hvac_final_values.Cool_Airflow)
+        # fan.setPressureRise(0)
+        # object.setRecirculatingWaterPumpPowerConsumption([2.79 * (hvac_final_values.Cool_Airflow)**(-0.29), 0.6].min * hvac_final_values.Cool_Airflow)
 
         @cond_zone.airLoopHVACTerminals.each do |aterm|
           next if air_loop != aterm.airLoopHVAC.get
-          next unless aterm.to_AirTerminalSingleDuctUncontrolled.is_initialized
+          next unless aterm.to_AirTerminalSingleDuctVAVNoReheat.is_initialized
 
           # Air Terminal
-          aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
+          aterm = aterm.to_AirTerminalSingleDuctVAVNoReheat.get
           aterm.setMaximumAirFlowRate(vfr)
         end
 
