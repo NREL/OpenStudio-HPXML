@@ -180,7 +180,6 @@ def create_hpxmls
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
-    'base-hvac-dual-fuel-ground-to-air-heat-pump.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'base-hvac-ducts-in-conditioned-space.xml' => 'base.xml',
     'base-hvac-ducts-leakage-percent.xml' => 'base.xml',
@@ -302,7 +301,6 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
     'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml',
     'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml',
-    'hvac_autosizing/base-hvac-dual-fuel-ground-to-air-heat-pump-autosize.xml' => 'base-hvac-dual-fuel-ground-to-air-heat-pump.xml',
     'hvac_autosizing/base-hvac-dual-fuel-mini-split-heat-pump-ducted-autosize.xml' => 'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml',
     'hvac_autosizing/base-hvac-ducts-outside-autosize.xml' => 'base-hvac-ducts-outside.xml',
     'hvac_autosizing/base-hvac-elec-resistance-only-autosize.xml' => 'base-hvac-elec-resistance-only.xml',
@@ -2092,7 +2090,6 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
          'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml',
          'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml',
-         'base-hvac-dual-fuel-ground-to-air-heat-pump.xml',
          'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml'].include? hpxml_file
     heat_pumps_values[0][:backup_heating_fuel] = "natural gas"
     heat_pumps_values[0][:backup_heating_capacity] = 36000
