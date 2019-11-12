@@ -37,6 +37,10 @@ class Constants
     return 1e-9
   end
 
+  def self.AssumedEvapCoolerEffectiveness
+    return 0.72
+  end
+
   # Strings --------------------
 
   def self.AirFilm
@@ -139,7 +143,7 @@ class Constants
     return 'supply'
   end
 
-  def self.DuctedInfoMiniSplitHeatPump
+  def self.DuctedInfoMiniSplitHeatPumpOrEvapCooler
     return __method__.to_s
   end
 
@@ -301,6 +305,10 @@ class Constants
 
   def self.ObjectNameElectricBaseboard
     return "baseboard"
+  end
+
+  def self.ObjectNameEvaporativeCooler
+    return "evap cooler"
   end
 
   def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")

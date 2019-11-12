@@ -114,7 +114,9 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'unattached-skylight.xml' => ["Attached roof 'foobar' not found for skylight 'SkylightNorth'."],
                             'unattached-window.xml' => ["Attached wall 'foobar' not found for window 'WindowNorth'."],
                             'water-heater-location.xml' => ["WaterHeatingSystem location is 'crawlspace - vented' but building does not have this location specified."],
-                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="] }
+                            'water-heater-location-other.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[Location="],
+                            'base-hvac-return-duct-incomplete1.xml' => ["Expected 1 or more element(s) but found 0 elements for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType='return']/../Ducts[DuctType='return']"],
+                            'base-hvac-return-duct-incomplete2.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='return']/../DuctLeakageMeasurement[DuctType='return']"] }
 
     # Test simulations
     Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
@@ -767,10 +769,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
-      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
-      if clg_sys_cap > 0
+      clg_sys_cap = XMLHelper.get_value(clg_sys, "CoolingCapacity")
+      if not clg_sys_cap.nil? and Float(clg_sys_cap) > 0
         clg_cap = 0 if clg_cap.nil?
-        clg_cap += clg_sys_cap
+        clg_cap += Float(clg_sys_cap)
       end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
@@ -1170,6 +1172,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Multiple HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
+      next if xml.include? "evap-cooler" # skip for evap cooler, neither energy nor capacity is linearly scaled for evap cooler
 
       xml_x3 = File.absolute_path(xml)
       xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3.xml", "-base.xml"))
@@ -1235,6 +1238,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Partial HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
+      next if xml.include? "evap-cooler" # skip for evap cooler, neither energy nor capacity is linearly scaled for evap cooler
 
       xml_33 = File.absolute_path(xml)
       xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-33percent.xml", "-base.xml"))
