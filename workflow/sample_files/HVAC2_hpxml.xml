@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-09-18T10:10:39-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-11-08T08:58:52-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2680.24881">
+    <BuildingID id="bid-3361.25571">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.137</Address1>
+        <Address1>Regression run 7.141</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-05-03</Date>
+      <Date>2019-11-04</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -228,7 +228,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="front_window_exterior_shading"/>
+              <SystemIdentifier id="front_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
@@ -246,7 +246,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="back_window_exterior_shading"/>
+              <SystemIdentifier id="back_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
@@ -264,7 +264,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_exterior_shading"/>
+              <SystemIdentifier id="right_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
@@ -282,7 +282,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="left_window_exterior_shading"/>
+              <SystemIdentifier id="left_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
@@ -308,7 +308,7 @@
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.95</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>0.7</FractionHeatLoadServed>
             </HeatingSystem>
@@ -319,7 +319,7 @@
               <FractionCoolLoadServed>0.7</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>15</Value>
+                <Value>13</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
             <HeatPump>
@@ -347,7 +347,7 @@
                   <DuctInsulationMaterial>
                     <Unknown/>
                   </DuctInsulationMaterial>
-                  <DuctLocation>living space</DuctLocation>
+                  <DuctLocation>attic - unconditioned</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
               </AirDistribution>
@@ -379,7 +379,7 @@
             <SystemIdentifier id="water_heater1"/>
             <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <EnergyFactor>0.9</EnergyFactor>
+            <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>

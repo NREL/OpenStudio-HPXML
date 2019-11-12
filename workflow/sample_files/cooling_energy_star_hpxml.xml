@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-09-04T10:33:38-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-11-08T11:35:52-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2195.24360">
+    <BuildingID id="bid-3385.25603">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -115,6 +115,13 @@
               <StructuralBrick/>
             </WallType>
             <Orientation>north</Orientation>
+            <Insulation>
+              <SystemIdentifier id="front_wall_insulation"/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>00</NominalRValue>
+              </Layer>
+            </Insulation>
             <extension>
               <hescore_wall_code>ewbr00nn</hescore_wall_code>
             </extension>
@@ -125,6 +132,13 @@
               <StructuralBrick/>
             </WallType>
             <Orientation>south</Orientation>
+            <Insulation>
+              <SystemIdentifier id="back_wall_insulation"/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>00</NominalRValue>
+              </Layer>
+            </Insulation>
             <extension>
               <hescore_wall_code>ewbr00nn</hescore_wall_code>
             </extension>
@@ -135,6 +149,13 @@
               <StructuralBrick/>
             </WallType>
             <Orientation>west</Orientation>
+            <Insulation>
+              <SystemIdentifier id="right_wall_insulation"/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>00</NominalRValue>
+              </Layer>
+            </Insulation>
             <extension>
               <hescore_wall_code>ewbr00nn</hescore_wall_code>
             </extension>
@@ -145,6 +166,13 @@
               <StructuralBrick/>
             </WallType>
             <Orientation>east</Orientation>
+            <Insulation>
+              <SystemIdentifier id="left_wall_insulation"/>
+              <Layer>
+                <InstallationType>continuous</InstallationType>
+                <NominalRValue>00</NominalRValue>
+              </Layer>
+            </Insulation>
             <extension>
               <hescore_wall_code>ewbr00nn</hescore_wall_code>
             </extension>
@@ -189,7 +217,7 @@
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
             <ExteriorShading>
-              <SystemIdentifier id="front_window_exterior_shading"/>
+              <SystemIdentifier id="front_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
@@ -208,7 +236,7 @@
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
             <ExteriorShading>
-              <SystemIdentifier id="back_window_exterior_shading"/>
+              <SystemIdentifier id="back_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
@@ -227,7 +255,7 @@
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_exterior_shading"/>
+              <SystemIdentifier id="right_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
@@ -246,7 +274,7 @@
             </FrameType>
             <GlassLayers>single-pane</GlassLayers>
             <ExteriorShading>
-              <SystemIdentifier id="left_window_exterior_shading"/>
+              <SystemIdentifier id="left_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
