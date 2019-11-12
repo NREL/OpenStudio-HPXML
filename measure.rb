@@ -3957,10 +3957,10 @@ class OSModel
       # Setpoint change
       # Calculate as the difference between total load and sum of component loads for this hour
       if mode == "htg"
-        program.addLine("  If #{htg_setpoint_sensor.name} > #{prev_hr_htg_setpoint_var.name}")
+        program.addLine("  If #{htg_setpoint_sensor.name} <> #{prev_hr_htg_setpoint_var.name}")
         program.addLine("    Set #{mode}_setpoint = #{htg_sensor.name}")
       elsif mode == "clg"
-        program.addLine("  If #{clg_setpoint_sensor.name} < #{prev_hr_clg_setpoint_var.name}")
+        program.addLine("  If #{clg_setpoint_sensor.name} <> #{prev_hr_clg_setpoint_var.name}")
         program.addLine("    Set #{mode}_setpoint = #{clg_sensor.name}")
       end
       surface_sensors.keys.each do |k|
