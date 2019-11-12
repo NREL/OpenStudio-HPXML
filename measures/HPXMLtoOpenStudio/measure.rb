@@ -3442,7 +3442,8 @@ class OSModel
   def self.add_building_output_variables(runner, model, map_tsv_dir)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
                         OutputVars.SpaceHeatingNaturalGas,
-                        OutputVars.SpaceHeatingOtherFuel,
+                        OutputVars.SpaceHeatingFuelOil,
+                        OutputVars.SpaceHeatingPropane,
                         OutputVars.SpaceCoolingElectricity]
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
@@ -3450,7 +3451,8 @@ class OSModel
                        OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingNaturalGas,
-                       OutputVars.WaterHeatingOtherFuel,
+                       OutputVars.WaterHeatingFuelOil,
+                       OutputVars.WaterHeatingPropane,
                        OutputVars.WaterHeatingLoad,
                        OutputVars.WaterHeatingLoadTankLosses,
                        OutputVars.WaterHeaterLoadDesuperheater]
@@ -4332,10 +4334,16 @@ class OutputVars
              'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy'] }
   end
 
-  def self.SpaceHeatingOtherFuel
-    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy', 'Heating Coil FuelOil#1 Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy', 'Baseboard FuelOil#1 Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy', 'Boiler FuelOil#1 Energy'] }
+  def self.SpaceHeatingFuelOil
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil FuelOil#1 Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard FuelOil#1 Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler FuelOil#1 Energy'] }
+  end
+
+  def self.SpaceHeatingPropane
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
   end
 
   def self.SpaceCoolingElectricity
@@ -4368,9 +4376,14 @@ class OutputVars
              'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy'] }
   end
 
-  def self.WaterHeatingOtherFuel
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy', 'Water Heater FuelOil#1 Energy'] }
+  def self.WaterHeatingFuelOil
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater FuelOil#1 Energy'] }
+  end
+
+  def self.WaterHeatingPropane
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy'] }
   end
 
   def self.WaterHeatingLoad
