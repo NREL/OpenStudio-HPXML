@@ -342,10 +342,10 @@ class HPXMLTranslatorTest < MiniTest::Test
     compload_results = {}
 
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
-      query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer:Zone:LIVING' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       compload_results["#{mode} - Total"] = sqlFile.execAndReturnFirstDouble(query).get
 
-      query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:District#{mode}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:District#{mode}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       compload_results["#{mode} - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
     end
 
@@ -364,7 +364,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                    "Internal Gains" => "intgains" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       components.each do |component, component_var|
-        query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         compload_results["#{mode} - #{component}"] = sqlFile.execAndReturnFirstDouble(query).get
       end
     end

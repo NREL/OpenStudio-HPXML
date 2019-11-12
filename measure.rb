@@ -3557,8 +3557,8 @@ class OSModel
                    "Gas:Facility",
                    "FuelOil#1:Facility",
                    "Propane:Facility",
-                   "Heating:EnergyTransfer",
-                   "Cooling:EnergyTransfer",
+                   "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
+                   "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
                    "Heating:DistrictHeating",
                    "Cooling:DistrictCooling",
                    "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity",
@@ -3598,10 +3598,10 @@ class OSModel
 
     # EMS Sensors: Global
 
-    htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer")
+    htg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
     htg_sensor.setName("htg_energy")
 
-    clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer")
+    clg_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
     clg_sensor.setName("clg_energy")
 
     htg_predicted_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate")
@@ -3751,9 +3751,10 @@ class OSModel
 
     if not plenum_zone.nil?
 
-      ducts_plenum_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
-      ducts_plenum_sensor.setName("ducts_plenum_other_equip")
-      ducts_plenum_sensor.setKeyName(plenum_zone.name.to_s)
+      # FIXME: Not needed? Compare to living, or living + plenum?
+      # ducts_plenum_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
+      # ducts_plenum_sensor.setName("ducts_plenum_other_equip")
+      # ducts_plenum_sensor.setKeyName(plenum_zone.name.to_s)
 
       if @living_zone.zoneMixing.size > 0
         ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Gain Energy")
@@ -3873,23 +3874,21 @@ class OSModel
     end
     ["htg", "clg"].each do |mode|
       if mode == "htg"
-        program.addLine("If #{htg_sensor.name} > #{clg_sensor.name}")
+        program.addLine("If #{htg_sensor.name} > 0")
         program.addLine("  Set #{mode}_load_ratio = 1")
         program.addLine("  If #{htg_predicted_sensor.name} > 0 && #{prev_htg_predicted_var.name} < 0")
         program.addLine("    Set #{mode}_load_ratio = #{htg_predicted_sensor.name} / (#{htg_predicted_sensor.name} - #{prev_htg_predicted_var.name})")
         program.addLine("  EndIf")
         sign = "+"
         opp_sign = "-"
-        opp_sensor = clg_sensor
       elsif mode == "clg"
-        program.addLine("ElseIf #{clg_sensor.name} > #{htg_sensor.name}")
+        program.addLine("ElseIf #{clg_sensor.name} > 0")
         program.addLine("  Set #{mode}_load_ratio = 1")
         program.addLine("  If #{clg_predicted_sensor.name} < 0 && #{prev_clg_predicted_var.name} > 0")
         program.addLine("    Set #{mode}_load_ratio = #{clg_predicted_sensor.name} / (#{clg_predicted_sensor.name} - #{prev_clg_predicted_var.name})")
         program.addLine("  EndIf")
         sign = "-"
         opp_sign = "+"
-        opp_sensor = htg_sensor
       end
       # Surfaces
       surface_sensors.each do |k, sensors|
@@ -3925,7 +3924,6 @@ class OSModel
       if not ducts_plenum_sensor.nil?
         program.addLine("  Set #{mode}_ducts = #{mode}_ducts #{opp_sign} #{ducts_plenum_sensor.name}")
       end
-      program.addLine("  Set #{mode}_ducts = #{mode}_ducts #{sign} #{opp_sensor.name}")
       # Mechanical Ventilation
       mechvent_sensors.each do |sensor|
         program.addLine("  Set #{mode}_mechvent = #{mode}_mechvent #{opp_sign} #{sensor.name} * #{mode}_load_ratio") # Balanced mech vent load + imbalanced mech vent fan heat
