@@ -178,6 +178,8 @@ def create_hpxmls
     'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml' => 'base-hvac-central-ac-only-1-speed.xml',
     'base-hvac-dse.xml' => 'base.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
+    'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-propane.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml' => 'base-hvac-air-to-air-heat-pump-2-speed.xml',
     'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml' => 'base-hvac-air-to-air-heat-pump-var-speed.xml',
     'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
@@ -299,6 +301,8 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-central-ac-only-var-speed-autosize.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'hvac_autosizing/base-hvac-central-ac-plus-air-to-air-heat-pump-heating-autosize.xml' => 'base-hvac-central-ac-plus-air-to-air-heat-pump-heating.xml',
     'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.xml',
+    'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.xml',
+    'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-propane-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-propane.xml',
     'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-2-speed-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.xml',
     'hvac_autosizing/base-hvac-dual-fuel-air-to-air-heat-pump-var-speed-autosize.xml' => 'base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.xml',
     'hvac_autosizing/base-hvac-dual-fuel-mini-split-heat-pump-ducted-autosize.xml' => 'base-hvac-dual-fuel-mini-split-heat-pump-ducted.xml',
@@ -2096,6 +2100,10 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:backup_heating_efficiency_percent] = nil
     heat_pumps_values[0][:backup_heating_efficiency_afue] = 0.8
     heat_pumps_values[0][:backup_heating_switchover_temp] = 25
+  elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.xml'].include? hpxml_file
+    heat_pumps_values[0][:backup_heating_fuel] = "fuel oil"
+  elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-propane.xml'].include? hpxml_file
+    heat_pumps_values[0][:backup_heating_fuel] = "propane"
   elsif hpxml_file.include? 'hvac_autosizing' and not heat_pumps_values.nil? and heat_pumps_values.size > 0
     heat_pumps_values[0][:cooling_capacity] = -1
     heat_pumps_values[0][:heating_capacity] = -1

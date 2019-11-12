@@ -3580,7 +3580,7 @@ class HVACSizing
     end
 
     # Supplemental heating coil
-    if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
+    if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric or supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingGas
       supp_htg_coil.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity_Supp, "Btu/hr", "W"))
 
     end
