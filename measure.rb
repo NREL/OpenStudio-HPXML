@@ -2599,6 +2599,18 @@ class OSModel
       sys_id = heat_pump_values[:id]
       @hvac_map[sys_id] = []
 
+      if not backup_switchover_temp.nil?
+        hp_compressor_min_temp = backup_switchover_temp
+        supp_htg_max_outdoor_temp = backup_switchover_temp
+      else
+        supp_htg_max_outdoor_temp = 40.0
+        if hp_type == "mini-split"
+          hp_compressor_min_temp = -30.0 # F; Minimum temperature for Heat Pump operation
+        else
+          hp_compressor_min_temp = 0.0 # FIXME
+        end
+      end
+
       if hp_type == "air-to-air"
 
         seer = heat_pump_values[:cooling_efficiency_seer]
@@ -2608,12 +2620,6 @@ class OSModel
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
-
-        if not backup_switchover_temp.nil?
-          min_temp = backup_switchover_temp
-        else
-          min_temp = 0.0 # FIXME
-        end
 
         if num_speeds == "1-Speed"
 
@@ -2625,9 +2631,9 @@ class OSModel
 
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
-                                                   fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                                   fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2643,9 +2649,9 @@ class OSModel
           end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                                   fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                                   fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2661,9 +2667,9 @@ class OSModel
           end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
-                                                   fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                                   fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2719,7 +2725,7 @@ class OSModel
                                   heating_capacity_offset, cap_retention_frac,
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
-                                  backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
+                                  hp_compressor_min_temp, backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @living_zone, @hvac_map, sys_id)

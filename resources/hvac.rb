@@ -380,7 +380,7 @@ class HVAC
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -481,7 +481,7 @@ class HVAC
     air_loop_unitary.setFanPlacement("BlowThrough")
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(40.0, "F", "C"))
+    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
     hvac_map[sys_id] << air_loop_unitary
 
@@ -534,7 +534,7 @@ class HVAC
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -639,7 +639,7 @@ class HVAC
     air_loop_unitary.setFanPlacement("BlowThrough")
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(40.0, "F", "C"))
+    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
     hvac_map[sys_id] << air_loop_unitary
@@ -695,7 +695,7 @@ class HVAC
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -804,7 +804,7 @@ class HVAC
     air_loop_unitary.setFanPlacement("BlowThrough")
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(40.0, "F", "C"))
+    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
     hvac_map[sys_id] << air_loop_unitary
@@ -864,7 +864,7 @@ class HVAC
                       min_heating_airflow_rate, max_heating_airflow_rate,
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
-                      heat_pump_capacity, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity,
+                      heat_pump_capacity, min_hp_temp, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_zone, hvac_map, sys_id)
@@ -873,8 +873,6 @@ class HVAC
 
     # htg_supply_air_temp = 105
     supp_htg_max_supply_temp = 200.0
-    min_hp_temp = -30.0 # F; Minimum temperature for Heat Pump operation
-    supp_htg_max_outdoor_temp = 40.0
     max_defrost_temp = 40.0 # F
 
     # Performance curves
