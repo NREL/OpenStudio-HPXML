@@ -349,8 +349,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       compload_results["#{mode} - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
     end
 
-    components = { "Ceilings/Roofs" => "ceilings_roofs",
-                   "Walls/Rim Joists" => "walls",
+    components = { "Roofs" => "roofs",
+                   "Ceilings" => "ceilings",
+                   "Walls" => "walls",
+                   "Rim Joists" => "rim_joists",
                    "Foundation Walls" => "foundation_walls",
                    "Doors" => "doors",
                    "Windows" => "windows",
