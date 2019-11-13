@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-09-18T10:12:25-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-11-08T09:00:02-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2688.24889">
+    <BuildingID id="bid-3369.25579">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.145</Address1>
+        <Address1>Regression run 7.149</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-05-03</Date>
+      <Date>2019-11-04</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -73,9 +73,12 @@
           <Attic>
             <SystemIdentifier id="attic1"/>
             <AtticType>
-              <CathedralCeiling/>
+              <Attic>
+                <Vented>true</Vented>
+              </Attic>
             </AtticType>
             <AttachedToRoof idref="roof1"/>
+            <AttachedToFrameFloor idref="roof1_floor"/>
           </Attic>
         </Attics>
         <Foundations>
@@ -90,7 +93,6 @@
         <Roofs>
           <Roof>
             <SystemIdentifier id="roof1"/>
-            <Area>1000</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <RadiantBarrier>false</RadiantBarrier>
@@ -98,11 +100,11 @@
               <SystemIdentifier id="roof1_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>11</NominalRValue>
+                <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <roof_assembly_code>rfwf11co</roof_assembly_code>
+              <roof_assembly_code>rfwf00co</roof_assembly_code>
             </extension>
           </Roof>
         </Roofs>
@@ -188,6 +190,20 @@
             </extension>
           </Wall>
         </Walls>
+        <FrameFloors>
+          <FrameFloor>
+            <SystemIdentifier id="roof1_floor"/>
+            <FloorCovering>none</FloorCovering>
+            <Area>1000</Area>
+            <Insulation>
+              <SystemIdentifier id="roof1_floor_insulation"/>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FrameFloor>
+        </FrameFloors>
         <Slabs>
           <Slab>
             <SystemIdentifier id="floor1_slab"/>
@@ -212,7 +228,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="front_window_exterior_shading"/>
+              <SystemIdentifier id="front_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
@@ -230,7 +246,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="back_window_exterior_shading"/>
+              <SystemIdentifier id="back_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
@@ -248,7 +264,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_exterior_shading"/>
+              <SystemIdentifier id="right_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
@@ -266,7 +282,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="left_window_exterior_shading"/>
+              <SystemIdentifier id="left_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
@@ -292,7 +308,7 @@
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.95</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
             </HeatingSystem>
@@ -303,7 +319,7 @@
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>15</Value>
+                <Value>13</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -315,7 +331,7 @@
                   <DuctInsulationMaterial>
                     <Unknown/>
                   </DuctInsulationMaterial>
-                  <DuctLocation>living space</DuctLocation>
+                  <DuctLocation>attic - unconditioned</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
               </AirDistribution>

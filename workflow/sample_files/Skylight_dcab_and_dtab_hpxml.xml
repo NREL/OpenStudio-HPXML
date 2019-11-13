@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType/>
     <XMLGeneratedBy>HES Generate HPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-09-18T09:56:57-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-11-08T08:47:03-08:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -11,7 +11,7 @@
     <SoftwareProgramVersion>0.2</SoftwareProgramVersion>
   </SoftwareInfo>
   <Building>
-    <BuildingID id="bid-2606.24807">
+    <BuildingID id="bid-3284.25494">
       <SendingSystemIdentifierType>hescore_external_building_id</SendingSystemIdentifierType>
       <SendingSystemIdentifierValue/>
     </BuildingID>
@@ -19,7 +19,7 @@
       <SiteID id="site1"/>
       <Address>
         <AddressType>street</AddressType>
-        <Address1>Regression run 6.63</Address1>
+        <Address1>Regression run 7.64</Address1>
         <CityMunicipality>St Louis</CityMunicipality>
         <StateCode>MO</StateCode>
         <ZipCode>63101</ZipCode>
@@ -27,7 +27,7 @@
     </Site>
     <ProjectStatus>
       <EventType>construction-period testing/daily test out</EventType>
-      <Date>2019-05-03</Date>
+      <Date>2019-11-04</Date>
     </ProjectStatus>
     <BuildingDetails>
       <BuildingSummary>
@@ -73,9 +73,12 @@
           <Attic>
             <SystemIdentifier id="attic1"/>
             <AtticType>
-              <CathedralCeiling/>
+              <Attic>
+                <Vented>true</Vented>
+              </Attic>
             </AtticType>
             <AttachedToRoof idref="roof1"/>
+            <AttachedToFrameFloor idref="roof1_floor"/>
           </Attic>
           <Attic>
             <SystemIdentifier id="attic2"/>
@@ -100,7 +103,6 @@
         <Roofs>
           <Roof>
             <SystemIdentifier id="roof1"/>
-            <Area>600</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
             <RoofColor>medium</RoofColor>
             <RadiantBarrier>false</RadiantBarrier>
@@ -108,11 +110,11 @@
               <SystemIdentifier id="roof1_insulation"/>
               <Layer>
                 <InstallationType>cavity</InstallationType>
-                <NominalRValue>11</NominalRValue>
+                <NominalRValue>00</NominalRValue>
               </Layer>
             </Insulation>
             <extension>
-              <roof_assembly_code>rfwf11co</roof_assembly_code>
+              <roof_assembly_code>rfwf00co</roof_assembly_code>
             </extension>
           </Roof>
           <Roof>
@@ -216,6 +218,18 @@
         </Walls>
         <FrameFloors>
           <FrameFloor>
+            <SystemIdentifier id="roof1_floor"/>
+            <FloorCovering>none</FloorCovering>
+            <Area>600</Area>
+            <Insulation>
+              <SystemIdentifier id="roof1_floor_insulation"/>
+              <Layer>
+                <InstallationType>cavity</InstallationType>
+                <NominalRValue>19</NominalRValue>
+              </Layer>
+            </Insulation>
+          </FrameFloor>
+          <FrameFloor>
             <SystemIdentifier id="roof2_floor"/>
             <FloorCovering>none</FloorCovering>
             <Area>400</Area>
@@ -252,7 +266,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="front_window_exterior_shading"/>
+              <SystemIdentifier id="front_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="front_wall"/>
@@ -270,7 +284,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="back_window_exterior_shading"/>
+              <SystemIdentifier id="back_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="back_wall"/>
@@ -288,7 +302,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="right_window_exterior_shading"/>
+              <SystemIdentifier id="right_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="right_wall"/>
@@ -306,7 +320,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="left_window_exterior_shading"/>
+              <SystemIdentifier id="left_window_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToWall idref="left_wall"/>
@@ -327,7 +341,7 @@
             <GlassLayers>double-pane</GlassLayers>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="roof1_skylight_exterior_shading"/>
+              <SystemIdentifier id="roof1_skylight_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToRoof idref="roof1"/>
@@ -347,7 +361,7 @@
             <GlassType>tinted/reflective</GlassType>
             <GasFill>air</GasFill>
             <ExteriorShading>
-              <SystemIdentifier id="roof2_skylight_exterior_shading"/>
+              <SystemIdentifier id="roof2_skylight_shade"/>
               <Type>none</Type>
             </ExteriorShading>
             <AttachedToRoof idref="roof2"/>
@@ -373,7 +387,7 @@
               <HeatingSystemFuel>natural gas</HeatingSystemFuel>
               <AnnualHeatingEfficiency>
                 <Units>AFUE</Units>
-                <Value>0.95</Value>
+                <Value>0.8</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1</FractionHeatLoadServed>
             </HeatingSystem>
@@ -384,7 +398,7 @@
               <FractionCoolLoadServed>1</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>15</Value>
+                <Value>13</Value>
               </AnnualCoolingEfficiency>
             </CoolingSystem>
           </HVACPlant>
@@ -396,7 +410,7 @@
                   <DuctInsulationMaterial>
                     <Unknown/>
                   </DuctInsulationMaterial>
-                  <DuctLocation>living space</DuctLocation>
+                  <DuctLocation>attic - unconditioned</DuctLocation>
                   <FractionDuctArea>1</FractionDuctArea>
                 </Ducts>
               </AirDistribution>
@@ -411,7 +425,7 @@
             <SystemIdentifier id="water_heater1"/>
             <FuelType>natural gas</FuelType>
             <WaterHeaterType>storage water heater</WaterHeaterType>
-            <EnergyFactor>0.9</EnergyFactor>
+            <EnergyFactor>0.6</EnergyFactor>
           </WaterHeatingSystem>
         </WaterHeating>
       </Systems>
