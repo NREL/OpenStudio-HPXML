@@ -1126,6 +1126,7 @@ class OSModel
         surface.additionalProperties.setFeature("Width", width)
         surface.additionalProperties.setFeature("Azimuth", azimuth)
         surface.additionalProperties.setFeature("Tilt", tilt)
+        surface.additionalProperties.setFeature("SurfaceType", "Roof")
         if azimuths.size > 1
           surface.setName("#{roof_values[:id]}:#{azimuth}")
         else
@@ -1213,6 +1214,7 @@ class OSModel
         surface.additionalProperties.setFeature("Length", length)
         surface.additionalProperties.setFeature("Azimuth", azimuth)
         surface.additionalProperties.setFeature("Tilt", 90.0)
+        surface.additionalProperties.setFeature("SurfaceType", "Wall")
         if azimuths.size > 1
           surface.setName("#{wall_values[:id]}:#{azimuth}")
         else
@@ -1281,6 +1283,7 @@ class OSModel
         surface.additionalProperties.setFeature("Length", length)
         surface.additionalProperties.setFeature("Azimuth", azimuth)
         surface.additionalProperties.setFeature("Tilt", 90.0)
+        surface.additionalProperties.setFeature("SurfaceType", "RimJoist")
         if azimuths.size > 1
           surface.setName("#{rim_joist_values[:id]}:#{azimuth}")
         else
@@ -1351,8 +1354,10 @@ class OSModel
 
       if hpxml_framefloor_is_ceiling(framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to])
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
+        surface.additionalProperties.setFeature("SurfaceType", "Ceiling")
       else
         surface = OpenStudio::Model::Surface.new(add_floor_polygon(length, width, z_origin), model)
+        surface.additionalProperties.setFeature("SurfaceType", "Floor")
       end
       set_surface_interior(model, spaces, surface, framefloor_values[:id], framefloor_values[:interior_adjacent_to])
       set_surface_exterior(model, spaces, surface, framefloor_values[:id], framefloor_values[:exterior_adjacent_to])
@@ -1516,6 +1521,7 @@ class OSModel
         surface.additionalProperties.setFeature("Length", length)
         surface.additionalProperties.setFeature("Azimuth", azimuth)
         surface.additionalProperties.setFeature("Tilt", 90.0)
+        surface.additionalProperties.setFeature("SurfaceType", "FoundationWall")
         surface.setName(fnd_wall_values[:id])
         surface.setSurfaceType("Wall")
         set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
@@ -1578,6 +1584,7 @@ class OSModel
     surface.additionalProperties.setFeature("Length", length)
     surface.additionalProperties.setFeature("Azimuth", azimuth)
     surface.additionalProperties.setFeature("Tilt", 90.0)
+    surface.additionalProperties.setFeature("SurfaceType", "FoundationWall")
     surface.setName(fnd_wall_values[:id])
     surface.setSurfaceType("Wall")
     set_surface_interior(model, spaces, surface, fnd_wall_values[:id], fnd_wall_values[:interior_adjacent_to])
@@ -1645,6 +1652,7 @@ class OSModel
     surface.setName(slab_values[:id])
     surface.setSurfaceType("Floor")
     surface.setOutsideBoundaryCondition("Foundation")
+    surface.additionalProperties.setFeature("SurfaceType", "Slab")
     set_surface_interior(model, spaces, surface, slab_values[:id], slab_values[:interior_adjacent_to])
     surface.setSunExposure("NoSun")
     surface.setWindExposure("NoWind")
@@ -1716,14 +1724,15 @@ class OSModel
     conditioned_floor_length = addtl_cfa / conditioned_floor_width
     z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
 
-    surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
+    floor_surface = OpenStudio::Model::Surface.new(add_floor_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
 
-    surface.setSunExposure("NoSun")
-    surface.setWindExposure("NoWind")
-    surface.setName("inferred conditioned floor")
-    surface.setSurfaceType("Floor")
-    surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
-    surface.setOutsideBoundaryCondition("Adiabatic")
+    floor_surface.setSunExposure("NoSun")
+    floor_surface.setWindExposure("NoWind")
+    floor_surface.setName("inferred conditioned floor")
+    floor_surface.setSurfaceType("Floor")
+    floor_surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    floor_surface.setOutsideBoundaryCondition("Adiabatic")
+    floor_surface.additionalProperties.setFeature("SurfaceType", "InferredFloor")
 
     # add ceiling surfaces accordingly
     ceiling_surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(-conditioned_floor_width, -conditioned_floor_length, z_origin), model)
@@ -1734,6 +1743,7 @@ class OSModel
     ceiling_surface.setSurfaceType("RoofCeiling")
     ceiling_surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
     ceiling_surface.setOutsideBoundaryCondition("Adiabatic")
+    ceiling_surface.additionalProperties.setFeature("SurfaceType", "InferredCeiling")
 
     if not @cond_bsmnt_surfaces.empty?
       # assuming added ceiling is in conditioned basement
@@ -1741,7 +1751,7 @@ class OSModel
     end
 
     # Apply Construction
-    success = apply_adiabatic_construction(runner, model, [surface, ceiling_surface], "floor")
+    success = apply_adiabatic_construction(runner, model, [floor_surface, ceiling_surface], "floor")
     return false if not success
 
     return true
@@ -1836,6 +1846,7 @@ class OSModel
       surface.additionalProperties.setFeature("Length", window_width)
       surface.additionalProperties.setFeature("Azimuth", window_azimuth)
       surface.additionalProperties.setFeature("Tilt", 90.0)
+      surface.additionalProperties.setFeature("SurfaceType", "Window")
       surface.setName("surface #{window_id}")
       surface.setSurfaceType("Wall")
       assign_space_to_subsurface(surface, window_id, window_values[:wall_idref], building, spaces, model, "window")
@@ -1914,6 +1925,7 @@ class OSModel
       surface.additionalProperties.setFeature("Width", skylight_height)
       surface.additionalProperties.setFeature("Azimuth", skylight_azimuth)
       surface.additionalProperties.setFeature("Tilt", skylight_tilt)
+      surface.additionalProperties.setFeature("SurfaceType", "Skylight")
       surface.setName("surface #{skylight_id}")
       surface.setSurfaceType("RoofCeiling")
       surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving)) # Ensures it is included in Manual J sizing
@@ -1964,6 +1976,7 @@ class OSModel
       surface.additionalProperties.setFeature("Length", door_width)
       surface.additionalProperties.setFeature("Azimuth", door_azimuth)
       surface.additionalProperties.setFeature("Tilt", 90.0)
+      surface.additionalProperties.setFeature("SurfaceType", "Door")
       surface.setName("surface #{door_id}")
       surface.setSurfaceType("Wall")
       assign_space_to_subsurface(surface, door_id, door_values[:wall_idref], building, spaces, model, "door")
@@ -3628,35 +3641,46 @@ class OSModel
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
 
     surface_sensors = { :walls => [],
+                        :rim_joists => [],
                         :foundation_walls => [],
                         :floors => [],
                         :slabs => [],
-                        :ceilings_roofs => [],
+                        :ceilings => [],
+                        :roofs => [],
                         :windows => [],
                         :doors => [],
                         :skylights => [],
                         :internal_mass => [] }
 
     surface_solar_sensors = { :walls => [],
+                              :rim_joists => [],
                               :foundation_walls => [],
                               :floors => [],
                               :slabs => [],
-                              :ceilings_roofs => [],
+                              :ceilings => [],
+                              :roofs => [],
                               :internal_mass => [] }
 
     model.getSurfaces.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
+
+      surface_type = s.additionalProperties.getFeatureAsString("SurfaceType")
+      if not surface_type.is_initialized
+        fail "Could not identify surface type for surface: '#{s.name}'."
+      end
+
+      surface_type = surface_type.get
 
       s.subSurfaces.each_with_index do |ss, idx|
         sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Surface Inside Face Convection Heat Gain Energy")
         sensor.setName("subsurface#{idx}_convection")
         sensor.setKeyName(ss.name.to_s)
 
-        if ss.subSurfaceType.downcase.include? 'window'
+        if surface_type == "Window"
           surface_sensors[:windows] << sensor
-        elsif ss.subSurfaceType.downcase.include? 'door'
+        elsif surface_type == "Door"
           surface_sensors[:doors] << sensor
-        elsif ss.subSurfaceType.downcase.include? 'skylight'
+        elsif surface_type == "Skylight"
           surface_sensors[:skylights] << sensor
         else
           fail "Unexpected subsurface for component loads: '#{ss.name}'."
@@ -3673,25 +3697,30 @@ class OSModel
       solar_sensor.setName("surface#{idx}_solar")
       solar_sensor.setKeyName(s.name.to_s)
 
-      if s.surfaceType == 'Wall'
-        if s.outsideBoundaryCondition == 'Foundation' or s.outsideBoundaryCondition == 'Ground'
-          surface_sensors[:foundation_walls] << sensor
-          surface_solar_sensors[:foundation_walls] << solar_sensor
-        else
-          surface_sensors[:walls] << sensor
-          surface_solar_sensors[:walls] << solar_sensor
-        end
-      elsif s.surfaceType == 'Floor'
-        if s.outsideBoundaryCondition == 'Foundation' or s.outsideBoundaryCondition == 'Ground'
-          surface_sensors[:slabs] << sensor
-          surface_solar_sensors[:slabs] << solar_sensor
-        else
-          surface_sensors[:floors] << sensor
-          surface_solar_sensors[:floors] << solar_sensor
-        end
-      elsif s.surfaceType == 'RoofCeiling'
-        surface_sensors[:ceilings_roofs] << sensor
-        surface_solar_sensors[:ceilings_roofs] << solar_sensor
+      if surface_type == "FoundationWall"
+        surface_sensors[:foundation_walls] << sensor
+        surface_solar_sensors[:foundation_walls] << solar_sensor
+      elsif surface_type == "RimJoist"
+        surface_sensors[:rim_joists] << sensor
+        surface_solar_sensors[:rim_joists] << solar_sensor
+      elsif surface_type == "Wall"
+        surface_sensors[:walls] << sensor
+        surface_solar_sensors[:walls] << solar_sensor
+      elsif surface_type == "Slab"
+        surface_sensors[:slabs] << sensor
+        surface_solar_sensors[:slabs] << solar_sensor
+      elsif surface_type == "Floor"
+        surface_sensors[:floors] << sensor
+        surface_solar_sensors[:floors] << solar_sensor
+      elsif surface_type == 'Ceiling'
+        surface_sensors[:ceilings] << sensor
+        surface_solar_sensors[:ceilings] << solar_sensor
+      elsif surface_type == 'Roof'
+        surface_sensors[:roofs] << sensor
+        surface_solar_sensors[:roofs] << solar_sensor
+      elsif surface_type == 'InferredCeiling' or surface_type == 'InferredFloor'
+        surface_sensors[:internal_mass] << sensor
+        surface_solar_sensors[:internal_mass] << solar_sensor
       else
         fail "Unexpected surface for component loads: '#{s.name}'."
       end
