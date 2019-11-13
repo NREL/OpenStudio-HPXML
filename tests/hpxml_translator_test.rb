@@ -428,6 +428,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var = OpenStudio::Model::OutputVariable.new('Baseboard Total Heating Energy', model)
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('*')
+    output_var = OpenStudio::Model::OutputVariable.new('Boiler Heating Energy', model) # This is needed for energy checking if there's boiler not connected to combi systems.
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
@@ -1242,7 +1245,10 @@ class HPXMLTranslatorTest < MiniTest::Test
         _display_result_delta(xml, result_x1, result_x3, k)
         if k[0] == "Volume"
           # Annual hot water volumes are large, use epsilon
-          assert_in_epsilon(result_x1, result_x3, 0.001)
+          assert_in_epsilon(result_x1, result_x3, 0.002)
+        elsif xml_x3.include? 'combi' and k == ["Natural Gas", "Heating", "General", "GJ"]
+          # use epsilon for combi system energy check
+          assert_in_epsilon(result_x1, result_x3, 0.01)
         else
           assert_in_delta(result_x1, result_x3, 0.1)
         end
