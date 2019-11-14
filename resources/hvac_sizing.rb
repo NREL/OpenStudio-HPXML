@@ -6,11 +6,7 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space, hpxml_path)
-    if hpxml_path.include? "dallas"
-      File.write(File.join(File.dirname(__FILE__), "dallas1.osm"), model.to_s)
-      show_debug_info = true
-    end
+  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space)
     @model_spaces = model.getSpaces
     @nbeds = nbeds
     @cfa = cfa
@@ -93,9 +89,6 @@ class HVACSizing
       if show_debug_info
         display_hvac_final_values_results(runner, hvac_final_values, hvac)
       end
-    end
-    if hpxml_path.include? "dallas"
-      File.write(File.join(File.dirname(__FILE__), "dallas2.osm"), model.to_s)
     end
 
     return true
@@ -3683,7 +3676,6 @@ class HVACSizing
       properties.each do |property|
         s += "\n#{property.to_s.gsub("_", " ")} = #{loads.send(property).round(0).to_s} Btu/hr"
       end
-      puts "#{s}\n"
       runner.registerInfo("#{s}\n")
     end
   end
@@ -3711,7 +3703,6 @@ class HVACSizing
     airflows.each do |airflow|
       s += "\n#{airflow.to_s.gsub("_", " ")} = #{hvac_final_values.send(airflow).round(0).to_s} cfm"
     end
-    puts "#{s}\n"
     runner.registerInfo("#{s}\n")
   end
 end
