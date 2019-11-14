@@ -1853,18 +1853,10 @@ class Airflow
     if mech_vent.type != Constants.VentTypeBalanced
       infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow - QWHV")
       infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = QWHV")
-      infil_program.addLine("If Q_tot_flow > 0")
-      infil_program.addLine("  Set infil_flow_ratio = #{infil_flow_actuator.name} / Q_tot_flow")
-      infil_program.addLine("Else")
-      infil_program.addLine("  Set infil_flow_ratio = 0")
-      infil_program.addLine("EndIf")
     else
       infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow")
       infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = 0")
-      infil_program.addLine("Set infil_flow_ratio = 1")
     end
-
-    infil_flow_ratio_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "infil_flow_ratio")
 
     return infil_program
   end
