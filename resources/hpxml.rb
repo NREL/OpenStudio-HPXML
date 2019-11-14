@@ -1560,6 +1560,7 @@ class HPXML
              :collector_area => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorArea")),
              :collector_loop_type => XMLHelper.get_value(solar_thermal_system, "CollectorLoopType"),
              :collector_azimuth => to_integer_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorAzimuth")),
+             :collector_type =>  XMLHelper.get_value(solar_thermal_system, "CollectorType"),
              :collector_tilt => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorTilt")),
              :collector_frta => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedOpticalEfficiency")),
              :collector_frul => to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedThermalLosses")),

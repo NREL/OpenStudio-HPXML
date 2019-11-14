@@ -2297,14 +2297,35 @@ class OSModel
       if not collector_area.nil? # Detailed solar water heater
         frta = solar_thermal_values[:collector_frta]
         frul = solar_thermal_values[:collector_frul]
-        iam = 0.1 # TODO: Review. Incident angle modifier coefficient
+        if solar_thermal_values[:collector_type] == Constants.SolarThermalCollectorTypeEvacuatedTube
+          iam_coeff2 = 0.3023 #IAM coeff1=1 by definition, values based on a system listed by SRCC with values close to the average
+          iam_coeff3 = -0.3057
+        elsif solar_thermal_values[:collector_type] == Constants.SolarThermalCollectorTypeGlazedFlatPlate
+          iam_coeff2 = 0.1
+          iam_coeff3 = 0
+        else #ICS
+          iam_coeff2 = 0.1 #TODO: do flat plate values represent ICS well?
+          iam_coeff3 = 0
+        end
         storage_vol = solar_thermal_values[:storage_volume]
         tank_r = 10.0 # TODO: Review
         fluid_type = Constants.FluidPropyleneGlycol # TODO: Review
         heat_ex_eff = 0.7 # TODO: Review
-        pump_power = 0.8 * collector_area # TODO: Review
+        if solar_thermal_values[:collector_loop_type] == Constants.SolarThermalLoopTypeIndirect
+          fluid_type = Constants.FluidPropyleneGlycol
+          heat_ex_eff = 0.7 # TODO: Review
+        else #Only allowed other options are 'liquid direct' and 'passive thermosyphon'
+          fluid_type = Constants.FluidWater
+          heat_ex_eff = 1.0 # TODO: Review
+        end
+        if solar_thermal_values[:collector_loop_type] == Constants.SolarThermalLoopTypeThermosyphon
+          pump_power = 0.0
+        else
+          pump_power = 0.8 * collector_area # TODO: Review
+        end
         azimuth = Float(solar_thermal_values[:collector_azimuth])
         tilt = solar_thermal_values[:collector_tilt]
+        coll_type = solar_thermal_values[:collector_type]
         dhw_system_idref = solar_thermal_values[:water_heating_system_idref]
         space = water_heater_spaces[dhw_system_idref]
 
@@ -2320,9 +2341,10 @@ class OSModel
         end
 
         success = Waterheater.apply_solar_thermal(model, runner, space, collector_area, frta,
-                                                  frul, iam, storage_vol, tank_r, fluid_type,
-                                                  heat_ex_eff, pump_power, azimuth, tilt,
-                                                  dhw_loop, @dhw_map, dhw_system_idref)
+                                                  frul, iam_coeff2, iam_coeff3, storage_vol,
+                                                  tank_r, fluid_type, heat_ex_eff, pump_power,
+                                                  azimuth, tilt, coll_type, dhw_loop, @dhw_map, 
+                                                  dhw_system_idref)
         return false if not success
       end
     end

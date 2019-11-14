@@ -2900,8 +2900,8 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
                                     :collector_type => "evacuated tube",
                                     :collector_azimuth => 180,
                                     :collector_tilt => 20,
-                                    :collector_frta => 0.476,
-                                    :collector_frul => 1.556,
+                                    :collector_frta => 0.50,
+                                    :collector_frul => 0.2799,
                                     :storage_volume => 60,
                                     :water_heating_system_idref => "WaterHeater" }
   elsif ['base-dhw-solar-direct-evacuated-tube.xml'].include? hpxml_file
@@ -2912,8 +2912,8 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
                                     :collector_type => "evacuated tube",
                                     :collector_azimuth => 180,
                                     :collector_tilt => 20,
-                                    :collector_frta => 0.476,
-                                    :collector_frul => 1.556,
+                                    :collector_frta => 0.5,
+                                    :collector_frul => 0.2799,
                                     :storage_volume => 60,
                                     :water_heating_system_idref => "WaterHeater" }
   elsif ['base-dhw-solar-direct-ics.xml'].include? hpxml_file

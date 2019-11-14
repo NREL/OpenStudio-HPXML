@@ -299,12 +299,6 @@ class Waterheater
     tank.setNode4AdditionalLossCoefficient(0)
     tank.setNode5AdditionalLossCoefficient(0)
     tank.setNode6AdditionalLossCoefficient(0)
-    tank.setNode7AdditionalLossCoefficient(0)
-    tank.setNode8AdditionalLossCoefficient(0)
-    tank.setNode9AdditionalLossCoefficient(0)
-    tank.setNode10AdditionalLossCoefficient(0)
-    tank.setNode11AdditionalLossCoefficient(0)
-    tank.setNode12AdditionalLossCoefficient(0)
     tank.setUseSideDesignFlowRate((UnitConversions.convert(v_actual, "gal", "m^3")) / 60.1) # Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
     tank.setSourceSideDesignFlowRate(0)
     tank.setSourceSideFlowControlMode("")
@@ -573,9 +567,9 @@ class Waterheater
   end
 
   def self.apply_solar_thermal(model, runner, space, collector_area, frta,
-                               frul, iam, storage_vol, tank_r, fluid_type,
-                               heat_ex_eff, pump_power, azimuth, tilt,
-                               dhw_loop, dhw_map, sys_id)
+                               frul, iam_coeff2, iam_coeff3, storage_vol, 
+                               tank_r, fluid_type, heat_ex_eff, pump_power, 
+                               azimuth, tilt, coll_type, dhw_loop, dhw_map, sys_id)
 
     obj_name = Constants.ObjectNameSolarHotWater
 
@@ -670,20 +664,47 @@ class Waterheater
     shading_surface.setName(obj_name + " shading surface")
     shading_surface.setShadingSurfaceGroup(shading_surface_group)
 
-    collector_plate = OpenStudio::Model::SolarCollectorFlatPlateWater.new(model)
-    collector_plate.setName(obj_name + " coll plate")
-    collector_plate.setSurface(shading_surface)
-    collector_plate.setMaximumFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
-    collector_performance = collector_plate.solarCollectorPerformance
-    collector_performance.setName(obj_name + " coll perf")
-    collector_performance.setGrossArea(UnitConversions.convert(collector_area, "ft^2", "m^2"))
-    collector_performance.setTestFluid('Water')
-    collector_performance.setTestFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
-    collector_performance.setTestCorrelationType('Inlet')
-    collector_performance.setCoefficient1ofEfficiencyEquation(frta)
-    collector_performance.setCoefficient2ofEfficiencyEquation(-UnitConversions.convert(frul, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
-    collector_performance.setCoefficient2ofIncidentAngleModifier(-iam)
-    collector_performance.setCoefficient3ofIncidentAngleModifier(0)
+    if coll_type == Constants.SolarThermalCollectorTypeICS #TODO: test this
+      collector_plate = OpenStudio::Model::SolarCollectorIntegralCollectorStorage.new(model)
+      collector_plate.setName(obj_name + " coll plate")
+      collector_plate.setSurface(shading_surface)
+      collector_plate.setMaximumFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+      
+      #ics_performance = OpenStudio::Model::SolarCollectorPerformanceIntegralCollectorStorage.new(model)
+      ics_performance = collector_plate.solarCollectorPerformance
+      #TODO: double check what defaults
+      #Values are based on spec sheet + OG-100 listing for Solarheart ICS collectors
+      ics_volume = UnitConversions.convert(collector_area, "ft^2", "m^2") / 17.4  #Based on average of OG-100 listed (as of 11/1/19) ICS collectors
+      ics_performance.setName(obj_name + " coll perf")
+      ics_performance.setGrossArea(UnitConversions.convert(collector_area, "ft^2", "m^2"))
+      ics_performance.setCollectorWaterVolume(ics_volume) 
+      ics_performance.setBottomHeatLossConductance(1.902) #Spec sheet
+      ics_performance.setSideHeatLossConductance(1.268) 
+      ics_performance.setAspectRatio(0.721)
+      ics_performance.setCollectorSideHeight(0.17272)
+      ics_performance.setNumberOfCovers(2)
+      ics_performance.setAbsorptanceOfAbsorberPlate(0.94) 
+      ics_performance.setEmissivityOfAbsorberPlate(0.56)
+      
+      collector_plate.setSolarCollectorPerformance(ics_performance)
+      
+    else
+      collector_plate = OpenStudio::Model::SolarCollectorFlatPlateWater.new(model)
+      collector_plate.setName(obj_name + " coll plate")
+      collector_plate.setSurface(shading_surface)
+      collector_plate.setMaximumFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+      collector_performance = collector_plate.solarCollectorPerformance
+      collector_performance.setName(obj_name + " coll perf")
+      collector_performance.setGrossArea(UnitConversions.convert(collector_area, "ft^2", "m^2"))
+      collector_performance.setTestFluid('Water')
+      collector_performance.setTestFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
+      collector_performance.setTestCorrelationType('Inlet')
+      collector_performance.setCoefficient1ofEfficiencyEquation(frta)
+      collector_performance.setCoefficient2ofEfficiencyEquation(-UnitConversions.convert(frul, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
+      collector_performance.setCoefficient2ofIncidentAngleModifier(-iam_coeff2)
+      collector_performance.setCoefficient3ofIncidentAngleModifier(iam_coeff3)
+      
+    end
 
     plant_loop.addSupplyBranchForComponent(collector_plate)
     runner.registerInfo("Added '#{collector_plate.name}' to supply branch of '#{plant_loop.name}'.")
@@ -736,7 +757,13 @@ class Waterheater
     storage_tank.setNumberofNodes(8)
     storage_tank.setAdditionalDestratificationConductivity(0)
     storage_tank.setNode1AdditionalLossCoefficient(0)
+    storage_tank.setNode2AdditionalLossCoefficient(0)
+    storage_tank.setNode3AdditionalLossCoefficient(0)
+    storage_tank.setNode4AdditionalLossCoefficient(0)
+    storage_tank.setNode5AdditionalLossCoefficient(0)
     storage_tank.setNode6AdditionalLossCoefficient(0)
+    storage_tank.setNode7AdditionalLossCoefficient(0)
+    storage_tank.setNode8AdditionalLossCoefficient(0)
     storage_tank.setSourceSideDesignFlowRate(UnitConversions.convert(coll_flow, "cfm", "m^3/s"))
     storage_tank.setOnCycleParasiticFuelConsumptionRate(0)
     storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
