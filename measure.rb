@@ -3774,6 +3774,23 @@ class OSModel
       objects_already_processed << o
     end
 
+    infil_flow_actuator = nil
+    natvent_flow_actuator = nil
+    imbal_mechvent_flow_actuator = nil
+
+    model.getEnergyManagementSystemActuators.each do |actuator|
+      if actuator.name.to_s.start_with? Constants.ObjectNameInfiltration.gsub(" ", "_")
+        infil_flow_actuator = actuator
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(" ", "_")
+        natvent_flow_actuator = actuator
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")
+        imbal_mechvent_flow_actuator = actuator
+      end
+    end
+    if infil_flow_actuator.nil? or natvent_flow_actuator.nil? or imbal_mechvent_flow_actuator.nil?
+      fail "Could not find actuator for component loads."
+    end
+
     # EMS Sensors: Ducts
 
     plenum_zone = nil
@@ -3909,6 +3926,7 @@ class OSModel
       program.addLine("Set #{mode}_intgains = 0")
       program.addLine("Set #{mode}_infil = 0")
       program.addLine("Set #{mode}_mechvent = 0")
+      program.addLine("Set #{mode}_natvent = 0")
       program.addLine("Set #{mode}_ducts = 0")
       program.addLine("Set #{mode}_setpoint = 0")
     end
@@ -3944,8 +3962,19 @@ class OSModel
         program.addLine("  Set dhw_loss_frac = #{offcycle_loss} * (1-#{dhw_rtf_sensor.name}) + #{oncycle_loss}*#{dhw_rtf_sensor.name}")
         program.addLine("  Set #{mode}_intgains = #{mode}_intgains #{sign} #{sensor.name} * dhw_loss_frac")
       end
-      # Infiltration/Natural Ventilation
-      program.addLine("  Set #{mode}_infil = #{mode}_infil #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * infil_flow_ratio)") # Airflow heat attributed to infiltration
+      # Infiltration, Natural Ventilation, Mechanical Ventilation
+      program.addLine("  Set #{mode}_airflow_loss = #{air_loss_sensor.name} - #{air_gain_sensor.name}") # Total airflow heat
+      program.addLine("  Set #{mode}_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name}")
+      program.addLine("  Set #{mode}_infil = #{mode}_infil #{sign} (#{mode}_airflow_loss * #{infil_flow_actuator.name} / #{mode}_airflow_rate)") # Airflow heat attributed to infiltration
+      if not imbal_mechvent_flow_actuator.nil?
+        program.addLine("  Set #{mode}_mechvent = #{mode}_mechvent #{sign} (#{mode}_airflow_loss * #{imbal_mechvent_flow_actuator.name} / #{mode}_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
+      end
+      mechvent_sensors.each do |sensor|
+        program.addLine("  Set #{mode}_mechvent = #{mode}_mechvent #{opp_sign} #{sensor.name}") # Balanced mech vent load + imbalanced mech vent fan heat
+      end
+      if not natvent_flow_actuator.nil?
+        program.addLine("  Set #{mode}_natvent = #{mode}_natvent #{sign} (#{mode}_airflow_loss * #{natvent_flow_actuator.name} / #{mode}_airflow_rate)") # Airflow heat attributed to natural ventilation
+      end
       # Ducts
       ducts_sensors.each do |sensor|
         program.addLine("  Set #{mode}_ducts = #{mode}_ducts #{opp_sign} #{sensor.name}")
@@ -3956,11 +3985,6 @@ class OSModel
       if not ducts_plenum_sensor.nil?
         program.addLine("  Set #{mode}_ducts = #{mode}_ducts #{opp_sign} #{ducts_plenum_sensor.name}")
       end
-      # Mechanical Ventilation
-      mechvent_sensors.each do |sensor|
-        program.addLine("  Set #{mode}_mechvent = #{mode}_mechvent #{opp_sign} #{sensor.name}") # Balanced mech vent load + imbalanced mech vent fan heat
-      end
-      program.addLine("  Set #{mode}_mechvent = #{mode}_mechvent #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * (1.0 - infil_flow_ratio))") # Airflow heat attributed to imbalanced mech vent
       # Apply hourly load ratio
       # If we just transitioned from, e.g., no heating load to a heating load, the component loads should
       # only account for the estimated portion of the hour for which there was a heating load. The predicted
@@ -3983,6 +4007,7 @@ class OSModel
       program.addLine("  Set #{mode}_infil = #{mode}_infil * #{mode}_load_ratio")
       program.addLine("  Set #{mode}_ducts = #{mode}_ducts * #{mode}_load_ratio")
       program.addLine("  Set #{mode}_mechvent = #{mode}_mechvent * #{mode}_load_ratio")
+      program.addLine("  Set #{mode}_natvent = #{mode}_natvent * #{mode}_load_ratio")
       # Setpoint change
       # Calculate as the difference between total load and sum of component loads for this hour
       if mode == "htg"
@@ -4022,7 +4047,7 @@ class OSModel
         output_var.setKeyValue('*')
       end
 
-      ["infil", "intgains", "mechvent", "ducts", "setpoint"].each do |k|
+      ["infil", "intgains", "mechvent", "natvent", "ducts", "setpoint"].each do |k|
         ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k}")
         ems_output_var.setName("#{mode}_#{k}_outvar")
         ems_output_var.setTypeOfDataInVariable("Summed")
