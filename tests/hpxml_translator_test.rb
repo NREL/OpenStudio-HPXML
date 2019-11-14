@@ -367,14 +367,12 @@ class HPXMLTranslatorTest < MiniTest::Test
                    "Internal Gains" => "intgains",
                    "Setpoint Change" => "setpoint" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
+      compload_results["#{mode} - Sum"] = 0
       components.each do |component, component_var|
         query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         compload_results["#{mode} - #{component}"] = sqlFile.execAndReturnFirstDouble(query).get
+        compload_results["#{mode} - Sum"] += compload_results["#{mode} - #{component}"]
       end
-    end
-    { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
-      query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName LIKE '#{mode_var}_%_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      compload_results["#{mode} - Sum"] = sqlFile.execAndReturnFirstDouble(query).get
     end
 
     # Discrepancy between total and sum of components
