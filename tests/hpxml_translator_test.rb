@@ -421,6 +421,17 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('*')
 
+    # Add output variables for combi system energy check
+    output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
+    output_var = OpenStudio::Model::OutputVariable.new('Baseboard Total Heating Energy', model)
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
+    output_var = OpenStudio::Model::OutputVariable.new('Boiler Heating Energy', model) # This is needed for energy checking if there's boiler not connected to combi systems.
+    output_var.setReportingFrequency('runperiod')
+    output_var.setKeyValue('*')
+
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     model_idf = forward_translator.translateModel(model)
@@ -893,6 +904,18 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
       assert_in_epsilon(calculated_ec_adj, simulated_ec_adj, 0.02)
+
+      # check_combi_system_energy_balance
+      if combi_htg_load > 0 and combi_hx_load > 0
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
+        combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+        assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
+
+        # Check boiler, hx, pump, heating coil energy balance
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
+        boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+        assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
+      end
     end
 
     # Mechanical Ventilation
@@ -1222,7 +1245,10 @@ class HPXMLTranslatorTest < MiniTest::Test
         _display_result_delta(xml, result_x1, result_x3, k)
         if k[0] == "Volume"
           # Annual hot water volumes are large, use epsilon
-          assert_in_epsilon(result_x1, result_x3, 0.001)
+          assert_in_epsilon(result_x1, result_x3, 0.002)
+        elsif xml_x3.include? 'combi' and k == ["Natural Gas", "Heating", "General", "GJ"]
+          # use epsilon for combi system energy check
+          assert_in_epsilon(result_x1, result_x3, 0.01)
         else
           assert_in_delta(result_x1, result_x3, 0.1)
         end
