@@ -401,7 +401,8 @@ def create_hpxmls
     'water_heating_multiple/base-dhw-tankless-electric-x3.xml' => 'base-dhw-tankless-electric.xml',
     'water_heating_multiple/base-dhw-tankless-gas-x3.xml' => 'base-dhw-tankless-gas.xml',
     'water_heating_multiple/base-dhw-tankless-oil-x3.xml' => 'base-dhw-tankless-oil.xml',
-    'water_heating_multiple/base-dhw-tankless-propane-x3.xml' => 'base-dhw-tankless-propane.xml'
+    'water_heating_multiple/base-dhw-tankless-propane-x3.xml' => 'base-dhw-tankless-propane.xml',
+    'water_heating_multiple/base-dhw-combi-tankless-x3.xml' => 'hvac_multiple/base-hvac-boiler-gas-only-x3.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -2761,11 +2762,23 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
   elsif hpxml_file.include? 'water_heating_multiple' and not water_heating_systems_values.nil? and water_heating_systems_values.size > 0
+    if hpxml_file.include? 'combi'
+      water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with tankless coil"
+      water_heating_systems_values[0][:tank_volume] = nil
+      water_heating_systems_values[0][:heating_capacity] = nil
+      water_heating_systems_values[0][:energy_factor] = nil
+      water_heating_systems_values[0][:fuel_type] = nil
+      water_heating_systems_values[0][:related_hvac] = "HeatingSystem"
+    end
     water_heating_systems_values[0][:fraction_dhw_load_served] = 0.333
     water_heating_systems_values << water_heating_systems_values[0].dup
     water_heating_systems_values[1][:id] = "WaterHeater2"
     water_heating_systems_values << water_heating_systems_values[0].dup
     water_heating_systems_values[2][:id] = "WaterHeater3"
+    if hpxml_file.include? 'combi'
+      water_heating_systems_values[1][:related_hvac] = "SpaceHeat_ID2"
+      water_heating_systems_values[2][:related_hvac] = "SpaceHeat_ID3"
+    end
   end
   return water_heating_systems_values
 end
