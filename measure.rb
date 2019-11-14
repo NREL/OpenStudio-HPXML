@@ -3812,16 +3812,10 @@ class OSModel
     end
 
     ducts_sensors = []
-    ducts_plenum_sensor = nil
     ducts_mix_gain_sensor = nil
     ducts_mix_loss_sensor = nil
 
     if not plenum_zone.nil?
-
-      # FIXME: Not needed? Compare to living, or living + plenum?
-      # ducts_plenum_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Other Equipment Convective Heating Energy")
-      # ducts_plenum_sensor.setName("ducts_plenum_other_equip")
-      # ducts_plenum_sensor.setKeyName(plenum_zone.name.to_s)
 
       if @living_zone.zoneMixing.size > 0
         ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Gain Energy")
@@ -3992,9 +3986,6 @@ class OSModel
       end
       if not ducts_mix_loss_sensor.nil?
         program.addLine("  Set #{mode}_ducts = #{mode}_ducts #{sign} (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
-      end
-      if not ducts_plenum_sensor.nil?
-        program.addLine("  Set #{mode}_ducts = #{mode}_ducts #{opp_sign} #{ducts_plenum_sensor.name}")
       end
       # Apply hourly load ratio
       # If we just transitioned from, e.g., no heating load to a heating load, the component loads should
