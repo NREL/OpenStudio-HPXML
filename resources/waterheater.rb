@@ -612,7 +612,7 @@ class Waterheater
     # Create hx setpoint schedule to specify source side temperature
     hx_stp_sch = OpenStudio::Model::ScheduleConstant.new(model)
     hx_stp_sch.setName("#{obj_name_indirect} HX Spt")
-    hx_temp = Constants.Combi_system_source_temp # degree C
+    hx_temp = 55 # tank source side inlet temperature, degree C
     hx_stp_sch.setValue(hx_temp)
 
     # change loop equipment operation scheme to heating load
@@ -644,6 +644,7 @@ class Waterheater
 
     new_source_manager = OpenStudio::Model::SetpointManagerScheduled.new(model, hx_stp_sch)
     new_source_manager.addToNode(source_loop.supplyOutletNode)
+    dhw_map[sys_id] << new_source_manager
 
     source_loop.addDemandBranchForComponent(new_heater)
 
@@ -664,7 +665,7 @@ class Waterheater
     equipment_peaks = {}
     equipment_sch_sensors = {}
     equipment_target_temp_sensors = {}
-    tank_volume, deadband = 0.0, 0.0
+    tank_volume, deadband, tank_source_temp = 0.0, 0.0, 0.0
     alt_spt_sch = nil
     tank_temp_sensor, tank_spt_sensor, tank_loss_energy_sensor = nil, nil, nil
     altsch_actuator, pump_actuator = nil, nil
@@ -708,6 +709,8 @@ class Waterheater
       elsif object.is_a? OpenStudio::Model::PumpVariableSpeed
         pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(object, "Pump", "Pump Mass Flow Rate")
         pump_actuator.setName("#{combi_sys_id} Pump MFR")
+      elsif object.is_a? OpenStudio::Model::SetpointManagerScheduled
+        tank_source_temp = object.schedule.to_ScheduleConstant.get.value
       end
     end
 
@@ -721,7 +724,7 @@ class Waterheater
     indirect_ctrl_program.addLine("Set Rho = @RhoH2O #{tank_temp_sensor.name}")
     indirect_ctrl_program.addLine("Set Cp = @CpHW #{tank_temp_sensor.name}")
     indirect_ctrl_program.addLine("Set Tank_Water_Mass = #{tank_volume} * Rho")
-    indirect_ctrl_program.addLine("Set DeltaT = #{Constants.Combi_system_source_temp} - #{tank_spt_sensor.name}")
+    indirect_ctrl_program.addLine("Set DeltaT = #{tank_source_temp} - #{tank_spt_sensor.name}")
     indirect_ctrl_program.addLine("Set WU_Hot_Temp = #{tank_temp_sensor.name}")
     indirect_ctrl_program.addLine("Set WU_Cold_Temp = #{mains_temp_sensor.name}")
     indirect_ctrl_program.addLine("Set Tank_Use_Total_MFR = 0.0")
