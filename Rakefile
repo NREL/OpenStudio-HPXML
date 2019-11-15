@@ -145,6 +145,7 @@ def create_hpxmls
     'base-enclosure-walltype-strawbale.xml' => 'base.xml',
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
+    'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
@@ -218,6 +219,7 @@ def create_hpxmls
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-oil-only-no-eae.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-stove-wood-only.xml' => 'base.xml',
+    'base-hvac-undersized.xml' => 'base.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only-no-eae.xml' => 'base-hvac-wall-furnace-propane-only.xml',
@@ -410,7 +412,8 @@ def create_hpxmls
     'water_heating_multiple/base-dhw-tankless-electric-x3.xml' => 'base-dhw-tankless-electric.xml',
     'water_heating_multiple/base-dhw-tankless-gas-x3.xml' => 'base-dhw-tankless-gas.xml',
     'water_heating_multiple/base-dhw-tankless-oil-x3.xml' => 'base-dhw-tankless-oil.xml',
-    'water_heating_multiple/base-dhw-tankless-propane-x3.xml' => 'base-dhw-tankless-propane.xml'
+    'water_heating_multiple/base-dhw-tankless-propane-x3.xml' => 'base-dhw-tankless-propane.xml',
+    'water_heating_multiple/base-dhw-combi-tankless-x3.xml' => 'hvac_multiple/base-hvac-boiler-gas-only-x3.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -1495,6 +1498,8 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values[2][:interior_shading_factor_winter] = 0.01
     windows_values[3][:interior_shading_factor_summer] = 0.85
     windows_values[3][:interior_shading_factor_winter] = 0.7
+  elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
+    windows_values = []
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     windows_values[0][:area] = 1000
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -1828,6 +1833,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:fraction_heat_load_served] = 0.5
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[1][:id] += "2"
+  elsif ['base-hvac-undersized.xml'].include? hpxml_file
+    heating_systems_values[0][:heating_capacity] /= 100.0
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] = -1
   elsif hpxml_file.include? '-zero-heat.xml' and not heating_systems_values.nil? and heating_systems_values.size > 0
@@ -1935,6 +1942,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[0][:fraction_cool_load_served] = 0.5
     cooling_systems_values << cooling_systems_values[0].dup
     cooling_systems_values[1][:id] += "2"
+  elsif ['base-hvac-undersized.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_capacity] /= 100.0
   elsif hpxml_file.include? 'hvac_autosizing' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] = -1
   elsif hpxml_file.include? '-zero-cool.xml' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
@@ -2799,11 +2808,23 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
   elsif ['base-dhw-none.xml'].include? hpxml_file
     water_heating_systems_values = []
   elsif hpxml_file.include? 'water_heating_multiple' and not water_heating_systems_values.nil? and water_heating_systems_values.size > 0
+    if hpxml_file.include? 'combi'
+      water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with tankless coil"
+      water_heating_systems_values[0][:tank_volume] = nil
+      water_heating_systems_values[0][:heating_capacity] = nil
+      water_heating_systems_values[0][:energy_factor] = nil
+      water_heating_systems_values[0][:fuel_type] = nil
+      water_heating_systems_values[0][:related_hvac] = "HeatingSystem"
+    end
     water_heating_systems_values[0][:fraction_dhw_load_served] = 0.333
     water_heating_systems_values << water_heating_systems_values[0].dup
     water_heating_systems_values[1][:id] = "WaterHeater2"
     water_heating_systems_values << water_heating_systems_values[0].dup
     water_heating_systems_values[2][:id] = "WaterHeater3"
+    if hpxml_file.include? 'combi'
+      water_heating_systems_values[1][:related_hvac] = "SpaceHeat_ID2"
+      water_heating_systems_values[2][:related_hvac] = "SpaceHeat_ID3"
+    end
   end
   return water_heating_systems_values
 end
