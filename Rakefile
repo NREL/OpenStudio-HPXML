@@ -143,6 +143,7 @@ def create_hpxmls
     'base-enclosure-walltype-strawbale.xml' => 'base.xml',
     'base-enclosure-walltype-structuralbrick.xml' => 'base.xml',
     'base-enclosure-windows-interior-shading.xml' => 'base.xml',
+    'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
@@ -213,6 +214,7 @@ def create_hpxmls
     'base-hvac-stove-oil-only.xml' => 'base.xml',
     'base-hvac-stove-oil-only-no-eae.xml' => 'base-hvac-stove-oil-only.xml',
     'base-hvac-stove-wood-only.xml' => 'base.xml',
+    'base-hvac-undersized.xml' => 'base.xml',
     'base-hvac-wall-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only.xml' => 'base.xml',
     'base-hvac-wall-furnace-propane-only-no-eae.xml' => 'base-hvac-wall-furnace-propane-only.xml',
@@ -1487,6 +1489,8 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values[2][:interior_shading_factor_winter] = 0.01
     windows_values[3][:interior_shading_factor_summer] = 0.85
     windows_values[3][:interior_shading_factor_winter] = 0.7
+  elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
+    windows_values = []
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file
     windows_values[0][:area] = 1000
   elsif ['base-atticroof-conditioned.xml'].include? hpxml_file
@@ -1818,6 +1822,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values[0][:fraction_heat_load_served] = 0.5
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[1][:id] += "2"
+  elsif ['base-hvac-undersized.xml'].include? hpxml_file
+    heating_systems_values[0][:heating_capacity] /= 100.0
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
     heating_systems_values[0][:heating_capacity] = -1
   elsif hpxml_file.include? '-zero-heat.xml' and not heating_systems_values.nil? and heating_systems_values.size > 0
@@ -1912,6 +1918,8 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values[0][:fraction_cool_load_served] = 0.5
     cooling_systems_values << cooling_systems_values[0].dup
     cooling_systems_values[1][:id] += "2"
+  elsif ['base-hvac-undersized.xml'].include? hpxml_file
+    cooling_systems_values[0][:cooling_capacity] /= 100.0
   elsif hpxml_file.include? 'hvac_autosizing' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
     cooling_systems_values[0][:cooling_capacity] = -1
   elsif hpxml_file.include? '-zero-cool.xml' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
