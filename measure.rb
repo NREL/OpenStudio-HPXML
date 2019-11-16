@@ -3676,15 +3676,15 @@ class OSModel
 
       surface_type = surface_type.get
 
-      s.subSurfaces.each_with_index do |ss, idx|
+      s.subSurfaces.each do |ss|
         key = { "Window" => :windows,
                 "Door" => :doors,
                 "Skylight" => :skylights }[surface_type]
         fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
-        { "Surface Inside Face Convection Heat Gain Energy" => "subsurface#{idx}_convection",
-          "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "subsurface#{idx}_intgains_radiation",
-          "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "subsurface#{idx}_surface_radiation" }.each do |var, name|
+        { "Surface Inside Face Convection Heat Gain Energy" => "subsurface_convection",
+          "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "subsurface_intgains_radiation",
+          "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "subsurface_surface_radiation" }.each do |var, name|
           sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
           sensor.setName(name)
           sensor.setKeyName(ss.name.to_s)
@@ -3705,11 +3705,11 @@ class OSModel
               "InferredFloor" => :internal_mass }[surface_type]
       fail "Unexpected surface for component loads: '#{s.name}'." if key.nil?
 
-      { "Surface Inside Face Convection Heat Gain Energy" => "surface#{idx}_convection",
-        "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "surface#{idx}_intgains_radiation",
-        "Surface Inside Face Solar Radiation Heat Gain Energy" => "surface#{idx}_solar_radiation",
-        "Surface Inside Face Lights Radiation Heat Gain Energy" => "surface#{idx}_lights_radiation",
-        "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "surface#{idx}_surface_radiation" }.each do |var, name|
+      { "Surface Inside Face Convection Heat Gain Energy" => "surface_convection",
+        "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "surface_intgains_radiation",
+        "Surface Inside Face Solar Radiation Heat Gain Energy" => "surface_solar_radiation",
+        "Surface Inside Face Lights Radiation Heat Gain Energy" => "surface_lights_radiation",
+        "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "surface_surface_radiation" }.each do |var, name|
         sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         sensor.setName(name)
         sensor.setKeyName(s.name.to_s)
@@ -3717,14 +3717,14 @@ class OSModel
       end
     end
 
-    model.getInternalMasss.each_with_index do |m, idx|
+    model.getInternalMasss.each do |m|
       next unless m.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
-      { "Surface Inside Face Convection Heat Gain Energy" => "intmass#{idx}_convection",
-        "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "intmass#{idx}_intgains_radiation",
-        "Surface Inside Face Solar Radiation Heat Gain Energy" => "intmass#{idx}_solar_radiation",
-        "Surface Inside Face Lights Radiation Heat Gain Energy" => "intmass#{idx}_lights_radiation",
-        "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "intmass#{idx}_surface_radiation" }.each do |var, name|
+      { "Surface Inside Face Convection Heat Gain Energy" => "intmass_convection",
+        "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "intmass_intgains_radiation",
+        "Surface Inside Face Solar Radiation Heat Gain Energy" => "intmass_solar_radiation",
+        "Surface Inside Face Lights Radiation Heat Gain Energy" => "intmass_lights_radiation",
+        "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "intmass_surface_radiation" }.each do |var, name|
         sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         sensor.setName(name)
         sensor.setKeyName(m.name.to_s)
@@ -3747,11 +3747,11 @@ class OSModel
     air_loss_sensor.setKeyName(@living_zone.name.to_s)
 
     mechvent_sensors = []
-    model.getElectricEquipments.each_with_index do |o, idx|
+    model.getElectricEquipments.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation
 
-      { "Electric Equipment Convective Heating Energy" => "mechvent_elec_equip#{idx}_convection",
-        "Electric Equipment Radiant Heating Energy" => "mechvent_elec_equip#{idx}_radiation" }.each do |var, name|
+      { "Electric Equipment Convective Heating Energy" => "mechvent_elec_equip_convection",
+        "Electric Equipment Radiant Heating Energy" => "mechvent_elec_equip_radiation" }.each do |var, name|
         mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         mechvent_sensor.setName(name)
         mechvent_sensor.setKeyName(o.name.to_s)
@@ -3759,11 +3759,11 @@ class OSModel
         objects_already_processed << o
       end
     end
-    model.getOtherEquipments.each_with_index do |o, idx|
+    model.getOtherEquipments.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameERVHRV
 
-      { "Other Equipment Convective Heating Energy" => "mechvent_other_equip#{idx}_convection",
-        "Other Equipment Radiant Heating Energy" => "mechvent_other_equip#{idx}_radiation" }.each do |var, name|
+      { "Other Equipment Convective Heating Energy" => "mechvent_other_equip_convection",
+        "Other Equipment Radiant Heating Energy" => "mechvent_other_equip_radiation" }.each do |var, name|
         mechvent_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         mechvent_sensor.setName(name)
         mechvent_sensor.setKeyName(o.name.to_s)
@@ -3814,15 +3814,13 @@ class OSModel
         ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
       end
 
-      idx = 0
       @living_zone.airLoopHVACs.each do |airloop|
         model.getOtherEquipments.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
           next unless o.name.to_s.start_with? airloop.name.to_s
 
-          idx += 1
-          { "Other Equipment Convective Heating Energy" => "ducts_other_equip#{idx}_convection",
-            "Other Equipment Radiant Heating Energy" => "ducts_other_equip#{idx}_radiation" }.each do |var, name|
+          { "Other Equipment Convective Heating Energy" => "ducts_other_equip_convection",
+            "Other Equipment Radiant Heating Energy" => "ducts_other_equip_radiation" }.each do |var, name|
             ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
             ducts_sensor.setName(name)
             ducts_sensor.setKeyName(o.name.to_s)
@@ -3904,12 +3902,12 @@ class OSModel
 
     intgains_dhw_sensors = {}
 
-    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each_with_index do |wh, idx|
+    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each do |wh|
       next unless wh.ambientTemperatureThermalZone.is_initialized
       next unless wh.ambientTemperatureThermalZone.get.name.to_s == @living_zone.name.to_s
 
       dhw_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Heat Loss Energy")
-      dhw_sensor.setName("dhw_mixed_tank#{idx}")
+      dhw_sensor.setName("dhw_mixed_tank")
       dhw_sensor.setKeyName(wh.name.to_s)
 
       if wh.is_a? OpenStudio::Model::WaterHeaterMixed
@@ -3921,7 +3919,7 @@ class OSModel
       end
 
       dhw_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Runtime Fraction")
-      dhw_rtf_sensor.setName("dhw_rtf#{idx}")
+      dhw_rtf_sensor.setName("dhw_rtf")
       dhw_rtf_sensor.setKeyName(wh.name.to_s)
 
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
