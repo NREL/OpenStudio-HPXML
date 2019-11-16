@@ -750,6 +750,9 @@ class OSModel
         lv_surfaces << surface
       end
     end
+
+    all_surfaces.sort!
+
     # calculate view factors separately for living and conditioned basement
     vf_map_lv = calc_approximate_view_factor(runner, model, lv_surfaces)
     vf_map_cb = calc_approximate_view_factor(runner, model, cond_base_surfaces)
