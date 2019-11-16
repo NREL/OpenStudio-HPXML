@@ -3343,6 +3343,19 @@ class HVACSizing
 
     hvac.Objects.each do |object|
       if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+
+        # Fixed airflow rate?
+        if object.supplyAirFlowRateDuringHeatingOperation.is_initialized and object.heatingCoil.is_initialized
+          if object.supplyAirFlowRateDuringHeatingOperation.get > 0
+            hvac_final_values.Heat_Airflow = UnitConversions.convert(object.supplyAirFlowRateDuringHeatingOperation.get, "m^3/s", "cfm")
+          end
+        end
+        if object.supplyAirFlowRateDuringCoolingOperation.is_initialized and object.coolingCoil.is_initialized
+          if object.supplyAirFlowRateDuringCoolingOperation.get > 0
+            hvac_final_values.Cool_Airflow = UnitConversions.convert(object.supplyAirFlowRateDuringCoolingOperation.get, "m^3/s", "cfm")
+          end
+        end
+
         # Fan Airflow
         if object.coolingCoil.is_initialized and object.heatingCoil.is_initialized
           fan_airflow = [hvac_final_values.Heat_Airflow, hvac_final_values.Cool_Airflow].max
