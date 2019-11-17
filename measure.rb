@@ -4047,6 +4047,8 @@ class OSModel
       nonsurf_names.each do |nonsurf_name|
         program.addLine("  Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_#{nonsurf_name}")
       end
+      program.addLine("Else")
+      program.addLine("  Set #{mode}_setpoint = 0")
       program.addLine("EndIf")
     end
     program.addLine("Set #{prev_hr_htg_predicted_var.name} = #{htg_predicted_sensor.name}")
