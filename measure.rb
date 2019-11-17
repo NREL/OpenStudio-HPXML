@@ -3729,11 +3729,11 @@ class OSModel
       next unless m.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       surfaces_sensors[:internal_mass] << []
-      { "Surface Inside Face Convection Heat Gain Energy" => "mass_conv",
-        "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "mass_ig",
-        "Surface Inside Face Solar Radiation Heat Gain Energy" => "mass_sol",
-        "Surface Inside Face Lights Radiation Heat Gain Energy" => "mass_lgt",
-        "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "mass_surf" }.each do |var, name|
+      { "Surface Inside Face Convection Heat Gain Energy" => "im_conv",
+        "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "im_ig",
+        "Surface Inside Face Solar Radiation Heat Gain Energy" => "im_sol",
+        "Surface Inside Face Lights Radiation Heat Gain Energy" => "im_lgt",
+        "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "im_surf" }.each do |var, name|
         sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
         sensor.setName(name)
         sensor.setKeyName(m.name.to_s)
@@ -3935,126 +3935,120 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
+    nonsurf_names = ["intgains", "infil", "mechvent", "natvent", "ducts"]
+
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName("component loads program")
-    ["htg", "clg"].each do |mode|
-      surfaces_sensors.keys.each do |k|
-        program.addLine("Set #{mode}_#{k.to_s} = 0")
+
+    # EMS program: Surfaces
+    surfaces_sensors.each do |k, surface_sensors|
+      program.addLine("Set hr_#{k.to_s} = 0")
+      surface_sensors.each do |sensors|
+        s = "Set hr_#{k.to_s} = hr_#{k.to_s}"
+        sensors.each do |sensor|
+          if sensor.name.to_s.start_with? "ss_sol"
+            s += " - #{sensor.name}"
+          else
+            s += " + #{sensor.name}"
+          end
+        end
+        program.addLine(s) if sensors.size > 0
       end
-      program.addLine("Set #{mode}_intgains = 0")
-      program.addLine("Set #{mode}_infil = 0")
-      program.addLine("Set #{mode}_mechvent = 0")
-      program.addLine("Set #{mode}_natvent = 0")
-      program.addLine("Set #{mode}_ducts = 0")
-      program.addLine("Set #{mode}_setpoint = 0")
     end
+
+    # EMS program: Internal gains
+    program.addLine("Set hr_intgains = 0")
+    intgains_sensors.each do |intgain_sensors|
+      s = "Set hr_intgains = hr_intgains"
+      intgain_sensors.each do |sensor|
+        s += " - #{sensor.name}"
+      end
+      program.addLine(s) if intgain_sensors.size > 0
+    end
+    intgains_dhw_sensors.each do |sensor, vals|
+      off_loss, on_loss, rtf_sensor = vals
+      program.addLine("Set hr_intgains = hr_intgains + #{sensor.name} * (#{off_loss}*(1-#{rtf_sensor.name}) + #{on_loss}*#{rtf_sensor.name})") # Water heater tank losses to zone
+    end
+
+    # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name}")
+    program.addLine("Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
+    if not natvent_flow_actuator.nil?
+      program.addLine("Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
+    else
+      program.addLine("Set hr_natvent = 0")
+    end
+    program.addLine("Set hr_mechvent = 0")
+    if not imbal_mechvent_flow_actuator.nil?
+      program.addLine("Set hr_mechvent = hr_mechvent + ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
+    end
+    s = "Set hr_mechvent = hr_mechvent"
+    mechvent_sensors.each do |sensor|
+      s += " - #{sensor.name}" # Balanced mech vent load + imbalanced mech vent fan heat
+    end
+    program.addLine(s) if mechvent_sensors.size > 0
+
+    # EMS program: Ducts
+    program.addLine("Set hr_ducts = 0")
+    ducts_sensors.each do |duct_sensors|
+      s = "Set hr_ducts = hr_ducts"
+      duct_sensors.each do |sensor|
+        s += " - #{sensor.name}"
+      end
+      program.addLine(s) if duct_sensors.size > 0
+    end
+    if not ducts_mix_loss_sensor.nil?
+      program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
+    end
+
+    # EMS program: Heating vs Cooling logic
     ["htg", "clg"].each do |mode|
+      # 1. Calculate hourly load ratio
+      #    If we just transitioned from, e.g., no heating load to a heating load, the component loads should
+      #    only account for the estimated portion of the hour for which there was a heating load. The predicted
+      #    loads from the previous and current hours are used to estimate this load ratio.
+      # 2. Calculate load associated with setpoint change (if applicable).
+      #    Calculated as the difference between total load and sum of component loads for this hour.
+      program.addLine("Set #{mode}_load_ratio = 0")
       if mode == "htg"
         program.addLine("If #{htg_sensor.name} > 0")
-        sign = "+"
-        opp_sign = "-"
-      elsif mode == "clg"
-        program.addLine("ElseIf #{clg_sensor.name} > 0")
-        sign = "-"
-        opp_sign = "+"
-      end
-
-      # Surfaces
-      surfaces_sensors.each do |k, surface_sensors|
-        surface_sensors.each do |sensors|
-          s = "Set #{mode}_#{k.to_s} = #{mode}_#{k.to_s}"
-          sensors.each do |sensor|
-            if sensor.name.to_s.start_with? "ss_sol"
-              s += " #{opp_sign} #{sensor.name}"
-            else
-              s += " #{sign} #{sensor.name}"
-            end
-          end
-          program.addLine(s) if sensors.size > 0
-        end
-      end
-
-      # Internal gains
-      intgains_sensors.each do |intgain_sensors|
-        s = "Set #{mode}_intgains = #{mode}_intgains"
-        intgain_sensors.each do |sensor|
-          s += " #{opp_sign} #{sensor.name}"
-        end
-        program.addLine(s) if intgain_sensors.size > 0
-      end
-      intgains_dhw_sensors.each do |sensor, vals|
-        offcycle_loss, oncycle_loss, dhw_rtf_sensor = vals
-        program.addLine("  Set #{mode}_intgains = #{mode}_intgains #{sign} #{sensor.name} * (#{offcycle_loss}*(1-#{dhw_rtf_sensor.name}) + #{oncycle_loss}*#{dhw_rtf_sensor.name})")
-      end
-
-      # Infiltration, Natural Ventilation, Mechanical Ventilation
-      program.addLine("  Set #{mode}_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name}")
-      program.addLine("  Set #{mode}_infil = #{mode}_infil #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / #{mode}_airflow_rate)") # Airflow heat attributed to infiltration
-      if not imbal_mechvent_flow_actuator.nil?
-        program.addLine("  Set #{mode}_mechvent = #{mode}_mechvent #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / #{mode}_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
-      end
-      s = "  Set #{mode}_mechvent = #{mode}_mechvent"
-      mechvent_sensors.each do |sensor|
-        s += " #{opp_sign} #{sensor.name}" # Balanced mech vent load + imbalanced mech vent fan heat
-      end
-      program.addLine(s) if mechvent_sensors.size > 0
-      if not natvent_flow_actuator.nil?
-        program.addLine("  Set #{mode}_natvent = #{mode}_natvent #{sign} ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / #{mode}_airflow_rate)") # Airflow heat attributed to natural ventilation
-      end
-
-      # Ducts
-      ducts_sensors.each do |duct_sensors|
-        s = "  Set #{mode}_ducts = #{mode}_ducts"
-        duct_sensors.each do |sensor|
-          s += " #{opp_sign} #{sensor.name}"
-        end
-        program.addLine(s) if duct_sensors.size > 0
-      end
-      if not ducts_mix_loss_sensor.nil?
-        program.addLine("  Set #{mode}_ducts = #{mode}_ducts #{sign} (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
-      end
-
-      # Apply hourly load ratio
-      # If we just transitioned from, e.g., no heating load to a heating load, the component loads should
-      # only account for the estimated portion of the hour for which there was a heating load. The predicted
-      # loads from the previous and current hours are used to estimate this load ratio.
-      if mode == "htg"
+        program.addLine("  Set #{mode}_load_ratio = 1")
         program.addLine("  If #{htg_predicted_sensor.name} > 0 && #{prev_hr_htg_predicted_var.name} < 0")
         program.addLine("    Set #{mode}_load_ratio = #{htg_predicted_sensor.name} / (#{htg_predicted_sensor.name} - #{prev_hr_htg_predicted_var.name})")
-      elsif mode == "clg"
+        program.addLine("  EndIf")
+        program.addLine("EndIf")
+        sign = ""
+      else
+        program.addLine("If #{clg_sensor.name} > 0")
+        program.addLine("  Set #{mode}_load_ratio = 1")
         program.addLine("  If #{clg_predicted_sensor.name} < 0 && #{prev_hr_clg_predicted_var.name} > 0")
         program.addLine("    Set #{mode}_load_ratio = #{clg_predicted_sensor.name} / (#{clg_predicted_sensor.name} - #{prev_hr_clg_predicted_var.name})")
+        program.addLine("  EndIf")
+        program.addLine("EndIf")
+        sign = "-"
       end
       surfaces_sensors.keys.each do |k|
-        program.addLine("    Set #{mode}_#{k.to_s} = #{mode}_#{k.to_s} * #{mode}_load_ratio")
+        program.addLine("Set #{mode}_#{k.to_s} = #{sign}hr_#{k.to_s} * #{mode}_load_ratio")
       end
-      program.addLine("    Set #{mode}_intgains = #{mode}_intgains * #{mode}_load_ratio")
-      program.addLine("    Set #{mode}_infil = #{mode}_infil * #{mode}_load_ratio")
-      program.addLine("    Set #{mode}_ducts = #{mode}_ducts * #{mode}_load_ratio")
-      program.addLine("    Set #{mode}_mechvent = #{mode}_mechvent * #{mode}_load_ratio")
-      program.addLine("    Set #{mode}_natvent = #{mode}_natvent * #{mode}_load_ratio")
-      program.addLine("  EndIf")
-
-      # Setpoint change
-      # Calculate as the difference between total load and sum of component loads for this hour
+      nonsurf_names.each do |nonsurf_name|
+        program.addLine("Set #{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_load_ratio")
+      end
       if mode == "htg"
-        program.addLine("  If #{htg_setpoint_sensor.name} <> #{prev_hr_htg_setpoint_var.name}")
-        program.addLine("    Set #{mode}_setpoint = #{htg_sensor.name}")
-      elsif mode == "clg"
-        program.addLine("  If #{clg_setpoint_sensor.name} <> #{prev_hr_clg_setpoint_var.name}")
-        program.addLine("    Set #{mode}_setpoint = #{clg_sensor.name}")
+        program.addLine("If #{htg_setpoint_sensor.name} <> #{prev_hr_htg_setpoint_var.name} && #{mode}_load_ratio > 0")
+        program.addLine("  Set #{mode}_setpoint = #{htg_sensor.name}")
+      else
+        program.addLine("If #{clg_setpoint_sensor.name} <> #{prev_hr_clg_setpoint_var.name} && #{mode}_load_ratio > 0")
+        program.addLine("  Set #{mode}_setpoint = #{clg_sensor.name}")
       end
       surfaces_sensors.keys.each do |k|
-        program.addLine("    Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_#{k.to_s}")
+        program.addLine("  Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_#{k.to_s}")
       end
-      program.addLine("    Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_intgains")
-      program.addLine("    Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_infil")
-      program.addLine("    Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_mechvent")
-      program.addLine("    Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_ducts")
-      program.addLine("  EndIf")
+      nonsurf_names.each do |nonsurf_name|
+        program.addLine("  Set #{mode}_setpoint = #{mode}_setpoint - #{mode}_#{nonsurf_name}")
+      end
+      program.addLine("EndIf")
     end
-    program.addLine("EndIf")
     program.addLine("Set #{prev_hr_htg_predicted_var.name} = #{htg_predicted_sensor.name}")
     program.addLine("Set #{prev_hr_clg_predicted_var.name} = #{clg_predicted_sensor.name}")
     program.addLine("Set #{prev_hr_htg_setpoint_var.name} = #{htg_setpoint_sensor.name}")
@@ -4075,7 +4069,7 @@ class OSModel
         output_var.setKeyValue('*')
       end
 
-      ["infil", "intgains", "mechvent", "natvent", "ducts", "setpoint"].each do |k|
+      (nonsurf_names + ["setpoint"]).each do |k|
         ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k}")
         ems_output_var.setName("#{mode}_#{k}_outvar")
         ems_output_var.setTypeOfDataInVariable("Summed")
