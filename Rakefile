@@ -1165,8 +1165,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 600,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
-                                 :insulation_distance_to_bottom => 4,
-                                 :insulation_r_value => 8.9 }
+                                 :insulation_distance_to_bottom => 0,
+                                 :insulation_r_value => 0 }
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     foundation_walls_values = []
@@ -1289,7 +1289,7 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :area => 1350,
                             :insulation_assembly_r_value => 18.7 }
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    framefloors_values[0][:insulation_assembly_r_value] = 2.1
+    framefloors_values[1][:insulation_assembly_r_value] = 2.1
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     framefloors_values << { :id => "FloorAboveUnventedCrawl",
                             :exterior_adjacent_to => "crawlspace - unvented",

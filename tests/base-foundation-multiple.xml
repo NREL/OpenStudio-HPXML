@@ -184,12 +184,12 @@
             <Area>600.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>3.0</DepthBelowGrade>
-            <DistanceToBottomOfInsulation>4.0</DistanceToBottomOfInsulation>
+            <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallCrawlspaceInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
-                <NominalRValue>8.9</NominalRValue>
+                <NominalRValue>0.0</NominalRValue>
               </Layer>
             </Insulation>
           </FoundationWall>

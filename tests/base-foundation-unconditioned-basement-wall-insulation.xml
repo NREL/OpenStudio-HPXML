@@ -156,7 +156,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FloorBelowAtticInsulation'/>
-              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>39.3</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
           <FrameFloor>
@@ -166,7 +166,7 @@
             <Area>1350.0</Area>
             <Insulation>
               <SystemIdentifier id='FloorAboveUncondBasementInsulation'/>
-              <AssemblyEffectiveRValue>18.7</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>2.1</AssemblyEffectiveRValue>
             </Insulation>
           </FrameFloor>
         </FrameFloors>
