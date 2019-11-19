@@ -363,24 +363,20 @@ class HVAC
                                     sequential_cool_load_frac, control_zone,
                                     hvac_map, sys_id, is_ducted)
 
-    cooler_effectiveness = Constants.AssumedEvapCoolerEffectiveness
     obj_name = Constants.ObjectNameEvaporativeCooler
 
     evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
     evap_cooler.setName(obj_name)
-    evap_cooler.setCoolerEffectiveness(cooler_effectiveness)
+    evap_cooler.setCoolerEffectiveness(0.72) # Assumed effectiveness
     evap_cooler.setEvaporativeOperationMinimumDrybulbTemperature(0) # relax limitation to open evap cooler for any potential cooling
     evap_cooler.setEvaporativeOperationMaximumLimitWetbulbTemperature(50) # relax limitation to open evap cooler for any potential cooling
     evap_cooler.setEvaporativeOperationMaximumLimitDrybulbTemperature(50) # relax limitation to open evap cooler for any potential cooling
     hvac_map[sys_id] << evap_cooler
 
-    # See https://github.com/NREL/openstudio-standards/blob/49626ee957db63129bb74cfe08b48abd571de759/lib/openstudio-standards/prototypes/common/objects/Prototype.hvac_systems.rb#L3764
-    # See 1ZoneEvapCooler.idf
-
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
     air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop.setName(obj_name + " airloop")
-    air_loop.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler, is_ducted)
+    air_loop.additionalProperties.setFeature(Constants.OptionallyDuctedSystemIsDucted, is_ducted)
     air_loop.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
     air_supply_inlet_node = air_loop.supplyInletNode
     air_supply_outlet_node = air_loop.supplyOutletNode
@@ -1195,7 +1191,7 @@ class HVAC
       cfms_cooling_4 << cfms_cooling[mshp_index]
       shrs_rated_4 << shrs_rated[mshp_index]
     end
-    air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler, is_ducted)
+    air_loop_unitary.additionalProperties.setFeature(Constants.OptionallyDuctedSystemIsDucted, is_ducted)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, cfms_heating_4.join(","))
@@ -4352,7 +4348,7 @@ class HVAC
     elsif Constants.ObjectNameFurnace == hvac_type_heat
       return true
     elsif [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
-      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler).get
+      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.OptionallyDuctedSystemIsDucted).get
       if is_ducted
         return true
       end
