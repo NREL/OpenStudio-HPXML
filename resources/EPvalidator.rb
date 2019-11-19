@@ -360,7 +360,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpBackup]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]" => {
-        "BackupAnnualHeatingEfficiency[Units='Percent' or Units='AFUE']/Value" => one, # FIXME: Allow either?
+        "BackupAnnualHeatingEfficiency[Units='Percent' or Units='AFUE']/Value" => one,
         "BackupHeatingCapacity" => one, # Use -1 for autosizing
         "BackupHeatingSwitchoverTemperature" => zero_or_one, # Use if dual-fuel heat pump
       },

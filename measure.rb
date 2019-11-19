@@ -2580,7 +2580,6 @@ class OSModel
           return false
         end
 
-        # FIXME: Does it make sense to treat them the same?
         if not heat_pump_values[:backup_heating_efficiency_percent].nil?
           backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
         else
@@ -2604,10 +2603,11 @@ class OSModel
         supp_htg_max_outdoor_temp = backup_switchover_temp
       else
         supp_htg_max_outdoor_temp = 40.0
+        # Minimum temperature for Heat Pump operation:
         if hp_type == "mini-split"
-          hp_compressor_min_temp = -30.0 # F; Minimum temperature for Heat Pump operation
+          hp_compressor_min_temp = -30.0 # deg-F
         else
-          hp_compressor_min_temp = 0.0 # FIXME
+          hp_compressor_min_temp = 0.0 # deg-F
         end
       end
 
