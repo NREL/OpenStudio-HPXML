@@ -37,10 +37,6 @@ class Constants
     return 1e-9
   end
 
-  def self.AssumedEvapCoolerEffectiveness
-    return 0.72
-  end
-
   # Strings --------------------
 
   def self.AirFilm
@@ -143,7 +139,7 @@ class Constants
     return 'supply'
   end
 
-  def self.DuctedInfoMiniSplitHeatPumpOrEvapCooler
+  def self.OptionallyDuctedSystemIsDucted
     return __method__.to_s
   end
 

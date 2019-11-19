@@ -6,10 +6,10 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space, living_zone)
+  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space)
     @model_spaces = model.getSpaces
     @cond_space = living_space
-    @cond_zone = living_zone
+    @cond_zone = @cond_space.thermalZone.get
     @nbeds = nbeds
     @cfa = cfa
     @infilvolume = infilvolume
@@ -34,7 +34,7 @@ class HVACSizing
     end
 
     # Get shelter class
-    @shelter_class = get_shelter_class(model, min_neighbor_distance, living_space)
+    @shelter_class = get_shelter_class(model, min_neighbor_distance)
 
     # Calculate loads for each conditioned thermal zone
     zones_loads = process_zone_loads(runner, model, weather)
@@ -1149,7 +1149,7 @@ class HVACSizing
     # evap cooler temperature calculation based on Mannual S Figure 4-7
     if hvac.has_type(Constants.ObjectNameEvaporativeCooler)
       td_potential = @cool_design_temps[nil] - @wetbulb_outdoor_cooling
-      td = td_potential * Constants.AssumedEvapCoolerEffectiveness
+      td = td_potential * hvac.EvapCoolerEffectiveness
       hvac.LeavingAirTemp = @cool_design_temps[nil] - td
     else
       # Calculate Leaving Air Temperature
@@ -1971,8 +1971,8 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.get_shelter_class(model, min_neighbor_distance, living_space)
-    height_ft = Geometry.get_height_of_spaces([living_space])
+  def self.get_shelter_class(model, min_neighbor_distance)
+    height_ft = Geometry.get_height_of_spaces([@cond_space])
     exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
                          Geometry.calculate_above_grade_wall_area(@model_spaces)
 
@@ -2328,17 +2328,17 @@ class HVACSizing
     hvacs = []
 
     # Get unique set of HVAC equipment
-    equips = {}
+    equips = []
 
     HVAC.existing_equipment(model, runner, @cond_zone).each do |equip|
-      next if equips.keys.include? equip
+      next if equips.include? equip
       next if equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
 
-      equips[equip] = @cond_zone
+      equips << equip
     end
 
     # Process each equipment
-    equips.each do |equip, control_zone|
+    equips.each do |equip|
       hvac = HVACInfo.new
       hvacs << hvac
 
@@ -2353,7 +2353,7 @@ class HVACSizing
       # Retrieve ducts if they exist
       if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
         air_loop = nil
-        control_zone.airLoopHVACs.each do |loop|
+        @cond_zone.airLoopHVACs.each do |loop|
           loop.supplyComponents.each do |supply_component|
             next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
             next unless supply_component.to_AirLoopHVACUnitarySystem.get.handle == equip.handle
@@ -2372,9 +2372,11 @@ class HVACSizing
         return nil if hvac.CoolingLoadFraction.nil?
 
         air_loop = equip.airLoopHVAC.get
-        if air_loop.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPumpOrEvapCooler).get
+        if air_loop.additionalProperties.getFeatureAsBoolean(Constants.OptionallyDuctedSystemIsDucted).get
           hvac.Ducts = get_ducts_for_air_loop(runner, air_loop)
         end
+
+        hvac.EvapCoolerEffectiveness = equip.coolerEffectiveness
       end
 
       if not clg_coil.nil?
@@ -3473,8 +3475,6 @@ class HVACSizing
         fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
         fan.setFanEfficiency(fan_eff)
         fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
-        # fan.setPressureRise(0)
-        # object.setRecirculatingWaterPumpPowerConsumption([2.79 * (hvac_final_values.Cool_Airflow)**(-0.29), 0.6].min * hvac_final_values.Cool_Airflow)
 
         @cond_zone.airLoopHVACTerminals.each do |aterm|
           next if air_loop != aterm.airLoopHVAC.get
@@ -3803,7 +3803,8 @@ class HVACInfo
                 :FanspeedRatioCooling, :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR,
                 :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
-                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp)
+                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
+                :EvapCoolerEffectiveness)
 end
 
 class DuctInfo
