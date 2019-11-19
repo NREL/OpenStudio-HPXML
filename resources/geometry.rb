@@ -49,14 +49,6 @@ class Geometry
     return maxz - minz
   end
 
-  def self.zone_is_conditioned(zone)
-    zone.spaces.each do |space|
-      unless self.space_is_conditioned(space)
-        return false
-      end
-    end
-  end
-
   def self.get_thermal_zones_from_spaces(spaces)
     thermal_zones = []
     spaces.each do |space|
@@ -67,10 +59,6 @@ class Geometry
       end
     end
     return thermal_zones
-  end
-
-  def self.space_is_unconditioned(space)
-    return !self.space_is_conditioned(space)
   end
 
   def self.space_is_conditioned(space)

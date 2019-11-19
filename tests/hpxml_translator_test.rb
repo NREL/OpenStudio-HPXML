@@ -99,6 +99,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'hvac-dse-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution'."],
                             'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
                                                             "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
+                            'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
@@ -825,10 +826,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
-      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
-      if clg_sys_cap > 0
+      clg_sys_cap = XMLHelper.get_value(clg_sys, "CoolingCapacity")
+      if not clg_sys_cap.nil? and Float(clg_sys_cap) > 0
         clg_cap = 0 if clg_cap.nil?
-        clg_cap += clg_sys_cap
+        clg_cap += Float(clg_sys_cap)
       end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
@@ -1264,6 +1265,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Multiple HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
+      next if xml.include? "evap-cooler" # skipping because W/cfm varies as a function of airflow rate
 
       xml_x3 = File.absolute_path(xml)
       xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3.xml", "-base.xml"))
@@ -1332,6 +1334,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Partial HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
+      next if xml.include? "evap-cooler" # skipping because W/cfm varies as a function of airflow rate
 
       xml_33 = File.absolute_path(xml)
       xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-33percent.xml", "-base.xml"))
