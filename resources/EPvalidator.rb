@@ -353,6 +353,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='ground-to-air']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
+        "BackupHeatingSwitchoverTemperature" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
         "AnnualHeatingEfficiency[Units='COP']/Value" => one,
       },
@@ -361,7 +362,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]" => {
         "BackupAnnualHeatingEfficiency[Units='Percent' or Units='AFUE']/Value" => one, # FIXME: Allow either?
         "BackupHeatingCapacity" => one, # Use -1 for autosizing
-        "BackupHeatingSwitchoverTemperature" => zero_or_one,
+        "BackupHeatingSwitchoverTemperature" => zero_or_one, # Use if dual-fuel heat pump
       },
 
       # [HVACControl]
