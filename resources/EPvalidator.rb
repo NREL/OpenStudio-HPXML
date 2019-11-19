@@ -307,15 +307,15 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioner']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
-        "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
+        "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
       },
 
       ## [CoolingType=RoomAC]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='room air conditioner']" => {
         "DistributionSystem" => zero,
-        "AnnualCoolingEfficiency[Units='EER']/Value" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
+        "AnnualCoolingEfficiency[Units='EER']/Value" => one,
       },
 
       ## [CoolingType=EvapCooler]
@@ -401,9 +401,9 @@ class EnergyPlusValidator
       ## [HVACDistType=Air]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution" => {
         "DuctLeakageMeasurement[DuctType='supply']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => one,
-        "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => zero_or_one, # See [HVACDuctLeakageMeasurement]
-        "Ducts[DuctType='supply']" => one_or_more, # See [HVACDuct]
-        "Ducts[DuctType='return']" => zero_or_more, # return ducts are optional for eg. evap cooler, See [HVACDuct]
+        "DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => zero_or_one,
+        "Ducts[DuctType='supply']" => zero_or_more, # See [HVACDuct]
+        "Ducts[DuctType='return']" => zero_or_more, # See [HVACDuct]
       },
 
       ## [HVACDistType=DSE]
@@ -412,19 +412,11 @@ class EnergyPlusValidator
         "[AnnualHeatingDistributionSystemEfficiency | AnnualCoolingDistributionSystemEfficiency]" => one_or_more,
       },
 
-      ## [HVACDuctLeakageMeasurement]
-      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/DuctLeakageMeasurement[DuctType='return']" => {
-        "../Ducts[DuctType='return']" => one_or_more,
-      },
-
       ## [HVACDuct]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='supply' or DuctType='return']" => {
         "DuctInsulationRValue" => one,
         "[DuctLocation='living space' or DuctLocation='basement - conditioned' or DuctLocation='basement - unconditioned' or DuctLocation='crawlspace - vented' or DuctLocation='crawlspace - unvented' or DuctLocation='attic - vented' or DuctLocation='attic - unvented' or DuctLocation='garage' or DuctLocation='outside']" => one,
         "DuctSurfaceArea" => one,
-      },
-      "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution/DistributionSystemType/AirDistribution/Ducts[DuctType='return']" => {
-        "../DuctLeakageMeasurement[DuctType='return']/DuctLeakage[Units='CFM25' or Units='Percent'][TotalOrToOutside='to outside']/Value" => one,
       },
 
       # [MechanicalVentilation]

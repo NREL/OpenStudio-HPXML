@@ -3164,7 +3164,7 @@ class OSModel
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      air_ducts = self.create_ducts(air_distribution, model, spaces)
+      air_ducts = self.create_ducts(air_distribution, model, spaces, dist_id)
 
       # Connect AirLoopHVACs to ducts
       ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
@@ -3180,7 +3180,7 @@ class OSModel
             elsif duct_systems[air_ducts] != loop
               # Multiple air loops associated with this duct system, treat
               # as separate duct systems.
-              air_ducts2 = self.create_ducts(air_distribution, model, spaces)
+              air_ducts2 = self.create_ducts(air_distribution, model, spaces, dist_id)
               duct_systems[air_ducts2] = loop
             end
           end
@@ -3315,7 +3315,7 @@ class OSModel
     return true
   end
 
-  def self.create_ducts(air_distribution, model, spaces)
+  def self.create_ducts(air_distribution, model, spaces, dist_id)
     air_ducts = []
 
     side_map = { 'supply' => Constants.DuctSideSupply,
@@ -3368,6 +3368,8 @@ class OSModel
         duct_leakage_cfm = duct_leakage_value
       elsif duct_leakage_units == 'Percent'
         duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
@@ -3389,6 +3391,8 @@ class OSModel
         duct_leakage_cfm = duct_leakage_value
       elsif duct_leakage_units == 'Percent'
         duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
@@ -3398,7 +3402,7 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, weather)
-    success = HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, false, @living_space, @living_zone)
+    success = HVACSizing.apply(model, runner, weather, @cfa, @infilvolume, @nbeds, @min_neighbor_distance, false, @living_space)
     return false if not success
 
     return true

@@ -37,12 +37,12 @@
       <ClimateandRiskZones>
         <ClimateZoneIECC>
           <Year>2006</Year>
-          <ClimateZone>5B</ClimateZone>
+          <ClimateZone>3A</ClimateZone>
         </ClimateZoneIECC>
         <WeatherStation>
           <SystemIdentifier id='WeatherStation'/>
-          <Name>Denver, CO</Name>
-          <WMO>725650</WMO>
+          <Name>Dallas, TX</Name>
+          <WMO>722590</WMO>
         </WeatherStation>
       </ClimateandRiskZones>
       <Enclosure>

@@ -43,6 +43,7 @@ def create_hpxmls
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
+    'invalid_files/hvac-distribution-return-duct-leakage-missing.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
     'invalid_files/hvac-dse-multiple-attached-cooling.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-dse-multiple-attached-heating.xml' => 'base-hvac-dse.xml',
     'invalid_files/hvac-frac-load-served.xml' => 'base-hvac-multiple.xml',
@@ -64,8 +65,6 @@ def create_hpxmls
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
-    'invalid_files/base-hvac-return-duct-incomplete1.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
-    'invalid_files/base-hvac-return-duct-incomplete2.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
 
     'base-addenda-exclude-g.xml' => 'base.xml',
     'base-addenda-exclude-g-e.xml' => 'base.xml',
@@ -186,9 +185,9 @@ def create_hpxmls
     'base-hvac-ducts-multiple.xml' => 'base.xml',
     'base-hvac-ducts-outside.xml' => 'base.xml',
     'base-hvac-elec-resistance-only.xml' => 'base.xml',
-    'base-hvac-evap-cooler-furnace-gas.xml' => 'base.xml',
-    'base-hvac-evap-cooler-only.xml' => 'base.xml',
-    'base-hvac-evap-cooler-only-ducted.xml' => 'base.xml',
+    'base-hvac-evap-cooler-furnace-gas.xml' => 'base-location-dallas-tx.xml',
+    'base-hvac-evap-cooler-only.xml' => 'base-location-dallas-tx.xml',
+    'base-hvac-evap-cooler-only-ducted.xml' => 'base-location-dallas-tx.xml',
     'base-hvac-furnace-elec-only.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-2-speed.xml' => 'base.xml',
     'base-hvac-furnace-gas-central-ac-var-speed.xml' => 'base.xml',
@@ -265,12 +264,14 @@ def create_hpxmls
     'cfis/base-hvac-central-ac-only-var-speed-cfis.xml' => 'base-hvac-central-ac-only-var-speed.xml',
     'cfis/base-hvac-dse-cfis.xml' => 'base-hvac-dse.xml',
     'cfis/base-hvac-ducts-in-conditioned-space-cfis.xml' => 'base-hvac-ducts-in-conditioned-space.xml',
+    'cfis/base-hvac-evap-cooler-only-ducted-cfis.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
     'cfis/base-hvac-furnace-elec-only-cfis.xml' => 'base-hvac-furnace-elec-only.xml',
     'cfis/base-hvac-furnace-gas-central-ac-2-speed-cfis.xml' => 'base-hvac-furnace-gas-central-ac-2-speed.xml',
     'cfis/base-hvac-furnace-gas-central-ac-var-speed-cfis.xml' => 'base-hvac-furnace-gas-central-ac-var-speed.xml',
     'cfis/base-hvac-furnace-gas-only-cfis.xml' => 'base-hvac-furnace-gas-only.xml',
     'cfis/base-hvac-furnace-gas-room-ac-cfis.xml' => 'base-hvac-furnace-gas-room-ac.xml',
     'cfis/base-hvac-ground-to-air-heat-pump-cfis.xml' => 'base-hvac-ground-to-air-heat-pump.xml',
+    'cfis/base-hvac-mini-split-heat-pump-ducted-cfis.xml' => 'base-hvac-mini-split-heat-pump-ducted.xml',
     'cfis/base-hvac-room-ac-furnace-gas-cfis.xml' => 'base-hvac-room-ac-furnace-gas.xml',
 
     'hvac_autosizing/base-autosize.xml' => 'base.xml',
@@ -2262,10 +2263,6 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
     duct_leakage_measurements_values[0][1][:duct_leakage_value] = 5
   elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
     duct_leakage_measurements_values[0].pop
-  elsif ['invalid_files/base-hvac-return-duct-incomplete1.xml'].include? hpxml_file
-    duct_leakage_measurements_values[0] << { :duct_type => "return",
-                                             :duct_leakage_units => "CFM25",
-                                             :duct_leakage_value => 25 }
   elsif ['base-hvac-multiple.xml'].include? hpxml_file
     duct_leakage_measurements_values[0] = []
     duct_leakage_measurements_values[1] = []
@@ -2402,7 +2399,7 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
     ducts_values[0][1][:duct_surface_area] = 10
   elsif ['base-hvac-evap-cooler-only-ducted.xml'].include? hpxml_file
     ducts_values[0].pop
-  elsif ['invalid_files/base-hvac-return-duct-incomplete2.xml'].include? hpxml_file
+  elsif ['invalid_files/hvac-distribution-return-duct-leakage-missing.xml'].include? hpxml_file
     ducts_values[0] << { :duct_type => "return",
                          :duct_insulation_r_value => 0,
                          :duct_location => "attic - unvented",
@@ -2516,12 +2513,14 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
          'cfis/base-hvac-central-ac-only-var-speed-cfis.xml',
          'cfis/base-hvac-dse-cfis.xml',
          'cfis/base-hvac-ducts-in-conditioned-space-cfis.xml',
+         'cfis/base-hvac-evap-cooler-only-ducted-cfis.xml',
          'cfis/base-hvac-furnace-elec-only-cfis.xml',
          'cfis/base-hvac-furnace-gas-central-ac-2-speed-cfis.xml',
          'cfis/base-hvac-furnace-gas-central-ac-var-speed-cfis.xml',
          'cfis/base-hvac-furnace-gas-only-cfis.xml',
          'cfis/base-hvac-furnace-gas-room-ac-cfis.xml',
          'cfis/base-hvac-ground-to-air-heat-pump-cfis.xml',
+         'cfis/base-hvac-mini-split-heat-pump-ducted-cfis.xml',
          'cfis/base-hvac-room-ac-furnace-gas-cfis.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "central fan integrated supply",

@@ -334,11 +334,13 @@ class Airflow
         fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
         fan_rtf_sensor.setName("#{fan_rtf_var.name} s")
         fan_rtf_sensor.setKeyName(supply_fan.name.to_s)
-      else
+      elsif supply_fan.to_FanVariableVolume.is_initialized
         fan_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Air Mass Flow Rate")
         fan_mfr_sensor.setName("#{supply_fan.name.to_s} air MFR")
         fan_mfr_sensor.setKeyName("#{supply_fan.name.to_s}")
         fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{fan_rtf_var.name}_s")
+      else
+        fail "Unexpected fan: #{supply_fan.name}"
       end
 
       # Supply fan maximum mass flow rate
