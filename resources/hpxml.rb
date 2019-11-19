@@ -975,6 +975,7 @@ class HPXML
                               heating_efficiency_hspf: nil,
                               fraction_heat_load_served:,
                               electric_auxiliary_energy: nil,
+                              heating_cfm: nil,
                               **remainder)
     hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     heating_system = XMLHelper.add_element(hvac_plant, "HeatingSystem")
@@ -1001,6 +1002,8 @@ class HPXML
     end
     XMLHelper.add_element(heating_system, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heating_system, "ElectricAuxiliaryEnergy", Float(electric_auxiliary_energy)) unless electric_auxiliary_energy.nil?
+    HPXML.add_extension(parent: heating_system,
+                        extensions: { "HeatingFlowRate": to_float_or_nil(heating_cfm) })
 
     return heating_system
   end
@@ -1020,6 +1023,7 @@ class HPXML
              :heating_efficiency_hspf => to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='HSPF']/Value")),
              :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed")),
              :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")),
+             :heating_cfm => to_float_or_nil(XMLHelper.get_value(heating_system, "extension/HeatingFlowRate")),
              :energy_star => XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
@@ -1035,6 +1039,7 @@ class HPXML
                               cooling_efficiency_eer: nil,
                               cooling_efficiency_seer: nil,
                               cooling_shr: nil,
+                              cooling_cfm: nil,
                               **remainder)
     hvac_plant = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "HVAC", "HVACPlant"])
     cooling_system = XMLHelper.add_element(hvac_plant, "CoolingSystem")
@@ -1060,6 +1065,8 @@ class HPXML
       XMLHelper.add_element(annual_efficiency, "Value", Float(value))
     end
     XMLHelper.add_element(cooling_system, "SensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
+    HPXML.add_extension(parent: cooling_system,
+                        extensions: { "CoolingFlowRate": to_float_or_nil(cooling_cfm) })
 
     return cooling_system
   end
@@ -1079,6 +1086,7 @@ class HPXML
              :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value")),
              :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")),
              :cooling_shr => to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction")),
+             :cooling_cfm => to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate")),
              :energy_star => XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") }
   end
 
