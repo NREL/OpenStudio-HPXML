@@ -3777,22 +3777,28 @@ class OSModel
       end
     end
 
-    infil_flow_actuator = nil
-    natvent_flow_actuator = nil
-    imbal_mechvent_flow_actuator = nil
+    infil_flow_actuators = []
+    natvent_flow_actuators = []
+    imbal_mechvent_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
+      next unless actuator.actuatedComponentType == "Zone Infiltration" and actuator.actuatedComponentControlType == "Air Exchange Flow Rate"
+
       if actuator.name.to_s.start_with? Constants.ObjectNameInfiltration.gsub(" ", "_")
-        infil_flow_actuator = actuator
+        infil_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(" ", "_")
-        natvent_flow_actuator = actuator
+        natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")
-        imbal_mechvent_flow_actuator = actuator
+        imbal_mechvent_flow_actuators << actuator
       end
     end
-    if infil_flow_actuator.nil? or natvent_flow_actuator.nil? or imbal_mechvent_flow_actuator.nil?
+    if infil_flow_actuators.size != 1 or natvent_flow_actuators.size != 1 or imbal_mechvent_flow_actuators.size != 1
       fail "Could not find actuator for component loads."
     end
+
+    infil_flow_actuator = infil_flow_actuators[0]
+    natvent_flow_actuator = natvent_flow_actuators[0]
+    imbal_mechvent_flow_actuator = imbal_mechvent_flow_actuators[0]
 
     # EMS Sensors: Ducts
 
