@@ -3666,7 +3666,7 @@ class OSModel
                          :skylights => [],
                          :internal_mass => [] }
 
-    model.getSurfaces.each_with_index do |s, idx|
+    model.getSurfaces.sort.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       surface_type = s.additionalProperties.getFeatureAsString("SurfaceType")
@@ -3725,7 +3725,7 @@ class OSModel
       end
     end
 
-    model.getInternalMasss.each do |m|
+    model.getInternalMasss.sort.each do |m|
       next unless m.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       surfaces_sensors[:internal_mass] << []
@@ -3752,7 +3752,7 @@ class OSModel
     air_loss_sensor.setKeyName(@living_zone.name.to_s)
 
     mechvent_sensors = []
-    model.getElectricEquipments.each do |o|
+    model.getElectricEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation
 
       { "Electric Equipment Convective Heating Energy" => "mv_conv",
@@ -3764,7 +3764,7 @@ class OSModel
         objects_already_processed << o
       end
     end
-    model.getOtherEquipments.each do |o|
+    model.getOtherEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameERVHRV
 
       { "Other Equipment Convective Heating Energy" => "mv_conv",
@@ -3825,8 +3825,8 @@ class OSModel
         ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
       end
 
-      @living_zone.airLoopHVACs.each do |airloop|
-        model.getOtherEquipments.each do |o|
+      @living_zone.airLoopHVACs.sort.each do |airloop|
+        model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
           next unless o.name.to_s.start_with? airloop.name.to_s
 
@@ -3847,7 +3847,7 @@ class OSModel
 
     intgains_sensors = []
 
-    model.getElectricEquipments.each do |o|
+    model.getElectricEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3861,7 +3861,7 @@ class OSModel
       end
     end
 
-    model.getGasEquipments.each do |o|
+    model.getGasEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3875,7 +3875,7 @@ class OSModel
       end
     end
 
-    model.getOtherEquipments.each do |o|
+    model.getOtherEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3889,7 +3889,7 @@ class OSModel
       end
     end
 
-    model.getLightss.each do |e|
+    model.getLightss.sort.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       intgains_sensors << []
@@ -3903,7 +3903,7 @@ class OSModel
       end
     end
 
-    model.getPeoples.each do |e|
+    model.getPeoples.sort.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       intgains_sensors << []
@@ -3918,7 +3918,7 @@ class OSModel
 
     intgains_dhw_sensors = {}
 
-    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each do |wh|
+    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
       next unless wh.ambientTemperatureThermalZone.is_initialized
       next unless wh.ambientTemperatureThermalZone.get.name.to_s == @living_zone.name.to_s
 
