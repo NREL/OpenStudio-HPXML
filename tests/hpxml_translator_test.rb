@@ -1265,7 +1265,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Multiple HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
-      next if xml.include? "evap-cooler" # skip for evap cooler, neither energy nor capacity is linearly scaled for evap cooler
+      next if xml.include? "evap-cooler" # skipping because W/cfm varies as a function of airflow rate
 
       xml_x3 = File.absolute_path(xml)
       xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3.xml", "-base.xml"))
@@ -1334,7 +1334,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Partial HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
-      next if xml.include? "evap-cooler" # skip for evap cooler, neither energy nor capacity is linearly scaled for evap cooler
+      next if xml.include? "evap-cooler" # skipping because W/cfm varies as a function of airflow rate
 
       xml_33 = File.absolute_path(xml)
       xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-33percent.xml", "-base.xml"))
