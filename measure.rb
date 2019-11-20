@@ -2292,7 +2292,7 @@ class OSModel
                                           recirc_pump_power, dwhr_present,
                                           dwhr_facilities_connected, dwhr_is_equal_flow,
                                           dwhr_efficiency, dhw_loop_fracs, @eri_version,
-                                          @dhw_map)
+                                          @dhw_map, @hpxml_path)
     return false if not success
 
     # Add combi-system EMS program with water use equipment information
@@ -2367,9 +2367,10 @@ class OSModel
             shrs = [cooling_system_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
+          airflow_rate = cooling_system_values[:cooling_cfm] # Hidden feature; used only for HERS DSE test
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, load_frac,
+                                                 cool_capacity_btuh, airflow_rate, load_frac,
                                                  sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2487,8 +2488,9 @@ class OSModel
 
           afue = heating_system_values[:heating_efficiency_afue]
           fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
+          airflow_rate = heating_system_values[:heating_cfm] # Hidden feature; used only for HERS DSE test
           success = HVAC.apply_furnace(model, runner, fuel, afue,
-                                       heat_capacity_btuh, fan_power,
+                                       heat_capacity_btuh, airflow_rate, fan_power,
                                        load_frac, sequential_load_frac,
                                        attached_clg_system, @living_zone,
                                        @hvac_map, sys_id)
