@@ -2333,8 +2333,10 @@ class OSModel
       clg_type = cooling_system_values[:cooling_system_type]
 
       cool_capacity_btuh = cooling_system_values[:cooling_capacity]
-      if cool_capacity_btuh < 0
-        cool_capacity_btuh = Constants.SizingAuto
+      if not cool_capacity_btuh.nil?
+        if cool_capacity_btuh < 0
+          cool_capacity_btuh = Constants.SizingAuto
+        end
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
@@ -2426,6 +2428,14 @@ class OSModel
                                      airflow_rate, cool_capacity_btuh, load_frac,
                                      sequential_load_frac, @living_zone,
                                      @hvac_map, sys_id)
+        return false if not success
+
+      elsif clg_type == "evaporative cooler"
+
+        is_ducted = XMLHelper.has_element(clgsys, "DistributionSystem")
+        success = HVAC.apply_evaporative_cooler(model, runner, load_frac,
+                                                sequential_load_frac, @living_zone,
+                                                @hvac_map, sys_id, is_ducted)
         return false if not success
 
       end
@@ -2591,26 +2601,52 @@ class OSModel
       end
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
-      if not backup_heat_fuel.nil?
+      backup_heat_fuel_xml = heat_pump_values[:backup_heating_fuel]
+      if not backup_heat_fuel_xml.nil?
+
+        backup_heat_fuel = to_beopt_fuel(backup_heat_fuel_xml)
+
         backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
         if backup_heat_capacity_btuh < 0
           backup_heat_capacity_btuh = Constants.SizingAuto
         end
-        backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
 
         # Heating and backup heating capacity must either both be Autosized or Fixed
         if (backup_heat_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
           runner.registerError("HeatPump '#{heat_pump_values[:id]}' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized.")
           return false
         end
+
+        if not heat_pump_values[:backup_heating_efficiency_percent].nil?
+          backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_percent]
+        else
+          backup_heat_efficiency = heat_pump_values[:backup_heating_efficiency_afue]
+        end
+
+        backup_switchover_temp = heat_pump_values[:backup_heating_switchover_temp]
+
       else
+        backup_heat_fuel = Constants.FuelTypeElectric
         backup_heat_capacity_btuh = 0.0
         backup_heat_efficiency = 1.0
+        backup_switchover_temp = nil
       end
 
       sys_id = heat_pump_values[:id]
       @hvac_map[sys_id] = []
+
+      if not backup_switchover_temp.nil?
+        hp_compressor_min_temp = backup_switchover_temp
+        supp_htg_max_outdoor_temp = backup_switchover_temp
+      else
+        supp_htg_max_outdoor_temp = 40.0
+        # Minimum temperature for Heat Pump operation:
+        if hp_type == "mini-split"
+          hp_compressor_min_temp = -30.0 # deg-F
+        else
+          hp_compressor_min_temp = 0.0 # deg-F
+        end
+      end
 
       if hp_type == "air-to-air"
 
@@ -2621,7 +2657,6 @@ class OSModel
 
         crankcase_kw = 0.05 # From RESNET Publication No. 002-2017
         crankcase_temp = 50.0 # From RESNET Publication No. 002-2017
-        min_temp = 0.0 # FIXME
 
         if num_speeds == "1-Speed"
 
@@ -2633,9 +2668,9 @@ class OSModel
 
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
-                                                   fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                                   fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2651,9 +2686,9 @@ class OSModel
           end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
-                                                   fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                                   fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2669,9 +2704,9 @@ class OSModel
           end
           fan_power_installed = get_fan_power_installed(seer)
           success = HVAC.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
-                                                   fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
+                                                   fan_power_installed, hp_compressor_min_temp, crankcase_kw, crankcase_temp,
                                                    cool_capacity_btuh, heat_capacity_btuh, heat_capacity_btuh_17F,
-                                                   backup_heat_efficiency, backup_heat_capacity_btuh,
+                                                   backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                                    load_frac_heat, load_frac_cool,
                                                    sequential_load_frac_heat, sequential_load_frac_cool,
                                                    @living_zone, @hvac_map, sys_id)
@@ -2727,7 +2762,7 @@ class OSModel
                                   heating_capacity_offset, cap_retention_frac,
                                   cap_retention_temp, pan_heater_power, fan_power,
                                   is_ducted, cool_capacity_btuh,
-                                  backup_heat_efficiency, backup_heat_capacity_btuh,
+                                  hp_compressor_min_temp, backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
                                   load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @living_zone, @hvac_map, sys_id)
@@ -3156,7 +3191,7 @@ class OSModel
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      air_ducts = self.create_ducts(air_distribution, model, spaces)
+      air_ducts = self.create_ducts(air_distribution, model, spaces, dist_id)
 
       # Connect AirLoopHVACs to ducts
       ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
@@ -3172,7 +3207,7 @@ class OSModel
             elsif duct_systems[air_ducts] != loop
               # Multiple air loops associated with this duct system, treat
               # as separate duct systems.
-              air_ducts2 = self.create_ducts(air_distribution, model, spaces)
+              air_ducts2 = self.create_ducts(air_distribution, model, spaces, dist_id)
               duct_systems[air_ducts2] = loop
             end
           end
@@ -3307,7 +3342,7 @@ class OSModel
     return true
   end
 
-  def self.create_ducts(air_distribution, model, spaces)
+  def self.create_ducts(air_distribution, model, spaces, dist_id)
     air_ducts = []
 
     side_map = { 'supply' => Constants.DuctSideSupply,
@@ -3360,6 +3395,8 @@ class OSModel
         duct_leakage_cfm = duct_leakage_value
       elsif duct_leakage_units == 'Percent'
         duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
@@ -3381,6 +3418,8 @@ class OSModel
         duct_leakage_cfm = duct_leakage_value
       elsif duct_leakage_units == 'Percent'
         duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
@@ -3668,7 +3707,7 @@ class OSModel
                          :skylights => [],
                          :internal_mass => [] }
 
-    model.getSurfaces.each_with_index do |s, idx|
+    model.getSurfaces.sort.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       surface_type = s.additionalProperties.getFeatureAsString("SurfaceType")
@@ -3727,7 +3766,7 @@ class OSModel
       end
     end
 
-    model.getInternalMasss.each do |m|
+    model.getInternalMasss.sort.each do |m|
       next unless m.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       surfaces_sensors[:internal_mass] << []
@@ -3754,7 +3793,7 @@ class OSModel
     air_loss_sensor.setKeyName(@living_zone.name.to_s)
 
     mechvent_sensors = []
-    model.getElectricEquipments.each do |o|
+    model.getElectricEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation
 
       { "Electric Equipment Convective Heating Energy" => "mv_conv",
@@ -3766,7 +3805,7 @@ class OSModel
         objects_already_processed << o
       end
     end
-    model.getOtherEquipments.each do |o|
+    model.getOtherEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameERVHRV
 
       { "Other Equipment Convective Heating Energy" => "mv_conv",
@@ -3827,8 +3866,8 @@ class OSModel
         ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
       end
 
-      @living_zone.airLoopHVACs.each do |airloop|
-        model.getOtherEquipments.each do |o|
+      @living_zone.airLoopHVACs.sort.each do |airloop|
+        model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
           next unless o.name.to_s.start_with? airloop.name.to_s
 
@@ -3849,7 +3888,7 @@ class OSModel
 
     intgains_sensors = []
 
-    model.getElectricEquipments.each do |o|
+    model.getElectricEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3863,7 +3902,7 @@ class OSModel
       end
     end
 
-    model.getGasEquipments.each do |o|
+    model.getGasEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3877,7 +3916,7 @@ class OSModel
       end
     end
 
-    model.getOtherEquipments.each do |o|
+    model.getOtherEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3891,7 +3930,7 @@ class OSModel
       end
     end
 
-    model.getLightss.each do |e|
+    model.getLightss.sort.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       intgains_sensors << []
@@ -3905,7 +3944,7 @@ class OSModel
       end
     end
 
-    model.getPeoples.each do |e|
+    model.getPeoples.sort.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       intgains_sensors << []
@@ -3920,7 +3959,7 @@ class OSModel
 
     intgains_dhw_sensors = {}
 
-    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each do |wh|
+    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
       next unless wh.ambientTemperatureThermalZone.is_initialized
       next unless wh.ambientTemperatureThermalZone.get.name.to_s == @living_zone.name.to_s
 
@@ -4901,7 +4940,8 @@ class OutputVars
   def self.SpaceCoolingElectricity
     return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
              'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'] }
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial' => ['Evaporative Cooler Electric Energy'] }
   end
 
   def self.WaterHeatingElectricity

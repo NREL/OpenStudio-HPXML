@@ -99,6 +99,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'hvac-dse-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution'."],
                             'hvac-frac-load-served.xml' => ["Expected FractionCoolLoadServed to sum to <= 1, but calculated sum is 1.2.",
                                                             "Expected FractionHeatLoadServed to sum to <= 1, but calculated sum is 1.1."],
+                            'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
@@ -825,10 +826,10 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/CoolingSystem') do |clg_sys|
-      clg_sys_cap = Float(XMLHelper.get_value(clg_sys, "CoolingCapacity"))
-      if clg_sys_cap > 0
+      clg_sys_cap = XMLHelper.get_value(clg_sys, "CoolingCapacity")
+      if not clg_sys_cap.nil? and Float(clg_sys_cap) > 0
         clg_cap = 0 if clg_cap.nil?
-        clg_cap += clg_sys_cap
+        clg_cap += Float(clg_sys_cap)
       end
     end
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatPump') do |hp|
@@ -1069,7 +1070,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
     ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
     ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
-    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? and not hpxml_path.include? "location-miami"
+    if not hpxml_path.include? "location-miami" and
+       (not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? or
+       not bldg_details.elements["Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel='natural gas']"].nil?)
       assert_operator(ng_htg, :>, 0)
     else
       assert_equal(ng_htg, 0)
@@ -1095,7 +1098,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     af_dhw = results.fetch(["Additional Fuel", "Water Systems", "General", "GJ"], 0)
     af_cd = results.fetch(["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"], 0)
     af_cr = results.fetch(["Additional Fuel", "Interior Equipment", "cooking range", "GJ"], 0)
-    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil? and not hpxml_path.include? "location-miami"
+    if not hpxml_path.include? "location-miami" and
+       (not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil? or
+       not bldg_details.elements["Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel='fuel oil' or BackupSystemFuel='propane' or BackupSystemFuel='wood']"].nil?)
       assert_operator(af_htg, :>, 0)
     else
       assert_equal(af_htg, 0)
@@ -1264,6 +1269,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Multiple HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_multiple_dir
+      next if xml.include? "evap-cooler" # skipping because W/cfm varies as a function of airflow rate
 
       xml_x3 = File.absolute_path(xml)
       xml_x1 = File.absolute_path(xml.gsub(hvac_multiple_dir, hvac_base_dir).gsub("-x3.xml", "-base.xml"))
@@ -1332,6 +1338,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Partial HVAC test results:"
     xmls.sort.each do |xml|
       next if not xml.include? hvac_partial_dir
+      next if xml.include? "evap-cooler" # skipping because W/cfm varies as a function of airflow rate
 
       xml_33 = File.absolute_path(xml)
       xml_100 = File.absolute_path(xml.gsub(hvac_partial_dir, hvac_base_dir).gsub("-33percent.xml", "-base.xml"))

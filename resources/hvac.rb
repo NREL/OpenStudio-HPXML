@@ -363,10 +363,92 @@ class HVAC
     return true
   end
 
+  def self.apply_evaporative_cooler(model, runner, frac_cool_load_served,
+                                    sequential_cool_load_frac, control_zone,
+                                    hvac_map, sys_id, is_ducted)
+
+    obj_name = Constants.ObjectNameEvaporativeCooler
+
+    evap_cooler = OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial.new(model, model.alwaysOnDiscreteSchedule)
+    evap_cooler.setName(obj_name)
+    evap_cooler.setCoolerEffectiveness(0.72) # Assumed effectiveness
+    evap_cooler.setEvaporativeOperationMinimumDrybulbTemperature(0) # relax limitation to open evap cooler for any potential cooling
+    evap_cooler.setEvaporativeOperationMaximumLimitWetbulbTemperature(50) # relax limitation to open evap cooler for any potential cooling
+    evap_cooler.setEvaporativeOperationMaximumLimitDrybulbTemperature(50) # relax limitation to open evap cooler for any potential cooling
+    hvac_map[sys_id] << evap_cooler
+
+    air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
+    air_loop.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    air_loop.setName(obj_name + " airloop")
+    air_loop.additionalProperties.setFeature(Constants.OptionallyDuctedSystemIsDucted, is_ducted)
+    air_loop.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
+    air_supply_inlet_node = air_loop.supplyInletNode
+    air_supply_outlet_node = air_loop.supplyOutletNode
+    air_demand_inlet_node = air_loop.demandInletNode
+    air_demand_outlet_node = air_loop.demandOutletNode
+    evap_cooler.addToNode(air_supply_inlet_node)
+    hvac_map[sys_id] << air_loop
+
+    fan = OpenStudio::Model::FanVariableVolume.new(model, model.alwaysOnDiscreteSchedule)
+    fan.setName(obj_name + " supply fan")
+    fan.setEndUseSubcategory("supply fan")
+    fan.setFanEfficiency(1)
+    fan.setMotorEfficiency(1)
+    fan.setMotorInAirstreamFraction(0)
+    fan.setFanPowerCoefficient1(0)
+    fan.setFanPowerCoefficient2(1)
+    fan.setFanPowerCoefficient3(0)
+    fan.setFanPowerCoefficient4(0)
+    fan.setFanPowerCoefficient5(0)
+    fan.addToNode(air_loop.supplyInletNode)
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [evap_cooler])
+
+    # Outdoor air intake system
+    oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
+    oa_intake_controller.setName("#{air_loop.name} OA Controller")
+    oa_intake_controller.setMaximumOutdoorAirFlowRate(10) # Set an extreme large value here, will be reset by E+ using sized value
+    oa_intake_controller.setMinimumLimitType('FixedMinimum')
+    oa_intake_controller.resetEconomizerMinimumLimitDryBulbTemperature
+    oa_intake_controller.setMinimumFractionofOutdoorAirSchedule(model.alwaysOnDiscreteSchedule)
+
+    oa_intake = OpenStudio::Model::AirLoopHVACOutdoorAirSystem.new(model, oa_intake_controller)
+    oa_intake.setName("#{air_loop.name} OA System")
+    oa_intake.addToNode(air_loop.supplyInletNode)
+
+    # air handler controls
+    # setpoint follows OAT WetBulb
+    evap_stpt_manager = OpenStudio::Model::SetpointManagerFollowOutdoorAirTemperature.new(model)
+    evap_stpt_manager.setName("Follow OATwb")
+    evap_stpt_manager.setReferenceTemperatureType('OutdoorAirWetBulb')
+    evap_stpt_manager.setOffsetTemperatureDifference(0.0)
+    evap_stpt_manager.addToNode(air_loop.supplyOutletNode)
+
+    # Supply Air
+    zone_splitter = air_loop.zoneSplitter
+    zone_splitter.setName(obj_name + " zone splitter")
+
+    zone_mixer = air_loop.zoneMixer
+    zone_mixer.setName(obj_name + " zone mixer")
+
+    air_terminal_living = OpenStudio::Model::AirTerminalSingleDuctVAVNoReheat.new(model, model.alwaysOnDiscreteSchedule)
+    air_terminal_living.setName(obj_name + " #{control_zone.name} terminal")
+    air_terminal_living.setConstantMinimumAirFlowFraction(0)
+    air_loop.multiAddBranchForZone(control_zone, air_terminal_living)
+    runner.registerInfo("Added '#{air_loop.name}' to '#{control_zone.name}'")
+    control_zone.setSequentialCoolingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_cool_load_frac.round(5)))
+    control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, 0))
+
+    # Store info for HVAC Sizing measure
+    evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACFracCoolLoadServed, frac_cool_load_served)
+    evap_cooler.additionalProperties.setFeature(Constants.SizingInfoHVACCoolType, Constants.ObjectNameEvaporativeCooler)
+
+    return true
+  end
+
   def self.apply_central_ashp_1speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -424,12 +506,7 @@ class HVAC
     htg_coil.setDefrostControl("OnDemand")
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
     hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXSingleSpeed.new(model, model.alwaysOnDiscreteSchedule, clg_coil_stage_data[0].totalCoolingCapacityFunctionofTemperatureCurve, clg_coil_stage_data[0].totalCoolingCapacityFunctionofFlowFractionCurve, clg_coil_stage_data[0].energyInputRatioFunctionofTemperatureCurve, clg_coil_stage_data[0].energyInputRatioFunctionofFlowFractionCurve, clg_coil_stage_data[0].partLoadFractionCorrelationCurve)
@@ -472,7 +549,7 @@ class HVAC
     air_loop_unitary.setFanPlacement("BlowThrough")
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(40.0, "F", "C"))
+    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
     hvac_map[sys_id] << air_loop_unitary
 
@@ -525,7 +602,7 @@ class HVAC
   def self.apply_central_ashp_2speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -583,12 +660,7 @@ class HVAC
     end
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
     hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -635,7 +707,7 @@ class HVAC
     air_loop_unitary.setFanPlacement("BlowThrough")
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(40.0, "F", "C"))
+    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
     hvac_map[sys_id] << air_loop_unitary
@@ -691,7 +763,7 @@ class HVAC
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
                                      fan_power_installed, min_temp, crankcase_kw, crankcase_temp,
                                      heat_pump_capacity_cool, heat_pump_capacity_heat, heat_pump_capacity_heat_17F,
-                                     supplemental_efficiency, supplemental_capacity,
+                                     supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                                      frac_heat_load_served, frac_cool_load_served,
                                      sequential_heat_load_frac, sequential_cool_load_frac,
                                      control_zone, hvac_map, sys_id)
@@ -753,12 +825,8 @@ class HVAC
     end
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
+    hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
     clg_coil.setName(obj_name + " clg coil")
@@ -804,7 +872,7 @@ class HVAC
     air_loop_unitary.setFanPlacement("BlowThrough")
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(170.0, "F", "C")) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(40.0, "F", "C"))
+    air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_htg_max_outdoor_temp, "F", "C"))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
     air_loop_unitary.setDesignSpecificationMultispeedObject(perf)
     hvac_map[sys_id] << air_loop_unitary
@@ -864,7 +932,7 @@ class HVAC
                       min_heating_airflow_rate, max_heating_airflow_rate,
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
-                      heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
+                      heat_pump_capacity, min_hp_temp, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity, supp_htg_max_outdoor_temp,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_zone, hvac_map, sys_id)
@@ -873,8 +941,6 @@ class HVAC
 
     # htg_supply_air_temp = 105
     supp_htg_max_supply_temp = 200.0
-    min_hp_temp = -30.0 # F; Minimum temperature for Heat Pump operation
-    supp_htg_max_outdoor_temp = 40.0
     max_defrost_temp = 40.0 # F
 
     # Performance curves
@@ -954,12 +1020,7 @@ class HVAC
     end
     hvac_map[sys_id] << htg_coil
 
-    htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
-    htg_supp_coil.setName(obj_name + " supp htg coil")
-    htg_supp_coil.setEfficiency(supplemental_efficiency)
-    if supplemental_capacity != Constants.SizingAuto
-      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
-    end
+    htg_supp_coil = apply_supplemental_htg_coil(model, obj_name, supplemental_fuel_type, supplemental_efficiency, supplemental_capacity)
     hvac_map[sys_id] << htg_supp_coil
 
     clg_coil = OpenStudio::Model::CoilCoolingDXMultiSpeed.new(model)
@@ -1113,7 +1174,7 @@ class HVAC
       cfms_cooling_4 << cfms_cooling[mshp_index]
       shrs_rated_4 << shrs_rated[mshp_index]
     end
-    air_loop_unitary.additionalProperties.setFeature(Constants.DuctedInfoMiniSplitHeatPump, is_ducted)
+    air_loop_unitary.additionalProperties.setFeature(Constants.OptionallyDuctedSystemIsDucted, is_ducted)
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioHeating, capacity_ratios_heating_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACCapacityRatioCooling, capacity_ratios_cooling_4.join(","))
     air_loop_unitary.additionalProperties.setFeature(Constants.SizingInfoHVACHeatingCFMs, cfms_heating_4.join(","))
@@ -1899,7 +1960,7 @@ class HVAC
 
     hvac_objects = []
 
-    if fan_or_pump.is_a? OpenStudio::Model::FanOnOff
+    if fan_or_pump.is_a? OpenStudio::Model::FanOnOff or fan_or_pump.is_a? OpenStudio::Model::FanVariableVolume
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Fan Electric Energy')
     elsif fan_or_pump.is_a? OpenStudio::Model::PumpVariableSpeed
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Pump Electric Energy')
@@ -1912,7 +1973,12 @@ class HVAC
 
     clg_object_sensors = []
     clg_objects.each do |clg_object|
-      clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling Coil Electric Energy")
+      if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+        var = "Evaporative Cooler Water Volume"
+      else
+        var = "Cooling Coil Electric Energy"
+      end
+      clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       clg_object_sensor.setName("#{clg_object.name} s")
       clg_object_sensor.setKeyName(clg_object.name.to_s)
       clg_object_sensors << clg_object_sensor
@@ -2777,6 +2843,24 @@ class HVAC
   end
 
   private
+
+  def self.apply_supplemental_htg_coil(model, obj_name, fuel_type, supplemental_efficiency, supplemental_capacity)
+    if fuel_type == Constants.FuelTypeElectric
+      htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
+      htg_supp_coil.setEfficiency(supplemental_efficiency)
+    else
+      htg_supp_coil = OpenStudio::Model::CoilHeatingGas.new(model)
+      htg_supp_coil.setGasBurnerEfficiency(supplemental_efficiency)
+      htg_supp_coil.setParasiticElectricLoad(0)
+      htg_supp_coil.setParasiticGasLoad(0)
+      htg_supp_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
+    end
+    htg_supp_coil.setName(obj_name + " supp htg coil")
+    if supplemental_capacity != Constants.SizingAuto
+      htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
+    end
+    return htg_supp_coil
+  end
 
   def self.get_gshp_hx_pipe_diameters(pipe_size)
     # Pipe norminal size convertion to pipe outside diameter and inside diameter,
@@ -3979,15 +4063,6 @@ class HVAC
     return pump_eff * pump_power / UnitConversions.convert(1.0, "gal/min", "m^3/s") # Pa
   end
 
-  def self.get_control_zone(thermal_zones)
-    thermal_zones.each do |zone|
-      next unless Geometry.zone_is_conditioned(zone)
-
-      return zone
-    end
-    return nil
-  end
-
   def self.existing_equipment(model, runner, thermal_zone)
     # Returns a list of equipment objects
 
@@ -4010,6 +4085,12 @@ class HVAC
     ptacs.each do |ptac|
       equipment << ptac
       hvac_types << ptac.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
+    end
+
+    evap_coolers = self.get_evap_coolers(model, runner, thermal_zone)
+    evap_coolers.each do |evap_cooler|
+      equipment << evap_cooler
+      hvac_types << evap_cooler.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get
     end
 
     baseboards = self.get_baseboard_waters(model, runner, thermal_zone)
@@ -4061,6 +4142,8 @@ class HVAC
         runner.registerInfo("Found boiler serving #{thermal_zone.name}.")
       elsif hvac_type == Constants.ObjectNameUnitHeater
         runner.registerInfo("Found unit heater in #{thermal_zone.name}.")
+      elsif hvac_type == Constants.ObjectNameEvaporativeCooler
+        runner.registerInfo("Found evaporative cooler in #{thermal_zone.name}.")
       end
     end
 
@@ -4134,6 +4217,16 @@ class HVAC
     return nil
   end
 
+  def self.get_evap_cooler_from_air_loop_hvac(air_loop)
+    # Returns the evap cooler or nil
+    air_loop.supplyComponents.each do |comp|
+      next unless comp.to_EvaporativeCoolerDirectResearchSpecial.is_initialized
+
+      return comp.to_EvaporativeCoolerDirectResearchSpecial.get
+    end
+    return nil
+  end
+
   def self.get_unitary_system_air_loops(model, runner, thermal_zone)
     # Returns the unitary system(s), cooling coil(s), heating coil(s), and air loops(s) if available
     unitary_system_air_loops = []
@@ -4185,6 +4278,18 @@ class HVAC
     return ptacs
   end
 
+  def self.get_evap_coolers(model, runner, thermal_zone)
+    # Returns the evaporative cooler if available
+    evap_coolers = []
+    thermal_zone.airLoopHVACs.each do |air_loop|
+      evap_cooler = get_evap_cooler_from_air_loop_hvac(air_loop)
+      next if evap_cooler.nil?
+
+      evap_coolers << evap_cooler
+    end
+    return evap_coolers
+  end
+
   def self.get_baseboard_waters(model, runner, thermal_zone)
     # Returns the water baseboard if available
     baseboards = []
@@ -4229,7 +4334,11 @@ class HVAC
   end
 
   def self.has_ducted_equipment(model, runner, air_loop)
-    system = get_unitary_system_from_air_loop_hvac(air_loop)
+    if air_loop.name.to_s.include? Constants.ObjectNameEvaporativeCooler
+      system = air_loop
+    else
+      system = get_unitary_system_from_air_loop_hvac(air_loop)
+    end
 
     hvac_type_cool = system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType)
     hvac_type_cool = hvac_type_cool.get if hvac_type_cool.is_initialized
@@ -4242,8 +4351,8 @@ class HVAC
       return true
     elsif Constants.ObjectNameFurnace == hvac_type_heat
       return true
-    elsif hvac_type_cool == Constants.ObjectNameMiniSplitHeatPump
-      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.DuctedInfoMiniSplitHeatPump).get
+    elsif [Constants.ObjectNameMiniSplitHeatPump, Constants.ObjectNameEvaporativeCooler].include? hvac_type_cool
+      is_ducted = system.additionalProperties.getFeatureAsBoolean(Constants.OptionallyDuctedSystemIsDucted).get
       if is_ducted
         return true
       end
