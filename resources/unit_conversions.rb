@@ -55,6 +55,8 @@ class UnitConversions
       return x * 29307.10701722222
     elsif from == 'wh' and to == 'btu'
       return x * 3.412141633127942
+    elsif from == 'wh' and to == 'kbtu'
+      return x * 0.003412141633127942
     elsif from == 'wh' and to == 'kwh'
       return x / 1000.0
     elsif from == 'wh' and to == 'therm'

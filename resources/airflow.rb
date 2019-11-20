@@ -316,17 +316,32 @@ class Airflow
     air_loops.each_with_index do |air_loop, air_loop_index|
       next unless building.living.zone.airLoopHVACs.include? air_loop # next if airloop doesn't serve this
 
+      system = HVAC.get_unitary_system_from_air_loop_hvac(air_loop)
+      if system.nil? # Evap cooler system stored information in airloopHVAC
+        system = air_loop
+      end
+      next if system.nil?
+
       # Get the supply fan
       supply_fan = nil
       if air_loop.to_AirLoopHVAC.is_initialized
-        supply_fan = HVAC.get_unitary_system_from_air_loop_hvac(air_loop).supplyFan.get
+        supply_fan = system.supplyFan.get
       end
 
       # Supply fan runtime fraction
       fan_rtf_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{air_loop.name.to_s} Fan RTF".gsub(" ", "_"))
-      fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
-      fan_rtf_sensor.setName("#{fan_rtf_var.name} s")
-      fan_rtf_sensor.setKeyName(supply_fan.name.to_s)
+      if supply_fan.to_FanOnOff.is_initialized
+        fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Runtime Fraction")
+        fan_rtf_sensor.setName("#{fan_rtf_var.name} s")
+        fan_rtf_sensor.setKeyName(supply_fan.name.to_s)
+      elsif supply_fan.to_FanVariableVolume.is_initialized
+        fan_mfr_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan Air Mass Flow Rate")
+        fan_mfr_sensor.setName("#{supply_fan.name.to_s} air MFR")
+        fan_mfr_sensor.setKeyName("#{supply_fan.name.to_s}")
+        fan_rtf_sensor = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{fan_rtf_var.name}_s")
+      else
+        fail "Unexpected fan: #{supply_fan.name}"
+      end
 
       # Supply fan maximum mass flow rate
       fan_mfr_max_var = OpenStudio::Model::EnergyManagementSystemInternalVariable.new(model, "Fan Maximum Mass Flow Rate")
@@ -335,7 +350,8 @@ class Airflow
 
       air_loop_objects[air_loop] = { :fan_rtf_var => fan_rtf_var,
                                      :fan_rtf_sensor => fan_rtf_sensor,
-                                     :fan_mfr_max_var => fan_mfr_max_var }
+                                     :fan_mfr_max_var => fan_mfr_max_var,
+                                     :fan_mfr_sensor => fan_mfr_sensor }
 
       if mech_vent.type == Constants.VentTypeCFIS and air_loop == mech_vent.cfis_air_loop
         mech_vent.cfis_fan_rtf_sensor = fan_rtf_sensor.name
@@ -1139,6 +1155,7 @@ class Airflow
 
       fan_mfr_max_var = air_loop_objects[air_loop][:fan_mfr_max_var]
       fan_rtf_sensor = air_loop_objects[air_loop][:fan_rtf_sensor]
+      fan_mfr_sensor = air_loop_objects[air_loop][:fan_mfr_sensor]
       fan_rtf_var = air_loop_objects[air_loop][:fan_rtf_var]
 
       # Create one duct program for each duct location zone
@@ -1414,6 +1431,9 @@ class Airflow
         duct_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
         duct_program.setName(air_loop_name_idx + " duct program")
         duct_program.addLine("Set #{ah_mfr_var.name} = #{ah_mfr_sensor.name}")
+        if fan_rtf_sensor.is_a? OpenStudio::Model::EnergyManagementSystemGlobalVariable
+          duct_program.addLine("Set #{fan_rtf_sensor.name} = #{fan_mfr_sensor.name} / #{fan_mfr_max_var.name}")
+        end
         duct_program.addLine("Set #{fan_rtf_var.name} = #{fan_rtf_sensor.name}")
         duct_program.addLine("Set #{ah_vfr_var.name} = #{ah_vfr_sensor.name}")
         duct_program.addLine("Set #{ah_tout_var.name} = #{ah_tout_sensor.name}")
