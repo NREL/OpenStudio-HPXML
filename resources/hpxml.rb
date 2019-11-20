@@ -1028,7 +1028,7 @@ class HPXML
                               distribution_system_idref: nil,
                               cooling_system_type:,
                               cooling_system_fuel:,
-                              cooling_capacity:,
+                              cooling_capacity: nil,
                               fraction_cool_load_served:,
                               cooling_efficiency_kw_per_ton: nil,
                               cooling_efficiency_cop: nil,
@@ -1046,7 +1046,7 @@ class HPXML
     end
     XMLHelper.add_element(cooling_system, "CoolingSystemType", cooling_system_type)
     XMLHelper.add_element(cooling_system, "CoolingSystemFuel", cooling_system_fuel)
-    XMLHelper.add_element(cooling_system, "CoolingCapacity", Float(cooling_capacity))
+    XMLHelper.add_element(cooling_system, "CoolingCapacity", Float(cooling_capacity)) unless cooling_capacity.nil?
     XMLHelper.add_element(cooling_system, "FractionCoolLoadServed", Float(fraction_cool_load_served))
     efficiencies = { "kW/ton" => cooling_efficiency_kw_per_ton,
                      "COP" => cooling_efficiency_cop,
