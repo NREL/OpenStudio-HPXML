@@ -3511,6 +3511,8 @@ class OSModel
                         OutputVars.SpaceHeatingNaturalGas,
                         OutputVars.SpaceHeatingFuelOil,
                         OutputVars.SpaceHeatingPropane,
+                        OutputVars.SpaceHeatingDFHPPrimaryLoad,
+                        OutputVars.SpaceHeatingDFHPBackupLoad,
                         OutputVars.SpaceCoolingElectricity]
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
@@ -4933,6 +4935,16 @@ class OutputVars
     return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy'],
              'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy'],
              'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
+  end
+
+  def self.SpaceHeatingDFHPPrimaryLoad
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Heating Energy'] }
+  end
+
+  def self.SpaceHeatingDFHPBackupLoad
+    return { 'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Heating Energy'] }
   end
 
   def self.SpaceCoolingElectricity
