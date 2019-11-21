@@ -581,7 +581,7 @@ class HEScoreRuleset
     orig_details.elements.each("Systems/HVAC/HVACPlant/CoolingSystem") do |orig_cooling|
       cooling_values = HPXML.get_cooling_system_values(cooling_system: orig_cooling)
       cooling_values[:cooling_system_fuel] = "electricity"
-      if not cooling_values[:cooling_system_type] == "evaporative cooler"
+      if cooling_values[:cooling_system_type] != "evaporative cooler"
         cooling_values[:cooling_capacity] = -1 # Use Manual J auto-sizing
       end
 
