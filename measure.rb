@@ -2333,8 +2333,10 @@ class OSModel
       clg_type = cooling_system_values[:cooling_system_type]
 
       cool_capacity_btuh = cooling_system_values[:cooling_capacity]
-      if cool_capacity_btuh < 0
-        cool_capacity_btuh = Constants.SizingAuto
+      if not cool_capacity_btuh.nil?
+        if cool_capacity_btuh < 0
+          cool_capacity_btuh = Constants.SizingAuto
+        end
       end
 
       load_frac = cooling_system_values[:fraction_cool_load_served]
@@ -2365,9 +2367,10 @@ class OSModel
             shrs = [cooling_system_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
+          airflow_rate = cooling_system_values[:cooling_cfm] # Hidden feature; used only for HERS DSE test
           success = HVAC.apply_central_ac_1speed(model, runner, seer, shrs,
                                                  fan_power_installed, crankcase_kw, crankcase_temp,
-                                                 cool_capacity_btuh, load_frac,
+                                                 cool_capacity_btuh, airflow_rate, load_frac,
                                                  sequential_load_frac, @living_zone,
                                                  @hvac_map, sys_id)
           return false if not success
@@ -2427,6 +2430,14 @@ class OSModel
                                      @hvac_map, sys_id)
         return false if not success
 
+      elsif clg_type == "evaporative cooler"
+
+        is_ducted = XMLHelper.has_element(clgsys, "DistributionSystem")
+        success = HVAC.apply_evaporative_cooler(model, runner, load_frac,
+                                                sequential_load_frac, @living_zone,
+                                                @hvac_map, sys_id, is_ducted)
+        return false if not success
+
       end
     end
 
@@ -2477,8 +2488,9 @@ class OSModel
 
           afue = heating_system_values[:heating_efficiency_afue]
           fan_power = 0.5 # For fuel furnaces, will be overridden by EAE later
+          airflow_rate = heating_system_values[:heating_cfm] # Hidden feature; used only for HERS DSE test
           success = HVAC.apply_furnace(model, runner, fuel, afue,
-                                       heat_capacity_btuh, fan_power,
+                                       heat_capacity_btuh, airflow_rate, fan_power,
                                        load_frac, sequential_load_frac,
                                        attached_clg_system, @living_zone,
                                        @hvac_map, sys_id)
@@ -3154,7 +3166,7 @@ class OSModel
       air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
       next if air_distribution.nil?
 
-      air_ducts = self.create_ducts(air_distribution, model, spaces)
+      air_ducts = self.create_ducts(air_distribution, model, spaces, dist_id)
 
       # Connect AirLoopHVACs to ducts
       ['HeatingSystem', 'CoolingSystem', 'HeatPump'].each do |hpxml_sys|
@@ -3170,7 +3182,7 @@ class OSModel
             elsif duct_systems[air_ducts] != loop
               # Multiple air loops associated with this duct system, treat
               # as separate duct systems.
-              air_ducts2 = self.create_ducts(air_distribution, model, spaces)
+              air_ducts2 = self.create_ducts(air_distribution, model, spaces, dist_id)
               duct_systems[air_ducts2] = loop
             end
           end
@@ -3305,7 +3317,7 @@ class OSModel
     return true
   end
 
-  def self.create_ducts(air_distribution, model, spaces)
+  def self.create_ducts(air_distribution, model, spaces, dist_id)
     air_ducts = []
 
     side_map = { 'supply' => Constants.DuctSideSupply,
@@ -3358,6 +3370,8 @@ class OSModel
         duct_leakage_cfm = duct_leakage_value
       elsif duct_leakage_units == 'Percent'
         duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
@@ -3379,6 +3393,8 @@ class OSModel
         duct_leakage_cfm = duct_leakage_value
       elsif duct_leakage_units == 'Percent'
         duct_leakage_frac = duct_leakage_value
+      else
+        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
@@ -3666,7 +3682,7 @@ class OSModel
                          :skylights => [],
                          :internal_mass => [] }
 
-    model.getSurfaces.each_with_index do |s, idx|
+    model.getSurfaces.sort.each_with_index do |s, idx|
       next unless s.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       surface_type = s.additionalProperties.getFeatureAsString("SurfaceType")
@@ -3725,7 +3741,7 @@ class OSModel
       end
     end
 
-    model.getInternalMasss.each do |m|
+    model.getInternalMasss.sort.each do |m|
       next unless m.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       surfaces_sensors[:internal_mass] << []
@@ -3752,7 +3768,7 @@ class OSModel
     air_loss_sensor.setKeyName(@living_zone.name.to_s)
 
     mechvent_sensors = []
-    model.getElectricEquipments.each do |o|
+    model.getElectricEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation
 
       { "Electric Equipment Convective Heating Energy" => "mv_conv",
@@ -3764,7 +3780,7 @@ class OSModel
         objects_already_processed << o
       end
     end
-    model.getOtherEquipments.each do |o|
+    model.getOtherEquipments.sort.each do |o|
       next unless o.name.to_s.start_with? Constants.ObjectNameERVHRV
 
       { "Other Equipment Convective Heating Energy" => "mv_conv",
@@ -3777,22 +3793,28 @@ class OSModel
       end
     end
 
-    infil_flow_actuator = nil
-    natvent_flow_actuator = nil
-    imbal_mechvent_flow_actuator = nil
+    infil_flow_actuators = []
+    natvent_flow_actuators = []
+    imbal_mechvent_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
+      next unless actuator.actuatedComponentType == "Zone Infiltration" and actuator.actuatedComponentControlType == "Air Exchange Flow Rate"
+
       if actuator.name.to_s.start_with? Constants.ObjectNameInfiltration.gsub(" ", "_")
-        infil_flow_actuator = actuator
+        infil_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(" ", "_")
-        natvent_flow_actuator = actuator
+        natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")
-        imbal_mechvent_flow_actuator = actuator
+        imbal_mechvent_flow_actuators << actuator
       end
     end
-    if infil_flow_actuator.nil? or natvent_flow_actuator.nil? or imbal_mechvent_flow_actuator.nil?
+    if infil_flow_actuators.size != 1 or natvent_flow_actuators.size != 1 or imbal_mechvent_flow_actuators.size != 1
       fail "Could not find actuator for component loads."
     end
+
+    infil_flow_actuator = infil_flow_actuators[0]
+    natvent_flow_actuator = natvent_flow_actuators[0]
+    imbal_mechvent_flow_actuator = imbal_mechvent_flow_actuators[0]
 
     # EMS Sensors: Ducts
 
@@ -3819,8 +3841,8 @@ class OSModel
         ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
       end
 
-      @living_zone.airLoopHVACs.each do |airloop|
-        model.getOtherEquipments.each do |o|
+      @living_zone.airLoopHVACs.sort.each do |airloop|
+        model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
           next unless o.name.to_s.start_with? airloop.name.to_s
 
@@ -3841,7 +3863,7 @@ class OSModel
 
     intgains_sensors = []
 
-    model.getElectricEquipments.each do |o|
+    model.getElectricEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3855,7 +3877,7 @@ class OSModel
       end
     end
 
-    model.getGasEquipments.each do |o|
+    model.getGasEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3869,7 +3891,7 @@ class OSModel
       end
     end
 
-    model.getOtherEquipments.each do |o|
+    model.getOtherEquipments.sort.each do |o|
       next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
       next if objects_already_processed.include? o
 
@@ -3883,7 +3905,7 @@ class OSModel
       end
     end
 
-    model.getLightss.each do |e|
+    model.getLightss.sort.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       intgains_sensors << []
@@ -3897,7 +3919,7 @@ class OSModel
       end
     end
 
-    model.getPeoples.each do |e|
+    model.getPeoples.sort.each do |e|
       next unless e.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
 
       intgains_sensors << []
@@ -3912,7 +3934,7 @@ class OSModel
 
     intgains_dhw_sensors = {}
 
-    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).each do |wh|
+    (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
       next unless wh.ambientTemperatureThermalZone.is_initialized
       next unless wh.ambientTemperatureThermalZone.get.name.to_s == @living_zone.name.to_s
 
@@ -4893,7 +4915,8 @@ class OutputVars
   def self.SpaceCoolingElectricity
     return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
              'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'] }
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial' => ['Evaporative Cooler Electric Energy'] }
   end
 
   def self.WaterHeatingElectricity

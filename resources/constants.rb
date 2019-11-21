@@ -139,7 +139,7 @@ class Constants
     return 'supply'
   end
 
-  def self.DuctedInfoMiniSplitHeatPump
+  def self.OptionallyDuctedSystemIsDucted
     return __method__.to_s
   end
 
@@ -301,6 +301,10 @@ class Constants
 
   def self.ObjectNameElectricBaseboard
     return "baseboard"
+  end
+
+  def self.ObjectNameEvaporativeCooler
+    return "evap cooler"
   end
 
   def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")
