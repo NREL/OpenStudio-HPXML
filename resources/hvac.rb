@@ -61,7 +61,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # _processSystemAir
 
@@ -174,7 +174,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # _processSystemAir
 
@@ -297,7 +297,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     # _processSystemAir
 
@@ -401,7 +401,7 @@ class HVAC
     fan.setFanPowerCoefficient4(0)
     fan.setFanPowerCoefficient5(0)
     fan.addToNode(air_loop.supplyInletNode)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [evap_cooler])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil)
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -535,7 +535,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     # _processSystemAir
 
@@ -686,7 +686,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
@@ -851,7 +851,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
@@ -1047,7 +1047,7 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
 
     perf = OpenStudio::Model::UnitarySystemPerformanceMultispeed.new(model)
     perf.setSingleModeOperation(false)
@@ -1374,8 +1374,8 @@ class HVAC
     fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil, htg_supp_coil], [clg_coil])
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, pump, [htg_coil, htg_supp_coil], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil)
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil)
 
     air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     air_loop_unitary.setName(obj_name + " unitary system")
@@ -1485,7 +1485,7 @@ class HVAC
     fan.setPressureRise(0)
     fan.setMotorEfficiency(1)
     fan.setMotorInAirstreamFraction(0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [], [clg_coil])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil)
 
     htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOffDiscreteSchedule())
     htg_coil.setName(obj_name + " #{control_zone.name} htg coil")
@@ -1512,7 +1512,7 @@ class HVAC
   def self.apply_furnace(model, runner, fuel_type, afue,
                          capacity, airflow_rate, fan_power_installed,
                          frac_heat_load_served, sequential_heat_load_frac,
-                         attached_cooling_system, control_zone,
+                         attached_clg_system, control_zone,
                          hvac_map, sys_id)
 
     # _processAirSystem
@@ -1537,7 +1537,7 @@ class HVAC
     end
     hvac_map[sys_id] << htg_coil
 
-    if attached_cooling_system.nil?
+    if attached_clg_system.nil?
       # _processSystemFan
 
       fan = OpenStudio::Model::FanOnOff.new(model, model.alwaysOnDiscreteSchedule)
@@ -1548,7 +1548,7 @@ class HVAC
       fan.setPressureRise(calculate_fan_pressure_rise(fan_eff, fan_power_installed))
       fan.setMotorEfficiency(1.0)
       fan.setMotorInAirstreamFraction(1.0)
-      hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil], [])
+      hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil)
 
       # _processSystemAir
 
@@ -1607,14 +1607,14 @@ class HVAC
       # Attach to existing cooling unitary system
       obj_name = Constants.ObjectNameCentralAirConditionerAndFurnace
 
-      fan = attached_cooling_system.supplyFan.get.to_FanOnOff.get
+      fan = attached_clg_system.supplyFan.get.to_FanOnOff.get
       fan.setName(obj_name + " supply fan")
 
       # Remove old disaggregation program
       attached_clg_sys_id = nil
       hvac_map.each do |clg_sys_id, clg_objects|
         clg_objects.each do |clg_object|
-          next unless clg_object == attached_cooling_system
+          next unless clg_object == attached_clg_system
 
           attached_clg_sys_id = clg_sys_id
         end
@@ -1630,23 +1630,23 @@ class HVAC
       end
 
       # Add new disaggregation program
-      ems_fan_objects = self.disaggregate_fan_or_pump(model, fan, [htg_coil], [attached_cooling_system.coolingCoil.get])
+      ems_fan_objects = self.disaggregate_fan_or_pump(model, fan, htg_coil, attached_clg_system.coolingCoil.get, nil)
       hvac_map[sys_id] += ems_fan_objects
       hvac_map[attached_clg_sys_id] += ems_fan_objects
 
-      attached_cooling_system.setHeatingCoil(htg_coil)
-      attached_cooling_system.setName(obj_name + " unitary system")
+      attached_clg_system.setHeatingCoil(htg_coil)
+      attached_clg_system.setName(obj_name + " unitary system")
       if not airflow_rate.nil?
-        attached_cooling_system.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
-        attached_cooling_system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(airflow_rate, "cfm", "m^3/s"))
+        attached_clg_system.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
+        attached_clg_system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(airflow_rate, "cfm", "m^3/s"))
       end
-      hvac_map[sys_id] << attached_cooling_system
+      hvac_map[sys_id] << attached_clg_system
 
-      air_loop = attached_cooling_system.airLoopHVAC.get
+      air_loop = attached_clg_system.airLoopHVAC.get
       air_loop.setName(obj_name + " airloop")
       hvac_map[sys_id] << air_loop
 
-      runner.registerInfo("Added '#{htg_coil.name}' to '#{attached_cooling_system.name}'")
+      runner.registerInfo("Added '#{htg_coil.name}' to '#{attached_clg_system.name}'")
 
       zone_splitter = air_loop.zoneSplitter
       zone_splitter.setName(obj_name + " zone splitter")
@@ -1661,8 +1661,8 @@ class HVAC
         control_zone.setSequentialHeatingFractionSchedule(air_terminal_living, get_constant_schedule(model, sequential_heat_load_frac.round(5)))
       end
 
-      attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
-      attached_cooling_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
+      attached_clg_system.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
+      attached_clg_system.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameFurnace)
     end
 
     return true
@@ -1802,6 +1802,7 @@ class HVAC
     baseboard_heater.addToThermalZone(control_zone)
     runner.registerInfo("Added '#{baseboard_heater.name}' to '#{control_zone.name}'")
     hvac_map[sys_id] << baseboard_heater
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, pump, baseboard_heater, nil, nil)
 
     plant_loop.addDemandBranchForComponent(baseboard_coil)
 
@@ -1811,14 +1812,6 @@ class HVAC
     # Store info for HVAC Sizing measure
     baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACFracHeatLoadServed, frac_heat_load_served)
     baseboard_heater.additionalProperties.setFeature(Constants.SizingInfoHVACHeatType, Constants.ObjectNameBoiler)
-
-    htg_objects = []
-    hvac_map[sys_id].each do |hvac_object|
-      if hvac_object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
-        htg_objects << hvac_object
-      end
-    end
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, pump, htg_objects, [])
 
     return true
   end
@@ -1894,7 +1887,7 @@ class HVAC
     end
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
-    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, [htg_coil], [])
+    hvac_map[sys_id] += self.disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil)
 
     # _processSystemAir
 
@@ -1955,7 +1948,7 @@ class HVAC
     return true
   end
 
-  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_objects, clg_objects)
+  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object)
     # Disaggregate into heating/cooling output energy use.
 
     hvac_objects = []
@@ -1971,8 +1964,9 @@ class HVAC
     fan_or_pump_sensor.setKeyName(fan_or_pump.name.to_s)
     hvac_objects << fan_or_pump_sensor
 
-    clg_object_sensors = []
-    clg_objects.each do |clg_object|
+    if clg_object.nil?
+      clg_object_sensor = nil
+    else
       if clg_object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
         var = "Evaporative Cooler Water Volume"
       else
@@ -1981,12 +1975,12 @@ class HVAC
       clg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       clg_object_sensor.setName("#{clg_object.name} s")
       clg_object_sensor.setKeyName(clg_object.name.to_s)
-      clg_object_sensors << clg_object_sensor
       hvac_objects << clg_object_sensor
     end
 
-    htg_object_sensors = []
-    htg_objects.each do |htg_object|
+    if htg_object.nil?
+      htg_object_sensor = nil
+    else
       var = 'Heating Coil Electric Energy'
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
         var = { 'NaturalGas' => 'Heating Coil Gas Energy',
@@ -2002,31 +1996,52 @@ class HVAC
       htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
       htg_object_sensor.setName("#{htg_object.name} s")
       htg_object_sensor.setKeyName(htg_object.name.to_s)
-      htg_object_sensors << htg_object_sensor
       hvac_objects << htg_object_sensor
     end
 
-    all_sensors = { "cool" => clg_object_sensors,
-                    "heat" => htg_object_sensors }
+    if backup_htg_object.nil?
+      backup_htg_object_sensor = nil
+    else
+      var = 'Heating Coil Electric Energy'
+      if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
+        var = { 'NaturalGas' => 'Heating Coil Gas Energy',
+                'PropaneGas' => 'Heating Coil Propane Energy',
+                'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
+                'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
+                'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[backup_htg_object.fuelType]
+        fail "Unexpected heating coil '#{backup_htg_object.name}'." if var.nil?
+      end
+
+      backup_htg_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+      backup_htg_object_sensor.setName("#{backup_htg_object.name} s")
+      backup_htg_object_sensor.setKeyName(backup_htg_object.name.to_s)
+      hvac_objects << backup_htg_object_sensor
+    end
+
+    sensors = { "clg" => clg_object_sensor,
+                "primary_htg" => htg_object_sensor,
+                "backup_htg" => backup_htg_object_sensor }
 
     fan_or_pump_var = fan_or_pump.name.to_s.gsub(' ', '_')
 
     # Disaggregate electric fan/pump energy
     fan_or_pump_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     fan_or_pump_program.setName("#{fan_or_pump_var} disaggregate program")
-    fan_or_pump_program.addLine("Set #{fan_or_pump_var}_heat = 0") unless htg_objects.empty?
-    fan_or_pump_program.addLine("Set #{fan_or_pump_var}_cool = 0") unless clg_objects.empty?
-    i = 0
-    all_sensors.each do |heat_or_cool, sensors|
-      next if sensors.empty?
+    sensors.each do |mode, sensor|
+      next if sensor.nil?
 
-      sum_of_sensors = sensors.map { |sensor| sensor.name }.join(" + ")
+      fan_or_pump_program.addLine("Set #{fan_or_pump_var}_#{mode} = 0")
+    end
+    i = 0
+    sensors.each do |mode, sensor|
+      next if sensor.nil?
+
       if i == 0
-        fan_or_pump_program.addLine("If #{sum_of_sensors} > 0")
+        fan_or_pump_program.addLine("If #{sensor.name} > 0")
       else
-        fan_or_pump_program.addLine("ElseIf #{sum_of_sensors} > 0")
+        fan_or_pump_program.addLine("ElseIf #{sensor.name} > 0")
       end
-      fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{heat_or_cool} = #{fan_or_pump_sensor.name}")
+      fan_or_pump_program.addLine("  Set #{fan_or_pump_var}_#{mode} = #{fan_or_pump_sensor.name}")
       i += 1
     end
     fan_or_pump_program.addLine("EndIf")
@@ -2038,30 +2053,21 @@ class HVAC
     fan_or_pump_program_calling_manager.addProgram(fan_or_pump_program)
     hvac_objects << fan_or_pump_program_calling_manager
 
-    if not htg_objects.empty?
-      fan_or_pump_ems_output_var_heat = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_heat")
-      fan_or_pump_ems_output_var_heat.setName(Constants.ObjectNameFanPumpDisaggregate(false, fan_or_pump.name.to_s))
-      fan_or_pump_ems_output_var_heat.setTypeOfDataInVariable("Summed")
-      fan_or_pump_ems_output_var_heat.setUpdateFrequency("SystemTimestep")
-      fan_or_pump_ems_output_var_heat.setEMSProgramOrSubroutineName(fan_or_pump_program)
-      fan_or_pump_ems_output_var_heat.setUnits("J")
-      hvac_objects << fan_or_pump_ems_output_var_heat
+    sensors.each do |mode, sensor|
+      next if sensor.nil?
 
-      outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var_heat.name.to_s, model)
-      outputVariable.setReportingFrequency('monthly')
-      outputVariable.setKeyValue('*')
-    end
+      fan_or_pump_ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_#{mode}")
+      name = { "clg" => Constants.ObjectNameFanPumpDisaggregateCool(fan_or_pump.name.to_s),
+               "primary_htg" => Constants.ObjectNameFanPumpDisaggregatePrimaryHeat(fan_or_pump.name.to_s),
+               "backup_htg" => Constants.ObjectNameFanPumpDisaggregateBackupHeat(fan_or_pump.name.to_s) }[mode]
+      fan_or_pump_ems_output_var.setName(name)
+      fan_or_pump_ems_output_var.setTypeOfDataInVariable("Summed")
+      fan_or_pump_ems_output_var.setUpdateFrequency("SystemTimestep")
+      fan_or_pump_ems_output_var.setEMSProgramOrSubroutineName(fan_or_pump_program)
+      fan_or_pump_ems_output_var.setUnits("J")
+      hvac_objects << fan_or_pump_ems_output_var
 
-    if not clg_objects.empty?
-      fan_or_pump_ems_output_var_cool = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{fan_or_pump_var}_cool")
-      fan_or_pump_ems_output_var_cool.setName(Constants.ObjectNameFanPumpDisaggregate(true, fan_or_pump.name.to_s))
-      fan_or_pump_ems_output_var_cool.setTypeOfDataInVariable("Summed")
-      fan_or_pump_ems_output_var_cool.setUpdateFrequency("SystemTimestep")
-      fan_or_pump_ems_output_var_cool.setEMSProgramOrSubroutineName(fan_or_pump_program)
-      fan_or_pump_ems_output_var_cool.setUnits("J")
-      hvac_objects << fan_or_pump_ems_output_var_cool
-
-      outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var_cool.name.to_s, model)
+      outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var.name.to_s, model)
       outputVariable.setReportingFrequency('monthly')
       outputVariable.setKeyValue('*')
     end
@@ -2855,7 +2861,7 @@ class HVAC
       htg_supp_coil.setParasiticGasLoad(0)
       htg_supp_coil.setFuelType(HelperMethods.eplus_fuel_map(fuel_type))
     end
-    htg_supp_coil.setName(obj_name + " supp htg coil")
+    htg_supp_coil.setName(obj_name + " " + Constants.ObjectNameBackupHeatingCoil)
     if supplemental_capacity != Constants.SizingAuto
       htg_supp_coil.setNominalCapacity(UnitConversions.convert([supplemental_capacity, Constants.small].max, "Btu/hr", "W")) # Used by HVACSizing measure
     end
