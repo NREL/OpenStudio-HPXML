@@ -81,6 +81,7 @@ def create_hpxmls
     'base-atticroof-cathedral.xml' => 'base.xml',
     'base-atticroof-conditioned.xml' => 'base.xml',
     'base-atticroof-flat.xml' => 'base.xml',
+    'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
@@ -895,6 +896,8 @@ def get_hpxml_file_roofs_values(hpxml_file, roofs_values)
         roofs_values[-1][:id] += i.to_s
       end
     end
+  elsif ['base-atticroof-radiant-barrier.xml'].include? hpxml_file
+    roofs_values[0][:radiant_barrier] = true
   end
   return roofs_values
 end

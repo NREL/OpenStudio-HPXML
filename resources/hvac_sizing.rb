@@ -908,7 +908,7 @@ class HVACSizing
       for d in 1..wall_height_ft
         r_soil = (Math::PI * d / 2.0) / k_soil
         if d <= above_grade_height
-          r_wall = 1.0 / ins_wall_ufactor + AirFilms.OutsideR
+          r_wall = 1.0 / ins_wall_ufactor + Material.AirFilmOutside.rvalue
         elsif d <= wall_ins_height
           r_wall = 1.0 / ins_wall_ufactor
         else
