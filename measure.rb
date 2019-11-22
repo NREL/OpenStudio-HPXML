@@ -1150,9 +1150,9 @@ class OSModel
       emitt = roof_values[:emittance]
       has_radiant_barrier = roof_values[:radiant_barrier]
       if has_radiant_barrier
-        film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]])).rvalue
-      else
         film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch([surfaces[0]])).rvalue
+      else
+        film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]])).rvalue
       end
       if solar_abs >= 0.875
         mat_roofing = Material.RoofingAsphaltShinglesDark(emitt, solar_abs)
