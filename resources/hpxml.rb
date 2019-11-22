@@ -1069,7 +1069,7 @@ class HPXML
 
     efficiency_units = nil
     efficiency_value = nil
-    if ["central air conditioner"].include? cooling_system_type
+    if ["central air conditioner", "evaporative cooler"].include? cooling_system_type # Need to include evap cooler for ERI EEC_x
       efficiency_units = "SEER"
       efficiency_value = cooling_efficiency_seer
     elsif ["room air conditioner"].include? cooling_system_type
