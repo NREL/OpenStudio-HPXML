@@ -769,7 +769,7 @@ class OSModel
         end
         next if vf < 0.01 # TODO: Remove this when https://github.com/NREL/OpenStudio/issues/3737 is resolved
 
-        os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf)
+        os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf.round(10))
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
         zone_prop.addViewFactor(os_vf)
       end
@@ -1146,10 +1146,14 @@ class OSModel
       else
         drywall_thick_in = 0.0
       end
-      film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]])).rvalue
       solar_abs = roof_values[:solar_absorptance]
       emitt = roof_values[:emittance]
       has_radiant_barrier = roof_values[:radiant_barrier]
+      if has_radiant_barrier
+        film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch([surfaces[0]])).rvalue
+      else
+        film_r = Material.AirFilmOutside.rvalue + Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]])).rvalue
+      end
       if solar_abs >= 0.875
         mat_roofing = Material.RoofingAsphaltShinglesDark(emitt, solar_abs)
       elsif solar_abs >= 0.75
@@ -1179,7 +1183,7 @@ class OSModel
                                                        true, constr_set.framing_factor,
                                                        constr_set.drywall_thick_in,
                                                        constr_set.osb_thick_in, constr_set.rigid_r,
-                                                       constr_set.exterior_material)
+                                                       constr_set.exterior_material, has_radiant_barrier)
       return false if not success
 
       check_surface_assembly_rvalue(runner, surfaces, film_r, assembly_r, match)
