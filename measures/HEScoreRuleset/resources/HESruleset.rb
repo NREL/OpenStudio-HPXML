@@ -741,6 +741,7 @@ class HEScoreRuleset
 
       orig_dist.elements.each("DistributionSystemType/AirDistribution/Ducts") do |orig_duct|
         duct_values = HPXML.get_ducts_values(ducts: orig_duct)
+        next if duct_values[:duct_location] == "living space"
 
         if duct_values[:duct_location] == "attic - unconditioned"
           duct_values[:duct_location] = "attic - vented"
@@ -754,13 +755,8 @@ class HEScoreRuleset
           fail "Unexpected duct insulation material '#{duct_values[:duct_insulation_material]}'."
         end
 
-        if duct_values[:duct_location] == "living space"
-          supply_duct_surface_area = 0.001 # Arbitrary; can't be zero
-          return_duct_surface_area = 0.001 # Arbitrary; can't be zero
-        else
-          supply_duct_surface_area = uncond_area_s * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
-          return_duct_surface_area = uncond_area_r * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
-        end
+        supply_duct_surface_area = uncond_area_s * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
+        return_duct_surface_area = uncond_area_r * duct_values[:duct_fraction_area] / (1.0 - frac_inside)
 
         # Supply duct
         HPXML.add_ducts(air_distribution: new_air_dist,
