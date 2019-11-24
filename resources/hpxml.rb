@@ -2118,9 +2118,8 @@ class HPXML
   private
 
   def self.is_selected(keys, key)
-    if keys.empty? or keys.include? key
-      return true
-    end
+    return true if keys.empty?
+    return true if keys.include? key
 
     return false
   end
