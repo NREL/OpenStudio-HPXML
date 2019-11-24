@@ -976,9 +976,11 @@ class Waterheater
 
   def self.get_combi_system_fuel(idref, orig_details)
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-      next unless HPXML.get_id(heating_system) == idref
+      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system,
+                                                              select: [:id, :heating_system_fuel])
+      next unless heating_system_values[:id] == idref
 
-      return XMLHelper.get_value(heating_system, "HeatingSystemFuel")
+      return heating_system_values[:heating_system_fuel]
     end
   end
 
