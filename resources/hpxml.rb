@@ -455,8 +455,8 @@ class HPXML
         vals[:attic_type] = "CathedralCeiling"
       end
     end
-    vals[:vented_attic_sla] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]/VentilationRate[UnitofMeasure='SLA']/Value")) if is_selected(select, :vented_attic_sla)
-    vals[:vented_attic_constant_ach] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]/extension/ConstantACHnatural")) if is_selected(select, :vented_attic_constant_ach)
+    vals[:vented_attic_sla] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value")) if is_selected(select, :vented_attic_sla)
+    vals[:vented_attic_constant_ach] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural")) if is_selected(select, :vented_attic_constant_ach)
     return vals
   end
 
@@ -521,8 +521,8 @@ class HPXML
         vals[:foundation_type] = "Ambient"
       end
     end
-    vals[:vented_crawlspace_sla] = to_float_or_nil(XMLHelper.get_value(foundation, "FoundationType/Crawlspace[Vented='true']/VentilationRate[UnitofMeasure='SLA']/Value")) if is_selected(select, :vented_crawlspace_sla)
-    vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "FoundationType/Basement[Conditioned='false']/ThermalBoundary") if is_selected(select, :unconditioned_basement_thermal_boundary)
+    vals[:vented_crawlspace_sla] = to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value")) if is_selected(select, :vented_crawlspace_sla)
+    vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary") if is_selected(select, :unconditioned_basement_thermal_boundary)
     return vals
   end
 
