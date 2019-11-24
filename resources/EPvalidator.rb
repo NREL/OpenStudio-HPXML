@@ -171,8 +171,8 @@ class EnergyPlusValidator
         "DepthBelowGrade" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
         # Either specify insulation layer R-value and insulation height OR assembly R-value:
-        "DistanceToBottomOfInsulation | Insulation/AssemblyEffectiveRValue" => one,
-        "Insulation/Layer[InstallationType='continuous']/NominalRValue | Insulation/AssemblyEffectiveRValue" => one,
+        "[DistanceToBottomOfInsulation | Insulation/AssemblyEffectiveRValue]" => one,
+        "[Insulation/Layer[InstallationType='continuous']/NominalRValue | Insulation/AssemblyEffectiveRValue]" => one,
       },
 
       ## [VentedCrawlspace]
