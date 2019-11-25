@@ -777,7 +777,7 @@ class Waterheater
     dsh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     dsh_program.setName("#{tank_name} DSH Program")
     dsh_program.addLine("Set Avail_Cap = #{reclaimed_efficiency} * (#{coil_clg_energy.name} + #{coil_elec_energy.name})")
-    dsh_program.addLine("Set #{tank_name}_dsh = @Min #{wh_energy.name}, Avail_Cap")
+    dsh_program.addLine("Set #{tank_name}_dsh = @Min #{wh_energy.name} Avail_Cap")
     dsh_program.addLine("Set #{tank_name}_e_htg = #{wh_energy.name} - #{tank_name}_dsh")
     dsh_program.addLine("Set #{tank_name}_e = #{tank_name}_e_htg / #{eta_c}")
 
