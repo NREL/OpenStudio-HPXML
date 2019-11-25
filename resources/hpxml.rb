@@ -38,19 +38,22 @@ class HPXML
     return doc
   end
 
-  def self.get_hpxml_values(hpxml:)
+  def self.get_hpxml_values(hpxml:,
+                            select: [])
     return nil if hpxml.nil?
 
-    return { :schema_version => hpxml.attributes["schemaVersion"],
-             :xml_type => XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/XMLType"),
-             :xml_generated_by => XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/XMLGeneratedBy"),
-             :created_date_and_time => XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/CreatedDateAndTime"),
-             :transaction => XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/Transaction"),
-             :software_program_used => XMLHelper.get_value(hpxml, "SoftwareInfo/SoftwareProgramUsed"),
-             :software_program_version => XMLHelper.get_value(hpxml, "SoftwareInfo/SoftwareProgramVersion"),
-             :eri_calculation_version => XMLHelper.get_value(hpxml, "SoftwareInfo/extension/ERICalculation/Version"),
-             :building_id => HPXML.get_id(hpxml, "Building/BuildingID"),
-             :event_type => XMLHelper.get_value(hpxml, "Building/ProjectStatus/EventType") }
+    vals = {}
+    vals[:schema_version] = hpxml.attributes["schemaVersion"] if is_selected(select, :schema_version)
+    vals[:xml_type] = XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/XMLType") if is_selected(select, :xml_type)
+    vals[:xml_generated_by] = XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/XMLGeneratedBy") if is_selected(select, :xml_generated_by)
+    vals[:created_date_and_time] = XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/CreatedDateAndTime") if is_selected(select, :created_date_and_time)
+    vals[:transaction] = XMLHelper.get_value(hpxml, "XMLTransactionHeaderInformation/Transaction") if is_selected(select, :transaction)
+    vals[:software_program_used] = XMLHelper.get_value(hpxml, "SoftwareInfo/SoftwareProgramUsed") if is_selected(select, :software_program_used)
+    vals[:software_program_version] = XMLHelper.get_value(hpxml, "SoftwareInfo/SoftwareProgramVersion") if is_selected(select, :software_program_version)
+    vals[:eri_calculation_version] = XMLHelper.get_value(hpxml, "SoftwareInfo/extension/ERICalculation/Version") if is_selected(select, :eri_calculation_version)
+    vals[:building_id] = HPXML.get_id(hpxml, "Building/BuildingID") if is_selected(select, :building_id)
+    vals[:event_type] = XMLHelper.get_value(hpxml, "Building/ProjectStatus/EventType") if is_selected(select, :event_type)
+    return vals
   end
 
   def self.add_site(hpxml:,
@@ -72,14 +75,17 @@ class HPXML
     return site
   end
 
-  def self.get_site_values(site:)
+  def self.get_site_values(site:,
+                           select: [])
     return nil if site.nil?
 
-    return { :surroundings => XMLHelper.get_value(site, "Surroundings"),
-             :orientation_of_front_of_home => XMLHelper.get_value(site, "OrientationOfFrontOfHome"),
-             :fuels => XMLHelper.get_values(site, "FuelTypesAvailable/Fuel"),
-             :shelter_coefficient => to_float_or_nil(XMLHelper.get_value(site, "extension/ShelterCoefficient")),
-             :disable_natural_ventilation => to_bool_or_nil(XMLHelper.get_value(site, "extension/DisableNaturalVentilation")) }
+    vals = {}
+    vals[:surroundings] = XMLHelper.get_value(site, "Surroundings") if is_selected(select, :surroundings)
+    vals[:orientation_of_front_of_home] = XMLHelper.get_value(site, "OrientationOfFrontOfHome") if is_selected(select, :orientation_of_front_of_home)
+    vals[:fuels] = XMLHelper.get_values(site, "FuelTypesAvailable/Fuel") if is_selected(select, :fuels)
+    vals[:shelter_coefficient] = to_float_or_nil(XMLHelper.get_value(site, "extension/ShelterCoefficient")) if is_selected(select, :shelter_coefficient)
+    vals[:disable_natural_ventilation] = to_bool_or_nil(XMLHelper.get_value(site, "extension/DisableNaturalVentilation")) if is_selected(select, :disable_natural_ventilation)
+    return vals
   end
 
   def self.add_site_neighbor(hpxml:,
@@ -96,12 +102,15 @@ class HPXML
     return neighbor_building
   end
 
-  def self.get_neighbor_building_values(neighbor_building:)
+  def self.get_neighbor_building_values(neighbor_building:,
+                                        select: [])
     return nil if neighbor_building.nil?
 
-    return { :azimuth => to_integer_or_nil(XMLHelper.get_value(neighbor_building, "Azimuth")),
-             :distance => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance")),
-             :height => to_float_or_nil(XMLHelper.get_value(neighbor_building, "Height")) }
+    vals = {}
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(neighbor_building, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:distance] = to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance")) if is_selected(select, :distance)
+    vals[:height] = to_float_or_nil(XMLHelper.get_value(neighbor_building, "Height")) if is_selected(select, :height)
+    return vals
   end
 
   def self.add_building_occupancy(hpxml:,
@@ -113,10 +122,13 @@ class HPXML
     return building_occupancy
   end
 
-  def self.get_building_occupancy_values(building_occupancy:)
+  def self.get_building_occupancy_values(building_occupancy:,
+                                         select: [])
     return nil if building_occupancy.nil?
 
-    return { :number_of_residents => to_float_or_nil(XMLHelper.get_value(building_occupancy, "NumberofResidents")) }
+    vals = {}
+    vals[:number_of_residents] = to_float_or_nil(XMLHelper.get_value(building_occupancy, "NumberofResidents")) if is_selected(select, :number_of_residents)
+    return vals
   end
 
   def self.add_building_construction(hpxml:,
@@ -141,19 +153,22 @@ class HPXML
     return building_construction
   end
 
-  def self.get_building_construction_values(building_construction:)
+  def self.get_building_construction_values(building_construction:,
+                                            select: [])
     return nil if building_construction.nil?
 
-    return { :year_built => to_integer_or_nil(XMLHelper.get_value(building_construction, "YearBuilt")),
-             :number_of_conditioned_floors => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloors")),
-             :number_of_conditioned_floors_above_grade => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade")),
-             :average_ceiling_height => to_float_or_nil(XMLHelper.get_value(building_construction, "AverageCeilingHeight")),
-             :number_of_bedrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")),
-             :number_of_bathrooms => to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms")),
-             :conditioned_floor_area => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")),
-             :conditioned_building_volume => to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")),
-             :use_only_ideal_air_system => to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")),
-             :residential_facility_type => XMLHelper.get_value(building_construction, "ResidentialFacilityType") }
+    vals = {}
+    vals[:year_built] = to_integer_or_nil(XMLHelper.get_value(building_construction, "YearBuilt")) if is_selected(select, :year_built)
+    vals[:number_of_conditioned_floors] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloors")) if is_selected(select, :number_of_conditioned_floors)
+    vals[:number_of_conditioned_floors_above_grade] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofConditionedFloorsAboveGrade")) if is_selected(select, :number_of_conditioned_floors_above_grade)
+    vals[:average_ceiling_height] = to_float_or_nil(XMLHelper.get_value(building_construction, "AverageCeilingHeight")) if is_selected(select, :average_ceiling_height)
+    vals[:number_of_bedrooms] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBedrooms")) if is_selected(select, :number_of_bedrooms)
+    vals[:number_of_bathrooms] = to_integer_or_nil(XMLHelper.get_value(building_construction, "NumberofBathrooms")) if is_selected(select, :number_of_bathrooms)
+    vals[:conditioned_floor_area] = to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedFloorArea")) if is_selected(select, :conditioned_floor_area)
+    vals[:conditioned_building_volume] = to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume")) if is_selected(select, :conditioned_building_volume)
+    vals[:use_only_ideal_air_system] = to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem")) if is_selected(select, :use_only_ideal_air_system)
+    vals[:residential_facility_type] = XMLHelper.get_value(building_construction, "ResidentialFacilityType") if is_selected(select, :residential_facility_type)
+    return vals
   end
 
   def self.add_climate_and_risk_zones(hpxml:,
@@ -192,20 +207,23 @@ class HPXML
     return climate_and_risk_zones
   end
 
-  def self.get_climate_and_risk_zones_values(climate_and_risk_zones:)
+  def self.get_climate_and_risk_zones_values(climate_and_risk_zones:,
+                                             select: [])
     return nil if climate_and_risk_zones.nil?
 
     weather_station = climate_and_risk_zones.elements["WeatherStation"]
 
-    return { :iecc2003 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2003]/ClimateZone"),
-             :iecc2006 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2006]/ClimateZone"),
-             :iecc2009 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2009]/ClimateZone"),
-             :iecc2012 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2012]/ClimateZone"),
-             :iecc2015 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2015]/ClimateZone"),
-             :iecc2018 => XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2018]/ClimateZone"),
-             :weather_station_id => HPXML.get_id(weather_station),
-             :weather_station_name => XMLHelper.get_value(weather_station, "Name"),
-             :weather_station_wmo => XMLHelper.get_value(weather_station, "WMO") }
+    vals = {}
+    vals[:iecc2003] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2003]/ClimateZone") if is_selected(select, :iecc2003)
+    vals[:iecc2006] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2006]/ClimateZone") if is_selected(select, :iecc2006)
+    vals[:iecc2009] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2009]/ClimateZone") if is_selected(select, :iecc2009)
+    vals[:iecc2012] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2012]/ClimateZone") if is_selected(select, :iecc2012)
+    vals[:iecc2015] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2015]/ClimateZone") if is_selected(select, :iecc2015)
+    vals[:iecc2018] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2018]/ClimateZone") if is_selected(select, :iecc2018)
+    vals[:weather_station_id] = HPXML.get_id(weather_station) if is_selected(select, :weather_station_id)
+    vals[:weather_station_name] = XMLHelper.get_value(weather_station, "Name") if is_selected(select, :weather_station_name)
+    vals[:weather_station_wmo] = XMLHelper.get_value(weather_station, "WMO") if is_selected(select, :weather_station_wmo)
+    return vals
   end
 
   def self.collapse_enclosure(enclosure)
@@ -366,17 +384,20 @@ class HPXML
     return air_infiltration_measurement
   end
 
-  def self.get_air_infiltration_measurement_values(air_infiltration_measurement:)
+  def self.get_air_infiltration_measurement_values(air_infiltration_measurement:,
+                                                   select: [])
     return nil if air_infiltration_measurement.nil?
 
-    return { :id => HPXML.get_id(air_infiltration_measurement),
-             :house_pressure => to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "HousePressure")),
-             :unit_of_measure => XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/UnitofMeasure"),
-             :air_leakage => to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/AirLeakage")),
-             :effective_leakage_area => to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "EffectiveLeakageArea")),
-             :infiltration_volume => to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "InfiltrationVolume")),
-             :constant_ach_natural => to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural")),
-             :leakiness_description => XMLHelper.get_value(air_infiltration_measurement, "LeakinessDescription") }
+    vals = {}
+    vals[:id] = HPXML.get_id(air_infiltration_measurement) if is_selected(select, :id)
+    vals[:house_pressure] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "HousePressure")) if is_selected(select, :house_pressure)
+    vals[:unit_of_measure] = XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/UnitofMeasure") if is_selected(select, :unit_of_measure)
+    vals[:air_leakage] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "BuildingAirLeakage/AirLeakage")) if is_selected(select, :air_leakage)
+    vals[:effective_leakage_area] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "EffectiveLeakageArea")) if is_selected(select, :effective_leakage_area)
+    vals[:infiltration_volume] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "InfiltrationVolume")) if is_selected(select, :infiltration_volume)
+    vals[:constant_ach_natural] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural")) if is_selected(select, :constant_ach_natural)
+    vals[:leakiness_description] = XMLHelper.get_value(air_infiltration_measurement, "LeakinessDescription") if is_selected(select, :leakiness_description)
+    return vals
   end
 
   def self.add_attic(hpxml:,
@@ -414,30 +435,29 @@ class HPXML
     return attic
   end
 
-  def self.get_attic_values(attic:)
+  def self.get_attic_values(attic:,
+                            select: [])
     return nil if attic.nil?
 
-    attic_type = nil
-    vented_attic_sla = nil
-    vented_attic_constant_ach = nil
-    if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
-      attic_type = "UnventedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
-      attic_type = "VentedAttic"
-      vented_attic_sla = to_float_or_nil(XMLHelper.get_value(attic, "VentilationRate[UnitofMeasure='SLA']/Value"))
-      vented_attic_constant_ach = to_float_or_nil(XMLHelper.get_value(attic, "extension/ConstantACHnatural"))
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
-      attic_type = "ConditionedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
-      attic_type = "FlatRoof"
-    elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
-      attic_type = "CathedralCeiling"
-    end
+    vals = {}
+    vals[:id] = HPXML.get_id(attic) if is_selected(select, :id)
 
-    return { :id => HPXML.get_id(attic),
-             :attic_type => attic_type,
-             :vented_attic_sla => vented_attic_sla,
-             :vented_attic_constant_ach => vented_attic_constant_ach }
+    if is_selected(select, :attic_type)
+      if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
+        vals[:attic_type] = "UnventedAttic"
+      elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
+        vals[:attic_type] = "VentedAttic"
+      elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
+        vals[:attic_type] = "ConditionedAttic"
+      elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
+        vals[:attic_type] = "FlatRoof"
+      elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
+        vals[:attic_type] = "CathedralCeiling"
+      end
+    end
+    vals[:vented_attic_sla] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value")) if is_selected(select, :vented_attic_sla)
+    vals[:vented_attic_constant_ach] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural")) if is_selected(select, :vented_attic_constant_ach)
+    return vals
   end
 
   def self.add_foundation(hpxml:,
@@ -480,31 +500,30 @@ class HPXML
     return foundation
   end
 
-  def self.get_foundation_values(foundation:)
+  def self.get_foundation_values(foundation:,
+                                 select: [])
     return nil if foundation.nil?
 
-    foundation_type = nil
-    vented_crawlspace_sla = nil
-    if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
-      foundation_type = "SlabOnGrade"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
-      foundation_type = "UnconditionedBasement"
-      unconditioned_basement_thermal_boundary = XMLHelper.get_value(foundation, "ThermalBoundary")
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
-      foundation_type = "ConditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
-      foundation_type = "UnventedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
-      foundation_type = "VentedCrawlspace"
-      vented_crawlspace_sla = to_float_or_nil(XMLHelper.get_value(foundation, "VentilationRate[UnitofMeasure='SLA']/Value"))
-    elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
-      foundation_type = "Ambient"
+    vals = {}
+    vals[:id] = HPXML.get_id(foundation) if is_selected(select, :id)
+    if is_selected(select, :foundation_type)
+      if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
+        vals[:foundation_type] = "SlabOnGrade"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
+        vals[:foundation_type] = "UnconditionedBasement"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
+        vals[:foundation_type] = "ConditionedBasement"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
+        vals[:foundation_type] = "UnventedCrawlspace"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
+        vals[:foundation_type] = "VentedCrawlspace"
+      elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
+        vals[:foundation_type] = "Ambient"
+      end
     end
-
-    return { :id => HPXML.get_id(foundation),
-             :foundation_type => foundation_type,
-             :vented_crawlspace_sla => vented_crawlspace_sla,
-             :unconditioned_basement_thermal_boundary => unconditioned_basement_thermal_boundary }
+    vals[:vented_crawlspace_sla] = to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value")) if is_selected(select, :vented_crawlspace_sla)
+    vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary") if is_selected(select, :unconditioned_basement_thermal_boundary)
+    return vals
   end
 
   def self.add_roof(hpxml:,
@@ -537,27 +556,36 @@ class HPXML
     return roof
   end
 
-  def self.get_roof_values(roof:)
+  def self.get_roof_values(roof:,
+                           select: [])
     return nil if roof.nil?
 
-    insulation_values = get_assembly_insulation_values(insulation: roof.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: roof.elements["Insulation"])
+    insulation_values = {}
+    if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
+      insulation_values = get_assembly_insulation_values(insulation: roof.elements["Insulation"])
+    end
+    insulation_layer_values = {}
+    if is_selected(select, :insulation_cavity_r_value) or is_selected(select, :insulation_continuous_r_value)
+      insulation_layer_values = get_layer_insulation_values(insulation: roof.elements["Insulation"])
+    end
 
-    return { :id => HPXML.get_id(roof),
-             :exterior_adjacent_to => "outside",
-             :interior_adjacent_to => XMLHelper.get_value(roof, "InteriorAdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(roof, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(roof, "Azimuth")),
-             :roof_type => XMLHelper.get_value(roof, "RoofType"),
-             :roof_color => XMLHelper.get_value(roof, "RoofColor"),
-             :solar_absorptance => to_float_or_nil(XMLHelper.get_value(roof, "SolarAbsorptance")),
-             :emittance => to_float_or_nil(XMLHelper.get_value(roof, "Emittance")),
-             :pitch => to_float_or_nil(XMLHelper.get_value(roof, "Pitch")),
-             :radiant_barrier => to_bool_or_nil(XMLHelper.get_value(roof, "RadiantBarrier")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
-             :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
-             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
+    vals = {}
+    vals[:id] = HPXML.get_id(roof) if is_selected(select, :id)
+    vals[:exterior_adjacent_to] = "outside" if is_selected(select, :exterior_adjacent_to)
+    vals[:interior_adjacent_to] = XMLHelper.get_value(roof, "InteriorAdjacentTo") if is_selected(select, :interior_adjacent_to)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(roof, "Area")) if is_selected(select, :area)
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(roof, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:roof_type] = XMLHelper.get_value(roof, "RoofType") if is_selected(select, :roof_type)
+    vals[:roof_color] = XMLHelper.get_value(roof, "RoofColor") if is_selected(select, :roof_color)
+    vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(roof, "SolarAbsorptance")) if is_selected(select, :solar_absorptance)
+    vals[:emittance] = to_float_or_nil(XMLHelper.get_value(roof, "Emittance")) if is_selected(select, :emittance)
+    vals[:pitch] = to_float_or_nil(XMLHelper.get_value(roof, "Pitch")) if is_selected(select, :pitch)
+    vals[:radiant_barrier] = to_bool_or_nil(XMLHelper.get_value(roof, "RadiantBarrier")) if is_selected(select, :radiant_barrier)
+    vals[:insulation_id] = insulation_values[:id] if is_selected(select, :insulation_id)
+    vals[:insulation_assembly_r_value] = to_float_or_nil(insulation_values[:assembly_r_value]) if is_selected(select, :insulation_assembly_r_value)
+    vals[:insulation_cavity_r_value] = to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]) if is_selected(select, :insulation_cavity_r_value)
+    vals[:insulation_continuous_r_value] = to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) if is_selected(select, :insulation_continuous_r_value)
+    return vals
   end
 
   def self.add_rim_joist(hpxml:,
@@ -588,20 +616,26 @@ class HPXML
     return rim_joist
   end
 
-  def self.get_rim_joist_values(rim_joist:)
+  def self.get_rim_joist_values(rim_joist:,
+                                select: [])
     return nil if rim_joist.nil?
 
-    insulation_values = get_assembly_insulation_values(insulation: rim_joist.elements["Insulation"])
+    insulation_values = {}
+    if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
+      insulation_values = get_assembly_insulation_values(insulation: rim_joist.elements["Insulation"])
+    end
 
-    return { :id => HPXML.get_id(rim_joist),
-             :exterior_adjacent_to => XMLHelper.get_value(rim_joist, "ExteriorAdjacentTo"),
-             :interior_adjacent_to => XMLHelper.get_value(rim_joist, "InteriorAdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(rim_joist, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth")),
-             :solar_absorptance => to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance")),
-             :emittance => to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
+    vals = {}
+    vals[:id] = HPXML.get_id(rim_joist) if is_selected(select, :id)
+    vals[:exterior_adjacent_to] = XMLHelper.get_value(rim_joist, "ExteriorAdjacentTo") if is_selected(select, :exterior_adjacent_to)
+    vals[:interior_adjacent_to] = XMLHelper.get_value(rim_joist, "InteriorAdjacentTo") if is_selected(select, :interior_adjacent_to)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(rim_joist, "Area")) if is_selected(select, :area)
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance")) if is_selected(select, :solar_absorptance)
+    vals[:emittance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance")) if is_selected(select, :emittance)
+    vals[:insulation_id] = insulation_values[:id] if is_selected(select, :insulation_id)
+    vals[:insulation_assembly_r_value] = to_float_or_nil(insulation_values[:assembly_r_value]) if is_selected(select, :insulation_assembly_r_value)
+    return vals
   end
 
   def self.add_wall(hpxml:,
@@ -635,27 +669,36 @@ class HPXML
     return wall
   end
 
-  def self.get_wall_values(wall:)
+  def self.get_wall_values(wall:,
+                           select: [])
     return nil if wall.nil?
 
-    insulation_values = get_assembly_insulation_values(insulation: wall.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: wall.elements["Insulation"])
+    insulation_values = {}
+    if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
+      insulation_values = get_assembly_insulation_values(insulation: wall.elements["Insulation"])
+    end
+    insulation_layer_values = {}
+    if is_selected(select, :insulation_cavity_r_value) or is_selected(select, :insulation_continuous_r_value)
+      insulation_layer_values = get_layer_insulation_values(insulation: wall.elements["Insulation"])
+    end
 
-    return { :id => HPXML.get_id(wall),
-             :exterior_adjacent_to => XMLHelper.get_value(wall, "ExteriorAdjacentTo"),
-             :interior_adjacent_to => XMLHelper.get_value(wall, "InteriorAdjacentTo"),
-             :wall_type => XMLHelper.get_child_name(wall, "WallType"),
-             :optimum_value_engineering => to_bool_or_nil(XMLHelper.get_value(wall, "WallType/WoodStud/OptimumValueEngineering")),
-             :area => to_float_or_nil(XMLHelper.get_value(wall, "Area")),
-             :orientation => XMLHelper.get_value(wall, "Orientation"),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(wall, "Azimuth")),
-             :siding => XMLHelper.get_value(wall, "Siding"),
-             :solar_absorptance => to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance")),
-             :emittance => to_float_or_nil(XMLHelper.get_value(wall, "Emittance")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
-             :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
-             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
+    vals = {}
+    vals[:id] = HPXML.get_id(wall) if is_selected(select, :id)
+    vals[:exterior_adjacent_to] = XMLHelper.get_value(wall, "ExteriorAdjacentTo") if is_selected(select, :exterior_adjacent_to)
+    vals[:interior_adjacent_to] = XMLHelper.get_value(wall, "InteriorAdjacentTo") if is_selected(select, :interior_adjacent_to)
+    vals[:wall_type] = XMLHelper.get_child_name(wall, "WallType") if is_selected(select, :wall_type)
+    vals[:optimum_value_engineering] = to_bool_or_nil(XMLHelper.get_value(wall, "WallType/WoodStud/OptimumValueEngineering")) if is_selected(select, :optimum_value_engineering)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(wall, "Area")) if is_selected(select, :area)
+    vals[:orientation] = XMLHelper.get_value(wall, "Orientation") if is_selected(select, :orientation)
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(wall, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:siding] = XMLHelper.get_value(wall, "Siding") if is_selected(select, :siding)
+    vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance")) if is_selected(select, :solar_absorptance)
+    vals[:emittance] = to_float_or_nil(XMLHelper.get_value(wall, "Emittance")) if is_selected(select, :emittance)
+    vals[:insulation_id] = insulation_values[:id] if is_selected(select, :insulation_id)
+    vals[:insulation_assembly_r_value] = to_float_or_nil(insulation_values[:assembly_r_value]) if is_selected(select, :insulation_assembly_r_value)
+    vals[:insulation_cavity_r_value] = to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]) if is_selected(select, :insulation_cavity_r_value)
+    vals[:insulation_continuous_r_value] = to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) if is_selected(select, :insulation_continuous_r_value)
+    return vals
   end
 
   def self.add_foundation_wall(hpxml:,
@@ -698,24 +741,33 @@ class HPXML
     return foundation_wall
   end
 
-  def self.get_foundation_wall_values(foundation_wall:)
+  def self.get_foundation_wall_values(foundation_wall:,
+                                      select: [])
     return nil if foundation_wall.nil?
 
-    insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
+    insulation_values = {}
+    if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
+      insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
+    end
+    insulation_layer_values = {}
+    if is_selected(select, :insulation_r_value)
+      insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
+    end
 
-    return { :id => HPXML.get_id(foundation_wall),
-             :exterior_adjacent_to => XMLHelper.get_value(foundation_wall, "ExteriorAdjacentTo"),
-             :interior_adjacent_to => XMLHelper.get_value(foundation_wall, "InteriorAdjacentTo"),
-             :height => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Height")),
-             :area => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth")),
-             :thickness => to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness")),
-             :depth_below_grade => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")),
-             :insulation_distance_to_bottom => to_float_or_nil(XMLHelper.get_value(foundation_wall, "DistanceToBottomOfInsulation")),
-             :insulation_id => insulation_layer_values[:id],
-             :insulation_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]),
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]) }
+    vals = {}
+    vals[:id] = HPXML.get_id(foundation_wall) if is_selected(select, :id)
+    vals[:exterior_adjacent_to] = XMLHelper.get_value(foundation_wall, "ExteriorAdjacentTo") if is_selected(select, :exterior_adjacent_to)
+    vals[:interior_adjacent_to] = XMLHelper.get_value(foundation_wall, "InteriorAdjacentTo") if is_selected(select, :interior_adjacent_to)
+    vals[:height] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Height")) if is_selected(select, :height)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Area")) if is_selected(select, :area)
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:thickness] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness")) if is_selected(select, :thickness)
+    vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")) if is_selected(select, :depth_below_grade)
+    vals[:insulation_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "DistanceToBottomOfInsulation")) if is_selected(select, :insulation_distance_to_bottom)
+    vals[:insulation_id] = insulation_values[:id] if is_selected(select, :insulation_id)
+    vals[:insulation_assembly_r_value] = to_float_or_nil(insulation_values[:assembly_r_value]) if is_selected(select, :insulation_assembly_r_value)
+    vals[:insulation_r_value] = to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) if is_selected(select, :insulation_r_value)
+    return vals
   end
 
   def self.add_framefloor(hpxml:,
@@ -740,20 +792,29 @@ class HPXML
     return framefloor
   end
 
-  def self.get_framefloor_values(framefloor:)
+  def self.get_framefloor_values(framefloor:,
+                                 select: [])
     return nil if framefloor.nil?
 
-    insulation_values = get_assembly_insulation_values(insulation: framefloor.elements["Insulation"])
-    insulation_layer_values = get_layer_insulation_values(insulation: framefloor.elements["Insulation"])
+    insulation_values = {}
+    if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
+      insulation_values = get_assembly_insulation_values(insulation: framefloor.elements["Insulation"])
+    end
+    insulation_layer_values = {}
+    if is_selected(select, :insulation_cavity_r_value) or is_selected(select, :insulation_continuous_r_value)
+      insulation_layer_values = get_layer_insulation_values(insulation: framefloor.elements["Insulation"])
+    end
 
-    return { :id => HPXML.get_id(framefloor),
-             :exterior_adjacent_to => XMLHelper.get_value(framefloor, "ExteriorAdjacentTo"),
-             :interior_adjacent_to => XMLHelper.get_value(framefloor, "InteriorAdjacentTo"),
-             :area => to_float_or_nil(XMLHelper.get_value(framefloor, "Area")),
-             :insulation_id => insulation_values[:id],
-             :insulation_assembly_r_value => to_float_or_nil(insulation_values[:assembly_r_value]),
-             :insulation_cavity_r_value => to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]),
-             :insulation_continuous_r_value => to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) }
+    vals = {}
+    vals[:id] = HPXML.get_id(framefloor) if is_selected(select, :id)
+    vals[:exterior_adjacent_to] = XMLHelper.get_value(framefloor, "ExteriorAdjacentTo") if is_selected(select, :exterior_adjacent_to)
+    vals[:interior_adjacent_to] = XMLHelper.get_value(framefloor, "InteriorAdjacentTo") if is_selected(select, :interior_adjacent_to)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(framefloor, "Area")) if is_selected(select, :area)
+    vals[:insulation_id] = insulation_values[:id] if is_selected(select, :insulation_id)
+    vals[:insulation_assembly_r_value] = to_float_or_nil(insulation_values[:assembly_r_value]) if is_selected(select, :insulation_assembly_r_value)
+    vals[:insulation_cavity_r_value] = to_float_or_nil(insulation_layer_values[:cavity_nominal_r_value]) if is_selected(select, :insulation_cavity_r_value)
+    vals[:insulation_continuous_r_value] = to_float_or_nil(insulation_layer_values[:continuous_nominal_r_value]) if is_selected(select, :insulation_continuous_r_value)
+    return vals
   end
 
   def self.add_slab(hpxml:,
@@ -800,28 +861,37 @@ class HPXML
     return slab
   end
 
-  def self.get_slab_values(slab:)
+  def self.get_slab_values(slab:,
+                           select: [])
     return nil if slab.nil?
 
-    perimeter_insulation_values = get_layer_insulation_values(insulation: slab.elements["PerimeterInsulation"])
-    under_slab_insulation_values = get_layer_insulation_values(insulation: slab.elements["UnderSlabInsulation"])
+    perimeter_insulation_values = {}
+    if is_selected(select, :perimeter_insulation_id) or is_selected(select, :perimeter_insulation_r_value)
+      perimeter_insulation_values = get_layer_insulation_values(insulation: slab.elements["PerimeterInsulation"])
+    end
+    under_slab_insulation_values = {}
+    if is_selected(select, :under_slab_insulation_id) or is_selected(select, :under_slab_insulation_r_value)
+      under_slab_insulation_values = get_layer_insulation_values(insulation: slab.elements["UnderSlabInsulation"])
+    end
 
-    return { :id => HPXML.get_id(slab),
-             :interior_adjacent_to => XMLHelper.get_value(slab, "InteriorAdjacentTo"),
-             :exterior_adjacent_to => "outside",
-             :area => to_float_or_nil(XMLHelper.get_value(slab, "Area")),
-             :thickness => to_float_or_nil(XMLHelper.get_value(slab, "Thickness")),
-             :exposed_perimeter => to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter")),
-             :perimeter_insulation_depth => to_float_or_nil(XMLHelper.get_value(slab, "PerimeterInsulationDepth")),
-             :under_slab_insulation_width => to_float_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationWidth")),
-             :under_slab_insulation_spans_entire_slab => to_bool_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab")),
-             :depth_below_grade => to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade")),
-             :carpet_fraction => to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction")),
-             :carpet_r_value => to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue")),
-             :perimeter_insulation_id => perimeter_insulation_values[:id],
-             :perimeter_insulation_r_value => to_float_or_nil(perimeter_insulation_values[:continuous_nominal_r_value]),
-             :under_slab_insulation_id => under_slab_insulation_values[:id],
-             :under_slab_insulation_r_value => to_float_or_nil(under_slab_insulation_values[:continuous_nominal_r_value]) }
+    vals = {}
+    vals[:id] = HPXML.get_id(slab) if is_selected(select, :id)
+    vals[:interior_adjacent_to] = XMLHelper.get_value(slab, "InteriorAdjacentTo") if is_selected(select, :interior_adjacent_to)
+    vals[:exterior_adjacent_to] = "outside" if is_selected(select, :exterior_adjacent_to)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(slab, "Area")) if is_selected(select, :area)
+    vals[:thickness] = to_float_or_nil(XMLHelper.get_value(slab, "Thickness")) if is_selected(select, :thickness)
+    vals[:exposed_perimeter] = to_float_or_nil(XMLHelper.get_value(slab, "ExposedPerimeter")) if is_selected(select, :exposed_perimeter)
+    vals[:perimeter_insulation_depth] = to_float_or_nil(XMLHelper.get_value(slab, "PerimeterInsulationDepth")) if is_selected(select, :perimeter_insulation_depth)
+    vals[:under_slab_insulation_width] = to_float_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationWidth")) if is_selected(select, :under_slab_insulation_width)
+    vals[:under_slab_insulation_spans_entire_slab] = to_bool_or_nil(XMLHelper.get_value(slab, "UnderSlabInsulationSpansEntireSlab")) if is_selected(select, :under_slab_insulation_spans_entire_slab)
+    vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade")) if is_selected(select, :depth_below_grade)
+    vals[:carpet_fraction] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction")) if is_selected(select, :carpet_fraction)
+    vals[:carpet_r_value] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue")) if is_selected(select, :carpet_r_value)
+    vals[:perimeter_insulation_id] = perimeter_insulation_values[:id] if is_selected(select, :perimeter_insulation_id)
+    vals[:perimeter_insulation_r_value] = to_float_or_nil(perimeter_insulation_values[:continuous_nominal_r_value]) if is_selected(select, :perimeter_insulation_r_value)
+    vals[:under_slab_insulation_id] = under_slab_insulation_values[:id] if is_selected(select, :under_slab_insulation_id)
+    vals[:under_slab_insulation_r_value] = to_float_or_nil(under_slab_insulation_values[:continuous_nominal_r_value]) if is_selected(select, :under_slab_insulation_r_value)
+    return vals
   end
 
   def self.add_window(hpxml:,
@@ -864,32 +934,30 @@ class HPXML
     return window
   end
 
-  def self.get_window_values(window:)
+  def self.get_window_values(window:,
+                             select: [])
     return nil if window.nil?
 
-    frame_type = window.elements["FrameType"]
-    unless frame_type.nil?
-      frame_type = XMLHelper.get_child_name(window, "FrameType")
-    end
-
-    return { :id => HPXML.get_id(window),
-             :area => to_float_or_nil(XMLHelper.get_value(window, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(window, "Azimuth")),
-             :orientation => XMLHelper.get_value(window, "Orientation"),
-             :frame_type => frame_type,
-             :aluminum_thermal_break => to_bool_or_nil(XMLHelper.get_value(window, "FrameType/Aluminum/ThermalBreak")),
-             :glass_layers => XMLHelper.get_value(window, "GlassLayers"),
-             :glass_type => XMLHelper.get_value(window, "GlassType"),
-             :gas_fill => XMLHelper.get_value(window, "GasFill"),
-             :ufactor => to_float_or_nil(XMLHelper.get_value(window, "UFactor")),
-             :shgc => to_float_or_nil(XMLHelper.get_value(window, "SHGC")),
-             :interior_shading_factor_summer => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/SummerShadingCoefficient")),
-             :interior_shading_factor_winter => to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/WinterShadingCoefficient")),
-             :exterior_shading => XMLHelper.get_value(window, "ExteriorShading/Type"),
-             :overhangs_depth => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth")),
-             :overhangs_distance_to_top_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow")),
-             :overhangs_distance_to_bottom_of_window => to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow")),
-             :wall_idref => HPXML.get_idref(window, "AttachedToWall") }
+    vals = {}
+    vals[:id] = HPXML.get_id(window) if is_selected(select, :id)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(window, "Area")) if is_selected(select, :area)
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(window, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:orientation] = XMLHelper.get_value(window, "Orientation") if is_selected(select, :orientation)
+    vals[:frame_type] = XMLHelper.get_child_name(window, "FrameType") if is_selected(select, :frame_type)
+    vals[:aluminum_thermal_break] = to_bool_or_nil(XMLHelper.get_value(window, "FrameType/Aluminum/ThermalBreak")) if is_selected(select, :aluminum_thermal_break)
+    vals[:glass_layers] = XMLHelper.get_value(window, "GlassLayers") if is_selected(select, :glass_layers)
+    vals[:glass_type] = XMLHelper.get_value(window, "GlassType") if is_selected(select, :glass_type)
+    vals[:gas_fill] = XMLHelper.get_value(window, "GasFill") if is_selected(select, :gas_fill)
+    vals[:ufactor] = to_float_or_nil(XMLHelper.get_value(window, "UFactor")) if is_selected(select, :ufactor)
+    vals[:shgc] = to_float_or_nil(XMLHelper.get_value(window, "SHGC")) if is_selected(select, :shgc)
+    vals[:interior_shading_factor_summer] = to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/SummerShadingCoefficient")) if is_selected(select, :interior_shading_factor_summer)
+    vals[:interior_shading_factor_winter] = to_float_or_nil(XMLHelper.get_value(window, "InteriorShading/WinterShadingCoefficient")) if is_selected(select, :interior_shading_factor_winter)
+    vals[:exterior_shading] = XMLHelper.get_value(window, "ExteriorShading/Type") if is_selected(select, :exterior_shading)
+    vals[:overhangs_depth] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/Depth")) if is_selected(select, :overhangs_depth)
+    vals[:overhangs_distance_to_top_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow")) if is_selected(select, :overhangs_distance_to_top_of_window)
+    vals[:overhangs_distance_to_bottom_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow")) if is_selected(select, :overhangs_distance_to_bottom_of_window)
+    vals[:wall_idref] = HPXML.get_idref(window, "AttachedToWall") if is_selected(select, :wall_idref)
+    return vals
   end
 
   def self.add_skylight(hpxml:,
@@ -914,27 +982,25 @@ class HPXML
     return skylight
   end
 
-  def self.get_skylight_values(skylight:)
+  def self.get_skylight_values(skylight:,
+                               select: [])
     return nil if skylight.nil?
 
-    frame_type = skylight.elements["FrameType"]
-    unless frame_type.nil?
-      frame_type = XMLHelper.get_child_name(skylight, "FrameType")
-    end
-
-    return { :id => HPXML.get_id(skylight),
-             :area => to_float_or_nil(XMLHelper.get_value(skylight, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(skylight, "Azimuth")),
-             :orientation => XMLHelper.get_value(skylight, "Orientation"),
-             :frame_type => frame_type,
-             :aluminum_thermal_break => to_bool_or_nil(XMLHelper.get_value(skylight, "FrameType/Aluminum/ThermalBreak")),
-             :glass_layers => XMLHelper.get_value(skylight, "GlassLayers"),
-             :glass_type => XMLHelper.get_value(skylight, "GlassType"),
-             :gas_fill => XMLHelper.get_value(skylight, "GasFill"),
-             :ufactor => to_float_or_nil(XMLHelper.get_value(skylight, "UFactor")),
-             :shgc => to_float_or_nil(XMLHelper.get_value(skylight, "SHGC")),
-             :exterior_shading => XMLHelper.get_value(skylight, "ExteriorShading/Type"),
-             :roof_idref => HPXML.get_idref(skylight, "AttachedToRoof") }
+    vals = {}
+    vals[:id] = HPXML.get_id(skylight) if is_selected(select, :id)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(skylight, "Area")) if is_selected(select, :area)
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(skylight, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:orientation] = XMLHelper.get_value(skylight, "Orientation") if is_selected(select, :orientation)
+    vals[:frame_type] = XMLHelper.get_child_name(skylight, "FrameType") if is_selected(select, :frame_type)
+    vals[:aluminum_thermal_break] = to_bool_or_nil(XMLHelper.get_value(skylight, "FrameType/Aluminum/ThermalBreak")) if is_selected(select, :aluminum_thermal_break)
+    vals[:glass_layers] = XMLHelper.get_value(skylight, "GlassLayers") if is_selected(select, :glass_layers)
+    vals[:glass_type] = XMLHelper.get_value(skylight, "GlassType") if is_selected(select, :glass_type)
+    vals[:gas_fill] = XMLHelper.get_value(skylight, "GasFill") if is_selected(select, :gas_fill)
+    vals[:ufactor] = to_float_or_nil(XMLHelper.get_value(skylight, "UFactor")) if is_selected(select, :ufactor)
+    vals[:shgc] = to_float_or_nil(XMLHelper.get_value(skylight, "SHGC")) if is_selected(select, :shgc)
+    vals[:exterior_shading] = XMLHelper.get_value(skylight, "ExteriorShading/Type") if is_selected(select, :exterior_shading)
+    vals[:roof_idref] = HPXML.get_idref(skylight, "AttachedToRoof") if is_selected(select, :roof_idref)
+    return vals
   end
 
   def self.add_door(hpxml:,
@@ -957,14 +1023,17 @@ class HPXML
     return door
   end
 
-  def self.get_door_values(door:)
+  def self.get_door_values(door:,
+                           select: [])
     return nil if door.nil?
 
-    return { :id => HPXML.get_id(door),
-             :wall_idref => HPXML.get_idref(door, "AttachedToWall"),
-             :area => to_float_or_nil(XMLHelper.get_value(door, "Area")),
-             :azimuth => to_integer_or_nil(XMLHelper.get_value(door, "Azimuth")),
-             :r_value => to_float_or_nil(XMLHelper.get_value(door, "RValue")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(door) if is_selected(select, :id)
+    vals[:wall_idref] = HPXML.get_idref(door, "AttachedToWall") if is_selected(select, :wall_idref)
+    vals[:area] = to_float_or_nil(XMLHelper.get_value(door, "Area")) if is_selected(select, :area)
+    vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(door, "Azimuth")) if is_selected(select, :azimuth)
+    vals[:r_value] = to_float_or_nil(XMLHelper.get_value(door, "RValue")) if is_selected(select, :r_value)
+    return vals
   end
 
   def self.add_heating_system(hpxml:,
@@ -1015,31 +1084,24 @@ class HPXML
     return heating_system
   end
 
-  def self.get_heating_system_values(heating_system:)
+  def self.get_heating_system_values(heating_system:,
+                                     select: [])
     return nil if heating_system.nil?
 
-    heating_system_type = XMLHelper.get_child_name(heating_system, "HeatingSystemType")
-
-    heating_efficiency_percent = nil
-    heating_efficiency_afue = nil
-    if ["ElectricResistance", "Stove", "PortableHeater"].include? heating_system_type
-      heating_efficiency_percent = to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='Percent']/Value"))
-    elsif ["Furnace", "WallFurnace", "Boiler"].include? heating_system_type
-      heating_efficiency_afue = to_float_or_nil(XMLHelper.get_value(heating_system, "AnnualHeatingEfficiency[Units='AFUE']/Value"))
-    end
-
-    return { :id => HPXML.get_id(heating_system),
-             :distribution_system_idref => HPXML.get_idref(heating_system, "DistributionSystem"),
-             :year_installed => to_integer_or_nil(XMLHelper.get_value(heating_system, "YearInstalled")),
-             :heating_system_type => heating_system_type,
-             :heating_system_fuel => XMLHelper.get_value(heating_system, "HeatingSystemFuel"),
-             :heating_capacity => to_float_or_nil(XMLHelper.get_value(heating_system, "HeatingCapacity")),
-             :heating_efficiency_afue => heating_efficiency_afue,
-             :heating_efficiency_percent => heating_efficiency_percent,
-             :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed")),
-             :electric_auxiliary_energy => to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")),
-             :heating_cfm => to_float_or_nil(XMLHelper.get_value(heating_system, "extension/HeatingFlowRate")),
-             :energy_star => XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star") }
+    vals = {}
+    vals[:id] = HPXML.get_id(heating_system) if is_selected(select, :id)
+    vals[:distribution_system_idref] = HPXML.get_idref(heating_system, "DistributionSystem") if is_selected(select, :distribution_system_idref)
+    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(heating_system, "YearInstalled")) if is_selected(select, :year_installed)
+    vals[:heating_system_type] = XMLHelper.get_child_name(heating_system, "HeatingSystemType") if is_selected(select, :heating_system_type)
+    vals[:heating_system_fuel] = XMLHelper.get_value(heating_system, "HeatingSystemFuel") if is_selected(select, :heating_system_fuel)
+    vals[:heating_capacity] = to_float_or_nil(XMLHelper.get_value(heating_system, "HeatingCapacity")) if is_selected(select, :heating_capacity)
+    vals[:heating_efficiency_afue] = to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[Furnace | WallFurnace | Boiler]]AnnualHeatingEfficiency[Units='AFUE']/Value")) if is_selected(select, :heating_efficiency_afue)
+    vals[:heating_efficiency_percent] = to_float_or_nil(XMLHelper.get_value(heating_system, "[HeatingSystemType[ElectricResistance | Stove | PortableHeater]]AnnualHeatingEfficiency[Units='Percent']/Value")) if is_selected(select, :heating_efficiency_percent)
+    vals[:fraction_heat_load_served] = to_float_or_nil(XMLHelper.get_value(heating_system, "FractionHeatLoadServed")) if is_selected(select, :fraction_heat_load_served)
+    vals[:electric_auxiliary_energy] = to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy")) if is_selected(select, :electric_auxiliary_energy)
+    vals[:heating_cfm] = to_float_or_nil(XMLHelper.get_value(heating_system, "extension/HeatingFlowRate")) if is_selected(select, :heating_cfm)
+    vals[:energy_star] = XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star") if is_selected(select, :energy_star)
+    return vals
   end
 
   def self.add_cooling_system(hpxml:,
@@ -1089,31 +1151,24 @@ class HPXML
     return cooling_system
   end
 
-  def self.get_cooling_system_values(cooling_system:)
+  def self.get_cooling_system_values(cooling_system:,
+                                     select: [])
     return nil if cooling_system.nil?
 
-    cooling_system_type = XMLHelper.get_value(cooling_system, "CoolingSystemType")
-
-    cooling_efficiency_seer = nil
-    cooling_efficiency_eer = nil
-    if ["central air conditioner"].include? cooling_system_type
-      cooling_efficiency_seer = to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value"))
-    elsif ["room air conditioner"].include? cooling_system_type
-      cooling_efficiency_eer = to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value"))
-    end
-
-    return { :id => HPXML.get_id(cooling_system),
-             :distribution_system_idref => HPXML.get_idref(cooling_system, "DistributionSystem"),
-             :year_installed => to_integer_or_nil(XMLHelper.get_value(cooling_system, "YearInstalled")),
-             :cooling_system_type => cooling_system_type,
-             :cooling_system_fuel => XMLHelper.get_value(cooling_system, "CoolingSystemFuel"),
-             :cooling_capacity => to_float_or_nil(XMLHelper.get_value(cooling_system, "CoolingCapacity")),
-             :fraction_cool_load_served => to_float_or_nil(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed")),
-             :cooling_efficiency_seer => cooling_efficiency_seer,
-             :cooling_efficiency_eer => cooling_efficiency_eer,
-             :cooling_shr => to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction")),
-             :cooling_cfm => to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate")),
-             :energy_star => XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") }
+    vals = {}
+    vals[:id] = HPXML.get_id(cooling_system) if is_selected(select, :id)
+    vals[:distribution_system_idref] = HPXML.get_idref(cooling_system, "DistributionSystem") if is_selected(select, :distribution_system_idref)
+    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(cooling_system, "YearInstalled")) if is_selected(select, :year_installed)
+    vals[:cooling_system_type] = XMLHelper.get_value(cooling_system, "CoolingSystemType") if is_selected(select, :cooling_system_type)
+    vals[:cooling_system_fuel] = XMLHelper.get_value(cooling_system, "CoolingSystemFuel") if is_selected(select, :cooling_system_fuel)
+    vals[:cooling_capacity] = to_float_or_nil(XMLHelper.get_value(cooling_system, "CoolingCapacity")) if is_selected(select, :cooling_capacity)
+    vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed")) if is_selected(select, :fraction_cool_load_served)
+    vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='central air conditioner']AnnualCoolingEfficiency[Units='SEER']/Value")) if is_selected(select, :cooling_efficiency_seer)
+    vals[:cooling_efficiency_eer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='room air conditioner']AnnualCoolingEfficiency[Units='EER']/Value")) if is_selected(select, :cooling_efficiency_eer)
+    vals[:cooling_shr] = to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction")) if is_selected(select, :cooling_shr)
+    vals[:cooling_cfm] = to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate")) if is_selected(select, :cooling_cfm)
+    vals[:energy_star] = XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") if is_selected(select, :energy_star)
+    return vals
   end
 
   def self.add_heat_pump(hpxml:,
@@ -1188,42 +1243,31 @@ class HPXML
     return heat_pump
   end
 
-  def self.get_heat_pump_values(heat_pump:)
+  def self.get_heat_pump_values(heat_pump:,
+                                select: [])
     return nil if heat_pump.nil?
 
-    heat_pump_type = XMLHelper.get_value(heat_pump, "HeatPumpType")
-
-    cooling_efficiency_seer = nil
-    cooling_efficiency_eer = nil
-    heating_efficiency_hspf = nil
-    heating_efficiency_cop = nil
-    if ["air-to-air", "mini-split"].include? heat_pump_type
-      cooling_efficiency_seer = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='SEER']/Value"))
-      heating_efficiency_hspf = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='HSPF']/Value"))
-    elsif ["ground-to-air"].include? heat_pump_type
-      cooling_efficiency_eer = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualCoolingEfficiency[Units='EER']/Value"))
-      heating_efficiency_cop = to_float_or_nil(XMLHelper.get_value(heat_pump, "AnnualHeatingEfficiency[Units='COP']/Value"))
-    end
-
-    return { :id => HPXML.get_id(heat_pump),
-             :distribution_system_idref => HPXML.get_idref(heat_pump, "DistributionSystem"),
-             :year_installed => to_integer_or_nil(XMLHelper.get_value(heat_pump, "YearInstalled")),
-             :heat_pump_type => heat_pump_type,
-             :heat_pump_fuel => XMLHelper.get_value(heat_pump, "HeatPumpFuel"),
-             :heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity")),
-             :heating_capacity_17F => to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity17F")),
-             :cooling_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity")),
-             :cooling_shr => to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingSensibleHeatFraction")),
-             :backup_heating_fuel => XMLHelper.get_value(heat_pump, "BackupSystemFuel"),
-             :backup_heating_capacity => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")),
-             :backup_heating_efficiency_percent => to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")),
-             :fraction_heat_load_served => to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")),
-             :fraction_cool_load_served => to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed")),
-             :cooling_efficiency_seer => cooling_efficiency_seer,
-             :cooling_efficiency_eer => cooling_efficiency_eer,
-             :heating_efficiency_hspf => heating_efficiency_hspf,
-             :heating_efficiency_cop => heating_efficiency_cop,
-             :energy_star => XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star") }
+    vals = {}
+    vals[:id] = HPXML.get_id(heat_pump) if is_selected(select, :id)
+    vals[:distribution_system_idref] = HPXML.get_idref(heat_pump, "DistributionSystem") if is_selected(select, :distribution_system_idref)
+    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(heat_pump, "YearInstalled")) if is_selected(select, :year_installed)
+    vals[:heat_pump_type] = XMLHelper.get_value(heat_pump, "HeatPumpType") if is_selected(select, :heat_pump_type)
+    vals[:heat_pump_fuel] = XMLHelper.get_value(heat_pump, "HeatPumpFuel") if is_selected(select, :heat_pump_fuel)
+    vals[:heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity")) if is_selected(select, :heating_capacity)
+    vals[:heating_capacity_17F] = to_float_or_nil(XMLHelper.get_value(heat_pump, "HeatingCapacity17F")) if is_selected(select, :heating_capacity_17F)
+    vals[:cooling_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingCapacity")) if is_selected(select, :cooling_capacity)
+    vals[:cooling_shr] = to_float_or_nil(XMLHelper.get_value(heat_pump, "CoolingSensibleHeatFraction")) if is_selected(select, :cooling_shr)
+    vals[:backup_heating_fuel] = XMLHelper.get_value(heat_pump, "BackupSystemFuel") if is_selected(select, :backup_heating_fuel)
+    vals[:backup_heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")) if is_selected(select, :backup_heating_capacity)
+    vals[:backup_heating_efficiency_percent] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")) if is_selected(select, :backup_heating_efficiency_percent)
+    vals[:fraction_heat_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")) if is_selected(select, :fraction_heat_load_served)
+    vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed")) if is_selected(select, :fraction_cool_load_served)
+    vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualCoolingEfficiency[Units='SEER']/Value")) if is_selected(select, :cooling_efficiency_seer)
+    vals[:cooling_efficiency_eer] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualCoolingEfficiency[Units='EER']/Value")) if is_selected(select, :cooling_efficiency_eer)
+    vals[:heating_efficiency_hspf] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualHeatingEfficiency[Units='HSPF']/Value")) if is_selected(select, :heating_efficiency_hspf)
+    vals[:heating_efficiency_cop] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualHeatingEfficiency[Units='COP']/Value")) if is_selected(select, :heating_efficiency_cop)
+    vals[:energy_star] = XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star") if is_selected(select, :energy_star)
+    return vals
   end
 
   def self.add_hvac_control(hpxml:,
@@ -1258,20 +1302,23 @@ class HPXML
     return hvac_control
   end
 
-  def self.get_hvac_control_values(hvac_control:)
+  def self.get_hvac_control_values(hvac_control:,
+                                   select: [])
     return nil if hvac_control.nil?
 
-    return { :id => HPXML.get_id(hvac_control),
-             :control_type => XMLHelper.get_value(hvac_control, "ControlType"),
-             :heating_setpoint_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason")),
-             :heating_setback_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetbackTempHeatingSeason")),
-             :heating_setback_hours_per_week => to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetbackHoursperWeekHeating")),
-             :heating_setback_start_hour => to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetbackStartHourHeating")),
-             :cooling_setpoint_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason")),
-             :cooling_setup_temp => to_float_or_nil(XMLHelper.get_value(hvac_control, "SetupTempCoolingSeason")),
-             :cooling_setup_hours_per_week => to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetupHoursperWeekCooling")),
-             :cooling_setup_start_hour => to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetupStartHourCooling")),
-             :ceiling_fan_cooling_setpoint_temp_offset => to_float_or_nil(XMLHelper.get_value(hvac_control, "extension/CeilingFanSetpointTempCoolingSeasonOffset")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(hvac_control) if is_selected(select, :id)
+    vals[:control_type] = XMLHelper.get_value(hvac_control, "ControlType") if is_selected(select, :control_type)
+    vals[:heating_setpoint_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempHeatingSeason")) if is_selected(select, :heating_setpoint_temp)
+    vals[:heating_setback_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetbackTempHeatingSeason")) if is_selected(select, :heating_setback_temp)
+    vals[:heating_setback_hours_per_week] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetbackHoursperWeekHeating")) if is_selected(select, :heating_setback_hours_per_week)
+    vals[:heating_setback_start_hour] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetbackStartHourHeating")) if is_selected(select, :heating_setback_start_hour)
+    vals[:cooling_setpoint_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetpointTempCoolingSeason")) if is_selected(select, :cooling_setpoint_temp)
+    vals[:cooling_setup_temp] = to_float_or_nil(XMLHelper.get_value(hvac_control, "SetupTempCoolingSeason")) if is_selected(select, :cooling_setup_temp)
+    vals[:cooling_setup_hours_per_week] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetupHoursperWeekCooling")) if is_selected(select, :cooling_setup_hours_per_week)
+    vals[:cooling_setup_start_hour] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetupStartHourCooling")) if is_selected(select, :cooling_setup_start_hour)
+    vals[:ceiling_fan_cooling_setpoint_temp_offset] = to_float_or_nil(XMLHelper.get_value(hvac_control, "extension/CeilingFanSetpointTempCoolingSeasonOffset")) if is_selected(select, :ceiling_fan_cooling_setpoint_temp_offset)
+    return vals
   end
 
   def self.add_hvac_distribution(hpxml:,
@@ -1298,19 +1345,22 @@ class HPXML
     return hvac_distribution
   end
 
-  def self.get_hvac_distribution_values(hvac_distribution:)
+  def self.get_hvac_distribution_values(hvac_distribution:,
+                                        select: [])
     return nil if hvac_distribution.nil?
 
-    distribution_system_type = XMLHelper.get_child_name(hvac_distribution, "DistributionSystemType")
-    if distribution_system_type == "Other"
-      distribution_system_type = XMLHelper.get_value(hvac_distribution.elements["DistributionSystemType"], "Other")
+    vals = {}
+    vals[:id] = HPXML.get_id(hvac_distribution) if is_selected(select, :id)
+    if is_selected(select, :distribution_system_type)
+      vals[:distribution_system_type] = XMLHelper.get_child_name(hvac_distribution, "DistributionSystemType")
+      if vals[:distribution_system_type] == "Other"
+        vals[:distribution_system_type] = XMLHelper.get_value(hvac_distribution.elements["DistributionSystemType"], "Other")
+      end
     end
-
-    return { :id => HPXML.get_id(hvac_distribution),
-             :distribution_system_type => distribution_system_type,
-             :annual_heating_dse => to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency")),
-             :annual_cooling_dse => to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency")),
-             :duct_system_sealed => to_bool_or_nil(XMLHelper.get_value(hvac_distribution, "HVACDistributionImprovement/DuctSystemSealed")) }
+    vals[:annual_heating_dse] = to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency")) if is_selected(select, :annual_heating_dse)
+    vals[:annual_cooling_dse] = to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency")) if is_selected(select, :annual_cooling_dse)
+    vals[:duct_system_sealed] = to_bool_or_nil(XMLHelper.get_value(hvac_distribution, "HVACDistributionImprovement/DuctSystemSealed")) if is_selected(select, :duct_system_sealed)
+    return vals
   end
 
   def self.add_duct_leakage_measurement(air_distribution:,
@@ -1328,14 +1378,17 @@ class HPXML
     return duct_leakage_measurement
   end
 
-  def self.get_duct_leakage_measurement_values(duct_leakage_measurement:)
+  def self.get_duct_leakage_measurement_values(duct_leakage_measurement:,
+                                               select: [])
     return nil if duct_leakage_measurement.nil?
 
-    return { :duct_type => XMLHelper.get_value(duct_leakage_measurement, "DuctType"),
-             :duct_leakage_test_method => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakageTestMethod"),
-             :duct_leakage_units => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Units"),
-             :duct_leakage_value => to_float_or_nil(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value")),
-             :duct_leakage_total_or_to_outside => XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/TotalOrToOutside") }
+    vals = {}
+    vals[:duct_type] = XMLHelper.get_value(duct_leakage_measurement, "DuctType") if is_selected(select, :duct_type)
+    vals[:duct_leakage_test_method] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakageTestMethod") if is_selected(select, :duct_leakage_test_method)
+    vals[:duct_leakage_units] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Units") if is_selected(select, :duct_leakage_units)
+    vals[:duct_leakage_value] = to_float_or_nil(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value")) if is_selected(select, :duct_leakage_value)
+    vals[:duct_leakage_total_or_to_outside] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/TotalOrToOutside") if is_selected(select, :duct_leakage_total_or_to_outside)
+    return vals
   end
 
   def self.add_ducts(air_distribution:,
@@ -1353,15 +1406,18 @@ class HPXML
     return ducts
   end
 
-  def self.get_ducts_values(ducts:)
+  def self.get_ducts_values(ducts:,
+                            select: [])
     return nil if ducts.nil?
 
-    return { :duct_type => XMLHelper.get_value(ducts, "DuctType"),
-             :duct_insulation_r_value => to_float_or_nil(XMLHelper.get_value(ducts, "DuctInsulationRValue")),
-             :duct_insulation_material => XMLHelper.get_value(ducts, "DuctInsulationMaterial"),
-             :duct_location => XMLHelper.get_value(ducts, "DuctLocation"),
-             :duct_fraction_area => to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea")),
-             :duct_surface_area => to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea")) }
+    vals = {}
+    vals[:duct_type] = XMLHelper.get_value(ducts, "DuctType") if is_selected(select, :duct_type)
+    vals[:duct_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctInsulationRValue")) if is_selected(select, :duct_insulation_r_value)
+    vals[:duct_insulation_material] = XMLHelper.get_value(ducts, "DuctInsulationMaterial") if is_selected(select, :duct_insulation_material)
+    vals[:duct_location] = XMLHelper.get_value(ducts, "DuctLocation") if is_selected(select, :duct_location)
+    vals[:duct_fraction_area] = to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea")) if is_selected(select, :duct_fraction_area)
+    vals[:duct_surface_area] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea")) if is_selected(select, :duct_surface_area)
+    return vals
   end
 
   def self.add_ventilation_fan(hpxml:,
@@ -1399,20 +1455,23 @@ class HPXML
     return ventilation_fan
   end
 
-  def self.get_ventilation_fan_values(ventilation_fan:)
+  def self.get_ventilation_fan_values(ventilation_fan:,
+                                      select: [])
     return nil if ventilation_fan.nil?
 
-    return { :id => HPXML.get_id(ventilation_fan),
-             :fan_type => XMLHelper.get_value(ventilation_fan, "FanType"),
-             :rated_flow_rate => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "RatedFlowRate")),
-             :tested_flow_rate => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TestedFlowRate")),
-             :hours_in_operation => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "HoursInOperation")),
-             :total_recovery_efficiency => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency")),
-             :total_recovery_efficiency_adjusted => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedTotalRecoveryEfficiency")),
-             :sensible_recovery_efficiency => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency")),
-             :sensible_recovery_efficiency_adjusted => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedSensibleRecoveryEfficiency")),
-             :fan_power => to_float_or_nil(XMLHelper.get_value(ventilation_fan, "FanPower")),
-             :distribution_system_idref => HPXML.get_idref(ventilation_fan, "AttachedToHVACDistributionSystem") }
+    vals = {}
+    vals[:id] = HPXML.get_id(ventilation_fan) if is_selected(select, :id)
+    vals[:fan_type] = XMLHelper.get_value(ventilation_fan, "FanType") if is_selected(select, :fan_type)
+    vals[:rated_flow_rate] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "RatedFlowRate")) if is_selected(select, :rated_flow_rate)
+    vals[:tested_flow_rate] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TestedFlowRate")) if is_selected(select, :tested_flow_rate)
+    vals[:hours_in_operation] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "HoursInOperation")) if is_selected(select, :hours_in_operation)
+    vals[:total_recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency")) if is_selected(select, :total_recovery_efficiency)
+    vals[:total_recovery_efficiency_adjusted] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedTotalRecoveryEfficiency")) if is_selected(select, :total_recovery_efficiency_adjusted)
+    vals[:sensible_recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency")) if is_selected(select, :sensible_recovery_efficiency)
+    vals[:sensible_recovery_efficiency_adjusted] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedSensibleRecoveryEfficiency")) if is_selected(select, :sensible_recovery_efficiency_adjusted)
+    vals[:fan_power] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "FanPower")) if is_selected(select, :fan_power)
+    vals[:distribution_system_idref] = HPXML.get_idref(ventilation_fan, "AttachedToHVACDistributionSystem") if is_selected(select, :distribution_system_idref)
+    return vals
   end
 
   def self.add_water_heating_system(hpxml:,
@@ -1459,25 +1518,28 @@ class HPXML
     return water_heating_system
   end
 
-  def self.get_water_heating_system_values(water_heating_system:)
+  def self.get_water_heating_system_values(water_heating_system:,
+                                           select: [])
     return nil if water_heating_system.nil?
 
-    return { :id => HPXML.get_id(water_heating_system),
-             :year_installed => to_integer_or_nil(XMLHelper.get_value(water_heating_system, "YearInstalled")),
-             :fuel_type => XMLHelper.get_value(water_heating_system, "FuelType"),
-             :water_heater_type => XMLHelper.get_value(water_heating_system, "WaterHeaterType"),
-             :location => XMLHelper.get_value(water_heating_system, "Location"),
-             :performance_adjustment => to_float_or_nil(XMLHelper.get_value(water_heating_system, "PerformanceAdjustment")),
-             :tank_volume => to_float_or_nil(XMLHelper.get_value(water_heating_system, "TankVolume")),
-             :fraction_dhw_load_served => to_float_or_nil(XMLHelper.get_value(water_heating_system, "FractionDHWLoadServed")),
-             :heating_capacity => to_float_or_nil(XMLHelper.get_value(water_heating_system, "HeatingCapacity")),
-             :energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor")),
-             :uniform_energy_factor => to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")),
-             :recovery_efficiency => to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")),
-             :uses_desuperheater => to_bool_or_nil(XMLHelper.get_value(water_heating_system, "UsesDesuperheater")),
-             :jacket_r_value => to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")),
-             :related_hvac => HPXML.get_idref(water_heating_system, "RelatedHVACSystem"),
-             :energy_star => XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star") }
+    vals = {}
+    vals[:id] = HPXML.get_id(water_heating_system) if is_selected(select, :id)
+    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(water_heating_system, "YearInstalled")) if is_selected(select, :year_installed)
+    vals[:fuel_type] = XMLHelper.get_value(water_heating_system, "FuelType") if is_selected(select, :fuel_type)
+    vals[:water_heater_type] = XMLHelper.get_value(water_heating_system, "WaterHeaterType") if is_selected(select, :water_heater_type)
+    vals[:location] = XMLHelper.get_value(water_heating_system, "Location") if is_selected(select, :location)
+    vals[:performance_adjustment] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "PerformanceAdjustment")) if is_selected(select, :performance_adjustment)
+    vals[:tank_volume] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "TankVolume")) if is_selected(select, :tank_volume)
+    vals[:fraction_dhw_load_served] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "FractionDHWLoadServed")) if is_selected(select, :fraction_dhw_load_served)
+    vals[:heating_capacity] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "HeatingCapacity")) if is_selected(select, :heating_capacity)
+    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "EnergyFactor")) if is_selected(select, :energy_factor)
+    vals[:uniform_energy_factor] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "UniformEnergyFactor")) if is_selected(select, :uniform_energy_factor)
+    vals[:recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "RecoveryEfficiency")) if is_selected(select, :recovery_efficiency)
+    vals[:uses_desuperheater] = to_bool_or_nil(XMLHelper.get_value(water_heating_system, "UsesDesuperheater")) if is_selected(select, :uses_desuperheater)
+    vals[:jacket_r_value] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")) if is_selected(select, :jacket_r_value)
+    vals[:related_hvac] = HPXML.get_idref(water_heating_system, "RelatedHVACSystem") if is_selected(select, :related_hvac)
+    vals[:energy_star] = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star") if is_selected(select, :energy_star)
+    return vals
   end
 
   def self.add_hot_water_distribution(hpxml:,
@@ -1522,20 +1584,23 @@ class HPXML
     return hot_water_distribution
   end
 
-  def self.get_hot_water_distribution_values(hot_water_distribution:)
+  def self.get_hot_water_distribution_values(hot_water_distribution:,
+                                             select: [])
     return nil if hot_water_distribution.nil?
 
-    return { :id => HPXML.get_id(hot_water_distribution),
-             :system_type => XMLHelper.get_child_name(hot_water_distribution, "SystemType"),
-             :pipe_r_value => to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "PipeInsulation/PipeRValue")),
-             :standard_piping_length => to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Standard/PipingLength")),
-             :recirculation_control_type => XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/ControlType"),
-             :recirculation_piping_length => to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/RecirculationPipingLoopLength")),
-             :recirculation_branch_piping_length => to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/BranchPipingLoopLength")),
-             :recirculation_pump_power => to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/PumpPower")),
-             :dwhr_facilities_connected => XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/FacilitiesConnected"),
-             :dwhr_equal_flow => to_bool_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/EqualFlow")),
-             :dwhr_efficiency => to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/Efficiency")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(hot_water_distribution) if is_selected(select, :id)
+    vals[:system_type] = XMLHelper.get_child_name(hot_water_distribution, "SystemType") if is_selected(select, :system_type)
+    vals[:pipe_r_value] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "PipeInsulation/PipeRValue")) if is_selected(select, :pipe_r_value)
+    vals[:standard_piping_length] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Standard/PipingLength")) if is_selected(select, :standard_piping_length)
+    vals[:recirculation_control_type] = XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/ControlType") if is_selected(select, :recirculation_control_type)
+    vals[:recirculation_piping_length] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/RecirculationPipingLoopLength")) if is_selected(select, :recirculation_piping_length)
+    vals[:recirculation_branch_piping_length] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/BranchPipingLoopLength")) if is_selected(select, :recirculation_branch_piping_length)
+    vals[:recirculation_pump_power] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "SystemType/Recirculation/PumpPower")) if is_selected(select, :recirculation_pump_power)
+    vals[:dwhr_facilities_connected] = XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/FacilitiesConnected") if is_selected(select, :dwhr_facilities_connected)
+    vals[:dwhr_equal_flow] = to_bool_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/EqualFlow")) if is_selected(select, :dwhr_equal_flow)
+    vals[:dwhr_efficiency] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/Efficiency")) if is_selected(select, :dwhr_efficiency)
+    return vals
   end
 
   def self.add_water_fixture(hpxml:,
@@ -1553,12 +1618,15 @@ class HPXML
     return water_fixture
   end
 
-  def self.get_water_fixture_values(water_fixture:)
+  def self.get_water_fixture_values(water_fixture:,
+                                    select: [])
     return nil if water_fixture.nil?
 
-    return { :id => HPXML.get_id(water_fixture),
-             :water_fixture_type => XMLHelper.get_value(water_fixture, "WaterFixtureType"),
-             :low_flow => to_bool_or_nil(XMLHelper.get_value(water_fixture, "LowFlow")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(water_fixture) if is_selected(select, :id)
+    vals[:water_fixture_type] = XMLHelper.get_value(water_fixture, "WaterFixtureType") if is_selected(select, :water_fixture_type)
+    vals[:low_flow] = to_bool_or_nil(XMLHelper.get_value(water_fixture, "LowFlow")) if is_selected(select, :low_flow)
+    return vals
   end
 
   def self.add_pv_system(hpxml:,
@@ -1588,21 +1656,24 @@ class HPXML
     return pv_system
   end
 
-  def self.get_pv_system_values(pv_system:)
+  def self.get_pv_system_values(pv_system:,
+                                select: [])
     return nil if pv_system.nil?
 
-    return { :id => HPXML.get_id(pv_system),
-             :location => XMLHelper.get_value(pv_system, "Location"),
-             :module_type => XMLHelper.get_value(pv_system, "ModuleType"),
-             :tracking => XMLHelper.get_value(pv_system, "Tracking"),
-             :array_orientation => XMLHelper.get_value(pv_system, "ArrayOrientation"),
-             :array_azimuth => to_integer_or_nil(XMLHelper.get_value(pv_system, "ArrayAzimuth")),
-             :array_tilt => to_float_or_nil(XMLHelper.get_value(pv_system, "ArrayTilt")),
-             :max_power_output => to_float_or_nil(XMLHelper.get_value(pv_system, "MaxPowerOutput")),
-             :inverter_efficiency => to_float_or_nil(XMLHelper.get_value(pv_system, "InverterEfficiency")),
-             :system_losses_fraction => to_float_or_nil(XMLHelper.get_value(pv_system, "SystemLossesFraction")),
-             :number_of_panels => to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels")),
-             :year_modules_manufactured => to_integer_or_nil(XMLHelper.get_value(pv_system, "YearModulesManufactured")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(pv_system) if is_selected(select, :id)
+    vals[:location] = XMLHelper.get_value(pv_system, "Location") if is_selected(select, :location)
+    vals[:module_type] = XMLHelper.get_value(pv_system, "ModuleType") if is_selected(select, :module_type)
+    vals[:tracking] = XMLHelper.get_value(pv_system, "Tracking") if is_selected(select, :tracking)
+    vals[:array_orientation] = XMLHelper.get_value(pv_system, "ArrayOrientation") if is_selected(select, :array_orientation)
+    vals[:array_azimuth] = to_integer_or_nil(XMLHelper.get_value(pv_system, "ArrayAzimuth")) if is_selected(select, :array_azimuth)
+    vals[:array_tilt] = to_float_or_nil(XMLHelper.get_value(pv_system, "ArrayTilt")) if is_selected(select, :array_tilt)
+    vals[:max_power_output] = to_float_or_nil(XMLHelper.get_value(pv_system, "MaxPowerOutput")) if is_selected(select, :max_power_output)
+    vals[:inverter_efficiency] = to_float_or_nil(XMLHelper.get_value(pv_system, "InverterEfficiency")) if is_selected(select, :inverter_efficiency)
+    vals[:system_losses_fraction] = to_float_or_nil(XMLHelper.get_value(pv_system, "SystemLossesFraction")) if is_selected(select, :system_losses_fraction)
+    vals[:number_of_panels] = to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels")) if is_selected(select, :number_of_panels)
+    vals[:year_modules_manufactured] = to_integer_or_nil(XMLHelper.get_value(pv_system, "YearModulesManufactured")) if is_selected(select, :year_modules_manufactured)
+    return vals
   end
 
   def self.add_clothes_washer(hpxml:,
@@ -1637,18 +1708,21 @@ class HPXML
     return clothes_washer
   end
 
-  def self.get_clothes_washer_values(clothes_washer:)
+  def self.get_clothes_washer_values(clothes_washer:,
+                                     select: [])
     return nil if clothes_washer.nil?
 
-    return { :id => HPXML.get_id(clothes_washer),
-             :location => XMLHelper.get_value(clothes_washer, "Location"),
-             :modified_energy_factor => to_float_or_nil(XMLHelper.get_value(clothes_washer, "ModifiedEnergyFactor")),
-             :integrated_modified_energy_factor => to_float_or_nil(XMLHelper.get_value(clothes_washer, "IntegratedModifiedEnergyFactor")),
-             :rated_annual_kwh => to_float_or_nil(XMLHelper.get_value(clothes_washer, "RatedAnnualkWh")),
-             :label_electric_rate => to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelElectricRate")),
-             :label_gas_rate => to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelGasRate")),
-             :label_annual_gas_cost => to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelAnnualGasCost")),
-             :capacity => to_float_or_nil(XMLHelper.get_value(clothes_washer, "Capacity")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(clothes_washer) if is_selected(select, :id)
+    vals[:location] = XMLHelper.get_value(clothes_washer, "Location") if is_selected(select, :location)
+    vals[:modified_energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "ModifiedEnergyFactor")) if is_selected(select, :modified_energy_factor)
+    vals[:integrated_modified_energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "IntegratedModifiedEnergyFactor")) if is_selected(select, :integrated_modified_energy_factor)
+    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "RatedAnnualkWh")) if is_selected(select, :rated_annual_kwh)
+    vals[:label_electric_rate] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelElectricRate")) if is_selected(select, :label_electric_rate)
+    vals[:label_gas_rate] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelGasRate")) if is_selected(select, :label_gas_rate)
+    vals[:label_annual_gas_cost] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelAnnualGasCost")) if is_selected(select, :label_annual_gas_cost)
+    vals[:capacity] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "Capacity")) if is_selected(select, :capacity)
+    return vals
   end
 
   def self.add_clothes_dryer(hpxml:,
@@ -1677,15 +1751,18 @@ class HPXML
     return clothes_dryer
   end
 
-  def self.get_clothes_dryer_values(clothes_dryer:)
+  def self.get_clothes_dryer_values(clothes_dryer:,
+                                    select: [])
     return nil if clothes_dryer.nil?
 
-    return { :id => HPXML.get_id(clothes_dryer),
-             :location => XMLHelper.get_value(clothes_dryer, "Location"),
-             :fuel_type => XMLHelper.get_value(clothes_dryer, "FuelType"),
-             :energy_factor => to_float_or_nil(XMLHelper.get_value(clothes_dryer, "EnergyFactor")),
-             :combined_energy_factor => to_float_or_nil(XMLHelper.get_value(clothes_dryer, "CombinedEnergyFactor")),
-             :control_type => XMLHelper.get_value(clothes_dryer, "ControlType") }
+    vals = {}
+    vals[:id] = HPXML.get_id(clothes_dryer) if is_selected(select, :id)
+    vals[:location] = XMLHelper.get_value(clothes_dryer, "Location") if is_selected(select, :location)
+    vals[:fuel_type] = XMLHelper.get_value(clothes_dryer, "FuelType") if is_selected(select, :fuel_type)
+    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_dryer, "EnergyFactor")) if is_selected(select, :energy_factor)
+    vals[:combined_energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_dryer, "CombinedEnergyFactor")) if is_selected(select, :combined_energy_factor)
+    vals[:control_type] = XMLHelper.get_value(clothes_dryer, "ControlType") if is_selected(select, :control_type)
+    return vals
   end
 
   def self.add_dishwasher(hpxml:,
@@ -1710,13 +1787,16 @@ class HPXML
     return dishwasher
   end
 
-  def self.get_dishwasher_values(dishwasher:)
+  def self.get_dishwasher_values(dishwasher:,
+                                 select: [])
     return nil if dishwasher.nil?
 
-    return { :id => HPXML.get_id(dishwasher),
-             :energy_factor => to_float_or_nil(XMLHelper.get_value(dishwasher, "EnergyFactor")),
-             :rated_annual_kwh => to_float_or_nil(XMLHelper.get_value(dishwasher, "RatedAnnualkWh")),
-             :place_setting_capacity => to_integer_or_nil(XMLHelper.get_value(dishwasher, "PlaceSettingCapacity")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(dishwasher) if is_selected(select, :id)
+    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dishwasher, "EnergyFactor")) if is_selected(select, :energy_factor)
+    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(dishwasher, "RatedAnnualkWh")) if is_selected(select, :rated_annual_kwh)
+    vals[:place_setting_capacity] = to_integer_or_nil(XMLHelper.get_value(dishwasher, "PlaceSettingCapacity")) if is_selected(select, :place_setting_capacity)
+    return vals
   end
 
   def self.add_refrigerator(hpxml:,
@@ -1737,13 +1817,16 @@ class HPXML
     return refrigerator
   end
 
-  def self.get_refrigerator_values(refrigerator:)
+  def self.get_refrigerator_values(refrigerator:,
+                                   select: [])
     return nil if refrigerator.nil?
 
-    return { :id => HPXML.get_id(refrigerator),
-             :location => XMLHelper.get_value(refrigerator, "Location"),
-             :rated_annual_kwh => to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh")),
-             :adjusted_annual_kwh => to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(refrigerator) if is_selected(select, :id)
+    vals[:location] = XMLHelper.get_value(refrigerator, "Location") if is_selected(select, :location)
+    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh")) if is_selected(select, :rated_annual_kwh)
+    vals[:adjusted_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh")) if is_selected(select, :adjusted_annual_kwh)
+    return vals
   end
 
   def self.add_cooking_range(hpxml:,
@@ -1761,12 +1844,15 @@ class HPXML
     return cooking_range
   end
 
-  def self.get_cooking_range_values(cooking_range:)
+  def self.get_cooking_range_values(cooking_range:,
+                                    select: [])
     return nil if cooking_range.nil?
 
-    return { :id => HPXML.get_id(cooking_range),
-             :fuel_type => XMLHelper.get_value(cooking_range, "FuelType"),
-             :is_induction => to_bool_or_nil(XMLHelper.get_value(cooking_range, "IsInduction")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(cooking_range) if is_selected(select, :id)
+    vals[:fuel_type] = XMLHelper.get_value(cooking_range, "FuelType") if is_selected(select, :fuel_type)
+    vals[:is_induction] = to_bool_or_nil(XMLHelper.get_value(cooking_range, "IsInduction")) if is_selected(select, :is_induction)
+    return vals
   end
 
   def self.add_oven(hpxml:,
@@ -1782,11 +1868,14 @@ class HPXML
     return oven
   end
 
-  def self.get_oven_values(oven:)
+  def self.get_oven_values(oven:,
+                           select: [])
     return nil if oven.nil?
 
-    return { :id => HPXML.get_id(oven),
-             :is_convection => to_bool_or_nil(XMLHelper.get_value(oven, "IsConvection")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(oven) if is_selected(select, :id)
+    vals[:is_convection] = to_bool_or_nil(XMLHelper.get_value(oven, "IsConvection")) if is_selected(select, :is_convection)
+    return vals
   end
 
   def self.add_lighting(hpxml:,
@@ -1844,15 +1933,18 @@ class HPXML
     return lighting_group
   end
 
-  def self.get_lighting_values(lighting:)
+  def self.get_lighting_values(lighting:,
+                               select: [])
     return nil if lighting.nil?
 
-    return { :fraction_tier_i_interior => to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='interior']/FractionofUnitsInLocation")),
-             :fraction_tier_i_exterior => to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='exterior']/FractionofUnitsInLocation")),
-             :fraction_tier_i_garage => to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='garage']/FractionofUnitsInLocation")),
-             :fraction_tier_ii_interior => to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='interior']/FractionofUnitsInLocation")),
-             :fraction_tier_ii_exterior => to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='exterior']/FractionofUnitsInLocation")),
-             :fraction_tier_ii_garage => to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='garage']/FractionofUnitsInLocation")) }
+    vals = {}
+    vals[:fraction_tier_i_interior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='interior']/FractionofUnitsInLocation")) if is_selected(select, :fraction_tier_i_interior)
+    vals[:fraction_tier_i_exterior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='exterior']/FractionofUnitsInLocation")) if is_selected(select, :fraction_tier_i_exterior)
+    vals[:fraction_tier_i_garage] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='garage']/FractionofUnitsInLocation")) if is_selected(select, :fraction_tier_i_garage)
+    vals[:fraction_tier_ii_interior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='interior']/FractionofUnitsInLocation")) if is_selected(select, :fraction_tier_ii_interior)
+    vals[:fraction_tier_ii_exterior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='exterior']/FractionofUnitsInLocation")) if is_selected(select, :fraction_tier_ii_exterior)
+    vals[:fraction_tier_ii_garage] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='garage']/FractionofUnitsInLocation")) if is_selected(select, :fraction_tier_ii_garage)
+    return vals
   end
 
   def self.add_ceiling_fan(hpxml:,
@@ -1874,12 +1966,15 @@ class HPXML
     return ceiling_fan
   end
 
-  def self.get_ceiling_fan_values(ceiling_fan:)
+  def self.get_ceiling_fan_values(ceiling_fan:,
+                                  select: [])
     return nil if ceiling_fan.nil?
 
-    return { :id => HPXML.get_id(ceiling_fan),
-             :efficiency => to_float_or_nil(XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency")),
-             :quantity => to_integer_or_nil(XMLHelper.get_value(ceiling_fan, "Quantity")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(ceiling_fan) if is_selected(select, :id)
+    vals[:efficiency] = to_float_or_nil(XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency")) if is_selected(select, :efficiency)
+    vals[:quantity] = to_integer_or_nil(XMLHelper.get_value(ceiling_fan, "Quantity")) if is_selected(select, :quantity)
+    return vals
   end
 
   def self.add_plug_load(hpxml:,
@@ -1906,14 +2001,17 @@ class HPXML
     return plug_load
   end
 
-  def self.get_plug_load_values(plug_load:)
+  def self.get_plug_load_values(plug_load:,
+                                select: [])
     return nil if plug_load.nil?
 
-    return { :id => HPXML.get_id(plug_load),
-             :plug_load_type => XMLHelper.get_value(plug_load, "PlugLoadType"),
-             :kWh_per_year => to_float_or_nil(XMLHelper.get_value(plug_load, "Load[Units='kWh/year']/Value")),
-             :frac_sensible => to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracSensible")),
-             :frac_latent => to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracLatent")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(plug_load) if is_selected(select, :id)
+    vals[:plug_load_type] = XMLHelper.get_value(plug_load, "PlugLoadType") if is_selected(select, :plug_load_type)
+    vals[:kWh_per_year] = to_float_or_nil(XMLHelper.get_value(plug_load, "Load[Units='kWh/year']/Value")) if is_selected(select, :kWh_per_year)
+    vals[:frac_sensible] = to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracSensible")) if is_selected(select, :frac_sensible)
+    vals[:frac_latent] = to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracLatent")) if is_selected(select, :frac_latent)
+    return vals
   end
 
   def self.add_misc_loads_schedule(hpxml:,
@@ -1930,12 +2028,15 @@ class HPXML
     return misc_loads
   end
 
-  def self.get_misc_loads_schedule_values(misc_loads:)
+  def self.get_misc_loads_schedule_values(misc_loads:,
+                                          select: [])
     return nil if misc_loads.nil?
 
-    return { :weekday_fractions => XMLHelper.get_value(misc_loads, "extension/WeekdayScheduleFractions"),
-             :weekend_fractions => XMLHelper.get_value(misc_loads, "extension/WeekendScheduleFractions"),
-             :monthly_multipliers => XMLHelper.get_value(misc_loads, "extension/MonthlyScheduleMultipliers") }
+    vals = {}
+    vals[:weekday_fractions] = XMLHelper.get_value(misc_loads, "extension/WeekdayScheduleFractions") if is_selected(select, :weekday_fractions)
+    vals[:weekend_fractions] = XMLHelper.get_value(misc_loads, "extension/WeekendScheduleFractions") if is_selected(select, :weekend_fractions)
+    vals[:monthly_multipliers] = XMLHelper.get_value(misc_loads, "extension/MonthlyScheduleMultipliers") if is_selected(select, :monthly_multipliers)
+    return vals
   end
 
   def self.add_assembly_insulation(parent:,
@@ -2015,6 +2116,13 @@ class HPXML
   end
 
   private
+
+  def self.is_selected(keys, key)
+    return true if keys.empty?
+    return true if keys.include? key
+
+    return false
+  end
 
   def self.get_id(parent, element_name = "SystemIdentifier")
     return parent.elements[element_name].attributes["id"]
