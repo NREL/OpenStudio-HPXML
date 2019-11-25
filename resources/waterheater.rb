@@ -36,7 +36,7 @@ class Waterheater
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
 
     if not desuperheater_clg_coil.nil?
-      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank)
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank).each {|e| dhw_map[sys_id] << e}
     end
     return true
   end
@@ -72,7 +72,7 @@ class Waterheater
     dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
     if not desuperheater_clg_coil.nil?
-      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTankless)
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank).each {|e| dhw_map[sys_id] << e}
     end
     return true
   end
@@ -761,6 +761,7 @@ class Waterheater
   def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type)
     reclaimed_efficiency = 0.25 # default
     eta_c = tank.heaterThermalEfficiency.get
+    tank_name = tank.name.to_s.gsub(' ', '_')
     coil_clg_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling Coil Total Cooling Energy")
     coil_clg_energy.setName("#{desuperheater_clg_coil.name.to_s} clg energy")
     coil_clg_energy.setKeyName(desuperheater_clg_coil.name.to_s)
@@ -770,24 +771,24 @@ class Waterheater
     coil_elec_energy.setKeyName(desuperheater_clg_coil.name.to_s)
 
     wh_energy = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Water Heater Heating Energy")
-    wh_energy.setName("#{desuperheater_clg_coil.name.to_s} wh energy")
-    wh_energy.setKeyName(desuperheater_clg_coil.name.to_s)
+    wh_energy.setName("#{tank.name.to_s} wh energy")
+    wh_energy.setKeyName(tank.name.to_s)
     
     dsh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    dsh_program.setName("#{tank.name} DSH Program")
+    dsh_program.setName("#{tank_name} DSH Program")
     dsh_program.addLine("Set Avail_Cap = #{reclaimed_efficiency} * (#{coil_clg_energy.name} + #{coil_elec_energy.name})")
-    dsh_program.addLine("Set Reclaimed_Heat = MIN(#{wh_energy.name}, Avail_Cap)")
-    dsh_program.addLine("Set #{tank.name}_dsh = #{wh_energy.name} - Reclaimed_Heat")
-    dsh_program.addLine("Set #{tank.name}_e = adj_wh_energy / #{eta_c}")
+    dsh_program.addLine("Set #{tank_name}_dsh = @Min #{wh_energy.name}, Avail_Cap")
+    dsh_program.addLine("Set #{tank_name}_e_htg = #{wh_energy.name} - #{tank_name}_dsh")
+    dsh_program.addLine("Set #{tank_name}_e = #{tank_name}_e_htg / #{eta_c}")
 
-    adjusted_water_heating = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank.name}_e")
+    adjusted_water_heating = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank_name}_e")
     adjusted_water_heating.setName("wh energy")
     adjusted_water_heating.setTypeOfDataInVariable("Summed")
     adjusted_water_heating.setUpdateFrequency("SystemTimestep")
     adjusted_water_heating.setEMSProgramOrSubroutineName(dsh_program)
     adjusted_water_heating.setUnits("J")
 
-    desuperheater_energy = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank.name}_dsh")
+    desuperheater_energy = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank_name}_dsh")
     desuperheater_energy.setName("desuperheater energy")
     desuperheater_energy.setTypeOfDataInVariable("Summed")
     desuperheater_energy.setUpdateFrequency("SystemTimestep")
