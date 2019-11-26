@@ -1899,7 +1899,7 @@ class Airflow
     duct_programs.each do |air_loop_name, duct_program|
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       program_calling_manager.setName(air_loop_name + " program calling manager")
-      program_calling_manager.setCallingPoint("InsideSystemTimestep")
+      program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
       program_calling_manager.addProgram(duct_program)
     end
   end
