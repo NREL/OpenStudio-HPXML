@@ -3675,31 +3675,21 @@ class OSModel
 
     # EMS Sensors: Global
 
-    tot_sensors = {}
+    tot_load_sensors = {}
 
-    tot_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer")
-    tot_sensors[:htg].setName("htg_energy_tot")
+    tot_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer")
+    tot_load_sensors[:htg].setName("htg_load_tot")
 
-    tot_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer")
-    tot_sensors[:clg].setName("clg_energy_tot")
+    tot_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer")
+    tot_load_sensors[:clg].setName("clg_load_tot")
 
-    liv_sensors = {}
+    liv_load_sensors = {}
 
-    liv_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:LIVING")
-    liv_sensors[:htg].setName("htg_energy_liv")
+    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:LIVING")
+    liv_load_sensors[:htg].setName("htg_load_liv")
 
-    liv_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:LIVING")
-    liv_sensors[:clg].setName("clg_energy_liv")
-
-    predicted_sensors = {}
-
-    predicted_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Heating Setpoint Heat Transfer Rate")
-    predicted_sensors[:htg].setName("htg_predicted_load")
-    predicted_sensors[:htg].setKeyName(@living_zone.name.to_s)
-
-    predicted_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate")
-    predicted_sensors[:clg].setName("clg_predicted_load")
-    predicted_sensors[:clg].setKeyName(@living_zone.name.to_s)
+    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:LIVING")
+    liv_load_sensors[:clg].setName("clg_load_liv")
 
     setpoint_sensors = {}
 
@@ -3711,10 +3701,10 @@ class OSModel
     setpoint_sensors[:clg].setName("clg_setpoint_temp")
     setpoint_sensors[:clg].setKeyName(@living_zone.name.to_s)
 
-    prev_hr_predicted_vars = {}
+    prev_hr_load_vars = {}
 
-    prev_hr_predicted_vars[:htg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_htg_predicted")
-    prev_hr_predicted_vars[:clg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_clg_predicted")
+    prev_hr_load_vars[:htg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_htg_load_liv")
+    prev_hr_load_vars[:clg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_clg_load_liv")
 
     prev_hr_setpoint_vars = {}
 
@@ -4103,7 +4093,7 @@ class OSModel
         sign = "-"
       end
       program.addLine("Set #{mode}_mode = 0")
-      program.addLine("If #{liv_sensors[mode].name} > 0")
+      program.addLine("If #{liv_load_sensors[mode].name} > 0")
       program.addLine("  Set #{mode}_mode = 1")
       program.addLine("EndIf")
       surfaces_sensors.keys.each do |k|
@@ -4115,13 +4105,11 @@ class OSModel
 
       # Calculate sum
 
-      # If partial load hour or setpoint change, ratio the loads to equal the total for this hour.
+      # If setpoint change or partial load hour, ratio the loads to equal the total for this hour.
       program.addLine("Set #{mode}_ratio = 0")
-      program.addLine("If #{setpoint_sensors[mode].name} <> #{prev_hr_setpoint_vars[mode].name} && #{mode}_mode > 0")
+      program.addLine("If (#{setpoint_sensors[mode].name} <> #{prev_hr_setpoint_vars[mode].name}) && (#{mode}_mode > 0)")
       program.addLine("  Set #{mode}_ratio = 1")
-      program.addLine("ElseIf #{predicted_sensors[mode].name} > 0 && #{prev_hr_predicted_vars[mode].name} <= 0 && #{mode}_mode > 0")
-      program.addLine("  Set #{mode}_ratio = 1")
-      program.addLine("ElseIf #{predicted_sensors[mode].name} < 0 && #{prev_hr_predicted_vars[mode].name} >= 0 && #{mode}_mode > 0")
+      program.addLine("ElseIf (#{liv_load_sensors[mode].name} * #{prev_hr_load_vars[mode].name} == 0) && (#{mode}_mode > 0)")
       program.addLine("  Set #{mode}_ratio = 1")
       program.addLine("EndIf")
       program.addLine("If #{mode}_ratio > 0")
@@ -4133,7 +4121,7 @@ class OSModel
         program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{nonsurf_name}")
       end
       program.addLine("  If #{mode}_sum <> 0")
-      program.addLine("    Set #{mode}_load_ratio = #{tot_sensors[mode].name} / #{mode}_sum")
+      program.addLine("    Set #{mode}_load_ratio = #{tot_load_sensors[mode].name} / #{mode}_sum")
       program.addLine("  Else")
       program.addLine("    Set #{mode}_load_ratio = 1")
       program.addLine("  EndIf")
@@ -4145,7 +4133,7 @@ class OSModel
       end
       program.addLine("EndIf")
 
-      program.addLine("Set #{prev_hr_predicted_vars[mode].name} = #{predicted_sensors[mode].name}")
+      program.addLine("Set #{prev_hr_load_vars[mode].name} = #{liv_load_sensors[mode].name}")
       program.addLine("Set #{prev_hr_setpoint_vars[mode].name} = #{setpoint_sensors[mode].name}")
     end
 
