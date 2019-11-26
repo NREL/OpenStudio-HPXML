@@ -1030,10 +1030,6 @@ class Airflow
       surface.setOutsideBoundaryCondition("Adiabatic")
       surface.setSunExposure("NoSun")
       surface.setWindExposure("NoWind")
-      surface_property_convection_coefficients = OpenStudio::Model::SurfacePropertyConvectionCoefficients.new(surface)
-      surface_property_convection_coefficients.setConvectionCoefficient1Location("Inside")
-      surface_property_convection_coefficients.setConvectionCoefficient1Type("Value")
-      surface_property_convection_coefficients.setConvectionCoefficient1(999)
     end
 
     return ra_duct_zone
@@ -1903,7 +1899,7 @@ class Airflow
     duct_programs.each do |air_loop_name, duct_program|
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       program_calling_manager.setName(air_loop_name + " program calling manager")
-      program_calling_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
+      program_calling_manager.setCallingPoint("InsideSystemTimestep")
       program_calling_manager.addProgram(duct_program)
     end
   end
