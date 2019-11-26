@@ -1012,7 +1012,7 @@ class Airflow
     # Create the return air plenum zone, space
     ra_duct_zone = OpenStudio::Model::ThermalZone.new(model)
     ra_duct_zone.setName(air_loop_name + " ret air zone")
-    ra_duct_zone.setVolume(1.0)
+    ra_duct_zone.setVolume(10.0)
 
     ra_duct_polygon = OpenStudio::Point3dVector.new
     ra_duct_polygon << OpenStudio::Point3d.new(0, 0, 0)
@@ -1899,7 +1899,7 @@ class Airflow
     duct_programs.each do |air_loop_name, duct_program|
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
       program_calling_manager.setName(air_loop_name + " program calling manager")
-      program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
+      program_calling_manager.setCallingPoint("EndOfSystemTimestepAfterHVACReporting")
       program_calling_manager.addProgram(duct_program)
     end
   end
