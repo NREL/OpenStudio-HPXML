@@ -4114,22 +4114,29 @@ class OSModel
       end
 
       # Calculate sum
-      program.addLine("Set #{mode}_sum = 0")
+
+      # If partial load hour or setpoint change, ratio the loads to equal the total for this hour.
+      program.addLine("Set #{mode}_ratio = 0")
+      program.addLine("If #{setpoint_sensors[mode].name} <> #{prev_hr_setpoint_vars[mode].name} && #{mode}_mode > 0")
+      program.addLine("  Set #{mode}_ratio = 1")
+      program.addLine("ElseIf #{predicted_sensors[mode].name} > 0 && #{prev_hr_predicted_vars[mode].name} <= 0 && #{mode}_mode > 0")
+      program.addLine("  Set #{mode}_ratio = 1")
+      program.addLine("ElseIf #{predicted_sensors[mode].name} < 0 && #{prev_hr_predicted_vars[mode].name} >= 0 && #{mode}_mode > 0")
+      program.addLine("  Set #{mode}_ratio = 1")
+      program.addLine("EndIf")
+      program.addLine("If #{mode}_ratio > 0")
+      program.addLine("  Set #{mode}_sum = 0")
       surfaces_sensors.keys.each do |k|
-        program.addLine("Set #{mode}_sum = #{mode}_sum + #{mode}_#{k.to_s}")
+        program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{k.to_s}")
       end
       nonsurf_names.each do |nonsurf_name|
-        program.addLine("Set #{mode}_sum = #{mode}_sum + #{mode}_#{nonsurf_name}")
+        program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{nonsurf_name}")
       end
-
-      # If setpoint changed, attribute residual load to setpoint change.
-      program.addLine("Set #{mode}_setpoint = 0")
-      program.addLine("If #{setpoint_sensors[mode].name} <> #{prev_hr_setpoint_vars[mode].name} && #{mode}_mode > 0")
-      program.addLine("  Set #{mode}_setpoint = #{tot_sensors[mode].name} - #{mode}_sum")
-
-      # If partial load hour, ratio the loads to equal the total for this hour.
-      program.addLine("ElseIf #{predicted_sensors[mode].name} > 0 && #{prev_hr_predicted_vars[mode].name} <= 0 && #{mode}_mode > 0")
-      program.addLine("  Set #{mode}_load_ratio = @Abs (#{tot_sensors[mode].name} / #{mode}_sum)")
+      program.addLine("  If #{mode}_sum <> 0")
+      program.addLine("    Set #{mode}_load_ratio = #{tot_sensors[mode].name} / #{mode}_sum")
+      program.addLine("  Else")
+      program.addLine("    Set #{mode}_load_ratio = 1")
+      program.addLine("  EndIf")
       surfaces_sensors.keys.each do |k|
         program.addLine("  Set #{mode}_#{k.to_s} = #{mode}_#{k.to_s} * #{mode}_load_ratio")
       end
@@ -4157,7 +4164,7 @@ class OSModel
         output_var.setKeyValue('*')
       end
 
-      (nonsurf_names + ["setpoint"]).each do |k|
+      nonsurf_names.each do |k|
         ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k}")
         ems_output_var.setName("#{mode}_#{k}_outvar")
         ems_output_var.setTypeOfDataInVariable("Summed")

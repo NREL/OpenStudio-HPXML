@@ -365,8 +365,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                    "Natural Ventilation" => "natvent",
                    "Mechanical Ventilation" => "mechvent",
                    "Ducts" => "ducts",
-                   "Internal Gains" => "intgains",
-                   "Setpoint Change" => "setpoint" }
+                   "Internal Gains" => "intgains" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       compload_results["#{mode} - Sum"] = 0
       components.each do |component, component_var|
@@ -383,8 +382,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     sqlFile.close
 
     # FIXME: Uncomment
-    #assert_operator(compload_results["Heating - Residual"], :<, 0.2)
-    #assert_operator(compload_results["Cooling - Residual"], :<, 0.2)
+    # assert_operator(compload_results["Heating - Residual"], :<, 0.2)
+    # assert_operator(compload_results["Cooling - Residual"], :<, 0.2)
 
     results[@simulation_runtime_key] = sim_time
     results[@workflow_runtime_key] = workflow_time
