@@ -1135,20 +1135,20 @@ class HPXML
                                      select: [])
     return nil if cooling_system.nil?
 
-    return { :id => HPXML.get_id(cooling_system),
-             :distribution_system_idref => HPXML.get_idref(cooling_system, "DistributionSystem"),
-             :year_installed => to_integer_or_nil(XMLHelper.get_value(cooling_system, "YearInstalled")),
-             :cooling_system_type => XMLHelper.get_value(cooling_system, "CoolingSystemType"),
-             :cooling_system_fuel => XMLHelper.get_value(cooling_system, "CoolingSystemFuel"),
-             :cooling_capacity => to_float_or_nil(XMLHelper.get_value(cooling_system, "CoolingCapacity")),
-             :fraction_cool_load_served => to_float_or_nil(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed")),
-             :cooling_efficiency_kw_per_ton => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='kW/ton']/Value")),
-             :cooling_efficiency_cop => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='COP']/Value")),
-             :cooling_efficiency_eer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='EER']/Value")),
-             :cooling_efficiency_seer => to_float_or_nil(XMLHelper.get_value(cooling_system, "AnnualCoolingEfficiency[Units='SEER']/Value")),
-             :cooling_shr => to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction")),
-             :cooling_cfm => to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate")),
-             :energy_star => XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") }
+    vals = {}
+    vals[:id] = HPXML.get_id(cooling_system) if is_selected(select, :id)
+    vals[:distribution_system_idref] = HPXML.get_idref(cooling_system, "DistributionSystem") if is_selected(select, :distribution_system_idref)
+    vals[:year_installed] = to_integer_or_nil(XMLHelper.get_value(cooling_system, "YearInstalled")) if is_selected(select, :year_installed)
+    vals[:cooling_system_type] = XMLHelper.get_value(cooling_system, "CoolingSystemType") if is_selected(select, :cooling_system_type)
+    vals[:cooling_system_fuel] = XMLHelper.get_value(cooling_system, "CoolingSystemFuel") if is_selected(select, :cooling_system_fuel)
+    vals[:cooling_capacity] = to_float_or_nil(XMLHelper.get_value(cooling_system, "CoolingCapacity")) if is_selected(select, :cooling_capacity)
+    vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(cooling_system, "FractionCoolLoadServed")) if is_selected(select, :fraction_cool_load_served)
+    vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='central air conditioner']AnnualCoolingEfficiency[Units='SEER']/Value")) if is_selected(select, :cooling_efficiency_seer)
+    vals[:cooling_efficiency_eer] = to_float_or_nil(XMLHelper.get_value(cooling_system, "[CoolingSystemType='room air conditioner']AnnualCoolingEfficiency[Units='EER']/Value")) if is_selected(select, :cooling_efficiency_eer)
+    vals[:cooling_shr] = to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction")) if is_selected(select, :cooling_shr)
+    vals[:cooling_cfm] = to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate")) if is_selected(select, :cooling_cfm)
+    vals[:energy_star] = XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star") if is_selected(select, :energy_star)
+    return vals
   end
 
   def self.add_heat_pump(hpxml:,
