@@ -66,6 +66,7 @@ class XMLHelper
   def self.get_child_name(parent, element_name)
     begin
       return parent.elements[element_name].elements[1].name
+    rescue
     end
     return nil
   end

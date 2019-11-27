@@ -81,6 +81,7 @@ def create_hpxmls
     'base-atticroof-cathedral.xml' => 'base.xml',
     'base-atticroof-conditioned.xml' => 'base.xml',
     'base-atticroof-flat.xml' => 'base.xml',
+    'base-atticroof-radiant-barrier.xml' => 'base-location-dallas-tx.xml',
     'base-atticroof-vented.xml' => 'base.xml',
     'base-atticroof-unvented-insulated-roof.xml' => 'base.xml',
     'base-dhw-combi-tankless.xml' => 'base-dhw-indirect.xml',
@@ -151,6 +152,7 @@ def create_hpxmls
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
     'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unconditioned-basement-above-grade.xml' => 'base-foundation-unconditioned-basement.xml',
+    'base-foundation-unconditioned-basement-wall-insulation.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
     'base-foundation-walkout-basement.xml' => 'base.xml',
@@ -837,6 +839,14 @@ def get_hpxml_file_foundation_values(hpxml_file, foundation_values)
     foundation_values = { :id => "VentedCrawlspace",
                           :foundation_type => "VentedCrawlspace",
                           :vented_crawlspace_sla => 0.00667 }
+  elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
+    foundation_values = { :id => "UnconditionedBasement",
+                          :foundation_type => "UnconditionedBasement",
+                          :unconditioned_basement_thermal_boundary => "frame floor" }
+  elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
+    foundation_values = { :id => "UnconditionedBasement",
+                          :foundation_type => "UnconditionedBasement",
+                          :unconditioned_basement_thermal_boundary => "foundation wall" }
   end
   return foundation_values
 end
@@ -903,6 +913,8 @@ def get_hpxml_file_roofs_values(hpxml_file, roofs_values)
         roofs_values[-1][:id] += i.to_s
       end
     end
+  elsif ['base-atticroof-radiant-barrier.xml'].include? hpxml_file
+    roofs_values[0][:radiant_barrier] = true
   end
   return roofs_values
 end
@@ -924,6 +936,11 @@ def get_hpxml_file_rim_joists_values(hpxml_file, rim_joists_values)
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     for i in 0..rim_joists_values.size - 1
       rim_joists_values[i][:interior_adjacent_to] = "basement - unconditioned"
+      rim_joists_values[i][:insulation_assembly_r_value] = 2.3
+    end
+  elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
+    for i in 0..rim_joists_values.size - 1
+      rim_joists_values[i][:insulation_assembly_r_value] = 23.0
     end
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     for i in 0..rim_joists_values.size - 1
@@ -1139,7 +1156,11 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :insulation_r_value => 8.9 }]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundation_walls_values[0][:interior_adjacent_to] = "basement - unconditioned"
+    foundation_walls_values[0][:insulation_distance_to_bottom] = 0
+    foundation_walls_values[0][:insulation_r_value] = 0
+  elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
     foundation_walls_values[0][:insulation_distance_to_bottom] = 4
+    foundation_walls_values[0][:insulation_r_value] = 8.9
   elsif ['base-foundation-unconditioned-basement-assembly-r.xml'].include? hpxml_file
     foundation_walls_values[0][:insulation_distance_to_bottom] = nil
     foundation_walls_values[0][:insulation_r_value] = nil
@@ -1175,8 +1196,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 600,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
-                                 :insulation_distance_to_bottom => 4,
-                                 :insulation_r_value => 8.9 }
+                                 :insulation_distance_to_bottom => 0,
+                                 :insulation_r_value => 0 }
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
     foundation_walls_values = []
@@ -1298,6 +1319,8 @@ def get_hpxml_file_framefloors_values(hpxml_file, framefloors_values)
                             :interior_adjacent_to => "living space",
                             :area => 1350,
                             :insulation_assembly_r_value => 18.7 }
+  elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
+    framefloors_values[1][:insulation_assembly_r_value] = 2.1
   elsif ['base-foundation-unvented-crawlspace.xml'].include? hpxml_file
     framefloors_values << { :id => "FloorAboveUnventedCrawl",
                             :exterior_adjacent_to => "crawlspace - unvented",
@@ -2497,39 +2520,11 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                          :duct_insulation_r_value => 4,
                          :duct_location => "outside",
                          :duct_surface_area => 100 }
-  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml'].include? hpxml_file
-    ducts_values[0][0][:duct_surface_area] = 0.0001
-    ducts_values[0][1][:duct_surface_area] = 0.0001
-    ducts_values << [{ :duct_type => "supply",
-                       :duct_insulation_r_value => ducts_values[0][0][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][0][:duct_location],
-                       :duct_surface_area => ducts_values[0][0][:duct_surface_area] },
-                     { :duct_type => "return",
-                       :duct_insulation_r_value => ducts_values[0][1][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][1][:duct_location],
-                       :duct_surface_area => ducts_values[0][1][:duct_surface_area] }]
-    ducts_values << [{ :duct_type => "supply",
-                       :duct_insulation_r_value => ducts_values[0][0][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][0][:duct_location],
-                       :duct_surface_area => ducts_values[0][0][:duct_surface_area] },
-                     { :duct_type => "return",
-                       :duct_insulation_r_value => ducts_values[0][1][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][1][:duct_location],
-                       :duct_surface_area => ducts_values[0][1][:duct_surface_area] }]
+  elsif (hpxml_file.include? 'hvac_multiple' and not ducts_values.empty?)
+    ducts_values = [[], [], []]
   elsif (hpxml_file.include? 'hvac_partial' and not ducts_values.empty?) or
         (hpxml_file.include? 'hvac_base' and not ducts_values.empty?)
-    ducts_values[0][0][:duct_surface_area] = 0.0001
-    ducts_values[0][1][:duct_surface_area] = 0.0001
+    ducts_values = [[]]
   end
   return ducts_values
 end
