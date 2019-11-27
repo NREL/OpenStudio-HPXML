@@ -691,6 +691,16 @@ class EnergyPlusValidator
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
     end
 
+    # Check for unique SystemIdentifier IDs
+    sys_ids = {}
+    REXML::XPath.each(hpxml_doc, "//SystemIdentifier/@id") do |sys_id|
+      sys_ids[sys_id.value] = 0 if sys_ids[sys_id.value].nil?
+      sys_ids[sys_id.value] += 1
+    end
+    sys_ids.each do |sys_id, cnt|
+      errors << "Duplicate SystemIdentifier IDs detected for '#{sys_id}'." if cnt > 1
+    end
+
     return errors
   end
 
