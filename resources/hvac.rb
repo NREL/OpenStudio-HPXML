@@ -8,7 +8,7 @@ require_relative "schedules"
 class HVAC
   def self.apply_central_ac_1speed(model, runner, seer, shrs,
                                    fan_power_installed, crankcase_kw, crankcase_temp,
-                                   capacity, frac_cool_load_served,
+                                   capacity, airflow_rate, frac_cool_load_served,
                                    sequential_cool_load_frac, control_zone,
                                    hvac_map, sys_id)
 
@@ -75,6 +75,10 @@ class HVAC
     air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
     air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(120.0, "F", "C"))
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
+    if not airflow_rate.nil?
+      air_loop_unitary.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
+      air_loop_unitary.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(airflow_rate, "cfm", "m^3/s"))
+    end
     hvac_map[sys_id] << air_loop_unitary
 
     air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
@@ -1506,7 +1510,7 @@ class HVAC
   end
 
   def self.apply_furnace(model, runner, fuel_type, afue,
-                         capacity, fan_power_installed,
+                         capacity, airflow_rate, fan_power_installed,
                          frac_heat_load_served, sequential_heat_load_frac,
                          attached_clg_system, control_zone,
                          hvac_map, sys_id)
@@ -1558,6 +1562,10 @@ class HVAC
       air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
       air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(120.0, "F", "C"))
       air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
+      if not airflow_rate.nil?
+        air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
+        air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(airflow_rate, "cfm", "m^3/s"))
+      end
       hvac_map[sys_id] << air_loop_unitary
 
       air_loop = OpenStudio::Model::AirLoopHVAC.new(model)
@@ -1628,6 +1636,10 @@ class HVAC
 
       attached_clg_system.setHeatingCoil(htg_coil)
       attached_clg_system.setName(obj_name + " unitary system")
+      if not airflow_rate.nil?
+        attached_clg_system.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
+        attached_clg_system.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(airflow_rate, "cfm", "m^3/s"))
+      end
       hvac_map[sys_id] << attached_clg_system
 
       air_loop = attached_clg_system.airLoopHVAC.get

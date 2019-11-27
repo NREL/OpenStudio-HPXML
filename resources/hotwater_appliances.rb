@@ -16,7 +16,7 @@ class HotWaterAndAppliances
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
                  dwhr_efficiency, dhw_loop_fracs, eri_version,
-                 dhw_map)
+                 dhw_map, hpxml_path)
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
@@ -140,8 +140,19 @@ class HotWaterAndAppliances
     if not dist_type.nil?
       # Fixtures (showers, sinks, baths) + distribution losses
       fx_gpd = get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures, daily_mw_fractions)
-      fx_gpd += get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
+      w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
+      fx_gpd += w_gpd
       fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
+
+      debug = false
+      if debug
+        puts "#{File.basename(hpxml_path)} cw_gpd #{cw_gpd}"
+        puts "#{File.basename(hpxml_path)} dw_gpd #{dw_gpd}"
+        avg_f_mix = daily_mw_fractions.inject(:+) / daily_mw_fractions.size
+        puts "#{File.basename(hpxml_path)} fx_gpd #{fx_gpd * avg_f_mix}"
+        puts "#{File.basename(hpxml_path)} w_gpd #{w_gpd * avg_f_mix}"
+        puts "#{File.basename(hpxml_path)} tot_gpd #{cw_gpd + dw_gpd + (fx_gpd + w_gpd) * avg_f_mix}"
+      end
 
       disaggregate_sinks_showers_baths = false
       if disaggregate_sinks_showers_baths

@@ -245,6 +245,9 @@
                 <Value>0.92</Value>
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
+              <extension>
+                <HeatingFlowRate>1920.0</HeatingFlowRate>
+              </extension>
             </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
@@ -257,6 +260,9 @@
                 <Units>SEER</Units>
                 <Value>13.0</Value>
               </AnnualCoolingEfficiency>
+              <extension>
+                <CoolingFlowRate>1440.0</CoolingFlowRate>
+              </extension>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>

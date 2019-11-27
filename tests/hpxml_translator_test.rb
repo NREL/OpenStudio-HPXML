@@ -365,8 +365,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                    "Natural Ventilation" => "natvent",
                    "Mechanical Ventilation" => "mechvent",
                    "Ducts" => "ducts",
-                   "Internal Gains" => "intgains",
-                   "Setpoint Change" => "setpoint" }
+                   "Internal Gains" => "intgains" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       compload_results["#{mode} - Sum"] = 0
       components.each do |component, component_var|
