@@ -1358,7 +1358,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         _display_result_epsilon(xml, result_33, result_100 / 3.0, k)
         if result_33 > 1.0
-          assert_in_epsilon(result_33, result_100 / 3.0, 0.05)
+          assert_in_epsilon(result_33, result_100 / 3.0, 0.12)
         else
           assert_in_delta(result_33, result_100 / 3.0, 0.1)
         end

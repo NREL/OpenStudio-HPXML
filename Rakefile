@@ -2520,39 +2520,11 @@ def get_hpxml_file_ducts_values(hpxml_file, ducts_values)
                          :duct_insulation_r_value => 4,
                          :duct_location => "outside",
                          :duct_surface_area => 100 }
-  elsif ['hvac_multiple/base-hvac-air-to-air-heat-pump-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-2-speed-x3.xml',
-         'hvac_multiple/base-hvac-air-to-air-heat-pump-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-2-speed-x3.xml',
-         'hvac_multiple/base-hvac-central-ac-only-var-speed-x3.xml',
-         'hvac_multiple/base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-x3.xml',
-         'hvac_multiple/base-hvac-furnace-elec-only-x3.xml',
-         'hvac_multiple/base-hvac-furnace-gas-only-x3.xml',
-         'hvac_multiple/base-hvac-ground-to-air-heat-pump-x3.xml',
-         'hvac_multiple/base-hvac-mini-split-heat-pump-ducted-x3.xml'].include? hpxml_file
-    ducts_values[0][0][:duct_surface_area] = 0.0001
-    ducts_values[0][1][:duct_surface_area] = 0.0001
-    ducts_values << [{ :duct_type => "supply",
-                       :duct_insulation_r_value => ducts_values[0][0][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][0][:duct_location],
-                       :duct_surface_area => ducts_values[0][0][:duct_surface_area] },
-                     { :duct_type => "return",
-                       :duct_insulation_r_value => ducts_values[0][1][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][1][:duct_location],
-                       :duct_surface_area => ducts_values[0][1][:duct_surface_area] }]
-    ducts_values << [{ :duct_type => "supply",
-                       :duct_insulation_r_value => ducts_values[0][0][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][0][:duct_location],
-                       :duct_surface_area => ducts_values[0][0][:duct_surface_area] },
-                     { :duct_type => "return",
-                       :duct_insulation_r_value => ducts_values[0][1][:duct_insulation_r_value],
-                       :duct_location => ducts_values[0][1][:duct_location],
-                       :duct_surface_area => ducts_values[0][1][:duct_surface_area] }]
+  elsif (hpxml_file.include? 'hvac_multiple' and not ducts_values.empty?)
+    ducts_values = [[], [], []]
   elsif (hpxml_file.include? 'hvac_partial' and not ducts_values.empty?) or
         (hpxml_file.include? 'hvac_base' and not ducts_values.empty?)
-    ducts_values[0][0][:duct_surface_area] = 0.0001
-    ducts_values[0][1][:duct_surface_area] = 0.0001
+    ducts_values = [[]]
   end
   return ducts_values
 end
