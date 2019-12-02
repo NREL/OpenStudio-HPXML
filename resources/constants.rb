@@ -437,7 +437,7 @@ class Constants
   end
 
   def self.ObjectNameDesuperheater(water_heater_name)
-    return "#{water_heater_name} DSH"
+    return "#{water_heater_name} Desuperheater"
   end
 
   def self.ObjectNameTankHX

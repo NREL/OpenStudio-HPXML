@@ -785,23 +785,19 @@ class Waterheater
 
       # energy variables
       dsh_total = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{tank_name}_dsh_total")
-      wh_e_var_name = "#{tank_name}_e"
-      wh_htg_var_name = "#{tank_name}_htg_load"
-      dsh_e_var_name = "#{tank_name}_dsh_load_saving"
 
       dsh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       dsh_program.setName("#{tank_name} DSH Program")
+      dsh_program.addLine("Set #{tank_name}_eta_c = #{eta_c}")
       dsh_program.addLine("Set Avail_Cap = #{reclaimed_efficiency} * (#{coil_clg_energy.name} + #{coil_elec_energy.name})")
       dsh_program.addLine("If WarmupFlag") # need to initialize cummulative dsh energy number
       dsh_program.addLine("Set #{dsh_total.name} = 0.0")
       dsh_program.addLine("Else")
       dsh_program.addLine("Set #{dsh_total.name} = #{dsh_total.name} + Avail_Cap")
       dsh_program.addLine("EndIf")
-      dsh_program.addLine("Set #{dsh_e_var_name} = -(@Min #{wh_energy.name} #{dsh_total.name})")
-      dsh_program.addLine("Set #{wh_htg_var_name} = #{wh_energy.name} + #{dsh_e_var_name}")
-      dsh_program.addLine("Set #{wh_e_var_name} = #{wh_htg_var_name} / #{eta_c}")
-      dsh_program.addLine("Set #{dsh_total.name} = #{dsh_total.name} + #{dsh_e_var_name}") # update cummulative dsh energy pool
-      dsh_program.addLine("Set #{dsh_actuator.name} = #{dsh_e_var_name} / (SystemTimeStep * 3600 ) / #{eta_c}")
+      dsh_program.addLine("Set #{tank_name}_dsh_load_saving = -(@Min #{wh_energy.name} #{dsh_total.name})")
+      dsh_program.addLine("Set #{dsh_total.name} = #{dsh_total.name} + #{tank_name}_dsh_load_saving") # update cummulative dsh energy pool
+      dsh_program.addLine("Set #{dsh_actuator.name} = #{tank_name}_dsh_load_saving / (SystemTimeStep * 3600 ) / #{tank_name}_eta_c")
 
       # Sensor for EMS reporting
       ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
