@@ -298,6 +298,16 @@ class Geometry
     return zrange
   end
 
+  def self.space_has_foundation_walls(space)
+    space.surfaces.each do |surface|
+      next if surface.surfaceType.downcase != "wall"
+      next if surface.outsideBoundaryCondition.downcase != "foundation"
+
+      return true
+    end
+    return false
+  end
+
   def self.get_spaces_above_grade_exterior_walls(spaces)
     above_grade_exterior_walls = []
     spaces.each do |space|
@@ -334,6 +344,7 @@ class Geometry
     above_grade_ground_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
+      next if Geometry.space_has_foundation_walls(space)
 
       space.surfaces.each do |surface|
         next if above_grade_ground_floors.include?(surface)
@@ -410,6 +421,7 @@ class Geometry
     below_grade_exterior_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
+      next if not Geometry.space_has_foundation_walls(space)
 
       space.surfaces.each do |surface|
         next if below_grade_exterior_floors.include?(surface)
