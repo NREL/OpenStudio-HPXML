@@ -829,6 +829,7 @@ class HVACSizing
 
     zone_loads.Heat_Walls = 0
     zone_loads.Cool_Walls = 0
+    surfaces_processed = []
 
     # Above-Grade Exterior Walls
     Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
@@ -878,6 +879,7 @@ class HVACSizing
 
       zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * cltd
       zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << wall.name.to_s
     end
 
     # Interzonal Walls
@@ -888,6 +890,7 @@ class HVACSizing
       adjacent_space = wall.adjacentSurface.get.space.get
       zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * (@cool_design_temps[adjacent_space] - @cool_setpoint)
       zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      surfaces_processed << wall.name.to_s
     end
 
     # Foundation walls
@@ -919,6 +922,12 @@ class HVACSizing
       u_value_mj8 = (u_value_mj8 / wall_height_ft) * 0.85
 
       zone_loads.Heat_Walls += u_value_mj8 * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << wall.name.to_s
+    end
+
+    if surfaces_processed.size != surfaces_processed.uniq.size
+      runner.registerError("Surface referenced twice in HVAC sizing\n#{surfaces_processed}.")
+      return nil
     end
 
     return zone_loads
@@ -935,6 +944,7 @@ class HVACSizing
 
     zone_loads.Heat_Roofs = 0
     zone_loads.Cool_Roofs = 0
+    surfaces_processed = []
 
     # Roofs
     Geometry.get_spaces_above_grade_exterior_roofs(thermal_zone.spaces).each do |roof|
@@ -994,6 +1004,12 @@ class HVACSizing
 
       zone_loads.Cool_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * cltd
       zone_loads.Heat_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << roof.name.to_s
+    end
+
+    if surfaces_processed.size != surfaces_processed.uniq.size
+      runner.registerError("Surface referenced twice in HVAC sizing\n#{surfaces_processed}.")
+      return nil
     end
 
     return zone_loads
@@ -1008,6 +1024,7 @@ class HVACSizing
 
     zone_loads.Heat_Floors = 0
     zone_loads.Cool_Floors = 0
+    surfaces_processed = []
 
     # Exterior Floors
     Geometry.get_spaces_above_grade_exterior_floors(thermal_zone.spaces).each do |floor|
@@ -1016,6 +1033,7 @@ class HVACSizing
 
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@ctd - 5 + @daily_range_temp_adjust[@daily_range_num])
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << floor.name.to_s
     end
 
     # Interzonal Floors
@@ -1026,6 +1044,7 @@ class HVACSizing
       adjacent_space = floor.adjacentSurface.get.space.get
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@cool_design_temps[adjacent_space] - @cool_setpoint)
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      surfaces_processed << floor.name.to_s
     end
 
     # Foundation Floors
@@ -1038,6 +1057,7 @@ class HVACSizing
       u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
       u_value_mj8 = 0.85 * u_avg_bf
       zone_loads.Heat_Floors += u_value_mj8 * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << floor.name.to_s
     end
 
     # Ground Floors (Slab)
@@ -1051,6 +1071,12 @@ class HVACSizing
 
       floor_ufactor = 1.0 / floor_rvalue
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@heat_setpoint - weather.data.GroundMonthlyTemps[0])
+      surfaces_processed << floor.name.to_s
+    end
+
+    if surfaces_processed.size != surfaces_processed.uniq.size
+      runner.registerError("Surface referenced twice in HVAC sizing\n#{surfaces_processed}.")
+      return nil
     end
 
     return zone_loads
