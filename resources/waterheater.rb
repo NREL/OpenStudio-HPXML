@@ -33,10 +33,10 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
+    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
 
     if not desuperheater_clg_coil.nil?
-      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj)
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj).each { |e| dhw_map[sys_id] << e }
     end
     return true
   end
@@ -69,10 +69,10 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
+    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
     if not desuperheater_clg_coil.nil?
-      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj)
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj).each { |e| dhw_map[sys_id] << e }
     end
     return true
   end
@@ -569,7 +569,7 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(tank)
 
-    add_ec_adj(model, runner, hpwh, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
+    dhw_map[sys_id] << add_ec_adj(model, runner, hpwh, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
 
     return true
   end
@@ -654,7 +654,7 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
+    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
 
     return true
   end
@@ -799,12 +799,29 @@ class Waterheater
       dsh_program.addLine("Set #{dsh_total.name} = #{dsh_total.name} + #{tank_name}_dsh_load_saving") # update cumulative dsh energy pool
       dsh_program.addLine("Set #{dsh_actuator.name} = #{tank_name}_dsh_load_saving * #{ec_adj.round(5)} / (SystemTimeStep * 3600) / #{tank_name}_eta_c") # convert to water heater power savings
 
-      dsh_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank_name}_dsh_load_saving")
-      dsh_output_var.setName("#{Constants.ObjectNameDesuperheater(tank.name)} outvar")
-      dsh_output_var.setTypeOfDataInVariable("Summed")
-      dsh_output_var.setUpdateFrequency("SystemTimestep")
-      dsh_output_var.setEMSProgramOrSubroutineName(dsh_program)
-      dsh_output_var.setUnits("J")
+      # Sensor for EMS reporting
+      ep_consumption_name = { Constants.FuelTypeElectric => "Electric Power",
+                              Constants.FuelTypePropane => "Propane Rate",
+                              Constants.FuelTypeOil => "FuelOil#1 Rate",
+                              Constants.FuelTypeGas => "Gas Rate",
+                              Constants.FuelTypeWood => "OtherFuel1 Rate" }[fuel_type]
+      dsh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{ep_consumption_name.gsub('Rate', 'Energy').gsub('Power', 'Energy')}")
+      dsh_sensor.setName("#{dsh_object.name} energy consumption")
+      dsh_sensor.setKeyName(dsh_object.name.to_s)
+
+      dsh_energy_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, dsh_sensor)
+      dsh_energy_output_var.setName("#{Constants.ObjectNameDesuperheaterEnergy(tank.name)} outvar")
+      dsh_energy_output_var.setTypeOfDataInVariable("Summed")
+      dsh_energy_output_var.setUpdateFrequency("SystemTimestep")
+      dsh_energy_output_var.setEMSProgramOrSubroutineName(dsh_program)
+      dsh_energy_output_var.setUnits("J")
+
+      dsh_load_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank_name}_dsh_load_saving")
+      dsh_load_output_var.setName("#{Constants.ObjectNameDesuperheaterLoad(tank.name)} outvar")
+      dsh_load_output_var.setTypeOfDataInVariable("Summed")
+      dsh_load_output_var.setUpdateFrequency("SystemTimestep")
+      dsh_load_output_var.setEMSProgramOrSubroutineName(dsh_program)
+      dsh_load_output_var.setUnits("J")
 
       # ProgramCallingManagers
       program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
@@ -812,7 +829,7 @@ class Waterheater
       program_calling_manager.setCallingPoint("EndOfSystemTimestepBeforeHVACReporting")
       program_calling_manager.addProgram(dsh_program)
 
-      return dsh_output_var
+      return [dsh_energy_output_var, dsh_load_output_var]
     else # need to test after switch
       # create a storage tank
       storage_vol = 50 # FIXME: Input vs assumption?
@@ -845,7 +862,7 @@ class Waterheater
       # attach to the clg coil source
       desuperheater.setHeatingSource(desuperheater_clg_coil)
 
-      return desuperheater
+      return [desuperheater]
     end
   end
 
@@ -1011,6 +1028,21 @@ class Waterheater
     program_calling_manager.setName("#{heater.name} EC_adj ProgramManager")
     program_calling_manager.setCallingPoint("EndOfSystemTimestepBeforeHVACReporting")
     program_calling_manager.addProgram(ec_adj_program)
+
+    # Sensor for EMS reporting
+    ec_adj_object_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{ep_consumption_name.gsub('Rate', 'Energy').gsub('Power', 'Energy')}")
+    ec_adj_object_sensor.setName("#{ec_adj_object.name} energy consumption")
+    ec_adj_object_sensor.setKeyName(ec_adj_object.name.to_s)
+
+    # EMS Output Variable for reporting
+    ec_adj_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, ec_adj_object_sensor)
+    ec_adj_output_var.setName("#{Constants.ObjectNameWaterHeaterAdjustment(heater.name)} outvar")
+    ec_adj_output_var.setTypeOfDataInVariable("Summed")
+    ec_adj_output_var.setUpdateFrequency("SystemTimestep")
+    ec_adj_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
+    ec_adj_output_var.setUnits("J")
+
+    return ec_adj_output_var
   end
 
   def self.get_default_hot_water_temperature(eri_version)
