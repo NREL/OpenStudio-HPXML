@@ -36,7 +36,7 @@ class Waterheater
     add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
 
     if not desuperheater_clg_coil.nil?
-      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner)
+      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj)
     end
     return true
   end
@@ -72,7 +72,7 @@ class Waterheater
     add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
     if not desuperheater_clg_coil.nil?
-      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner)
+      dhw_map[sys_id] << add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj)
     end
     return true
   end
@@ -758,7 +758,7 @@ class Waterheater
     program_calling_manager.addProgram(indirect_ctrl_program)
   end
 
-  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type, fuel_type, space, loop, runner)
+  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type, fuel_type, space, loop, runner, ec_adj)
     reclaimed_efficiency = 0.25 # default
     workaround_flag = true # switch after E+ 9.3 release
     if workaround_flag
@@ -797,7 +797,7 @@ class Waterheater
       dsh_program.addLine("EndIf")
       dsh_program.addLine("Set #{tank_name}_dsh_load_saving = -(@Min #{wh_energy.name} #{dsh_total.name})")
       dsh_program.addLine("Set #{dsh_total.name} = #{dsh_total.name} + #{tank_name}_dsh_load_saving") # update cumulative dsh energy pool
-      dsh_program.addLine("Set #{dsh_actuator.name} = #{tank_name}_dsh_load_saving / (SystemTimeStep * 3600) / #{tank_name}_eta_c") # convert to water heater power savings
+      dsh_program.addLine("Set #{dsh_actuator.name} = #{tank_name}_dsh_load_saving * #{ec_adj.round(5)} / (SystemTimeStep * 3600) / #{tank_name}_eta_c") # convert to water heater power savings
 
       dsh_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{tank_name}_dsh_load_saving")
       dsh_output_var.setName("#{Constants.ObjectNameDesuperheater(tank.name)} outvar")
@@ -926,7 +926,7 @@ class Waterheater
   end
 
   def self.add_ec_adj(model, runner, heater, ec_adj, space, fuel_type, wh_type, combi_boiler = nil, combi_hx = nil)
-    adjusmtment = ec_adj - 1.0
+    adjustment = ec_adj - 1.0
 
     if space.nil? # WH is outdoors, set the other equipment to be in a random space
       space = model.getSpaces[0]
@@ -1004,7 +1004,7 @@ class Waterheater
     else
       ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name}")
     end
-    ec_adj_program.addLine("Set #{ec_adj_actuator.name} = #{adjusmtment} * wh_e_cons")
+    ec_adj_program.addLine("Set #{ec_adj_actuator.name} = #{adjustment} * wh_e_cons")
 
     # Program Calling Manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
