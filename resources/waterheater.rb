@@ -582,9 +582,40 @@ class Waterheater
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
+      # Actual tank volume = 95% nominal tank volume
+      act_vol = 0.95 * vol
+      # Tank geometry
+      height = 48 # inches
+      pi = Math::PI
+      diameter = 24 * ((act_vol * 0.1337) / (height / 12 * pi))**0.5 # inches
+      a_top = pi * (diameter / 12)**2 / 4 # sqft
+      a_side = pi * (diameter / 12) * (height / 12) # sqft
+      surface_area = 2 * a_top + a_side # sqft
+
+      if standby_loss.nil? # Swiched to standby_loss equation fit from AHRI database
+        # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
+        sqft_by_gal = surface_area / act_vol # sqft/gal
+        standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u
+      end
+
+      # Test conditions
+      cp = 0.999 # Btu/lb-F
+      rho = 8.216 # lb/gal
+      t_amb = 70 # F
+      t_tank_avg = 135 # F, Test begins at 137-138F stop at 133F
+
+      # UA calculation
+      q = standby_loss * cp * act_vol * rho # Btu/hr
+      ua = q / (t_tank_avg - t_amb) # Btu/hr-F
+
+      # Tank jacket
+      # assume indirect water heater skin to be insulated with 2inch R5 (the same as electric)
+      ua = apply_tank_jacket(jacket_r, nil, Constants.FuelTypeElectric, ua, a_side)
+
     else
       tank_type = Constants.WaterHeaterTypeTankless
-      standby_loss = 0.0
+      ua = 0.0
+      act_vol = vol
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
@@ -594,38 +625,6 @@ class Waterheater
 
     new_manager = create_new_schedule_manager(t_set, model, tank_type)
     new_manager.addToNode(loop.supplyOutletNode)
-
-    # Actual tank volume = 95% nominal tank volume
-    act_vol = 0.95 * vol
-    # Tank geometry
-    height = 48 # inches
-    pi = Math::PI
-    diameter = 24 * ((act_vol * 0.1337) / (height / 12 * pi))**0.5 # inches
-    a_top = pi * (diameter / 12)**2 / 4 # sqft
-    a_side = pi * (diameter / 12) * (height / 12) # sqft
-    surface_area = 2 * a_top + a_side # sqft
-
-    if standby_loss.nil? # Swiched to standby_loss equation fit from AHRI database
-      # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
-      sqft_by_gal = surface_area / act_vol # sqft/gal
-      standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u
-    end
-
-    # Test conditions
-    cp = 0.999 # Btu/lb-F
-    rho = 8.216 # lb/gal
-    t_amb = 70 # F
-    t_tank_avg = 135 # F, Test begins at 137-138F stop at 133F
-
-    # UA calculation
-    q = standby_loss * cp * act_vol * rho # Btu/hr
-    ua = q / (t_tank_avg - t_amb) # Btu/hr-F
-
-    # Tank jacket
-    if wh_type == "space-heating boiler with storage tank"
-      # assume indirect water heater skin to be insulated with 2inch R5 (the same as electric)
-      ua = apply_tank_jacket(jacket_r, nil, Constants.FuelTypeElectric, ua, a_side)
-    end
 
     # Create water heater
     new_heater = create_new_heater(obj_name_indirect, cap, nil, act_vol, nil, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner, ua)
