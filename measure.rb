@@ -2282,6 +2282,7 @@ class OSModel
             tank_vol = water_heating_system_values[:tank_volume]
           end
           heating_source_id = water_heating_system_values[:related_hvac]
+          standby_loss = water_heating_system_values[:standby_loss]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
             boiler_sys = get_boiler_and_boiler_loop(@hvac_map, heating_source_id, sys_id)
@@ -2297,7 +2298,7 @@ class OSModel
                                                tank_vol, setpoint_temp, oncycle_power,
                                                offcycle_power, ec_adj, @nbeds, boiler_sys['boiler'],
                                                boiler_sys['plant_loop'], boiler_fuel_type,
-                                               @dhw_map, sys_id, wh_type, jacket_r)
+                                               @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
           return false if not success
 
         else

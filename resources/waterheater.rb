@@ -28,7 +28,7 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner, nil)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -64,7 +64,7 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, nil, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, nil, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner, nil)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -575,7 +575,7 @@ class Waterheater
   end
 
   def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj,
-                          nbeds, boiler, boiler_plant_loop, boiler_fuel_type, dhw_map, sys_id, wh_type, jacket_r)
+                          nbeds, boiler, boiler_plant_loop, boiler_fuel_type, dhw_map, sys_id, wh_type, jacket_r, standby_loss)
     obj_name_indirect = Constants.ObjectNameWaterHeater
     convlim = model.getConvergenceLimits
     convlim.setMinimumPlantIterations(3) # add one more minimum plant iteration to achieve better energy balance across plant loops.
@@ -584,6 +584,7 @@ class Waterheater
       tank_type = Constants.WaterHeaterTypeTank
     else
       tank_type = Constants.WaterHeaterTypeTankless
+      standby_loss = 0.0
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
@@ -594,10 +595,40 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, tank_type)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    # Create an initial simple tank model by calling create_new_heater
-    assumed_ef = get_indirect_assumed_ef_for_tank_losses()
-    assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
-    new_heater = create_new_heater(obj_name_indirect, cap, assumed_fuel, vol, assumed_ef, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner)
+    # Actual tank volume = 95% nominal tank volume
+    act_vol = 0.95 * vol
+    # Tank geometry
+    height = 48 # inches
+    pi = Math::PI
+    diameter = 24 * ((act_vol * 0.1337) / (height / 12 * pi))**0.5 # inches
+    a_top = pi * (diameter / 12)**2 / 4 # sqft
+    a_side = pi * (diameter / 12) * (height / 12) # sqft
+    surface_area = 2 * a_top + a_side # sqft
+
+    if standby_loss.nil? # Swiched to standby_loss equation fit from AHRI database
+      # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
+      sqft_by_gal = surface_area / act_vol # sqft/gal
+      standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u
+    end
+
+    # Test conditions
+    cp = 0.999 # Btu/lb-F
+    rho = 8.216 # lb/gal
+    t_amb = 70 # F
+    t_tank_avg = 135 # F, Test begins at 137-138F stop at 133F
+
+    # UA calculation
+    q = standby_loss * cp * act_vol * rho # Btu/hr
+    ua = q / (t_tank_avg - t_amb) # Btu/hr-F
+
+    # Tank jacket
+    if wh_type == "space-heating boiler with storage tank"
+      # assume indirect water heater skin to be insulated with 2inch R5 (the same as electric)
+      ua = apply_tank_jacket(jacket_r, nil, Constants.FuelTypeElectric, ua, a_side)
+    end
+
+    # Create water heater
+    new_heater = create_new_heater(obj_name_indirect, cap, nil, act_vol, nil, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner, ua)
     new_heater.setSourceSideDesignFlowRate(100) # set one large number, override by EMS
     dhw_map[sys_id] << new_heater
 
@@ -832,13 +863,12 @@ class Waterheater
       return [dsh_energy_output_var, dsh_load_output_var]
     else # need to test after switch
       # create a storage tank
-      storage_vol = 50 # FIXME: Input vs assumption?
+      storage_vol_actual = 50 * 0.95 # FIXME: Input vs assumption?
       cap = 0
       nbeds = 0 # won't be used
-      assumed_ef = get_indirect_assumed_ef_for_tank_losses() # FIXME: Input vs assumption?
-      assumed_fuel = get_indirect_assumed_fuel_for_tank_losses()
+      assumed_ua = 6.0 # Btu/hr-F FIXME: Assumption: indirect tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
       storage_tank_name = "#{tank.name} storage tank"
-      storage_tank = create_new_heater(storage_tank_name, cap, assumed_fuel, storage_vol, assumed_ef, 0, nil, t_set, space, 0, 0, 0, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner)
+      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, 0, nil, t_set, space, 0, 0, 0, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner, assumed_ua)
 
       loop.addSupplyBranchForComponent(storage_tank)
       runner.registerInfo("Added '#{storage_tank.name}' to supply branch of '#{loop.name}'.")
@@ -1053,16 +1083,6 @@ class Waterheater
     return 120.0
   end
 
-  def self.get_indirect_assumed_ef_for_tank_losses()
-    # assumed ef used only for ua calculation
-    return 0.95
-  end
-
-  def self.get_indirect_assumed_fuel_for_tank_losses()
-    # assumed fuel type used only for ua calculation
-    return Constants.FuelTypeElectric
-  end
-
   def self.get_combi_system_fuel(idref, orig_details)
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
       heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system,
@@ -1124,25 +1144,14 @@ class Waterheater
       a_top = pi * (diameter / 12)**2 / 4 # sqft
       a_side = pi * (diameter / 12) * (height / 12) # sqft
       surface_area = 2 * a_top + a_side # sqft
-      skin_insulation_R = 5.0 # R5
       if fuel != Constants.FuelTypeElectric
         ua = (re / ef - 1) / ((t - t_env) * (24 / q_load - 1 / (1000 * (pow) * ef))) # Btu/hr-F
         eta_c = (re + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
-        if ef < 0.7
-          skin_insulation_t = 1.0 # inch
-        else
-          skin_insulation_t = 2.0 # inch
-        end
       else # is Electric
         ua = q_load * (1 / ef - 1) / ((t - t_env) * 24)
         eta_c = 1.0
-        skin_insulation_t = 2.0 # inch
       end
-      # water heater wrap calculation based on:
-      # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
-      # Authors:  Ben Polly and Jay Burch (NREL)
-      u_pre_skin = 1 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
-      ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side unless jacket_r.nil?
+      ua = apply_tank_jacket(jacket_r, ef, fuel, ua, a_side)
     end
     u = ua / surface_area # Btu/hr-ft^2-F
     if eta_c > 1
@@ -1153,6 +1162,29 @@ class Waterheater
     end
 
     return u, ua, eta_c
+  end
+
+  def self.apply_tank_jacket(jacket_r, ef, fuel, ua_pre, a_side)
+    if not jacket_r.nil?
+      skin_insulation_R = 5.0 # R5
+      if fuel != Constants.FuelTypeElectric
+        if ef < 0.7
+          skin_insulation_t = 1.0 # inch
+        else
+          skin_insulation_t = 2.0 # inch
+        end
+      else
+        skin_insulation_t = 2.0 # inch
+      end
+      # water heater wrap calculation based on:
+      # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
+      # Authors:  Ben Polly and Jay Burch (NREL)
+      u_pre_skin = 1 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
+      ua = ua_pre - jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side unless jacket_r.nil?
+    else
+      ua = ua_pre
+    end
+    return ua
   end
 
   def self.calc_tank_EF(wh_type, ua, eta_c)
@@ -1199,11 +1231,19 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name, cap, fuel, vol, ef, re, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, wh_type, cyc_derate, nbeds, model, runner)
+  def self.create_new_heater(name, cap, fuel, vol, ef, re, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, wh_type, cyc_derate, nbeds, model, runner, ua)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
-    act_vol = calc_actual_tankvol(vol, fuel, wh_type)
-    u, ua, eta_c = calc_tank_UA(act_vol, fuel, ef, re, cap, wh_type, cyc_derate, jacket_r, runner)
+    if ua.nil?
+      act_vol = calc_actual_tankvol(vol, fuel, wh_type)
+      u, ua, eta_c = calc_tank_UA(act_vol, fuel, ef, re, cap, wh_type, cyc_derate, jacket_r, runner)
+      new_heater.setHeaterThermalEfficiency(eta_c)
+      new_heater.setHeaterFuelType(HelperMethods.eplus_fuel_map(fuel))
+    else
+      # indirect water heater has standby loss for ua calculation
+      # actual volume is already calculated
+      act_vol = vol
+    end
     configure_setpoint_schedule(new_heater, t_set, wh_type, model)
     new_heater.setMaximumTemperatureLimit(99.0)
     if wh_type == Constants.WaterHeaterTypeTankless
@@ -1215,8 +1255,6 @@ class Waterheater
 
     new_heater.setHeaterMinimumCapacity(0.0)
     new_heater.setHeaterMaximumCapacity(UnitConversions.convert(cap, "kBtu/hr", "W"))
-    new_heater.setHeaterFuelType(HelperMethods.eplus_fuel_map(fuel))
-    new_heater.setHeaterThermalEfficiency(eta_c)
     new_heater.setTankVolume(UnitConversions.convert(act_vol, "gal", "m^3"))
 
     # Set parasitic power consumption
@@ -1251,13 +1289,15 @@ class Waterheater
     # Set fraction of heat loss from tank to ambient (vs out flue)
     # Based on lab testing done by LBNL
     skinlossfrac = 1.0
-    if fuel != Constants.FuelTypeElectric and wh_type == Constants.WaterHeaterTypeTank
-      if oncycle_p == 0
-        skinlossfrac = 0.64
-      elsif ef < 0.8
-        skinlossfrac = 0.91
-      else
-        skinlossfrac = 0.96
+    if not fuel.nil?
+      if fuel != Constants.FuelTypeElectric and wh_type == Constants.WaterHeaterTypeTank
+        if oncycle_p == 0
+          skinlossfrac = 0.64
+        elsif ef < 0.8
+          skinlossfrac = 0.91
+        else
+          skinlossfrac = 0.96
+        end
       end
     end
     new_heater.setOffCycleLossFractiontoThermalZone(skinlossfrac)
