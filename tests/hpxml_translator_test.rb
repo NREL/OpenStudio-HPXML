@@ -84,10 +84,18 @@ class HPXMLTranslatorTest < MiniTest::Test
   def test_template_osw
     # Check that simulation works using template.osw
     os_cli = OpenStudio.getOpenStudioCLI
-    puts "Current dir:\n#{Dir.entries(File.dirname(__FILE__))}"
-    puts "Parent dir:\n#{Dir.entries(File.join(File.dirname(__FILE__), '..'))}"
-    puts "Parent parent dir:\n#{Dir.entries(File.join(File.dirname(__FILE__), '..', '..'))}"
     osw_path = File.join(File.dirname(__FILE__), "..", "resources", "template.osw")
+    if Dir.exists? File.join(File.dirname(__FILE__), "..", "..", "project")
+      osw_path_ci = osw_path.gsub('.osw', '2.osw')
+      FileUtils.cp(osw_path, osw_path_ci)
+      require 'json'
+      json = JSON.parse(File.read(osw_path_ci), :symbolize_names => true)
+      json[:steps][0][:measure_dir_name] = "project"
+      File.open(osw_path_ci, "w") do |f|
+        f.write(JSON.pretty_generate(json))
+      end
+      osw_path = osw_path_ci
+    end
     command = "#{os_cli} run -w #{osw_path}"
     system(command, :err => File::NULL)
     sql_path = File.join(File.dirname(osw_path), "run", "eplusout.sql")
