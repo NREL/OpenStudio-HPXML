@@ -585,12 +585,7 @@ class Waterheater
       # Actual tank volume = 95% nominal tank volume
       act_vol = 0.95 * vol
       # Tank geometry
-      height = 48 # inches
-      pi = Math::PI
-      diameter = 24 * ((act_vol * 0.1337) / (height / 12 * pi))**0.5 # inches
-      a_top = pi * (diameter / 12)**2 / 4 # sqft
-      a_side = pi * (diameter / 12) * (height / 12) # sqft
-      surface_area = 2 * a_top + a_side # sqft
+      surface_area, a_side = calc_tank_areas(act_vol)
 
       if standby_loss.nil? # Swiched to standby_loss equation fit from AHRI database
         # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
@@ -965,6 +960,17 @@ class Waterheater
     return nil
   end
 
+  def self.calc_tank_areas(vol)
+    pi = Math::PI
+    height = 48 # inches
+    diameter = 24 * ((vol * 0.1337) / (height / 12 * pi))**0.5 # inches
+    a_top = pi * (diameter / 12)**2 / 4 # sqft
+    a_side = pi * (diameter / 12) * (height / 12) # sqft
+    surface_area = 2 * a_top + a_side # sqft
+
+    return surface_area, a_side
+  end
+
   def self.get_default_num_bathrooms(num_beds)
     # From https://www.sansomeandgeorge.co.uk/news-updates/what-is-the-ideal-ratio-of-bathrooms-to-bedrooms.html
     # "According to 70% of estate agents, a property should have two bathrooms for every three bedrooms..."
@@ -1129,7 +1135,6 @@ class Waterheater
       ua = 0
       surface_area = 1
     else
-      pi = Math::PI
       volume_drawn = 64.3 # gal/day
       density = 8.2938 # lb/gal
       draw_mass = volume_drawn * density # lb
@@ -1138,11 +1143,7 @@ class Waterheater
       t_in = 58 # F
       t_env = 67.5 # F
       q_load = draw_mass * cp * (t - t_in) # Btu/day
-      height = 48 # inches
-      diameter = 24 * ((vol * 0.1337) / (height / 12 * pi))**0.5 # inches
-      a_top = pi * (diameter / 12)**2 / 4 # sqft
-      a_side = pi * (diameter / 12) * (height / 12) # sqft
-      surface_area = 2 * a_top + a_side # sqft
+      surface_area, a_side = calc_tank_areas(vol)
       if fuel != Constants.FuelTypeElectric
         ua = (re / ef - 1) / ((t - t_env) * (24 / q_load - 1 / (1000 * (pow) * ef))) # Btu/hr-F
         eta_c = (re + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
