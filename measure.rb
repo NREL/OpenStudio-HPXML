@@ -2250,9 +2250,6 @@ class OSModel
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
         runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
-        if (ec_adj - 1.0).abs > 0.001
-          runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
-        end
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
