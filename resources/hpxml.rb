@@ -1388,7 +1388,7 @@ class HPXML
     vals = {}
     vals[:duct_type] = XMLHelper.get_value(ducts, "DuctType") if is_selected(select, :duct_type)
     vals[:duct_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctInsulationRValue")) if is_selected(select, :duct_insulation_r_value)
-    vals[:duct_insulation_material] = XMLHelper.get_value(ducts, "DuctInsulationMaterial") if is_selected(select, :duct_insulation_material)
+    vals[:duct_insulation_material] = XMLHelper.get_child_name(ducts, "DuctInsulationMaterial") if is_selected(select, :duct_insulation_material)
     vals[:duct_location] = XMLHelper.get_value(ducts, "DuctLocation") if is_selected(select, :duct_location)
     vals[:duct_fraction_area] = to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea")) if is_selected(select, :duct_fraction_area)
     vals[:duct_surface_area] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea")) if is_selected(select, :duct_surface_area)
