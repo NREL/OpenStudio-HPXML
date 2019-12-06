@@ -1006,13 +1006,13 @@ class Airflow
     # Create the return air plenum zone, space
     ra_duct_zone = OpenStudio::Model::ThermalZone.new(model)
     ra_duct_zone.setName(air_loop_name + " ret air zone")
-    ra_duct_zone.setVolume(8.0)
+    ra_duct_zone.setVolume(1.0)
 
     ra_duct_polygon = OpenStudio::Point3dVector.new
     ra_duct_polygon << OpenStudio::Point3d.new(0, 0, 0)
-    ra_duct_polygon << OpenStudio::Point3d.new(0, 2.0, 0)
-    ra_duct_polygon << OpenStudio::Point3d.new(2.0, 2.0, 0)
-    ra_duct_polygon << OpenStudio::Point3d.new(2.0, 0, 0)
+    ra_duct_polygon << OpenStudio::Point3d.new(0, 1.0, 0)
+    ra_duct_polygon << OpenStudio::Point3d.new(1.0, 1.0, 0)
+    ra_duct_polygon << OpenStudio::Point3d.new(1.0, 0, 0)
 
     ra_space = OpenStudio::Model::Space::fromFloorPrint(ra_duct_polygon, 1, model)
     ra_space = ra_space.get
@@ -1027,7 +1027,7 @@ class Airflow
       surface_property_convection_coefficients = OpenStudio::Model::SurfacePropertyConvectionCoefficients.new(surface)
       surface_property_convection_coefficients.setConvectionCoefficient1Location("Inside")
       surface_property_convection_coefficients.setConvectionCoefficient1Type("Value")
-      surface_property_convection_coefficients.setConvectionCoefficient1(9.9)
+      surface_property_convection_coefficients.setConvectionCoefficient1(99)
     end
 
     return ra_duct_zone
