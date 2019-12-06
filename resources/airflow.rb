@@ -18,13 +18,7 @@ class Airflow
 
     # Populate building object
     building = Building.new
-    spaces = []
-    model_spaces.each do |space|
-      next unless Geometry.space_is_above_grade(space)
-
-      spaces << space
-    end
-    building.height = Geometry.get_max_z_of_spaces(spaces)
+    building.height = Geometry.get_max_z_of_spaces(model_spaces)
     model.getThermalZones.each do |thermal_zone|
       if Geometry.is_living(thermal_zone)
         building.living = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone, runner), Geometry.get_z_origin_for_zone(thermal_zone), nil, nil)
