@@ -1859,7 +1859,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[1][:id] += "2"
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
-    heating_systems_values[0][:heating_capacity] /= 100.0
+    heating_systems_values[0][:heating_capacity] /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     heating_systems_values[0][:heating_cfm] = heating_systems_values[0][:heating_capacity] * 360.0 / 12000.0
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
@@ -1970,7 +1970,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values << cooling_systems_values[0].dup
     cooling_systems_values[1][:id] += "2"
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
-    cooling_systems_values[0][:cooling_capacity] /= 100.0
+    cooling_systems_values[0][:cooling_capacity] /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_cfm] = cooling_systems_values[0][:cooling_capacity] * 360.0 / 12000.0
   elsif hpxml_file.include? 'hvac_autosizing' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
@@ -2363,6 +2363,9 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                          { :duct_type => "return",
                                            :duct_leakage_units => "Percent",
                                            :duct_leakage_value => 0.05 }]]
+  elsif ['base-hvac-undersized.xml'].include? hpxml_file
+    duct_leakage_measurements_values[0][0][:duct_leakage_value] /= 10.0
+    duct_leakage_measurements_values[0][1][:duct_leakage_value] /= 10.0
   end
   return duct_leakage_measurements_values
 end
