@@ -13,8 +13,12 @@ class HEScoreRuleset
 
     # Create new HPXML doc
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml_doc.elements["/HPXML"])
-    hpxml_values[:eri_calculation_version] = "2014AEG" # FIXME: Verify
-    hpxml_doc = HPXML.create_hpxml(**hpxml_values)
+    hpxml_doc = HPXML.create_hpxml(xml_type: hpxml_values[:xml_type],
+                                   xml_generated_by: hpxml_values[:xml_generated_by],
+                                   transaction: hpxml_values[:transaction],
+                                   eri_calculation_version: "2014AEG",
+                                   building_id: hpxml_values[:building_id],
+                                   event_type: hpxml_values[:event_type])
     hpxml = hpxml_doc.elements["HPXML"]
 
     # BuildingSummary
@@ -146,14 +150,16 @@ class HEScoreRuleset
                                     number_of_conditioned_floors_above_grade: @ncfl_ag,
                                     number_of_bedrooms: @nbeds,
                                     conditioned_floor_area: @cfa,
-                                    conditioned_building_volume: @cvolume,
-                                    garage_present: false)
+                                    conditioned_building_volume: @cvolume)
   end
 
   def self.set_climate(orig_details, hpxml)
-    climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: orig_details.elements["ClimateandRiskZones"])
-    HPXML.add_climate_and_risk_zones(hpxml: hpxml, **climate_and_risk_zones_values)
-    @iecc_zone = climate_and_risk_zones_values[:iecc2012]
+    climate_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: orig_details.elements["ClimateandRiskZones"])
+    HPXML.add_climate_and_risk_zones(hpxml: hpxml,
+                                     weather_station_id: climate_values[:weather_station_id],
+                                     weather_station_name: climate_values[:weather_station_name],
+                                     weather_station_wmo: climate_values[:weather_station_wmo])
+    @iecc_zone = climate_values[:iecc2012]
   end
 
   def self.set_enclosure_air_infiltration(orig_details, hpxml)
@@ -574,7 +580,15 @@ class HEScoreRuleset
         end
       end
 
-      HPXML.add_heating_system(hpxml: hpxml, **heating_values)
+      HPXML.add_heating_system(hpxml: hpxml,
+                               id: heating_values[:id],
+                               distribution_system_idref: heating_values[:distribution_system_idref],
+                               heating_system_type: heating_values[:heating_system_type],
+                               heating_system_fuel: heating_values[:heating_system_fuel],
+                               heating_capacity: heating_values[:heating_capacity],
+                               heating_efficiency_afue: heating_values[:heating_efficiency_afue],
+                               heating_efficiency_percent: heating_values[:heating_efficiency_percent],
+                               fraction_heat_load_served: heating_values[:fraction_heat_load_served])
     end
 
     # CoolingSystem
@@ -626,7 +640,15 @@ class HEScoreRuleset
         end
       end
 
-      HPXML.add_cooling_system(hpxml: hpxml, **cooling_values)
+      HPXML.add_cooling_system(hpxml: hpxml,
+                               id: cooling_values[:id],
+                               distribution_system_idref: cooling_values[:distribution_system_idref],
+                               cooling_system_type: cooling_values[:cooling_system_type],
+                               cooling_system_fuel: cooling_values[:cooling_system_fuel],
+                               cooling_capacity: cooling_values[:cooling_capacity],
+                               fraction_cool_load_served: cooling_values[:fraction_cool_load_served],
+                               cooling_efficiency_seer: cooling_values[:cooling_efficiency_seer],
+                               cooling_efficiency_eer: cooling_values[:cooling_efficiency_eer])
     end
 
     # HeatPump
@@ -694,7 +716,22 @@ class HEScoreRuleset
         end
       end
 
-      HPXML.add_heat_pump(hpxml: hpxml, **hp_values)
+      HPXML.add_heat_pump(hpxml: hpxml,
+                          id: hp_values[:id],
+                          distribution_system_idref: hp_values[:distribution_system_idref],
+                          heat_pump_type: hp_values[:heat_pump_type],
+                          heat_pump_fuel: hp_values[:heat_pump_fuel],
+                          heating_capacity: hp_values[:heating_capacity],
+                          cooling_capacity: hp_values[:cooling_capacity],
+                          backup_heating_fuel: hp_values[:backup_heating_fuel],
+                          backup_heating_capacity: hp_values[:backup_heating_capacity],
+                          backup_heating_efficiency_percent: hp_values[:backup_heating_efficiency_percent],
+                          fraction_heat_load_served: hp_values[:fraction_heat_load_served],
+                          fraction_cool_load_served: hp_values[:fraction_cool_load_served],
+                          cooling_efficiency_seer: hp_values[:cooling_efficiency_seer],
+                          cooling_efficiency_eer: hp_values[:cooling_efficiency_eer],
+                          heating_efficiency_hspf: hp_values[:heating_efficiency_hspf],
+                          heating_efficiency_cop: hp_values[:heating_efficiency_cop])
     end
 
     # HVACControl
