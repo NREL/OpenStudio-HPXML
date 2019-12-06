@@ -32,7 +32,8 @@ It is used for high-level building information including conditioned floor area,
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
 
 Shading due to neighboring buildings can be defined inside an ``Site/extension/Neighbors`` element.
-Each ``Neighbors/NeighborBuilding`` element can have an azimuth, distance from the building, and optional height provided.
+Each ``Neighbors/NeighborBuilding`` element is required to have an ``Azimuth`` and ``Distance`` from the house.
+A ``Height`` is also optionally allowed; if not provided, the neighbor is assumed to be the same height as the house.
 
 The local shelter coefficient can be entered as ``Site/extension/ShelterCoefficient``.
 The shelter coefficient is defined by the AIM-2 infiltration model to account for nearby buildings, trees and obstructions.
@@ -343,7 +344,7 @@ Mechanical Ventilation
 **********************
 
 A single whole-house mechanical ventilation system may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForWholeBuildingVentilation='true'``.
-Inputs including ``FanType``, ``TestedFlowRate``, ``HoursInOperation``, and ``FanPower`` must be provided.
+Inputs including ``FanType``, ``TestedFlowRate`` (or ``RatedFlowRate``), ``HoursInOperation``, and ``FanPower`` must be provided.
 
 Depending on the type of mechanical ventilation specified, additional elements are required:
 
@@ -494,7 +495,7 @@ Ceiling Fans
 ~~~~~~~~~~~~
 
 Each ceiling fan (or set of identical ceiling fans) should be entered as a ``Lighting/CeilingFan``.
-The ``Airflow/Efficiency`` (at medium speed) and ``Quantity`` can be provided; otherwise default assumptions are used.
+The ``Airflow/Efficiency`` (at medium speed) and ``Quantity`` can be provided, otherwise default assumptions are used.
 
 In addition, a reduced cooling setpoint can be specified for summer months when ceiling fans are operating.
 See the Thermostat section for more information.
@@ -502,7 +503,9 @@ See the Thermostat section for more information.
 Plug Loads
 ~~~~~~~~~~
 
-TODO FIXME
+Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
+Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions are used.
 
 Validating & Debugging Errors
 -----------------------------
