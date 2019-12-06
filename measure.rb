@@ -50,7 +50,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Absolute/relative path of the HPXML file.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("weather_dir", false)
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument("weather_dir", true)
     arg.setDisplayName("Weather Directory")
     arg.setDescription("Absolute/relative path of the weather directory.")
     arg.setDefaultValue("weather")
