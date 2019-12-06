@@ -103,7 +103,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "Name" => one, # Required by HPXML schema
-        "WMO" => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
+        "[WMO | extension/EPWFileName]" => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
       },
 
       # [AirInfiltration]
@@ -505,6 +505,7 @@ class EnergyPlusValidator
 
       ## [Desuperheater]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[UsesDesuperheater='true']" => {
+        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater']" => one, # Desuperheater is only supported with storage/tankless water heater
         "RelatedHVACSystem" => one, # HeatPump or CoolingSystem
       },
 
@@ -687,6 +688,16 @@ class EnergyPlusValidator
     frac_dhw_load = hpxml_doc.elements["sum(/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem/FractionDHWLoadServed/text())"]
     if frac_dhw_load > 0 and (frac_dhw_load < 0.99 or frac_dhw_load > 1.01) # Use 0.99/1.01 in case of rounding
       errors << "Expected FractionDHWLoadServed to sum to 1, but calculated sum is #{frac_dhw_load.round(2)}."
+    end
+
+    # Check for unique SystemIdentifier IDs
+    sys_ids = {}
+    REXML::XPath.each(hpxml_doc, "//SystemIdentifier/@id") do |sys_id|
+      sys_ids[sys_id.value] = 0 if sys_ids[sys_id.value].nil?
+      sys_ids[sys_id.value] += 1
+    end
+    sys_ids.each do |sys_id, cnt|
+      errors << "Duplicate SystemIdentifier IDs detected for '#{sys_id}'." if cnt > 1
     end
 
     return errors

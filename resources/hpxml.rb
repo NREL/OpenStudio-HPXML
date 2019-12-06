@@ -175,7 +175,8 @@ class HPXML
                                       iecc2018: nil,
                                       weather_station_id:,
                                       weather_station_name:,
-                                      weather_station_wmo:)
+                                      weather_station_wmo: nil,
+                                      weather_station_epw_filename: nil)
     climate_and_risk_zones = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "ClimateandRiskZones"])
 
     climate_zones = { 2003 => iecc2003,
@@ -196,7 +197,9 @@ class HPXML
     sys_id = XMLHelper.add_element(weather_station, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", weather_station_id)
     XMLHelper.add_element(weather_station, "Name", weather_station_name)
-    XMLHelper.add_element(weather_station, "WMO", weather_station_wmo)
+    XMLHelper.add_element(weather_station, "WMO", weather_station_wmo) unless weather_station_wmo.nil?
+    HPXML.add_extension(parent: weather_station,
+                        extensions: { "EPWFileName": weather_station_epw_filename })
 
     return climate_and_risk_zones
   end
@@ -217,6 +220,7 @@ class HPXML
     vals[:weather_station_id] = HPXML.get_id(weather_station) if is_selected(select, :weather_station_id)
     vals[:weather_station_name] = XMLHelper.get_value(weather_station, "Name") if is_selected(select, :weather_station_name)
     vals[:weather_station_wmo] = XMLHelper.get_value(weather_station, "WMO") if is_selected(select, :weather_station_wmo)
+    vals[:weather_station_epw_filename] = XMLHelper.get_value(weather_station, "extension/EPWFileName") if is_selected(select, :weather_station_epw_filename)
     return vals
   end
 
@@ -1388,7 +1392,7 @@ class HPXML
     vals = {}
     vals[:duct_type] = XMLHelper.get_value(ducts, "DuctType") if is_selected(select, :duct_type)
     vals[:duct_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctInsulationRValue")) if is_selected(select, :duct_insulation_r_value)
-    vals[:duct_insulation_material] = XMLHelper.get_value(ducts, "DuctInsulationMaterial") if is_selected(select, :duct_insulation_material)
+    vals[:duct_insulation_material] = XMLHelper.get_child_name(ducts, "DuctInsulationMaterial") if is_selected(select, :duct_insulation_material)
     vals[:duct_location] = XMLHelper.get_value(ducts, "DuctLocation") if is_selected(select, :duct_location)
     vals[:duct_fraction_area] = to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea")) if is_selected(select, :duct_fraction_area)
     vals[:duct_surface_area] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea")) if is_selected(select, :duct_surface_area)

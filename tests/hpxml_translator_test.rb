@@ -20,10 +20,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     results_dir = File.join(this_dir, "results")
     _rm_path(results_dir)
 
-    args = {}
-    args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
-    args['skip_validation'] = false
-
     @simulation_runtime_key = "Simulation Runtime"
     @workflow_runtime_key = "Workflow Runtime"
 
@@ -56,7 +52,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     all_results = {}
     all_compload_results = {}
     xmls.each do |xml|
-      all_results[xml], all_compload_results[xml] = _run_xml(xml, this_dir, args.dup)
+      all_results[xml], all_compload_results[xml] = _run_xml(xml, this_dir)
     end
 
     Dir.mkdir(results_dir)
@@ -74,10 +70,6 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def test_invalid
     this_dir = File.dirname(__FILE__)
-
-    args = {}
-    args['weather_dir'] = File.absolute_path(File.join(this_dir, "..", "weather"))
-    args['skip_validation'] = false
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
                             'bad-site-neighbor-azimuth.xml' => ["A neighbor building has an azimuth (145) not equal to the azimuth of any wall."],
@@ -122,7 +114,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Test simulations
     Dir["#{this_dir}/invalid_files/*.xml"].sort.each do |xml|
-      _run_xml(File.absolute_path(xml), this_dir, args.dup, true, expected_error_msgs[File.basename(xml)])
+      _run_xml(File.absolute_path(xml), this_dir, true, expected_error_msgs[File.basename(xml)])
     end
   end
 
@@ -218,15 +210,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
   end
 
-  def _run_xml(xml, this_dir, args, expect_error = false, expect_error_msgs = nil)
+  def _run_xml(xml, this_dir, expect_error = false, expect_error_msgs = nil)
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, "run")
-    args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
-    args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
-    args['hpxml_path'] = xml
-    args['map_tsv_dir'] = rundir
     _test_schema_validation(this_dir, xml)
-    results, compload_results = _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
+    results, compload_results = _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
     return results, compload_results
   end
 
@@ -343,7 +331,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     compload_results = {}
 
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
-      query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer:Zone:LIVING' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       compload_results["#{mode} - Total"] = sqlFile.execAndReturnFirstDouble(query).get
 
       query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:District#{mode}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
@@ -390,7 +378,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     return results, compload_results
   end
 
-  def _test_simulation(args, this_dir, rundir, expect_error, expect_error_msgs)
+  def _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
     # Uses meta_measure workflow for faster simulations
 
     # Setup
@@ -400,6 +388,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     workflow_start = Time.now
     model = OpenStudio::Model::Model.new
     runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+
+    args = {}
+    args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
+    args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
+    args['hpxml_path'] = xml
+    args['map_tsv_dir'] = rundir
+    args['skip_validation'] = false
+    args['weather_dir'] = "weather"
 
     # Add measure to workflow
     measures = {}
