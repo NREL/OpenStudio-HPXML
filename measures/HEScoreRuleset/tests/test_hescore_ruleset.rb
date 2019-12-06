@@ -270,8 +270,12 @@ class HEScoreRulesetTest < MiniTest::Test
 
     orig_details = hpxml_doc.elements["/HPXML/Building/BuildingDetails"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml_doc.elements["/HPXML"])
-    hpxml_values[:eri_calculation_version] = "2014AEG" # FIXME: Verify
-    hpxml_doc2 = HPXML.create_hpxml(**hpxml_values)
+    hpxml_doc2 = HPXML.create_hpxml(xml_type: hpxml_values[:xml_type],
+                                    xml_generated_by: hpxml_values[:xml_generated_by],
+                                    transaction: hpxml_values[:transaction],
+                                    eri_calculation_version: "2014AEG",
+                                    building_id: hpxml_values[:building_id],
+                                    event_type: hpxml_values[:event_type])
     hpxml2 = hpxml_doc.elements["HPXML"]
     HEScoreRuleset.set_summary(orig_details, hpxml2)
     bldg_length_side = HEScoreRuleset.instance_variable_get(:@bldg_length_side)
