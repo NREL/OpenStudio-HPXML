@@ -1,8 +1,6 @@
 Capabilities
 ============
 
-Modeling Capabilities
----------------------
 The following building features/technologies are available for modeling:
 
 - Enclosure
@@ -92,13 +90,3 @@ The following building features/technologies are available for modeling:
 - Lighting
 - Ceiling Fans
 - Plug Loads
-
-Accuracy vs Speed
------------------
-
-The EnergyPlus simulation engine is like a Swiss army knife.
-There are often multiple models available for the same building technology with varying trade-offs between accuracy and speed.
-This OpenStudio measure standardizes the use of EnergyPlus (e.g., the choice of models appropriate for residential buildings) to provide a fast and easy to use solution.
-
-The workflow is continuously being evaluated for ways to reduce runtime without significant impact on accuracy.
-A number of such enhancements have been made to date.

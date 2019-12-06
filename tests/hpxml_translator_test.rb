@@ -68,6 +68,27 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_collapsed_surfaces(all_results, this_dir)
   end
 
+  def test_run_simulation_rb
+    # Check that simulation works using run_simulation.rb script
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), "..", "resources", "run_simulation.rb")
+    xml = File.join(File.dirname(__FILE__), "base.xml")
+    command = "#{os_cli} #{rb_path} -x #{xml}"
+    system(command, :err => File::NULL)
+    sql_path = File.join(File.dirname(xml), "run", "eplusout.sql")
+    assert(File.exists? sql_path)
+  end
+
+  def test_template_osw
+    # Check that simulation works using template.osw
+    os_cli = OpenStudio.getOpenStudioCLI
+    osw_path = File.join(File.dirname(__FILE__), "..", "resources", "template.osw")
+    command = "#{os_cli} run -w #{osw_path}"
+    system(command, :err => File::NULL)
+    sql_path = File.join(File.dirname(osw_path), "run", "eplusout.sql")
+    assert(File.exists? sql_path)
+  end
+
   def test_invalid
     this_dir = File.dirname(__FILE__)
 

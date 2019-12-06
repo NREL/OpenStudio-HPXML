@@ -1,5 +1,5 @@
 HPXML Generation
-===================
+================
 
 The OpenStudio-HPXML measure requires a building description in an `HPXML file <https://hpxml.nrel.gov/>`_ format.
 HPXML is an open data standard for collecting and transferring home energy data. 
@@ -54,14 +54,15 @@ The terrain surrounding the building is assumed to be suburban.
 Finally, natural ventilation can be disabled by setting true for ``Site/extension/DisableNaturalVentilation``.
 If not specified, natural ventilation is assumed to be available year-round to reduce space cooling, with airflow influenced by the amount of window area.
 
-Climate and Weather
-~~~~~~~~~~~~~~~~~~~
+Weather File
+~~~~~~~~~~~~
 
-This section describes fields specified in HPXML's ``ClimateandRiskZones``.
+The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation.
+The weather file can be entered in one of two ways:
 
-The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weather file (EPW) to be used in the simulation. 
-Currently the ``WeatherStation/WMO`` must be one of the acceptable TMY3 WMO station numbers found in the `weather/data.csv <https://github.com/NREL/OpenStudio-HPXML/blob/master/weather/data.csv>`_ file.
-The full set of TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache.zip>`_.
+#. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the `weather/data.csv <https://github.com/NREL/OpenStudio-HPXML/blob/master/weather/data.csv>`_ file.
+   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache.zip>`_.
+#. Using the ``WeatherStation/extension/EPWFileName``.
 
 Enclosure
 ~~~~~~~~~
@@ -237,6 +238,7 @@ If any water heating systems are entered, the sum of all their ``FractionDHWLoad
 
   HVAC systems (Heating Systems, Cooling Systems, and Heat Pumps) can be autosized via ACCA Manual J/S by using -1 as the capacity.
   For a given system, all capacities must either be autosized or user-specified.
+  For example, an air-to-air heat pump must have its heating capacity, cooling capacity, and backup heating capacity all autosized or user-specified.
 
 Heating Systems
 ***************

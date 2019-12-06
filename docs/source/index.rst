@@ -12,6 +12,7 @@ OpenStudio-HPXML documentation
 
    intro
    capabilities
+   getting_started
    hpxml_generation
 
 Indices and tables
