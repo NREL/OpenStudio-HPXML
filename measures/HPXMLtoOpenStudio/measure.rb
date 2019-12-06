@@ -3634,8 +3634,8 @@ class OSModel
                    "Gas:Facility",
                    "FuelOil#1:Facility",
                    "Propane:Facility",
-                   "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
-                   "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
+                   "Heating:EnergyTransfer",
+                   "Cooling:EnergyTransfer",
                    "Heating:DistrictHeating",
                    "Cooling:DistrictCooling",
                    "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity",
@@ -3876,7 +3876,6 @@ class OSModel
         ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
       end
 
-=begin
       # Return duct losses
       plenum_zones.each do |plenum_zone|
         model.getOtherEquipments.sort.each do |o|
@@ -3884,7 +3883,7 @@ class OSModel
 
           ducts_sensors << []
           { "Other Equipment Convective Heating Energy" => "ducts_conv",
-          "Other Equipment Radiant Heating Energy" => "ducts_rad" }.each do |var, name|
+            "Other Equipment Radiant Heating Energy" => "ducts_rad" }.each do |var, name|
             ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
             ducts_sensor.setName(name)
             ducts_sensor.setKeyName(o.name.to_s)
@@ -3893,13 +3892,12 @@ class OSModel
           end
         end
       end
-=end
 
       # Supply duct losses
       @living_zone.airLoopHVACs.sort.each do |airloop|
         model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
-          next unless o.name.to_s.start_with? airloop.name.to_s
+          next unless o.name.to_s.start_with? airloop.name.to_s.gsub(" ", "_")
 
           ducts_sensors << []
           { "Other Equipment Convective Heating Energy" => "ducts_conv",
