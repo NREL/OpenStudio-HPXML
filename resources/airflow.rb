@@ -1027,7 +1027,7 @@ class Airflow
       surface_property_convection_coefficients = OpenStudio::Model::SurfacePropertyConvectionCoefficients.new(surface)
       surface_property_convection_coefficients.setConvectionCoefficient1Location("Inside")
       surface_property_convection_coefficients.setConvectionCoefficient1Type("Value")
-      surface_property_convection_coefficients.setConvectionCoefficient1(99)
+      surface_property_convection_coefficients.setConvectionCoefficient1(30)
     end
 
     return ra_duct_zone
