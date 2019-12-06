@@ -656,8 +656,10 @@ class Constructions
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
+      constr.add_layer(Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch(surfaces)))
+    else
+      constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
     end
-    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
 
     # Create and assign construction to roof surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
@@ -669,7 +671,7 @@ class Constructions
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, !mat_rb.nil?)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, has_radiant_barrier)
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
@@ -679,7 +681,7 @@ class Constructions
   def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, drywall_thick_in,
-                                    osb_thick_in, rigid_r, mat_roofing)
+                                    osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier)
 
     return true if surfaces.empty?
 
@@ -707,6 +709,10 @@ class Constructions
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = "RoofRigidIns", thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
+    mat_rb = nil
+    if has_radiant_barrier
+      mat_rb = Material.RadiantBarrier
+    end
 
     # Set paths
     gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
@@ -728,7 +734,12 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+    if not mat_rb.nil?
+      constr.add_layer(mat_rb)
+      constr.add_layer(Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch(surfaces)))
+    else
+      constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+    end
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
@@ -740,7 +751,7 @@ class Constructions
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, false)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, has_radiant_barrier)
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
