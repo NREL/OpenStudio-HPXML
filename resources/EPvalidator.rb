@@ -32,14 +32,13 @@ class EnergyPlusValidator
         "/HPXML/XMLTransactionHeaderInformation/XMLGeneratedBy" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/CreatedDateAndTime" => one, # Required by HPXML schema
         "/HPXML/XMLTransactionHeaderInformation/Transaction" => one, # Required by HPXML schema
-        "/HPXML/SoftwareInfo/extension/ERICalculation[Version='2014' or Version='2014A' or Version='2014AE' or Version='2014AEG']" => one, # Choose version of 301 standard and addenda (e.g., A, E, G)
 
         "/HPXML/Building" => one,
         "/HPXML/Building/BuildingID" => one, # Required by HPXML schema
         "/HPXML/Building/ProjectStatus/EventType" => one, # Required by HPXML schema
 
-        "/HPXML/Building/BuildingDetails/BuildingSummary/Site/FuelTypesAvailable/Fuel" => one_or_more,
         "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/ShelterCoefficient" => zero_or_one, # Uses ERI assumption if not provided
+        "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/DisableNaturalVentilation" => zero_or_one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingOccupancy/NumberofResidents" => zero_or_one, # Uses ERI assumption if not provided
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors" => one,
         "/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloorsAboveGrade" => one,
@@ -68,7 +67,6 @@ class EnergyPlusValidator
         "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump" => zero_or_more, # See [HeatPump]
         "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl" => zero_or_one, # See [HVACControl]
         "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution" => zero_or_more, # See [HVACDistribution]
-        "/HPXML/Building/BuildingDetails/Systems/HVAC/extension/NaturalVentilation" => zero_or_one, # See [NaturalVentilation]
 
         "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']" => zero_or_one, # See [MechanicalVentilation]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem" => zero_or_more, # See [WaterHeatingSystem]
@@ -105,7 +103,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "Name" => one, # Required by HPXML schema
-        "WMO" => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
+        "[WMO | extension/EPWFileName]" => one_or_more, # Reference weather/data.csv for the list of acceptable WMO station numbers
       },
 
       # [AirInfiltration]
@@ -507,6 +505,7 @@ class EnergyPlusValidator
 
       ## [Desuperheater]
       "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[UsesDesuperheater='true']" => {
+        "[WaterHeaterType='storage water heater' or WaterHeaterType='instantaneous water heater']" => one, # Desuperheater is only supported with storage/tankless water heater
         "RelatedHVACSystem" => one, # HeatPump or CoolingSystem
       },
 
