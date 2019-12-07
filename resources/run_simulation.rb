@@ -110,12 +110,6 @@ unless File.exists?(options[:hpxml]) and options[:hpxml].downcase.end_with? ".xm
   fail "'#{options[:hpxml]}' does not exist or is not an .xml file."
 end
 
-# Check for correct versions of OS
-os_version = "2.9.0"
-if OpenStudio.openStudioVersion != os_version
-  fail "OpenStudio version #{os_version} is required."
-end
-
 if options[:output_dir].nil?
   options[:output_dir] = File.dirname(options[:hpxml]) # default
 end
