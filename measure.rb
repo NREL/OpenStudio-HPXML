@@ -252,12 +252,11 @@ class OSModel
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml,
                                           select: [:eri_calculation_version])
+    @eri_version = hpxml_values[:eri_calculation_version] # Hidden feature
+    @eri_version = '2014AEG' if @eri_version.nil? # Use latest version/addenda implemented
+
     building = hpxml_doc.elements["/HPXML/Building"]
     enclosure = building.elements["BuildingDetails/Enclosure"]
-
-    @eri_version = hpxml_values[:eri_calculation_version]
-    fail "Could not find ERI Version" if @eri_version.nil?
-
     HPXML.collapse_enclosure(enclosure)
 
     # Global variables
@@ -2251,9 +2250,6 @@ class OSModel
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
         runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
-        if (ec_adj - 1.0).abs > 0.001
-          runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
-        end
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 

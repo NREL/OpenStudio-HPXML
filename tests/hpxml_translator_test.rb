@@ -68,6 +68,39 @@ class HPXMLTranslatorTest < MiniTest::Test
     _test_collapsed_surfaces(all_results, this_dir)
   end
 
+  def test_run_simulation_rb
+    # Check that simulation works using run_simulation.rb script
+    os_cli = OpenStudio.getOpenStudioCLI
+    rb_path = File.join(File.dirname(__FILE__), "..", "resources", "run_simulation.rb")
+    xml = File.join(File.dirname(__FILE__), "base.xml")
+    command = "#{os_cli} #{rb_path} -x #{xml}"
+    system(command, :err => File::NULL)
+    sql_path = File.join(File.dirname(xml), "run", "eplusout.sql")
+    assert(File.exists? sql_path)
+  end
+
+  def test_template_osw
+    # Check that simulation works using template.osw
+    os_cli = OpenStudio.getOpenStudioCLI
+    osw_path = File.join(File.dirname(__FILE__), "..", "resources", "template.osw")
+    if Dir.exists? File.join(File.dirname(__FILE__), "..", "..", "project")
+      # CI checks out the repo as "project", so need to update the OSW
+      osw_path_ci = osw_path.gsub('.osw', '2.osw')
+      FileUtils.cp(osw_path, osw_path_ci)
+      require 'json'
+      json = JSON.parse(File.read(osw_path_ci), :symbolize_names => true)
+      json[:steps][0][:measure_dir_name] = "project"
+      File.open(osw_path_ci, "w") do |f|
+        f.write(JSON.pretty_generate(json))
+      end
+      osw_path = osw_path_ci
+    end
+    command = "#{os_cli} run -w #{osw_path}"
+    system(command, :err => File::NULL)
+    sql_path = File.join(File.dirname(osw_path), "run", "eplusout.sql")
+    assert(File.exists? sql_path)
+  end
+
   def test_invalid
     this_dir = File.dirname(__FILE__)
 
