@@ -2,7 +2,6 @@ start_time = Time.now
 
 require 'fileutils'
 require 'optparse'
-require 'json'
 require 'pathname'
 require_relative "../measures/HPXMLtoOpenStudio/resources/meta_measure"
 require_relative "../measures/HPXMLtoOpenStudio/resources/unit_conversions"
@@ -29,15 +28,15 @@ def get_output_hpxml_path(resultsdir, designdir)
   return File.join(resultsdir, File.basename(designdir) + ".xml")
 end
 
-def run_design(basedir, designdir, design, resultsdir, hpxml, debug)
+def run_design(basedir, designdir, design, resultsdir, hpxml, debug, validate)
   puts "Creating input..."
-  create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
+  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
 
   puts "Running simulation..."
   run_energyplus(design, designdir)
 end
 
-def create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
+def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
   Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -66,7 +65,7 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
   if debug
     args['osm_output_path'] = File.join(designdir, "in.osm")
   end
-  args['skip_validation'] = false
+  args['skip_validation'] = !validate
   update_args_hash(measures, measure_subdir, args)
 
   # Apply measures
@@ -107,7 +106,18 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
 
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
+  forward_translator.setExcludeLCCObjects(true)
   model_idf = forward_translator.translateModel(model)
+
+  # Report warnings/errors
+  File.open(File.join(designdir, 'run.log'), 'a') do |f|
+    forward_translator.warnings.each do |s|
+      f << "FT Warning: #{s.logMessage}\n"
+    end
+    forward_translator.errors.each do |s|
+      f << "FT Error: #{s.logMessage}\n"
+    end
+  end
 
   # Write IDF to file
   File.open(File.join(designdir, "in.idf"), 'w') { |f| f << model_idf.to_s }
@@ -157,21 +167,21 @@ def create_output(designdir, resultsdir)
         results[hes_key][i - 1] += result
         results_gj[hes_key][i - 1] += result_gj
 
-        if hes_end_use == :large_appliance
+        if hes_end_use == "large_appliance"
           # Subtract out from small appliance end use
-          results[[:small_appliance, hes_resource_type]][i - 1] -= result
-          results_gj[[:small_appliance, hes_resource_type]][i - 1] -= result_gj
+          results[["small_appliance", hes_resource_type]][i - 1] -= result
+          results_gj[["small_appliance", hes_resource_type]][i - 1] -= result_gj
         end
       end
     end
   end
 
   # Subtract out disaggregated heating/cooling fan and pump energy from hot water electricity end use
-  hes_resource_type = :electric
+  hes_resource_type = "electric"
   to_units = get_fuel_site_units(hes_resource_type)
-  for hes_end_use in [:heating, :cooling]
+  for hes_end_use in ["heating", "cooling"]
     for i in 1..12
-      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName LIKE '%#{Constants.ObjectNameFanPumpDisaggregate(hes_end_use == :cooling)}' AND ReportingFrequency='Monthly' AND VariableUnits='J') AND TimeIndex='#{i}'"
+      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName LIKE '%#{Constants.ObjectNameFanPumpDisaggregate(hes_end_use == "cooling")}' AND ReportingFrequency='Monthly' AND VariableUnits='J') AND TimeIndex='#{i}'"
       sql_result = sqlFile.execAndReturnFirstDouble(query)
       next unless sql_result.is_initialized
 
@@ -185,14 +195,14 @@ def create_output(designdir, resultsdir)
       results_gj[[hes_end_use, hes_resource_type]][i - 1] += result_gj
 
       # Subtract from hot water end use
-      results[[:hot_water, hes_resource_type]][i - 1] -= result
-      results_gj[[:hot_water, hes_resource_type]][i - 1] -= result_gj
+      results[["hot_water", hes_resource_type]][i - 1] -= result
+      results_gj[["hot_water", hes_resource_type]][i - 1] -= result_gj
     end
   end
 
   # Add hot water volume output
-  hes_end_use = :hot_water
-  hes_resource_type = :hot_water
+  hes_end_use = "hot_water"
+  hes_resource_type = "hot_water"
   to_units = get_fuel_site_units(hes_resource_type)
   for i in 1..12
     query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='Water Use Equipment Hot Water Volume' AND ReportingFrequency='Monthly' AND VariableUnits='m3') AND TimeIndex='#{i}'"
@@ -211,7 +221,7 @@ def create_output(designdir, resultsdir)
   sum_energy_gj = 0
   results_gj.each do |hes_key, values|
     hes_end_use, hes_resource_type = hes_key
-    if hes_end_use == :generation
+    if hes_end_use == "generation"
       sum_energy_gj -= values.inject(0, :+)
     else
       sum_energy_gj += values.inject(0, :+)
@@ -243,7 +253,7 @@ def create_output(designdir, resultsdir)
   end
 
   File.open(File.join(resultsdir, "results.json"), "w") do |f|
-    f.write(JSON.pretty_generate(data))
+    f.write(data.to_s.gsub("=>", ":")) # Much faster than requiring JSON to use pretty_generate
   end
 end
 
@@ -306,7 +316,7 @@ end
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename(__FILE__)} -x building.xml\n e.g., #{File.basename(__FILE__)} -s -x sample_files/valid.xml\n"
+  opts.banner = "Usage: #{File.basename(__FILE__)} -x building.xml\n e.g., #{File.basename(__FILE__)} -x sample_files/valid.xml\n"
 
   opts.on('-x', '--xml <FILE>', 'HPXML file') do |t|
     options[:hpxml] = t
@@ -318,6 +328,11 @@ OptionParser.new do |opts|
 
   opts.on('-w', '--download-weather', 'Downloads all weather files') do |t|
     options[:epws] = t
+  end
+
+  options[:validate] = false
+  opts.on('--validate', 'Validate against HPXML EnergyPlus Use Case') do |t|
+    options[:validate] = true
   end
 
   options[:debug] = false
@@ -371,7 +386,7 @@ puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
 designdir = get_designdir(options[:output_dir], design)
 rm_path(designdir)
-rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug])
+rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:validate])
 
 # Create output
 create_output(designdir, resultsdir)
