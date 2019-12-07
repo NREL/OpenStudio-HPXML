@@ -510,6 +510,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
+    forward_translator.setExcludeLCCObjects(true)
     model_idf = forward_translator.translateModel(model)
     File.open(File.join(rundir, "in.idf"), 'w') { |f| f << model_idf.to_s }
 
