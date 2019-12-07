@@ -13,7 +13,6 @@ require_relative '../resources/xmlhelper'
 
 class HPXMLTranslatorTest < MiniTest::Test
   def test_simulations
-    skip
     OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
     # OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
 
@@ -70,7 +69,6 @@ class HPXMLTranslatorTest < MiniTest::Test
   end
 
   def test_run_simulation_rb
-    skip
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
     rb_path = File.join(File.dirname(__FILE__), "..", "resources", "run_simulation.rb")
@@ -86,6 +84,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     os_cli = OpenStudio.getOpenStudioCLI
     osw_path = File.join(File.dirname(__FILE__), "..", "resources", "template.osw")
     if Dir.exists? File.join(File.dirname(__FILE__), "..", "..", "project")
+      # CI checks out the repo as "project", so need to update the OSW
       osw_path_ci = osw_path.gsub('.osw', '2.osw')
       FileUtils.cp(osw_path, osw_path_ci)
       require 'json'
@@ -103,7 +102,6 @@ class HPXMLTranslatorTest < MiniTest::Test
   end
 
   def test_invalid
-    skip
     this_dir = File.dirname(__FILE__)
 
     expected_error_msgs = { 'bad-wmo.xml' => ["Weather station WMO '999999' could not be found in weather/data.csv."],
@@ -154,7 +152,6 @@ class HPXMLTranslatorTest < MiniTest::Test
   end
 
   def test_generalized_hvac
-    skip
     # single-speed air conditioner
     seer_to_expected_eer = { 13 => 11.2, 14 => 12.1, 15 => 13.0, 16 => 13.6 }
     seer_to_expected_eer.each do |seer, expected_eer|
