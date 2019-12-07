@@ -73,13 +73,8 @@ class XMLHelper
 
   # Returns true if the element exists.
   def self.has_element(parent, element_name)
-    element_name.split("/").each do |name|
-      element = parent.elements[name]
-      return false if element.nil?
-
-      parent = element
-    end
-    return true
+    element = REXML::XPath.first(parent, element_name)
+    return !element.nil?
   end
 
   # Returns the attribute added
