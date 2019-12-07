@@ -18,7 +18,7 @@ def rm_path(path)
   end
 end
 
-def create_idf(basedir, rundir, hpxml, debug)
+def create_idf(basedir, rundir, hpxml, debug, skip_validation)
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
 
   model = OpenStudio::Model::Model.new
@@ -36,7 +36,7 @@ def create_idf(basedir, rundir, hpxml, debug)
   if debug
     args['osm_output_path'] = File.join(rundir, "in.osm")
   end
-  args['skip_validation'] = false
+  args['skip_validation'] = skip_validation
   update_args_hash(measures, measure_subdir, args)
 
   # Apply measures
@@ -63,7 +63,18 @@ def create_idf(basedir, rundir, hpxml, debug)
 
   # Translate model to IDF
   forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
+  forward_translator.setExcludeLCCObjects(true)
   model_idf = forward_translator.translateModel(model)
+
+  # Report warnings/errors
+  File.open(File.join(rundir, 'run.log'), 'a') do |f|
+    forward_translator.warnings.each do |s|
+      f << "FT Warning: #{s.logMessage}\n"
+    end
+    forward_translator.errors.each do |s|
+      f << "FT Error: #{s.logMessage}\n"
+    end
+  end
 
   # Write IDF to file
   File.open(File.join(rundir, "in.idf"), 'w') { |f| f << model_idf.to_s }
@@ -78,7 +89,7 @@ end
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename(__FILE__)} -x building.xml\n e.g., #{File.basename(__FILE__)} -s -x sample_files/valid.xml\n"
+  opts.banner = "Usage: #{File.basename(__FILE__)} -x building.xml\n e.g., #{File.basename(__FILE__)} -s -x tests/base.xml\n"
 
   opts.on('-x', '--xml <FILE>', 'HPXML file') do |t|
     options[:hpxml] = t
@@ -86,6 +97,11 @@ OptionParser.new do |opts|
 
   opts.on('-o', '--output-dir <DIR>', 'Output directory') do |t|
     options[:output_dir] = t
+  end
+
+  options[:skip_validation] = false
+  opts.on('-s', '--skip-validation', 'Skips HPXML validation') do |t|
+    options[:skip_validation] = true
   end
 
   options[:debug] = false
@@ -127,7 +143,7 @@ Dir.mkdir(rundir)
 # Run design
 puts "HPXML: #{options[:hpxml]}"
 puts "Creating input..."
-create_idf(basedir, rundir, options[:hpxml], options[:debug])
+create_idf(basedir, rundir, options[:hpxml], options[:debug], options[:skip_validation])
 
 puts "Running simulation..."
 run_energyplus(rundir)
