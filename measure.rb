@@ -1171,6 +1171,8 @@ class OSModel
         set_surface_interior(model, spaces, surface, roof_values[:id], roof_values[:interior_adjacent_to])
       end
 
+      next if surfaces.empty?
+
       # Apply construction
       if is_thermal_boundary(roof_values)
         drywall_thick_in = 0.5
@@ -1266,6 +1268,8 @@ class OSModel
           surface.setWindExposure("NoWind")
         end
       end
+
+      next if surfaces.empty?
 
       # Apply construction
       # The code below constructs a reasonable wall construction based on the
