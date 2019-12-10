@@ -588,24 +588,8 @@ class Waterheater
       tank_type = Constants.WaterHeaterTypeTank
       # Actual tank volume = 95% nominal tank volume
       act_vol = calc_storage_tank_actual_vol(vol, nil)
-      # Tank geometry
-      surface_area, a_side = calc_tank_areas(act_vol)
-
-      if standby_loss.nil? # Swiched to standby_loss equation fit from AHRI database
-        # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
-        sqft_by_gal = surface_area / act_vol # sqft/gal
-        standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u
-      end
-
-      # Test conditions
-      cp = 0.999 # Btu/lb-F
-      rho = 8.216 # lb/gal
-      t_amb = 70 # F
-      t_tank_avg = 135 # F, Test begins at 137-138F stop at 133F
-
-      # UA calculation
-      q = standby_loss * cp * act_vol * rho # Btu/hr
-      ua = q / (t_tank_avg - t_amb) # Btu/hr-F
+      a_side = calc_tank_areas(act_vol)[1]
+      ua = calc_indirect_tank_ua(act_vol, standby_loss)
 
       # Tank jacket
       # assume indirect water heater skin to be insulated with 2inch R5 (the same as electric)
@@ -965,15 +949,37 @@ class Waterheater
     return nil
   end
 
-  def self.calc_tank_areas(vol)
+  def self.calc_tank_areas(act_vol)
     pi = Math::PI
     height = 48 # inches
-    diameter = 24 * ((vol * 0.1337) / (height / 12 * pi))**0.5 # inches
+    diameter = 24 * ((act_vol * 0.1337) / (height / 12 * pi))**0.5 # inches
     a_top = pi * (diameter / 12)**2 / 4 # sqft
     a_side = pi * (diameter / 12) * (height / 12) # sqft
     surface_area = 2 * a_top + a_side # sqft
 
     return surface_area, a_side
+  end
+
+  def self.calc_indirect_tank_ua(act_vol, standby_loss)
+    # Tank geometry
+    surface_area = calc_tank_areas(act_vol)[0]
+
+    if standby_loss.nil? # Swiched to standby_loss equation fit from AHRI database
+      # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
+      sqft_by_gal = surface_area / act_vol # sqft/gal
+      standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u
+    end
+
+    # Test conditions
+    cp = 0.999 # Btu/lb-F
+    rho = 8.216 # lb/gal
+    t_amb = 70 # F
+    t_tank_avg = 135 # F, Test begins at 137-138F stop at 133F
+
+    # UA calculation
+    q = standby_loss * cp * act_vol * rho # Btu/hr
+    ua = q / (t_tank_avg - t_amb) # Btu/hr-F
+    return ua
   end
 
   def self.get_default_num_bathrooms(num_beds)
@@ -1131,7 +1137,7 @@ class Waterheater
     return act_vol
   end
 
-  def self.calc_tank_UA(vol, fuel, ef, re, pow, wh_type, cyc_derate, jacket_r, runner)
+  def self.calc_tank_UA(act_vol, fuel, ef, re, pow, wh_type, cyc_derate, jacket_r, runner)
     # Calculates the U value, UA of the tank and conversion efficiency (eta_c)
     # based on the Energy Factor and recovery efficiency of the tank
     # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
@@ -1148,7 +1154,7 @@ class Waterheater
       t_in = 58 # F
       t_env = 67.5 # F
       q_load = draw_mass * cp * (t - t_in) # Btu/day
-      surface_area, a_side = calc_tank_areas(vol)
+      surface_area, a_side = calc_tank_areas(act_vol)
       if fuel != Constants.FuelTypeElectric
         ua = (re / ef - 1) / ((t - t_env) * (24 / q_load - 1 / (1000 * (pow) * ef))) # Btu/hr-F
         eta_c = (re + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
