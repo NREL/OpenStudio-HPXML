@@ -6,7 +6,7 @@ class HPXML
                         transaction:,
                         software_program_used: nil,
                         software_program_version: nil,
-                        eri_calculation_version:,
+                        eri_calculation_version: nil,
                         building_id:,
                         event_type:)
     doc = XMLHelper.create_doc(version = "1.0", encoding = "UTF-8")
@@ -26,7 +26,7 @@ class HPXML
     XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used) unless software_program_used.nil?
     XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version) unless software_program_version.nil?
     eri_calculation = XMLHelper.add_element(software_info, "extension/ERICalculation")
-    XMLHelper.add_element(eri_calculation, "Version", eri_calculation_version)
+    XMLHelper.add_element(eri_calculation, "Version", eri_calculation_version) unless eri_calculation_version.nil?
 
     building = XMLHelper.add_element(hpxml, "Building")
     building_building_id = XMLHelper.add_element(building, "BuildingID")
