@@ -1171,6 +1171,8 @@ class OSModel
         set_surface_interior(model, spaces, surface, roof_values[:id], roof_values[:interior_adjacent_to])
       end
 
+      next if surfaces.empty?
+
       # Apply construction
       if is_thermal_boundary(roof_values)
         drywall_thick_in = 0.5
@@ -1266,6 +1268,8 @@ class OSModel
           surface.setWindExposure("NoWind")
         end
       end
+
+      next if surfaces.empty?
 
       # Apply construction
       # The code below constructs a reasonable wall construction based on the
@@ -2296,12 +2300,8 @@ class OSModel
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
           # Check tank type to default tank volume for tankless coil
           combi_sys_id_list << sys_id
-          if wh_type == "space-heating boiler with tankless coil"
-            tank_vol = 1.0
-          else
-            tank_vol = water_heating_system_values[:tank_volume]
-          end
           heating_source_id = water_heating_system_values[:related_hvac]
+          standby_loss = water_heating_system_values[:standby_loss]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
             boiler_sys = get_boiler_and_boiler_loop(@hvac_map, heating_source_id, sys_id)
@@ -2314,10 +2314,10 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, space, capacity_kbtuh,
-                                               tank_vol, setpoint_temp, oncycle_power,
+                                               water_heating_system_values[:tank_volume], setpoint_temp, oncycle_power,
                                                offcycle_power, ec_adj, @nbeds, boiler_sys['boiler'],
                                                boiler_sys['plant_loop'], boiler_fuel_type,
-                                               @dhw_map, sys_id, wh_type, jacket_r)
+                                               @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
           return false if not success
 
         else
