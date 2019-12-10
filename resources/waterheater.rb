@@ -28,7 +28,9 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTank)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, vol, ef, re, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner, nil)
+    act_vol = calc_storage_tank_actual_vol(vol, fuel_type)
+    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, re, cap, Constants.WaterHeaterTypeTank, 0, jacket_r, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTank, nbeds, model, runner, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -64,7 +66,9 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, 1, ef, 0, nil, t_set, space, oncycle_p, offcycle_p, ec_adj, Constants.WaterHeaterTypeTankless, cd, nbeds, model, runner, nil)
+    act_vol = 1
+    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, 0, cap, Constants.WaterHeaterTypeTankless, cd, nil, runner)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTankless, nbeds, model, runner, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
@@ -583,7 +587,7 @@ class Waterheater
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
       # Actual tank volume = 95% nominal tank volume
-      act_vol = 0.95 * vol
+      act_vol = calc_storage_tank_actual_vol(vol, nil)
       # Tank geometry
       surface_area, a_side = calc_tank_areas(act_vol)
 
@@ -610,7 +614,7 @@ class Waterheater
     else
       tank_type = Constants.WaterHeaterTypeTankless
       ua = 0.0
-      act_vol = vol
+      act_vol = 1.0
     end
 
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, tank_type)
@@ -622,7 +626,7 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create water heater
-    new_heater = create_new_heater(obj_name_indirect, cap, nil, act_vol, nil, 0, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, tank_type, 0, nbeds, model, runner, ua)
+    new_heater = create_new_heater(obj_name_indirect, cap, nil, act_vol, nil, t_set, space, oncycle_p, offcycle_p, tank_type, nbeds, model, runner, ua, nil)
     new_heater.setSourceSideDesignFlowRate(100) # set one large number, override by EMS
     dhw_map[sys_id] << new_heater
 
@@ -857,12 +861,13 @@ class Waterheater
       return [dsh_energy_output_var, dsh_load_output_var]
     else # need to test after switch
       # create a storage tank
-      storage_vol_actual = 50 * 0.95 # FIXME: Input vs assumption?
+      vol = 50 # FIXME: Input vs assumption?
+      storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
       cap = 0
       nbeds = 0 # won't be used
       assumed_ua = 6.0 # Btu/hr-F FIXME: Assumption: indirect tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
       storage_tank_name = "#{tank.name} storage tank"
-      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, 0, nil, t_set, space, 0, 0, 0, Constants.WaterHeaterTypeTank, 0, nbeds, model, runner, assumed_ua)
+      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, t_set, space, 0, 0, Constants.WaterHeaterTypeTank, nbeds, model, runner, assumed_ua, nil)
 
       loop.addSupplyBranchForComponent(storage_tank)
       runner.registerInfo("Added '#{storage_tank.name}' to supply branch of '#{loop.name}'.")
@@ -1112,10 +1117,10 @@ class Waterheater
     end
   end
 
-  def self.calc_actual_tankvol(vol, fuel, wh_type)
+  def self.calc_storage_tank_actual_vol(vol, fuel)
     # Convert the nominal tank volume to an actual volume
-    if wh_type == Constants.WaterHeaterTypeTankless
-      act_vol = 1 # gal
+    if fuel.nil?
+      act_vol = 0.95 * vol # indirect tank
     else
       if fuel == Constants.FuelTypeElectric
         act_vol = 0.9 * vol
@@ -1231,19 +1236,11 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name, cap, fuel, vol, ef, re, jacket_r, t_set, space, oncycle_p, offcycle_p, ec_adj, wh_type, cyc_derate, nbeds, model, runner, ua)
+  def self.create_new_heater(name, cap, fuel, act_vol, ef, t_set, space, oncycle_p, offcycle_p, wh_type, nbeds, model, runner, ua, eta_c)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
-    if ua.nil?
-      act_vol = calc_actual_tankvol(vol, fuel, wh_type)
-      u, ua, eta_c = calc_tank_UA(act_vol, fuel, ef, re, cap, wh_type, cyc_derate, jacket_r, runner)
-      new_heater.setHeaterThermalEfficiency(eta_c)
-      new_heater.setHeaterFuelType(HelperMethods.eplus_fuel_map(fuel))
-    else
-      # indirect water heater has standby loss for ua calculation
-      # actual volume is already calculated
-      act_vol = vol
-    end
+    new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
+    new_heater.setHeaterFuelType(HelperMethods.eplus_fuel_map(fuel)) unless fuel.nil?
     configure_setpoint_schedule(new_heater, t_set, wh_type, model)
     new_heater.setMaximumTemperatureLimit(99.0)
     if wh_type == Constants.WaterHeaterTypeTankless

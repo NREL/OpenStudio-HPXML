@@ -2300,11 +2300,6 @@ class OSModel
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
           # Check tank type to default tank volume for tankless coil
           combi_sys_id_list << sys_id
-          if wh_type == "space-heating boiler with tankless coil"
-            tank_vol = 1.0
-          else
-            tank_vol = water_heating_system_values[:tank_volume]
-          end
           heating_source_id = water_heating_system_values[:related_hvac]
           standby_loss = water_heating_system_values[:standby_loss]
           if not related_hvac_list.include? heating_source_id
@@ -2319,7 +2314,7 @@ class OSModel
           oncycle_power = 0.0
           offcycle_power = 0.0
           success = Waterheater.apply_indirect(model, runner, space, capacity_kbtuh,
-                                               tank_vol, setpoint_temp, oncycle_power,
+                                               water_heating_system_values[:tank_volume], setpoint_temp, oncycle_power,
                                                offcycle_power, ec_adj, @nbeds, boiler_sys['boiler'],
                                                boiler_sys['plant_loop'], boiler_fuel_type,
                                                @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
