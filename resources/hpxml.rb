@@ -1492,7 +1492,7 @@ class HPXML
       related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
       XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac)
     end
-    HPXML.add_extension(parent: water_heating_system, extensions: { "StandbyLoss": to_float_or_nil(standby_loss) }) unless standby_loss.nil?
+    HPXML.add_extension(parent: water_heating_system, extensions: { "StandbyLoss": to_float_or_nil(standby_loss) })
 
     return water_heating_system
   end
