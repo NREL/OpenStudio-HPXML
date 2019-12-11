@@ -67,7 +67,7 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     act_vol = 1.0
-    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, 0, cap, Constants.WaterHeaterTypeTankless, cd, nil, runner)
+    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, nil, cap, Constants.WaterHeaterTypeTankless, cd, nil, runner)
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTankless, nbeds, model, runner, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
