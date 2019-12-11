@@ -139,7 +139,6 @@ class Waterheater
     r_tank = (UnitConversions.convert(v_actual, "gal", "m^3") / (pi * h_tank))**0.5
     a_tank = 2 * pi * r_tank * (r_tank + h_tank)
 
-
     a_side = 2 * pi * UnitConversions.convert(r_tank, "m", "ft") * UnitConversions.convert(h_tank, "m", "ft") # sqft
     tank_ua = apply_tank_jacket(jacket_r, ef, Constants.FuelTypeElectric, tank_ua, a_side)
     u_tank = (5.678 * tank_ua) / UnitConversions.convert(a_tank, "m^2", "ft^2")
@@ -581,11 +580,7 @@ class Waterheater
       tank_type = Constants.WaterHeaterTypeTank
       act_vol = calc_storage_tank_actual_vol(vol, nil)
       a_side = calc_tank_areas(act_vol)[1]
-      ua = calc_indirect_tank_ua(act_vol, standby_loss)
-
-      # Tank jacket
-      ua = apply_tank_jacket(jacket_r, nil, nil, ua, a_side)
-
+      ua = calc_indirect_tank_ua(act_vol, standby_loss, jacket_r, a_side, runner)
     else
       tank_type = Constants.WaterHeaterTypeTankless
       ua = 0.0
@@ -951,7 +946,7 @@ class Waterheater
     return surface_area, a_side
   end
 
-  def self.calc_indirect_tank_ua(act_vol, standby_loss)
+  def self.calc_indirect_tank_ua(act_vol, standby_loss, jacket_r, a_side, runner)
     # Tank geometry
     surface_area = calc_tank_areas(act_vol)[0]
 
@@ -967,6 +962,9 @@ class Waterheater
         runner.registerError("A negative water heater standby loss is found, double check water heater input: HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystemextension/StandbyLoss.")
       end
     end
+    if standby_loss > 10.0
+      runner.registerWarning("Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.")
+    end
 
     # Test conditions
     cp = 0.999 # Btu/lb-F
@@ -977,6 +975,9 @@ class Waterheater
     # UA calculation
     q = standby_loss * cp * act_vol * rho # Btu/hr
     ua = q / (t_tank_avg - t_amb) # Btu/hr-F
+
+    # jacket
+    ua = apply_tank_jacket(jacket_r, nil, nil, ua, a_side)
     return ua
   end
 
