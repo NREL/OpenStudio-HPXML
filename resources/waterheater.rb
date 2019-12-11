@@ -954,16 +954,13 @@ class Waterheater
       # calculate independent variable SurfaceArea/vol(physically linear to standby_loss/skin_u under test condition) to fit the linear equation from AHRI database
       sqft_by_gal = surface_area / act_vol # sqft/gal
       standby_loss = 2.9721 * sqft_by_gal - 0.4732 # linear equation assuming a constant u, F/hr
-      if standby_loss <= 0
-        runner.registerError("A negative water heater standby loss coefficient (UA) was calculated for indirect water heater, double check its volume to be <829 gal, or add its standby loss input with HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystemextension/StandbyLoss.")
-      end
-    else
-      if standby_loss <= 0
-        runner.registerError("A negative water heater standby loss is found, double check water heater input: HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystemextension/StandbyLoss.")
-      end
     end
-    if standby_loss > 10.0
-      runner.registerWarning("Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.")
+    if not runner.nil? # error checking
+      if standby_loss <= 0
+        runner.registerError("Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or /extension/StandbyLoss to be >0.0 F/hr.")
+      elsif standby_loss > 10.0
+        runner.registerWarning("Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.")
+      end
     end
 
     # Test conditions
