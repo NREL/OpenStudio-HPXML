@@ -579,7 +579,6 @@ class Waterheater
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
-      # Actual tank volume = 95% nominal tank volume
       act_vol = calc_storage_tank_actual_vol(vol, nil)
       a_side = calc_tank_areas(act_vol)[1]
       ua = calc_indirect_tank_ua(act_vol, standby_loss)
