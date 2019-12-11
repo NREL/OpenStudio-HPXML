@@ -66,8 +66,8 @@ class Waterheater
     new_manager = create_new_schedule_manager(t_set, model, Constants.WaterHeaterTypeTankless)
     new_manager.addToNode(loop.supplyOutletNode)
 
-    act_vol = 1
-    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, 0, cap, Constants.WaterHeaterTypeTankless, cd, nil, runner)
+    act_vol = 1.0
+    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, nil, cap, Constants.WaterHeaterTypeTankless, cd, nil, runner)
     new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTankless, nbeds, model, runner, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
@@ -90,9 +90,9 @@ class Waterheater
     ducting = "none"
 
     # Based on Ecotope lab testing of most recent AO Smith HPWHs (series HPTU)
-    if vol <= 58
+    if vol <= 58.0
       tank_ua = 3.6 # Btu/h-R
-    elsif vol <= 73
+    elsif vol <= 73.0
       tank_ua = 4.0 # Btu/h-R
     else
       tank_ua = 4.7 # Btu/h-R
@@ -139,16 +139,8 @@ class Waterheater
     r_tank = (UnitConversions.convert(v_actual, "gal", "m^3") / (pi * h_tank))**0.5
     a_tank = 2 * pi * r_tank * (r_tank + h_tank)
 
-    # water heater wrap calculation based on:
-    # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
-    # Authors:  Ben Polly and Jay Burch (NREL)
-    if not jacket_r.nil?
-      a_side = 2 * pi * UnitConversions.convert(r_tank, "m", "ft") * UnitConversions.convert(h_tank, "m", "ft") # sqft
-      skin_insulation_t = 2.0 # inch
-      skin_insulation_R = 5.0 # R5
-      u_pre_skin = 1 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
-      tank_ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side
-    end
+    a_side = 2 * pi * UnitConversions.convert(r_tank, "m", "ft") * UnitConversions.convert(h_tank, "m", "ft") # sqft
+    tank_ua = apply_tank_jacket(jacket_r, ef, Constants.FuelTypeElectric, tank_ua, a_side)
     u_tank = (5.678 * tank_ua) / UnitConversions.convert(a_tank, "m^2", "ft^2")
 
     h_UE = (1 - (3.5 / 12)) * h_tank # in the 3rd node of the tank (counting from top)
@@ -321,8 +313,8 @@ class Waterheater
     # Fan:OnOff
     fan = hpwh.fan.to_FanOnOff.get
     fan.setName("#{obj_name_hpwh} fan")
-    fan.setFanEfficiency(65 / fan_power * UnitConversions.convert(1, "ft^3/min", "m^3/s"))
-    fan.setPressureRise(65)
+    fan.setFanEfficiency(65.0 / fan_power * UnitConversions.convert(1.0, "ft^3/min", "m^3/s"))
+    fan.setPressureRise(65.0)
     fan.setMaximumFlowRate(UnitConversions.convert(airflow_rate, "ft^3/min", "m^3/s"))
     fan.setMotorEfficiency(1.0)
     fan.setMotorInAirstreamFraction(1.0)
@@ -586,15 +578,9 @@ class Waterheater
 
     if wh_type == "space-heating boiler with storage tank"
       tank_type = Constants.WaterHeaterTypeTank
-      # Actual tank volume = 95% nominal tank volume
       act_vol = calc_storage_tank_actual_vol(vol, nil)
       a_side = calc_tank_areas(act_vol)[1]
-      ua = calc_indirect_tank_ua(act_vol, standby_loss)
-
-      # Tank jacket
-      # assume indirect water heater skin to be insulated with 2inch R5 (the same as electric)
-      ua = apply_tank_jacket(jacket_r, nil, Constants.FuelTypeElectric, ua, a_side)
-
+      ua = calc_indirect_tank_ua(act_vol, standby_loss, jacket_r, a_side, runner)
     else
       tank_type = Constants.WaterHeaterTypeTankless
       ua = 0.0
@@ -845,7 +831,7 @@ class Waterheater
       return [dsh_energy_output_var, dsh_load_output_var]
     else # need to test after switch
       # create a storage tank
-      vol = 50 # FIXME: Input vs assumption?
+      vol = 50.0 # FIXME: Input vs assumption?
       storage_vol_actual = calc_storage_tank_actual_vol(vol, nil)
       cap = 0
       nbeds = 0 # won't be used
@@ -900,11 +886,11 @@ class Waterheater
 
     if fuel != Constants.FuelTypeElectric
       if num_beds <= 4
-        cap_kbtuh = 40
+        cap_kbtuh = 40.0
       elsif num_beds == 5
-        cap_kbtuh = 47
+        cap_kbtuh = 47.0
       else
-        cap_kbtuh = 50
+        cap_kbtuh = 50.0
       end
       return cap_kbtuh
     else
@@ -951,16 +937,16 @@ class Waterheater
 
   def self.calc_tank_areas(act_vol)
     pi = Math::PI
-    height = 48 # inches
-    diameter = 24 * ((act_vol * 0.1337) / (height / 12 * pi))**0.5 # inches
-    a_top = pi * (diameter / 12)**2 / 4 # sqft
-    a_side = pi * (diameter / 12) * (height / 12) # sqft
-    surface_area = 2 * a_top + a_side # sqft
+    height = 48.0 # inches
+    diameter = 24.0 * ((act_vol * 0.1337) / (height / 12.0 * pi))**0.5 # inches
+    a_top = pi * (diameter / 12.0)**(2.0) / 4.0 # sqft
+    a_side = pi * (diameter / 12.0) * (height / 12.0) # sqft
+    surface_area = 2.0 * a_top + a_side # sqft
 
     return surface_area, a_side
   end
 
-  def self.calc_indirect_tank_ua(act_vol, standby_loss)
+  def self.calc_indirect_tank_ua(act_vol, standby_loss, jacket_r, a_side, runner)
     # Tank geometry
     surface_area = calc_tank_areas(act_vol)[0]
 
@@ -976,16 +962,22 @@ class Waterheater
         runner.registerError("A negative water heater standby loss is found, double check water heater input: HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystemextension/StandbyLoss.")
       end
     end
+    if standby_loss > 10.0
+      runner.registerWarning("Indirect water heater standby loss is over 10.0 F/hr, double check water heater inputs.")
+    end
 
     # Test conditions
     cp = 0.999 # Btu/lb-F
     rho = 8.216 # lb/gal
-    t_amb = 70 # F
-    t_tank_avg = 135 # F, Test begins at 137-138F stop at 133F
+    t_amb = 70.0 # F
+    t_tank_avg = 135.0 # F, Test begins at 137-138F stop at 133F
 
     # UA calculation
     q = standby_loss * cp * act_vol * rho # Btu/hr
     ua = q / (t_tank_avg - t_amb) # Btu/hr-F
+
+    # jacket
+    ua = apply_tank_jacket(jacket_r, nil, nil, ua, a_side)
     return ua
   end
 
@@ -1149,33 +1141,33 @@ class Waterheater
     # based on the Energy Factor and recovery efficiency of the tank
     # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
     if wh_type == Constants.WaterHeaterTypeTankless
-      eta_c = ef * (1 - cyc_derate)
-      ua = 0
-      surface_area = 1
+      eta_c = ef * (1.0 - cyc_derate)
+      ua = 0.0
+      surface_area = 1.0
     else
       volume_drawn = 64.3 # gal/day
       density = 8.2938 # lb/gal
       draw_mass = volume_drawn * density # lb
       cp = 1.0007 # Btu/lb-F
-      t = 135 # F
-      t_in = 58 # F
+      t = 135.0 # F
+      t_in = 58.0 # F
       t_env = 67.5 # F
       q_load = draw_mass * cp * (t - t_in) # Btu/day
       surface_area, a_side = calc_tank_areas(act_vol)
       if fuel != Constants.FuelTypeElectric
-        ua = (re / ef - 1) / ((t - t_env) * (24 / q_load - 1 / (1000 * (pow) * ef))) # Btu/hr-F
+        ua = (re / ef - 1.0) / ((t - t_env) * (24.0 / q_load - 1.0 / (1000.0 * (pow) * ef))) # Btu/hr-F
         eta_c = (re + ua * (t - t_env) / (1000 * pow)) # conversion efficiency is supposed to be calculated with initial tank ua
       else # is Electric
-        ua = q_load * (1 / ef - 1) / ((t - t_env) * 24)
+        ua = q_load * (1.0 / ef - 1.0) / ((t - t_env) * 24.0)
         eta_c = 1.0
       end
       ua = apply_tank_jacket(jacket_r, ef, fuel, ua, a_side)
     end
     u = ua / surface_area # Btu/hr-ft^2-F
-    if eta_c > 1
+    if eta_c > 1.0
       runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
     end
-    if ua < 0
+    if ua < 0.0
       runner.registerError("A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.")
     end
 
@@ -1185,20 +1177,22 @@ class Waterheater
   def self.apply_tank_jacket(jacket_r, ef, fuel, ua_pre, a_side)
     if not jacket_r.nil?
       skin_insulation_R = 5.0 # R5
-      if fuel != Constants.FuelTypeElectric
+      if fuel.nil? # indirect water heater, etc. Assume 2 inch skin insulation
+        skin_insulation_t = 2.0 # inch
+      elsif fuel != Constants.FuelTypeElectric
         if ef < 0.7
           skin_insulation_t = 1.0 # inch
         else
           skin_insulation_t = 2.0 # inch
         end
-      else
+      else # electric
         skin_insulation_t = 2.0 # inch
       end
       # water heater wrap calculation based on:
       # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
       # Authors:  Ben Polly and Jay Burch (NREL)
-      u_pre_skin = 1 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
-      ua = ua_pre - jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side unless jacket_r.nil?
+      u_pre_skin = 1.0 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
+      ua = ua_pre - jacket_r / (1.0 / u_pre_skin + jacket_r) * u_pre_skin * a_side
     else
       ua = ua_pre
     end
@@ -1216,12 +1210,12 @@ class Waterheater
       density = 8.2938 # lb/gal
       draw_mass = volume_drawn * density # lb
       cp = 1.0007 # Btu/lb-F
-      t = 135 # F
-      t_in = 58 # F
+      t = 135.0 # F
+      t_in = 58.0 # F
       t_env = 67.5 # F
       q_load = draw_mass * cp * (t - t_in) # Btu/day
 
-      ef = q_load / ((ua * (t - t_env) * 24 + q_load) / eta_c)
+      ef = q_load / ((ua * (t - t_env) * 24.0 + q_load) / eta_c)
     end
     return ef
   end
@@ -1301,7 +1295,7 @@ class Waterheater
     skinlossfrac = 1.0
     if not fuel.nil?
       if fuel != Constants.FuelTypeElectric and wh_type == Constants.WaterHeaterTypeTank
-        if oncycle_p == 0
+        if oncycle_p == 0.0
           skinlossfrac = 0.64
         elsif ef < 0.8
           skinlossfrac = 0.91
@@ -1345,7 +1339,7 @@ class Waterheater
     loop = OpenStudio::Model::PlantLoop.new(model)
     loop.setName(name)
     loop.sizingPlant.setDesignLoopExitTemperature(UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0)
-    loop.sizingPlant.setLoopDesignTemperatureDifference(UnitConversions.convert(10, "R", "K"))
+    loop.sizingPlant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, "R", "K"))
     loop.setPlantLoopVolume(0.003) # ~1 gal
     loop.setMaximumLoopFlowRate(0.01) # This size represents the physical limitations to flow due to losses in the piping system. For BEopt we assume that the pipes are always adequately sized
 
