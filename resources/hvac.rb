@@ -946,7 +946,7 @@ class HVAC
                       min_heating_airflow_rate, max_heating_airflow_rate,
                       heating_capacity_offset, cap_retention_frac, cap_retention_temp,
                       pan_heater_power, fan_power, is_ducted,
-                      heat_pump_capacity, supplemental_efficiency, supplemental_capacity,
+                      heat_pump_capacity_cool, supplemental_efficiency, supplemental_capacity,
                       frac_heat_load_served, frac_cool_load_served,
                       sequential_heat_load_frac, sequential_cool_load_frac,
                       control_zone, hvac_map, sys_id)
@@ -1016,8 +1016,13 @@ class HVAC
 
     # _processCurvesDX
 
-    htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity, mshp_indices, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC)
-    clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity, mshp_indices, cooling_eirs, shrs_rated, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC)
+    if heat_pump_capacity_cool == Constants.SizingAuto
+      heat_pump_capacity_heat = Constants.SizingAuto
+    else
+      heat_pump_capacity_heat = heat_pump_capacity_cool + heating_capacity_offset
+    end
+    htg_coil_stage_data = calc_coil_stage_data_heating(model, heat_pump_capacity_heat, mshp_indices, heating_eirs, hEAT_CAP_FT_SPEC, hEAT_EIR_FT_SPEC, hEAT_CLOSS_FPLR_SPEC, hEAT_CAP_FFLOW_SPEC, hEAT_EIR_FFLOW_SPEC)
+    clg_coil_stage_data = calc_coil_stage_data_cooling(model, heat_pump_capacity_cool, mshp_indices, cooling_eirs, shrs_rated, cOOL_CAP_FT_SPEC, cOOL_EIR_FT_SPEC, cOOL_CLOSS_FPLR_SPEC, cOOL_CAP_FFLOW_SPEC, cOOL_EIR_FFLOW_SPEC)
 
     # _processSystemCoil
 
@@ -1162,8 +1167,8 @@ class HVAC
 
       program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
       program.setName(obj_name + " pan heater program")
-      if heat_pump_capacity != Constants.SizingAuto
-        num_outdoor_units = (UnitConversions.convert([heat_pump_capacity, Constants.small].max, "Btu/hr", "ton") / 1.5).ceil # Assume 1.5 tons max per outdoor unit
+      if heat_pump_capacity_cool != Constants.SizingAuto
+        num_outdoor_units = (UnitConversions.convert([heat_pump_capacity_cool, Constants.small].max, "Btu/hr", "ton") / 1.5).ceil # Assume 1.5 tons max per outdoor unit
       else
         num_outdoor_units = 2
       end
