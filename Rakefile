@@ -95,6 +95,7 @@ def create_hpxmls
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
@@ -2799,6 +2800,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     if hpxml_file == 'base-dhw-indirect-outside.xml'
       water_heating_systems_values[0][:location] = "other exterior"
     end
+  elsif ['base-dhw-indirect-standbyloss.xml'].include? hpxml_file
+    water_heating_systems_values[0][:standby_loss] = 1.0
   elsif ['base-dhw-combi-tankless.xml',
          'base-dhw-combi-tankless-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with tankless coil"
