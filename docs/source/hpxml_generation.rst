@@ -295,9 +295,7 @@ mini-split     AirDistribution or DSE (optional)  electricity   SEER            
 ground-to-air  AirDistribution or DSE             electricity   EER                      COP                      (optional)
 =============  =================================  ============  =======================  =======================  ===========================  ==================
 
-If the heat pump has backup heating, it can be specified with ``BackupSystemFuel``, ``BackupAnnualHeatingEfficiency``, and ``BackupHeatingCapacity``.
-If the heat pump has a switchover temperature (e.g., dual-fuel heat pump) where the heat pump stops operating and the backup heating system starts running, it can be specified with ``BackupHeatingSwitchoverTemperature``.
-If the ``BackupHeatingSwitchoverTemperature`` is not provided, the backup heating system will operate as needed when the heat pump has insufficient capacity.
+If the heat pump has integrated backup heating, it can be specified with ``BackupSystemFuel`` (currently only "electricity" is allowed), ``BackupAnnualHeatingEfficiency`` (percent), and ``BackupHeatingCapacity``.
 
 Thermostat
 **********
