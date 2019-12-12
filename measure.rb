@@ -47,27 +47,29 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("hpxml_path", true)
     arg.setDisplayName("HPXML File Path")
-    arg.setDescription("Absolute (or relative) path of the HPXML file.")
+    arg.setDescription("Absolute/relative path of the HPXML file.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("weather_dir", true)
     arg.setDisplayName("Weather Directory")
-    arg.setDescription("Absolute path of the weather directory.")
+    arg.setDescription("Absolute/relative path of the weather directory.")
+    arg.setDefaultValue("weather")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("schemas_dir", false)
     arg.setDisplayName("HPXML Schemas Directory")
-    arg.setDescription("Absolute path of the hpxml schemas directory.")
+    arg.setDescription("Absolute/relative path of the hpxml schemas directory.")
+    arg.setDefaultValue("hpxml_schemas")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("epw_output_path", false)
     arg.setDisplayName("EPW Output File Path")
-    arg.setDescription("Absolute (or relative) path of the output EPW file.")
+    arg.setDescription("Absolute/relative path of the output EPW file.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("osm_output_path", false)
     arg.setDisplayName("OSM Output File Path")
-    arg.setDescription("Absolute (or relative) path of the output OSM file.")
+    arg.setDescription("Absolute/relative path of the output OSM file.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeBoolArgument("skip_validation", true)
@@ -94,7 +96,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for correct versions of OS
-    os_version = "2.9.0"
+    os_version = "2.9.1"
     if OpenStudio.openStudioVersion != os_version
       fail "OpenStudio version #{os_version} is required."
     end
@@ -127,28 +129,50 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
     begin
       # Weather file
+      unless (Pathname.new weather_dir).absolute?
+        weather_dir = File.expand_path(File.join(File.dirname(__FILE__), weather_dir))
+      end
       climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones"],
-                                                                              select: [:weather_station_wmo])
-      weather_wmo = climate_and_risk_zones_values[:weather_station_wmo]
-      epw_path = nil
-      CSV.foreach(File.join(weather_dir, "data.csv"), headers: true) do |row|
-        next if row["wmo"] != weather_wmo
-
-        epw_path = File.join(weather_dir, row["filename"])
+                                                                              select: [:weather_station_wmo, :weather_station_epw_filename])
+      epw_path = climate_and_risk_zones_values[:weather_station_epw_filename]
+      if not epw_path.nil?
+        epw_path = File.join(weather_dir, epw_path)
         if not File.exists?(epw_path)
           runner.registerError("'#{epw_path}' could not be found.")
           return false
         end
-        cache_path = epw_path.gsub('.epw', '.cache')
-        if not File.exists?(cache_path)
-          runner.registerError("'#{cache_path}' could not be found.")
+      else
+        weather_wmo = climate_and_risk_zones_values[:weather_station_wmo]
+        CSV.foreach(File.join(weather_dir, "data.csv"), headers: true) do |row|
+          next if row["wmo"] != weather_wmo
+
+          epw_path = File.join(weather_dir, row["filename"])
+          if not File.exists?(epw_path)
+            runner.registerError("'#{epw_path}' could not be found.")
+            return false
+          end
+          break
+        end
+        if epw_path.nil?
+          runner.registerError("Weather station WMO '#{weather_wmo}' could not be found in weather/data.csv.")
           return false
         end
-        break
       end
-      if epw_path.nil?
-        runner.registerError("Weather station WMO '#{weather_wmo}' could not be found in weather/data.csv.")
-        return false
+      cache_path = epw_path.gsub('.epw', '.cache')
+      if not File.exists?(cache_path)
+        # Process weather file to create .cache
+        runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
+        epw_file = OpenStudio::EpwFile.new(epw_path)
+        OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
+        weather = WeatherProcess.new(model, runner)
+        if weather.error? or weather.data.WSF.nil?
+          runner.registerError("Could not successfully process weather file.")
+          return false
+        end
+
+        File.open(cache_path, "wb") do |file|
+          Marshal.dump(weather, file)
+        end
       end
       if epw_output_path.is_initialized
         FileUtils.cp(epw_path, epw_output_path.get)
@@ -228,12 +252,11 @@ class OSModel
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml,
                                           select: [:eri_calculation_version])
+    @eri_version = hpxml_values[:eri_calculation_version] # Hidden feature
+    @eri_version = '2014AEG' if @eri_version.nil? # Use latest version/addenda implemented
+
     building = hpxml_doc.elements["/HPXML/Building"]
     enclosure = building.elements["BuildingDetails/Enclosure"]
-
-    @eri_version = hpxml_values[:eri_calculation_version]
-    fail "Could not find ERI Version" if @eri_version.nil?
-
     HPXML.collapse_enclosure(enclosure)
 
     # Global variables
@@ -1148,6 +1171,8 @@ class OSModel
         set_surface_interior(model, spaces, surface, roof_values[:id], roof_values[:interior_adjacent_to])
       end
 
+      next if surfaces.empty?
+
       # Apply construction
       if is_thermal_boundary(roof_values)
         drywall_thick_in = 0.5
@@ -1243,6 +1268,8 @@ class OSModel
           surface.setWindExposure("NoWind")
         end
       end
+
+      next if surfaces.empty?
 
       # Apply construction
       # The code below constructs a reasonable wall construction based on the
@@ -2227,9 +2254,6 @@ class OSModel
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
         runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
-        if (ec_adj - 1.0).abs > 0.001
-          runner.registerWarning("Water heater energy consumption is being adjusted with equipment to account for distribution system waste.")
-        end
 
         dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
 
@@ -2790,9 +2814,9 @@ class OSModel
                                   min_heating_airflow_rate, max_heating_airflow_rate,
                                   heating_capacity_offset, cap_retention_frac,
                                   cap_retention_temp, pan_heater_power, fan_power,
-                                  is_ducted, cool_capacity_btuh,
-                                  hp_compressor_min_temp, backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh, supp_htg_max_outdoor_temp,
-                                  load_frac_heat, load_frac_cool,
+                                  is_ducted, cool_capacity_btuh, hp_compressor_min_temp,
+                                  backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
+                                  supp_htg_max_outdoor_temp, load_frac_heat, load_frac_cool,
                                   sequential_load_frac_heat, sequential_load_frac_cool,
                                   @living_zone, @hvac_map, sys_id)
         return false if not success
@@ -3661,8 +3685,8 @@ class OSModel
                    "Gas:Facility",
                    "FuelOil#1:Facility",
                    "Propane:Facility",
-                   "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
-                   "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
+                   "Heating:EnergyTransfer",
+                   "Cooling:EnergyTransfer",
                    "Heating:DistrictHeating",
                    "Cooling:DistrictCooling",
                    "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity",
@@ -3903,7 +3927,6 @@ class OSModel
         ducts_mix_loss_sensor.setKeyName(@living_zone.name.to_s)
       end
 
-=begin
       # Return duct losses
       plenum_zones.each do |plenum_zone|
         model.getOtherEquipments.sort.each do |o|
@@ -3911,7 +3934,7 @@ class OSModel
 
           ducts_sensors << []
           { "Other Equipment Convective Heating Energy" => "ducts_conv",
-          "Other Equipment Radiant Heating Energy" => "ducts_rad" }.each do |var, name|
+            "Other Equipment Radiant Heating Energy" => "ducts_rad" }.each do |var, name|
             ducts_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
             ducts_sensor.setName(name)
             ducts_sensor.setKeyName(o.name.to_s)
@@ -3920,13 +3943,12 @@ class OSModel
           end
         end
       end
-=end
 
       # Supply duct losses
       @living_zone.airLoopHVACs.sort.each do |airloop|
         model.getOtherEquipments.sort.each do |o|
           next unless o.space.get.thermalZone.get.name.to_s == @living_zone.name.to_s
-          next unless o.name.to_s.start_with? airloop.name.to_s
+          next unless o.name.to_s.start_with? airloop.name.to_s.gsub(" ", "_")
 
           ducts_sensors << []
           { "Other Equipment Convective Heating Energy" => "ducts_conv",
