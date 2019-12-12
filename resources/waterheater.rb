@@ -98,7 +98,7 @@ class Waterheater
     cap = 0.5 # kW
     shr = 0.88 # unitless
     airflow_rate = 181.0 # cfm
-    fan_power = 0.0462 # FIXME
+    fan_power = 0.0462 # W/cfm TODO: Based on 1st gen AO Smith HPWH: Does this need to be updated?
     parasitics = 3.0 # W
 
     # Calculate the COP based on EF
@@ -131,26 +131,26 @@ class Waterheater
     v_actual = 0.9 * vol
     pi = Math::PI
     r_tank = (UnitConversions.convert(v_actual, "gal", "m^3") / (pi * h_tank))**0.5
-    a_tank = 2 * pi * r_tank * (r_tank + h_tank)
+    a_tank = 2.0 * pi * r_tank * (r_tank + h_tank)
 
     # water heater wrap calculation based on:
     # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
     # Authors:  Ben Polly and Jay Burch (NREL)
     if not jacket_r.nil?
-      a_side = 2 * pi * UnitConversions.convert(r_tank, "m", "ft") * UnitConversions.convert(h_tank, "m", "ft") # sqft
+      a_side = 2.0 * pi * UnitConversions.convert(r_tank, "m", "ft") * UnitConversions.convert(h_tank, "m", "ft") # sqft
       skin_insulation_t = 2.0 # inch
       skin_insulation_R = 5.0 # R5
-      u_pre_skin = 1 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
+      u_pre_skin = 1.0 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
       tank_ua -= jacket_r / (1 / u_pre_skin + jacket_r) * u_pre_skin * a_side
     end
     u_tank = (5.678 * tank_ua) / UnitConversions.convert(a_tank, "m^2", "ft^2") * (1.0 - solar_fraction)
 
-    h_UE = (1 - (3.5 / 12)) * h_tank # in the 3rd node of the tank (counting from top)
-    h_LE = (1 - (9.5 / 12)) * h_tank # in the 10th node of the tank (counting from top)
-    h_condtop = (1 - (5.5 / 12)) * h_tank # in the 6th node of the tank (counting from top)
+    h_UE = (1.0 - (3.5 / 12.0)) * h_tank # in the 3rd node of the tank (counting from top)
+    h_LE = (1.0 - (9.5 / 12.0)) * h_tank # in the 10th node of the tank (counting from top)
+    h_condtop = (1.0 - (5.5 / 12.0)) * h_tank # in the 6th node of the tank (counting from top)
     h_condbot = 0.01 # bottom node
-    h_hpctrl_up = (1 - (2.5 / 12)) * h_tank # in the 3rd node of the tank
-    h_hpctrl_low = (1 - (8.5 / 12)) * h_tank # in the 9th node of the tank
+    h_hpctrl_up = (1.0 - (2.5 / 12.0)) * h_tank # in the 3rd node of the tank
+    h_hpctrl_low = (1.0 - (8.5 / 12.0)) * h_tank # in the 9th node of the tank
 
     # Calculate an altitude adjusted rated evaporator wetbulb temperature
     rated_ewb_F = 56.4
@@ -575,7 +575,7 @@ class Waterheater
 
     test_flow = 55.0 / UnitConversions.convert(1.0, "lbm/min", "kg/hr") / Liquid.H2O_l.rho * UnitConversions.convert(1.0, "ft^2", "m^2") # cfm/ft^2
     coll_flow = test_flow * collector_area # cfm
-    storage_diam = (4.0 * storage_vol / 3 / Math::PI)**(1.0 / 3.0) # ft
+    storage_diam = (4.0 * UnitConversions.convert(storage_vol, "gal", "ft^3") / 3.0 / Math::PI)**(1.0 / 3.0) # ft
     storage_ht = 3.0 * storage_diam # ft
     storage_Uvalue = 1.0 / tank_r # Btu/hr-ft^2-R
 
@@ -664,7 +664,7 @@ class Waterheater
     shading_surface.setName(obj_name + " shading surface")
     shading_surface.setShadingSurfaceGroup(shading_surface_group)
 
-    if coll_type == Constants.SolarThermalCollectorTypeICS #TODO: test this
+    if coll_type == Constants.SolarThermalCollectorTypeICS
       collector_plate = OpenStudio::Model::SolarCollectorIntegralCollectorStorage.new(model)
       collector_plate.setName(obj_name + " coll plate")
       collector_plate.setSurface(shading_surface)
@@ -725,8 +725,8 @@ class Waterheater
 
     storage_tank = OpenStudio::Model::WaterHeaterStratified.new(model)
     storage_tank.setName(obj_name + " storage tank")
-    storage_tank.setTankVolume(UnitConversions.convert(storage_vol, "ft^3", "m^3"))
-    storage_tank.setTankHeight(UnitConversions.convert(storage_ht, "in", "m"))
+    storage_tank.setTankVolume(UnitConversions.convert(storage_vol, "gal", "m^3"))
+    storage_tank.setTankHeight(UnitConversions.convert(storage_ht, "ft", "m"))
     storage_tank.setTankShape('VerticalCylinder')
     storage_tank.setTankPerimeter(Math::PI * UnitConversions.convert(storage_diam, "in", "m"))
     storage_tank.setMaximumTemperatureLimit(99)
@@ -743,14 +743,19 @@ class Waterheater
     storage_tank.ambientTemperatureSchedule.get.remove
     storage_tank.setAmbientTemperatureThermalZone(space.thermalZone.get)
     storage_tank.setAmbientTemperatureIndicator('ThermalZone')
-    storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(UnitConversions.convert(storage_Uvalue, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
+    if fluid_type == Constants.FluidWater #Direct, make the storage tank a dummy tank with 0 tank losses
+      storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(0.0)
+    else
+      storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(UnitConversions.convert(storage_Uvalue, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
+    end
+    
     storage_tank.setSkinLossFractiontoZone(1)
     storage_tank.setOffCycleFlueLossFractiontoZone(1)
     storage_tank.setUseSideEffectiveness(1)
     storage_tank.setUseSideInletHeight(0)
-    storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, "in", "m"))
+    storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, "ft", "m"))
     storage_tank.setSourceSideEffectiveness(heat_ex_eff)
-    storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, "in", "m") / 3.0)
+    storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, "ft", "m") / 3.0)
     storage_tank.setSourceSideOutletHeight(0)
     storage_tank.setInletMode('Fixed')
     storage_tank.setIndirectWaterHeatingRecoveryTime(1.5)
@@ -785,7 +790,36 @@ class Waterheater
     availability_manager.setTemperatureDifferenceOnLimit(0)
     availability_manager.setTemperatureDifferenceOffLimit(0)
     plant_loop.setAvailabilityManager(availability_manager)
-
+    
+    #Add EMS code for SWH control (keeps the WH for the last hour if there's useful energy that can be delivered, E+ wouldn't always do this by default)
+    #Sensors
+    coll_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Temperature")
+    coll_sensor.setName("#{obj_name} Collector Outlet")
+    coll_sensor.setKeyName("#{collector_plate.outletModelObject.get.to_Node.get.name}")
+    
+    tank_source_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "System Node Temperature")
+    tank_source_sensor.setName("#{obj_name} Tank Source Inlet")
+    tank_source_sensor.setKeyName("#{storage_tank.demandOutletModelObject.get.to_Node.get.name}")
+    
+    #Actuators
+    swh_pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, "Pump", "Pump Mass Flow Rate")
+    swh_pump_actuator.setName("#{obj_name}_pump")
+    
+    #Program
+    swh_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
+    swh_program.setName("#{obj_name} Controller")
+    swh_program.addLine("If #{coll_sensor.name} > #{tank_source_sensor.name}")
+    swh_program.addLine("Set #{swh_pump_actuator.name} = 100")
+    swh_program.addLine("Else")
+    swh_program.addLine("Set #{swh_pump_actuator.name} = 0")
+    swh_program.addLine("EndIf")
+    
+    #ProgramCallingManager
+    program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
+    program_calling_manager.setName("#{obj_name} Control")
+    program_calling_manager.setCallingPoint("InsideHVACSystemIterationLoop")
+    program_calling_manager.addProgram(swh_program)
+    
     return true
   end
 
