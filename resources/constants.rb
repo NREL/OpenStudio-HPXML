@@ -443,6 +443,18 @@ class Constants
     return "#{water_heater_name} EC adjustment"
   end
 
+  def self.ObjectNameDesuperheater(water_heater_name)
+    return "#{water_heater_name} Desuperheater"
+  end
+
+  def self.ObjectNameDesuperheaterEnergy(water_heater_name)
+    return "#{water_heater_name} Desuperheater energy"
+  end
+
+  def self.ObjectNameDesuperheaterLoad(water_heater_name)
+    return "#{water_heater_name} Desuperheater load"
+  end
+
   def self.ObjectNameTankHX
     return "dhw source hx"
   end

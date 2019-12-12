@@ -238,6 +238,7 @@ def create_hpxmls
     'base-location-dallas-tx.xml' => 'base.xml',
     'base-location-duluth-mn.xml' => 'base.xml',
     'base-location-miami-fl.xml' => 'base.xml',
+    'base-location-epw-filename.xml' => 'base.xml',
     'base-mechvent-balanced.xml' => 'base.xml',
     'base-mechvent-cfis.xml' => 'base.xml',
     'base-mechvent-cfis-24hrs.xml' => 'base-mechvent-cfis.xml',
@@ -795,6 +796,9 @@ def get_hpxml_file_climate_and_risk_zones_values(hpxml_file, climate_and_risk_zo
                                       :weather_station_id => "WeatherStation",
                                       :weather_station_name => "Miami, FL",
                                       :weather_station_wmo => "722020" }
+  elsif ['base-location-epw-filename.xml'].include? hpxml_file
+    climate_and_risk_zones_values[:weather_station_wmo] = nil
+    climate_and_risk_zones_values[:weather_station_epw_filename] = "USA_CO_Denver.Intl.AP.725650_TMY3.epw"
   elsif ['invalid_files/bad-wmo.xml'].include? hpxml_file
     climate_and_risk_zones_values[:weather_station_wmo] = "999999"
   end
@@ -1876,7 +1880,7 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     heating_systems_values << heating_systems_values[0].dup
     heating_systems_values[1][:id] += "2"
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
-    heating_systems_values[0][:heating_capacity] /= 100.0
+    heating_systems_values[0][:heating_capacity] /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     heating_systems_values[0][:heating_cfm] = heating_systems_values[0][:heating_capacity] * 360.0 / 12000.0
   elsif hpxml_file.include? 'hvac_autosizing' and not heating_systems_values.nil? and heating_systems_values.size > 0
@@ -1987,7 +1991,7 @@ def get_hpxml_file_cooling_systems_values(hpxml_file, cooling_systems_values)
     cooling_systems_values << cooling_systems_values[0].dup
     cooling_systems_values[1][:id] += "2"
   elsif ['base-hvac-undersized.xml'].include? hpxml_file
-    cooling_systems_values[0][:cooling_capacity] /= 100.0
+    cooling_systems_values[0][:cooling_capacity] /= 10.0
   elsif ['base-hvac-flowrate.xml'].include? hpxml_file
     cooling_systems_values[0][:cooling_cfm] = cooling_systems_values[0][:cooling_capacity] * 360.0 / 12000.0
   elsif hpxml_file.include? 'hvac_autosizing' and not cooling_systems_values.nil? and cooling_systems_values.size > 0
@@ -2397,6 +2401,9 @@ def get_hpxml_file_duct_leakage_measurements_values(hpxml_file, duct_leakage_mea
                                          { :duct_type => "return",
                                            :duct_leakage_units => "Percent",
                                            :duct_leakage_value => 0.05 }]]
+  elsif ['base-hvac-undersized.xml'].include? hpxml_file
+    duct_leakage_measurements_values[0][0][:duct_leakage_value] /= 10.0
+    duct_leakage_measurements_values[0][1][:duct_leakage_value] /= 10.0
   end
   return duct_leakage_measurements_values
 end
