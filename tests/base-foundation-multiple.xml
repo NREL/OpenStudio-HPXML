@@ -150,13 +150,15 @@
             <Area>600.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-            <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
+                <extension>
+                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
+                  <DistanceToBottomOfFoundationWall>0.0</DistanceToBottomOfFoundationWall>
+                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -168,13 +170,15 @@
             <Area>360.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>4.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-            <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallInteriorInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
+                <extension>
+                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
+                  <DistanceToBottomOfFoundationWall>0.0</DistanceToBottomOfFoundationWall>
+                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -186,13 +190,15 @@
             <Area>600.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>3.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-            <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallCrawlspaceInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
+                <extension>
+                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
+                  <DistanceToBottomOfFoundationWall>0.0</DistanceToBottomOfFoundationWall>
+                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>

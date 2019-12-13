@@ -130,13 +130,15 @@
             <Area>1200.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-            <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
               <Layer>
                 <InstallationType>continuous</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
+                <extension>
+                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
+                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>

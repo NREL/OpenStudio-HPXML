@@ -168,9 +168,9 @@ class EnergyPlusValidator
         "Thickness" => one,
         "DepthBelowGrade" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        # Either specify insulation layer R-value and insulation top/bottom distance OR assembly R-value:
-        "[DistanceToTopOfInsulation | Insulation/AssemblyEffectiveRValue]" => one,
-        "[DistanceToBottomOfInsulation | Insulation/AssemblyEffectiveRValue]" => one,
+        # Either specify insulation layer R-value and insulation layer top/bottom distance OR assembly R-value:
+        "[Insulation/Layer[InstallationType='continuous']/extension/DistanceToTopOfFoundationWall | Insulation/AssemblyEffectiveRValue]" => one,
+        "[Insulation/Layer[InstallationType='continuous']/extension/DistanceToBottomOfFoundationWall | Insulation/AssemblyEffectiveRValue]" => one,
         "[Insulation/Layer[InstallationType='continuous']/NominalRValue | Insulation/AssemblyEffectiveRValue]" => one,
       },
 
