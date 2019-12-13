@@ -1202,6 +1202,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 480,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 8,
                                  :insulation_r_value => 8.9 },
                                { :id => "FoundationWall2",
@@ -1211,6 +1212,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 120,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 4,
                                  :insulation_r_value => 8.9 },
                                { :id => "FoundationWall3",
@@ -1220,6 +1222,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 60,
                                  :thickness => 8,
                                  :depth_below_grade => 1,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 2,
                                  :insulation_r_value => 8.9 }]
   elsif ['base-foundation-complex.xml'].include? hpxml_file
@@ -1230,6 +1233,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 160,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 0,
                                  :insulation_r_value => 0.0 },
                                { :id => "FoundationWall2",
@@ -1239,6 +1243,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 240,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 8,
                                  :insulation_r_value => 8.9 },
                                { :id => "FoundationWall3",
@@ -1248,6 +1253,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 160,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 0,
                                  :insulation_r_value => 0.0 },
                                { :id => "FoundationWall4",
@@ -1257,6 +1263,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 120,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 4,
                                  :insulation_r_value => 8.9 },
                                { :id => "FoundationWall5",
@@ -1266,6 +1273,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 80,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
+                                 :insulation_distance_to_top => 0,
                                  :insulation_distance_to_bottom => 4,
                                  :insulation_r_value => 8.9 }]
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file

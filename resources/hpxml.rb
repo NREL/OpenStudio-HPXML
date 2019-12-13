@@ -439,15 +439,15 @@ class HPXML
     vals[:id] = HPXML.get_id(attic) if is_selected(select, :id)
 
     if is_selected(select, :attic_type)
-    if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
+      if XMLHelper.has_element(attic, "AtticType/Attic[Vented='false']")
         vals[:attic_type] = "UnventedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
+      elsif XMLHelper.has_element(attic, "AtticType/Attic[Vented='true']")
         vals[:attic_type] = "VentedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
+      elsif XMLHelper.has_element(attic, "AtticType/Attic[Conditioned='true']")
         vals[:attic_type] = "ConditionedAttic"
-    elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
+      elsif XMLHelper.has_element(attic, "AtticType/FlatRoof")
         vals[:attic_type] = "FlatRoof"
-    elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
+      elsif XMLHelper.has_element(attic, "AtticType/CathedralCeiling")
         vals[:attic_type] = "CathedralCeiling"
       end
     end
@@ -502,19 +502,19 @@ class HPXML
     vals = {}
     vals[:id] = HPXML.get_id(foundation) if is_selected(select, :id)
     if is_selected(select, :foundation_type)
-    if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
+      if XMLHelper.has_element(foundation, "FoundationType/SlabOnGrade")
         vals[:foundation_type] = "SlabOnGrade"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
+      elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='false']")
         vals[:foundation_type] = "UnconditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
+      elsif XMLHelper.has_element(foundation, "FoundationType/Basement[Conditioned='true']")
         vals[:foundation_type] = "ConditionedBasement"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='false']")
         vals[:foundation_type] = "UnventedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
+      elsif XMLHelper.has_element(foundation, "FoundationType/Crawlspace[Vented='true']")
         vals[:foundation_type] = "VentedCrawlspace"
-    elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
+      elsif XMLHelper.has_element(foundation, "FoundationType/Ambient")
         vals[:foundation_type] = "Ambient"
-    end
+      end
     end
     vals[:vented_crawlspace_sla] = to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value")) if is_selected(select, :vented_crawlspace_sla)
     vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary") if is_selected(select, :unconditioned_basement_thermal_boundary)
@@ -556,11 +556,11 @@ class HPXML
 
     insulation_values = {}
     if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
-    insulation_values = get_assembly_insulation_values(insulation: roof.elements["Insulation"])
+      insulation_values = get_assembly_insulation_values(insulation: roof.elements["Insulation"])
     end
     insulation_layer_values = {}
     if is_selected(select, :insulation_cavity_r_value) or is_selected(select, :insulation_continuous_r_value)
-    insulation_layer_values = get_layer_insulation_values(insulation: roof.elements["Insulation"])
+      insulation_layer_values = get_layer_insulation_values(insulation: roof.elements["Insulation"])
     end
 
     vals = {}
@@ -615,7 +615,7 @@ class HPXML
 
     insulation_values = {}
     if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
-    insulation_values = get_assembly_insulation_values(insulation: rim_joist.elements["Insulation"])
+      insulation_values = get_assembly_insulation_values(insulation: rim_joist.elements["Insulation"])
     end
 
     vals = {}
@@ -667,11 +667,11 @@ class HPXML
 
     insulation_values = {}
     if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
-    insulation_values = get_assembly_insulation_values(insulation: wall.elements["Insulation"])
+      insulation_values = get_assembly_insulation_values(insulation: wall.elements["Insulation"])
     end
     insulation_layer_values = {}
     if is_selected(select, :insulation_cavity_r_value) or is_selected(select, :insulation_continuous_r_value)
-    insulation_layer_values = get_layer_insulation_values(insulation: wall.elements["Insulation"])
+      insulation_layer_values = get_layer_insulation_values(insulation: wall.elements["Insulation"])
     end
 
     vals = {}
@@ -740,11 +740,11 @@ class HPXML
 
     insulation_values = {}
     if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
-    insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
+      insulation_values = get_assembly_insulation_values(insulation: foundation_wall.elements["Insulation"])
     end
     insulation_layer_values = {}
     if is_selected(select, :insulation_r_value)
-    insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
+      insulation_layer_values = get_layer_insulation_values(insulation: foundation_wall.elements["Insulation"])
     end
 
     vals = {}
@@ -791,11 +791,11 @@ class HPXML
 
     insulation_values = {}
     if is_selected(select, :insulation_id) or is_selected(select, :insulation_assembly_r_value)
-    insulation_values = get_assembly_insulation_values(insulation: framefloor.elements["Insulation"])
+      insulation_values = get_assembly_insulation_values(insulation: framefloor.elements["Insulation"])
     end
     insulation_layer_values = {}
     if is_selected(select, :insulation_cavity_r_value) or is_selected(select, :insulation_continuous_r_value)
-    insulation_layer_values = get_layer_insulation_values(insulation: framefloor.elements["Insulation"])
+      insulation_layer_values = get_layer_insulation_values(insulation: framefloor.elements["Insulation"])
     end
 
     vals = {}
@@ -859,11 +859,11 @@ class HPXML
 
     perimeter_insulation_values = {}
     if is_selected(select, :perimeter_insulation_id) or is_selected(select, :perimeter_insulation_r_value)
-    perimeter_insulation_values = get_layer_insulation_values(insulation: slab.elements["PerimeterInsulation"])
+      perimeter_insulation_values = get_layer_insulation_values(insulation: slab.elements["PerimeterInsulation"])
     end
     under_slab_insulation_values = {}
     if is_selected(select, :under_slab_insulation_id) or is_selected(select, :under_slab_insulation_r_value)
-    under_slab_insulation_values = get_layer_insulation_values(insulation: slab.elements["UnderSlabInsulation"])
+      under_slab_insulation_values = get_layer_insulation_values(insulation: slab.elements["UnderSlabInsulation"])
     end
 
     vals = {}
