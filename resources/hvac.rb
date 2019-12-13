@@ -2043,6 +2043,8 @@ class HVAC
 
       if i == 0
         fan_or_pump_program.addLine("If #{sensor.name} > 0")
+      elsif i == 2
+        fan_or_pump_program.addLine("Else")
       else
         fan_or_pump_program.addLine("ElseIf #{sensor.name} > 0")
       end
@@ -2072,6 +2074,7 @@ class HVAC
       fan_or_pump_ems_output_var.setUnits("J")
       hvac_objects << fan_or_pump_ems_output_var
 
+      # Used by HEScore
       outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var.name.to_s, model)
       outputVariable.setReportingFrequency('monthly')
       outputVariable.setKeyValue('*')

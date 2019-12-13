@@ -95,6 +95,7 @@ def create_hpxmls
     'base-dhw-indirect.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-indirect-dse.xml' => 'base-dhw-indirect.xml',
     'base-dhw-indirect-outside.xml' => 'base-dhw-indirect.xml',
+    'base-dhw-indirect-standbyloss.xml' => 'base-dhw-indirect.xml',
     'base-dhw-low-flow-fixtures.xml' => 'base.xml',
     'base-dhw-multiple.xml' => 'base-hvac-boiler-gas-only.xml',
     'base-dhw-none.xml' => 'base.xml',
@@ -2169,7 +2170,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:backup_heating_fuel] = "natural gas"
     heat_pumps_values[0][:backup_heating_capacity] = 36000
     heat_pumps_values[0][:backup_heating_efficiency_percent] = nil
-    heat_pumps_values[0][:backup_heating_efficiency_afue] = 0.8
+    heat_pumps_values[0][:backup_heating_efficiency_afue] = 0.95
     heat_pumps_values[0][:backup_heating_switchover_temp] = 25
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.xml'].include? hpxml_file
     heat_pumps_values[0][:backup_heating_fuel] = "fuel oil"
@@ -2806,6 +2807,8 @@ def get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems
     if hpxml_file == 'base-dhw-indirect-outside.xml'
       water_heating_systems_values[0][:location] = "other exterior"
     end
+  elsif ['base-dhw-indirect-standbyloss.xml'].include? hpxml_file
+    water_heating_systems_values[0][:standby_loss] = 1.0
   elsif ['base-dhw-combi-tankless.xml',
          'base-dhw-combi-tankless-outside.xml'].include? hpxml_file
     water_heating_systems_values[0][:water_heater_type] = "space-heating boiler with tankless coil"
