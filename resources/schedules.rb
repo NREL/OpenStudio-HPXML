@@ -423,7 +423,7 @@ class MonthWeekdayWeekendSchedule
 end
 
 class HotWaterSchedule
-  def initialize(model, runner, obj_name, nbeds, daily_mw_fractions = nil, days_shift = 0, create_sch_object = true)
+  def initialize(model, runner, obj_name, nbeds, days_shift = 0, create_sch_object = true)
     @validated = true
     @model = model
     @runner = runner
@@ -437,8 +437,6 @@ class HotWaterSchedule
     else
       @nbeds = nbeds
     end
-    @daily_mw_fractions = daily_mw_fractions
-
     file_prefixes = { Constants.ObjectNameClothesWasher => "ClothesWasher",
                       Constants.ObjectNameClothesDryer => "ClothesWasher",
                       Constants.ObjectNameDishwasher => "Dishwasher",
@@ -607,60 +605,38 @@ class HotWaterSchedule
     last_day_of_year = 365
     last_day_of_year += 1 if year_description.isLeapYear
 
-    if not @daily_mw_fractions.nil?
-      # Create ScheduleInterval with repeating weeks
-      # This is an annual schedule due to (daily) conversion between mixed water and hot water
+    # Create ScheduleRuleset with repeating weeks
 
-      annual_values = []
-      data_idx = 0
-      for day in 0..last_day_of_year - 1
-        for hr in 0..23
-          for timestep in 1..(60.0 / timestep_minutes)
-            data_idx += 1
-            annual_values << data[data_idx % data_size] * @daily_mw_fractions[day]
-          end
+    time = []
+    (timestep_minutes..24 * 60).step(timestep_minutes).to_a.each_with_index do |m, i|
+      time[i] = OpenStudio::Time.new(0, 0, m, 0)
+    end
+
+    schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
+
+    schedule_rules = []
+    for d in 1..7 * weeks # how many unique day schedules
+      next if d > last_day_of_year
+
+      rule = OpenStudio::Model::ScheduleRule.new(schedule)
+      rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{d}")
+      day_schedule = rule.daySchedule
+      day_schedule.setName(@sch_name + " #{Schedule.allday_name}#{d}")
+      previous_value = data[(d - 1) * 24 * 60 / timestep_minutes]
+      time.each_with_index do |m, i|
+        if i != time.length - 1
+          next if data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes] == previous_value
         end
+        day_schedule.addValue(m, previous_value)
+        previous_value = data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes]
       end
+      Schedule.set_weekday_rule(rule)
+      Schedule.set_weekend_rule(rule)
+      for w in 0..52 # max num of weeks
+        next if d + (w * 7 * weeks) > last_day_of_year
 
-      start_datetime = OpenStudio::DateTime.new(year_description.makeDate(1, 1), OpenStudio::Time.new(0, 0))
-      timestep_interval = OpenStudio::Time.new(0, 0, timestep_minutes)
-      time_series = OpenStudio::TimeSeries.new(start_datetime, timestep_interval, OpenStudio::createVector(annual_values), "")
-      schedule = OpenStudio::Model::ScheduleInterval.fromTimeSeries(time_series, @model).get
-
-    else
-      # Create ScheduleRuleset with repeating weeks
-
-      time = []
-      (timestep_minutes..24 * 60).step(timestep_minutes).to_a.each_with_index do |m, i|
-        time[i] = OpenStudio::Time.new(0, 0, m, 0)
-      end
-
-      schedule = OpenStudio::Model::ScheduleRuleset.new(@model)
-
-      schedule_rules = []
-      for d in 1..7 * weeks # how many unique day schedules
-        next if d > last_day_of_year
-
-        rule = OpenStudio::Model::ScheduleRule.new(schedule)
-        rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{d}")
-        day_schedule = rule.daySchedule
-        day_schedule.setName(@sch_name + " #{Schedule.allday_name}#{d}")
-        previous_value = data[(d - 1) * 24 * 60 / timestep_minutes]
-        time.each_with_index do |m, i|
-          if i != time.length - 1
-            next if data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes] == previous_value
-          end
-          day_schedule.addValue(m, previous_value)
-          previous_value = data[i + 1 + (d - 1) * 24 * 60 / timestep_minutes]
-        end
-        Schedule.set_weekday_rule(rule)
-        Schedule.set_weekend_rule(rule)
-        for w in 0..52 # max num of weeks
-          next if d + (w * 7 * weeks) > last_day_of_year
-
-          date_s = OpenStudio::Date::fromDayOfYear(d + (w * 7 * weeks), assumed_year)
-          rule.addSpecificDate(date_s)
-        end
+        date_s = OpenStudio::Date::fromDayOfYear(d + (w * 7 * weeks), assumed_year)
+        rule.addSpecificDate(date_s)
       end
     end
 
@@ -681,43 +657,6 @@ class Schedule
 
   def self.weekend_name
     return 'weekend'
-  end
-
-  # find the maximum profile value for a schedule
-  def self.getMinMaxAnnualProfileValue(model, schedule)
-    if not schedule.to_ScheduleRuleset.is_initialized
-      return nil
-    end
-
-    schedule = schedule.to_ScheduleRuleset.get
-
-    # gather profiles
-    profiles = []
-    defaultProfile = schedule.to_ScheduleRuleset.get.defaultDaySchedule
-    profiles << defaultProfile
-    rules = schedule.scheduleRules
-    rules.each do |rule|
-      profiles << rule.daySchedule
-    end
-
-    # test profiles
-    min = nil
-    max = nil
-    profiles.each do |profile|
-      profile.values.each do |value|
-        if min.nil?
-          min = value
-        else
-          if min > value then min = value end
-        end
-        if max.nil?
-          max = value
-        else
-          if max < value then max = value end
-        end
-      end
-    end
-    return { 'min' => min, 'max' => max } # this doesn't include summer and winter design day
   end
 
   # return [Double] The total number of full load hours for this schedule.

@@ -3,22 +3,6 @@ require_relative "unit_conversions"
 require_relative "util"
 
 class Geometry
-  def self.initialize_transformation_matrix(m)
-    m[0, 0] = 1
-    m[1, 1] = 1
-    m[2, 2] = 1
-    m[3, 3] = 1
-    return m
-  end
-
-  def self.make_polygon(*pts)
-    p = OpenStudio::Point3dVector.new
-    pts.each do |pt|
-      p << pt
-    end
-    return p
-  end
-
   def self.get_zone_volume(zone, runner = nil)
     if zone.isVolumeAutocalculated or not zone.volume.is_initialized
       # Calculate volume from spaces
@@ -36,20 +20,6 @@ class Geometry
     return volume
   end
 
-  def self.get_above_grade_conditioned_volume(model, runner = nil)
-    volume = 0
-    model.getThermalZones.each do |zone|
-      next if not (self.zone_is_conditioned(zone) and self.zone_is_above_grade(zone))
-
-      volume += self.get_zone_volume(zone, runner)
-    end
-    if volume == 0 and not runner.nil?
-      runner.registerError("Could not find any above-grade conditioned volume.")
-      return nil
-    end
-    return volume
-  end
-
   # Calculates space heights as the max z coordinate minus the min z coordinate
   def self.get_height_of_spaces(spaces)
     minzs = []
@@ -62,53 +32,21 @@ class Geometry
     return maxzs.max - minzs.min
   end
 
+  def self.get_max_z_of_spaces(spaces)
+    maxzs = []
+    spaces.each do |space|
+      zvalues = self.getSurfaceZValues(space.surfaces)
+      maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, "m", "ft")
+    end
+    return maxzs.max
+  end
+
   # Calculates the surface height as the max z coordinate minus the min z coordinate
   def self.surface_height(surface)
     zvalues = self.getSurfaceZValues([surface])
     minz = zvalues.min
     maxz = zvalues.max
     return maxz - minz
-  end
-
-  def self.zone_is_conditioned(zone)
-    zone.spaces.each do |space|
-      unless self.space_is_conditioned(space)
-        return false
-      end
-    end
-  end
-
-  # Returns true if all spaces in zone are fully above grade
-  def self.zone_is_above_grade(zone)
-    spaces_are_above_grade = []
-    zone.spaces.each do |space|
-      spaces_are_above_grade << self.space_is_above_grade(space)
-    end
-    if spaces_are_above_grade.all?
-      return true
-    end
-
-    return false
-  end
-
-  # Returns true if all spaces in zone are either fully or partially below grade
-  def self.zone_is_below_grade(zone)
-    return !self.zone_is_above_grade(zone)
-  end
-
-  def self.get_conditioned_above_and_below_grade_zones(thermal_zones)
-    conditioned_living_zones = []
-    conditioned_basement_zones = []
-    thermal_zones.each do |thermal_zone|
-      next unless self.zone_is_conditioned(thermal_zone)
-
-      if self.zone_is_above_grade(thermal_zone)
-        conditioned_living_zones << thermal_zone
-      elsif self.zone_is_below_grade(thermal_zone)
-        conditioned_basement_zones << thermal_zone
-      end
-    end
-    return conditioned_living_zones, conditioned_basement_zones
   end
 
   def self.get_thermal_zones_from_spaces(spaces)
@@ -123,10 +61,6 @@ class Geometry
     return thermal_zones
   end
 
-  def self.space_is_unconditioned(space)
-    return !self.space_is_conditioned(space)
-  end
-
   def self.space_is_conditioned(space)
     unless space.isPlenum
       if space.spaceType.is_initialized
@@ -139,26 +73,10 @@ class Geometry
   end
 
   def self.is_conditioned_space_type(space_type)
-    if [Constants.SpaceTypeLiving, Constants.SpaceTypeConditionedBasement].include? space_type
+    if [Constants.SpaceTypeLiving].include? space_type
       return true
     end
 
-    return false
-  end
-
-  # Returns true if space is fully above grade
-  def self.space_is_above_grade(space)
-    return !self.space_is_below_grade(space)
-  end
-
-  # Returns true if space is either fully or partially below grade
-  def self.space_is_below_grade(space)
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != "wall"
-      if surface.outsideBoundaryCondition.downcase == "foundation"
-        return true
-      end
-    end
     return false
   end
 
@@ -293,10 +211,6 @@ class Geometry
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedCrawl)
   end
 
-  def self.is_conditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeConditionedBasement)
-  end
-
   def self.is_unconditioned_basement(space_or_zone)
     return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedBasement)
   end
@@ -336,36 +250,6 @@ class Geometry
     zone.spaces.each do |space|
       return self.space_is_of_type(space, space_type)
     end
-  end
-
-  def self.get_conditioned_spaces(spaces)
-    conditioned_spaces = []
-    spaces.each do |space|
-      next if self.space_is_unconditioned(space)
-
-      conditioned_spaces << space
-    end
-    return conditioned_spaces
-  end
-
-  def self.get_unconditioned_basement_spaces(spaces)
-    unconditioned_basement_spaces = []
-    spaces.each do |space|
-      next if not self.is_unconditioned_basement(space)
-
-      unconditioned_basement_spaces << space
-    end
-    return unconditioned_basement_spaces
-  end
-
-  def self.get_garage_spaces(spaces)
-    garage_spaces = []
-    spaces.each do |space|
-      next if not self.is_garage(space)
-
-      garage_spaces << space
-    end
-    return garage_spaces
   end
 
   def self.get_facade_for_surface(surface)
@@ -414,11 +298,20 @@ class Geometry
     return zrange
   end
 
+  def self.space_has_foundation_walls(space)
+    space.surfaces.each do |surface|
+      next if surface.surfaceType.downcase != "wall"
+      next if surface.outsideBoundaryCondition.downcase != "foundation"
+
+      return true
+    end
+    return false
+  end
+
   def self.get_spaces_above_grade_exterior_walls(spaces)
     above_grade_exterior_walls = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_walls.include?(surface)
@@ -435,7 +328,6 @@ class Geometry
     above_grade_exterior_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_floors.include?(surface)
@@ -452,7 +344,7 @@ class Geometry
     above_grade_ground_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
+      next if Geometry.space_has_foundation_walls(space)
 
       space.surfaces.each do |surface|
         next if above_grade_ground_floors.include?(surface)
@@ -469,7 +361,6 @@ class Geometry
     above_grade_exterior_roofs = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_roofs.include?(surface)
@@ -514,7 +405,6 @@ class Geometry
     below_grade_exterior_walls = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
 
       space.surfaces.each do |surface|
         next if below_grade_exterior_walls.include?(surface)
@@ -531,7 +421,7 @@ class Geometry
     below_grade_exterior_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
+      next if not Geometry.space_has_foundation_walls(space)
 
       space.surfaces.each do |surface|
         next if below_grade_exterior_floors.include?(surface)
@@ -545,17 +435,9 @@ class Geometry
   end
 
   def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             cfa, nbeds)
+                             cfa, nbeds, space)
 
     # Error checking
-    if num_occ < 0
-      runner.registerError("Number of occupants cannot be negative.")
-      return false
-    end
-    if occ_gain < 0
-      runner.registerError("Internal gains cannot be negative.")
-      return false
-    end
     if sens_frac < 0 or sens_frac > 1
       runner.registerError("Sensible fraction must be greater than or equal to 0 and less than or equal to 1.")
       return false
@@ -578,54 +460,35 @@ class Geometry
     occ_rad = 0.558 * occ_sens
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
-    # Update number of occupants
-    total_num_occ = 0
-    people_sch = nil
-    activity_sch = nil
+    space_obj_name = "#{Constants.ObjectNameOccupants}"
+    space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
 
-    # Get spaces
-    ffa_spaces = self.get_conditioned_spaces(model.getSpaces)
-
-    ffa_spaces.each do |space|
-      space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
-
-      space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
-
-      if people_sch.nil?
-        # Create schedule
-        people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
-        if not people_sch.validated?
-          return false
-        end
-      end
-
-      if activity_sch.nil?
-        # Create schedule
-        activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
-      end
-
-      # Add people definition for the occ
-      occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-      occ = OpenStudio::Model::People.new(occ_def)
-      occ.setName(space_obj_name)
-      occ.setSpace(space)
-      occ_def.setName(space_obj_name)
-      occ_def.setNumberOfPeopleCalculationMethod("People", 1)
-      occ_def.setNumberofPeople(space_num_occ)
-      occ_def.setFractionRadiant(occ_rad)
-      occ_def.setSensibleHeatFraction(occ_sens)
-      occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
-      occ_def.setCarbonDioxideGenerationRate(0)
-      occ_def.setEnableASHRAE55ComfortWarnings(false)
-      occ.setActivityLevelSchedule(activity_sch)
-      occ.setNumberofPeopleSchedule(people_sch.schedule)
-
-      total_num_occ += space_num_occ
-
-      runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
+    # Create schedule
+    people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    if not people_sch.validated?
+      return false
     end
 
-    runner.registerInfo("The building has been assigned #{total_num_occ.round(2)} total occupant(s).")
+    # Create schedule
+    activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
+
+    # Add people definition for the occ
+    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
+    occ = OpenStudio::Model::People.new(occ_def)
+    occ.setName(space_obj_name)
+    occ.setSpace(space)
+    occ_def.setName(space_obj_name)
+    occ_def.setNumberOfPeopleCalculationMethod("People", 1)
+    occ_def.setNumberofPeople(space_num_occ)
+    occ_def.setFractionRadiant(occ_rad)
+    occ_def.setSensibleHeatFraction(occ_sens)
+    occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
+    occ_def.setCarbonDioxideGenerationRate(0)
+    occ_def.setEnableASHRAE55ComfortWarnings(false)
+    occ.setActivityLevelSchedule(activity_sch)
+    occ.setNumberofPeopleSchedule(people_sch.schedule)
+
+    runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
     return true
   end
 
