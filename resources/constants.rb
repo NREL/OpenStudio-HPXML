@@ -139,7 +139,7 @@ class Constants
     return 'supply'
   end
 
-  def self.DuctedInfoMiniSplitHeatPump
+  def self.OptionallyDuctedSystemIsDucted
     return __method__.to_s
   end
 
@@ -251,6 +251,10 @@ class Constants
     return "ashp"
   end
 
+  def self.ObjectNameBackupHeatingCoil
+    return "backup htg coil"
+  end
+
   def self.ObjectNameBath
     return "res baths"
   end
@@ -303,13 +307,20 @@ class Constants
     return "baseboard"
   end
 
-  def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")
-    if is_cooling
-      s = "cool"
-    else
-      s = "heat"
-    end
-    return "#{fan_or_pump_name} #{s} disaggregate"
+  def self.ObjectNameEvaporativeCooler
+    return "evap cooler"
+  end
+
+  def self.ObjectNameFanPumpDisaggregateCool(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} clg disaggregate"
+  end
+
+  def self.ObjectNameFanPumpDisaggregatePrimaryHeat(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} htg primary disaggregate"
+  end
+
+  def self.ObjectNameFanPumpDisaggregateBackupHeat(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} htg backup disaggregate"
   end
 
   def self.ObjectNameFixtures
@@ -430,6 +441,18 @@ class Constants
 
   def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
     return "#{water_heater_name} EC adjustment"
+  end
+
+  def self.ObjectNameDesuperheater(water_heater_name)
+    return "#{water_heater_name} Desuperheater"
+  end
+
+  def self.ObjectNameDesuperheaterEnergy(water_heater_name)
+    return "#{water_heater_name} Desuperheater energy"
+  end
+
+  def self.ObjectNameDesuperheaterLoad(water_heater_name)
+    return "#{water_heater_name} Desuperheater load"
   end
 
   def self.ObjectNameTankHX
