@@ -307,7 +307,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Obtain water heater EC_adj
     new_key = ["Any", "Water Systems", "EC_adj", "GJ"]
-    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName LIKE '%#{Constants.ObjectNameWaterHeaterAdjustment(nil)}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+    query = "SELECT SUM(VariableValue/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName LIKE '%#{Constants.ObjectNameWaterHeaterAdjustment(nil)} outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
     results[new_key] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Disaggregate any crankcase and defrost energy from results
