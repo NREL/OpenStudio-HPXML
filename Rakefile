@@ -2169,7 +2169,7 @@ def get_hpxml_file_heat_pumps_values(hpxml_file, heat_pumps_values)
     heat_pumps_values[0][:backup_heating_fuel] = "natural gas"
     heat_pumps_values[0][:backup_heating_capacity] = 36000
     heat_pumps_values[0][:backup_heating_efficiency_percent] = nil
-    heat_pumps_values[0][:backup_heating_efficiency_afue] = 0.8
+    heat_pumps_values[0][:backup_heating_efficiency_afue] = 0.95
     heat_pumps_values[0][:backup_heating_switchover_temp] = 25
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-oil.xml'].include? hpxml_file
     heat_pumps_values[0][:backup_heating_fuel] = "fuel oil"
