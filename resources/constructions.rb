@@ -1474,7 +1474,7 @@ class Constructions
         foundation.setExteriorVerticalInsulationMaterial(ext_vert_mat)
         foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
       else
-        foundation.addCustomBlock(material,
+        foundation.addCustomBlock(ext_vert_mat,
                                   UnitConversions.convert(ext_vert_depth, "ft", "m"),
                                   UnitConversions.convert(wall_concrete_thick_in, "in", "m"),
                                   UnitConversions.convert(ext_vert_offset, "ft", "m"))

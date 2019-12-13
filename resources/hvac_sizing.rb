@@ -913,7 +913,7 @@ class HVACSizing
       for d in 1..wall_height_ft
         r_soil = (Math::PI * d / 2.0) / k_soil
         if d <= wall_ins_offset
-          r_wall = 1.0 / ins_wall_ufactor + AirFilms.OutsideR
+          r_wall = 1.0 / ins_wall_ufactor + Material.AirFilmOutside.rvalue
         elsif d <= wall_ins_offset + wall_ins_height
           r_wall = 1.0 / ins_wall_ufactor
         else
@@ -2650,17 +2650,21 @@ class HVACSizing
     return MathTools.biquadratic(airFlowRate / capacity_tons, temp, @shr_biquadratic)
   end
 
-  def self.space_is_vented(space, min_sla_for_venting)
-    ela = 0.0
-    space.spaceInfiltrationEffectiveLeakageAreas.each do |leakage_area|
-      ela += UnitConversions.convert(leakage_area.effectiveAirLeakageArea, "cm^2", "ft^2")
+  def self.get_sizing_speed(hvac)
+    if hvac.NumSpeedsCooling > 1
+      sizingSpeed = hvac.NumSpeedsCooling # Default
+      sizingSpeed_Test = 10 # Initialize
+      for speed in 0..(hvac.NumSpeedsCooling - 1)
+        # Select curves for sizing using the speed with the capacity ratio closest to 1
+        temp = (hvac.CapacityRatioCooling[speed] - 1).abs
+        if temp <= sizingSpeed_Test
+          sizingSpeed = speed
+          sizingSpeed_Test = temp
+        end
+      end
+      return sizingSpeed
     end
-    sla = ela / UnitConversions.convert(space.floorArea, "m^2", "ft^2")
-    if sla > min_sla_for_venting
-      return true
-    end
-
-    return false
+    return 0
   end
 
   def self.true_azimuth(surface)
