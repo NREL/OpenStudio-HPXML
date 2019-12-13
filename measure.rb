@@ -1658,6 +1658,7 @@ class OSModel
     assembly_r = fnd_wall_values[:insulation_assembly_r_value]
     if not assembly_r.nil?
       rigid_height = height
+      rigid_offset = 0.0
       film_r = Material.AirFilmVertical.rvalue
       rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
       if rigid_r < 0 # Try without drywall
