@@ -339,7 +339,7 @@ class EnergyPlusValidator
         "HeatingCapacity" => one, # Use -1 for autosizing
         "CoolingCapacity" => one, # Use -1 for autosizing
         "CoolingSensibleHeatFraction" => zero_or_one,
-        "[BackupSystemFuel='electricity']" => zero_or_one, # See [HeatPumpBackup]
+        "[BackupSystemFuel='electricity' or BackupSystemFuel='natural gas' or BackupSystemFuel='fuel oil' or BackupSystemFuel='propane']" => zero_or_one, # See [HeatPumpBackup]
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
       },
@@ -366,14 +366,16 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='ground-to-air']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
+        "BackupHeatingSwitchoverTemperature" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
         "AnnualHeatingEfficiency[Units='COP']/Value" => one,
       },
 
       ## [HeatPumpBackup]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]" => {
-        "BackupAnnualHeatingEfficiency[Units='Percent']/Value" => one,
+        "BackupAnnualHeatingEfficiency[Units='Percent' or Units='AFUE']/Value" => one,
         "BackupHeatingCapacity" => one, # Use -1 for autosizing
+        "BackupHeatingSwitchoverTemperature" => zero_or_one, # Use if dual-fuel heat pump
       },
 
       # [HVACControl]

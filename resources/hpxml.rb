@@ -1167,6 +1167,8 @@ class HPXML
                          backup_heating_fuel: nil,
                          backup_heating_capacity: nil,
                          backup_heating_efficiency_percent: nil,
+                         backup_heating_efficiency_afue: nil,
+                         backup_heating_switchover_temp: nil,
                          fraction_heat_load_served:,
                          fraction_cool_load_served:,
                          cooling_efficiency_seer: nil,
@@ -1189,10 +1191,17 @@ class HPXML
     XMLHelper.add_element(heat_pump, "CoolingSensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
     if not backup_heating_fuel.nil?
       XMLHelper.add_element(heat_pump, "BackupSystemFuel", backup_heating_fuel)
-      backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
-      XMLHelper.add_element(backup_eff, "Units", "Percent")
-      XMLHelper.add_element(backup_eff, "Value", Float(backup_heating_efficiency_percent))
+      efficiencies = { "Percent" => backup_heating_efficiency_percent,
+                       "AFUE" => backup_heating_efficiency_afue }
+      efficiencies.each do |units, value|
+        next if value.nil?
+
+        backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
+        XMLHelper.add_element(backup_eff, "Units", units)
+        XMLHelper.add_element(backup_eff, "Value", Float(value))
+      end
       XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", Float(backup_heating_capacity))
+      XMLHelper.add_element(heat_pump, "BackupHeatingSwitchoverTemperature", Float(backup_heating_switchover_temp)) unless backup_heating_switchover_temp.nil?
     end
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", Float(fraction_cool_load_served))
@@ -1243,6 +1252,8 @@ class HPXML
     vals[:backup_heating_fuel] = XMLHelper.get_value(heat_pump, "BackupSystemFuel") if is_selected(select, :backup_heating_fuel)
     vals[:backup_heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")) if is_selected(select, :backup_heating_capacity)
     vals[:backup_heating_efficiency_percent] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")) if is_selected(select, :backup_heating_efficiency_percent)
+    vals[:backup_heating_efficiency_afue] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='AFUE']/Value")) if is_selected(select, :backup_heating_efficiency_afue)
+    vals[:backup_heating_switchover_temp] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingSwitchoverTemperature")) if is_selected(select, :backup_heating_switchover_temp)
     vals[:fraction_heat_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")) if is_selected(select, :fraction_heat_load_served)
     vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed")) if is_selected(select, :fraction_cool_load_served)
     vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualCoolingEfficiency[Units='SEER']/Value")) if is_selected(select, :cooling_efficiency_seer)
