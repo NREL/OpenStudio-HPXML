@@ -622,7 +622,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
@@ -640,7 +640,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall2Insulation'/>
@@ -658,7 +658,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall3Insulation'/>
@@ -676,7 +676,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall4Insulation'/>
@@ -694,7 +694,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall5Insulation'/>
@@ -712,7 +712,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall6Insulation'/>
@@ -730,7 +730,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall7Insulation'/>
@@ -748,7 +748,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall8Insulation'/>
@@ -766,7 +766,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall9Insulation'/>
@@ -784,7 +784,7 @@
             <Area>120.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+            <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
             <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWall10Insulation'/>
