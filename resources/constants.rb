@@ -139,7 +139,7 @@ class Constants
     return 'supply'
   end
 
-  def self.DuctedInfoMiniSplitHeatPump
+  def self.OptionallyDuctedSystemIsDucted
     return __method__.to_s
   end
 
@@ -303,6 +303,10 @@ class Constants
     return "baseboard"
   end
 
+  def self.ObjectNameEvaporativeCooler
+    return "evap cooler"
+  end
+
   def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")
     if is_cooling
       s = "cool"
@@ -430,6 +434,18 @@ class Constants
 
   def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
     return "#{water_heater_name} EC adjustment"
+  end
+
+  def self.ObjectNameDesuperheater(water_heater_name)
+    return "#{water_heater_name} Desuperheater"
+  end
+
+  def self.ObjectNameDesuperheaterEnergy(water_heater_name)
+    return "#{water_heater_name} Desuperheater energy"
+  end
+
+  def self.ObjectNameDesuperheaterLoad(water_heater_name)
+    return "#{water_heater_name} Desuperheater load"
   end
 
   def self.ObjectNameTankHX
@@ -703,27 +719,27 @@ class Constants
   def self.SizingInfoZoneInfiltrationELA
     return __method__.to_s
   end
-  
+
   def self.SolarThermalCollectorTypeEvacuatedTube
     return 'evacuated tube'
   end
-  
+
   def self.SolarThermalCollectorTypeGlazedFlatPlate
     return 'single glazing black'
   end
-  
+
   def self.SolarThermalCollectorTypeICS
     return 'integrated collector storage'
   end
-  
+
   def self.SolarThermalLoopTypeDirect
     return 'liquid direct'
   end
-  
+
   def self.SolarThermalLoopTypeIndirect
     return 'liquid indirect'
   end
-  
+
   def self.SolarThermalLoopTypeThermosyphon
     return 'passive thermosyphon'
   end

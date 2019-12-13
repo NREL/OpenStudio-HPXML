@@ -343,8 +343,8 @@
             <CollectorType>evacuated tube</CollectorType>
             <CollectorAzimuth>180</CollectorAzimuth>
             <CollectorTilt>20.0</CollectorTilt>
-            <CollectorRatedOpticalEfficiency>0.476</CollectorRatedOpticalEfficiency>
-            <CollectorRatedThermalLosses>1.556</CollectorRatedThermalLosses>
+            <CollectorRatedOpticalEfficiency>0.5</CollectorRatedOpticalEfficiency>
+            <CollectorRatedThermalLosses>0.2799</CollectorRatedThermalLosses>
             <StorageVolume>60.0</StorageVolume>
             <ConnectedTo idref='WaterHeater'/>
           </SolarThermalSystem>

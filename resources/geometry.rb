@@ -49,14 +49,6 @@ class Geometry
     return maxz - minz
   end
 
-  def self.zone_is_conditioned(zone)
-    zone.spaces.each do |space|
-      unless self.space_is_conditioned(space)
-        return false
-      end
-    end
-  end
-
   def self.get_thermal_zones_from_spaces(spaces)
     thermal_zones = []
     spaces.each do |space|
@@ -67,10 +59,6 @@ class Geometry
       end
     end
     return thermal_zones
-  end
-
-  def self.space_is_unconditioned(space)
-    return !self.space_is_conditioned(space)
   end
 
   def self.space_is_conditioned(space)
@@ -89,22 +77,6 @@ class Geometry
       return true
     end
 
-    return false
-  end
-
-  # Returns true if space is fully above grade
-  def self.space_is_above_grade(space)
-    return !self.space_is_below_grade(space)
-  end
-
-  # Returns true if space is either fully or partially below grade
-  def self.space_is_below_grade(space)
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != "wall"
-      if surface.outsideBoundaryCondition.downcase == "foundation"
-        return true
-      end
-    end
     return false
   end
 
@@ -326,11 +298,20 @@ class Geometry
     return zrange
   end
 
+  def self.space_has_foundation_walls(space)
+    space.surfaces.each do |surface|
+      next if surface.surfaceType.downcase != "wall"
+      next if surface.outsideBoundaryCondition.downcase != "foundation"
+
+      return true
+    end
+    return false
+  end
+
   def self.get_spaces_above_grade_exterior_walls(spaces)
     above_grade_exterior_walls = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_walls.include?(surface)
@@ -347,7 +328,6 @@ class Geometry
     above_grade_exterior_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_floors.include?(surface)
@@ -364,7 +344,7 @@ class Geometry
     above_grade_ground_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
+      next if Geometry.space_has_foundation_walls(space)
 
       space.surfaces.each do |surface|
         next if above_grade_ground_floors.include?(surface)
@@ -381,7 +361,6 @@ class Geometry
     above_grade_exterior_roofs = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
 
       space.surfaces.each do |surface|
         next if above_grade_exterior_roofs.include?(surface)
@@ -426,7 +405,6 @@ class Geometry
     below_grade_exterior_walls = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
 
       space.surfaces.each do |surface|
         next if below_grade_exterior_walls.include?(surface)
@@ -443,7 +421,7 @@ class Geometry
     below_grade_exterior_floors = []
     spaces.each do |space|
       next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
+      next if not Geometry.space_has_foundation_walls(space)
 
       space.surfaces.each do |surface|
         next if below_grade_exterior_floors.include?(surface)
