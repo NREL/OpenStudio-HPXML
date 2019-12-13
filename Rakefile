@@ -70,6 +70,7 @@ def create_hpxmls
     'base-addenda-exclude-g-e.xml' => 'base.xml',
     'base-addenda-exclude-g-e-a.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
+    'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dishwasher-ef.xml' => 'base.xml',
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
@@ -3153,9 +3154,12 @@ def get_hpxml_file_dehumidifier_values(hpxml_file, dehumidifier_values)
     dehumidifier_values = {}
   elsif ['base-appliances-dehumidifier.xml'].include? hpxml_file
     dehumidifier_values = { :id => "Dehumidifier",
-                            :capacity => 65,
+                            :capacity => 40,
                             :energy_factor => 1.8,
                             :rh_setpoint => 0.5 }
+  elsif ['base-appliances-dehumidifier-ief.xml'].include? hpxml_file
+    dehumidifier_values[:energy_factor] = nil
+    dehumidifier_values[:integrated_energy_factor] = 1.5
   end
   return dehumidifier_values
 end

@@ -1816,9 +1816,9 @@ class HPXML
   def self.add_dehumidifier(hpxml:,
                             id:,
                             capacity:,
-                            energy_factor:,
-                            rh_setpoint:,
-                            **remainder)
+                            energy_factor: nil,
+                            integrated_energy_factor: nil,
+                            rh_setpoint:)
     appliances = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Appliances"])
     dehumidifier = XMLHelper.add_element(appliances, "Dehumidifier")
     sys_id = XMLHelper.add_element(dehumidifier, "SystemIdentifier")
@@ -1826,16 +1826,21 @@ class HPXML
     HPXML.add_extension(parent: dehumidifier,
                         extensions: { "Capacity": to_float_or_nil(capacity),
                                       "EnergyFactor": to_float_or_nil(energy_factor),
+                                      "IntegratedEnergyFactor": to_float_or_nil(integrated_energy_factor),
                                       "DehumidistatSetpoint": to_float_or_nil(rh_setpoint) })
   end
 
-  def self.get_dehumidifier_values(dehumidifier:)
+  def self.get_dehumidifier_values(dehumidifier:,
+                                   select: [])
     return nil if dehumidifier.nil?
 
-    return { :id => HPXML.get_id(dehumidifier),
-             :capacity => to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/Capacity")),
-             :energy_factor => to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/EnergyFactor")),
-             :rh_setpoint => to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/DehumidistatSetpoint")) }
+    vals = {}
+    vals[:id] = HPXML.get_id(dehumidifier) if is_selected(select, :id)
+    vals[:capacity] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/Capacity")) if is_selected(select, :capacity)
+    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/EnergyFactor")) if is_selected(select, :energy_factor)
+    vals[:integrated_energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/IntegratedEnergyFactor")) if is_selected(select, :integrated_energy_factor)
+    vals[:rh_setpoint] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/DehumidistatSetpoint")) if is_selected(select, :rh_setpoint)
+    return vals
   end
 
   def self.add_cooking_range(hpxml:,

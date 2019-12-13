@@ -3002,12 +3002,13 @@ class OSModel
 
     water_removal_rate = dehumidifier_values[:capacity]
     energy_factor = dehumidifier_values[:energy_factor]
+    integrated_energy_factor = dehumidifier_values[:integrated_energy_factor]
     humidity_setpoint = dehumidifier_values[:rh_setpoint]
 
     # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
     air_flow_rate = 2.75 * water_removal_rate
 
-    success = HVAC.apply_dehumidifier(model, runner, energy_factor, water_removal_rate,
+    success = HVAC.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
                                       air_flow_rate, humidity_setpoint, @living_zone)
     return false if not success
 

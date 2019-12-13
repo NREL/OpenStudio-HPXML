@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-11-05T17:36:35-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-12-13T11:17:31-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -367,7 +367,7 @@
           <SystemIdentifier id='Dehumidifier'/>
           <extension>
             <Capacity>40.0</Capacity>
-            <EnergyFactor>1.8</EnergyFactor>
+            <IntegratedEnergyFactor>1.5</IntegratedEnergyFactor>
             <DehumidistatSetpoint>0.5</DehumidistatSetpoint>
           </extension>
         </Dehumidifier>

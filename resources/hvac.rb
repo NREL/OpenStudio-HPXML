@@ -2431,10 +2431,21 @@ class HVAC
     return clg_sp, clg_setup_sp, clg_setup_hrs_per_week, clg_setup_start_hr
   end
 
-  def self.apply_dehumidifier(model, runner, energy_factor, water_removal_rate,
+  def self.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
                               air_flow_rate, humidity_setpoint, control_zone)
 
     obj_name = Constants.ObjectNameDehumidifier
+
+    if energy_factor.nil?
+      # Convert using Slide 19 from https://www.energystar.gov/sites/default/files/Dehumidifier%20Draft%201%20Version%205.0%20Webinar%20Slides_8%2030%2018_final.pdf
+      if water_removal_rate <= 25.0
+        energy_factor = integrated_energy_factor * 1.30 / 1.88
+      elsif water_removal_rate <= 50.0
+        energy_factor = integrated_energy_factor * 1.60 / 1.96
+      else
+        energy_factor = integrated_energy_factor * 2.80 / 3.53
+      end
+    end
 
     avg_rh_setpoint = humidity_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
     relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
