@@ -149,11 +149,11 @@ def create_hpxmls
     'base-enclosure-windows-none.xml' => 'base.xml',
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
+    'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
     'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unconditioned-basement-above-grade.xml' => 'base-foundation-unconditioned-basement.xml',
-    'base-foundation-unconditioned-basement-slab-insulation.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unconditioned-basement-wall-insulation.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-unvented-crawlspace.xml' => 'base.xml',
     'base-foundation-vented-crawlspace.xml' => 'base.xml',
@@ -1392,7 +1392,7 @@ def get_hpxml_file_slabs_values(hpxml_file, slabs_values)
                       :carpet_r_value => 0 }]
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     slabs_values[0][:interior_adjacent_to] = "basement - unconditioned"
-  elsif ['base-foundation-unconditioned-basement-slab-insulation.xml'].include? hpxml_file
+  elsif ['base-foundation-conditioned-basement-slab-insulation.xml'].include? hpxml_file
     slabs_values[0][:under_slab_insulation_width] = 4
     slabs_values[0][:under_slab_insulation_r_value] = 10
   elsif ['base-foundation-slab.xml'].include? hpxml_file
