@@ -1663,8 +1663,8 @@ class OSModel
         drywall_thick_in = 0.0
         rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
       end
-      if rigid_r < 0.1
-        rigid_r = 0.0
+      if rigid_r > 0 and rigid_r < 0.1
+        rigid_r = 0.0 # Prevent tiny strip of insulation
       end
       if rigid_r < 0
         rigid_r = 0.0
