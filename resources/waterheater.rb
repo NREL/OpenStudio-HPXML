@@ -678,7 +678,7 @@ class Waterheater
       ics_performance.setSideHeatLossConductance(1.268)
       ics_performance.setAspectRatio(0.721)
       ics_performance.setCollectorSideHeight(0.17272)
-      ics_performance.setNumberOfCovers(2)
+      ics_performance.setNumberOfCovers(1)
       ics_performance.setAbsorptanceOfAbsorberPlate(0.94)
       ics_performance.setEmissivityOfAbsorberPlate(0.56)
 
