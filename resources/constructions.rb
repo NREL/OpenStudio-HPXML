@@ -871,15 +871,14 @@ class Constructions
   def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                 wall_height, wall_height_above_grade, foundation = nil)
+                                 wall_height, wall_height_above_grade)
 
-    if foundation.nil?
-      # Create Kiva foundation
-      foundation = create_kiva_crawl_or_basement_foundation(model, wall_height, ext_rigid_r,
-                                                            int_rigid_r, ext_rigid_ins_offset, int_rigid_ins_offset,
-                                                            ext_rigid_ins_height, int_rigid_ins_height,
-                                                            wall_height_above_grade, wall_concrete_thick_in)
-    end
+
+    # Create Kiva foundation
+    foundation = apply_kiva_walled_foundation(model, wall_height, ext_rigid_r,
+                                              int_rigid_r, ext_rigid_ins_offset, int_rigid_ins_offset,
+                                              ext_rigid_ins_height, int_rigid_ins_height,
+                                              wall_height_above_grade, wall_concrete_thick_in)
 
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
@@ -908,16 +907,24 @@ class Constructions
                                  under_r, under_width, gap_r,
                                  perimeter_r, perimeter_depth,
                                  whole_r, concrete_thick_in, exposed_perimeter,
-                                 mat_carpet = nil, foundation = nil)
+                                 mat_carpet, foundation)
 
     return true if surface.nil?
 
     if foundation.nil?
-      # Create Kiva foundation
+      # Create Kiva foundation for slab
       thick = UnitConversions.convert(concrete_thick_in, "in", "ft")
       foundation = create_kiva_slab_foundation(model, under_r, under_width,
                                                gap_r, thick, perimeter_r, perimeter_depth,
                                                concrete_thick_in)
+    else
+      # Kiva foundation (for crawlspace/basement) exists
+      if under_r > 0 and under_width > 0
+        int_horiz_mat = create_insulation_material(model, "FoundationIntHorizIns", under_r)
+        foundation.setInteriorHorizontalInsulationMaterial(int_horiz_mat)
+        foundation.setInteriorHorizontalInsulationDepth(0)
+        foundation.setInteriorHorizontalInsulationWidth(UnitConversions.convert(under_width, "ft", "m"))
+      end
     end
 
     # Define materials
@@ -1389,9 +1396,9 @@ class Constructions
     return foundation
   end
 
-  def self.create_kiva_crawl_or_basement_foundation(model, wall_height, ext_vert_r, int_vert_r,
-                                                    ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
-                                                    wall_height_above_grade, wall_concrete_thick_in)
+  def self.apply_kiva_walled_foundation(model, wall_height, ext_vert_r, int_vert_r,
+                                        ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
+                                        wall_height_above_grade, wall_concrete_thick_in)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
