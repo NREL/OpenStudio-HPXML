@@ -873,7 +873,6 @@ class Constructions
                                  int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                                  wall_height, wall_height_above_grade)
 
-
     # Create Kiva foundation
     foundation = apply_kiva_walled_foundation(model, wall_height, ext_rigid_r,
                                               int_rigid_r, ext_rigid_ins_offset, int_rigid_ins_offset,
