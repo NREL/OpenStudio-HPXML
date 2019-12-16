@@ -1407,9 +1407,9 @@ class Constructions
       if int_vert_r > 0 and int_vert_depth > 0
         int_vert_mat = create_insulation_material(model, "FoundationIntVertIns", int_vert_r)
           foundation.addCustomBlock(int_vert_mat,
-                                    UnitConversions.convert(ext_vert_depth, "ft", "m"),
-                                    UnitConversions.convert(-ext_vert_mat.thickness, "in", "m"),
-                                    UnitConversions.convert(ext_vert_offset, "ft", "m"))
+                                    UnitConversions.convert(int_vert_depth, "ft", "m"),
+                                    UnitConversions.convert(-int_vert_mat.thickness, "in", "m"),
+                                    UnitConversions.convert(int_vert_offset, "ft", "m"))
       end
     end
 
