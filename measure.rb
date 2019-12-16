@@ -4590,13 +4590,9 @@ class OSModel
 
       if surface.adjacentFoundation.is_initialized
         foundation = surface.adjacentFoundation.get
-        if foundation.interiorVerticalInsulationMaterial.is_initialized
-          int_mat = foundation.interiorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
-          constr_r += UnitConversions.convert(int_mat.thickness, "m", "ft") / UnitConversions.convert(int_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
-        end
-        if foundation.exteriorVerticalInsulationMaterial.is_initialized
-          ext_mat = foundation.exteriorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
-          constr_r += UnitConversions.convert(ext_mat.thickness, "m", "ft") / UnitConversions.convert(ext_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
+        foundation.customBlocks.each do |custom_block|
+          ins_mat = custom_block.material.to_StandardOpaqueMaterial.get
+          constr_r += UnitConversions.convert(ins_mat.thickness, "m", "ft") / UnitConversions.convert(ins_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
         end
       end
 
