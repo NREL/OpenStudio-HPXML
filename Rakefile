@@ -150,6 +150,7 @@ def create_hpxmls
     'base-foundation-multiple.xml' => 'base-foundation-unconditioned-basement.xml',
     'base-foundation-ambient.xml' => 'base.xml',
     'base-foundation-conditioned-basement-slab-insulation.xml' => 'base.xml',
+    'base-foundation-conditioned-basement-wall-interior-insulation.xml' => 'base.xml',
     'base-foundation-slab.xml' => 'base.xml',
     'base-foundation-unconditioned-basement.xml' => 'base.xml',
     'base-foundation-unconditioned-basement-assembly-r.xml' => 'base-foundation-unconditioned-basement.xml',
@@ -1161,6 +1162,10 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :exterior_layer_distance_to_top => 0,
                                  :exterior_layer_height => 8,
                                  :exterior_layer_r_value => 8.9 }]
+  elsif ['base-foundation-conditioned-basement-wall-interior-insulation.xml'].include? hpxml_file
+    foundation_walls_values[0][:interior_layer_distance_to_top] = 0
+    foundation_walls_values[0][:interior_layer_height] = 8
+    foundation_walls_values[0][:interior_layer_r_value] = 10
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundation_walls_values[0][:interior_adjacent_to] = "basement - unconditioned"
     foundation_walls_values[0][:exterior_layer_height] = 0
