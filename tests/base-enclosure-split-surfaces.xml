@@ -625,11 +625,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -645,11 +645,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall2Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -665,11 +665,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall3Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -685,11 +685,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall4Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -705,11 +705,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall5Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -725,11 +725,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall6Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -745,11 +745,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall7Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -765,11 +765,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall8Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -785,11 +785,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall9Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -805,11 +805,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWall10Insulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>8.0</DistanceToBottomOfFoundationWall>
+                  <Height>8.0</Height>
                 </extension>
               </Layer>
             </Insulation>

@@ -153,11 +153,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>0.0</DistanceToBottomOfFoundationWall>
+                  <Height>0.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -173,11 +173,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWallInteriorInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>0.0</DistanceToBottomOfFoundationWall>
+                  <Height>0.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -193,11 +193,11 @@
             <Insulation>
               <SystemIdentifier id='FoundationWallCrawlspaceInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <DistanceToBottomOfFoundationWall>0.0</DistanceToBottomOfFoundationWall>
+                  <Height>0.0</Height>
                 </extension>
               </Layer>
             </Insulation>

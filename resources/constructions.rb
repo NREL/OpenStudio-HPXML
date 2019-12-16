@@ -869,24 +869,15 @@ class Constructions
   end
 
   def self.apply_foundation_wall(runner, model, wall_surfaces, wall_constr_name,
-                                 wall_rigid_ins_offset, wall_rigid_ins_height, wall_cavity_r, wall_install_grade,
-                                 wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
-                                 wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
+                                 ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
+                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
                                  wall_height, wall_height_above_grade, foundation = nil)
-
-    # Calculate interior wall R-value
-    int_wall_rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
-                                                 wall_filled_cavity, wall_framing_factor,
-                                                 wall_install_grade, wall_rigid_r,
-                                                 wall_drywall_thick_in)
-    if int_wall_rvalue.nil?
-      return false
-    end
 
     if foundation.nil?
       # Create Kiva foundation
-      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_rvalue, wall_height, wall_rigid_r,
-                                                            wall_rigid_ins_offset, wall_rigid_ins_height,
+      foundation = create_kiva_crawl_or_basement_foundation(model, wall_height, ext_rigid_r,
+                                                            int_rigid_r, ext_rigid_ins_offset, int_rigid_ins_offset,
+                                                            ext_rigid_ins_height, int_rigid_ins_height,
                                                             wall_height_above_grade, wall_concrete_thick_in)
     end
 
@@ -1361,61 +1352,6 @@ class Constructions
     return 0
   end
 
-  def self.calc_interior_wall_r_value(runner, cavity_depth_in, cavity_r, filled_cavity,
-                                      framing_factor, install_grade, rigid_r, drywall_thick_in)
-
-    # Define materials
-    mat_framing = nil
-    mat_cavity = nil
-    mat_gap = nil
-    if cavity_depth_in > 0
-      if cavity_r > 0
-        if filled_cavity
-          # Insulation
-          mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / cavity_r)
-        else
-          # Insulation plus air gap when insulation thickness < cavity depth
-          mat_cavity = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.InsulationGenericDensepack, k_in = cavity_depth_in / (cavity_r + Gas.AirGapRvalue))
-        end
-      else
-        # Empty cavity
-        mat_cavity = Material.AirCavityClosed(cavity_depth_in)
-      end
-      mat_framing = Material.new(name = nil, thick_in = cavity_depth_in, mat_base = BaseMaterial.Wood)
-      mat_gap = Material.AirCavityClosed(cavity_depth_in)
-    end
-    mat_drywall = nil
-    drywall_r = 0
-    if drywall_thick_in > 0
-      mat_drywall = Material.GypsumWall(drywall_thick_in)
-      drywall_r = mat_drywall.rvalue
-    end
-    mat_rigid = nil
-    if rigid_r > 0
-      rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
-      mat_rigid = Material.new(name = nil, thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
-    end
-
-    # Set paths
-    gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
-    path_fracs = [framing_factor, 1 - framing_factor - gapFactor, gapFactor]
-
-    # Define construction (only used to calculate assembly R-value)
-    constr = Construction.new(nil, path_fracs)
-    if not mat_drywall.nil?
-      constr.add_layer(mat_drywall)
-    end
-    if not mat_framing.nil? and not mat_cavity.nil? and not mat_gap.nil?
-      constr.add_layer(Material.AirFilmVertical)
-      constr.add_layer([mat_framing, mat_cavity, mat_gap])
-    end
-    if not mat_rigid.nil?
-      constr.add_layer(mat_rigid)
-    end
-
-    return constr.assembly_rvalue(runner) - rigid_r - drywall_r
-  end
-
   def self.create_kiva_slab_foundation(model, int_horiz_r, int_horiz_width, int_vert_r,
                                        int_vert_depth, ext_vert_r, ext_vert_depth,
                                        concrete_thick_in)
@@ -1453,31 +1389,42 @@ class Constructions
     return foundation
   end
 
-  def self.create_kiva_crawl_or_basement_foundation(model, int_vert_r, int_vert_depth,
-                                                    ext_vert_r, ext_vert_offset, ext_vert_depth,
+  def self.create_kiva_crawl_or_basement_foundation(model, wall_height, ext_vert_r, int_vert_r,
+                                                    ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
                                                     wall_height_above_grade, wall_concrete_thick_in)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
 
     # Interior vertical insulation
-    if int_vert_r > 0 and int_vert_depth > 0
-      int_vert_mat = create_insulation_material(model, "FoundationIntVertIns", int_vert_r)
-      foundation.setInteriorVerticalInsulationMaterial(int_vert_mat)
-      foundation.setInteriorVerticalInsulationDepth(UnitConversions.convert(int_vert_depth, "ft", "m"))
+    if not int_vert_r.nil?
+      if int_vert_r > 0 and int_vert_depth > 0
+        int_vert_mat = create_insulation_material(model, "FoundationIntVertIns", int_vert_r)
+        if int_vert_offset == 0
+          foundation.setInteriorVerticalInsulationMaterial(int_vert_mat)
+          foundation.setInteriorVerticalInsulationDepth(UnitConversions.convert(int_vert_depth, "ft", "m"))
+        else
+          foundation.addCustomBlock(int_vert_mat,
+                                    UnitConversions.convert(ext_vert_depth, "ft", "m"),
+                                    UnitConversions.convert(-ext_vert_mat.thickness, "in", "m"),
+                                    UnitConversions.convert(ext_vert_offset, "ft", "m"))
+        end
+      end
     end
 
     # Exterior vertical insulation
-    if ext_vert_r > 0 and ext_vert_depth > 0
-      ext_vert_mat = create_insulation_material(model, "FoundationExtVertIns", ext_vert_r)
-      if ext_vert_offset == 0
-        foundation.setExteriorVerticalInsulationMaterial(ext_vert_mat)
-        foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
-      else
-        foundation.addCustomBlock(ext_vert_mat,
-                                  UnitConversions.convert(ext_vert_depth, "ft", "m"),
-                                  UnitConversions.convert(wall_concrete_thick_in, "in", "m"),
-                                  UnitConversions.convert(ext_vert_offset, "ft", "m"))
+    if not ext_vert_r.nil?
+      if ext_vert_r > 0 and ext_vert_depth > 0
+        ext_vert_mat = create_insulation_material(model, "FoundationExtVertIns", ext_vert_r)
+        if ext_vert_offset == 0
+          foundation.setExteriorVerticalInsulationMaterial(ext_vert_mat)
+          foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
+        else
+          foundation.addCustomBlock(ext_vert_mat,
+                                    UnitConversions.convert(ext_vert_depth, "ft", "m"),
+                                    UnitConversions.convert(wall_concrete_thick_in, "in", "m"),
+                                    UnitConversions.convert(ext_vert_offset, "ft", "m"))
+        end
       end
     end
 
