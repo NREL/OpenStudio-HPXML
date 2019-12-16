@@ -383,7 +383,7 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "SetpointTempHeatingSeason" => one,
         "SetbackTempHeatingSeason" => zero_or_one, # See [HVACControlType=HeatingSetback]
-        "SetupTempCoolingSeason" => zero_or_one, # See [HVACControlType=CoolingSetback]
+        "SetupTempCoolingSeason" => zero_or_one, # See [HVACControlType=CoolingSetup]
         "SetpointTempCoolingSeason" => one,
         "extension/CeilingFanSetpointTempCoolingSeasonOffset" => zero_or_one,
       },
@@ -394,7 +394,7 @@ class EnergyPlusValidator
         "extension/SetbackStartHourHeating" => one, # 0 = midnight. 12 = noon
       },
 
-      ## [HVACControlType=CoolingSetback]
+      ## [HVACControlType=CoolingSetup]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl[SetupTempCoolingSeason]" => {
         "TotalSetupHoursperWeekCooling" => one,
         "extension/SetupStartHourCooling" => one, # 0 = midnight, 12 = noon
