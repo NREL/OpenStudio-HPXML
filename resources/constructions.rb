@@ -877,7 +877,7 @@ class Constructions
     foundation = apply_kiva_walled_foundation(model, wall_height, ext_rigid_r,
                                               int_rigid_r, ext_rigid_ins_offset, int_rigid_ins_offset,
                                               ext_rigid_ins_height, int_rigid_ins_height,
-                                              wall_height_above_grade, wall_concrete_thick_in)
+                                              wall_height_above_grade, wall_concrete_thick_in, wall_drywall_thick_in)
 
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
@@ -1397,7 +1397,7 @@ class Constructions
 
   def self.apply_kiva_walled_foundation(model, wall_height, ext_vert_r, int_vert_r,
                                         ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
-                                        wall_height_above_grade, wall_concrete_thick_in)
+                                        wall_height_above_grade, wall_concrete_thick_in, wall_drywall_thick_in)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1406,31 +1406,25 @@ class Constructions
     if not int_vert_r.nil?
       if int_vert_r > 0 and int_vert_depth > 0
         int_vert_mat = create_insulation_material(model, "FoundationIntVertIns", int_vert_r)
-        if int_vert_offset == 0
-          foundation.setInteriorVerticalInsulationMaterial(int_vert_mat)
-          foundation.setInteriorVerticalInsulationDepth(UnitConversions.convert(int_vert_depth, "ft", "m"))
-        else
           foundation.addCustomBlock(int_vert_mat,
                                     UnitConversions.convert(ext_vert_depth, "ft", "m"),
                                     UnitConversions.convert(-ext_vert_mat.thickness, "in", "m"),
                                     UnitConversions.convert(ext_vert_offset, "ft", "m"))
-        end
       end
+    end
+
+    if wall_drywall_thick_in < 0.0
+      wall_drywall_thick_in = 0.0
     end
 
     # Exterior vertical insulation
     if not ext_vert_r.nil?
       if ext_vert_r > 0 and ext_vert_depth > 0
         ext_vert_mat = create_insulation_material(model, "FoundationExtVertIns", ext_vert_r)
-        if ext_vert_offset == 0
-          foundation.setExteriorVerticalInsulationMaterial(ext_vert_mat)
-          foundation.setExteriorVerticalInsulationDepth(UnitConversions.convert(ext_vert_depth, "ft", "m"))
-        else
           foundation.addCustomBlock(ext_vert_mat,
                                     UnitConversions.convert(ext_vert_depth, "ft", "m"),
-                                    UnitConversions.convert(wall_concrete_thick_in, "in", "m"),
+                                    UnitConversions.convert(wall_concrete_thick_in + wall_drywall_thick_in, "in", "m"),
                                     UnitConversions.convert(ext_vert_offset, "ft", "m"))
-        end
       end
     end
 
