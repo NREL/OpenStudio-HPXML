@@ -1494,8 +1494,6 @@ class OSModel
       end
 
       kiva_instances.each do |fnd_wall, slab|
-        kiva_foundation = nil
-
         # Apportion referenced walls/slabs for this Kiva instance
         slab_frac = slab_exp_perims[slab] / total_slab_exp_perim
         if total_fnd_wall_length > 0
@@ -1504,11 +1502,12 @@ class OSModel
           fnd_wall_frac = 1.0 # Handle slab foundation type
         end
 
+        kiva_foundation = nil
         if not fnd_wall.nil?
           # Add exterior foundation wall surface
           fnd_wall_values = fnd_walls_values[fnd_wall]
           kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
-                                                total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
+                                                total_fnd_wall_length, total_slab_exp_perim)
           return false if kiva_foundation.nil?
         end
 
@@ -1607,7 +1606,7 @@ class OSModel
   end
 
   def self.add_foundation_wall(runner, model, spaces, fnd_wall_values, slab_frac,
-                               total_fnd_wall_length, total_slab_exp_perim, kiva_foundation)
+                               total_fnd_wall_length, total_slab_exp_perim)
 
     net_area = net_surface_area(fnd_wall_values[:area], fnd_wall_values[:id]) * slab_frac
     gross_area = fnd_wall_values[:area] * slab_frac
@@ -1664,8 +1663,8 @@ class OSModel
         drywall_thick_in = 0.0
         rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
       end
-      if rigid_r < 0.1
-        rigid_r = 0.0
+      if rigid_r > 0 and rigid_r < 0.1
+        rigid_r = 0.0 # Prevent tiny strip of insulation
       end
       if rigid_r < 0
         rigid_r = 0.0
@@ -1682,7 +1681,7 @@ class OSModel
                                                   rigid_height, cavity_r, install_grade,
                                                   cavity_depth_in, filled_cavity, framing_factor,
                                                   rigid_r, drywall_thick_in, concrete_thick_in,
-                                                  height, height_ag, kiva_foundation)
+                                                  height, height_ag)
     return nil if not success
 
     if not assembly_r.nil?
