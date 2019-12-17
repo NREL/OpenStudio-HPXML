@@ -147,7 +147,7 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
+                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
                   <Height>3.0</Height>
                 </extension>
               </Layer>

@@ -133,8 +133,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <Height>8.0</Height>
+                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
+                  <Height>7.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -153,8 +153,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <Height>4.0</Height>
+                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
+                  <Height>3.0</Height>
                 </extension>
               </Layer>
             </Insulation>
@@ -173,8 +173,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <Height>2.0</Height>
+                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
+                  <Height>1.0</Height>
                 </extension>
               </Layer>
             </Insulation>
