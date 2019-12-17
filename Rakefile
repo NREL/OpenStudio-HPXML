@@ -1159,8 +1159,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 1200,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
-                                 :exterior_layer_distance_to_top => 0,
-                                 :exterior_layer_height => 8,
+                                 :exterior_layer_distance_to_top => 1,
+                                 :exterior_layer_height => 7,
                                  :exterior_layer_r_value => 8.9 }]
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.xml'].include? hpxml_file
     foundation_walls_values[0][:interior_layer_distance_to_top] = 0

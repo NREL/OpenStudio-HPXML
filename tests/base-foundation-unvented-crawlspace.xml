@@ -134,7 +134,7 @@
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfFoundationWall>0.0</DistanceToTopOfFoundationWall>
-                  <Height>4.0</Height>
+                  <Height>3.0</Height>
                 </extension>
               </Layer>
             </Insulation>

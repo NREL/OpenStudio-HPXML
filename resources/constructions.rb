@@ -1406,10 +1406,10 @@ class Constructions
     if not int_vert_r.nil?
       if int_vert_r > 0 and int_vert_depth > 0
         int_vert_mat = create_insulation_material(model, "FoundationIntVertIns", int_vert_r)
-          foundation.addCustomBlock(int_vert_mat,
-                                    UnitConversions.convert(int_vert_depth, "ft", "m"),
-                                    UnitConversions.convert(-int_vert_mat.thickness, "in", "m"),
-                                    UnitConversions.convert(int_vert_offset, "ft", "m"))
+        foundation.addCustomBlock(int_vert_mat,
+                                  UnitConversions.convert(int_vert_depth, "ft", "m"),
+                                  UnitConversions.convert(-int_vert_mat.thickness, "in", "m"),
+                                  UnitConversions.convert(int_vert_offset, "ft", "m"))
       end
     end
 
@@ -1421,10 +1421,10 @@ class Constructions
     if not ext_vert_r.nil?
       if ext_vert_r > 0 and ext_vert_depth > 0
         ext_vert_mat = create_insulation_material(model, "FoundationExtVertIns", ext_vert_r)
-          foundation.addCustomBlock(ext_vert_mat,
-                                    UnitConversions.convert(ext_vert_depth, "ft", "m"),
-                                    UnitConversions.convert(wall_concrete_thick_in + wall_drywall_thick_in, "in", "m"),
-                                    UnitConversions.convert(ext_vert_offset, "ft", "m"))
+        foundation.addCustomBlock(ext_vert_mat,
+                                  UnitConversions.convert(ext_vert_depth, "ft", "m"),
+                                  UnitConversions.convert(wall_concrete_thick_in + wall_drywall_thick_in, "in", "m"),
+                                  UnitConversions.convert(ext_vert_offset, "ft", "m"))
       end
     end
 
