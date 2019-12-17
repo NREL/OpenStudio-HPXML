@@ -760,7 +760,7 @@ class HPXML
       insulation_layer_values = get_layer_insulation_values(insulation: insulation)
     end
     if is_selected(select, :insulation_distance_to_bottom)
-      insulation_layer_distances = get_insulation_layer_distance_top_bottom(insulation: insulation)
+      insulation_layer_distances = get_insulation_layer_top_distance_height(insulation: insulation)
     end
 
     vals = {}
@@ -2054,7 +2054,7 @@ class HPXML
     return insulation
   end
 
-  def self.get_insulation_layer_distance_top_bottom(insulation:)
+  def self.get_insulation_layer_top_distance_height(insulation:)
     return {} if insulation.nil?
 
     return { :ext_distance_to_top => to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToTopOfFoundationWall")),
