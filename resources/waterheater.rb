@@ -8,7 +8,7 @@ require_relative "psychrometrics"
 require_relative "hotwater_appliances"
 
 class Waterheater
-  def self.apply_tank(model, runner, space, fuel_type, cap, vol, ef,
+  def self.apply_tank(model, space, fuel_type, cap, vol, ef,
                       re, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil, jacket_r)
 
     if fuel_type == Constants.FuelTypeElectric
@@ -17,8 +17,6 @@ class Waterheater
       offcycle_p = 0
     end
 
-    runner.registerInfo("A new plant loop for DHW will be added to the model")
-    runner.registerInitialCondition("No water heater model currently exists")
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTank)
     dhw_map[sys_id] << loop
 
@@ -29,34 +27,31 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     act_vol = calc_storage_tank_actual_vol(vol, fuel_type)
-    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, re, cap, Constants.WaterHeaterTypeTank, 0, jacket_r, runner)
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTank, nbeds, model, runner, ua, eta_c)
+    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, re, cap, Constants.WaterHeaterTypeTank, 0, jacket_r)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTank, nbeds, model, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
+    dhw_map[sys_id] << add_ec_adj(model, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTank)
 
     if not desuperheater_clg_coil.nil?
-      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj).each { |e| dhw_map[sys_id] << e }
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
     end
-    return true
   end
 
-  def self.apply_tankless(model, runner, space, fuel_type, cap, ef,
+  def self.apply_tankless(model, space, fuel_type, cap, ef,
                           cd, t_set, oncycle_p, offcycle_p, ec_adj, nbeds, dhw_map, sys_id, desuperheater_clg_coil)
 
     if cd < 0 or cd > 1
-      runner.registerError("Cycling derate must be at least 0 and at most 1.")
-      return false
+      fail "Cycling derate must be at least 0 and at most 1."
     end
+
     if fuel_type == Constants.FuelTypeElectric
       oncycle_p = 0
       offcycle_p = 0
     end
 
-    runner.registerInfo("A new plant loop for DHW will be added to the model")
-    runner.registerInitialCondition("No water heater model currently exists")
     loop = Waterheater.create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeTankless)
     dhw_map[sys_id] << loop
 
@@ -67,18 +62,17 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     act_vol = 1.0
-    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, nil, cap, Constants.WaterHeaterTypeTankless, cd, nil, runner)
-    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTankless, nbeds, model, runner, ua, eta_c)
+    u, ua, eta_c = calc_tank_UA(act_vol, fuel_type, ef, nil, cap, Constants.WaterHeaterTypeTankless, cd, nil)
+    new_heater = create_new_heater(Constants.ObjectNameWaterHeater, cap, fuel_type, act_vol, ef, t_set, space, oncycle_p, offcycle_p, Constants.WaterHeaterTypeTankless, nbeds, model, ua, eta_c)
     dhw_map[sys_id] << new_heater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
+    dhw_map[sys_id] << add_ec_adj(model, new_heater, ec_adj, space, fuel_type, Constants.WaterHeaterTypeTankless)
 
     if not desuperheater_clg_coil.nil?
-      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, runner, ec_adj).each { |e| dhw_map[sys_id] << e }
+      add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, Constants.WaterHeaterTypeTank, fuel_type, space, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
     end
-    return true
   end
 
   def self.apply_heatpump(model, runner, space, weather, t_set, vol, ef,
@@ -120,8 +114,6 @@ class Waterheater
       water_heater_tz = space.thermalZone.get
     end
 
-    runner.registerInfo("A new plant loop for DHW will be added to the model")
-    runner.registerInitialCondition("There is no existing water heater")
     loop = create_new_loop(model, Constants.PlantLoopDomesticWater, t_set, Constants.WaterHeaterTypeHeatPump)
     dhw_map[sys_id] << loop
 
@@ -429,8 +421,7 @@ class Waterheater
     if ducting == Constants.VentTypeSupply or ducting == Constants.VentTypeExhaust
 
       if water_heater_tz.nil?
-        runner.registerError("Water heater cannot be located outside and ducted.")
-        return false
+        fail "Water heater cannot be located outside and ducted."
       end
 
       amb_w_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mean Air Humidity Ratio")
@@ -565,9 +556,7 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(tank)
 
-    dhw_map[sys_id] << add_ec_adj(model, runner, hpwh, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
-
-    return true
+    dhw_map[sys_id] << add_ec_adj(model, hpwh, ec_adj, space, Constants.FuelTypeElectric, "heat pump water heater")
   end
 
   def self.apply_indirect(model, runner, space, cap, vol, t_set, oncycle_p, offcycle_p, ec_adj,
@@ -600,7 +589,7 @@ class Waterheater
     new_manager.addToNode(loop.supplyOutletNode)
 
     # Create water heater
-    new_heater = create_new_heater(obj_name_indirect, cap, nil, act_vol, nil, t_set, space, oncycle_p, offcycle_p, tank_type, nbeds, model, runner, ua, nil)
+    new_heater = create_new_heater(obj_name_indirect, cap, nil, act_vol, nil, t_set, space, oncycle_p, offcycle_p, tank_type, nbeds, model, ua, nil)
     new_heater.setSourceSideDesignFlowRate(100) # set one large number, override by EMS
     dhw_map[sys_id] << new_heater
 
@@ -657,12 +646,10 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    dhw_map[sys_id] << add_ec_adj(model, runner, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
-
-    return true
+    dhw_map[sys_id] << add_ec_adj(model, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, indirect_hx)
   end
 
-  def self.apply_combi_system_EMS(model, runner, combi_sys_id, dhw_map)
+  def self.apply_combi_system_EMS(model, combi_sys_id, dhw_map)
     # EMS for modulate source side mass flow rate
     # Initialization
     equipment_peaks = {}
@@ -761,7 +748,7 @@ class Waterheater
     program_calling_manager.addProgram(indirect_ctrl_program)
   end
 
-  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type, fuel_type, space, loop, runner, ec_adj)
+  def self.add_desuperheater(model, t_set, tank, desuperheater_clg_coil, wh_type, fuel_type, space, loop, ec_adj)
     reclaimed_efficiency = 0.25 # default
     workaround_flag = true # switch after E+ 9.3 release
     if workaround_flag
@@ -841,13 +828,10 @@ class Waterheater
       nbeds = 0 # won't be used
       assumed_ua = 6.0 # Btu/hr-F FIXME: Assumption: indirect tank ua calculated based on 1.0 standby_loss and 50gal nominal vol
       storage_tank_name = "#{tank.name} storage tank"
-      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, t_set, space, 0, 0, Constants.WaterHeaterTypeTank, nbeds, model, runner, assumed_ua, nil)
+      storage_tank = create_new_heater(storage_tank_name, cap, nil, storage_vol_actual, nil, t_set, space, 0, 0, Constants.WaterHeaterTypeTank, nbeds, model, assumed_ua, nil)
 
       loop.addSupplyBranchForComponent(storage_tank)
-      runner.registerInfo("Added '#{storage_tank.name}' to supply branch of '#{loop.name}'.")
-
       tank.addToNode(storage_tank.supplyOutletModelObject.get.to_Node.get)
-      runner.registerInfo("Moved '#{tank.name}' to supply outlet node of '#{storage_tank.name}'.")
 
       # Create a schedule for desuperheater
       new_schedule = OpenStudio::Model::ScheduleConstant.new(model)
@@ -936,7 +920,7 @@ class Waterheater
         return uef
       end
     end
-    return nil
+    fail "Unexpected water heater."
   end
 
   def self.calc_tank_areas(act_vol)
@@ -987,7 +971,7 @@ class Waterheater
     num_baths = 2.0 / 3.0 * num_beds
   end
 
-  def self.add_ec_adj(model, runner, heater, ec_adj, space, fuel_type, wh_type, combi_boiler = nil, combi_hx = nil)
+  def self.add_ec_adj(model, heater, ec_adj, space, fuel_type, wh_type, combi_boiler = nil, combi_hx = nil)
     adjustment = ec_adj - 1.0
 
     if space.nil? # WH is outdoors, set the other equipment to be in a random space
@@ -1136,7 +1120,7 @@ class Waterheater
     return act_vol
   end
 
-  def self.calc_tank_UA(act_vol, fuel, ef, re, pow, wh_type, cyc_derate, jacket_r, runner)
+  def self.calc_tank_UA(act_vol, fuel, ef, re, pow, wh_type, cyc_derate, jacket_r)
     # Calculates the U value, UA of the tank and conversion efficiency (eta_c)
     # based on the Energy Factor and recovery efficiency of the tank
     # Source: Burch and Erickson 2004 - http://www.nrel.gov/docs/gen/fy04/36035.pdf
@@ -1165,10 +1149,10 @@ class Waterheater
     end
     u = ua / surface_area # Btu/hr-ft^2-F
     if eta_c > 1.0
-      runner.registerError("A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.")
+      fail "A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs."
     end
     if ua < 0.0
-      runner.registerError("A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.")
+      fail "A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs."
     end
 
     return u, ua, eta_c
@@ -1243,7 +1227,7 @@ class Waterheater
     OpenStudio::Model::SetpointManagerScheduled.new(model, new_schedule)
   end
 
-  def self.create_new_heater(name, cap, fuel, act_vol, ef, t_set, space, oncycle_p, offcycle_p, wh_type, nbeds, model, runner, ua, eta_c)
+  def self.create_new_heater(name, cap, fuel, act_vol, ef, t_set, space, oncycle_p, offcycle_p, wh_type, nbeds, model, ua, eta_c)
     new_heater = OpenStudio::Model::WaterHeaterMixed.new(model)
     new_heater.setName(name)
     new_heater.setHeaterThermalEfficiency(eta_c) unless eta_c.nil?
