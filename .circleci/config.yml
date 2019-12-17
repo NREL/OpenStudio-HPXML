@@ -25,19 +25,19 @@ jobs:
       - image: continuumio/miniconda3
     steps:
       - checkout
-    attach_workspace:
-      at: /tmp/data
-    run:
-      name: Install plotting packages
-      command: |
-        conda install -y bokeh pandas lxml
-    run:
-      name: Plot comparison
-      command: |
-        python plots/make_comparison_plots.py /tmp/data/test_results/results.csv
-    store_artifacts:
-      path: plots/plots
-      destination: plots
+      - attach_workspace:
+          at: /tmp/data
+      - run:
+          name: Install plotting packages
+          command: |
+            conda install -y bokeh pandas lxml
+      - run:
+          name: Plot comparison
+          command: |
+            python plots/make_comparison_plots.py /tmp/data/test_results/results.csv
+      - store_artifacts:
+          path: plots/plots
+          destination: plots
 
 workflows:
   version: 2
