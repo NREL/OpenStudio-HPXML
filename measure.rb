@@ -1678,7 +1678,7 @@ class OSModel
       end
       if not fnd_wall_values[:interior_layer_distance_to_top].nil?
         int_rigid_offset = fnd_wall_values[:interior_layer_distance_to_top]
-        int_rigid_height = fnd_wall_values[:exterior_layer_height]
+        int_rigid_height = fnd_wall_values[:interior_layer_height]
         int_rigid_r = fnd_wall_values[:interior_layer_r_value]
       end
     end
