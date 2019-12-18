@@ -183,8 +183,8 @@ class Material
     return self.new(name = "Brick, Medium/Dark", thick_in = 4.0, mat_base = BaseMaterial.Brick, k_in = nil, rho = nil, cp = nil, tAbs = 0.96, sAbs = 0.88, vAbs = 0.88)
   end
 
-  def self.ExtFinishWoodLight
-    return self.new(name = "Wood, Light", thick_in = 1.0, mat_base = nil, k_in = 0.71, rho = 34.0, cp = 0.28, tAbs = 0.82, sAbs = 0.3, vAbs = 0.3)
+  def self.ExtFinishWoodLight(thick_in = 1.0)
+    return self.new(name = "Wood, Light", thick_in, mat_base = nil, k_in = 0.71, rho = 34.0, cp = 0.28, tAbs = 0.82, sAbs = 0.3, vAbs = 0.3)
   end
 
   def self.ExtFinishWoodMedDark
@@ -227,20 +227,20 @@ class Material
     return self.new(name = "Drywall #{thick_in.to_s} in.", thick_in = thick_in, mat_base = BaseMaterial.Gypsum, k_in = nil, rho = nil, cp = nil, tAbs = 0.9, sAbs = 0.3, vAbs = 0.1)
   end
 
-  def self.RoofingAsphaltShinglesDark
-    return self.RoofMaterial("Asphalt Shingles, Dark", 0.91, 0.92)
+  def self.RoofingAsphaltShinglesDark(emissivity = 0.91, absorptivity = 0.92)
+    return self.RoofMaterial("Asphalt Shingles, Dark", emissivity, absorptivity)
   end
 
-  def self.RoofingAsphaltShinglesMed
-    return self.RoofMaterial("Asphalt Shingles, Medium", 0.91, 0.85)
+  def self.RoofingAsphaltShinglesMed(emissivity = 0.91, absorptivity = 0.85)
+    return self.RoofMaterial("Asphalt Shingles, Medium", emissivity, absorptivity)
   end
 
-  def self.RoofingAsphaltShinglesLight
-    return self.RoofMaterial("Asphalt Shingles, Light", 0.91, 0.8)
+  def self.RoofingAsphaltShinglesLight(emissivity = 0.91, absorptivity = 0.8)
+    return self.RoofMaterial("Asphalt Shingles, Light", emissivity, absorptivity)
   end
 
-  def self.RoofingAsphaltShinglesWhiteCool
-    return self.RoofMaterial("Asphalt Shingles, White or Cool Colors", 0.91, 0.75)
+  def self.RoofingAsphaltShinglesWhiteCool(emissivity = 0.91, absorptivity = 0.75)
+    return self.RoofMaterial("Asphalt Shingles, White or Cool Colors", emissivity, absorptivity)
   end
 
   def self.RoofingTileDark
@@ -481,85 +481,5 @@ class Gas
 
   def self.PsychMassRat
     return self.H2O_v.m / self.Air.m
-  end
-end
-
-class AirFilms
-  def self.OutsideR
-    return 0.197 # hr-ft-F/Btu
-  end
-
-  def self.VerticalR
-    return 0.68 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
-  end
-
-  def self.FlatEnhancedR
-    return 0.61 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
-  end
-
-  def self.FlatReducedR
-    return 0.92 # hr-ft-F/Btu (ASHRAE 2005, F25.2, Table 1)
-  end
-
-  def self.FloorAverageR
-    # For floors between conditioned spaces where heat does not flow across
-    # the floor; heat transfer is only important with regards to the thermal
-    return (self.FlatReducedR + self.FlatEnhancedR) / 2.0 # hr-ft-F/Btu
-  end
-
-  def self.FloorReducedR
-    # For floors above unconditioned basement spaces, where heat will
-    # always flow down through the floor.
-    return self.FlatReducedR # hr-ft-F/Btu
-  end
-
-  def self.SlopeEnhancedR(roof_pitch)
-    # Correlation functions used to interpolate between values provided
-    # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
-    # 0, 45, and 90 degrees. Values are for non-reflective materials of
-    # emissivity = 0.90.
-    return 0.002 * Math::exp(0.0398 * roof_pitch) + 0.608 # hr-ft-F/Btu (evaluates to film_flat_enhanced at 0 degrees, 0.62 at 45 degrees, and film_vertical at 90 degrees)
-  end
-
-  def self.SlopeReducedR(roof_pitch)
-    # Correlation functions used to interpolate between values provided
-    # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
-    # 0, 45, and 90 degrees. Values are for non-reflective materials of
-    # emissivity = 0.90.
-    return 0.32 * Math::exp(-0.0154 * roof_pitch) + 0.6 # hr-ft-F/Btu (evaluates to film_flat_reduced at 0 degrees, 0.76 at 45 degrees, and film_vertical at 90 degrees)
-  end
-
-  def self.SlopeEnhancedReflectiveR(roof_pitch)
-    # Correlation functions used to interpolate between values provided
-    # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
-    # 0, 45, and 90 degrees. Values are for reflective materials of
-    # emissivity = 0.05.
-    return 0.00893 * Math::exp(0.0419 * roof_pitch) + 1.311 # hr-ft-F/Btu (evaluates to 1.32 at 0 degrees, 1.37 at 45 degrees, and 1.70 at 90 degrees)
-  end
-
-  def self.SlopeReducedReflectiveR(roof_pitch)
-    # Correlation functions used to interpolate between values provided
-    # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
-    # 0, 45, and 90 degrees. Values are for reflective materials of
-    # emissivity = 0.05.
-    return 2.999 * Math::exp(-0.0333 * roof_pitch) + 1.551 # hr-ft-F/Btu (evaluates to 4.55 at 0 degrees, 2.22 at 45 degrees, and 1.70 at 90 degrees)
-  end
-
-  def self.RoofR(roof_pitch)
-    # Use weighted average between enhanced and reduced convection based on degree days.
-    # hdd_frac = hdd65f / (hdd65f + cdd65f)
-    # cdd_frac = cdd65f / (hdd65f + cdd65f)
-    # return self.SlopeEnhancedR(roof_pitch) * hdd_frac + self.SlopeReducedR(roof_pitch) * cdd_frac # hr-ft-F/Btu
-    # Simplification to not depend on weather
-    return (self.SlopeEnhancedR(roof_pitch) + self.SlopeReducedR(roof_pitch)) / 2.0 # hr-ft-F/Btu
-  end
-
-  def self.RoofRadiantBarrierR(roof_pitch)
-    # Use weighted average between enhanced and reduced convection based on degree days.
-    # hdd_frac = hdd65f / (hdd65f + cdd65f)
-    # cdd_frac = cdd65f / (hdd65f + cdd65f)
-    # return self.SlopeEnhancedReflectiveR(roof_pitch) * hdd_frac + self.SlopeReducedReflectiveR(roof_pitch) * cdd_frac # hr-ft-F/Btu
-    # Simplification to not depend on weather
-    return (self.SlopeEnhancedReflectiveR(roof_pitch) + self.SlopeReducedReflectiveR(roof_pitch)) / 2.0 # hr-ft-F/Btu
   end
 end

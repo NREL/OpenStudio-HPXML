@@ -6,10 +6,13 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, cfa, nbeds, min_neighbor_distance, show_debug_info)
+  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space)
     @model_spaces = model.getSpaces
+    @cond_space = living_space
+    @cond_zone = @cond_space.thermalZone.get
     @nbeds = nbeds
     @cfa = cfa
+    @infilvolume = infilvolume
 
     @model_year = model.yearDescription.get.assumedYear
     @north_axis = model.getBuilding.northAxis
@@ -23,15 +26,6 @@ class HVACSizing
     @conditioned_heat_design_temp = 70 # Indoor heating design temperature according to acca MANUAL J
     @conditioned_cool_design_temp = 75 # Indoor heating design temperature according to acca MANUAL J
 
-    # Manual J: The default values for wind velocity are 15 mph for heating and 7.5 mph for cooling.
-    # These velocities do not represent the most severe wind conditions that will be experienced when
-    # the outdoor temperature is at the winter or summer design temperature, but they do represent
-    # values that are compatible with normal weather patterns. If a location has a reputation for
-    # wind velocities that consistently exceed these defaults during non-storm conditions, an
-    # appropriate set of velocity values may be substituted for the default values
-    @windspeed_heating = UnitConversions.convert(15.0, "mph", "m/s")
-    @windspeed_cooling = UnitConversions.convert(7.5, "mph", "m/s")
-
     assumed_inside_temp = 73.5 # F
     @inside_air_dens = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (assumed_inside_temp + 460.0))
 
@@ -42,22 +36,18 @@ class HVACSizing
     # Get shelter class
     @shelter_class = get_shelter_class(model, min_neighbor_distance)
 
-    # Calculate loads for each conditioned thermal zone
-    zones_loads = process_zone_loads(runner, model, weather)
-    return false if zones_loads.nil?
+    # Calculate loads for the conditioned thermal zone
+    zone_loads = process_zone_loads(runner, model, weather)
+    return false if zone_loads.nil?
 
     # Display debug info
     if show_debug_info
-      display_zone_loads(runner, zones_loads)
+      display_zone_loads(runner, zone_loads)
     end
 
     # Aggregate zone loads into initial loads
-    init_loads = aggregate_zone_loads(zones_loads)
+    init_loads = aggregate_zone_loads(zone_loads)
     return false if init_loads.nil?
-
-    # For airloop systems serving multiple zones, calculate air flow ratio to slave zones
-    zone_ratios = process_slave_zone_flow_ratios(runner, zones_loads)
-    return false if zone_ratios.nil?
 
     # Get HVAC system info
     hvacs = get_hvacs(runner, model)
@@ -70,6 +60,9 @@ class HVACSizing
       hvac_init_loads = apply_hvac_load_fractions(init_loads, hvac)
       return false if hvac_init_loads.nil?
 
+      hvac_init_loads = apply_hp_sizing_logic(hvac_init_loads, hvac)
+      return false if hvac_init_loads.nil?
+
       hvac_final_values = FinalValues.new
 
       # Calculate heating ducts load
@@ -80,23 +73,26 @@ class HVACSizing
       hvac_final_values = process_duct_loads_cooling(runner, hvac_final_values, weather, hvac, hvac_init_loads.Cool_Sens, hvac_init_loads.Cool_Lat)
       return false if hvac_final_values.nil?
 
-      hvac_final_values = process_cooling_equipment_adjustments(runner, hvac_final_values, weather, hvac)
+      hvac_final_values = process_equipment_adjustments(runner, hvac_final_values, weather, hvac)
       return false if hvac_final_values.nil?
 
       hvac_final_values = process_fixed_equipment(runner, hvac_final_values, hvac)
       return false if hvac_final_values.nil?
 
-      hvac_final_values = process_finalize(runner, hvac_final_values, zones_loads, weather, hvac)
+      hvac_final_values = process_ground_loop(runner, hvac_final_values, weather, hvac)
+      return false if hvac_final_values.nil?
+
+      hvac_final_values = process_finalize(runner, hvac_final_values, zone_loads, weather, hvac)
       return false if hvac_final_values.nil?
 
       # Set OpenStudio object values
-      if not set_object_values(runner, model, hvac, hvac_final_values, zone_ratios)
+      if not set_object_values(runner, model, hvac, hvac_final_values)
         return false
       end
 
       # Display debug info
       if show_debug_info
-        display_hvac_final_values_results(runner, hvac_final_values)
+        display_hvac_final_values_results(runner, hvac_final_values, hvac)
       end
     end
 
@@ -155,6 +151,11 @@ class HVACSizing
 
     @cool_design_temps = {}
     @heat_design_temps = {}
+    @wetbulb_outdoor_cooling = weather.design.CoolingWetbulb
+
+    # Outside
+    @cool_design_temps[nil] = weather.design.CoolingDrybulb
+    @heat_design_temps[nil] = weather.design.HeatingDrybulb
 
     # Initialize Manual J buffer space temperatures using current design temperatures
     @model_spaces.each do |space|
@@ -181,10 +182,10 @@ class HVACSizing
 
       is_vented = Geometry.is_vented_attic(space)
 
-      attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
+      attic_floor_r = self.get_space_r_value(runner, space, "floor")
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
+      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling")
       return nil if attic_roof_r.nil?
 
       # Unconditioned attic
@@ -258,10 +259,10 @@ class HVACSizing
 
       is_vented = Geometry.is_vented_attic(space)
 
-      attic_floor_r = self.get_space_r_value(runner, space, "floor", true)
+      attic_floor_r = self.get_space_r_value(runner, space, "floor")
       return nil if attic_floor_r.nil?
 
-      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling", true)
+      attic_roof_r = self.get_space_r_value(runner, space, "roofceiling")
       return nil if attic_roof_r.nil?
 
       # Unconditioned attic
@@ -292,8 +293,8 @@ class HVACSizing
           roof_material = get_feature(runner, surface, Constants.SizingInfoRoofMaterial, 'string')
           return nil if roof_color.nil? or roof_material.nil?
 
-          has_radiant_barrier = get_feature(runner, surface, Constants.SizingInfoRoofHasRadiantBarrier, 'boolean', false)
-          has_radiant_barrier = false if has_radiant_barrier.nil?
+          has_radiant_barrier = get_feature(runner, surface, Constants.SizingInfoRoofHasRadiantBarrier, 'boolean')
+          return nil if has_radiant_barrier.nil?
 
           if not is_vented
             if not has_radiant_barrier
@@ -393,57 +394,18 @@ class HVACSizing
   end
 
   def self.process_zone_loads(runner, model, weather)
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
-
     # Constant loads (no variation throughout day)
-    zones_loads = {}
-    thermal_zones.each do |thermal_zone|
-      next if not Geometry.zone_is_conditioned(thermal_zone)
+    zone_loads = ZoneLoads.new
+    zone_loads = process_load_windows_skylights(runner, @cond_zone, zone_loads, weather)
+    zone_loads = process_load_doors(runner, @cond_zone, zone_loads, weather)
+    zone_loads = process_load_walls(runner, @cond_zone, zone_loads, weather)
+    zone_loads = process_load_roofs(runner, @cond_zone, zone_loads, weather)
+    zone_loads = process_load_floors(runner, @cond_zone, zone_loads, weather)
+    zone_loads = process_infiltration_ventilation(runner, model, @cond_zone, zone_loads, weather)
+    zone_loads = process_internal_gains(runner, @cond_zone, zone_loads)
+    return nil if zone_loads.nil?
 
-      zone_loads = ZoneLoads.new
-      zone_loads = process_load_windows_skylights(runner, thermal_zone, zone_loads, weather)
-      zone_loads = process_load_doors(runner, thermal_zone, zone_loads, weather)
-      zone_loads = process_load_walls(runner, thermal_zone, zone_loads, weather)
-      zone_loads = process_load_roofs(runner, thermal_zone, zone_loads, weather)
-      zone_loads = process_load_floors(runner, thermal_zone, zone_loads, weather)
-      zone_loads = process_infiltration_ventilation(runner, model, thermal_zone, zone_loads, weather)
-      return nil if zone_loads.nil?
-
-      zones_loads[thermal_zone] = zone_loads
-    end
-
-    # Varying loads (ensure coincidence of loads during the day)
-    # TODO: Currently handles internal gains but not window loads.
-    zones_sens = {}
-    zones_lat = {}
-    thermal_zones.each do |thermal_zone|
-      next if not Geometry.zone_is_conditioned(thermal_zone)
-
-      zones_sens[thermal_zone], zones_lat[thermal_zone] = process_internal_gains(runner, thermal_zone, weather)
-      return nil if zones_sens[thermal_zone].nil? or zones_lat[thermal_zone].nil?
-    end
-    # Find hour of the maximum total & latent loads
-    tot_loads = [0] * 24
-    lat_loads = [0] * 24
-    for hr in 0..23
-      zones_sens.each do |tz, hourly_sens|
-        tot_loads[hr] += hourly_sens[hr]
-      end
-      zones_lat.each do |tz, hourly_lat|
-        tot_loads[hr] += hourly_lat[hr]
-        lat_loads[hr] += hourly_lat[hr]
-      end
-    end
-    idx_tot = tot_loads.each_with_index.max[1]
-    idx_lat = lat_loads.each_with_index.max[1]
-    # Assign zone loads for each zone at the coincident hour
-    zones_loads.each do |thermal_zone, zone_loads|
-      # Cooling based on max total hr
-      zone_loads.Cool_IntGains_Sens = zones_sens[thermal_zone][idx_tot]
-      zone_loads.Cool_IntGains_Lat = zones_lat[thermal_zone][idx_tot]
-    end
-
-    return zones_loads
+    return zone_loads
   end
 
   def self.process_load_windows_skylights(runner, thermal_zone, zone_loads, weather)
@@ -660,7 +622,6 @@ class HVACSizing
             surf_azimuth = wall_true_azimuth - 360
           end
 
-          # TODO: Account for eaves, porches, etc.
           if windowHasOverhang
             if (hr == -1 and surf_azimuth.abs < 90.1) or (hr > -1)
               if hr == -1
@@ -870,6 +831,7 @@ class HVACSizing
 
     zone_loads.Heat_Walls = 0
     zone_loads.Cool_Walls = 0
+    surfaces_processed = []
 
     # Above-Grade Exterior Walls
     Geometry.get_spaces_above_grade_exterior_walls(thermal_zone.spaces).each do |wall|
@@ -919,6 +881,7 @@ class HVACSizing
 
       zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * cltd
       zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << wall.name.to_s
     end
 
     # Interzonal Walls
@@ -929,6 +892,7 @@ class HVACSizing
       adjacent_space = wall.adjacentSurface.get.space.get
       zone_loads.Cool_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * (@cool_design_temps[adjacent_space] - @cool_setpoint)
       zone_loads.Heat_Walls += wall_ufactor * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      surfaces_processed << wall.name.to_s
     end
 
     # Foundation walls
@@ -949,7 +913,7 @@ class HVACSizing
       for d in 1..wall_height_ft
         r_soil = (Math::PI * d / 2.0) / k_soil
         if d <= above_grade_height
-          r_wall = 1.0 / ins_wall_ufactor + AirFilms.OutsideR
+          r_wall = 1.0 / ins_wall_ufactor + Material.AirFilmOutside.rvalue
         elsif d <= wall_ins_height
           r_wall = 1.0 / ins_wall_ufactor
         else
@@ -960,6 +924,12 @@ class HVACSizing
       u_value_mj8 = (u_value_mj8 / wall_height_ft) * 0.85
 
       zone_loads.Heat_Walls += u_value_mj8 * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << wall.name.to_s
+    end
+
+    if surfaces_processed.size != surfaces_processed.uniq.size
+      runner.registerError("Surface referenced twice in HVAC sizing\n#{surfaces_processed}.")
+      return nil
     end
 
     return zone_loads
@@ -976,6 +946,7 @@ class HVACSizing
 
     zone_loads.Heat_Roofs = 0
     zone_loads.Cool_Roofs = 0
+    surfaces_processed = []
 
     # Roofs
     Geometry.get_spaces_above_grade_exterior_roofs(thermal_zone.spaces).each do |roof|
@@ -988,8 +959,8 @@ class HVACSizing
       cavity_r = get_feature(runner, roof, Constants.SizingInfoRoofCavityRvalue, 'double')
       return nil if cavity_r.nil?
 
-      rigid_r = get_feature(runner, roof, Constants.SizingInfoRoofRigidInsRvalue, 'double', false)
-      rigid_r = 0 if rigid_r.nil?
+      rigid_r = get_feature(runner, roof, Constants.SizingInfoRoofRigidInsRvalue, 'double')
+      return nil if rigid_r.nil?
 
       total_r = cavity_r + rigid_r
 
@@ -1035,6 +1006,12 @@ class HVACSizing
 
       zone_loads.Cool_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * cltd
       zone_loads.Heat_Roofs += roof_ufactor * UnitConversions.convert(roof.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << roof.name.to_s
+    end
+
+    if surfaces_processed.size != surfaces_processed.uniq.size
+      runner.registerError("Surface referenced twice in HVAC sizing\n#{surfaces_processed}.")
+      return nil
     end
 
     return zone_loads
@@ -1049,6 +1026,7 @@ class HVACSizing
 
     zone_loads.Heat_Floors = 0
     zone_loads.Cool_Floors = 0
+    surfaces_processed = []
 
     # Exterior Floors
     Geometry.get_spaces_above_grade_exterior_floors(thermal_zone.spaces).each do |floor|
@@ -1057,6 +1035,7 @@ class HVACSizing
 
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@ctd - 5 + @daily_range_temp_adjust[@daily_range_num])
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << floor.name.to_s
     end
 
     # Interzonal Floors
@@ -1067,6 +1046,7 @@ class HVACSizing
       adjacent_space = floor.adjacentSurface.get.space.get
       zone_loads.Cool_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@cool_design_temps[adjacent_space] - @cool_setpoint)
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@heat_setpoint - @heat_design_temps[adjacent_space])
+      surfaces_processed << floor.name.to_s
     end
 
     # Foundation Floors
@@ -1079,6 +1059,7 @@ class HVACSizing
       u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
       u_value_mj8 = 0.85 * u_avg_bf
       zone_loads.Heat_Floors += u_value_mj8 * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * @htd
+      surfaces_processed << floor.name.to_s
     end
 
     # Ground Floors (Slab)
@@ -1092,6 +1073,12 @@ class HVACSizing
 
       floor_ufactor = 1.0 / floor_rvalue
       zone_loads.Heat_Floors += floor_ufactor * UnitConversions.convert(floor.netArea, "m^2", "ft^2") * (@heat_setpoint - weather.data.GroundMonthlyTemps[0])
+      surfaces_processed << floor.name.to_s
+    end
+
+    if surfaces_processed.size != surfaces_processed.uniq.size
+      runner.registerError("Surface referenced twice in HVAC sizing\n#{surfaces_processed}.")
+      return nil
     end
 
     return zone_loads
@@ -1104,43 +1091,15 @@ class HVACSizing
 
     return nil if zone_loads.nil?
 
-    if Geometry.zone_is_below_grade(thermal_zone)
-      zone_loads.Heat_Infil = 0 # TODO: Calculate using actual basement infiltration?
-      zone_loads.Cool_Infil_Sens = 0
-      zone_loads.Cool_Infil_Lat = 0
-      return zone_loads
-    end
+    # Per ANSI/RESNET/ICC 301
+    ach_nat = get_feature(runner, thermal_zone, Constants.SizingInfoZoneInfiltrationACH, 'double')
+    return nil if ach_nat.nil?
 
-    # Stack Coefficient (Cs) for infiltration calculation taken from Table 5D
-    # Wind Coefficient (Cw) for Shielding Classes 1-5 for infiltration calculation taken from Table 5D
-    # Coefficients converted to regression equations to allow for more than 3 stories
-    zone_conditioned_top = Geometry.get_height_of_spaces(Geometry.get_conditioned_spaces(thermal_zone.spaces))
-    zone_top_story = (zone_conditioned_top / 8.0).round
-    c_s = 0.015 * zone_top_story
-    if @shelter_class == 1
-      c_w = 0.0119 * zone_top_story**0.4
-    elsif @shelter_class == 2
-      c_w = 0.0092 * zone_top_story**0.4
-    elsif @shelter_class == 3
-      c_w = 0.0065 * zone_top_story**0.4
-    elsif @shelter_class == 4
-      c_w = 0.0039 * zone_top_story**0.4
-    elsif @shelter_class == 5
-      c_w = 0.0012 * zone_top_story**0.4
-    else
-      runner.registerError('Invalid shelter_class: {}'.format(@shelter_class))
-      return nil
-    end
+    ach_Cooling = 1.2 * ach_nat
+    ach_Heating = 1.6 * ach_nat
 
-    ela = get_feature(runner, thermal_zone, Constants.SizingInfoZoneInfiltrationELA, 'double', false)
-    ela = 0 if ela.nil?
-
-    ela_in2 = UnitConversions.convert(ela, "ft^2", "in^2")
-    windspeed_cooling_mph = UnitConversions.convert(@windspeed_cooling, "m/s", "mph")
-    windspeed_heating_mph = UnitConversions.convert(@windspeed_heating, "m/s", "mph")
-
-    icfm_Cooling = ela_in2 * (c_s * @ctd.abs + c_w * windspeed_cooling_mph**2)**0.5
-    icfm_Heating = ela_in2 * (c_s * @htd.abs + c_w * windspeed_heating_mph**2)**0.5
+    icfm_Cooling = ach_Cooling / UnitConversions.convert(1.0, "hr", "min") * @infilvolume
+    icfm_Heating = ach_Heating / UnitConversions.convert(1.0, "hr", "min") * @infilvolume
 
     q_unb, q_bal_Sens, q_bal_Lat = get_ventilation_rates(runner, model)
     return nil if q_unb.nil? or q_bal_Sens.nil? or q_bal_Lat.nil?
@@ -1158,188 +1117,50 @@ class HVACSizing
     return zone_loads
   end
 
-  def self.process_internal_gains(runner, thermal_zone, weather)
+  def self.process_internal_gains(runner, thermal_zone, zone_loads)
     '''
     Cooling Load: Internal Gains
     '''
 
-    int_Tot_Max = 0
-    int_Lat_Max = 0
+    return nil if zone_loads.nil?
 
-    # Plug loads, appliances, showers/sinks/baths, occupants, ceiling fans
-    gains = []
+    zone_loads.Cool_IntGains_Sens = 0
+    zone_loads.Cool_IntGains_Lat = 0
+
+    # Per ANSI/RESNET/ICC 301
+    n_occupants = @nbeds + 1
+    intGains_Sens = 1600.0 + 230.0 * n_occupants
+    intGains_Lat = 200.0 * n_occupants
+
     thermal_zone.spaces.each do |space|
-      gains.push(*space.electricEquipment)
-      gains.push(*space.gasEquipment)
-      gains.push(*space.otherEquipment)
+      zone_loads.Cool_IntGains_Sens += intGains_Sens * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
+      zone_loads.Cool_IntGains_Lat += intGains_Lat * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
     end
 
-    july_1 = OpenStudio::Date.new(OpenStudio::MonthOfYear.new('July'), 1, @model_year)
-
-    int_Sens_Hr = [0] * 24
-    int_Lat_Hr = [0] * 24
-
-    gains.each do |gain|
-      # TODO: The lines below are for equivalence with BEopt
-      next if gain.name.to_s.start_with?(Constants.ObjectNameHotWaterRecircPump)
-
-      sched = nil
-      sensible_frac = nil
-      latent_frac = nil
-      design_level = nil
-
-      # Get design level
-      if gain.is_a? OpenStudio::Model::OtherEquipment
-        design_level_obj = gain.otherEquipmentDefinition
-      else
-        design_level_obj = gain
-      end
-      if not design_level_obj.designLevel.is_initialized
-        runner.registerWarning("DesignLevel not provided for object '#{gain.name.to_s}'. Skipping...")
-        next
-      end
-      design_level_w = design_level_obj.designLevel.get
-      design_level = UnitConversions.convert(design_level_w, "W", "Btu/hr") # Btu/hr
-      next if design_level == 0
-
-      # Get sensible/latent fractions
-      if gain.is_a? OpenStudio::Model::ElectricEquipment
-        sensible_frac = 1.0 - gain.electricEquipmentDefinition.fractionLost - gain.electricEquipmentDefinition.fractionLatent
-        latent_frac = gain.electricEquipmentDefinition.fractionLatent
-      elsif gain.is_a? OpenStudio::Model::GasEquipment
-        sensible_frac = 1.0 - gain.gasEquipmentDefinition.fractionLost - gain.gasEquipmentDefinition.fractionLatent
-        latent_frac = gain.gasEquipmentDefinition.fractionLatent
-      elsif gain.is_a? OpenStudio::Model::OtherEquipment
-        sensible_frac = 1.0 - gain.otherEquipmentDefinition.fractionLost - gain.otherEquipmentDefinition.fractionLatent
-        latent_frac = gain.otherEquipmentDefinition.fractionLatent
-      else
-        runner.registerError("Unexpected type for object '#{gain.name.to_s}' in process_internal_gains.")
-        return nil
-      end
-      next if sensible_frac.nil? or latent_frac.nil? or (sensible_frac == 0 and latent_frac == 0)
-
-      # Get schedule
-      if not gain.schedule.is_initialized
-        runner.registerError("Schedule not provided for object '#{gain.name.to_s}'. Skipping...")
-        next
-      end
-      sched_base = gain.schedule.get
-      if sched_base.to_ScheduleRuleset.is_initialized
-        sched = sched_base.to_ScheduleRuleset.get
-      elsif sched_base.to_ScheduleFixedInterval.is_initialized
-        sched = sched_base.to_ScheduleFixedInterval.get
-      elsif sched_base.to_ScheduleConstant.is_initialized
-        sched = sched_base.to_ScheduleConstant.get
-      else
-        runner.registerWarning("Expected type for object '#{gain.name.to_s}'. Skipping...")
-        next
-      end
-      next if sched.nil?
-
-      # Get schedule hourly values
-      if sched.is_a? OpenStudio::Model::ScheduleRuleset or sched.is_a? OpenStudio::Model::ScheduleFixedInterval
-        # Override any hot water schedules with smoothed schedules; TODO: Is there a better approach?
-        max_mult = nil
-        if gain.name.to_s.start_with?(Constants.ObjectNameShower)
-          sched_values = [0.011, 0.005, 0.003, 0.005, 0.014, 0.052, 0.118, 0.117, 0.095, 0.074, 0.060, 0.047, 0.034, 0.029, 0.026, 0.025, 0.030, 0.039, 0.042, 0.042, 0.042, 0.041, 0.029, 0.021]
-          max_mult = 1.05 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameSink) or gain.name.to_s.start_with?(Constants.ObjectNameFixtures)
-          sched_values = [0.014, 0.007, 0.005, 0.005, 0.007, 0.018, 0.042, 0.062, 0.066, 0.062, 0.054, 0.050, 0.049, 0.045, 0.043, 0.041, 0.048, 0.065, 0.075, 0.069, 0.057, 0.048, 0.040, 0.027]
-          max_mult = 1.04 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameBath)
-          sched_values = [0.008, 0.004, 0.004, 0.004, 0.008, 0.019, 0.046, 0.058, 0.066, 0.058, 0.046, 0.035, 0.031, 0.023, 0.023, 0.023, 0.039, 0.046, 0.077, 0.100, 0.100, 0.077, 0.066, 0.039]
-          max_mult = 1.26 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameDishwasher)
-          sched_values = [0.015, 0.007, 0.005, 0.003, 0.003, 0.010, 0.020, 0.031, 0.058, 0.065, 0.056, 0.048, 0.041, 0.046, 0.036, 0.038, 0.038, 0.049, 0.087, 0.111, 0.090, 0.067, 0.044, 0.031]
-          max_mult = 1.05 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameClothesWasher)
-          sched_values = [0.009, 0.007, 0.004, 0.004, 0.007, 0.011, 0.022, 0.049, 0.073, 0.086, 0.084, 0.075, 0.067, 0.060, 0.049, 0.052, 0.050, 0.049, 0.049, 0.049, 0.049, 0.047, 0.032, 0.017]
-          max_mult = 1.15 * 1.04
-        elsif gain.name.to_s.start_with?(Constants.ObjectNameClothesDryer)
-          sched_values = [0.010, 0.006, 0.004, 0.002, 0.004, 0.006, 0.016, 0.032, 0.048, 0.068, 0.078, 0.081, 0.074, 0.067, 0.057, 0.061, 0.055, 0.054, 0.051, 0.051, 0.052, 0.054, 0.044, 0.024]
-          max_mult = 1.15 * 1.04
-        else
-          day_sched = sched.getDaySchedules(july_1, july_1)[0]
-          # Convert to 24 hour values
-          sched_values = []
-          previous_time_decimal = 0
-          day_sched.times.each_with_index do |time, i|
-            time_decimal = (time.days * 24.0) + time.hours + (time.minutes / 60.0) + (time.seconds / 3600.0)
-            # Back-fill in hourly values
-            for hr in sched_values.size + 1..time_decimal.floor
-              sched_values[hr - 1] = day_sched.values[i]
-            end
-          end
-        end
-        if not max_mult.nil?
-          # Calculate daily load
-          annual_energy = Schedule.annual_equivalent_full_load_hrs(@model_year, sched) * design_level_w * gain.multiplier # Wh
-          daily_load = UnitConversions.convert(annual_energy, "Wh", "Btu") / 365.0 # Btu/day
-          # Calculate design level in Btu/hr
-          design_level = sched_values.max * daily_load * max_mult # Btu/hr
-          # Normalize schedule values to be max=1 from sum=1
-          sched_values_max = sched_values.max
-          sched_values = sched_values.collect { |n| n / sched_values_max }
-        end
-      elsif sched.is_a? OpenStudio::Model::ScheduleConstant
-        sched_values = [sched.value] * 24
-      else
-        runner.registerError("Unexpected type for object '#{sched.name.to_s}' in process_internal_gains.")
-        return nil
-      end
-      if sched_values.size != 24
-        runner.registerError("Expected 24 schedule values for object '#{gain.name.to_s}' but found #{sched_values.size} values.")
-        return nil
-      end
-
-      for hr in 0..23
-        int_Sens_Hr[hr] += sched_values[hr] * design_level * sensible_frac
-        int_Lat_Hr[hr] += sched_values[hr] * design_level * latent_frac
-      end
-    end
-
-    # Process occupants
-    n_occupants = @nbeds + 1 # Number of occupants based on Section 22-3
-    occ_sched = [1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189,
-                 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000]
-    thermal_zone.spaces.each do |space|
-      for hr in 0..23
-        int_Sens_Hr[hr] += occ_sched[hr] * 230 * n_occupants * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
-        int_Lat_Hr[hr] += occ_sched[hr] * 200 * n_occupants * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / @cfa
-      end
-    end
-
-    return int_Sens_Hr, int_Lat_Hr
+    return zone_loads
   end
 
-  def self.aggregate_zone_loads(zones_loads)
+  def self.aggregate_zone_loads(zone_loads)
     '''
     Intermediate Loads
     (total loads excluding ducts)
     '''
 
-    return nil if zones_loads.nil?
+    return nil if zone_loads.nil?
 
     init_loads = InitialLoads.new
-    init_loads.Heat = 0
-    init_loads.Cool_Sens = 0
-    init_loads.Cool_Lat = 0
-    zones_loads.keys.each do |thermal_zone|
-      zone_loads = zones_loads[thermal_zone]
+    # Heating
+    init_loads.Heat = [zone_loads.Heat_Windows + zone_loads.Heat_Skylights +
+      zone_loads.Heat_Doors + zone_loads.Heat_Walls +
+      zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0].max +
+                      zone_loads.Heat_Infil
 
-      # Heating
-      init_loads.Heat += [zone_loads.Heat_Windows + zone_loads.Heat_Skylights +
-        zone_loads.Heat_Doors + zone_loads.Heat_Walls +
-        zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0].max +
-                         zone_loads.Heat_Infil
-
-      # Cooling
-      init_loads.Cool_Sens += zone_loads.Cool_Windows + zone_loads.Cool_Skylights +
-                              zone_loads.Cool_Doors + zone_loads.Cool_Walls +
-                              zone_loads.Cool_Floors + zone_loads.Cool_Roofs +
-                              zone_loads.Cool_Infil_Sens + zone_loads.Cool_IntGains_Sens
-      init_loads.Cool_Lat += zone_loads.Cool_Infil_Lat + zone_loads.Cool_IntGains_Lat
-    end
+    # Cooling
+    init_loads.Cool_Sens = zone_loads.Cool_Windows + zone_loads.Cool_Skylights +
+                           zone_loads.Cool_Doors + zone_loads.Cool_Walls +
+                           zone_loads.Cool_Floors + zone_loads.Cool_Roofs +
+                           zone_loads.Cool_Infil_Sens + zone_loads.Cool_IntGains_Sens
+    init_loads.Cool_Lat = zone_loads.Cool_Infil_Lat + zone_loads.Cool_IntGains_Lat
 
     init_loads.Cool_Lat = [init_loads.Cool_Lat, 0].max
     init_loads.Cool_Tot = init_loads.Cool_Sens + init_loads.Cool_Lat
@@ -1353,17 +1174,24 @@ class HVACSizing
     '''
     return nil if init_loads.nil?
 
-    # Calculate Leaving Air Temperature
-    shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
-    # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
-    if shr < 0.80
-      hvac.LeavingAirTemp = 54 # F
-    elsif shr < 0.85
-      # MJ8 says to use 56 degF in this SHR range. Linear interpolation provides a more
-      # continuous supply air flow rate across building efficiency levels.
-      hvac.LeavingAirTemp = ((58 - 54) / (0.85 - 0.80)) * (shr - 0.8) + 54 # F
+    # evap cooler temperature calculation based on Mannual S Figure 4-7
+    if hvac.has_type(Constants.ObjectNameEvaporativeCooler)
+      td_potential = @cool_design_temps[nil] - @wetbulb_outdoor_cooling
+      td = td_potential * hvac.EvapCoolerEffectiveness
+      hvac.LeavingAirTemp = @cool_design_temps[nil] - td
     else
-      hvac.LeavingAirTemp = 58 # F
+      # Calculate Leaving Air Temperature
+      shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
+      # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
+      if shr < 0.80
+        hvac.LeavingAirTemp = 54 # F
+      elsif shr < 0.85
+        # MJ8 says to use 56 degF in this SHR range. Linear interpolation provides a more
+        # continuous supply air flow rate across building efficiency levels.
+        hvac.LeavingAirTemp = ((58 - 54) / (0.85 - 0.80)) * (shr - 0.8) + 54 # F
+      else
+        hvac.LeavingAirTemp = 58 # F
+      end
     end
 
     # Calculate Supply Air Temperature
@@ -1397,44 +1225,52 @@ class HVACSizing
     return hvac_init_loads
   end
 
+  def self.apply_hp_sizing_logic(hvac_init_loads, hvac)
+    # If true, uses the larger of heating and cooling loads for heat pump capacity sizing (required for ERI).
+    # Otherwise, uses standard Manual S oversize allowances.
+    hp_use_max_load = true
+
+    if hvac.has_type([Constants.ObjectNameAirSourceHeatPump,
+                      Constants.ObjectNameMiniSplitHeatPump,
+                      Constants.ObjectNameGroundSourceHeatPump])
+      if hp_use_max_load
+        max_load = [hvac_init_loads.Heat, hvac_init_loads.Cool_Tot].max
+        hvac_init_loads.Heat = max_load
+        hvac_init_loads.Cool_Sens *= max_load / hvac_init_loads.Cool_Tot
+        hvac_init_loads.Cool_Lat *= max_load / hvac_init_loads.Cool_Tot
+        hvac_init_loads.Cool_Tot = max_load
+
+        # Override Manual S oversize allowances:
+        hvac.OverSizeLimit = 1.0
+        hvac.OverSizeDelta = 0.0
+      end
+    end
+
+    return hvac_init_loads
+  end
+
   def self.get_duct_regain_factor(runner, duct)
     # dse_Fregain values comes from MJ8 pg 204 and Walker (1998) "Technical background for default
     # values used for forced air systems in proposed ASHRAE Std. 152"
 
     dse_Fregain = nil
 
-    if Geometry.is_unconditioned_basement(duct.LocationSpace) or Geometry.is_conditioned_basement(duct.LocationSpace)
+    if duct.LocationSpace.nil? # Outside
+      dse_Fregain = 0.0
+
+    elsif Geometry.is_unconditioned_basement(duct.LocationSpace)
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
-      infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
-      infiltration_cfm = 0 if infiltration_cfm.nil?
-
       if not ceiling_insulated
         if not walls_insulated
-          if infiltration_cfm == 0
-            dse_Fregain = 0.55 # Uninsulated ceiling, uninsulated walls, no infiltration
-          else # infiltration_cfm > 0
-            dse_Fregain = 0.51 # Uninsulated ceiling, uninsulated walls, with infiltration
-          end
-        else # walls_insulated
-          if infiltration_cfm == 0
-            dse_Fregain = 0.78 # Uninsulated ceiling, insulated walls, no infiltration
-          else # infiltration_cfm > 0
-            dse_Fregain = 0.74 # Uninsulated ceiling, insulated walls, with infiltration
-          end
+          dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
+        else
+          dse_Fregain = 0.75 # Uninsulated ceiling, insulated walls
         end
-      else # ceiling_insulated
-        if walls_insulated
-          if infiltration_cfm == 0
-            dse_Fregain = 0.32 # Insulated ceiling, insulated walls, no infiltration
-          else # infiltration_cfm > 0
-            dse_Fregain = 0.27 # Insulated ceiling, insulated walls, with infiltration
-          end
-        else # not walls_insulated
-          dse_Fregain = 0.06 # Insulated ceiling and uninsulated walls
-        end
+      else
+        dse_Fregain = 0.30 # Insulated ceiling
       end
 
     elsif Geometry.is_vented_crawl(duct.LocationSpace) or Geometry.is_unvented_crawl(duct.LocationSpace)
@@ -1442,24 +1278,27 @@ class HVACSizing
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(runner, duct.LocationSpace)
       return nil if walls_insulated.nil? or ceiling_insulated.nil?
 
-      infiltration_cfm = get_feature(runner, duct.LocationSpace.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
-      infiltration_cfm = 0 if infiltration_cfm.nil?
+      is_vented = Geometry.is_vented_crawl(duct.LocationSpace)
 
-      if infiltration_cfm > 0
-        if ceiling_insulated
-          dse_Fregain = 0.12    # Insulated ceiling and uninsulated walls
-        else
-          dse_Fregain = 0.50    # Uninsulated ceiling and uninsulated walls
-        end
-      else # infiltration_cfm == 0
-        if not ceiling_insulated and not walls_insulated
-          dse_Fregain = 0.60    # Uninsulated ceiling and uninsulated walls
+      if is_vented
+        if ceiling_insulated and walls_insulated
+          dse_Fregain = 0.17 # Insulated ceiling, insulated walls
         elsif ceiling_insulated and not walls_insulated
-          dse_Fregain = 0.16    # Insulated ceiling and uninsulated walls
+          dse_Fregain = 0.12 # Insulated ceiling, uninsulated walls
         elsif not ceiling_insulated and walls_insulated
-          dse_Fregain = 0.76    # Uninsulated ceiling and insulated walls (not explicitly included in A152)
-        else
-          dse_Fregain = 0.30    # Insulated ceiling and insulated walls
+          dse_Fregain = 0.66 # Uninsulated ceiling, insulated walls
+        elsif not ceiling_insulated and not walls_insulated
+          dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
+        end
+      else # unvented
+        if ceiling_insulated and walls_insulated
+          dse_Fregain = 0.30 # Insulated ceiling, insulated walls
+        elsif ceiling_insulated and not walls_insulated
+          dse_Fregain = 0.16 # Insulated ceiling, uninsulated walls
+        elsif not ceiling_insulated and walls_insulated
+          dse_Fregain = 0.76 # Uninsulated ceiling, insulated walls
+        elsif not ceiling_insulated and not walls_insulated
+          dse_Fregain = 0.60 # Uninsulated ceiling, uninsulated walls
         end
       end
 
@@ -1487,9 +1326,10 @@ class HVACSizing
     return nil if hvac_final_values.nil?
 
     if init_heat_load == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
-      hvac_final_values.Heat_Load = init_heat_load
       hvac_final_values.Heat_Load_Ducts = 0
+      hvac_final_values.Heat_Load = init_heat_load
     else
+      # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
 
@@ -1548,14 +1388,14 @@ class HVACSizing
 
     return nil if hvac_final_values.nil?
 
-    # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
     if init_cool_load_sens == 0 or hvac.Ducts.nil? or hvac.Ducts.size == 0
-      hvac_final_values.Cool_Load_Lat = init_cool_load_lat
-      hvac_final_values.Cool_Load_Sens = init_cool_load_sens
-      hvac_final_values.Cool_Load_Tot = hvac_final_values.Cool_Load_Sens + hvac_final_values.Cool_Load_Lat
       hvac_final_values.Cool_Load_Ducts_Sens = 0
       hvac_final_values.Cool_Load_Ducts_Tot = 0
+      hvac_final_values.Cool_Load_Sens = init_cool_load_sens
+      hvac_final_values.Cool_Load_Lat = init_cool_load_lat
+      hvac_final_values.Cool_Load_Tot = hvac_final_values.Cool_Load_Sens + hvac_final_values.Cool_Load_Lat
     else
+      # Distribution system efficiency (DSE) calculations based on ASHRAE Standard 152
       dse_As, dse_Ar = calc_ducts_areas(hvac.Ducts)
       supply_r, return_r = calc_ducts_rvalues(hvac.Ducts)
 
@@ -1622,7 +1462,7 @@ class HVACSizing
     return hvac_final_values
   end
 
-  def self.process_cooling_equipment_adjustments(runner, hvac_final_values, weather, hvac)
+  def self.process_equipment_adjustments(runner, hvac_final_values, weather, hvac)
     '''
     Equipment Adjustments
     '''
@@ -1631,6 +1471,7 @@ class HVACSizing
 
     underSizeLimit = 0.9
 
+    # Cooling
     if hvac.has_type([Constants.ObjectNameCentralAirConditioner,
                       Constants.ObjectNameAirSourceHeatPump,
                       Constants.ObjectNameMiniSplitHeatPump,
@@ -1654,34 +1495,16 @@ class HVACSizing
       if hvac.has_type([Constants.ObjectNameCentralAirConditioner,
                         Constants.ObjectNameAirSourceHeatPump])
 
-        if hvac.NumSpeedsCooling > 1
-          sizingSpeed = hvac.NumSpeedsCooling # Default
-          sizingSpeed_Test = 10 # Initialize
-          for speed in 0..(hvac.NumSpeedsCooling - 1)
-            # Select curves for sizing using the speed with the capacity ratio closest to 1
-            temp = (hvac.CapacityRatioCooling[speed] - 1).abs
-            if temp <= sizingSpeed_Test
-              sizingSpeed = speed
-              sizingSpeed_Test = temp
-            end
-          end
-          coefficients = hvac.COOL_CAP_FT_SPEC[sizingSpeed]
-        else
-          coefficients = hvac.COOL_CAP_FT_SPEC[0]
-        end
+        hvac.SizingSpeed = get_sizing_speed(hvac)
+        coefficients = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed]
 
-        hvac_final_values.TotalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, coefficients)
-        coolCap_Rated = hvac_final_values.Cool_Load_Tot / hvac_final_values.TotalCap_CurveValue
-        if hvac.NumSpeedsCooling > 1
-          sHR_Rated_Equip = hvac.SHRRated[sizingSpeed]
-        else
-          sHR_Rated_Equip = hvac.SHRRated[0]
-        end
+        totalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, coefficients)
+        coolCap_Rated = hvac_final_values.Cool_Load_Tot / totalCap_CurveValue
 
-        sensCap_Rated = coolCap_Rated * sHR_Rated_Equip
+        sensCap_Rated = coolCap_Rated * hvac.SHRRated[hvac.SizingSpeed]
 
-        hvac_final_values.SensibleCap_CurveValue = process_curve_fit(hvac_final_values.Cool_Airflow, hvac_final_values.Cool_Load_Tot, enteringTemp)
-        sensCap_Design = sensCap_Rated * hvac_final_values.SensibleCap_CurveValue
+        sensibleCap_CurveValue = process_curve_fit(hvac_final_values.Cool_Airflow, hvac_final_values.Cool_Load_Tot, enteringTemp)
+        sensCap_Design = sensCap_Rated * sensibleCap_CurveValue
         latCap_Design = [hvac_final_values.Cool_Load_Tot - sensCap_Design, 1].max
 
         a_sens = @shr_biquadratic[0]
@@ -1698,7 +1521,7 @@ class HVACSizing
           # solve the following for cool_Capacity_Design: SensCap_Design = SHRRated * cool_Capacity_Design / TotalCap_CurveValue * function(CFM/cool_Capacity_Design, ODB)
           # substituting in CFM = cool_Load_SensCap_Design / (1.1 * ACF * (cool_setpoint - LAT))
 
-          cool_Load_SensCap_Design = hvac_final_values.Cool_Load_Lat / ((hvac_final_values.TotalCap_CurveValue / sHR_Rated_Equip - \
+          cool_Load_SensCap_Design = hvac_final_values.Cool_Load_Lat / ((totalCap_CurveValue / hvac.SHRRated[hvac.SizingSpeed] - \
                                     (UnitConversions.convert(b_sens, "ton", "Btu/hr") + UnitConversions.convert(d_sens, "ton", "Btu/hr") * enteringTemp) / \
                                     (1.1 * @acf * (@cool_setpoint - hvac.LeavingAirTemp))) / \
                                     (a_sens + c_sens * enteringTemp) - 1)
@@ -1708,7 +1531,7 @@ class HVACSizing
           # The SHR of the equipment at the design condition
           sHR_design = cool_Load_SensCap_Design / cool_Capacity_Design
 
-          # If the adjusted equipment size is negative (occurs at altitude), oversize by 15% (the adjustment
+          # If the adjusted equipment size is negative (occurs at altitude), use oversize limit (the adjustment
           # almost always hits the oversize limit in this case, making this a safe assumption)
           if cool_Capacity_Design < 0 or cool_Load_SensCap_Design < 0
             cool_Capacity_Design = hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot
@@ -1724,8 +1547,8 @@ class HVACSizing
           hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
 
           # Determine rated capacities
-          hvac_final_values.Cool_Capacity = cool_Capacity_Design / hvac_final_values.TotalCap_CurveValue
-          hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * sHR_Rated_Equip
+          hvac_final_values.Cool_Capacity = cool_Capacity_Design / totalCap_CurveValue
+          hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
 
         elsif sensCap_Design < underSizeLimit * hvac_final_values.Cool_Load_Sens
           # Size by MJ8 Sensible load, return to rated conditions, find Sens with SHRRated. Limit total
@@ -1738,7 +1561,7 @@ class HVACSizing
           #                  = SHRRated * cool_Capacity_Design / TotalCap_CurveValue * SensibleCap_CurveValue
           #                  = SHRRated * cool_Capacity_Design / TotalCap_CurveValue * function(CFM/cool_Capacity_Design, ODB)
 
-          cool_Capacity_Design = (sensCap_Design / (sHR_Rated_Equip / hvac_final_values.TotalCap_CurveValue) - \
+          cool_Capacity_Design = (sensCap_Design / (hvac.SHRRated[hvac.SizingSpeed] / totalCap_CurveValue) - \
                                              (b_sens * UnitConversions.convert(hvac_final_values.Cool_Airflow, "ton", "Btu/hr") + \
                                              d_sens * UnitConversions.convert(hvac_final_values.Cool_Airflow, "ton", "Btu/hr") * enteringTemp)) / \
                                  (a_sens + c_sens * enteringTemp)
@@ -1746,20 +1569,19 @@ class HVACSizing
           # Limit total capacity to oversize limit
           cool_Capacity_Design = [cool_Capacity_Design, hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot].min
 
-          hvac_final_values.Cool_Capacity = cool_Capacity_Design / hvac_final_values.TotalCap_CurveValue
-          hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * sHR_Rated_Equip
+          hvac_final_values.Cool_Capacity = cool_Capacity_Design / totalCap_CurveValue
+          hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
 
           # Recalculate the air flow rate in case the oversizing limit has been used
-          cool_Load_SensCap_Design = hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue
+          cool_Load_SensCap_Design = hvac_final_values.Cool_Capacity_Sens * sensibleCap_CurveValue
           hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
 
         else
-          hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / hvac_final_values.TotalCap_CurveValue
-          hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * sHR_Rated_Equip
+          hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / totalCap_CurveValue
+          hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
 
-          cool_Load_SensCap_Design = hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue
+          cool_Load_SensCap_Design = hvac_final_values.Cool_Capacity_Sens * sensibleCap_CurveValue
           hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
-
         end
 
         # Ensure the air flow rate is in between 200 and 500 cfm/ton.
@@ -1772,44 +1594,37 @@ class HVACSizing
 
       elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
 
-        sizingSpeed = hvac.NumSpeedsCooling # Default
-        sizingSpeed_Test = 10 # Initialize
-        for speed in 0..(hvac.NumSpeedsCooling - 1)
-          # Select curves for sizing using the speed with the capacity ratio closest to 1
-          temp = (hvac.CapacityRatioCooling[speed] - 1).abs
-          if temp <= sizingSpeed_Test
-            sizingSpeed = speed
-            sizingSpeed_Test = temp
-          end
-        end
-        coefficients = hvac.COOL_CAP_FT_SPEC[sizingSpeed]
+        hvac.SizingSpeed = get_sizing_speed(hvac)
+        coefficients = hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed]
 
-        hvac_final_values.TotalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, coefficients)
+        totalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, coefficients)
 
-        hvac_final_values.Cool_Capacity = (hvac_final_values.Cool_Load_Tot / hvac_final_values.TotalCap_CurveValue)
-        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[sizingSpeed]
+        hvac_final_values.Cool_Capacity = (hvac_final_values.Cool_Load_Tot / totalCap_CurveValue)
+        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
         hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
 
       elsif hvac.has_type(Constants.ObjectNameRoomAirConditioner)
 
-        hvac_final_values.TotalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_CAP_FT_SPEC[0])
+        hvac.SizingSpeed = 0
+        totalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed])
 
-        hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / hvac_final_values.TotalCap_CurveValue
-        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
-        hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[0] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
+        hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / totalCap_CurveValue
+        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+        hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[hvac.SizingSpeed] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
 
       elsif hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
 
         # Single speed as current
-        hvac_final_values.TotalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_CAP_FT_SPEC[0])
-        hvac_final_values.SensibleCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_SH_FT_SPEC[0])
-        hvac_final_values.BypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, hvac.COIL_BF_FT_SPEC[0])
+        hvac.SizingSpeed = 0
+        totalCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_CAP_FT_SPEC[hvac.SizingSpeed])
+        sensibleCap_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, enteringTemp, hvac.COOL_SH_FT_SPEC[hvac.SizingSpeed])
+        bypassFactor_CurveValue = MathTools.biquadratic(@wetbulb_indoor_cooling, @cool_setpoint, hvac.COIL_BF_FT_SPEC[hvac.SizingSpeed])
 
-        hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / hvac_final_values.TotalCap_CurveValue # Note: cool_Capacity_Design = hvac_final_values.Cool_Load_Tot
-        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
+        hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot / totalCap_CurveValue # Note: cool_Capacity_Design = hvac_final_values.Cool_Load_Tot
+        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
 
-        cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
-                                   (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *
+        cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
+                                   (1 + (1 - hvac.CoilBF * bypassFactor_CurveValue) *
                                    (80 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
         cool_Load_LatCap_Design = hvac_final_values.Cool_Load_Tot - cool_Load_SensCap_Design
 
@@ -1818,14 +1633,14 @@ class HVACSizing
         cool_Load_LatCap_Design = [cool_Load_LatCap_Design, hvac_final_values.Cool_Load_Lat].max
         cool_Capacity_Design = cool_Load_SensCap_Design + cool_Load_LatCap_Design
 
-        # Limit total capacity to 15% oversizing
+        # Limit total capacity via oversizing limit
         cool_Capacity_Design = [cool_Capacity_Design, hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot].min
-        hvac_final_values.Cool_Capacity = cool_Capacity_Design / hvac_final_values.TotalCap_CurveValue
-        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
+        hvac_final_values.Cool_Capacity = cool_Capacity_Design / totalCap_CurveValue
+        hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
 
-        # Recalculate the air flow rate in case the 15% oversizing rule has been used
-        cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
-                                   (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *
+        # Recalculate the air flow rate in case the oversizing limit has been used
+        cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
+                                   (1 + (1 - hvac.CoilBF * bypassFactor_CurveValue) *
                                    (80 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
         hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
       else
@@ -1835,11 +1650,98 @@ class HVACSizing
 
       end
 
+    elsif hvac.has_type(Constants.ObjectNameEvaporativeCooler)
+      hvac_final_values.Cool_Capacity = hvac_final_values.Cool_Load_Tot
+      hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Load_Sens
+      if @cool_setpoint - hvac.LeavingAirTemp > 0
+        hvac_final_values.Cool_Airflow = calc_airflow_rate(hvac_final_values.Cool_Load_Sens, (@cool_setpoint - hvac.LeavingAirTemp))
+      else
+        hvac_final_values.Cool_Airflow = @cfa * 2 # Use industry rule of thumb sizing method adopted by HEScore
+      end
     else
       hvac_final_values.Cool_Capacity = 0
       hvac_final_values.Cool_Capacity_Sens = 0
       hvac_final_values.Cool_Airflow = 0
+
     end
+
+    # Heating
+    if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
+      hvac_final_values = process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac, totalCap_CurveValue)
+      return nil if hvac_final_values.nil?
+
+      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
+
+      if hvac_final_values.Cool_Capacity > @min_cooling_capacity
+        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
+      else
+        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity_Supp, (hvac.SupplyAirTemp - @heat_setpoint))
+      end
+
+    elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
+      hvac_final_values = process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac, totalCap_CurveValue)
+      return nil if hvac_final_values.nil?
+
+      hvac_final_values.Heat_Capacity = [hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset, Constants.small].max
+      hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
+
+      hvac_final_values.Heat_Airflow = hvac.HeatingCFMs[-1] * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") # Maximum air flow under heating operation
+
+    elsif hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
+      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
+      hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
+
+      # For single stage compressor, when heating capacity is much larger than cooling capacity,
+      # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
+      if hvac_final_values.Heat_Capacity >= 1.5 * hvac_final_values.Cool_Capacity
+        hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load * 0.75
+      elsif hvac_final_values.Heat_Capacity < hvac_final_values.Cool_Capacity
+        hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Capacity
+      end
+
+      hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
+      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+
+      hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+      cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * sensibleCap_CurveValue /
+                                 (1 + (1 - hvac.CoilBF * bypassFactor_CurveValue) *
+                                 (80 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
+      hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
+      hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
+
+    elsif hvac.has_type(Constants.ObjectNameFurnace)
+      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
+      hvac_final_values.Heat_Capacity_Supp = 0
+
+      hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
+
+    elsif hvac.has_type(Constants.ObjectNameUnitHeater)
+      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
+      hvac_final_values.Heat_Capacity_Supp = 0
+
+      if hvac.RatedCFMperTonHeating[0] > 0
+        # Fixed airflow rate
+        hvac_final_values.Heat_Airflow = UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * hvac.RatedCFMperTonHeating[0]
+      else
+        # Autosized airflow rate
+        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
+      end
+
+    elsif hvac.has_type([Constants.ObjectNameBoiler,
+                         Constants.ObjectNameElectricBaseboard])
+      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
+      hvac_final_values.Heat_Capacity_Supp = 0
+
+      hvac_final_values.Heat_Airflow = 0
+
+    else
+      hvac_final_values.Heat_Capacity = 0
+      hvac_final_values.Heat_Capacity_Supp = 0
+      hvac_final_values.Heat_Airflow = 0
+
+    end
+
     return hvac_final_values
   end
 
@@ -1854,95 +1756,36 @@ class HVACSizing
     if not hvac.FixedCoolingCapacity.nil?
       prev_capacity = hvac_final_values.Cool_Capacity
       hvac_final_values.Cool_Capacity = UnitConversions.convert(hvac.FixedCoolingCapacity, "ton", "Btu/hr")
-      if prev_capacity > 0
+      hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
+      if prev_capacity > 0 # Preserve cfm/ton
         hvac_final_values.Cool_Airflow = hvac_final_values.Cool_Airflow * hvac_final_values.Cool_Capacity / prev_capacity
       else
         hvac_final_values.Cool_Airflow = 0
       end
     end
+    if not hvac.FixedHeatingCapacity.nil?
+      prev_capacity = hvac_final_values.Heat_Capacity
+      hvac_final_values.Heat_Capacity = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
+      if prev_capacity > 0 # Preserve cfm/ton
+        hvac_final_values.Heat_Airflow = hvac_final_values.Heat_Airflow * hvac_final_values.Heat_Capacity / prev_capacity
+      else
+        hvac_final_values.Heat_Airflow = 0
+      end
+    end
     if not hvac.FixedSuppHeatingCapacity.nil?
-      hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "ton", "Btu/hr")
-    elsif not hvac.FixedHeatingCapacity.nil?
-      hvac_final_values.Heat_Load = UnitConversions.convert(hvac.FixedHeatingCapacity, "ton", "Btu/hr")
+      hvac_final_values.Heat_Capacity_Supp = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "ton", "Btu/hr")
     end
 
     return hvac_final_values
   end
 
-  def self.process_finalize(runner, hvac_final_values, zones_loads, weather, hvac)
+  def self.process_ground_loop(runner, hvac_final_values, weather, hvac)
     '''
-    Finalize Sizing Calculations
+    GSHP Ground Loop Sizing Calculations
     '''
-
     return nil if hvac_final_values.nil?
 
-    hvac_final_values.Heat_Capacity_Supp = 0
-
-    if hvac.has_type(Constants.ObjectNameFurnace)
-      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-      hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
-
-    elsif hvac.has_type(Constants.ObjectNameUnitHeater)
-      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-
-      if hvac.RatedCFMperTonHeating[0] > 0
-        # Fixed airflow rate
-        hvac_final_values.Heat_Airflow = UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * hvac.RatedCFMperTonHeating[0]
-      else
-        # Autosized airflow rate
-        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
-      end
-
-    elsif hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-
-      if hvac.FixedCoolingCapacity.nil?
-        hvac_final_values = process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac)
-        return nil if hvac_final_values.nil?
-      end
-
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
-      hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
-
-      if hvac_final_values.Cool_Capacity > @min_cooling_capacity
-        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
-      else
-        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity_Supp, (hvac.SupplyAirTemp - @heat_setpoint))
-      end
-
-    elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-
-      if hvac.FixedCoolingCapacity.nil?
-        hvac_final_values = process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac)
-        return nil if hvac_final_values.nil?
-      end
-
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
-      hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
-
-      hvac_final_values.Heat_Airflow = hvac.HeatingCFMs[-1] * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") # Maximum air flow under heating operation
-
-    elsif hvac.has_type([Constants.ObjectNameBoiler,
-                         Constants.ObjectNameElectricBaseboard])
-      hvac_final_values.Heat_Airflow = 0
-      hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-
-    elsif hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
-
-      if hvac.FixedCoolingCapacity.nil?
-        hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
-      else
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
-      end
-      hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
-
-      # For single stage compressor, when heating capacity is much larger than cooling capacity,
-      # in order to avoid frequent cycling in cooling mode, heating capacity is derated to 75%.
-      if hvac_final_values.Heat_Capacity >= 1.5 * hvac_final_values.Cool_Capacity
-        hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load * 0.75
-      elsif hvac_final_values.Heat_Capacity < hvac_final_values.Cool_Capacity
-        hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Capacity
-      end
-
+    if hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
       ground_conductivity = UnitConversions.convert(hvac.GSHP_HXVertical.groundThermalConductivity.get, "W/(m*K)", "Btu/(hr*ft*R)")
       grout_conductivity = UnitConversions.convert(hvac.GSHP_HXVertical.groutThermalConductivity.get, "W/(m*K)", "Btu/(hr*ft*R)")
       bore_diameter = UnitConversions.convert(hvac.GSHP_HXVertical.boreHoleRadius.get * 2.0, "m", "in")
@@ -1957,40 +1800,6 @@ class HVACSizing
       bore_length_heat = nom_length_heat * hvac_final_values.Heat_Capacity / UnitConversions.convert(1.0, "ton", "Btu/hr")
       bore_length_cool = nom_length_cool * hvac_final_values.Cool_Capacity / UnitConversions.convert(1.0, "ton", "Btu/hr")
       bore_length = [bore_length_heat, bore_length_cool].max
-
-      # Degree day calculation for balance temperature
-      intGains_Sens = 0
-      zones_loads.each do |thermal_zone, zone_loads|
-        intGains_Sens += zone_loads.Cool_IntGains_Sens
-      end
-      bLC_Heat = hvac_final_values.Heat_Load / @htd
-      bLC_Cool = hvac_final_values.Cool_Load_Sens / @ctd
-      t_Ref_Bal = @heat_setpoint - intGains_Sens / bLC_Heat
-      hDD_Ref_Bal = [weather.data.HDD65F, [weather.data.HDD50F, weather.data.HDD50F + (weather.data.HDD65F - weather.data.HDD50F) / (65 - 50) * (t_Ref_Bal - 50)].max].min
-      cDD_Ref_Bal = [weather.data.CDD50F, [weather.data.CDD65F, weather.data.CDD50F + (weather.data.CDD65F - weather.data.CDD50F) / (65 - 50) * (t_Ref_Bal - 50)].max].min
-      aNNL_Grnd_Cool = (1 + hvac.CoolingEIR) * cDD_Ref_Bal * bLC_Cool * 24 * 0.6 # use 0.6 to account for average solar load
-      aNNL_Grnd_Heat = (1 - hvac.HeatingEIR) * hDD_Ref_Bal * bLC_Heat * 24
-
-      # Normalized net annual ground energy load
-      nNAGL = [(aNNL_Grnd_Heat - aNNL_Grnd_Cool) / (weather.data.AnnualAvgDrybulb - (2 * hvac.GSHP_HXHWDesign - hvac.GSHP_HXDTDesign) / 2),
-               (aNNL_Grnd_Cool - aNNL_Grnd_Heat) / ((2 * hvac.GSHP_HXDTDesign + hvac.GSHP_HXDTDesign) / 2 - weather.data.AnnualAvgDrybulb)].max / bore_length
-
-      if hvac.GSHP_BoreSpacing > 15 and hvac.GSHP_BoreSpacing <= 20
-        bore_length_mult = 1.0 + nNAGL / 7000 * (0.55 / ground_conductivity)
-      else
-        bore_length_mult = 1.0 + nNAGL / 6700 * (1.00 / ground_conductivity)
-      end
-
-      bore_length *= bore_length_mult
-
-      hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, hvac_final_values.Heat_Capacity].max
-      hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
-      hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[0]
-      cool_Load_SensCap_Design = (hvac_final_values.Cool_Capacity_Sens * hvac_final_values.SensibleCap_CurveValue /
-                                 (1 + (1 - hvac.CoilBF * hvac_final_values.BypassFactor_CurveValue) *
-                                 (80 - @cool_setpoint) / (@cool_setpoint - hvac.LeavingAirTemp)))
-      hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
-      hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
 
       loop_flow = [1.0, UnitConversions.convert([hvac_final_values.Heat_Capacity, hvac_final_values.Cool_Capacity].max, "Btu/hr", "ton")].max.floor * 3.0
 
@@ -2087,16 +1896,30 @@ class HVACSizing
       hvac_final_values.GSHP_Bore_Depth = hvac.GSHP_BoreDepth
       hvac_final_values.GSHP_Bore_Holes = hvac.GSHP_BoreHoles
       hvac_final_values.GSHP_G_Functions = [lntts, gfnc_coeff]
+    end
+    return hvac_final_values
+  end
 
-    else
-      hvac_final_values.Heat_Capacity = 0
-      hvac_final_values.Heat_Airflow = 0
+  def self.process_finalize(runner, hvac_final_values, zone_loads, weather, hvac)
+    '''
+    Finalize Sizing Calculations
+    '''
+
+    return nil if hvac_final_values.nil?
+
+    # Prevent errors of "has no air flow"
+    min_air_flow = 3.0 # cfm; E+ minimum is 0.001 m^3/s"
+    if hvac_final_values.Heat_Airflow > 0
+      hvac_final_values.Heat_Airflow = [hvac_final_values.Heat_Airflow, min_air_flow].max
+    end
+    if hvac_final_values.Cool_Airflow > 0
+      hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max
     end
 
     return hvac_final_values
   end
 
-  def self.process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac)
+  def self.process_heat_pump_adjustment(runner, hvac_final_values, weather, hvac, totalCap_CurveValue)
     '''
     Adjust heat pump sizing
     '''
@@ -2116,97 +1939,32 @@ class HVACSizing
       if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
         hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
+        hvac_final_values.Heat_Capacity = [hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset, Constants.small].max
       end
     else
-      if hvac.HPSizedForMaxLoad
-        # Auto size the heat pump heating capacity based on the heating design temperature (if the heating capacity is larger than the cooling capacity)
-        hvac_final_values.Heat_Capacity = heatCap_Rated
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-          cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
-          hvac_final_values.Cool_Capacity = hvac_final_values.Heat_Capacity
-          hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
-        elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-          hvac_final_values.Cool_Capacity = hvac_final_values.Heat_Capacity - hvac.HeatingCapacityOffset
-          hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
-        end
+      cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
+      load_shr = hvac_final_values.Cool_Load_Sens / hvac_final_values.Cool_Load_Tot
+      if (weather.data.HDD65F / weather.data.CDD50F) < 2.0 or load_shr < 0.95
+        # Mild winter or has a latent cooling load
+        hvac_final_values.Cool_Capacity = [(hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot) / totalCap_CurveValue, heatCap_Rated].min
       else
-        cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
-        load_shr = hvac_final_values.Cool_Load_Sens / hvac_final_values.Cool_Load_Tot
-        if (weather.data.HDD65F / weather.data.CDD50F) < 2.0 or load_shr < 0.95
-          # Mild winter or has a latent cooling load
-          hvac_final_values.Cool_Capacity = [(hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
-        else
-          # Cold winter and no latent cooling load (add a ton rule applies)
-          hvac_final_values.Cool_Capacity = [(hvac_final_values.Cool_Load_Tot + 15000) / hvac_final_values.TotalCap_CurveValue, heatCap_Rated].min
-        end
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-          hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
-          hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
-        elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
-          hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
-          hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset
-        end
+        # Cold winter and no latent cooling load (add a ton rule applies)
+        hvac_final_values.Cool_Capacity = [(hvac_final_values.Cool_Load_Tot + hvac.OverSizeDelta) / totalCap_CurveValue, heatCap_Rated].min
+      end
+      if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
+        hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
+        hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
+      elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
+        hvac_final_values.Cool_Airflow = hvac.CoolingCFMs[-1] * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton")
+        hvac_final_values.Heat_Capacity = [hvac_final_values.Cool_Capacity + hvac.HeatingCapacityOffset, Constants.small].max
       end
     end
 
     return hvac_final_values
   end
 
-  def self.process_slave_zone_flow_ratios(runner, zones_loads)
-    '''
-    Flow Ratios for Slave Zones
-    '''
-
-    return nil if zones_loads.nil?
-
-    zone_heat_loads = {}
-    zones_loads.each do |thermal_zone, zone_loads|
-      zone_heat_loads[thermal_zone] = [zone_loads.Heat_Windows + zone_loads.Heat_Skylights +
-        zone_loads.Heat_Doors + zone_loads.Heat_Walls +
-        zone_loads.Heat_Floors + zone_loads.Heat_Roofs, 0].max +
-                                      zone_loads.Heat_Infil
-    end
-
-    sum_heat_loads = 0.0
-    zones_loads.each do |thermal_zone, zone_loads|
-      sum_heat_loads += zone_heat_loads[thermal_zone]
-    end
-
-    # Divide up flow rate to thermal zones based on MJ8 loads
-    zone_ratios = {}
-    total = 0.0
-    zones_loads.each do |thermal_zone, zone_loads|
-      next if Geometry.is_living(thermal_zone)
-
-      zone_ratios[thermal_zone] = zone_heat_loads[thermal_zone] / sum_heat_loads
-      # Use a minimum flow ratio of 1%. (Low flow ratios can be calculated, e.g., for buildings
-      # with inefficient above grade construction or poor ductwork in the conditioned basement.)
-      zone_ratios[thermal_zone] = [zone_ratios[thermal_zone], 0.01].max
-      total += zone_ratios[thermal_zone]
-    end
-
-    zones_loads.each do |thermal_zone, zone_loads|
-      next if not Geometry.is_living(thermal_zone)
-
-      zone_ratios[thermal_zone] = 1.0 - total
-      total += zone_ratios[thermal_zone]
-    end
-
-    if (total - 1.0).abs > 0.001
-      s = ""
-      zone_ratios.each do |zone, flow_ratio|
-        s += " #{zone.name.to_s}: #{flow_ratio.round(3).to_s},"
-      end
-      runner.registerError("Zone flow ratios do not add up to one:#{s.chomp(',')}")
-      return nil
-    end
-
-    return zone_ratios
-  end
-
   def self.get_shelter_class(model, min_neighbor_distance)
-    height_ft = Geometry.get_height_of_spaces(Geometry.get_conditioned_spaces(@model_spaces))
+    height_ft = Geometry.get_height_of_spaces([@cond_space])
     exposed_wall_ratio = Geometry.calculate_above_grade_exterior_wall_area(@model_spaces) /
                          Geometry.calculate_above_grade_wall_area(@model_spaces)
 
@@ -2319,51 +2077,51 @@ class HVACSizing
     return load_or_capacity / (1.1 * @acf * deltaT)
   end
 
-  def self.calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r)
+  def self.calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r, air_dens = @inside_air_dens, air_cp = Gas.Air.cp)
     '''
     Calculate the Delivery Effectiveness for heating (using the method of ASHRAE Standard 152).
     '''
-    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
     dse_DE = _calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
     dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
 
     return dse_DEcorr
   end
 
-  def self.calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, leavingAirTemp, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, load_total, dse_h_r, supply_r, return_r)
+  def self.calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, leavingAirTemp, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, load_total, dse_h_r, supply_r, return_r, air_dens = @inside_air_dens, air_cp = Gas.Air.cp, h_in = @enthalpy_indoor_cooling)
     '''
     Calculate the Delivery Effectiveness for cooling (using the method of ASHRAE Standard 152).
     '''
-    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+    dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r = _calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
     dse_dTe *= -1
-    dse_DE, coolingLoad_Ducts_Sens = _calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens)
+    dse_DE, coolingLoad_Ducts_Sens = _calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
     dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
 
     return dse_DEcorr, dse_dTe, coolingLoad_Ducts_Sens
   end
 
-  def self._calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r)
+  def self._calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
     # Supply and return conduction functions, Bs and Br
-    dse_Bs = Math.exp((-1.0 * dse_As) / (60 * system_cfm * @inside_air_dens * Gas.Air.cp * supply_r))
-    dse_Br = Math.exp((-1.0 * dse_Ar) / (60 * system_cfm * @inside_air_dens * Gas.Air.cp * return_r))
+    dse_Bs = Math.exp((-1.0 * dse_As) / (60 * system_cfm * air_dens * air_cp * supply_r))
+    dse_Br = Math.exp((-1.0 * dse_Ar) / (60 * system_cfm * air_dens * air_cp * return_r))
 
     dse_a_s = (system_cfm - dse_Qs) / system_cfm
     dse_a_r = (system_cfm - dse_Qr) / system_cfm
 
-    dse_dTe = load_sens / (60 * system_cfm * @inside_air_dens * Gas.Air.cp)
+    dse_dTe = load_sens / (60 * system_cfm * air_dens * air_cp)
     dse_dT_s = t_setpoint - dse_Tamb_s
     dse_dT_r = t_setpoint - dse_Tamb_r
 
     return dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r
   end
 
-  def self._calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens)
+  def self._calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
     # Calculate the delivery effectiveness (Equation 6-25)
-    dse_DE = ((dse_a_s * 60 * system_cfm * @inside_air_dens) / (-1 * load_total)) * \
-             (((-1 * load_total) / (60 * system_cfm * @inside_air_dens)) + \
-              (1 - dse_a_r) * (dse_h_r - @enthalpy_indoor_cooling) + \
-              dse_a_r * Gas.Air.cp * (dse_Br - 1) * dse_dT_r + \
-              Gas.Air.cp * (dse_Bs - 1) * (leavingAirTemp - dse_Tamb_s))
+    dse_DE = ((dse_a_s * 60 * system_cfm * air_dens) / (-1 * load_total)) * \
+             (((-1 * load_total) / (60 * system_cfm * air_dens)) + \
+              (1 - dse_a_r) * (dse_h_r - h_in) + \
+              dse_a_r * air_cp * (dse_Br - 1) * dse_dT_r + \
+              air_cp * (dse_Bs - 1) * (leavingAirTemp - dse_Tamb_s))
 
     # Calculate the sensible heat transfer from surroundings
     coolingLoad_Ducts_Sens = (1 - [dse_DE, 0].max) * load_sens
@@ -2443,6 +2201,11 @@ class HVACSizing
     location_spaces = []
     thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
     locations.each do |location|
+      if location == "outside"
+        location_spaces << nil
+        next
+      end
+
       location_space = nil
       thermal_zones.each do |zone|
         next if not zone.handle.to_s.start_with?(location)
@@ -2481,7 +2244,6 @@ class HVACSizing
     '''
     Calculate area-weighted average values for unconditioned duct(s)
     '''
-
     uncond_area = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
     ducts.each do |duct|
       next if Geometry.is_living(duct.LocationSpace)
@@ -2558,22 +2320,17 @@ class HVACSizing
     hvacs = []
 
     # Get unique set of HVAC equipment
-    equips = {}
+    equips = []
 
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
-    control_slave_zones_hash = HVAC.get_control_and_slave_zones(thermal_zones)
+    HVAC.existing_equipment(model, runner, @cond_zone).each do |equip|
+      next if equips.include? equip
+      next if equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
 
-    control_slave_zones_hash.keys.each do |control_zone|
-      HVAC.existing_equipment(model, runner, control_zone).each do |equip|
-        next if equips.keys.include? equip
-        next if equip.is_a? OpenStudio::Model::ZoneHVACIdealLoadsAirSystem
-
-        equips[equip] = control_zone
-      end
+      equips << equip
     end
 
     # Process each equipment
-    equips.each do |equip, control_zone|
+    equips.each do |equip|
       hvac = HVACInfo.new
       hvacs << hvac
 
@@ -2583,18 +2340,12 @@ class HVACSizing
 
       # Get type of heating/cooling system
       hvac.CoolType = get_feature(runner, equip, Constants.SizingInfoHVACCoolType, 'string', false)
-      if hvac.CoolType.nil? and not clg_coil.nil?
-        hvac.CoolType = get_feature(runner, clg_coil, Constants.SizingInfoHVACCoolType, 'string', false)
-      end
       hvac.HeatType = get_feature(runner, equip, Constants.SizingInfoHVACHeatType, 'string', false)
-      if hvac.HeatType.nil? and not htg_coil.nil?
-        hvac.HeatType = get_feature(runner, htg_coil, Constants.SizingInfoHVACHeatType, 'string', false)
-      end
 
       # Retrieve ducts if they exist
       if equip.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
         air_loop = nil
-        control_zone.airLoopHVACs.each do |loop|
+        @cond_zone.airLoopHVACs.each do |loop|
           loop.supplyComponents.each do |supply_component|
             next unless supply_component.to_AirLoopHVACUnitarySystem.is_initialized
             next unless supply_component.to_AirLoopHVACUnitarySystem.get.handle == equip.handle
@@ -2606,6 +2357,18 @@ class HVACSizing
           hvac.Ducts = get_ducts_for_air_loop(runner, air_loop)
           return nil if hvac.Ducts.nil?
         end
+      end
+
+      if equip.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+        hvac.CoolingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracCoolLoadServed, 'double')
+        return nil if hvac.CoolingLoadFraction.nil?
+
+        air_loop = equip.airLoopHVAC.get
+        if air_loop.additionalProperties.getFeatureAsBoolean(Constants.OptionallyDuctedSystemIsDucted).get
+          hvac.Ducts = get_ducts_for_air_loop(runner, air_loop)
+        end
+
+        hvac.EvapCoolerEffectiveness = equip.coolerEffectiveness
       end
 
       if not clg_coil.nil?
@@ -2737,18 +2500,15 @@ class HVACSizing
       end
 
       if not htg_coil.nil?
-        if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
-          hvac.HPSizedForMaxLoad = get_feature(runner, equip, Constants.SizingInfoHPSizedForMaxLoad, 'boolean')
-          return nil if hvac.HPSizedForMaxLoad.nil?
-        end
-
         ratedCFMperTonHeating = get_feature(runner, equip, Constants.SizingInfoHVACRatedCFMperTonHeating, 'string', false)
         if not ratedCFMperTonHeating.nil?
           hvac.RatedCFMperTonHeating = ratedCFMperTonHeating.split(",").map(&:to_f)
         end
+      end
 
-        hvac.HeatingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracHeatLoadServed, 'double')
-        return nil if hvac.HeatingLoadFraction.nil?
+      heatingLoadFraction = get_feature(runner, equip, Constants.SizingInfoHVACFracHeatLoadServed, 'double', false)
+      if not heatingLoadFraction.nil?
+        hvac.HeatingLoadFraction = heatingLoadFraction
       end
 
       if equip.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric
@@ -2852,7 +2612,7 @@ class HVACSizing
       end
 
       # Supplemental heating
-      if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
+      if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric or supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingGas
         if supp_htg_coil.nominalCapacity.is_initialized
           hvac.FixedSuppHeatingCapacity = UnitConversions.convert(supp_htg_coil.nominalCapacity.get, "W", "ton")
         end
@@ -2860,32 +2620,6 @@ class HVACSizing
       elsif not supp_htg_coil.nil?
         runner.registerError("Unexpected supplemental heating coil: #{supp_htg_coil.name}.")
         return nil
-      end
-    end
-
-    # Populate other zone objects (e.g., in a conditioned basement) related to a given HVAC object
-    hvacs.each do |hvac|
-      hvac.Objects.each do |object|
-        other_zone_object = get_feature(runner, object, Constants.SizingInfoHVACOtherZoneObject, 'string', false)
-        next if other_zone_object.nil?
-
-        thermal_zones.each do |thermal_zone|
-          thermal_zone.equipment.each do |equip|
-            next unless equip.handle.to_s == other_zone_object
-
-            if equip.to_ZoneHVACPackagedTerminalAirConditioner.is_initialized
-              hvac.Objects << equip.to_ZoneHVACPackagedTerminalAirConditioner.get
-            elsif equip.to_ZoneHVACBaseboardConvectiveWater.is_initialized
-              hvac.Objects << equip.to_ZoneHVACBaseboardConvectiveWater.get
-            elsif equip.to_ZoneHVACBaseboardConvectiveElectric.is_initialized
-              hvac.Objects << equip.to_ZoneHVACBaseboardConvectiveElectric.get
-            elsif equip.to_AirLoopHVACUnitarySystem.is_initialized
-              hvac.Objects << equip.to_AirLoopHVACUnitarySystem.get
-            else
-              fail "Unexpected object type."
-            end
-          end
-        end
       end
     end
 
@@ -2916,17 +2650,21 @@ class HVACSizing
     return MathTools.biquadratic(airFlowRate / capacity_tons, temp, @shr_biquadratic)
   end
 
-  def self.space_is_vented(space, min_sla_for_venting)
-    ela = 0.0
-    space.spaceInfiltrationEffectiveLeakageAreas.each do |leakage_area|
-      ela += UnitConversions.convert(leakage_area.effectiveAirLeakageArea, "cm^2", "ft^2")
+  def self.get_sizing_speed(hvac)
+    if hvac.NumSpeedsCooling > 1
+      sizingSpeed = hvac.NumSpeedsCooling # Default
+      sizingSpeed_Test = 10 # Initialize
+      for speed in 0..(hvac.NumSpeedsCooling - 1)
+        # Select curves for sizing using the speed with the capacity ratio closest to 1
+        temp = (hvac.CapacityRatioCooling[speed] - 1).abs
+        if temp <= sizingSpeed_Test
+          sizingSpeed = speed
+          sizingSpeed_Test = temp
+        end
+      end
+      return sizingSpeed
     end
-    sla = ela / UnitConversions.convert(space.floorArea, "m^2", "ft^2")
-    if sla > min_sla_for_venting
-      return true
-    end
-
-    return false
+    return 0
   end
 
   def self.true_azimuth(surface)
@@ -2948,58 +2686,6 @@ class HVACSizing
       true_azimuth = true_azimuth - 360
     end
     return true_azimuth
-  end
-
-  def self.calculate_t_attic_iter(runner, attic_UAs, t_solair, cool_setpoint, coolingLoad_Ducts_Sens)
-    # Calculate new value for Tattic based on updated duct losses
-    sum_uat = -coolingLoad_Ducts_Sens
-    attic_UAs.each do |ua_type, ua|
-      if ua_type == "outdoors" or ua_type == "infil"
-        sum_uat += ua * t_solair
-      elsif ua_type == "surface" # adjacent to conditioned
-        sum_uat += ua * cool_setpoint
-      elsif ua_type == "total" or ua_type == "foundation"
-      # skip
-      else
-          runner.registerError("Unexpected ua_type: '#{ua_type}'.")
-          return nil
-      end
-    end
-    t_attic_iter = sum_uat / attic_UAs["total"]
-    t_attic_iter = [t_attic_iter, t_solair].min # Prevent attic from being hotter than T_solair
-    t_attic_iter = [t_attic_iter, cool_setpoint].max # Prevent attic from being colder than cool_setpoint
-    return t_attic_iter
-  end
-
-  def self.calculate_t_solair(weather, roofAbsorptance, roofPitch)
-    # Calculates Tsolair under design conditions
-    # Uses equation (30) from 2009 ASHRAE Handbook-Fundamentals (IP), p 18.22:
-
-    t_outdoor = weather.design.CoolingDrybulb # Design outdoor air temp (F)
-    i_b = weather.design.CoolingDirectNormal
-    i_d = weather.design.CoolingDiffuseHorizontal
-
-    # Use max summer direct normal plus diffuse solar radiation, adjusted for roof pitch
-    # (Not calculating max coincident i_b + i_d because that requires knowing roofPitch in advance; will typically coincide with peak i_b though.)
-    i_T = UnitConversions.convert(i_b + i_d * (1 + Math::cos(roofPitch.deg2rad)) / 2, "W/m^2", "Btu/(hr*ft^2)") # total solar radiation incident on surface (Btu/h/ft2)
-    # Adjust diffuse horizontal for roof pitch using isotropic diffuse model (Liu and Jordan 1963) from Duffie and Beckman eq 2.15.1
-
-    h_o = 4 # coefficient of heat transfer for long-wave radiation and convection at outer surface (Btu/h-ft2-F)
-    # Value of 4.0 for 7.5 mph wind (summer design) from 2009 ASHRAE H-F (IP) p 26.1
-    # p 18.22 assumes h_o = 3.0 Btu/hft2F for horizontal surfaces, but we found 4.0 gives
-    # more realistic sol air temperatures and is more realistic for residential roofs.
-
-    emittance = 1.0 # hemispherical emittance of surface = 1 for horizontal surface, from 2009 ASHRAE H-F (IP) p 18.22
-
-    deltaR = 20 # difference between long-wave radiation incident on surface from sky and surroundings
-    # and radiation emitted by blackbody at outdoor air temperature
-    # 20 Btu/h-ft2 appropriate for horizontal surfaces, from ASHRAE H-F (IP) p 18.22
-
-    deltaR_inclined = deltaR * Math::cos(roofPitch.deg2rad) # Correct deltaR for inclined surface,
-    # from eq. 2.32 in  Castelino, R.L. 1992. "Implementation of the Revised Transfer Function Method and Evaluation of the CLTD/SCL/CLF Method" (Thesis) Oklahoma State University
-
-    t_solair = t_outdoor + (roofAbsorptance * i_T - emittance * deltaR_inclined) / h_o
-    return t_solair
   end
 
   def self.get_space_ua_values(runner, space, weather)
@@ -3039,7 +2725,7 @@ class HVACSizing
 
     # Infiltration UA
     infiltration_cfm = get_feature(runner, space.thermalZone.get, Constants.SizingInfoZoneInfiltrationCFM, 'double', false)
-    infiltration_cfm = 0 if infiltration_cfm.nil?
+    infiltration_cfm = 0.0 if infiltration_cfm.nil?
     outside_air_density = UnitConversions.convert(weather.header.LocalPressure, "atm", "Btu/ft^3") / (Gas.Air.r * (weather.data.AnnualAvgDrybulb + 460.0))
     space_UAs["infil"] = infiltration_cfm * outside_air_density * Gas.Air.cp * UnitConversions.convert(1.0, "hr", "min")
 
@@ -3122,7 +2808,7 @@ class HVACSizing
     return nil if wall_type.nil?
 
     rigid_r = get_feature(runner, wall, Constants.SizingInfoWallRigidInsRvalue, 'double', false)
-    rigid_r = 0 if rigid_r.nil?
+    return nil if rigid_r.nil?
 
     # Determine the wall Group Number (A - K = 1 - 11) for exterior walls (ie. all walls except basement walls)
     maxWallGroup = 11
@@ -3167,7 +2853,7 @@ class HVACSizing
 
     elsif wall_type == 'SIP'
       rigid_thick_in = get_feature(runner, wall, Constants.SizingInfoWallRigidInsThickness, 'double', false)
-      rigid_thick_in = 0 if rigid_thick_in.nil?
+      return nil if rigid_thick_in.nil?
 
       sip_ins_thick_in = get_feature(runner, wall, Constants.SizingInfoSIPWallInsThickness, 'double')
       return nil if sip_ins_thick_in.nil?
@@ -3186,7 +2872,7 @@ class HVACSizing
 
     elsif wall_type == 'CMU'
       cmu_furring_ins_r = get_feature(runner, wall, Constants.SizingInfoCMUWallFurringInsRvalue, 'double', false)
-      cmu_furring_ins_r = 0 if cmu_furring_ins_r.nil?
+      return nil if cmu_furring_ins_r.nil?
 
       # Manual J uses the same wall group for filled or hollow block
       if cmu_furring_ins_r < 2
@@ -3645,7 +3331,7 @@ class HVACSizing
       wall_ins_height = UnitConversions.convert(foundation.exteriorVerticalInsulationDepth.get, "m", "ft").round
     end
 
-    wall_constr_rvalue = self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
+    wall_constr_rvalue = 1.0 / self.get_surface_ufactor(runner, surface, surface.surfaceType, true)
 
     return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
   end
@@ -3668,13 +3354,24 @@ class HVACSizing
     return val.get
   end
 
-  def self.set_object_values(runner, model, hvac, hvac_final_values, zone_ratios)
+  def self.set_object_values(runner, model, hvac, hvac_final_values)
     # Updates object properties in the model
-
-    thermal_zones = Geometry.get_thermal_zones_from_spaces(@model_spaces)
 
     hvac.Objects.each do |object|
       if object.is_a? OpenStudio::Model::AirLoopHVACUnitarySystem
+
+        # Fixed airflow rate?
+        if object.supplyAirFlowRateDuringHeatingOperation.is_initialized and object.heatingCoil.is_initialized
+          if object.supplyAirFlowRateDuringHeatingOperation.get > 0
+            hvac_final_values.Heat_Airflow = UnitConversions.convert(object.supplyAirFlowRateDuringHeatingOperation.get, "m^3/s", "cfm")
+          end
+        end
+        if object.supplyAirFlowRateDuringCoolingOperation.is_initialized and object.coolingCoil.is_initialized
+          if object.supplyAirFlowRateDuringCoolingOperation.get > 0
+            hvac_final_values.Cool_Airflow = UnitConversions.convert(object.supplyAirFlowRateDuringCoolingOperation.get, "m^3/s", "cfm")
+          end
+        end
+
         # Fan Airflow
         if object.coolingCoil.is_initialized and object.heatingCoil.is_initialized
           fan_airflow = [hvac_final_values.Heat_Airflow, hvac_final_values.Cool_Airflow].max
@@ -3711,19 +3408,17 @@ class HVACSizing
         air_loop = object.airLoopHVAC.get
         air_loop.setDesignSupplyAirFlowRate(hvac.FanspeedRatioCooling.max * UnitConversions.convert(fan_airflow, "cfm", "m^3/s"))
 
-        thermal_zones.each do |thermal_zone|
-          thermal_zone.airLoopHVACTerminals.each do |aterm|
-            next if air_loop != aterm.airLoopHVAC.get
-            next unless aterm.to_AirTerminalSingleDuctUncontrolled.is_initialized
+        @cond_zone.airLoopHVACTerminals.each do |aterm|
+          next if air_loop != aterm.airLoopHVAC.get
+          next unless aterm.to_AirTerminalSingleDuctUncontrolled.is_initialized
 
-            # Air Terminal
-            aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
-            aterm.setMaximumAirFlowRate(UnitConversions.convert(fan_airflow, "cfm", "m^3/s") * zone_ratios[thermal_zone])
-          end
+          # Air Terminal
+          aterm = aterm.to_AirTerminalSingleDuctUncontrolled.get
+          aterm.setMaximumAirFlowRate(UnitConversions.convert(fan_airflow, "cfm", "m^3/s"))
         end
 
         # Coils
-        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, 1.0)
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values)
 
         if hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
 
@@ -3765,23 +3460,52 @@ class HVACSizing
         # Unitary System
         object.setSupplyAirFlowRateMethodDuringCoolingOperation("SupplyAirFlowRate")
         if object.coolingCoil.is_initialized
-          object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+          object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
         else
           object.setSupplyAirFlowRateDuringCoolingOperation(0.0)
         end
         object.setSupplyAirFlowRateMethodDuringHeatingOperation("SupplyAirFlowRate")
         if object.heatingCoil.is_initialized
-          object.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(hvac_final_values.Heat_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+          object.setSupplyAirFlowRateDuringHeatingOperation(UnitConversions.convert(hvac_final_values.Heat_Airflow, "cfm", "m^3/s"))
         else
           object.setSupplyAirFlowRateDuringHeatingOperation(0.0)
         end
 
         # Fan
         fanonoff = object.supplyFan.get.to_FanOnOff.get
-        fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, "cfm", "m^3/s") * zone_ratios[thermal_zone])
+        fanonoff.setMaximumFlowRate(UnitConversions.convert(fan_airflow + 0.01, "cfm", "m^3/s"))
 
         # Coils
-        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values)
+
+      elsif object.is_a? OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial
+
+        ## Evaporative Cooler ##
+
+        # Air Loop
+        vfr = UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s")
+        # evap cooler design flow rate
+        object.setPrimaryAirDesignFlowRate(vfr)
+        # air loop object design flow rates
+        air_loop = object.airLoopHVAC.get
+        air_loop.setDesignSupplyAirFlowRate(vfr)
+        fan = air_loop.supplyFan.get.to_FanVariableVolume.get
+        fan.setMaximumFlowRate(vfr)
+
+        # Fan pressure rise calculation (based on design cfm)
+        fan_power = [2.79 * (hvac_final_values.Cool_Airflow)**(-0.29), 0.6].min # fit of efficacy to air flow from the CEC listed equipment  W/cfm
+        fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+        fan.setFanEfficiency(fan_eff)
+        fan.setPressureRise(HVAC.calculate_fan_pressure_rise(fan_eff, fan_power))
+
+        @cond_zone.airLoopHVACTerminals.each do |aterm|
+          next if air_loop != aterm.airLoopHVAC.get
+          next unless aterm.to_AirTerminalSingleDuctVAVNoReheat.is_initialized
+
+          # Air Terminal
+          aterm = aterm.to_AirTerminalSingleDuctVAVNoReheat.get
+          aterm.setMaximumAirFlowRate(vfr)
+        end
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACBaseboardConvectiveWater
 
@@ -3819,7 +3543,7 @@ class HVACSizing
         thermal_zone = object.thermalZone.get
 
         # Baseboard
-        object.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity * zone_ratios[thermal_zone], "Btu/hr", "W"))
+        object.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
 
       elsif object.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
 
@@ -3828,7 +3552,7 @@ class HVACSizing
         thermal_zone = object.thermalZone.get
 
         # PTAC
-        object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+        object.setSupplyAirFlowRateDuringCoolingOperation(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
         object.setSupplyAirFlowRateDuringHeatingOperation(0.00001)
         object.setSupplyAirFlowRateWhenNoCoolingorHeatingisNeeded(0.0)
         object.setOutdoorAirFlowRateDuringCoolingOperation(0.0)
@@ -3837,10 +3561,10 @@ class HVACSizing
 
         # Fan
         fanonoff = object.supplyAirFan.to_FanOnOff.get
-        fanonoff.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow * zone_ratios[thermal_zone], "cfm", "m^3/s"))
+        fanonoff.setMaximumFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
 
         # Coils
-        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values, zone_ratios[thermal_zone])
+        setCoilsObjectValues(runner, model, hvac, object, hvac_final_values)
 
         # Heating Coil override
         ptac_htg_coil = object.heatingCoil.to_CoilHeatingElectric.get
@@ -3855,66 +3579,64 @@ class HVACSizing
     return true
   end
 
-  def self.setCoilsObjectValues(runner, model, hvac, equip, hvac_final_values, zone_ratio)
-    # zone_ratio is 1.0 unless there are multiple coils for the system (e.g., living coil and conditioned basement coil)
-
+  def self.setCoilsObjectValues(runner, model, hvac, equip, hvac_final_values)
     clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, equip)
 
     # Cooling coil
     if clg_coil.is_a? OpenStudio::Model::CoilCoolingDXSingleSpeed
-      clg_coil.setRatedTotalCoolingCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "W"))
-      clg_coil.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonCooling[0], "cfm", "m^3/s"))
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "W"))
+      clg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonCooling[0], "cfm", "m^3/s"))
 
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
       clg_coil.stages.each_with_index do |stage, speed|
-        stage.setGrossRatedTotalCoolingCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "W") * hvac.CapacityRatioCooling[speed])
+        stage.setGrossRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "W") * hvac.CapacityRatioCooling[speed])
         if clg_coil.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump or clg_coil.name.to_s.start_with? Constants.ObjectNameCentralAirConditioner
-          stage.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonCooling[speed], "cfm", "m^3/s") * hvac.CapacityRatioCooling[speed])
+          stage.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonCooling[speed], "cfm", "m^3/s") * hvac.CapacityRatioCooling[speed])
         elsif clg_coil.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
-          stage.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.CoolingCFMs[speed], "cfm", "m^3/s"))
+          stage.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.CoolingCFMs[speed], "cfm", "m^3/s"))
         end
       end
 
     elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit
-      clg_coil.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
-      clg_coil.setRatedWaterFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.GSHP_Loop_flow, "gal/min", "m^3/s"))
-      clg_coil.setRatedTotalCoolingCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "W"))
-      clg_coil.setRatedSensibleCoolingCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Cool_Capacity_Sens, "Btu/hr", "W"))
+      clg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Cool_Airflow, "cfm", "m^3/s"))
+      clg_coil.setRatedWaterFlowRate(UnitConversions.convert(hvac_final_values.GSHP_Loop_flow, "gal/min", "m^3/s"))
+      clg_coil.setRatedTotalCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity, "Btu/hr", "W"))
+      clg_coil.setRatedSensibleCoolingCapacity(UnitConversions.convert(hvac_final_values.Cool_Capacity_Sens, "Btu/hr", "W"))
 
     end
 
     # Heating coil
     if htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
       if not equip.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
-        htg_coil.setNominalCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
+        htg_coil.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
       end
 
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingGas
-      htg_coil.setNominalCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
+      htg_coil.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
 
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXSingleSpeed
-      htg_coil.setRatedTotalHeatingCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
-      htg_coil.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonHeating[0], "cfm", "m^3/s"))
+      htg_coil.setRatedTotalHeatingCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
+      htg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonHeating[0], "cfm", "m^3/s"))
 
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingDXMultiSpeed
       htg_coil.stages.each_with_index do |stage, speed|
-        stage.setGrossRatedHeatingCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W") * hvac.CapacityRatioHeating[speed])
+        stage.setGrossRatedHeatingCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W") * hvac.CapacityRatioHeating[speed])
         if htg_coil.name.to_s.start_with? Constants.ObjectNameAirSourceHeatPump
-          stage.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonHeating[speed], "cfm", "m^3/s") * hvac.CapacityRatioHeating[speed])
+          stage.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.RatedCFMperTonHeating[speed], "cfm", "m^3/s") * hvac.CapacityRatioHeating[speed])
         elsif htg_coil.name.to_s.start_with? Constants.ObjectNameMiniSplitHeatPump
-          stage.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.HeatingCFMs[speed], "cfm", "m^3/s"))
+          stage.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "ton") * UnitConversions.convert(hvac.HeatingCFMs[speed], "cfm", "m^3/s"))
         end
       end
 
     elsif htg_coil.is_a? OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit
-      htg_coil.setRatedAirFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Airflow, "cfm", "m^3/s"))
-      htg_coil.setRatedWaterFlowRate(zone_ratio * UnitConversions.convert(hvac_final_values.GSHP_Loop_flow, "gal/min", "m^3/s"))
-      htg_coil.setRatedHeatingCapacity(zone_ratio * UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
+      htg_coil.setRatedAirFlowRate(UnitConversions.convert(hvac_final_values.Heat_Airflow, "cfm", "m^3/s"))
+      htg_coil.setRatedWaterFlowRate(UnitConversions.convert(hvac_final_values.GSHP_Loop_flow, "gal/min", "m^3/s"))
+      htg_coil.setRatedHeatingCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, "Btu/hr", "W"))
 
     end
 
     # Supplemental heating coil
-    if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
+    if supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric or supp_htg_coil.is_a? OpenStudio::Model::CoilHeatingGas
       supp_htg_coil.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity_Supp, "Btu/hr", "W"))
 
     end
@@ -3993,29 +3715,26 @@ class HVACSizing
   end
 
   def self.display_zone_loads(runner, zone_loads)
-    zone_loads.keys.each do |thermal_zone|
-      loads = zone_loads[thermal_zone]
-      s = "Zone Loads for #{thermal_zone.name.to_s}:"
-      properties = [
-        :Heat_Windows, :Heat_Skylights,
-        :Heat_Doors, :Heat_Walls,
-        :Heat_Roofs, :Heat_Floors,
-        :Heat_Infil,
-        :Cool_Windows, :Cool_Skylights,
-        :Cool_Doors, :Cool_Walls,
-        :Cool_Roofs, :Cool_Floors,
-        :Cool_Infil_Sens, :Cool_Infil_Lat,
-        :Cool_IntGains_Sens, :Cool_IntGains_Lat,
-      ]
-      properties.each do |property|
-        s += "\n#{property.to_s.gsub("_", " ")} = #{loads.send(property).round(0).to_s} Btu/hr"
-      end
-      runner.registerInfo("#{s}\n")
+    s = "Zone Loads for #{@cond_zone.name.to_s}:"
+    properties = [
+      :Heat_Windows, :Heat_Skylights,
+      :Heat_Doors, :Heat_Walls,
+      :Heat_Roofs, :Heat_Floors,
+      :Heat_Infil,
+      :Cool_Windows, :Cool_Skylights,
+      :Cool_Doors, :Cool_Walls,
+      :Cool_Roofs, :Cool_Floors,
+      :Cool_Infil_Sens, :Cool_Infil_Lat,
+      :Cool_IntGains_Sens, :Cool_IntGains_Lat,
+    ]
+    properties.each do |property|
+      s += "\n#{property.to_s.gsub("_", " ")} = #{zone_loads.send(property).round(0).to_s} Btu/hr"
     end
+    runner.registerInfo("#{s}\n")
   end
 
-  def self.display_hvac_final_values_results(runner, hvac_final_values)
-    s = "Final Results:"
+  def self.display_hvac_final_values_results(runner, hvac_final_values, hvac)
+    s = "Final Results for #{hvac.Objects[0].name.to_s}:"
     loads = [
       :Heat_Load, :Heat_Load_Ducts,
       :Cool_Load_Lat, :Cool_Load_Sens,
@@ -4067,8 +3786,7 @@ class FinalValues
                 :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
                 :Heat_Load, :Heat_Load_Ducts,
                 :Heat_Capacity, :Heat_Capacity_Supp, :Heat_Airflow,
-                :TotalCap_CurveValue, :SensibleCap_CurveValue, :BypassFactor_CurveValue,
-                :Zone_Ratios, :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
+                :GSHP_Loop_flow, :GSHP_Bore_Holes, :GSHP_Bore_Depth, :GSHP_G_Functions)
 end
 
 class HVACInfo
@@ -4081,7 +3799,7 @@ class HVACInfo
     self.CapacityRatioCooling = [1.0]
     self.CapacityRatioHeating = [1.0]
     self.OverSizeLimit = 1.15
-    self.HPSizedForMaxLoad = false
+    self.OverSizeDelta = 15000.0
     self.FanspeedRatioCooling = [1.0]
   end
 
@@ -4102,11 +3820,12 @@ class HVACInfo
                 :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
                 :SHRRated, :CapacityRatioCooling, :CapacityRatioHeating,
-                :HeatingCapacityOffset, :OverSizeLimit, :HPSizedForMaxLoad,
-                :FanspeedRatioCooling, :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR,
+                :HeatingCapacityOffset, :OverSizeLimit, :OverSizeDelta, :FanspeedRatioCooling,
+                :BoilerDesignTemp, :CoilBF, :HeatingEIR, :CoolingEIR, :SizingSpeed,
                 :GSHP_HXVertical, :GSHP_HXDTDesign, :GSHP_HXCHWDesign, :GSHP_HXHWDesign,
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
-                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp)
+                :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
+                :EvapCoolerEffectiveness)
 end
 
 class DuctInfo

@@ -71,6 +71,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -150,6 +151,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "DoubleWoodStud")
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -229,6 +231,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "CMU")
       surface.additionalProperties.setFeature(Constants.SizingInfoCMUWallFurringInsRvalue, Float(furring_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -289,6 +292,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "ICF")
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -364,6 +368,8 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SIP")
       surface.additionalProperties.setFeature(Constants.SizingInfoSIPWallInsThickness, Float(sip_thick_in))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsThickness, Float(sheathing_thick_in))
     end
 
     return true
@@ -435,6 +441,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "SteelStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -451,30 +458,6 @@ class Constructions
     for idx in 0..4
       if thick_ins[idx].nil? != conds[idx].nil? or thick_ins[idx].nil? != denss[idx].nil? or thick_ins[idx].nil? != specheats[idx].nil?
         runner.registerError("Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered.")
-        return false
-      end
-    end
-    thick_ins.each_with_index do |thick_in, idx|
-      if not thick_in.nil? and thick_in <= 0.0
-        runner.registerError("Thickness #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    conds.each_with_index do |cond, idx|
-      if not cond.nil? and cond <= 0.0
-        runner.registerError("Conductivity #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    denss.each_with_index do |dens, idx|
-      if not dens.nil? and dens <= 0.0
-        runner.registerError("Density #{idx + 1} must be greater than 0.")
-        return false
-      end
-    end
-    specheats.each_with_index do |specheat, idx|
-      if not specheat.nil? and specheat <= 0.0
-        runner.registerError("Specific Heat #{idx + 1} must be greater than 0.")
         return false
       end
     end
@@ -537,6 +520,7 @@ class Constructions
     # Store info for HVAC Sizing measure
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "Generic")
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -605,6 +589,7 @@ class Constructions
     (surfaces).each do |surface|
       surface.additionalProperties.setFeature(Constants.SizingInfoWallType, "WoodStud")
       surface.additionalProperties.setFeature(Constants.SizingInfoStudWallCavityRvalue, Float(cavity_r))
+      surface.additionalProperties.setFeature(Constants.SizingInfoWallRigidInsRvalue, Float(rigid_r))
     end
 
     return true
@@ -671,8 +656,10 @@ class Constructions
     end
     if not mat_rb.nil?
       constr.add_layer(mat_rb)
+      constr.add_layer(Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch(surfaces)))
+    else
+      constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
     end
-    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
 
     # Create and assign construction to roof surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
@@ -684,7 +671,7 @@ class Constructions
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, !mat_rb.nil?)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, has_radiant_barrier)
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
@@ -694,7 +681,7 @@ class Constructions
   def self.apply_closed_cavity_roof(runner, model, surfaces, constr_name,
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, drywall_thick_in,
-                                    osb_thick_in, rigid_r, mat_roofing)
+                                    osb_thick_in, rigid_r, mat_roofing, has_radiant_barrier)
 
     return true if surfaces.empty?
 
@@ -722,6 +709,10 @@ class Constructions
       rigid_thick_in = rigid_r * BaseMaterial.InsulationRigid.k_in
       mat_rigid = Material.new(name = "RoofRigidIns", thick_in = rigid_thick_in, mat_base = BaseMaterial.InsulationRigid, k_in = rigid_thick_in / rigid_r)
     end
+    mat_rb = nil
+    if has_radiant_barrier
+      mat_rb = Material.RadiantBarrier
+    end
 
     # Set paths
     gapFactor = self.get_gap_factor(install_grade, framing_factor, cavity_r)
@@ -743,7 +734,12 @@ class Constructions
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+    if not mat_rb.nil?
+      constr.add_layer(mat_rb)
+      constr.add_layer(Material.AirFilmRoofRadiantBarrier(Geometry.get_roof_pitch(surfaces)))
+    else
+      constr.add_layer(Material.AirFilmRoof(Geometry.get_roof_pitch(surfaces)))
+    end
 
     # Create and assign construction to surfaces
     if not constr.create_and_assign_constructions(surfaces, runner, model)
@@ -755,7 +751,7 @@ class Constructions
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofColor, get_roofing_material_manual_j_color(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofMaterial, get_roofing_material_manual_j_material(mat_roofing.name))
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofRigidInsRvalue, Float(rigid_r))
-      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, false)
+      surface.additionalProperties.setFeature(Constants.SizingInfoRoofHasRadiantBarrier, has_radiant_barrier)
       surface.additionalProperties.setFeature(Constants.SizingInfoRoofCavityRvalue, Float(cavity_r))
     end
 
@@ -876,12 +872,7 @@ class Constructions
                                  wall_rigid_ins_height, wall_cavity_r, wall_install_grade,
                                  wall_cavity_depth_in, wall_filled_cavity, wall_framing_factor,
                                  wall_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                 wall_height, wall_height_above_grade, foundation = nil)
-
-    if wall_surfaces.empty?
-      runner.registerError("No wall surfaces found adjacent to floor surface.")
-      return false
-    end
+                                 wall_height, wall_height_above_grade)
 
     # Calculate interior wall R-value
     int_wall_rvalue = calc_interior_wall_r_value(runner, wall_cavity_depth_in, wall_cavity_r,
@@ -892,12 +883,10 @@ class Constructions
       return false
     end
 
-    if foundation.nil?
-      # Create Kiva foundation
-      foundation = create_kiva_crawl_or_basement_foundation(model, int_wall_rvalue, wall_height,
-                                                            wall_rigid_r, wall_rigid_ins_height,
-                                                            wall_height_above_grade)
-    end
+    # Create Kiva foundation for crawlspace/basement
+    foundation = apply_kiva_walled_foundation(model, int_wall_rvalue, wall_height,
+                                              wall_rigid_r, wall_rigid_ins_height,
+                                              wall_height_above_grade)
 
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
@@ -926,16 +915,24 @@ class Constructions
                                  under_r, under_width, gap_r,
                                  perimeter_r, perimeter_depth,
                                  whole_r, concrete_thick_in, exposed_perimeter,
-                                 mat_carpet = nil, foundation = nil)
+                                 mat_carpet, foundation)
 
     return true if surface.nil?
 
     if foundation.nil?
-      # Create Kiva foundation
+      # Create Kiva foundation for slab
       thick = UnitConversions.convert(concrete_thick_in, "in", "ft")
       foundation = create_kiva_slab_foundation(model, under_r, under_width,
                                                gap_r, thick, perimeter_r, perimeter_depth,
                                                concrete_thick_in)
+    else
+      # Kiva foundation (for crawlspace/basement) exists
+      if under_r > 0 and under_width > 0
+        int_horiz_mat = create_insulation_material(model, "FoundationIntHorizIns", under_r)
+        foundation.setInteriorHorizontalInsulationMaterial(int_horiz_mat)
+        foundation.setInteriorHorizontalInsulationDepth(0)
+        foundation.setInteriorHorizontalInsulationWidth(UnitConversions.convert(under_width, "ft", "m"))
+      end
     end
 
     # Define materials
@@ -1023,37 +1020,30 @@ class Constructions
     return true
   end
 
-  def self.apply_partition_walls(runner, model, surfaces, constr_name,
-                                 drywall_thick_in, frac_of_ffa)
-
-    spaces = Geometry.get_conditioned_spaces(model.getSpaces)
-
-    return true if spaces.empty?
+  def self.apply_partition_walls(runner, model, constr_name, drywall_thick_in, frac_of_ffa,
+                                 basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     imdefs = []
-    spaces.each do |space|
-      # Determine existing partition wall mass in space
-      existing_surface_area = 0
-      surfaces.each do |surface|
-        existing_surface_area += surface.grossArea
-      end
 
-      # Determine additional partition wall mass required
-      addtl_surface_area = frac_of_ffa * space.floorArea - existing_surface_area * 2 / spaces.size.to_f
+    # Determine additional partition wall mass required
+    addtl_surface_area_base = frac_of_ffa * living_space.floorArea * basement_frac_of_cfa
+    addtl_surface_area_lv = frac_of_ffa * living_space.floorArea * (1.0 - basement_frac_of_cfa)
 
-      if addtl_surface_area > 0
-        # Add remaining partition walls within spaces (those without geometric representation)
-        # as internal mass object.
-        imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-        imdef.setName("#{space.name.to_s} Partition")
-        imdef.setSurfaceArea(addtl_surface_area)
-        imdefs << imdef
+    if addtl_surface_area_lv > 0
+      # Add remaining partition walls within spaces (those without geometric representation)
+      # as internal mass object.
+      obj_name = "#{living_space.name.to_s} Living Partition"
+      imdef = create_os_int_mass_and_def(runner, model, obj_name, living_space, addtl_surface_area_lv)
+      imdefs << imdef
+    end
 
-        im = OpenStudio::Model::InternalMass.new(imdef)
-        im.setName("#{space.name.to_s} Partition")
-        im.setSpace(space)
-        runner.registerInfo("Added internal mass object '#{im.name.to_s}' to space '#{space.name.to_s}'")
-      end
+    if addtl_surface_area_base > 0
+      # Add remaining partition walls within spaces (those without geometric representation)
+      # as internal mass object.
+      obj_name = "#{living_space.name.to_s} Basement Partition"
+      imdef = create_os_int_mass_and_def(runner, model, obj_name, living_space, addtl_surface_area_base)
+      cond_base_surfaces << imdef
+      imdefs << imdef
     end
 
     if not Constructions.apply_wood_stud_wall(runner, model, imdefs, constr_name,
@@ -1066,26 +1056,20 @@ class Constructions
     return true
   end
 
-  def self.apply_furniture(runner, model, frac_of_ffa, mass_lb_per_sqft = 8.0,
-                           density_lb_per_cuft = 40.0, mat = BaseMaterial.Wood)
-
-    model_spaces = model.getSpaces
-
-    conditioned_spaces = Geometry.get_conditioned_spaces(model_spaces)
-    unconditioned_basement_spaces = Geometry.get_unconditioned_basement_spaces(model_spaces)
-    garage_spaces = Geometry.get_garage_spaces(model_spaces)
+  def self.apply_furniture(runner, model, mass_lb_per_sqft, density_lb_per_cuft,
+                           mat, basement_frac_of_cfa, cond_base_surfaces, living_space)
 
     # Add user-specified furniture mass
-    model_spaces.each do |space|
-      furnAreaFraction = nil
+    model.getSpaces.each do |space|
+      furnAreaFraction = nil # Fraction of conditioned floor area
       furnConductivity = mat.k_in
       furnSolarAbsorptance = 0.6
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
-      if conditioned_spaces.include?(space) or unconditioned_basement_spaces.include?(space)
-        furnAreaFraction = frac_of_ffa
+      if space == living_space or Geometry.is_unconditioned_basement(space)
+        furnAreaFraction = 1.0
         furnMass = mass_lb_per_sqft
-      elsif garage_spaces.include?(space)
+      elsif Geometry.is_garage(space)
         furnAreaFraction = 0.1
         furnMass = 2.0
       end
@@ -1110,23 +1094,50 @@ class Constructions
       constr = Construction.new(constr_obj_name_space, path_fracs)
       constr.add_layer(mat_fm)
 
-      imdef = OpenStudio::Model::InternalMassDefinition.new(model)
-      imdef.setName(mass_obj_name_space)
-      imdef.setSurfaceArea(furnAreaFraction * space.floorArea)
-
-      im = OpenStudio::Model::InternalMass.new(imdef)
-      im.setName(mass_obj_name_space)
-      im.setSpace(space)
-
+      imdefs = []
+      if space == living_space
+        # if living space, judge if includes conditioned basement, create furniture independently
+        living_surface_area = furnAreaFraction * space.floorArea * (1 - basement_frac_of_cfa)
+        base_surface_area = furnAreaFraction * space.floorArea * basement_frac_of_cfa
+        # living furniture mass
+        if living_surface_area > 0
+          living_obj_name = mass_obj_name_space + " living"
+          imdef = create_os_int_mass_and_def(runner, model, living_obj_name, space, living_surface_area)
+          imdefs << imdef
+        end
+        # basement furniture mass
+        if base_surface_area > 0
+          base_obj_name = mass_obj_name_space + " basement"
+          imdef = create_os_int_mass_and_def(runner, model, base_obj_name, space, base_surface_area)
+          cond_base_surfaces << imdef
+          imdefs << imdef
+        end
+      else
+        surface_area = furnAreaFraction * space.floorArea
+        imdef = create_os_int_mass_and_def(runner, model, mass_obj_name_space, space, surface_area)
+        imdefs << imdef
+      end
       # Create and assign construction to surfaces
-      if not constr.create_and_assign_constructions([imdef], runner, model)
+      if not constr.create_and_assign_constructions(imdefs, runner, model)
         return false
       end
-
-      runner.registerInfo("Assigned internal mass object '#{mass_obj_name_space}' to space '#{space.name}'.")
     end
 
     return true
+  end
+
+  def self.create_os_int_mass_and_def(runner, model, object_name, space, area)
+    # create internal mass objects
+    imdef = OpenStudio::Model::InternalMassDefinition.new(model)
+    imdef.setName(object_name)
+    imdef.setSurfaceArea(area)
+
+    im = OpenStudio::Model::InternalMass.new(imdef)
+    im.setName(object_name)
+    im.setSpace(space)
+
+    runner.registerInfo("Assigned internal mass object '#{object_name}' to space '#{space.name}'.")
+    return imdef
   end
 
   def self.get_exterior_finish_materials
@@ -1448,9 +1459,9 @@ class Constructions
     return foundation
   end
 
-  def self.create_kiva_crawl_or_basement_foundation(model, int_vert_r, int_vert_depth,
-                                                    ext_vert_r, ext_vert_depth,
-                                                    wall_height_above_grade)
+  def self.apply_kiva_walled_foundation(model, int_vert_r, int_vert_depth,
+                                        ext_vert_r, ext_vert_depth,
+                                        wall_height_above_grade)
 
     # Create the Foundation:Kiva object for crawl/basement foundations
     foundation = OpenStudio::Model::FoundationKiva.new(model)
@@ -1487,11 +1498,11 @@ class Constructions
     settings.setGroundSolarAbsorptivity(0.9)
     settings.setGroundThermalAbsorptivity(0.9)
     settings.setGroundSurfaceRoughness(0.03)
-    settings.setFarFieldWidth(40) # TODO: Set based on neighbor distances
+    settings.setFarFieldWidth(40) # TODO: Set based on neighbor distances?
     settings.setDeepGroundBoundaryCondition('ZeroFlux')
     settings.setDeepGroundDepth(40)
-    settings.setMinimumCellDimension(0.02)
-    settings.setMaximumCellGrowthCoefficient(1.5)
+    settings.setMinimumCellDimension(0.2)
+    settings.setMaximumCellGrowthCoefficient(3.0)
     settings.setSimulationTimestep("Hourly")
   end
 
@@ -1551,7 +1562,7 @@ class Constructions
 
       # CoolingShade
       sm = OpenStudio::Model::Shade.new(model)
-      sm.setName("CoolingShade")
+      sm.setName("#{type}CoolingShade")
       sm.setSolarTransmittance(total_shade_trans)
       sm.setSolarReflectance(total_shade_ref)
       sm.setVisibleTransmittance(total_shade_trans)
