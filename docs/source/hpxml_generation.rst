@@ -441,7 +441,7 @@ If using simple inputs, the following element is required:
 If using detailed inputs, the following elements are required:
 
 - ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
-- ``CollectorType``: 'single glazing black' or 'evacuated tube' or 'integrated collector storage'
+- ``CollectorType``: 'single glazing black' or 'double glazing black' or 'evacuated tube' or 'integrated collector storage'
 - ``CollectorAzimuth``
 - ``CollectorTilt``
 - ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings

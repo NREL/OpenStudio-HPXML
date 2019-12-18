@@ -731,8 +731,12 @@ class Constants
     return 'evacuated tube'
   end
 
-  def self.SolarThermalCollectorTypeGlazedFlatPlate
+  def self.SolarThermalCollectorTypeGlazedFlatPlateSingle
     return 'single glazing black'
+  end
+
+  def self.SolarThermalCollectorTypeGlazedFlatPlateDouble
+    return 'double glazing black'
   end
 
   def self.SolarThermalCollectorTypeICS

@@ -2381,13 +2381,13 @@ class OSModel
       if not collector_area.nil? # Detailed solar water heater
         frta = solar_thermal_values[:collector_frta]
         frul = solar_thermal_values[:collector_frul]
-        if solar_thermal_values[:collector_type] == Constants.SolarThermalCollectorTypeEvacuatedTube
+        if [Constants.SolarThermalCollectorTypeEvacuatedTube].include? solar_thermal_values[:collector_type]
           iam_coeff2 = 0.3023 # IAM coeff1=1 by definition, values based on a system listed by SRCC with values close to the average
           iam_coeff3 = -0.3057
-        elsif solar_thermal_values[:collector_type] == Constants.SolarThermalCollectorTypeGlazedFlatPlate
+        elsif [Constants.SolarThermalCollectorTypeGlazedFlatPlateSingle, Constants.SolarThermalCollectorTypeGlazedFlatPlateDouble].include? solar_thermal_values[:collector_type]
           iam_coeff2 = 0.1
           iam_coeff3 = 0
-        else # ICS
+        elsif [Constants.SolarThermalCollectorTypeICS].include? solar_thermal_values[:collector_type]
           iam_coeff2 = 0.1
           iam_coeff3 = 0
         end
