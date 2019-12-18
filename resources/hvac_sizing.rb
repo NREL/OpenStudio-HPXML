@@ -622,7 +622,6 @@ class HVACSizing
             surf_azimuth = wall_true_azimuth - 360
           end
 
-          # TODO: Account for eaves, porches, etc.
           if windowHasOverhang
             if (hr == -1 and surf_azimuth.abs < 90.1) or (hr > -1)
               if hr == -1

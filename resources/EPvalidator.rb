@@ -70,8 +70,8 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']" => zero_or_one, # See [MechanicalVentilation]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem" => zero_or_more, # See [WaterHeatingSystem]
-        "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture" => zero_or_more, # See [WaterFixture]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution" => zero_or_one, # See [HotWaterDistribution]
+        "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture" => zero_or_more, # See [WaterFixture]
         "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => zero_or_one, # See [SolarThermalSystem]
         "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem" => zero_or_more, # See [PVSystem]
 
@@ -551,13 +551,13 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[SystemType='hot water']" => one,
         "[CollectorArea | SolarFraction]" => one, # See [SolarThermal=Detailed] if CollectorArea provided
-        "ConnectedTo" => one, # WaterHeatingSystem
+        "ConnectedTo" => one, # WaterHeatingSystem (any type but space-heating boiler)
       },
 
       ## [SolarThermal=Detailed]
       "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[CollectorArea]" => {
-        "[CollectorLoopType='liquid indirect' or CollectorLoopType='liquid direct' or CollectorLoopType='passive thermosyphon']" => one, # Not allowed BUT in the schema: air direct, air indirect
-        "[CollectorType='evacuated tube' or CollectorType='integrated collector storage' or CollectorType='single glazing black']" => one, # Not allowed BUT in the schema: single glazing selective, double glazing black, double glazing selective
+        "[CollectorLoopType='liquid indirect' or CollectorLoopType='liquid direct' or CollectorLoopType='passive thermosyphon']" => one,
+        "[CollectorType='single glazing black' or CollectorType='evacuated tube' or CollectorType='integrated collector storage']" => one,
         "CollectorAzimuth" => one,
         "CollectorTilt" => one,
         "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings

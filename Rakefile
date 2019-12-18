@@ -57,6 +57,9 @@ def create_hpxmls
     'invalid_files/refrigerator-location-other.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
+    'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
+    'invalid_files/solar-thermal-system-with-dhw-indirect.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
@@ -117,6 +120,7 @@ def create_hpxmls
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
@@ -124,6 +128,7 @@ def create_hpxmls
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
     'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
+    'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
     'base-dhw-tankless-wood.xml' => 'base.xml',
@@ -2945,7 +2950,12 @@ end
 
 def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
   if ['base-dhw-solar-fraction.xml',
-      'base-dhw-multiple.xml'].include? hpxml_file
+      'base-dhw-multiple.xml',
+      'base-dhw-tank-heat-pump-with-solar-fraction.xml',
+      'base-dhw-tankless-gas-with-solar-fraction.xml',
+      'invalid_files/solar-thermal-system-with-combi-tankless.xml',
+      'invalid_files/solar-thermal-system-with-desuperheater.xml',
+      'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
     solar_thermal_system_values = { :id => "SolarThermalSystem",
                                     :system_type => "hot water",
                                     :water_heating_system_idref => "WaterHeater",

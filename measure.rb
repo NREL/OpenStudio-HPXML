@@ -794,7 +794,7 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
-        next if vf < 0.01 # TODO: Remove this when https://github.com/NREL/OpenStudio/issues/3737 is resolved
+        next if vf < 0.01
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf.round(10))
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
@@ -1042,7 +1042,7 @@ class OSModel
     end
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
-      weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
+      weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000"
       weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject(0, :+)
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
         runner.registerError("Occupancy schedule inconsistent with hrs_per_day.")
@@ -2256,8 +2256,9 @@ class OSModel
         # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
         # the portion of the total conventional hot water heating load (delivered energy + tank losses).
         solar_fraction = nil
-        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts)
-        if not solar_thermal_values.nil?
+        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts,
+                                                                     select: [:solar_fraction, :water_heating_system_idref])
+        if not solar_thermal_values.nil? and solar_thermal_values[:water_heating_system_idref] == sys_id
           solar_fraction = solar_thermal_values[:solar_fraction]
         end
         solar_fraction = 0.0 if solar_fraction.nil?
@@ -2362,6 +2363,22 @@ class OSModel
     solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts)
     if not solar_thermal_values.nil?
       collector_area = solar_thermal_values[:collector_area]
+      dhw_system_idref = solar_thermal_values[:water_heating_system_idref]
+
+      wh.elements.each("WaterHeatingSystem") do |dhw|
+        water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw,
+                                                                            select: [:id, :water_heater_type, :uses_desuperheater])
+        next unless water_heating_system_values[:id] == dhw_system_idref
+
+        if ['space-heating boiler with storage tank', 'space-heating boiler with tankless coil'].include? water_heating_system_values[:water_heater_type]
+          fail "Water heating system '#{dhw_system_idref}' connected to solar thermal system '#{solar_thermal_values[:id]}' cannot be a space-heating boiler."
+        end
+
+        if water_heating_system_values[:uses_desuperheater]
+          fail "Water heating system '#{dhw_system_idref}' connected to solar thermal system '#{solar_thermal_values[:id]}' cannot be attached to a desuperheater."
+        end
+      end
+
       if not collector_area.nil? # Detailed solar water heater
         frta = solar_thermal_values[:collector_frta]
         frul = solar_thermal_values[:collector_frul]
@@ -2394,7 +2411,6 @@ class OSModel
         azimuth = Float(solar_thermal_values[:collector_azimuth])
         tilt = solar_thermal_values[:collector_tilt]
         coll_type = solar_thermal_values[:collector_type]
-        dhw_system_idref = solar_thermal_values[:water_heating_system_idref]
         space = water_heater_spaces[dhw_system_idref]
 
         dhw_loop = nil
@@ -2502,7 +2518,7 @@ class OSModel
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.71, 0.73]
           else
-            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages
+            # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages
             shrs = [cooling_system_values[:cooling_shr] - 0.02, cooling_system_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
@@ -2778,7 +2794,7 @@ class OSModel
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.71, 0.724]
           else
-            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages?
+            # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages?
             shrs = [heat_pump_values[:cooling_shr] - 0.014, heat_pump_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
