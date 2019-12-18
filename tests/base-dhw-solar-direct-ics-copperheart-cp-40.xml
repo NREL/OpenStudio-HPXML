@@ -345,7 +345,7 @@
             <CollectorTilt>20.0</CollectorTilt>
             <CollectorRatedOpticalEfficiency>0.674</CollectorRatedOpticalEfficiency>
             <CollectorRatedThermalLosses>0.921</CollectorRatedThermalLosses>
-            <StorageVolume>60.0</StorageVolume>
+            <StorageVolume>40.0</StorageVolume>
             <ConnectedTo idref='WaterHeater'/>
           </SolarThermalSystem>
         </SolarThermal>

@@ -102,7 +102,7 @@ class Waterheater
     cap = 0.5 # kW
     shr = 0.88 # unitless
     airflow_rate = 181.0 # cfm
-    fan_power = 0.0462 # W/cfm TODO: Based on 1st gen AO Smith HPWH: Does this need to be updated?
+    fan_power = 0.0462 # W/cfm, Based on 1st gen AO Smith HPWH, could be updated but pretty minor impact
     parasitics = 3.0 # W
 
     # Calculate the COP based on EF
@@ -668,12 +668,11 @@ class Waterheater
 
       # ics_performance = OpenStudio::Model::SolarCollectorPerformanceIntegralCollectorStorage.new(model)
       ics_performance = collector_plate.solarCollectorPerformance
-      # TODO: double check what defaults
       # Values are based on spec sheet + OG-100 listing for Solarheart ICS collectors
-      ics_volume = UnitConversions.convert(collector_area, "ft^2", "m^2") / 17.4 # Based on average of OG-100 listed (as of 11/1/19) ICS collectors
+      #ics_volume = UnitConversions.convert(collector_area, "ft^2", "m^2") / 17.4 # Based on average of OG-100 listed (as of 11/1/19) ICS collectors
       ics_performance.setName(obj_name + " coll perf")
       ics_performance.setGrossArea(UnitConversions.convert(collector_area, "ft^2", "m^2"))
-      ics_performance.setCollectorWaterVolume(ics_volume)
+      ics_performance.setCollectorWaterVolume(UnitConversions.convert(storage_vol, "gal", "m^3"))
       ics_performance.setBottomHeatLossConductance(1.902) # Spec sheet
       ics_performance.setSideHeatLossConductance(1.268)
       ics_performance.setAspectRatio(0.721)
@@ -721,10 +720,17 @@ class Waterheater
 
     storage_tank = OpenStudio::Model::WaterHeaterStratified.new(model)
     storage_tank.setName(obj_name + " storage tank")
-    storage_tank.setTankVolume(UnitConversions.convert(storage_vol, "gal", "m^3"))
-    storage_tank.setTankHeight(UnitConversions.convert(storage_ht, "ft", "m"))
-    storage_tank.setTankShape('VerticalCylinder')
-    storage_tank.setTankPerimeter(Math::PI * UnitConversions.convert(storage_diam, "in", "m"))
+    if coll_type == Constants.SolarThermalCollectorTypeICS or fluid_type == Constants.FluidWater #Use a 60 gal tank dummy tank for direct systems, storage volume for ICS is assumed to be collector volume
+        storage_tank.setTankVolume(0.2271)
+        storage_tank.setTankHeight(1.3755)
+        storage_tank.setTankShape('VerticalCylinder')
+        storage_tank.setTankPerimeter(0.120)
+    else
+        storage_tank.setTankVolume(UnitConversions.convert(storage_vol, "gal", "m^3"))
+        storage_tank.setTankHeight(UnitConversions.convert(storage_ht, "ft", "m"))
+        storage_tank.setTankShape('VerticalCylinder')
+        storage_tank.setTankPerimeter(Math::PI * UnitConversions.convert(storage_diam, "in", "m"))
+    end
     storage_tank.setMaximumTemperatureLimit(99)
     storage_tank.heater1SetpointTemperatureSchedule.remove
     storage_tank.setHeater1SetpointTemperatureSchedule(setpoint_schedule_one)
@@ -749,9 +755,16 @@ class Waterheater
     storage_tank.setOffCycleFlueLossFractiontoZone(1)
     storage_tank.setUseSideEffectiveness(1)
     storage_tank.setUseSideInletHeight(0)
-    storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, "ft", "m"))
-    storage_tank.setSourceSideEffectiveness(heat_ex_eff)
-    storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, "ft", "m") / 3.0)
+    if coll_type == Constants.SolarThermalCollectorTypeICS
+        storage_tank.setUseSideOutletHeight(1.3755)
+        storage_tank.setSourceSideEffectiveness(heat_ex_eff)
+        storage_tank.setSourceSideInletHeight(1.3755 / 3.0)
+    else
+        storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, "ft", "m"))
+        storage_tank.setSourceSideEffectiveness(heat_ex_eff)
+        storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, "ft", "m") / 3.0)
+    end
+    
     storage_tank.setSourceSideOutletHeight(0)
     storage_tank.setInletMode('Fixed')
     storage_tank.setIndirectWaterHeatingRecoveryTime(1.5)

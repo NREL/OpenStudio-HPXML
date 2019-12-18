@@ -2372,24 +2372,24 @@ class OSModel
           iam_coeff2 = 0.1
           iam_coeff3 = 0
         else # ICS
-          iam_coeff2 = 0.1 # TODO: do flat plate values represent ICS well?
+          iam_coeff2 = 0.1 
           iam_coeff3 = 0
         end
         storage_vol = solar_thermal_values[:storage_volume]
-        tank_r = 10.0 # TODO: Review
-        fluid_type = Constants.FluidPropyleneGlycol # TODO: Review
-        heat_ex_eff = 0.7 # TODO: Review
+        tank_r = 10.0
+        fluid_type = Constants.FluidPropyleneGlycol
+        heat_ex_eff = 0.7
         if solar_thermal_values[:collector_loop_type] == Constants.SolarThermalLoopTypeIndirect
           fluid_type = Constants.FluidPropyleneGlycol
-          heat_ex_eff = 0.7 # TODO: Review
+          heat_ex_eff = 0.7
         else # Only allowed other options are 'liquid direct' and 'passive thermosyphon'
           fluid_type = Constants.FluidWater
-          heat_ex_eff = 1.0 # TODO: Review
+          heat_ex_eff = 1.0
         end
         if solar_thermal_values[:collector_loop_type] == Constants.SolarThermalLoopTypeThermosyphon
           pump_power = 0.0
         else
-          pump_power = 0.8 * collector_area # TODO: Review
+          pump_power = 0.8 * collector_area
         end
         azimuth = Float(solar_thermal_values[:collector_azimuth])
         tilt = solar_thermal_values[:collector_tilt]
