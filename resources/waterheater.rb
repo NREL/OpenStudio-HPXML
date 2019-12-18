@@ -755,7 +755,7 @@ class Waterheater
     storage_tank.setOffCycleFlueLossFractiontoZone(1)
     storage_tank.setUseSideEffectiveness(1)
     storage_tank.setUseSideInletHeight(0)
-    if coll_type == Constants.SolarThermalCollectorTypeICS
+    if coll_type == Constants.SolarThermalCollectorTypeICS or fluid_type == Constants.FluidWater
         storage_tank.setUseSideOutletHeight(1.3755)
         storage_tank.setSourceSideEffectiveness(heat_ex_eff)
         storage_tank.setSourceSideInletHeight(1.3755 / 3.0)
