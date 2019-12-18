@@ -3,7 +3,11 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
+<<<<<<< HEAD:measures/HPXMLtoOpenStudio/tests/base-hvac-air-to-air-heat-pump-2-speed-17F.xml
     <CreatedDateAndTime>2019-10-15T09:57:40-06:00</CreatedDateAndTime>
+=======
+    <CreatedDateAndTime>2019-09-06T08:31:50-06:00</CreatedDateAndTime>
+>>>>>>> e36990752ec21b235323f5a9b684bd43340af3af:measures/HPXMLtoOpenStudio/tests/hvac_base/base-hvac-ideal-air-base.xml
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -32,6 +36,12 @@
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>2700.0</ConditionedFloorArea>
           <ConditionedBuildingVolume>21600.0</ConditionedBuildingVolume>
+<<<<<<< HEAD:measures/HPXMLtoOpenStudio/tests/base-hvac-air-to-air-heat-pump-2-speed-17F.xml
+=======
+          <extension>
+            <UseOnlyIdealAirSystem>true</UseOnlyIdealAirSystem>
+          </extension>
+>>>>>>> e36990752ec21b235323f5a9b684bd43340af3af:measures/HPXMLtoOpenStudio/tests/hvac_base/base-hvac-ideal-air-base.xml
         </BuildingConstruction>
       </BuildingSummary>
       <ClimateandRiskZones>
@@ -231,6 +241,7 @@
       </Enclosure>
       <Systems>
         <HVAC>
+<<<<<<< HEAD:measures/HPXMLtoOpenStudio/tests/base-hvac-air-to-air-heat-pump-2-speed-17F.xml
           <HVACPlant>
             <HeatPump>
               <SystemIdentifier id='HeatPump'/>
@@ -258,12 +269,15 @@
               </AnnualHeatingEfficiency>
             </HeatPump>
           </HVACPlant>
+=======
+>>>>>>> e36990752ec21b235323f5a9b684bd43340af3af:measures/HPXMLtoOpenStudio/tests/hvac_base/base-hvac-ideal-air-base.xml
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
             <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
+<<<<<<< HEAD:measures/HPXMLtoOpenStudio/tests/base-hvac-air-to-air-heat-pump-2-speed-17F.xml
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution'/>
             <DistributionSystemType>
@@ -299,6 +313,8 @@
               </AirDistribution>
             </DistributionSystemType>
           </HVACDistribution>
+=======
+>>>>>>> e36990752ec21b235323f5a9b684bd43340af3af:measures/HPXMLtoOpenStudio/tests/hvac_base/base-hvac-ideal-air-base.xml
         </HVAC>
         <WaterHeating>
           <WaterHeatingSystem>
