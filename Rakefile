@@ -108,13 +108,15 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
-    'base-dhw-solar-fraction.xml' => 'base.xml',
-    'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
-    'base-dhw-solar-indirect-flat-plate-thermosyphon.xml' => 'base.xml',
-    'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
-    'base-dhw-solar-indirect-evacuated-tube.xml' => 'base.xml',
     'base-dhw-solar-direct-evacuated-tube.xml' => 'base.xml',
+    'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
     'base-dhw-solar-direct-ics.xml' => 'base.xml',
+    'base-dhw-solar-fraction.xml' => 'base.xml',
+    'base-dhw-solar-indirect-evacuated-tube.xml' => 'base.xml',
+    'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
+    'base-dhw-solar-thermosyphon-evacuated-tube.xml' => 'base.xml',
+    'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
+    'base-dhw-solar-thermosyphon-ics.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
@@ -2971,13 +2973,14 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
                                     :system_type => "hot water",
                                     :water_heating_system_idref => "WaterHeater",
                                     :solar_fraction => 0.65 }
-  elsif ['base-dhw-solar-indirect-flat-plate.xml',
+  elsif ['base-dhw-solar-direct-flat-plate.xml',
+         'base-dhw-solar-indirect-flat-plate.xml',
+         'base-dhw-solar-thermosyphon-flat-plate.xml',
          'base-dhw-tank-heat-pump-with-solar.xml',
          'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
     solar_thermal_system_values = { :id => "SolarThermalSystem",
                                     :system_type => "hot water",
                                     :collector_area => 40,
-                                    :collector_loop_type => "liquid indirect",
                                     :collector_type => "single glazing black",
                                     :collector_azimuth => 180,
                                     :collector_tilt => 20,
@@ -2985,35 +2988,19 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
                                     :collector_frul => 0.793,
                                     :storage_volume => 60,
                                     :water_heating_system_idref => "WaterHeater" }
-  elsif ['base-dhw-solar-indirect-flat-plate-thermosyphon.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-solar-direct-flat-plate.xml'
+      solar_thermal_system_values[:collector_loop_type] = "liquid direct"
+    elsif hpxml_file == 'base-dhw-solar-thermosyphon-flat-plate.xml'
+      solar_thermal_system_values[:collector_loop_type] = "passive thermosyphon"
+    else
+      solar_thermal_system_values[:collector_loop_type] = "liquid indirect"
+    end
+  elsif ['base-dhw-solar-indirect-evacuated-tube.xml',
+         'base-dhw-solar-direct-evacuated-tube.xml',
+         'base-dhw-solar-thermosyphon-evacuated-tube.xml'].include? hpxml_file
     solar_thermal_system_values = { :id => "SolarThermalSystem",
                                     :system_type => "hot water",
                                     :collector_area => 40,
-                                    :collector_loop_type => "passive thermosyphon",
-                                    :collector_type => "single glazing black",
-                                    :collector_azimuth => 180,
-                                    :collector_tilt => 20,
-                                    :collector_frta => 0.77,
-                                    :collector_frul => 0.793,
-                                    :storage_volume => 60,
-                                    :water_heating_system_idref => "WaterHeater" }
-  elsif ['base-dhw-solar-direct-flat-plate.xml'].include? hpxml_file
-    solar_thermal_system_values = { :id => "SolarThermalSystem",
-                                    :system_type => "hot water",
-                                    :collector_area => 40,
-                                    :collector_loop_type => "liquid direct",
-                                    :collector_type => "single glazing black",
-                                    :collector_azimuth => 180,
-                                    :collector_tilt => 20,
-                                    :collector_frta => 0.77,
-                                    :collector_frul => 0.793,
-                                    :storage_volume => 60,
-                                    :water_heating_system_idref => "WaterHeater" }
-  elsif ['base-dhw-solar-indirect-evacuated-tube.xml'].include? hpxml_file
-    solar_thermal_system_values = { :id => "SolarThermalSystem",
-                                    :system_type => "hot water",
-                                    :collector_area => 40,
-                                    :collector_loop_type => "liquid indirect",
                                     :collector_type => "evacuated tube",
                                     :collector_azimuth => 180,
                                     :collector_tilt => 20,
@@ -3021,23 +3008,18 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
                                     :collector_frul => 0.2799,
                                     :storage_volume => 60,
                                     :water_heating_system_idref => "WaterHeater" }
-  elsif ['base-dhw-solar-direct-evacuated-tube.xml'].include? hpxml_file
+    if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
+      solar_thermal_system_values[:collector_loop_type] = "liquid direct"
+    elsif hpxml_file == 'base-dhw-solar-thermosyphon-evacuated-tube.xml'
+      solar_thermal_system_values[:collector_loop_type] = "passive thermosyphon"
+    else
+      solar_thermal_system_values[:collector_loop_type] = "liquid indirect"
+    end
+  elsif ['base-dhw-solar-direct-ics.xml',
+         'base-dhw-solar-thermosyphon-ics.xml'].include? hpxml_file
     solar_thermal_system_values = { :id => "SolarThermalSystem",
                                     :system_type => "hot water",
                                     :collector_area => 40,
-                                    :collector_loop_type => "liquid direct",
-                                    :collector_type => "evacuated tube",
-                                    :collector_azimuth => 180,
-                                    :collector_tilt => 20,
-                                    :collector_frta => 0.5,
-                                    :collector_frul => 0.2799,
-                                    :storage_volume => 60,
-                                    :water_heating_system_idref => "WaterHeater" }
-  elsif ['base-dhw-solar-direct-ics.xml'].include? hpxml_file
-    solar_thermal_system_values = { :id => "SolarThermalSystem",
-                                    :system_type => "hot water",
-                                    :collector_area => 40,
-                                    :collector_loop_type => "liquid direct",
                                     :collector_type => "integrated collector storage",
                                     :collector_azimuth => 180,
                                     :collector_tilt => 20,
@@ -3045,6 +3027,11 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
                                     :collector_frul => 0.793,
                                     :storage_volume => 60,
                                     :water_heating_system_idref => "WaterHeater" }
+    if hpxml_file == 'base-dhw-solar-direct-ics.xml'
+      solar_thermal_system_values[:collector_loop_type] = "liquid direct"
+    elsif hpxml_file == 'base-dhw-solar-thermosyphon-ics.xml'
+      solar_thermal_system_values[:collector_loop_type] = "passive thermosyphon"
+    end
   elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
     solar_thermal_system_values[:water_heating_system_idref] = "foobar"
   end
