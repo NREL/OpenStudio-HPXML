@@ -571,8 +571,6 @@ class Waterheater
 
     test_flow = 55.0 / UnitConversions.convert(1.0, "lbm/min", "kg/hr") / Liquid.H2O_l.rho * UnitConversions.convert(1.0, "ft^2", "m^2") # cfm/ft^2
     coll_flow = test_flow * collector_area # cfm
-    storage_diam = (4.0 * UnitConversions.convert(storage_vol, "gal", "ft^3") / 3.0 / Math::PI)**(1.0 / 3.0) # ft
-    storage_ht = 3.0 * storage_diam # ft
     storage_Uvalue = 1.0 / tank_r # Btu/hr-ft^2-R
 
     # Get water heater and setpoint temperature schedules from loop
@@ -717,16 +715,22 @@ class Waterheater
 
     storage_tank = OpenStudio::Model::WaterHeaterStratified.new(model)
     storage_tank.setName(obj_name + " storage tank")
+    storage_tank.setSourceSideEffectiveness(heat_ex_eff)
+    storage_tank.setTankShape('VerticalCylinder')
     if coll_type == Constants.SolarThermalCollectorTypeICS or fluid_type == Constants.FluidWater # Use a 60 gal tank dummy tank for direct systems, storage volume for ICS is assumed to be collector volume
       storage_tank.setTankVolume(0.2271)
       storage_tank.setTankHeight(1.3755)
-      storage_tank.setTankShape('VerticalCylinder')
       storage_tank.setTankPerimeter(0.120)
+      storage_tank.setUseSideOutletHeight(1.3755)
+      storage_tank.setSourceSideInletHeight(1.3755 / 3.0)
     else
+      storage_diam = (4.0 * UnitConversions.convert(storage_vol, "gal", "ft^3") / 3.0 / Math::PI)**(1.0 / 3.0) # ft
+      storage_ht = 3.0 * storage_diam # ft
       storage_tank.setTankVolume(UnitConversions.convert(storage_vol, "gal", "m^3"))
       storage_tank.setTankHeight(UnitConversions.convert(storage_ht, "ft", "m"))
-      storage_tank.setTankShape('VerticalCylinder')
       storage_tank.setTankPerimeter(Math::PI * UnitConversions.convert(storage_diam, "in", "m"))
+      storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, "ft", "m"))
+      storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, "ft", "m") / 3.0)
     end
     storage_tank.setMaximumTemperatureLimit(99)
     storage_tank.heater1SetpointTemperatureSchedule.remove
@@ -747,21 +751,10 @@ class Waterheater
     else
       storage_tank.setUniformSkinLossCoefficientperUnitAreatoAmbientTemperature(UnitConversions.convert(storage_Uvalue, "Btu/(hr*ft^2*F)", "W/(m^2*K)"))
     end
-
     storage_tank.setSkinLossFractiontoZone(1)
     storage_tank.setOffCycleFlueLossFractiontoZone(1)
     storage_tank.setUseSideEffectiveness(1)
     storage_tank.setUseSideInletHeight(0)
-    if coll_type == Constants.SolarThermalCollectorTypeICS or fluid_type == Constants.FluidWater
-      storage_tank.setUseSideOutletHeight(1.3755)
-      storage_tank.setSourceSideEffectiveness(heat_ex_eff)
-      storage_tank.setSourceSideInletHeight(1.3755 / 3.0)
-    else
-      storage_tank.setUseSideOutletHeight(UnitConversions.convert(storage_ht, "ft", "m"))
-      storage_tank.setSourceSideEffectiveness(heat_ex_eff)
-      storage_tank.setSourceSideInletHeight(UnitConversions.convert(storage_ht, "ft", "m") / 3.0)
-    end
-
     storage_tank.setSourceSideOutletHeight(0)
     storage_tank.setInletMode('Fixed')
     storage_tank.setIndirectWaterHeatingRecoveryTime(1.5)
