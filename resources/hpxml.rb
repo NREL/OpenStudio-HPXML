@@ -351,8 +351,6 @@ class HPXML
       surf = surfs[surf_id]
       surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
     end
-
-    return true
   end
 
   def self.add_air_infiltration_measurement(hpxml:,
