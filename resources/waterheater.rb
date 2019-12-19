@@ -772,6 +772,7 @@ class Waterheater
     storage_tank.setOnCycleParasiticFuelConsumptionRate(0)
     storage_tank.setOffCycleParasiticFuelConsumptionRate(0)
     storage_tank.setUseSideDesignFlowRate((UnitConversions.convert(storage_vol, "gal", "m^3")) / 60.1) # Sized to ensure that E+ never autosizes the design flow rate to be larger than the tank volume getting drawn out in a hour (60 minutes)
+    dhw_map[sys_id] << storage_tank
 
     plant_loop.addDemandBranchForComponent(storage_tank)
     runner.registerInfo("Added '#{storage_tank.name}' to demand branch of '#{plant_loop.name}'.")
