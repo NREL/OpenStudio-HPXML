@@ -1993,156 +1993,32 @@ class HVAC
     return hvac_objects
   end
 
-  def self.apply_heating_setpoints(model, runner, weather, htg_wkdy_monthly, htg_wked_monthly,
-                                   use_auto_season, season_start_month, season_end_month,
-                                   living_zone)
+  def self.apply_setpoints(model, runner, weather, living_zone,
+                           htg_wkdy_monthly, htg_wked_monthly, htg_start_month, htg_end_month,
+                           clg_wkdy_monthly, clg_wked_monthly, clg_start_month, clg_end_month)
 
     # Get heating season
-    if use_auto_season
-      heating_season, _ = calc_heating_and_cooling_seasons(model, weather)
+    if htg_start_month <= htg_end_month
+      heating_season = Array.new(htg_start_month - 1, 0) + Array.new(htg_end_month - htg_start_month + 1, 1) + Array.new(12 - htg_end_month, 0)
     else
-      if season_start_month <= season_end_month
-        heating_season = Array.new(season_start_month - 1, 0) + Array.new(season_end_month - season_start_month + 1, 1) + Array.new(12 - season_end_month, 0)
-      else
-        heating_season = Array.new(season_end_month, 1) + Array.new(season_start_month - season_end_month - 1, 0) + Array.new(12 - season_start_month + 1, 1)
-      end
+      heating_season = Array.new(htg_end_month, 1) + Array.new(htg_start_month - htg_end_month - 1, 0) + Array.new(12 - htg_start_month + 1, 1)
     end
 
-    cooling_season = get_season(model, weather, runner, Constants.ObjectNameCoolingSeason)
+    # Get cooling season
+    if clg_start_month <= clg_end_month
+      cooling_season = Array.new(clg_start_month - 1, 0) + Array.new(clg_end_month - clg_start_month + 1, 1) + Array.new(12 - clg_end_month, 0)
+    else
+      cooling_season = Array.new(clg_end_month, 1) + Array.new(clg_start_month - clg_end_month - 1, 0) + Array.new(12 - clg_start_month + 1, 1)
+    end
 
     heating_season_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameHeatingSeason, Array.new(24, 1), Array.new(24, 1), heating_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsOnOff)
+    cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsOnOff)
 
     htg_wkdy_monthly = htg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
     htg_wked_monthly = htg_wked_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
-
-    # Make the setpoint schedules
-    clg_wkdy_monthly = nil
-    clg_wked_monthly = nil
-    thermostat_setpoint = living_zone.thermostatSetpointDualSetpoint
-    if thermostat_setpoint.is_initialized
-
-      thermostat_setpoint = thermostat_setpoint.get
-
-      clg_wkdy_monthly = get_setpoint_schedule(thermostat_setpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday')
-      clg_wked_monthly = get_setpoint_schedule(thermostat_setpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend')
-
-      if not clg_wkdy_monthly.uniq.length == 1 or not clg_wked_monthly.uniq.length == 1
-        fail "Found monthly variation in cooling setpoint schedule."
-      end
-
-      model.getScheduleRulesets.each do |sch|
-        next unless sch.name.to_s == Constants.ObjectNameCoolingSetpoint
-
-        sch.remove
-      end
-    else # no thermostat in model yet
-
-      clg_wkdy_monthly = [[UnitConversions.convert(Constants.DefaultCoolingSetpoint, "F", "C")] * 24] * 12
-      clg_wked_monthly = [[UnitConversions.convert(Constants.DefaultCoolingSetpoint, "F", "C")] * 24] * 12
-
-    end
-
-    (0..11).to_a.each do |i|
-      if heating_season[i] == 1 and cooling_season[i] == 1 # overlap seasons
-        htg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        htg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        clg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-        clg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-      elsif heating_season[i] == 1 # heating only seasons; cooling has minimum of heating
-        htg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? h : h }
-        htg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? h : h }
-        clg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? h : c }
-        clg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? h : c }
-      elsif cooling_season[i] == 1 # cooling only seasons; heating has maximum of cooling
-        htg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? c : h }
-        htg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? c : h }
-        clg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? c : c }
-        clg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? c : c }
-      else
-        htg_wkdy = [UnitConversions.convert(Constants.DefaultHeatingSetpoint, "F", "C")] * 24
-        htg_wked = [UnitConversions.convert(Constants.DefaultHeatingSetpoint, "F", "C")] * 24
-        clg_wkdy = [UnitConversions.convert(Constants.DefaultCoolingSetpoint, "F", "C")] * 24
-        clg_wked = [UnitConversions.convert(Constants.DefaultCoolingSetpoint, "F", "C")] * 24
-      end
-      htg_wkdy_monthly[i] = htg_wkdy
-      htg_wked_monthly[i] = htg_wked
-      clg_wkdy_monthly[i] = clg_wkdy
-      clg_wked_monthly[i] = clg_wked
-    end
-
-    heating_setpoint = HourlyByMonthSchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_wkdy_monthly, htg_wked_monthly, normalize_values = false)
-    cooling_setpoint = HourlyByMonthSchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_wkdy_monthly, clg_wked_monthly, normalize_values = false)
-
-    # Set the setpoint schedules
-    thermostat_setpoint = living_zone.thermostatSetpointDualSetpoint
-    if thermostat_setpoint.is_initialized
-      thermostat_setpoint = thermostat_setpoint.get
-      thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
-      thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
-    else
-      thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
-      thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
-      thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
-      thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
-      living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
-    end
-
-    model.getScheduleDays.each do |obj| # remove orphaned summer and winter design day schedules
-      next if obj.directUseCount > 0
-
-      obj.remove
-    end
-  end
-
-  def self.apply_cooling_setpoints(model, runner, weather, clg_wkdy_monthly, clg_wked_monthly,
-                                   use_auto_season, season_start_month, season_end_month,
-                                   living_zone)
-
-    # Get cooling season
-    if use_auto_season
-      _, cooling_season = calc_heating_and_cooling_seasons(model, weather)
-    else
-      if season_start_month <= season_end_month
-        cooling_season = Array.new(season_start_month - 1, 0) + Array.new(season_end_month - season_start_month + 1, 1) + Array.new(12 - season_end_month, 0)
-      else
-        cooling_season = Array.new(season_end_month, 1) + Array.new(season_start_month - season_end_month - 1, 0) + Array.new(12 - season_start_month + 1, 1)
-      end
-    end
-
-    heating_season = get_season(model, weather, runner, Constants.ObjectNameHeatingSeason)
-
-    cooling_season_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameCoolingSeason, Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = false, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsOnOff)
-
     clg_wkdy_monthly = clg_wkdy_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
     clg_wked_monthly = clg_wked_monthly.map { |i| i.map { |j| UnitConversions.convert(j, "F", "C") } }
 
-    # Make the setpoint schedules
-    htg_wkdy_monthly = nil
-    htg_wked_monthly = nil
-    thermostat_setpoint = living_zone.thermostatSetpointDualSetpoint
-    if thermostat_setpoint.is_initialized
-
-      thermostat_setpoint = thermostat_setpoint.get
-
-      htg_wkdy_monthly = get_setpoint_schedule(thermostat_setpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday')
-      htg_wked_monthly = get_setpoint_schedule(thermostat_setpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend')
-
-      if not htg_wkdy_monthly.uniq.length == 1 or not htg_wked_monthly.uniq.length == 1
-        fail "Found monthly variation in heating setpoint schedule."
-      end
-
-      model.getScheduleRulesets.each do |sch|
-        next unless sch.name.to_s == Constants.ObjectNameHeatingSetpoint
-
-        sch.remove
-      end
-    else # no thermostat in model yet
-
-      htg_wkdy_monthly = [[UnitConversions.convert(Constants.DefaultHeatingSetpoint, "F", "C")] * 24] * 12
-      htg_wked_monthly = [[UnitConversions.convert(Constants.DefaultHeatingSetpoint, "F", "C")] * 24] * 12
-
-    end
-
     (0..11).to_a.each do |i|
       if heating_season[i] == 1 and cooling_season[i] == 1 # overlap seasons
         htg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
@@ -2160,10 +2036,7 @@ class HVAC
         clg_wkdy = htg_wkdy_monthly[i].zip(clg_wkdy_monthly[i]).map { |h, c| c < h ? c : c }
         clg_wked = htg_wked_monthly[i].zip(clg_wked_monthly[i]).map { |h, c| c < h ? c : c }
       else
-        htg_wkdy = [UnitConversions.convert(Constants.DefaultHeatingSetpoint, "F", "C")] * 24
-        htg_wked = [UnitConversions.convert(Constants.DefaultHeatingSetpoint, "F", "C")] * 24
-        clg_wkdy = [UnitConversions.convert(Constants.DefaultCoolingSetpoint, "F", "C")] * 24
-        clg_wked = [UnitConversions.convert(Constants.DefaultCoolingSetpoint, "F", "C")] * 24
+        fail "Unhandled case."
       end
       htg_wkdy_monthly[i] = htg_wkdy
       htg_wked_monthly[i] = htg_wked
@@ -2187,78 +2060,6 @@ class HVAC
       thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
       living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
     end
-
-    model.getScheduleDays.each do |obj| # remove orphaned summer and winter design day schedules
-      next if obj.directUseCount > 0
-
-      obj.remove
-    end
-  end
-
-  def self.get_setpoint_schedule(schedule_ruleset, weekday_or_weekend)
-    setpoint_schedule = [[0] * 24] * 12
-    schedule_ruleset.scheduleRules.each do |rule|
-      month = rule.startDate.get.monthOfYear.value.to_i - 1
-      next unless weekday_or_weekend_rule(rule).include? weekday_or_weekend
-
-      rule.daySchedule.values.each_with_index do |value, i|
-        hour = rule.daySchedule.times[i].hours - 1
-        setpoint_schedule[month][hour] = value
-      end
-      setpoint_schedule[month] = backfill_schedule_values(setpoint_schedule[month])
-    end
-    if setpoint_schedule.any? { |m| m.any? { |h| h == 0 } }
-      fail "Failed to get the setpoint schedule."
-    end
-
-    return setpoint_schedule
-  end
-
-  def self.weekday_or_weekend_rule(rule)
-    if rule.applyMonday and rule.applyTuesday and rule.applyWednesday and rule.applyThursday and rule.applyFriday and rule.applySaturday and rule.applySunday
-      return 'weekday/weekend'
-    elsif rule.applyMonday and rule.applyTuesday and rule.applyWednesday and rule.applyThursday and rule.applyFriday
-      return 'weekday'
-    elsif rule.applySaturday and rule.applySunday
-      return 'weekend'
-    end
-
-    fail "Unexpected schedule ruleset days."
-  end
-
-  def self.backfill_schedule_values(values)
-    # backfill the array values
-    values = values.reverse
-    previous_value = values[0]
-    values.each_with_index do |c, i|
-      if values[i + 1] == 0
-        values[i + 1] = previous_value
-      end
-      previous_value = values[i + 1]
-    end
-    values = values.reverse
-    return values
-  end
-
-  def self.get_season(model, weather, runner, sch_name)
-    season = []
-    model.getScheduleRulesets.each do |sch|
-      if sch.name.to_s == sch_name
-        sch.scheduleRules.each do |rule|
-          ix = rule.startDate.get.monthOfYear.value.to_i - 1
-          season[ix] = rule.daySchedule.values[0]
-        end
-      end
-    end
-    if season.empty?
-      heating_season, cooling_season = calc_heating_and_cooling_seasons(model, weather)
-      if sch_name == Constants.ObjectNameHeatingSeason
-        season = heating_season
-      else
-        season = cooling_season
-      end
-    end
-    return season
   end
 
   def self.get_default_heating_setpoint(control_type)

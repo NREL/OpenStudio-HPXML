@@ -360,16 +360,15 @@ class OSModel
     spaces = {}
     @foundation_top, @walls_top = get_foundation_and_walls_top(building)
 
-    heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
-
     add_roofs(runner, model, building, spaces)
     add_walls(runner, model, building, spaces)
     add_rim_joists(runner, model, building, spaces)
     add_framefloors(runner, model, building, spaces)
     add_foundation_walls_slabs(runner, model, building, spaces)
-    add_windows(runner, model, building, spaces, weather, cooling_season)
+    is_sch = add_interior_shading_schedule(runner, model, weather)
+    add_windows(runner, model, building, spaces, weather, is_sch)
     add_doors(runner, model, building, spaces)
-    add_skylights(runner, model, building, spaces, weather, cooling_season)
+    add_skylights(runner, model, building, spaces, weather, is_sch)
     add_conditioned_floor_area(runner, model, building, spaces)
 
     # update living space/zone global variable
@@ -1752,7 +1751,13 @@ class OSModel
     end
   end
 
-  def self.add_windows(runner, model, building, spaces, weather, cooling_season)
+  def self.add_interior_shading_schedule(runner, model, weather)
+    heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
+    sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    return sch
+  end
+
+  def self.add_windows(runner, model, building, spaces, weather, is_sch)
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
@@ -1815,14 +1820,14 @@ class OSModel
       end
       Constructions.apply_window(model, [sub_surface],
                                  "WindowConstruction",
-                                 weather, cooling_season, ufactor, shgc,
+                                 weather, is_sch, ufactor, shgc,
                                  heat_shade_mult, cool_shade_mult)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, "wall")
   end
 
-  def self.add_skylights(runner, model, building, spaces, weather, cooling_season)
+  def self.add_skylights(runner, model, building, spaces, weather, is_sch)
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_values = HPXML.get_skylight_values(skylight: skylight)
@@ -1876,7 +1881,7 @@ class OSModel
       heat_shade_mult = 1.0
       Constructions.apply_skylight(model, [sub_surface],
                                    "SkylightConstruction",
-                                   weather, cooling_season, ufactor, shgc,
+                                   weather, is_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
 
@@ -2755,7 +2760,7 @@ class OSModel
 
     # Base heating setpoint
     htg_setpoint = hvac_control_values[:heating_setpoint_temp]
-    htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
+    @htg_weekday_setpoints = [[htg_setpoint] * 24] * 12
 
     # Apply heating setback?
     htg_setback = hvac_control_values[:heating_setback_temp]
@@ -2764,22 +2769,15 @@ class OSModel
       htg_setback_start_hr = hvac_control_values[:heating_setback_start_hour]
       for m in 1..12
         for hr in htg_setback_start_hr..htg_setback_start_hr + Integer(htg_setback_hrs_per_week / 7.0) - 1
-          htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
+          @htg_weekday_setpoints[m - 1][hr % 24] = htg_setback
         end
       end
     end
-
-    htg_weekend_setpoints = htg_weekday_setpoints
-    htg_use_auto_season = false
-    htg_season_start_month = 1
-    htg_season_end_month = 12
-    HVAC.apply_heating_setpoints(model, runner, weather, htg_weekday_setpoints, htg_weekend_setpoints,
-                                 htg_use_auto_season, htg_season_start_month, htg_season_end_month,
-                                 @living_zone)
+    @htg_weekend_setpoints = @htg_weekday_setpoints
 
     # Base cooling setpoint
     clg_setpoint = hvac_control_values[:cooling_setpoint_temp]
-    clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
+    @clg_weekday_setpoints = [[clg_setpoint] * 24] * 12
 
     # Apply cooling setup?
     clg_setup = hvac_control_values[:cooling_setup_temp]
@@ -2788,7 +2786,7 @@ class OSModel
       clg_setup_start_hr = hvac_control_values[:cooling_setup_start_hour]
       for m in 1..12
         for hr in clg_setup_start_hr..clg_setup_start_hr + Integer(clg_setup_hrs_per_week / 7.0) - 1
-          clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
+          @clg_weekday_setpoints[m - 1][hr % 24] = clg_setup
         end
       end
     end
@@ -2799,17 +2797,14 @@ class OSModel
       HVAC.get_ceiling_fan_operation_months(weather).each_with_index do |operation, m|
         next unless operation == 1
 
-        clg_weekday_setpoints[m] = [clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
+        @clg_weekday_setpoints[m] = [@clg_weekday_setpoints[m], Array.new(24, clg_ceiling_fan_offset)].transpose.map { |i| i.reduce(:+) }
       end
     end
+    @clg_weekend_setpoints = @clg_weekday_setpoints
 
-    clg_weekend_setpoints = clg_weekday_setpoints
-    clg_use_auto_season = false
-    clg_season_start_month = 1
-    clg_season_end_month = 12
-    HVAC.apply_cooling_setpoints(model, runner, weather, clg_weekday_setpoints, clg_weekend_setpoints,
-                                 clg_use_auto_season, clg_season_start_month, clg_season_end_month,
-                                 @living_zone)
+    HVAC.apply_setpoints(model, runner, weather, @living_zone,
+                         @htg_weekday_setpoints, @htg_weekend_setpoints, 1, 12,
+                         @clg_weekday_setpoints, @clg_weekend_setpoints, 1, 12)
   end
 
   def self.add_ceiling_fans(runner, model, building, weather)
@@ -3055,7 +3050,8 @@ class OSModel
     nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
                                       nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
                                       nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
-                                      nat_vent_max_oa_hr, nat_vent_max_oa_rh)
+                                      nat_vent_max_oa_hr, nat_vent_max_oa_rh, @htg_weekday_setpoints, @htg_weekend_setpoints,
+                                      @clg_weekday_setpoints, @clg_weekend_setpoints)
 
     # Ducts
     duct_systems = {}

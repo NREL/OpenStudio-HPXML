@@ -72,9 +72,6 @@ class HourlyByMonthSchedule
   end
 
   def createSchedule()
-    wkdy = []
-    wknd = []
-
     year_description = @model.getYearDescription
     leap_offset = 0
     if year_description.isLeapYear
@@ -93,6 +90,10 @@ class HourlyByMonthSchedule
 
     assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 
+    prev_wkdy_vals = nil
+    prev_wkdy_rule = nil
+    prev_wknd_vals = nil
+    prev_wknd_rule = nil
     for m in 1..12
       date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
       date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
@@ -104,56 +105,67 @@ class HourlyByMonthSchedule
         wknd_vals[h] = (@weekend_month_by_hour_values[m - 1][h - 1]) / @maxval
       end
 
-      if wkdy_vals == wknd_vals
+      if wkdy_vals == prev_wkdy_vals and wknd_vals == prev_wknd_vals
+        # Extend end date of current rule(s)
+        prev_wkdy_rule.setEndDate(date_e) unless prev_wkdy_rule.nil?
+        prev_wknd_rule.setEndDate(date_e) unless prev_wknd_rule.nil?
+      elsif wkdy_vals == wknd_vals
         # Alldays
         wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
         wkdy_rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{m}")
-        wkdy[m] = wkdy_rule.daySchedule
-        wkdy[m].setName(@sch_name + " #{Schedule.allday_name}#{m}")
+        wkdy = wkdy_rule.daySchedule
+        wkdy.setName(@sch_name + " #{Schedule.allday_name}#{m}")
         previous_value = wkdy_vals[1]
         for h in 1..24
           next if h != 24 and wkdy_vals[h + 1] == previous_value
 
-          wkdy[m].addValue(time[h], previous_value)
+          wkdy.addValue(time[h], previous_value)
           previous_value = wkdy_vals[h + 1]
         end
         Schedule.set_weekday_rule(wkdy_rule)
         Schedule.set_weekend_rule(wkdy_rule)
         wkdy_rule.setStartDate(date_s)
         wkdy_rule.setEndDate(date_e)
+        prev_wkdy_rule = wkdy_rule
+        prev_wknd_rule = nil
       else
         # Weekdays
         wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
         wkdy_rule.setName(@sch_name + " #{Schedule.weekday_name} ruleset#{m}")
-        wkdy[m] = wkdy_rule.daySchedule
-        wkdy[m].setName(@sch_name + " #{Schedule.weekday_name}#{m}")
+        wkdy = wkdy_rule.daySchedule
+        wkdy.setName(@sch_name + " #{Schedule.weekday_name}#{m}")
         previous_value = wkdy_vals[1]
         for h in 1..24
           next if h != 24 and wkdy_vals[h + 1] == previous_value
 
-          wkdy[m].addValue(time[h], previous_value)
+          wkdy.addValue(time[h], previous_value)
           previous_value = wkdy_vals[h + 1]
         end
         Schedule.set_weekday_rule(wkdy_rule)
         wkdy_rule.setStartDate(date_s)
         wkdy_rule.setEndDate(date_e)
+        prev_wkdy_rule = wkdy_rule
 
         # Weekends
         wknd_rule = OpenStudio::Model::ScheduleRule.new(schedule)
         wknd_rule.setName(@sch_name + " #{Schedule.weekend_name} ruleset#{m}")
-        wknd[m] = wknd_rule.daySchedule
-        wknd[m].setName(@sch_name + " #{Schedule.weekend_name}#{m}")
+        wknd = wknd_rule.daySchedule
+        wknd.setName(@sch_name + " #{Schedule.weekend_name}#{m}")
         previous_value = wknd_vals[1]
         for h in 1..24
           next if h != 24 and wknd_vals[h + 1] == previous_value
 
-          wknd[m].addValue(time[h], previous_value)
+          wknd.addValue(time[h], previous_value)
           previous_value = wknd_vals[h + 1]
         end
         Schedule.set_weekend_rule(wknd_rule)
         wknd_rule.setStartDate(date_s)
         wknd_rule.setEndDate(date_e)
+        prev_wknd_rule = wknd_rule
       end
+
+      prev_wkdy_vals = wkdy_vals
+      prev_wknd_vals = wknd_vals
     end
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
@@ -295,9 +307,6 @@ class MonthWeekdayWeekendSchedule
   end
 
   def createSchedule()
-    wkdy = []
-    wknd = []
-
     year_description = @model.getYearDescription
     leap_offset = 0
     if year_description.isLeapYear
@@ -316,6 +325,10 @@ class MonthWeekdayWeekendSchedule
 
     assumedYear = year_description.assumedYear # prevent excessive OS warnings about 'UseWeatherFile'
 
+    prev_wkdy_vals = nil
+    prev_wkdy_rule = nil
+    prev_wknd_vals = nil
+    prev_wknd_rule = nil
     for m in 1..12
       date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
       date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
@@ -327,56 +340,67 @@ class MonthWeekdayWeekendSchedule
         wknd_vals[h] = (@monthly_values[m - 1] * @weekend_hourly_values[h - 1] * @mult_weekend) / @maxval
       end
 
-      if wkdy_vals == wknd_vals
+      if wkdy_vals == prev_wkdy_vals and wknd_vals == prev_wknd_vals
+        # Extend end date of current rule(s)
+        prev_wkdy_rule.setEndDate(date_e) unless prev_wkdy_rule.nil?
+        prev_wknd_rule.setEndDate(date_e) unless prev_wknd_rule.nil?
+      elsif wkdy_vals == wknd_vals
         # Alldays
         wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
         wkdy_rule.setName(@sch_name + " #{Schedule.allday_name} ruleset#{m}")
-        wkdy[m] = wkdy_rule.daySchedule
-        wkdy[m].setName(@sch_name + " #{Schedule.allday_name}#{m}")
+        wkdy = wkdy_rule.daySchedule
+        wkdy.setName(@sch_name + " #{Schedule.allday_name}#{m}")
         previous_value = wkdy_vals[1]
         for h in 1..24
           next if h != 24 and wkdy_vals[h + 1] == previous_value
 
-          wkdy[m].addValue(time[h], previous_value)
+          wkdy.addValue(time[h], previous_value)
           previous_value = wkdy_vals[h + 1]
         end
         Schedule.set_weekday_rule(wkdy_rule)
         Schedule.set_weekend_rule(wkdy_rule)
         wkdy_rule.setStartDate(date_s)
         wkdy_rule.setEndDate(date_e)
+        prev_wkdy_rule = wkdy_rule
+        prev_wknd_rule = nil
       else
         # Weekdays
         wkdy_rule = OpenStudio::Model::ScheduleRule.new(schedule)
         wkdy_rule.setName(@sch_name + " #{Schedule.weekday_name} ruleset#{m}")
-        wkdy[m] = wkdy_rule.daySchedule
-        wkdy[m].setName(@sch_name + " #{Schedule.weekday_name}#{m}")
+        wkdy = wkdy_rule.daySchedule
+        wkdy.setName(@sch_name + " #{Schedule.weekday_name}#{m}")
         previous_value = wkdy_vals[1]
         for h in 1..24
           next if h != 24 and wkdy_vals[h + 1] == previous_value
 
-          wkdy[m].addValue(time[h], previous_value)
+          wkdy.addValue(time[h], previous_value)
           previous_value = wkdy_vals[h + 1]
         end
         Schedule.set_weekday_rule(wkdy_rule)
         wkdy_rule.setStartDate(date_s)
         wkdy_rule.setEndDate(date_e)
+        prev_wkdy_rule = wkdy_rule
 
         # Weekends
         wknd_rule = OpenStudio::Model::ScheduleRule.new(schedule)
         wknd_rule.setName(@sch_name + " #{Schedule.weekend_name} ruleset#{m}")
-        wknd[m] = wknd_rule.daySchedule
-        wknd[m].setName(@sch_name + " #{Schedule.weekend_name}#{m}")
+        wknd = wknd_rule.daySchedule
+        wknd.setName(@sch_name + " #{Schedule.weekend_name}#{m}")
         previous_value = wknd_vals[1]
         for h in 1..24
           next if h != 24 and wknd_vals[h + 1] == previous_value
 
-          wknd[m].addValue(time[h], previous_value)
+          wknd.addValue(time[h], previous_value)
           previous_value = wknd_vals[h + 1]
         end
         Schedule.set_weekend_rule(wknd_rule)
         wknd_rule.setStartDate(date_s)
         wknd_rule.setEndDate(date_e)
+        prev_wknd_rule = wknd_rule
       end
+
+      prev_wkdy_vals = wkdy_vals
+      prev_wknd_vals = wknd_vals
     end
 
     Schedule.set_schedule_type_limits(@model, schedule, @schedule_type_limits_name)
