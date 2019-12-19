@@ -156,8 +156,16 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
                 <extension>
-                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
                   <DistanceToBottomOfInsulation>1.0</DistanceToBottomOfInsulation>
+                </extension>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+                <extension>
+                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -180,6 +188,14 @@
                   <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+                <extension>
+                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
+                </extension>
+              </Layer>
             </Insulation>
           </FoundationWall>
           <FoundationWall>
@@ -194,6 +210,14 @@
               <SystemIdentifier id='FoundationWallCrawlspaceInsulation'/>
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+                <extension>
+                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
+                </extension>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
                 <NominalRValue>0.0</NominalRValue>
                 <extension>
                   <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>

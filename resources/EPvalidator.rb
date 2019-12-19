@@ -169,11 +169,9 @@ class EnergyPlusValidator
         "Thickness" => one,
         "DepthBelowGrade" => one,
         "Insulation/SystemIdentifier" => one, # Required by HPXML schema
-        # Insulation: either specify layer OR assembly R-value:
-        "[Insulation/Layer[InstallationType='continuous - exterior' or InstallationType='continuous - interior'] | Insulation/AssemblyEffectiveRValue]" => one_or_more, # See [Insulation/Layer] and [AssemblyEffectiveRValue]
-        "Insulation/Layer[InstallationType='continuous - exterior']" => zero_or_one,
-        "Insulation/Layer[InstallationType='continuous - interior']" => zero_or_one,
-        "Insulation/AssemblyEffectiveRValue" => zero_or_one,
+        # Insulation: either specify interior and exterior layers OR assembly R-value:
+        "[Insulation/Layer[InstallationType='continuous - interior'] | Insulation/AssemblyEffectiveRValue]" => one, # See [Insulation/Layer]
+        "[Insulation/Layer[InstallationType='continuous - exterior'] | Insulation/AssemblyEffectiveRValue]" => one, # See [Insulation/Layer]
       },
 
       ## [VentedCrawlspace]
