@@ -5,16 +5,8 @@ class Constants
     return 73.5 # deg-F
   end
 
-  def self.DefaultCoolingSetpoint
-    return 76.0
-  end
-
   def self.DefaultFramingFactorInterior
     return 0.16
-  end
-
-  def self.DefaultHeatingSetpoint
-    return 71.0
   end
 
   def self.DefaultHumiditySetpoint

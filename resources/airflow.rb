@@ -736,41 +736,32 @@ class Airflow
   def self.process_nat_vent(model, nat_vent, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
     thermostatsetpointdualsetpoint = building.living.zone.thermostatSetpointDualSetpoint
 
-    # Get heating setpoints
-    heatingSetpointWeekday = Array.new
-    heatingSetpointWeekend = Array.new
-    coolingSetpointWeekday = Array.new
-    coolingSetpointWeekend = Array.new
-    if thermostatsetpointdualsetpoint.is_initialized
-      thermostatsetpointdualsetpoint = thermostatsetpointdualsetpoint.get
+    # Get setpoints
+    heatingSetpointWeekday = nat_vent.htg_weekday_setpoints
+    heatingSetpointWeekend = nat_vent.htg_weekend_setpoints
+    coolingSetpointWeekday = nat_vent.clg_weekday_setpoints
+    coolingSetpointWeekend = nat_vent.clg_weekend_setpoints
 
-      heatingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday')
-      heatingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.heatingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend')
-
-      heatingSetpointWeekday = heatingSetpointWeekday[0].map { |j| UnitConversions.convert(j, "C", "F") } # get january hourly setpoints
-      heatingSetpointWeekend = heatingSetpointWeekend[0].map { |j| UnitConversions.convert(j, "C", "F") } # get january hourly setpoints
-
-      coolingSetpointWeekday = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekday')
-      coolingSetpointWeekend = HVAC.get_setpoint_schedule(thermostatsetpointdualsetpoint.coolingSetpointTemperatureSchedule.get.to_Schedule.get.to_ScheduleRuleset.get, 'weekend')
-
-      coolingSetpointWeekday = coolingSetpointWeekday[6].map { |j| UnitConversions.convert(j, "C", "F") } # get july hourly setpoints
-      coolingSetpointWeekend = coolingSetpointWeekend[6].map { |j| UnitConversions.convert(j, "C", "F") } # get july hourly setpoints
-    end
-
-    if heatingSetpointWeekday.empty?
-      @runner.registerWarning("No heating setpoint schedule found. Assuming #{Constants.DefaultHeatingSetpoint} F for natural ventilation calculations.")
-      ovlp_ssn_hourly_temp = Array.new(24, UnitConversions.convert(Constants.DefaultHeatingSetpoint + nat_vent.ovlp_offset, "F", "C"))
-      heatingSetpointWeekday = Array.new(24, Constants.DefaultHeatingSetpoint)
-      heatingSetpointWeekend = Array.new(24, Constants.DefaultHeatingSetpoint)
+    if heatingSetpointWeekday.nil?
+      default_sp = HVAC.get_default_heating_setpoint("manual thermostat")[0]
+      @runner.registerWarning("No heating setpoint schedule found. Assuming #{default_sp} F for natural ventilation calculations.")
+      ovlp_ssn_hourly_temp = Array.new(24, UnitConversions.convert(default_sp + nat_vent.ovlp_offset, "F", "C"))
+      heatingSetpointWeekday = Array.new(24, default_sp)
+      heatingSetpointWeekend = Array.new(24, default_sp)
     else
+      heatingSetpointWeekday = heatingSetpointWeekday[0] # get January hourly setpoints
+      heatingSetpointWeekend = heatingSetpointWeekend[0] # get January hourly setpoints
       ovlp_ssn_hourly_temp = Array.new(24, UnitConversions.convert([heatingSetpointWeekday.max, heatingSetpointWeekend.max].max + nat_vent.ovlp_offset, "F", "C"))
     end
-    if coolingSetpointWeekday.empty?
-      @runner.registerWarning("No cooling setpoint schedule found. Assuming #{Constants.DefaultCoolingSetpoint} F for natural ventilation calculations.")
-      coolingSetpointWeekday = Array.new(24, Constants.DefaultCoolingSetpoint)
-      coolingSetpointWeekend = Array.new(24, Constants.DefaultCoolingSetpoint)
+    if coolingSetpointWeekday.nil?
+      default_sp = HVAC.get_default_cooling_setpoint("manual thermostat")[0]
+      @runner.registerWarning("No cooling setpoint schedule found. Assuming #{default_sp} F for natural ventilation calculations.")
+      coolingSetpointWeekday = Array.new(24, default_sp)
+      coolingSetpointWeekend = Array.new(24, default_sp)
+    else
+      coolingSetpointWeekday = coolingSetpointWeekday[6] # get July hourly setpoints
+      coolingSetpointWeekend = coolingSetpointWeekend[6] # get July hourly setpoints
     end
-    ovlp_ssn_hourly_weekend_temp = ovlp_ssn_hourly_temp
 
     # Get heating and cooling seasons
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
@@ -828,7 +819,7 @@ class Airflow
         ssn_schedule_wked = clg_ssn_hourly_weekend_temp
       else
         ssn_schedule_wkdy = ovlp_ssn_hourly_temp
-        ssn_schedule_wked = ovlp_ssn_hourly_weekend_temp
+        ssn_schedule_wked = ovlp_ssn_hourly_temp
       end
       temp_hourly_wkdy << ssn_schedule_wkdy
       temp_hourly_wked << ssn_schedule_wked
@@ -1949,7 +1940,8 @@ class Infiltration
 end
 
 class NaturalVentilation
-  def initialize(htg_offset, clg_offset, ovlp_offset, htg_season, clg_season, ovlp_season, num_weekdays, num_weekends, frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh)
+  def initialize(htg_offset, clg_offset, ovlp_offset, htg_season, clg_season, ovlp_season, num_weekdays, num_weekends, frac_windows_open, frac_window_area_openable,
+                 max_oa_hr, max_oa_rh, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints)
     @htg_offset = htg_offset
     @clg_offset = clg_offset
     @ovlp_offset = ovlp_offset
@@ -1962,8 +1954,13 @@ class NaturalVentilation
     @frac_window_area_openable = frac_window_area_openable
     @max_oa_hr = max_oa_hr
     @max_oa_rh = max_oa_rh
+    @htg_weekday_setpoints = htg_weekday_setpoints
+    @htg_weekend_setpoints = htg_weekend_setpoints
+    @clg_weekday_setpoints = clg_weekday_setpoints
+    @clg_weekend_setpoints = clg_weekend_setpoints
   end
-  attr_accessor(:htg_offset, :clg_offset, :ovlp_offset, :htg_season, :clg_season, :ovlp_season, :num_weekdays, :num_weekends, :frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh)
+  attr_accessor(:htg_offset, :clg_offset, :ovlp_offset, :htg_season, :clg_season, :ovlp_season, :num_weekdays, :num_weekends, :frac_windows_open, :frac_window_area_openable,
+                :max_oa_hr, :max_oa_rh, :htg_weekday_setpoints, :htg_weekend_setpoints, :clg_weekday_setpoints, :clg_weekend_setpoints)
 end
 
 class MechanicalVentilation

@@ -937,17 +937,17 @@ class Constructions
   end
 
   def self.apply_window(model, subsurfaces, constr_name, weather,
-                        cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                        is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     apply_window_skylight(model, "Window", subsurfaces, constr_name, weather,
-                          cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                          is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
   def self.apply_skylight(model, subsurfaces, constr_name, weather,
-                          cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                          is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     apply_window_skylight(model, "Skylight", subsurfaces, constr_name, weather,
-                          cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                          is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
   def self.apply_partition_walls(model, constr_name, drywall_thick_in, frac_of_ffa,
@@ -1453,7 +1453,7 @@ class Constructions
   end
 
   def self.apply_window_skylight(model, type, subsurfaces, constr_name, weather,
-                                 cooling_season, ufactor, shgc, heat_shade_mult, cool_shade_mult)
+                                 is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     return if subsurfaces.empty?
 
@@ -1471,12 +1471,6 @@ class Constructions
       total_shade_trans = cool_shade_mult / heat_shade_mult * 0.999
       total_shade_abs = 0.00001
       total_shade_ref = 1 - total_shade_trans - total_shade_abs
-
-      day_startm = [0, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
-      day_endm = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]
-
-      # Interior Shading Schedule
-      sch = MonthWeekdayWeekendSchedule.new(model, "#{type} shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
 
       # CoolingShade
       sm = OpenStudio::Model::Shade.new(model)
@@ -1501,7 +1495,7 @@ class Constructions
       sc.setName("#{type}ShadingControl")
       sc.setShadingType("InteriorShade")
       sc.setShadingControlType("OnIfScheduleAllows")
-      sc.setSchedule(sch.schedule)
+      sc.setSchedule(is_sch.schedule)
 
       # Add shading controls
       subsurfaces.each do |subsurface|
