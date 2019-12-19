@@ -169,16 +169,21 @@ def create_output(designdir, resultsdir)
   # Subtract out disaggregated heating/cooling fan and pump energy from hot water electricity end use
   hes_resource_type = :electric
   to_units = get_fuel_site_units(hes_resource_type)
-  for hes_end_use in [:heating, :cooling]
+  hes_end_uses = { :heating => [Constants.ObjectNameFanPumpDisaggregatePrimaryHeat, Constants.ObjectNameFanPumpDisaggregateBackupHeat],
+                   :cooling => [Constants.ObjectNameFanPumpDisaggregateCool] }
+  hes_end_uses.each do |hes_end_use, var_names|
     for i in 1..12
-      query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName LIKE '%#{Constants.ObjectNameFanPumpDisaggregate(hes_end_use == :cooling)}' AND ReportingFrequency='Monthly' AND VariableUnits='J') AND TimeIndex='#{i}'"
-      sql_result = sqlFile.execAndReturnFirstDouble(query)
-      next unless sql_result.is_initialized
+      total = 0.0
+      var_names.each do |var_name|
+        query = "SELECT SUM(VariableValue) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName LIKE '%#{var_name}' AND ReportingFrequency='Monthly' AND VariableUnits='J') AND TimeIndex='#{i}'"
+        sql_result = sqlFile.execAndReturnFirstDouble(query)
+        next unless sql_result.is_initialized
 
-      sql_result = sql_result.get
+        total += sql_result.get
+      end
 
-      result = UnitConversions.convert(sql_result, "J", to_units) # convert from J to site energy units
-      result_gj = sql_result / 1000000000.0 # convert from J to GJ
+      result = UnitConversions.convert(total, "J", to_units) # convert from J to site energy units
+      result_gj = total / 1000000000.0 # convert from J to GJ
 
       # Add to heating/cooling end use
       results[[hes_end_use, hes_resource_type]][i - 1] += result
