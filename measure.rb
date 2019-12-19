@@ -710,7 +710,7 @@ class OSModel
         else
           vf = vf_map_cb[from_surface][to_surface]
         end
-        next if vf < 0.01 # TODO: Remove this when https://github.com/NREL/OpenStudio/issues/3737 is resolved
+        next if vf < 0.01
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf.round(10))
         zone_prop = @living_zone.getZonePropertyUserViewFactorsBySurfaceName
@@ -956,7 +956,7 @@ class OSModel
     end
     if num_occ > 0
       occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
-      weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000" # TODO: Normalize schedule based on hrs_per_day
+      weekday_sch = "1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000"
       weekday_sch_sum = weekday_sch.split(",").map(&:to_f).inject(0, :+)
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
         fail "Occupancy schedule inconsistent with hrs_per_day."
@@ -2014,6 +2014,7 @@ class OSModel
     end
 
     wh = building.elements["BuildingDetails/Systems/WaterHeating"]
+    sts = building.elements["BuildingDetails/Systems/SolarThermal/SolarThermalSystem"]
 
     # Fixtures
     has_low_flow_fixtures = false
@@ -2068,6 +2069,7 @@ class OSModel
     # Water Heater
     related_hvac_list = [] # list of heating systems referred in water heating system "RelatedHVACSystem" element
     dhw_loop_fracs = {}
+    water_heater_spaces = {}
     combi_sys_id_list = []
     if not wh.nil?
       wh.elements.each("WaterHeatingSystem") do |dhw|
@@ -2077,6 +2079,7 @@ class OSModel
         @dhw_map[sys_id] = []
 
         space = get_space_from_location(water_heating_system_values[:location], "WaterHeatingSystem", model, spaces)
+        water_heater_spaces[sys_id] = space
         setpoint_temp = Waterheater.get_default_hot_water_temperature(@eri_version)
         wh_type = water_heating_system_values[:water_heater_type]
         fuel = water_heating_system_values[:fuel_type]
@@ -2103,75 +2106,81 @@ class OSModel
           end
         end
 
+        # Check if simple solar water heater (defined by Solar Fraction) attached.
+        # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
+        # the portion of the total conventional hot water heating load (delivered energy + tank losses).
+        solar_fraction = nil
+        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts,
+                                                                     select: [:solar_fraction, :water_heating_system_idref])
+        if not solar_thermal_values.nil? and solar_thermal_values[:water_heating_system_idref] == sys_id
+          solar_fraction = solar_thermal_values[:solar_fraction]
+        end
+        solar_fraction = 0.0 if solar_fraction.nil?
+
         ec_adj = HotWaterAndAppliances.get_dist_energy_consumption_adjustment(@has_uncond_bsmnt, @cfa, @ncfl,
                                                                               dist_type, recirc_control_type,
                                                                               pipe_r, std_pipe_length, recirc_loop_length)
 
         runner.registerInfo("EC_adj=#{ec_adj}") # Pass value to tests
 
-        dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served]
+        dhw_load_frac = water_heating_system_values[:fraction_dhw_load_served] * (1.0 - solar_fraction)
+
+        @dhw_map[sys_id] = []
 
         if wh_type == "storage water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
-          if fuel != "electricity"
-            re = water_heating_system_values[:recovery_efficiency]
-          else
-            re = 0.98
-          end
+          re = water_heating_system_values[:recovery_efficiency]
           capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
-          oncycle_power = 0.0
-          offcycle_power = 0.0
-          Waterheater.apply_tank(model, space, to_beopt_fuel(fuel),
-                                 capacity_kbtuh, tank_vol, ef, re, setpoint_temp,
-                                 oncycle_power, offcycle_power, ec_adj,
-                                 @nbeds, @dhw_map, sys_id, desuperheater_clg_coil, jacket_r)
+
+          Waterheater.apply_tank(model, space, to_beopt_fuel(fuel), capacity_kbtuh, tank_vol,
+                                 ef, re, setpoint_temp, ec_adj, @nbeds, @dhw_map,
+                                 sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
+
         elsif wh_type == "instantaneous water heater"
 
           cycling_derate = water_heating_system_values[:performance_adjustment]
-          if cycling_derate.nil?
-            cycling_derate = Waterheater.get_tankless_cycling_derate()
-          end
 
-          capacity_kbtuh = 100000000.0
-          oncycle_power = 0.0
-          offcycle_power = 0.0
-          Waterheater.apply_tankless(model, space, to_beopt_fuel(fuel),
-                                     capacity_kbtuh, ef, cycling_derate,
-                                     setpoint_temp, oncycle_power, offcycle_power, ec_adj,
-                                     @nbeds, @dhw_map, sys_id, desuperheater_clg_coil)
+          Waterheater.apply_tankless(model, space, to_beopt_fuel(fuel), ef, cycling_derate,
+                                     setpoint_temp, ec_adj, @nbeds, @dhw_map,
+                                     sys_id, desuperheater_clg_coil, solar_fraction)
+
         elsif wh_type == "heat pump water heater"
 
           tank_vol = water_heating_system_values[:tank_volume]
+
           Waterheater.apply_heatpump(model, runner, space, weather, setpoint_temp, tank_vol, ef, ec_adj,
-                                     @nbeds, @dhw_map, sys_id, jacket_r)
+                                     @nbeds, @dhw_map, sys_id, jacket_r, solar_fraction)
+
         elsif wh_type == "space-heating boiler with storage tank" or wh_type == "space-heating boiler with tankless coil"
-          # Check tank type to default tank volume for tankless coil
+
           combi_sys_id_list << sys_id
           heating_source_id = water_heating_system_values[:related_hvac]
           standby_loss = water_heating_system_values[:standby_loss]
+          vol = water_heating_system_values[:tank_volume]
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
-            boiler_sys = get_boiler_and_boiler_loop(@hvac_map, heating_source_id, sys_id)
+            boiler_sys = get_boiler_and_plant_loop(@hvac_map, heating_source_id, sys_id)
             boiler_fuel_type = to_beopt_fuel(Waterheater.get_combi_system_fuel(heating_source_id, building.elements["BuildingDetails"]))
           else
             fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end
           @dhw_map[sys_id] << boiler_sys['boiler']
-          capacity_kbtuh = 0.0
-          oncycle_power = 0.0
-          offcycle_power = 0.0
-          Waterheater.apply_indirect(model, runner, space, capacity_kbtuh,
-                                     water_heating_system_values[:tank_volume], setpoint_temp, oncycle_power,
-                                     offcycle_power, ec_adj, @nbeds, boiler_sys['boiler'],
-                                     boiler_sys['plant_loop'], boiler_fuel_type,
+
+          Waterheater.apply_indirect(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
+                                     boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
                                      @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
+
         else
+
           fail "Unhandled water heater (#{wh_type})."
+
         end
+
         dhw_loop_fracs[sys_id] = dhw_load_frac
       end
     end
+
     wh_setpoint = Waterheater.get_default_hot_water_temperature(@eri_version)
     HotWaterAndAppliances.apply(model, weather, @living_space,
                                 @cfa, @nbeds, @ncfl, @has_uncond_bsmnt, wh_setpoint,
@@ -2186,6 +2195,52 @@ class OSModel
                                 dwhr_facilities_connected, dwhr_is_equal_flow,
                                 dwhr_efficiency, dhw_loop_fracs, @eri_version,
                                 @dhw_map, @hpxml_path)
+
+    solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts)
+    if not solar_thermal_values.nil?
+      collector_area = solar_thermal_values[:collector_area]
+      dhw_system_idref = solar_thermal_values[:water_heating_system_idref]
+
+      wh.elements.each("WaterHeatingSystem") do |dhw|
+        water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw,
+                                                                            select: [:id, :water_heater_type, :uses_desuperheater])
+        next unless water_heating_system_values[:id] == dhw_system_idref
+
+        if ['space-heating boiler with storage tank', 'space-heating boiler with tankless coil'].include? water_heating_system_values[:water_heater_type]
+          fail "Water heating system '#{dhw_system_idref}' connected to solar thermal system '#{solar_thermal_values[:id]}' cannot be a space-heating boiler."
+        end
+
+        if water_heating_system_values[:uses_desuperheater]
+          fail "Water heating system '#{dhw_system_idref}' connected to solar thermal system '#{solar_thermal_values[:id]}' cannot be attached to a desuperheater."
+        end
+      end
+
+      if not collector_area.nil? # Detailed solar water heater
+        frta = solar_thermal_values[:collector_frta]
+        frul = solar_thermal_values[:collector_frul]
+        storage_vol = solar_thermal_values[:storage_volume]
+        loop_type = solar_thermal_values[:collector_loop_type]
+        azimuth = Float(solar_thermal_values[:collector_azimuth])
+        tilt = solar_thermal_values[:collector_tilt]
+        collector_type = solar_thermal_values[:collector_type]
+        space = water_heater_spaces[dhw_system_idref]
+
+        dhw_loop = nil
+        if @dhw_map.keys.include? dhw_system_idref
+          @dhw_map[dhw_system_idref].each do |dhw_object|
+            next unless dhw_object.is_a? OpenStudio::Model::PlantLoop
+
+            dhw_loop = dhw_object
+          end
+        else
+          fail "Attached water heating system '#{dhw_system_idref}' not found for solar thermal system '#{solar_thermal_values[:id]}'."
+        end
+
+        Waterheater.apply_solar_thermal(model, space, collector_area, frta, frul, storage_vol,
+                                        azimuth, tilt, collector_type, loop_type, dhw_loop, @dhw_map,
+                                        dhw_system_idref)
+      end
+    end
 
     # Add combi-system EMS program with water use equipment information
     @dhw_map.keys.each do |sys_id|
@@ -2268,7 +2323,7 @@ class OSModel
           if cooling_system_values[:cooling_shr].nil?
             shrs = [0.71, 0.73]
           else
-            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages
+            # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages
             shrs = [cooling_system_values[:cooling_shr] - 0.02, cooling_system_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
@@ -2542,7 +2597,7 @@ class OSModel
           if heat_pump_values[:cooling_shr].nil?
             shrs = [0.71, 0.724]
           else
-            # TODO: is the following assumption correct (revist Dylan's data?)? OR should value from HPXML be used for both stages?
+            # TODO: is the following assumption correct (revisit Dylan's data?)? OR should value from HPXML be used for both stages?
             shrs = [heat_pump_values[:cooling_shr] - 0.014, heat_pump_values[:cooling_shr]]
           end
           fan_power_installed = get_fan_power_installed(seer)
@@ -2802,7 +2857,7 @@ class OSModel
     end
   end
 
-  def self.get_boiler_and_boiler_loop(loop_hvacs, heating_source_id, sys_id)
+  def self.get_boiler_and_plant_loop(loop_hvacs, heating_source_id, sys_id)
     # Search for the right boiler OS object
     related_boiler_sys = {}
     if loop_hvacs.keys.include? heating_source_id
@@ -3338,6 +3393,7 @@ class OSModel
 
     dhw_output_vars = [OutputVars.WaterHeatingElectricity,
                        OutputVars.WaterHeatingElectricityRecircPump,
+                       OutputVars.WaterHeatingElectricitySolarThermalPump,
                        OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
                        OutputVars.WaterHeatingNaturalGas,
@@ -3345,7 +3401,8 @@ class OSModel
                        OutputVars.WaterHeatingPropane,
                        OutputVars.WaterHeatingLoad,
                        OutputVars.WaterHeatingLoadTankLosses,
-                       OutputVars.WaterHeaterLoadDesuperheater]
+                       OutputVars.WaterHeaterLoadDesuperheater,
+                       OutputVars.WaterHeaterLoadSolarThermal]
 
     # Remove objects that are not referenced by output vars and are not
     # EMS output vars.
@@ -4782,6 +4839,10 @@ class OutputVars
              'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'] }
   end
 
+  def self.WaterHeatingElectricitySolarThermalPump
+    return { 'OpenStudio::Model::PumpConstantSpeed' => ['Pump Electric Energy'] }
+  end
+
   def self.WaterHeatingElectricityRecircPump
     return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
   end
@@ -4820,6 +4881,10 @@ class OutputVars
 
   def self.WaterHeaterLoadDesuperheater
     return { 'OpenStudio::Model::CoilWaterHeatingDesuperheater' => ['Water Heater Heating Energy'] }
+  end
+
+  def self.WaterHeaterLoadSolarThermal
+    return { 'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Use Side Heat Transfer Energy'] }
   end
 end
 
