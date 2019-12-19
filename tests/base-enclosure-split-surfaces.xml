@@ -628,8 +628,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -648,8 +648,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -668,8 +668,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -688,8 +688,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -708,8 +708,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -728,8 +728,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -748,8 +748,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -768,8 +768,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -788,8 +788,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>
@@ -808,8 +808,8 @@
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
-                  <DistanceToTopOfFoundationWall>1.0</DistanceToTopOfFoundationWall>
-                  <Height>7.0</Height>
+                  <DistanceToTopOfInsulation>1.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
             </Insulation>

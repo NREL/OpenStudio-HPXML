@@ -183,8 +183,8 @@ class EnergyPlusValidator
       ## [Insulation/Layer]
       "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType='continuous - exterior' or InstallationType='continuous - interior']" => {
         "NominalRValue" => one,
-        "extension/DistanceToTopOfFoundationWall" => one,
-        "extension/Height" => one,
+        "extension/DistanceToTopOfInsulation" => one,
+        "extension/DistanceToBottomOfInsulation" => one,
       },
 
       # [FrameFloor]

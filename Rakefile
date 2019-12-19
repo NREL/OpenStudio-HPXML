@@ -1159,23 +1159,23 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 1200,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
-                                 :exterior_layer_distance_to_top => 1,
-                                 :exterior_layer_height => 7,
+                                 :distance_to_exterior_insulation_top => 1,
+                                 :distance_to_exterior_insulation_bottom => 8,
                                  :exterior_layer_r_value => 8.9 }]
   elsif ['base-foundation-conditioned-basement-wall-interior-insulation.xml'].include? hpxml_file
-    foundation_walls_values[0][:interior_layer_distance_to_top] = 0
-    foundation_walls_values[0][:interior_layer_height] = 8
+    foundation_walls_values[0][:distance_to_interior_insulation_top] = 0
+    foundation_walls_values[0][:distance_to_interior_insulation_bottom] = 8
     foundation_walls_values[0][:interior_layer_r_value] = 10
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundation_walls_values[0][:interior_adjacent_to] = "basement - unconditioned"
-    foundation_walls_values[0][:exterior_layer_height] = 0
+    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = 1
     foundation_walls_values[0][:exterior_layer_r_value] = 0
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    foundation_walls_values[0][:exterior_layer_height] = 4
+    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = 5
     foundation_walls_values[0][:exterior_layer_r_value] = 8.9
   elsif ['base-foundation-unconditioned-basement-assembly-r.xml'].include? hpxml_file
-    foundation_walls_values[0][:exterior_layer_distance_to_top] = nil
-    foundation_walls_values[0][:exterior_layer_height] = nil
+    foundation_walls_values[0][:distance_to_exterior_insulation_top] = nil
+    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = nil
     foundation_walls_values[0][:exterior_layer_r_value] = nil
     foundation_walls_values[0][:insulation_assembly_r_value] = 10.69
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
@@ -1190,7 +1190,7 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
     foundation_walls_values[0][:height] -= 4
     foundation_walls_values[0][:area] /= 2.0
     foundation_walls_values[0][:depth_below_grade] -= 4
-    foundation_walls_values[0][:exterior_layer_height] -= 4
+    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] -= 4
   elsif ['base-foundation-multiple.xml'].include? hpxml_file
     foundation_walls_values[0][:area] = 600
     foundation_walls_values << { :id => "FoundationWallInterior",
@@ -1200,8 +1200,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 360,
                                  :thickness => 8,
                                  :depth_below_grade => 4,
-                                 :exterior_layer_distance_to_top => 0,
-                                 :exterior_layer_height => 0,
+                                 :distance_to_exterior_insulation_top => 0,
+                                 :distance_to_exterior_insulation_bottom => 0,
                                  :exterior_layer_r_value => 0 }
     foundation_walls_values << { :id => "FoundationWallCrawlspace",
                                  :exterior_adjacent_to => "ground",
@@ -1210,8 +1210,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 600,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
-                                 :exterior_layer_distance_to_top => 0,
-                                 :exterior_layer_height => 0,
+                                 :distance_to_exterior_insulation_top => 0,
+                                 :distance_to_exterior_insulation_bottom => 0,
                                  :exterior_layer_r_value => 0 }
   elsif ['base-foundation-ambient.xml',
          'base-foundation-slab.xml'].include? hpxml_file
@@ -1224,8 +1224,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 480,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
-                                 :exterior_layer_distance_to_top => 1,
-                                 :exterior_layer_height => 7,
+                                 :distance_to_exterior_insulation_top => 1,
+                                 :distance_to_exterior_insulation_bottom => 8,
                                  :exterior_layer_r_value => 8.9 },
                                { :id => "FoundationWall2",
                                  :exterior_adjacent_to => "ground",
@@ -1234,8 +1234,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 120,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
-                                 :exterior_layer_distance_to_top => 1,
-                                 :exterior_layer_height => 3,
+                                 :distance_to_exterior_insulation_top => 1,
+                                 :distance_to_exterior_insulation_bottom => 4,
                                  :exterior_layer_r_value => 8.9 },
                                { :id => "FoundationWall3",
                                  :exterior_adjacent_to => "ground",
@@ -1244,8 +1244,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 60,
                                  :thickness => 8,
                                  :depth_below_grade => 1,
-                                 :exterior_layer_distance_to_top => 1,
-                                 :exterior_layer_height => 1,
+                                 :distance_to_exterior_insulation_top => 1,
+                                 :distance_to_exterior_insulation_bottom => 2,
                                  :exterior_layer_r_value => 8.9 }]
   elsif ['base-foundation-complex.xml'].include? hpxml_file
     foundation_walls_values = [{ :id => "FoundationWall1",
@@ -1255,8 +1255,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 160,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
-                                 :exterior_layer_distance_to_top => 0,
-                                 :exterior_layer_height => 0,
+                                 :distance_to_exterior_insulation_top => 0,
+                                 :distance_to_exterior_insulation_bottom => 0,
                                  :exterior_layer_r_value => 0.0 },
                                { :id => "FoundationWall2",
                                  :exterior_adjacent_to => "ground",
@@ -1265,8 +1265,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 240,
                                  :thickness => 8,
                                  :depth_below_grade => 7,
-                                 :exterior_layer_distance_to_top => 1,
-                                 :exterior_layer_height => 7,
+                                 :distance_to_exterior_insulation_top => 1,
+                                 :distance_to_exterior_insulation_bottom => 8,
                                  :exterior_layer_r_value => 8.9 },
                                { :id => "FoundationWall3",
                                  :exterior_adjacent_to => "ground",
@@ -1275,8 +1275,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 160,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
-                                 :exterior_layer_distance_to_top => 0,
-                                 :exterior_layer_height => 0,
+                                 :distance_to_exterior_insulation_top => 0,
+                                 :distance_to_exterior_insulation_bottom => 0,
                                  :exterior_layer_r_value => 0.0 },
                                { :id => "FoundationWall4",
                                  :exterior_adjacent_to => "ground",
@@ -1285,8 +1285,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 120,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
-                                 :exterior_layer_distance_to_top => 1,
-                                 :exterior_layer_height => 3,
+                                 :distance_to_exterior_insulation_top => 1,
+                                 :distance_to_exterior_insulation_bottom => 4,
                                  :exterior_layer_r_value => 8.9 },
                                { :id => "FoundationWall5",
                                  :exterior_adjacent_to => "ground",
@@ -1295,8 +1295,8 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
                                  :area => 80,
                                  :thickness => 8,
                                  :depth_below_grade => 3,
-                                 :exterior_layer_distance_to_top => 1,
-                                 :exterior_layer_height => 3,
+                                 :distance_to_exterior_insulation_top => 1,
+                                 :distance_to_exterior_insulation_bottom => 4,
                                  :exterior_layer_r_value => 8.9 }]
   elsif ['base-enclosure-split-surfaces.xml'].include? hpxml_file
     for n in 1..foundation_walls_values.size

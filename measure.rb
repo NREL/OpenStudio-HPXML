@@ -1671,14 +1671,14 @@ class OSModel
         match = true
       end
     else
-      if not fnd_wall_values[:exterior_layer_distance_to_top].nil?
-        ext_rigid_offset = fnd_wall_values[:exterior_layer_distance_to_top]
-        ext_rigid_height = fnd_wall_values[:exterior_layer_height]
+      if not fnd_wall_values[:distance_to_exterior_insulation_top].nil?
+        ext_rigid_offset = fnd_wall_values[:distance_to_exterior_insulation_top]
+        ext_rigid_height = fnd_wall_values[:distance_to_exterior_insulation_bottom] - ext_rigid_offset
         ext_rigid_r = fnd_wall_values[:exterior_layer_r_value]
       end
-      if not fnd_wall_values[:interior_layer_distance_to_top].nil?
-        int_rigid_offset = fnd_wall_values[:interior_layer_distance_to_top]
-        int_rigid_height = fnd_wall_values[:interior_layer_height]
+      if not fnd_wall_values[:distance_to_interior_insulation_top].nil?
+        int_rigid_offset = fnd_wall_values[:distance_to_interior_insulation_top]
+        int_rigid_height = fnd_wall_values[:distance_to_interior_insulation_bottom] - int_rigid_offset
         int_rigid_r = fnd_wall_values[:interior_layer_r_value]
       end
     end
