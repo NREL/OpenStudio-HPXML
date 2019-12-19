@@ -70,8 +70,9 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']" => zero_or_one, # See [MechanicalVentilation]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem" => zero_or_more, # See [WaterHeatingSystem]
-        "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture" => zero_or_more, # See [WaterFixture]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution" => zero_or_one, # See [HotWaterDistribution]
+        "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture" => zero_or_more, # See [WaterFixture]
+        "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => zero_or_one, # See [SolarThermalSystem]
         "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem" => zero_or_more, # See [PVSystem]
 
         "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher" => zero_or_one, # See [ClothesWasher]
@@ -554,6 +555,25 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[WaterFixtureType='shower head' or WaterFixtureType='faucet']" => one, # Required by HPXML schema
         "LowFlow" => one,
+      },
+
+      # [SolarThermalSystem]
+      "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[SystemType='hot water']" => one,
+        "[CollectorArea | SolarFraction]" => one, # See [SolarThermal=Detailed] if CollectorArea provided
+        "ConnectedTo" => one, # WaterHeatingSystem (any type but space-heating boiler)
+      },
+
+      ## [SolarThermal=Detailed]
+      "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[CollectorArea]" => {
+        "[CollectorLoopType='liquid indirect' or CollectorLoopType='liquid direct' or CollectorLoopType='passive thermosyphon']" => one,
+        "[CollectorType='single glazing black' or CollectorType='double glazing black' or CollectorType='evacuated tube' or CollectorType='integrated collector storage']" => one,
+        "CollectorAzimuth" => one,
+        "CollectorTilt" => one,
+        "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
+        "CollectorRatedThermalLosses" => one, # FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC Certified Solar Collector Ratings
+        "StorageVolume" => one,
       },
 
       # [PVSystem]
