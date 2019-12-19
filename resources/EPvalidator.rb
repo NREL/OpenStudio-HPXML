@@ -70,8 +70,9 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']" => zero_or_one, # See [MechanicalVentilation]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem" => zero_or_more, # See [WaterHeatingSystem]
-        "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture" => zero_or_more, # See [WaterFixture]
         "/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution" => zero_or_one, # See [HotWaterDistribution]
+        "/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterFixture" => zero_or_more, # See [WaterFixture]
+        "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => zero_or_one, # See [SolarThermalSystem]
         "/HPXML/Building/BuildingDetails/Systems/Photovoltaics/PVSystem" => zero_or_more, # See [PVSystem]
 
         "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher" => zero_or_one, # See [ClothesWasher]
@@ -339,7 +340,7 @@ class EnergyPlusValidator
         "HeatingCapacity" => one, # Use -1 for autosizing
         "CoolingCapacity" => one, # Use -1 for autosizing
         "CoolingSensibleHeatFraction" => zero_or_one,
-        "[BackupSystemFuel='electricity']" => zero_or_one, # See [HeatPumpBackup]
+        "[BackupSystemFuel='electricity' or BackupSystemFuel='natural gas' or BackupSystemFuel='fuel oil' or BackupSystemFuel='propane']" => zero_or_one, # See [HeatPumpBackup]
         "FractionHeatLoadServed" => one, # Must sum to <= 1 across all HeatPumps and HeatingSystems
         "FractionCoolLoadServed" => one, # Must sum to <= 1 across all HeatPumps and CoolingSystems
       },
@@ -366,14 +367,16 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='ground-to-air']" => {
         "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
         "DistributionSystem" => one,
+        "BackupHeatingSwitchoverTemperature" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
         "AnnualHeatingEfficiency[Units='COP']/Value" => one,
       },
 
       ## [HeatPumpBackup]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel]" => {
-        "BackupAnnualHeatingEfficiency[Units='Percent']/Value" => one,
+        "BackupAnnualHeatingEfficiency[Units='Percent' or Units='AFUE']/Value" => one,
         "BackupHeatingCapacity" => one, # Use -1 for autosizing
+        "BackupHeatingSwitchoverTemperature" => zero_or_one, # Use if dual-fuel heat pump
       },
 
       # [HVACControl]
@@ -381,7 +384,7 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "SetpointTempHeatingSeason" => one,
         "SetbackTempHeatingSeason" => zero_or_one, # See [HVACControlType=HeatingSetback]
-        "SetupTempCoolingSeason" => zero_or_one, # See [HVACControlType=CoolingSetback]
+        "SetupTempCoolingSeason" => zero_or_one, # See [HVACControlType=CoolingSetup]
         "SetpointTempCoolingSeason" => one,
         "extension/CeilingFanSetpointTempCoolingSeasonOffset" => zero_or_one,
       },
@@ -392,7 +395,7 @@ class EnergyPlusValidator
         "extension/SetbackStartHourHeating" => one, # 0 = midnight. 12 = noon
       },
 
-      ## [HVACControlType=CoolingSetback]
+      ## [HVACControlType=CoolingSetup]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACControl[SetupTempCoolingSeason]" => {
         "TotalSetupHoursperWeekCooling" => one,
         "extension/SetupStartHourCooling" => one, # 0 = midnight, 12 = noon
@@ -496,6 +499,7 @@ class EnergyPlusValidator
         "RelatedHVACSystem" => one, # HeatingSystem (boiler)
         "TankVolume" => one,
         "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
+        "extension/StandbyLoss" => zero_or_one, # F/h, refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
       },
 
       ## [WHType=CombiTankless]
@@ -542,6 +546,25 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[WaterFixtureType='shower head' or WaterFixtureType='faucet']" => one, # Required by HPXML schema
         "LowFlow" => one,
+      },
+
+      # [SolarThermalSystem]
+      "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem" => {
+        "SystemIdentifier" => one, # Required by HPXML schema
+        "[SystemType='hot water']" => one,
+        "[CollectorArea | SolarFraction]" => one, # See [SolarThermal=Detailed] if CollectorArea provided
+        "ConnectedTo" => one, # WaterHeatingSystem (any type but space-heating boiler)
+      },
+
+      ## [SolarThermal=Detailed]
+      "/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[CollectorArea]" => {
+        "[CollectorLoopType='liquid indirect' or CollectorLoopType='liquid direct' or CollectorLoopType='passive thermosyphon']" => one,
+        "[CollectorType='single glazing black' or CollectorType='double glazing black' or CollectorType='evacuated tube' or CollectorType='integrated collector storage']" => one,
+        "CollectorAzimuth" => one,
+        "CollectorTilt" => one,
+        "CollectorRatedOpticalEfficiency" => one, # FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
+        "CollectorRatedThermalLosses" => one, # FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC Certified Solar Collector Ratings
+        "StorageVolume" => one,
       },
 
       # [PVSystem]
