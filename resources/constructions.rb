@@ -1502,6 +1502,11 @@ class Constructions
       sc.setShadingType("InteriorShade")
       sc.setShadingControlType("OnIfScheduleAllows")
       sc.setSchedule(sch.schedule)
+
+      # Add shading controls
+      subsurfaces.each do |subsurface|
+        subsurface.setShadingControl(sc)
+      end
     end
 
     # Define materials
