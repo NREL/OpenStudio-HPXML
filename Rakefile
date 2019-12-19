@@ -57,11 +57,15 @@ def create_hpxmls
     'invalid_files/refrigerator-location-other.xml' => 'base.xml',
     'invalid_files/repeated-relatedhvac-dhw-indirect.xml' => 'base-dhw-indirect.xml',
     'invalid_files/repeated-relatedhvac-desuperheater.xml' => 'base-hvac-central-ac-only-1-speed.xml',
+    'invalid_files/solar-thermal-system-with-combi-tankless.xml' => 'base-dhw-combi-tankless.xml',
+    'invalid_files/solar-thermal-system-with-desuperheater.xml' => 'base-dhw-desuperheater.xml',
+    'invalid_files/solar-thermal-system-with-dhw-indirect.xml' => 'base-dhw-combi-tankless.xml',
     'invalid_files/unattached-cfis.xml' => 'base.xml',
     'invalid_files/unattached-door.xml' => 'base.xml',
     'invalid_files/unattached-hvac-distribution.xml' => 'base.xml',
     'invalid_files/orphaned-hvac-distribution.xml' => 'base-hvac-room-ac-furnace-gas.xml',
     'invalid_files/unattached-skylight.xml' => 'base-enclosure-skylights.xml',
+    'invalid_files/unattached-solar-thermal-system.xml' => 'base-dhw-solar-indirect-flat-plate.xml',
     'invalid_files/unattached-window.xml' => 'base.xml',
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
@@ -104,16 +108,29 @@ def create_hpxmls
     'base-dhw-recirc-nocontrol.xml' => 'base.xml',
     'base-dhw-recirc-temperature.xml' => 'base.xml',
     'base-dhw-recirc-timer.xml' => 'base.xml',
+    'base-dhw-solar-direct-evacuated-tube.xml' => 'base.xml',
+    'base-dhw-solar-direct-flat-plate.xml' => 'base.xml',
+    'base-dhw-solar-direct-ics.xml' => 'base.xml',
+    'base-dhw-solar-fraction.xml' => 'base.xml',
+    'base-dhw-solar-indirect-evacuated-tube.xml' => 'base.xml',
+    'base-dhw-solar-indirect-flat-plate.xml' => 'base.xml',
+    'base-dhw-solar-thermosyphon-evacuated-tube.xml' => 'base.xml',
+    'base-dhw-solar-thermosyphon-flat-plate.xml' => 'base.xml',
+    'base-dhw-solar-thermosyphon-ics.xml' => 'base.xml',
     'base-dhw-tank-gas.xml' => 'base.xml',
     'base-dhw-tank-gas-outside.xml' => 'base-dhw-tank-gas.xml',
     'base-dhw-tank-heat-pump.xml' => 'base.xml',
     'base-dhw-tank-heat-pump-outside.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-with-solar.xml' => 'base-dhw-tank-heat-pump.xml',
+    'base-dhw-tank-heat-pump-with-solar-fraction.xml' => 'base-dhw-tank-heat-pump.xml',
     'base-dhw-tank-oil.xml' => 'base.xml',
     'base-dhw-tank-propane.xml' => 'base.xml',
     'base-dhw-tank-wood.xml' => 'base.xml',
     'base-dhw-tankless-electric.xml' => 'base.xml',
     'base-dhw-tankless-electric-outside.xml' => 'base-dhw-tankless-electric.xml',
     'base-dhw-tankless-gas.xml' => 'base.xml',
+    'base-dhw-tankless-gas-with-solar.xml' => 'base-dhw-tankless-gas.xml',
+    'base-dhw-tankless-gas-with-solar-fraction.xml' => 'base-dhw-tankless-gas.xml',
     'base-dhw-tankless-oil.xml' => 'base.xml',
     'base-dhw-tankless-propane.xml' => 'base.xml',
     'base-dhw-tankless-wood.xml' => 'base.xml',
@@ -488,6 +505,7 @@ def create_hpxmls
       water_heating_systems_values = []
       hot_water_distribution_values = {}
       water_fixtures_values = []
+      solar_thermal_system_values = {}
       pv_systems_values = []
       clothes_washer_values = {}
       clothes_dryer_values = {}
@@ -529,6 +547,7 @@ def create_hpxmls
         water_heating_systems_values = get_hpxml_file_water_heating_system_values(hpxml_file, water_heating_systems_values)
         hot_water_distribution_values = get_hpxml_file_hot_water_distribution_values(hpxml_file, hot_water_distribution_values)
         water_fixtures_values = get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
+        solar_thermal_system_values = get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
         pv_systems_values = get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
         clothes_washer_values = get_hpxml_file_clothes_washer_values(hpxml_file, clothes_washer_values)
         clothes_dryer_values = get_hpxml_file_clothes_dryer_values(hpxml_file, clothes_dryer_values)
@@ -620,6 +639,7 @@ def create_hpxmls
       water_fixtures_values.each do |water_fixture_values|
         HPXML.add_water_fixture(hpxml: hpxml, **water_fixture_values)
       end
+      HPXML.add_solar_thermal_system(hpxml: hpxml, **solar_thermal_system_values) unless solar_thermal_system_values.empty?
       pv_systems_values.each do |pv_system_values|
         HPXML.add_pv_system(hpxml: hpxml, **pv_system_values)
       end
@@ -2939,6 +2959,83 @@ def get_hpxml_file_water_fixtures_values(hpxml_file, water_fixtures_values)
     water_fixtures_values = []
   end
   return water_fixtures_values
+end
+
+def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_values)
+  if ['base-dhw-solar-fraction.xml',
+      'base-dhw-multiple.xml',
+      'base-dhw-tank-heat-pump-with-solar-fraction.xml',
+      'base-dhw-tankless-gas-with-solar-fraction.xml',
+      'invalid_files/solar-thermal-system-with-combi-tankless.xml',
+      'invalid_files/solar-thermal-system-with-desuperheater.xml',
+      'invalid_files/solar-thermal-system-with-dhw-indirect.xml'].include? hpxml_file
+    solar_thermal_system_values = { :id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :water_heating_system_idref => "WaterHeater",
+                                    :solar_fraction => 0.65 }
+  elsif ['base-dhw-solar-direct-flat-plate.xml',
+         'base-dhw-solar-indirect-flat-plate.xml',
+         'base-dhw-solar-thermosyphon-flat-plate.xml',
+         'base-dhw-tank-heat-pump-with-solar.xml',
+         'base-dhw-tankless-gas-with-solar.xml'].include? hpxml_file
+    solar_thermal_system_values = { :id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :collector_area => 40,
+                                    :collector_type => "single glazing black",
+                                    :collector_azimuth => 180,
+                                    :collector_tilt => 20,
+                                    :collector_frta => 0.77,
+                                    :collector_frul => 0.793,
+                                    :storage_volume => 60,
+                                    :water_heating_system_idref => "WaterHeater" }
+    if hpxml_file == 'base-dhw-solar-direct-flat-plate.xml'
+      solar_thermal_system_values[:collector_loop_type] = "liquid direct"
+    elsif hpxml_file == 'base-dhw-solar-thermosyphon-flat-plate.xml'
+      solar_thermal_system_values[:collector_loop_type] = "passive thermosyphon"
+    else
+      solar_thermal_system_values[:collector_loop_type] = "liquid indirect"
+    end
+  elsif ['base-dhw-solar-indirect-evacuated-tube.xml',
+         'base-dhw-solar-direct-evacuated-tube.xml',
+         'base-dhw-solar-thermosyphon-evacuated-tube.xml'].include? hpxml_file
+    solar_thermal_system_values = { :id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :collector_area => 40,
+                                    :collector_type => "evacuated tube",
+                                    :collector_azimuth => 180,
+                                    :collector_tilt => 20,
+                                    :collector_frta => 0.50,
+                                    :collector_frul => 0.2799,
+                                    :storage_volume => 60,
+                                    :water_heating_system_idref => "WaterHeater" }
+    if hpxml_file == 'base-dhw-solar-direct-evacuated-tube.xml'
+      solar_thermal_system_values[:collector_loop_type] = "liquid direct"
+    elsif hpxml_file == 'base-dhw-solar-thermosyphon-evacuated-tube.xml'
+      solar_thermal_system_values[:collector_loop_type] = "passive thermosyphon"
+    else
+      solar_thermal_system_values[:collector_loop_type] = "liquid indirect"
+    end
+  elsif ['base-dhw-solar-direct-ics.xml',
+         'base-dhw-solar-thermosyphon-ics.xml'].include? hpxml_file
+    solar_thermal_system_values = { :id => "SolarThermalSystem",
+                                    :system_type => "hot water",
+                                    :collector_area => 40,
+                                    :collector_type => "integrated collector storage",
+                                    :collector_azimuth => 180,
+                                    :collector_tilt => 20,
+                                    :collector_frta => 0.77,
+                                    :collector_frul => 0.793,
+                                    :storage_volume => 60,
+                                    :water_heating_system_idref => "WaterHeater" }
+    if hpxml_file == 'base-dhw-solar-direct-ics.xml'
+      solar_thermal_system_values[:collector_loop_type] = "liquid direct"
+    elsif hpxml_file == 'base-dhw-solar-thermosyphon-ics.xml'
+      solar_thermal_system_values[:collector_loop_type] = "passive thermosyphon"
+    end
+  elsif ['invalid_files/unattached-solar-thermal-system.xml'].include? hpxml_file
+    solar_thermal_system_values[:water_heating_system_idref] = "foobar"
+  end
+  return solar_thermal_system_values
 end
 
 def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)

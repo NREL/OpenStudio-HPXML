@@ -727,6 +727,34 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SolarThermalCollectorTypeEvacuatedTube
+    return 'evacuated tube'
+  end
+
+  def self.SolarThermalCollectorTypeGlazedFlatPlateSingle
+    return 'single glazing black'
+  end
+
+  def self.SolarThermalCollectorTypeGlazedFlatPlateDouble
+    return 'double glazing black'
+  end
+
+  def self.SolarThermalCollectorTypeICS
+    return 'integrated collector storage'
+  end
+
+  def self.SolarThermalLoopTypeDirect
+    return 'liquid direct'
+  end
+
+  def self.SolarThermalLoopTypeIndirect
+    return 'liquid indirect'
+  end
+
+  def self.SolarThermalLoopTypeThermosyphon
+    return 'passive thermosyphon'
+  end
+
   def self.SpaceTypeVentedCrawl
     return 'vented crawlspace'
   end

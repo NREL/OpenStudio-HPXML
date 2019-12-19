@@ -1498,7 +1498,7 @@ class Constructions
     settings.setGroundSolarAbsorptivity(0.9)
     settings.setGroundThermalAbsorptivity(0.9)
     settings.setGroundSurfaceRoughness(0.03)
-    settings.setFarFieldWidth(40) # TODO: Set based on neighbor distances
+    settings.setFarFieldWidth(40) # TODO: Set based on neighbor distances?
     settings.setDeepGroundBoundaryCondition('ZeroFlux')
     settings.setDeepGroundDepth(40)
     settings.setMinimumCellDimension(0.2)
