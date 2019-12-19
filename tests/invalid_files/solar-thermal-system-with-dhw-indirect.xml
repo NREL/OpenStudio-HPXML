@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:26:36-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-12-18T10:19:28-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -267,56 +267,9 @@
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
+            <WaterHeaterType>space-heating boiler with tankless coil</WaterHeaterType>
             <Location>living space</Location>
-            <TankVolume>40.0</TankVolume>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <HeatingCapacity>18767.0</HeatingCapacity>
-            <EnergyFactor>0.95</EnergyFactor>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater2'/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>storage water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <TankVolume>50.0</TankVolume>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <HeatingCapacity>40000.0</HeatingCapacity>
-            <EnergyFactor>0.59</EnergyFactor>
-            <RecoveryEfficiency>0.76</RecoveryEfficiency>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater3'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>heat pump water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <TankVolume>80.0</TankVolume>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <EnergyFactor>2.3</EnergyFactor>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater4'/>
-            <FuelType>electricity</FuelType>
-            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <FractionDHWLoadServed>0.2</FractionDHWLoadServed>
-            <EnergyFactor>0.99</EnergyFactor>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater5'/>
-            <FuelType>natural gas</FuelType>
-            <WaterHeaterType>instantaneous water heater</WaterHeaterType>
-            <Location>living space</Location>
-            <FractionDHWLoadServed>0.1</FractionDHWLoadServed>
-            <EnergyFactor>0.82</EnergyFactor>
-          </WaterHeatingSystem>
-          <WaterHeatingSystem>
-            <SystemIdentifier id='WaterHeater6'/>
-            <WaterHeaterType>space-heating boiler with storage tank</WaterHeaterType>
-            <Location>living space</Location>
-            <TankVolume>50.0</TankVolume>
-            <FractionDHWLoadServed>0.1</FractionDHWLoadServed>
+            <FractionDHWLoadServed>1.0</FractionDHWLoadServed>
             <RelatedHVACSystem idref='HeatingSystem'/>
           </WaterHeatingSystem>
           <HotWaterDistribution>
