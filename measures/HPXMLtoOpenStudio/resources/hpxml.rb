@@ -351,8 +351,6 @@ class HPXML
       surf = surfs[surf_id]
       surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
     end
-
-    return true
   end
 
   def self.add_air_infiltration_measurement(hpxml:,
@@ -1167,6 +1165,8 @@ class HPXML
                          backup_heating_fuel: nil,
                          backup_heating_capacity: nil,
                          backup_heating_efficiency_percent: nil,
+                         backup_heating_efficiency_afue: nil,
+                         backup_heating_switchover_temp: nil,
                          fraction_heat_load_served:,
                          fraction_cool_load_served:,
                          cooling_efficiency_seer: nil,
@@ -1189,10 +1189,17 @@ class HPXML
     XMLHelper.add_element(heat_pump, "CoolingSensibleHeatFraction", Float(cooling_shr)) unless cooling_shr.nil?
     if not backup_heating_fuel.nil?
       XMLHelper.add_element(heat_pump, "BackupSystemFuel", backup_heating_fuel)
-      backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
-      XMLHelper.add_element(backup_eff, "Units", "Percent")
-      XMLHelper.add_element(backup_eff, "Value", Float(backup_heating_efficiency_percent))
+      efficiencies = { "Percent" => backup_heating_efficiency_percent,
+                       "AFUE" => backup_heating_efficiency_afue }
+      efficiencies.each do |units, value|
+        next if value.nil?
+
+        backup_eff = XMLHelper.add_element(heat_pump, "BackupAnnualHeatingEfficiency")
+        XMLHelper.add_element(backup_eff, "Units", units)
+        XMLHelper.add_element(backup_eff, "Value", Float(value))
+      end
       XMLHelper.add_element(heat_pump, "BackupHeatingCapacity", Float(backup_heating_capacity))
+      XMLHelper.add_element(heat_pump, "BackupHeatingSwitchoverTemperature", Float(backup_heating_switchover_temp)) unless backup_heating_switchover_temp.nil?
     end
     XMLHelper.add_element(heat_pump, "FractionHeatLoadServed", Float(fraction_heat_load_served))
     XMLHelper.add_element(heat_pump, "FractionCoolLoadServed", Float(fraction_cool_load_served))
@@ -1243,6 +1250,8 @@ class HPXML
     vals[:backup_heating_fuel] = XMLHelper.get_value(heat_pump, "BackupSystemFuel") if is_selected(select, :backup_heating_fuel)
     vals[:backup_heating_capacity] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingCapacity")) if is_selected(select, :backup_heating_capacity)
     vals[:backup_heating_efficiency_percent] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='Percent']/Value")) if is_selected(select, :backup_heating_efficiency_percent)
+    vals[:backup_heating_efficiency_afue] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupAnnualHeatingEfficiency[Units='AFUE']/Value")) if is_selected(select, :backup_heating_efficiency_afue)
+    vals[:backup_heating_switchover_temp] = to_float_or_nil(XMLHelper.get_value(heat_pump, "BackupHeatingSwitchoverTemperature")) if is_selected(select, :backup_heating_switchover_temp)
     vals[:fraction_heat_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionHeatLoadServed")) if is_selected(select, :fraction_heat_load_served)
     vals[:fraction_cool_load_served] = to_float_or_nil(XMLHelper.get_value(heat_pump, "FractionCoolLoadServed")) if is_selected(select, :fraction_cool_load_served)
     vals[:cooling_efficiency_seer] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualCoolingEfficiency[Units='SEER']/Value")) if is_selected(select, :cooling_efficiency_seer)
@@ -1466,7 +1475,8 @@ class HPXML
                                     recovery_efficiency: nil,
                                     uses_desuperheater: nil,
                                     jacket_r_value: nil,
-                                    related_hvac: nil)
+                                    related_hvac: nil,
+                                    standby_loss: nil)
     water_heating = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "WaterHeating"])
     water_heating_system = XMLHelper.add_element(water_heating, "WaterHeatingSystem")
     sys_id = XMLHelper.add_element(water_heating_system, "SystemIdentifier")
@@ -1491,6 +1501,7 @@ class HPXML
       related_hvac_el = XMLHelper.add_element(water_heating_system, "RelatedHVACSystem")
       XMLHelper.add_attribute(related_hvac_el, "idref", related_hvac)
     end
+    HPXML.add_extension(parent: water_heating_system, extensions: { "StandbyLoss": to_float_or_nil(standby_loss) })
 
     return water_heating_system
   end
@@ -1516,6 +1527,7 @@ class HPXML
     vals[:jacket_r_value] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "WaterHeaterInsulation/Jacket/JacketRValue")) if is_selected(select, :jacket_r_value)
     vals[:related_hvac] = HPXML.get_idref(water_heating_system, "RelatedHVACSystem") if is_selected(select, :related_hvac)
     vals[:energy_star] = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star") if is_selected(select, :energy_star)
+    vals[:standby_loss] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "extension/StandbyLoss")) if is_selected(select, :standby_loss)
     return vals
   end
 
@@ -1601,6 +1613,60 @@ class HPXML
     vals[:id] = HPXML.get_id(water_fixture) if is_selected(select, :id)
     vals[:water_fixture_type] = XMLHelper.get_value(water_fixture, "WaterFixtureType") if is_selected(select, :water_fixture_type)
     vals[:low_flow] = to_bool_or_nil(XMLHelper.get_value(water_fixture, "LowFlow")) if is_selected(select, :low_flow)
+    return vals
+  end
+
+  def self.add_solar_thermal_system(hpxml:,
+                                    id:,
+                                    system_type:,
+                                    collector_area: nil,
+                                    collector_loop_type: nil,
+                                    collector_azimuth: nil,
+                                    collector_type: nil,
+                                    collector_tilt: nil,
+                                    collector_frta: nil,
+                                    collector_frul: nil,
+                                    storage_volume: nil,
+                                    water_heating_system_idref:,
+                                    solar_fraction: nil)
+
+    solar_thermal = XMLHelper.create_elements_as_needed(hpxml, ["Building", "BuildingDetails", "Systems", "SolarThermal"])
+    solar_thermal_system = XMLHelper.add_element(solar_thermal, "SolarThermalSystem")
+    sys_id = XMLHelper.add_element(solar_thermal_system, "SystemIdentifier")
+    XMLHelper.add_attribute(sys_id, "id", id)
+    XMLHelper.add_element(solar_thermal_system, "SystemType", system_type)
+    XMLHelper.add_element(solar_thermal_system, "CollectorArea", Float(collector_area)) unless collector_area.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorLoopType", collector_loop_type) unless collector_loop_type.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorType", collector_type) unless collector_type.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorAzimuth", Integer(collector_azimuth)) unless collector_azimuth.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorTilt", Float(collector_tilt)) unless collector_tilt.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorRatedOpticalEfficiency", Float(collector_frta)) unless collector_frta.nil?
+    XMLHelper.add_element(solar_thermal_system, "CollectorRatedThermalLosses", Float(collector_frul)) unless collector_frul.nil?
+    XMLHelper.add_element(solar_thermal_system, "StorageVolume", Float(storage_volume)) unless storage_volume.nil?
+    connected_to = XMLHelper.add_element(solar_thermal_system, "ConnectedTo")
+    XMLHelper.add_attribute(connected_to, "idref", water_heating_system_idref)
+    XMLHelper.add_element(solar_thermal_system, "SolarFraction", Float(solar_fraction)) unless solar_fraction.nil?
+
+    return solar_thermal_system
+  end
+
+  def self.get_solar_thermal_system_values(solar_thermal_system:,
+                                           select: [])
+    return nil if solar_thermal_system.nil?
+
+    vals = {}
+    vals[:id] = HPXML.get_id(solar_thermal_system) if is_selected(select, :id)
+    vals[:system_type] = XMLHelper.get_value(solar_thermal_system, "SystemType") if is_selected(select, :system_type)
+    vals[:collector_area] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorArea")) if is_selected(select, :collector_area)
+    vals[:collector_loop_type] = XMLHelper.get_value(solar_thermal_system, "CollectorLoopType") if is_selected(select, :collector_loop_type)
+    vals[:collector_azimuth] = to_integer_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorAzimuth")) if is_selected(select, :collector_azimuth)
+    vals[:collector_type] = XMLHelper.get_value(solar_thermal_system, "CollectorType") if is_selected(select, :collector_type)
+    vals[:collector_tilt] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorTilt")) if is_selected(select, :collector_tilt)
+    vals[:collector_frta] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedOpticalEfficiency")) if is_selected(select, :collector_frta)
+    vals[:collector_frul] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "CollectorRatedThermalLosses")) if is_selected(select, :collector_frul)
+    vals[:storage_volume] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume")) if is_selected(select, :storage_volume)
+    vals[:water_heating_system_idref] = HPXML.get_idref(solar_thermal_system, "ConnectedTo") if is_selected(select, :water_heating_system_idref)
+    vals[:solar_fraction] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "SolarFraction")) if is_selected(select, :solar_fraction)
     return vals
   end
 

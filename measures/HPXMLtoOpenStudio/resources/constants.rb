@@ -5,16 +5,8 @@ class Constants
     return 73.5 # deg-F
   end
 
-  def self.DefaultCoolingSetpoint
-    return 76.0
-  end
-
   def self.DefaultFramingFactorInterior
     return 0.16
-  end
-
-  def self.DefaultHeatingSetpoint
-    return 71.0
   end
 
   def self.DefaultHumiditySetpoint
@@ -251,6 +243,10 @@ class Constants
     return "ashp"
   end
 
+  def self.ObjectNameBackupHeatingCoil
+    return "backup htg coil"
+  end
+
   def self.ObjectNameBath
     return "res baths"
   end
@@ -307,13 +303,16 @@ class Constants
     return "evap cooler"
   end
 
-  def self.ObjectNameFanPumpDisaggregate(is_cooling, fan_or_pump_name = "")
-    if is_cooling
-      s = "cool"
-    else
-      s = "heat"
-    end
-    return "#{fan_or_pump_name} #{s} disaggregate"
+  def self.ObjectNameFanPumpDisaggregateCool(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} clg disaggregate"
+  end
+
+  def self.ObjectNameFanPumpDisaggregatePrimaryHeat(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} htg primary disaggregate"
+  end
+
+  def self.ObjectNameFanPumpDisaggregateBackupHeat(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} htg backup disaggregate"
   end
 
   def self.ObjectNameFixtures
@@ -718,6 +717,34 @@ class Constants
 
   def self.SizingInfoZoneInfiltrationELA
     return __method__.to_s
+  end
+
+  def self.SolarThermalCollectorTypeEvacuatedTube
+    return 'evacuated tube'
+  end
+
+  def self.SolarThermalCollectorTypeGlazedFlatPlateSingle
+    return 'single glazing black'
+  end
+
+  def self.SolarThermalCollectorTypeGlazedFlatPlateDouble
+    return 'double glazing black'
+  end
+
+  def self.SolarThermalCollectorTypeICS
+    return 'integrated collector storage'
+  end
+
+  def self.SolarThermalLoopTypeDirect
+    return 'liquid direct'
+  end
+
+  def self.SolarThermalLoopTypeIndirect
+    return 'liquid indirect'
+  end
+
+  def self.SolarThermalLoopTypeThermosyphon
+    return 'passive thermosyphon'
   end
 
   def self.SpaceTypeVentedCrawl
