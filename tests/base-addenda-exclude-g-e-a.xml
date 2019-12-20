@@ -129,7 +129,6 @@
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
-              <AssemblyEffectiveRValue>10</AssemblyEffectiveRValue>
               <Layer>
                 <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
