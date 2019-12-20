@@ -1193,10 +1193,10 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
     foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = 7
   elsif ['base-foundation-unconditioned-basement.xml'].include? hpxml_file
     foundation_walls_values[0][:interior_adjacent_to] = "basement - unconditioned"
-    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = 1
+    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = 0
     foundation_walls_values[0][:exterior_layer_r_value] = 0
   elsif ['base-foundation-unconditioned-basement-wall-insulation.xml'].include? hpxml_file
-    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = 5
+    foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = 4
     foundation_walls_values[0][:exterior_layer_r_value] = 8.9
   elsif ['base-foundation-unconditioned-basement-assembly-r.xml'].include? hpxml_file
     foundation_walls_values[0][:distance_to_exterior_insulation_top] = nil

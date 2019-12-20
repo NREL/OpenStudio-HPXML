@@ -145,7 +145,7 @@
                 <NominalRValue>8.9</NominalRValue>
                 <extension>
                   <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
-                  <DistanceToBottomOfInsulation>5.0</DistanceToBottomOfInsulation>
+                  <DistanceToBottomOfInsulation>4.0</DistanceToBottomOfInsulation>
                 </extension>
               </Layer>
               <Layer>
