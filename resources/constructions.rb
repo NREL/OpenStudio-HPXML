@@ -821,14 +821,13 @@ class Constructions
 
   def self.apply_foundation_wall(model, wall_surfaces, wall_constr_name,
                                  ext_rigid_ins_offset, int_rigid_ins_offset, ext_rigid_ins_height,
-                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in,
-                                 wall_height, wall_height_above_grade)
+                                 int_rigid_ins_height, ext_rigid_r, int_rigid_r, wall_drywall_thick_in, wall_concrete_thick_in, wall_height_above_grade)
 
     # Create Kiva foundation
-    foundation = apply_kiva_walled_foundation(model, wall_height, ext_rigid_r,
-                                              int_rigid_r, ext_rigid_ins_offset, int_rigid_ins_offset,
-                                              ext_rigid_ins_height, int_rigid_ins_height,
-                                              wall_height_above_grade, wall_concrete_thick_in, wall_drywall_thick_in)
+    foundation = apply_kiva_walled_foundation(model, ext_rigid_r, int_rigid_r, ext_rigid_ins_offset,
+                                              int_rigid_ins_offset, ext_rigid_ins_height,
+                                              int_rigid_ins_height, wall_height_above_grade,
+                                              wall_concrete_thick_in, wall_drywall_thick_in)
 
     # Define materials
     mat_concrete = Material.Concrete(wall_concrete_thick_in)
@@ -1319,7 +1318,7 @@ class Constructions
     return foundation
   end
 
-  def self.apply_kiva_walled_foundation(model, wall_height, ext_vert_r, int_vert_r,
+  def self.apply_kiva_walled_foundation(model, ext_vert_r, int_vert_r,
                                         ext_vert_offset, int_vert_offset, ext_vert_depth, int_vert_depth,
                                         wall_height_above_grade, wall_concrete_thick_in, wall_drywall_thick_in)
 
@@ -1327,29 +1326,21 @@ class Constructions
     foundation = OpenStudio::Model::FoundationKiva.new(model)
 
     # Interior vertical insulation
-    if not int_vert_r.nil?
-      if int_vert_r > 0 and int_vert_depth > 0
-        int_vert_mat = create_insulation_material(model, "FoundationIntVertIns", int_vert_r)
-        foundation.addCustomBlock(int_vert_mat,
-                                  UnitConversions.convert(int_vert_depth, "ft", "m"),
-                                  -int_vert_mat.thickness,
-                                  UnitConversions.convert(int_vert_offset, "ft", "m"))
-      end
-    end
-
-    if wall_drywall_thick_in < 0.0
-      wall_drywall_thick_in = 0.0
+    if int_vert_r > 0 and int_vert_depth > 0
+      int_vert_mat = create_insulation_material(model, "FoundationIntVertIns", int_vert_r)
+      foundation.addCustomBlock(int_vert_mat,
+                                UnitConversions.convert(int_vert_depth, "ft", "m"),
+                                -int_vert_mat.thickness,
+                                UnitConversions.convert(int_vert_offset, "ft", "m"))
     end
 
     # Exterior vertical insulation
-    if not ext_vert_r.nil?
-      if ext_vert_r > 0 and ext_vert_depth > 0
-        ext_vert_mat = create_insulation_material(model, "FoundationExtVertIns", ext_vert_r)
-        foundation.addCustomBlock(ext_vert_mat,
-                                  UnitConversions.convert(ext_vert_depth, "ft", "m"),
-                                  UnitConversions.convert(wall_concrete_thick_in + wall_drywall_thick_in, "in", "m"),
-                                  UnitConversions.convert(ext_vert_offset, "ft", "m"))
-      end
+    if ext_vert_r > 0 and ext_vert_depth > 0
+      ext_vert_mat = create_insulation_material(model, "FoundationExtVertIns", ext_vert_r)
+      foundation.addCustomBlock(ext_vert_mat,
+                                UnitConversions.convert(ext_vert_depth, "ft", "m"),
+                                UnitConversions.convert(wall_concrete_thick_in + wall_drywall_thick_in, "in", "m"),
+                                UnitConversions.convert(ext_vert_offset, "ft", "m"))
     end
 
     foundation.setWallHeightAboveGrade(UnitConversions.convert(wall_height_above_grade, "ft", "m"))
