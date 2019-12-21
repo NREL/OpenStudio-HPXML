@@ -1202,6 +1202,9 @@ def get_hpxml_file_foundation_walls_values(hpxml_file, foundation_walls_values)
     foundation_walls_values[0][:distance_to_exterior_insulation_top] = nil
     foundation_walls_values[0][:distance_to_exterior_insulation_bottom] = nil
     foundation_walls_values[0][:exterior_layer_r_value] = nil
+    foundation_walls_values[0][:distance_to_interior_insulation_top] = nil
+    foundation_walls_values[0][:distance_to_interior_insulation_bottom] = nil
+    foundation_walls_values[0][:interior_layer_r_value] = nil
     foundation_walls_values[0][:insulation_assembly_r_value] = 10.69
   elsif ['base-foundation-unconditioned-basement-above-grade.xml'].include? hpxml_file
     foundation_walls_values[0][:depth_below_grade] = 4
