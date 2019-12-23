@@ -109,7 +109,7 @@ class EnergyPlusValidator
       # [AirInfiltration]
       "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | extension/ConstantACHnatural" => one,#ACH50, CFM50, or constant nACH;
+        "[HousePressure=50]BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | extension/ConstantACHnatural" => one, # ACH50, CFM50, or constant nACH;
         "InfiltrationVolume" => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
       },
 
