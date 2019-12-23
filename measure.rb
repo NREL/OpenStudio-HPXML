@@ -1486,8 +1486,8 @@ class OSModel
         assembly_r = fnd_wall_values[:insulation_assembly_r_value]
         if assembly_r.nil?
           concrete_thick_in = fnd_wall_values[:thickness]
-          int_r = fnd_wall_values[:interior_layer_r_value].nil? ? 0.0 : fnd_wall_values[:interior_layer_r_value]
-          ext_r = fnd_wall_values[:exterior_layer_r_value].nil? ? 0.0 : fnd_wall_values[:exterior_layer_r_value]
+          int_r = fnd_wall_values[:interior_layer_r_value]
+          ext_r = fnd_wall_values[:exterior_layer_r_value]
           assembly_r = int_r + ext_r + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
         end
         mat_ext_finish = nil
@@ -1548,6 +1548,7 @@ class OSModel
       ext_rigid_offset = 0.0
       film_r = Material.AirFilmVertical.rvalue
       ext_rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
+      int_rigid_r = 0.0
       if ext_rigid_r < 0 # Try without drywall
         drywall_thick_in = 0.0
         ext_rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
@@ -1562,22 +1563,17 @@ class OSModel
         match = true
       end
     else
-      if not fnd_wall_values[:distance_to_exterior_insulation_top].nil?
-        ext_rigid_offset = fnd_wall_values[:distance_to_exterior_insulation_top]
-        ext_rigid_height = fnd_wall_values[:distance_to_exterior_insulation_bottom] - ext_rigid_offset
-        ext_rigid_r = fnd_wall_values[:exterior_layer_r_value]
-      end
-      if not fnd_wall_values[:distance_to_interior_insulation_top].nil?
-        int_rigid_offset = fnd_wall_values[:distance_to_interior_insulation_top]
-        int_rigid_height = fnd_wall_values[:distance_to_interior_insulation_bottom] - int_rigid_offset
-        int_rigid_r = fnd_wall_values[:interior_layer_r_value]
-      end
+      ext_rigid_offset = fnd_wall_values[:distance_to_exterior_insulation_top]
+      ext_rigid_height = fnd_wall_values[:distance_to_exterior_insulation_bottom] - ext_rigid_offset
+      ext_rigid_r = fnd_wall_values[:exterior_layer_r_value]
+      int_rigid_offset = fnd_wall_values[:distance_to_interior_insulation_top]
+      int_rigid_height = fnd_wall_values[:distance_to_interior_insulation_bottom] - int_rigid_offset
+      int_rigid_r = fnd_wall_values[:interior_layer_r_value]
     end
 
     Constructions.apply_foundation_wall(model, [surface], "#{fnd_wall_values[:id]} construction",
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
-                                        ext_rigid_r, int_rigid_r, drywall_thick_in, concrete_thick_in,
-                                        height, height_ag)
+                                        ext_rigid_r, int_rigid_r, drywall_thick_in, concrete_thick_in, height_ag)
 
     if not assembly_r.nil?
       check_surface_assembly_rvalue(runner, [surface], film_r, assembly_r, match)
