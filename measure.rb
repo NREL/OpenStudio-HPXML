@@ -1563,12 +1563,12 @@ class OSModel
         match = true
       end
     else
-      ext_rigid_offset = fnd_wall_values[:distance_to_exterior_insulation_top]
-      ext_rigid_height = fnd_wall_values[:distance_to_exterior_insulation_bottom] - ext_rigid_offset
-      ext_rigid_r = fnd_wall_values[:exterior_layer_r_value]
-      int_rigid_offset = fnd_wall_values[:distance_to_interior_insulation_top]
-      int_rigid_height = fnd_wall_values[:distance_to_interior_insulation_bottom] - int_rigid_offset
-      int_rigid_r = fnd_wall_values[:interior_layer_r_value]
+      ext_rigid_offset = fnd_wall_values[:insulation_exterior_distance_to_top]
+      ext_rigid_height = fnd_wall_values[:insulation_exterior_distance_to_bottom] - ext_rigid_offset
+      ext_rigid_r = fnd_wall_values[:insulation_exterior_r_value]
+      int_rigid_offset = fnd_wall_values[:insulation_interior_distance_to_top]
+      int_rigid_height = fnd_wall_values[:insulation_interior_distance_to_bottom] - int_rigid_offset
+      int_rigid_r = fnd_wall_values[:insulation_interior_r_value]
     end
 
     Constructions.apply_foundation_wall(model, [surface], "#{fnd_wall_values[:id]} construction",
