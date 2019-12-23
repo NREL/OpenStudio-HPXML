@@ -846,9 +846,9 @@ class HVACSizing
 
     # Foundation walls
     Geometry.get_spaces_below_grade_exterior_walls(thermal_zone.spaces).each do |wall|
-      u_wall, is_insulated = get_foundation_wall_props(wall)
+      u_wall_with_soil, u_wall_without_soil, is_insulated = get_foundation_wall_props(wall)
 
-      zone_loads.Heat_Walls += u_wall * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      zone_loads.Heat_Walls += u_wall_with_soil * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
       surfaces_processed << wall.name.to_s
     end
 
@@ -2521,7 +2521,8 @@ class HVACSizing
 
       if obc == "foundation"
         if surface.surfaceType.downcase == "wall"
-          ufactor, is_insulated = get_foundation_wall_props(surface)
+          u_wall_with_soil, u_wall_without_soil, is_insulated = get_foundation_wall_props(surface)
+          ufactor = u_wall_without_soil
         elsif surface.surfaceType.downcase == "floor"
           next
         end
@@ -3067,7 +3068,7 @@ class HVACSizing
       next if surface.surfaceType.downcase != "wall"
       next if not surface.adjacentFoundation.is_initialized
 
-      u_wall, walls_insulated = get_foundation_wall_props(surface)
+      u_wall_with_soil, u_wall_without_soil, walls_insulated = get_foundation_wall_props(surface)
       break
     end
 
@@ -3123,7 +3124,8 @@ class HVACSizing
     k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
 
     # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
-    u_wall = 0.0
+    u_wall_with_soil = 0.0
+    u_wall_without_soil = 0.0
     wall_height_ft = Geometry.get_surface_height(surface).round
     for d in 1..wall_height_ft
       r_soil = (Math::PI * d / 2.0) / k_soil
@@ -3138,12 +3140,14 @@ class HVACSizing
           r_wall += wall_ins_rvalues[i] # Insulation at this depth, add R-value
         end
       end
-      u_wall += 1.0 / (r_soil + r_wall)
+      u_wall_with_soil += 1.0 / (r_soil + r_wall)
+      u_wall_without_soil += 1.0 / r_wall
     end
-    u_wall = (u_wall / wall_height_ft) * 0.85
+    u_wall_with_soil = (u_wall_with_soil / wall_height_ft) * 0.85
+    u_wall_without_soil = (u_wall_without_soil / wall_height_ft)
     is_insulated = (wall_ins_rvalues.size > 0)
 
-    return u_wall, is_insulated
+    return u_wall_with_soil, u_wall_without_soil, is_insulated
   end
 
   def self.get_feature(obj, feature, datatype, fail_on_error = true)
