@@ -96,8 +96,8 @@ class EnergyPlusValidator
       # [NeighborBuilding]
       "/HPXML/Building/BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding" => {
         "Azimuth" => one,
-        "Distance" => one,
-        "Height" => zero_or_one # if omitted, the neighbor is the same height as the main building
+        "Distance" => one, # ft
+        "Height" => zero_or_one # ft; if omitted, the neighbor is the same height as the main building
       },
 
       # [WeatherStation]
@@ -182,8 +182,8 @@ class EnergyPlusValidator
       ## [FoundationWallInsLayer]
       "/HPXML/Building/BuildingDetails/Enclosure/FoundationWalls/FoundationWall/Insulation/Layer[InstallationType='continuous - exterior' or InstallationType='continuous - interior']" => {
         "NominalRValue" => one,
-        "extension/DistanceToTopOfInsulation" => one,
-        "extension/DistanceToBottomOfInsulation" => one,
+        "extension/DistanceToTopOfInsulation" => one, # ft
+        "extension/DistanceToBottomOfInsulation" => one, # ft
       },
 
       # [FrameFloor]
@@ -210,7 +210,7 @@ class EnergyPlusValidator
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
         "UnderSlabInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "UnderSlabInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
-        "extension/CarpetFraction" => one,
+        "extension/CarpetFraction" => one, # 0 - 1
         "extension/CarpetRValue" => one,
       },
 
@@ -393,7 +393,7 @@ class EnergyPlusValidator
         "SetbackTempHeatingSeason" => zero_or_one, # See [HVACControlType=HeatingSetback]
         "SetupTempCoolingSeason" => zero_or_one, # See [HVACControlType=CoolingSetup]
         "SetpointTempCoolingSeason" => one,
-        "extension/CeilingFanSetpointTempCoolingSeasonOffset" => zero_or_one,
+        "extension/CeilingFanSetpointTempCoolingSeasonOffset" => zero_or_one, # deg-F
       },
 
       ## [HVACControlType=HeatingSetback]
@@ -506,7 +506,7 @@ class EnergyPlusValidator
         "RelatedHVACSystem" => one, # HeatingSystem (boiler)
         "TankVolume" => one,
         "WaterHeaterInsulation/Jacket/JacketRValue" => zero_or_one, # Capable to model tank wrap insulation
-        "extension/StandbyLoss" => zero_or_one, # F/h, refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
+        "extension/StandbyLoss" => zero_or_one, # deg-F/h, refer to https://www.ahridirectory.org/NewSearch?programId=28&searchTypeId=3
       },
 
       ## [WHType=CombiTankless]
