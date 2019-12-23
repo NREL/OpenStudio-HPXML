@@ -3721,7 +3721,16 @@ class OSModel
 
     if not plenum_zones.empty?
 
-      if @living_zone.zoneMixing.size > 0
+      has_duct_zone_mixing = false
+      @living_zone.airLoopHVACs.sort.each do |airloop|
+        @living_zone.zoneMixing.each do |zone_mix|
+          next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(" ", "_")
+
+          has_duct_zone_mixing = true
+        end
+      end
+
+      if has_duct_zone_mixing
         ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Gain Energy")
         ducts_mix_gain_sensor.setName("duct_mix_gain")
         ducts_mix_gain_sensor.setKeyName(@living_zone.name.to_s)
