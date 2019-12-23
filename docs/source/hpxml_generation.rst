@@ -157,8 +157,8 @@ Alternatively, an interior foundation wall between an 8 ft conditioned basement 
 
 Foundation wall insulation can be described in two ways: 
 
-Option 1. A continuous insulation layer with ``NominalRValue`` and ``DistanceToBottomOfInsulation``. 
-An insulation layer is useful for describing foundation wall insulation that doesn't span the entire height (e.g., 4 ft of insulation for an 8 ft conditioned basement). 
+Option 1. Interior/exterior continuous insulation layers with ``NominalRValue``, ``extension/DistanceToTopOfInsulation``, and ``extension/DistanceToBottomOfInsulation``. 
+Insulation layers are useful for describing foundation wall insulation that doesn't span the entire height (e.g., 4 ft of insulation for an 8 ft conditioned basement). 
 When an insulation layer R-value is specified, it is modeled with a concrete wall (whose ``Thickness`` is provided) as well as air film resistances as appropriate.
 
 Option 2. An ``AssemblyEffectiveRValue``. 
