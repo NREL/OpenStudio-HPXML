@@ -118,7 +118,7 @@ class Lighting
     end
 
     # Create schedule
-    sch = HourlyByMonthSchedule.new(model, "lighting schedule", lighting_sch, lighting_sch, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    sch = HourlyByMonthSchedule.new(model, "lighting schedule", lighting_sch, lighting_sch, true, true, Constants.ScheduleTypeLimitsFraction)
 
     # Add lighting to each conditioned space
     if interior_kwh > 0

@@ -1753,7 +1753,7 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
-    sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     return sch
   end
 
@@ -3019,39 +3019,20 @@ class OSModel
 
     # Natural Ventilation
     if not disable_nat_vent.nil? and disable_nat_vent
-      nat_vent_htg_offset = 0
-      nat_vent_clg_offset = 0
-      nat_vent_ovlp_offset = 0
-      nat_vent_htg_season = false
-      nat_vent_clg_season = false
-      nat_vent_ovlp_season = false
-      nat_vent_num_weekdays = 0
-      nat_vent_num_weekends = 0
-      nat_vent_frac_windows_open = 0
-      nat_vent_frac_window_area_openable = 0
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
+      nv_num_weekdays = 0
+      nv_num_weekends = 0
+      nv_frac_windows_open = 0.0
+      nv_frac_window_area_openable = 0.0
     else
-      nat_vent_htg_offset = 1.0
-      nat_vent_clg_offset = 1.0
-      nat_vent_ovlp_offset = 1.0
-      nat_vent_htg_season = true
-      nat_vent_clg_season = true
-      nat_vent_ovlp_season = true
-      nat_vent_num_weekdays = 5
-      nat_vent_num_weekends = 2
-      # According to 2010 BA Benchmark, 33% of the windows will be open
-      # at any given time and can only be opened to 20% of their area.
-      nat_vent_frac_windows_open = 0.33
-      nat_vent_frac_window_area_openable = 0.2
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
+      nv_num_weekdays = 5
+      nv_num_weekends = 2
+      nv_frac_windows_open = 0.33
+      nv_frac_window_area_openable = 0.2
     end
-    nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
-                                      nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
-                                      nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
-                                      nat_vent_max_oa_hr, nat_vent_max_oa_rh, @htg_weekday_setpoints, @htg_weekend_setpoints,
-                                      @clg_weekday_setpoints, @clg_weekend_setpoints)
+    nv_max_oa_hr = 0.0115
+    nv_max_oa_rh = 0.7
+    nat_vent = NaturalVentilation.new(nv_num_weekdays, nv_num_weekends, nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh,
+                                      @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints)
 
     # Ducts
     duct_systems = {}
