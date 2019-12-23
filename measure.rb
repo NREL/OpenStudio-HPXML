@@ -1486,7 +1486,9 @@ class OSModel
         assembly_r = fnd_wall_values[:insulation_assembly_r_value]
         if assembly_r.nil?
           concrete_thick_in = fnd_wall_values[:thickness]
-          assembly_r = fnd_wall_values[:insulation_r_value] + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
+          int_r = fnd_wall_values[:interior_layer_r_value]
+          ext_r = fnd_wall_values[:exterior_layer_r_value]
+          assembly_r = int_r + ext_r + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
         end
         mat_ext_finish = nil
 
@@ -1539,40 +1541,40 @@ class OSModel
     else
       drywall_thick_in = 0.0
     end
-    filled_cavity = true
     concrete_thick_in = fnd_wall_values[:thickness]
-    cavity_r = 0.0
-    cavity_depth_in = 0.0
-    install_grade = 1
-    framing_factor = 0.0
     assembly_r = fnd_wall_values[:insulation_assembly_r_value]
     if not assembly_r.nil?
-      rigid_height = height
+      ext_rigid_height = height
+      ext_rigid_offset = 0.0
       film_r = Material.AirFilmVertical.rvalue
-      rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
-      if rigid_r < 0 # Try without drywall
+      ext_rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
+      int_rigid_r = 0.0
+      if ext_rigid_r < 0 # Try without drywall
         drywall_thick_in = 0.0
-        rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
+        ext_rigid_r = assembly_r - Material.Concrete(concrete_thick_in).rvalue - Material.GypsumWall(drywall_thick_in).rvalue - film_r
       end
-      if rigid_r > 0 and rigid_r < 0.1
-        rigid_r = 0.0 # Prevent tiny strip of insulation
+      if ext_rigid_r > 0 and ext_rigid_r < 0.1
+        ext_rigid_r = 0.0 # Prevent tiny strip of insulation
       end
-      if rigid_r < 0
-        rigid_r = 0.0
+      if ext_rigid_r < 0
+        ext_rigid_r = 0.0
         match = false
       else
         match = true
       end
     else
-      rigid_height = fnd_wall_values[:insulation_distance_to_bottom]
-      rigid_r = fnd_wall_values[:insulation_r_value]
+      ext_rigid_offset = fnd_wall_values[:distance_to_exterior_insulation_top]
+      ext_rigid_height = fnd_wall_values[:distance_to_exterior_insulation_bottom] - ext_rigid_offset
+      ext_rigid_r = fnd_wall_values[:exterior_layer_r_value]
+      int_rigid_offset = fnd_wall_values[:distance_to_interior_insulation_top]
+      int_rigid_height = fnd_wall_values[:distance_to_interior_insulation_bottom] - int_rigid_offset
+      int_rigid_r = fnd_wall_values[:interior_layer_r_value]
     end
 
     Constructions.apply_foundation_wall(model, [surface], "#{fnd_wall_values[:id]} construction",
-                                        rigid_height, cavity_r, install_grade,
-                                        cavity_depth_in, filled_cavity, framing_factor,
-                                        rigid_r, drywall_thick_in, concrete_thick_in,
-                                        height, height_ag)
+                                        ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
+                                        ext_rigid_r, int_rigid_r, drywall_thick_in, concrete_thick_in, height_ag)
+
     if not assembly_r.nil?
       check_surface_assembly_rvalue(runner, [surface], film_r, assembly_r, match)
     end
@@ -4384,13 +4386,9 @@ class OSModel
 
       if surface.adjacentFoundation.is_initialized
         foundation = surface.adjacentFoundation.get
-        if foundation.interiorVerticalInsulationMaterial.is_initialized
-          int_mat = foundation.interiorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
-          constr_r += UnitConversions.convert(int_mat.thickness, "m", "ft") / UnitConversions.convert(int_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
-        end
-        if foundation.exteriorVerticalInsulationMaterial.is_initialized
-          ext_mat = foundation.exteriorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
-          constr_r += UnitConversions.convert(ext_mat.thickness, "m", "ft") / UnitConversions.convert(ext_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
+        foundation.customBlocks.each do |custom_block|
+          ins_mat = custom_block.material.to_StandardOpaqueMaterial.get
+          constr_r += UnitConversions.convert(ins_mat.thickness, "m", "ft") / UnitConversions.convert(ins_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
         end
       end
 
