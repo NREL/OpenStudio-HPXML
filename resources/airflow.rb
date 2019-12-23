@@ -1776,15 +1776,13 @@ class Infiltration
 end
 
 class NaturalVentilation
-  def initialize(num_weekdays, num_weekends, frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh)
-    @num_weekdays = num_weekdays
-    @num_weekends = num_weekends
+  def initialize(frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh)
     @frac_windows_open = frac_windows_open
     @frac_window_area_openable = frac_window_area_openable
     @max_oa_hr = max_oa_hr
     @max_oa_rh = max_oa_rh
   end
-  attr_accessor(:num_weekdays, :num_weekends, :frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh)
+  attr_accessor(:frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh)
 end
 
 class MechanicalVentilation
