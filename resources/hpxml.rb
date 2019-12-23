@@ -1410,10 +1410,12 @@ class HPXML
 
   def self.add_ventilation_fan(hpxml:,
                                id:,
-                               fan_type:,
+                               fan_type: nil,
                                rated_flow_rate: nil,
                                tested_flow_rate: nil,
-                               hours_in_operation:,
+                               hours_in_operation: nil,
+                               used_for_whole_building_ventilation: nil,
+                               used_for_seasonal_cooling_load_reduction: nil,
                                total_recovery_efficiency: nil,
                                total_recovery_efficiency_adjusted: nil,
                                sensible_recovery_efficiency: nil,
@@ -1424,11 +1426,12 @@ class HPXML
     ventilation_fan = XMLHelper.add_element(ventilation_fans, "VentilationFan")
     sys_id = XMLHelper.add_element(ventilation_fan, "SystemIdentifier")
     XMLHelper.add_attribute(sys_id, "id", id)
-    XMLHelper.add_element(ventilation_fan, "FanType", fan_type)
+    XMLHelper.add_element(ventilation_fan, "FanType", fan_type) unless fan_type.nil?
     XMLHelper.add_element(ventilation_fan, "RatedFlowRate", Float(rated_flow_rate)) unless rated_flow_rate.nil?
     XMLHelper.add_element(ventilation_fan, "TestedFlowRate", Float(tested_flow_rate)) unless tested_flow_rate.nil?
-    XMLHelper.add_element(ventilation_fan, "HoursInOperation", Float(hours_in_operation))
-    XMLHelper.add_element(ventilation_fan, "UsedForWholeBuildingVentilation", true)
+    XMLHelper.add_element(ventilation_fan, "HoursInOperation", Float(hours_in_operation)) unless hours_in_operation.nil?
+    XMLHelper.add_element(ventilation_fan, "UsedForWholeBuildingVentilation", Boolean(used_for_whole_building_ventilation)) unless used_for_whole_building_ventilation.nil?
+    XMLHelper.add_element(ventilation_fan, "UsedForSeasonalCoolingLoadReduction", Boolean(used_for_seasonal_cooling_load_reduction)) unless used_for_seasonal_cooling_load_reduction.nil?
     XMLHelper.add_element(ventilation_fan, "TotalRecoveryEfficiency", Float(total_recovery_efficiency)) unless total_recovery_efficiency.nil?
     XMLHelper.add_element(ventilation_fan, "SensibleRecoveryEfficiency", Float(sensible_recovery_efficiency)) unless sensible_recovery_efficiency.nil?
     XMLHelper.add_element(ventilation_fan, "AdjustedTotalRecoveryEfficiency", Float(total_recovery_efficiency_adjusted)) unless total_recovery_efficiency_adjusted.nil?
@@ -1452,6 +1455,8 @@ class HPXML
     vals[:rated_flow_rate] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "RatedFlowRate")) if is_selected(select, :rated_flow_rate)
     vals[:tested_flow_rate] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TestedFlowRate")) if is_selected(select, :tested_flow_rate)
     vals[:hours_in_operation] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "HoursInOperation")) if is_selected(select, :hours_in_operation)
+    vals[:used_for_whole_building_ventilation] = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, "UsedForWholeBuildingVentilation")) if is_selected(select, :used_for_whole_building_ventilation)
+    vals[:used_for_seasonal_cooling_load_reduction] = to_bool_or_nil(XMLHelper.get_value(ventilation_fan, "UsedForSeasonalCoolingLoadReduction")) if is_selected(select, :used_for_seasonal_cooling_load_reduction)
     vals[:total_recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "TotalRecoveryEfficiency")) if is_selected(select, :total_recovery_efficiency)
     vals[:total_recovery_efficiency_adjusted] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedTotalRecoveryEfficiency")) if is_selected(select, :total_recovery_efficiency_adjusted)
     vals[:sensible_recovery_efficiency] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "SensibleRecoveryEfficiency")) if is_selected(select, :sensible_recovery_efficiency)

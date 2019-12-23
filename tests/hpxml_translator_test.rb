@@ -385,6 +385,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                    "Infiltration" => "infil",
                    "Natural Ventilation" => "natvent",
                    "Mechanical Ventilation" => "mechvent",
+                   "Whole House Fan" => "whf",
                    "Ducts" => "ducts",
                    "Internal Gains" => "intgains" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|

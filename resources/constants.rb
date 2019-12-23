@@ -439,6 +439,10 @@ class Constants
     return "dhw source hx"
   end
 
+  def self.ObjectNameWholeHouseFan
+    return 'whole house fan'
+  end
+
   def self.PlantLoopDomesticWater
     return "dhw loop"
   end
