@@ -1486,8 +1486,8 @@ class OSModel
         assembly_r = fnd_wall_values[:insulation_assembly_r_value]
         if assembly_r.nil?
           concrete_thick_in = fnd_wall_values[:thickness]
-          int_r = fnd_wall_values[:interior_layer_r_value]
-          ext_r = fnd_wall_values[:exterior_layer_r_value]
+          int_r = fnd_wall_values[:insulation_interior_r_value]
+          ext_r = fnd_wall_values[:insulation_exterior_r_value]
           assembly_r = int_r + ext_r + Material.Concrete(concrete_thick_in).rvalue + Material.GypsumWall(drywall_thick_in).rvalue + film_r
         end
         mat_ext_finish = nil
