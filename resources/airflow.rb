@@ -734,40 +734,18 @@ class Airflow
   end
 
   def self.process_nat_vent(model, nat_vent, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
-    thermostatsetpointdualsetpoint = building.living.zone.thermostatSetpointDualSetpoint
-
-    # Calculate natural ventilation lower setpoint as the average of heating/cooling setpoints to prevent increased heating
-    temp_hourly_wkdy = []
-    temp_hourly_wked = []
-    for m in 1..12
-      temp_hourly_wkdy << []
-      temp_hourly_wked << []
-      for h in 1..24
-        temp_hourly_wkdy[m - 1] << UnitConversions.convert((nat_vent.htg_weekday_setpoints[m - 1][h - 1] + nat_vent.clg_weekday_setpoints[m - 1][h - 1]) / 2.0, "F", "C")
-        temp_hourly_wked[m - 1] << UnitConversions.convert((nat_vent.htg_weekend_setpoints[m - 1][h - 1] + nat_vent.clg_weekend_setpoints[m - 1][h - 1]) / 2.0, "F", "C")
-      end
-    end
-
-    temp_sch = HourlyByMonthSchedule.new(model, Constants.ObjectNameNaturalVentilation + " temp schedule", temp_hourly_wkdy, temp_hourly_wked, false, true, Constants.ScheduleTypeLimitsTemperature)
-
-    # Sensors
-
-    nvsp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    nvsp_sensor.setName("#{Constants.ObjectNameNaturalVentilation} sp s")
-    nvsp_sensor.setKeyName(temp_sch.schedule.name.to_s)
+    # Sensor
+    zone_load = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
+    zone_load.setName("#{Constants.ObjectNameNaturalVentilation} load s")
+    zone_load.setKeyName(building.living.zone.name.to_s)
 
     # Actuator
-
-    living_space = building.living.zone.spaces[0]
-
     natvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
     natvent_flow.setName(Constants.ObjectNameNaturalVentilation + " flow")
     natvent_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    natvent_flow.setSpace(living_space)
+    natvent_flow.setSpace(building.living.zone.spaces[0])
     natvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(natvent_flow, "Zone Infiltration", "Air Exchange Flow Rate")
     natvent_flow_actuator.setName("#{natvent_flow.name} act")
-
-    # Program
 
     area = 0.6 * building.window_area * nat_vent.frac_windows_open * nat_vent.frac_window_area_openable # ft^2 (For S-G, this is 0.6*(open window area))
     max_rate = 20.0 # Air Changes per hour
@@ -779,6 +757,7 @@ class Airflow
     c_s = f_s_nv**2.0 * Constants.g * building.infilheight / (Constants.AssumedInsideTemp + 460.0)
     c_w = f_w_nv**2.0
 
+    # Program
     nv_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     nv_program.setName(Constants.ObjectNameNaturalVentilation + " program")
     nv_program.addLine("Set Tin = #{tin_sensor.name}")
@@ -796,13 +775,9 @@ class Airflow
     nv_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
     nv_program.addLine("Set Vwind = #{vwind_sensor.name}")
     nv_program.addLine("Set SGNV = NVArea*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
-    nv_program.addLine("Set NVSP = #{nvsp_sensor.name}")
-    nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>NVSP) && (Tin>Tout)")
-    nv_program.addLine("  Set NVadj1 = (Tin-NVSP)/(Tin-Tout)")
-    nv_program.addLine("  Set NVadj2 = (@Min NVadj1 1)")
-    nv_program.addLine("  Set NVadj3 = (@Max NVadj2 0)")
-    nv_program.addLine("  Set NVadj = SGNV*NVadj3")
-    nv_program.addLine("  Set #{natvent_flow_actuator.name} = (@Min NVadj MaxNV)")
+    nv_program.addLine("Set ZoneLoad = #{zone_load.name}")
+    nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>Tout) && (ZoneLoad < 0)")
+    nv_program.addLine("  Set #{natvent_flow_actuator.name} = (@Min SGNV MaxNV)")
     nv_program.addLine("Else")
     nv_program.addLine("  Set #{natvent_flow_actuator.name} = 0")
     nv_program.addLine("EndIf")
@@ -1801,21 +1776,15 @@ class Infiltration
 end
 
 class NaturalVentilation
-  def initialize(num_weekdays, num_weekends, frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh,
-                 htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints)
+  def initialize(num_weekdays, num_weekends, frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh)
     @num_weekdays = num_weekdays
     @num_weekends = num_weekends
     @frac_windows_open = frac_windows_open
     @frac_window_area_openable = frac_window_area_openable
     @max_oa_hr = max_oa_hr
     @max_oa_rh = max_oa_rh
-    @htg_weekday_setpoints = htg_weekday_setpoints
-    @htg_weekend_setpoints = htg_weekend_setpoints
-    @clg_weekday_setpoints = clg_weekday_setpoints
-    @clg_weekend_setpoints = clg_weekend_setpoints
   end
-  attr_accessor(:num_weekdays, :num_weekends, :frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh,
-                :htg_weekday_setpoints, :htg_weekend_setpoints, :clg_weekday_setpoints, :clg_weekend_setpoints)
+  attr_accessor(:num_weekdays, :num_weekends, :frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh)
 end
 
 class MechanicalVentilation
