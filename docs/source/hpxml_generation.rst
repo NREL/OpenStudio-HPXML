@@ -368,6 +368,14 @@ Note that AdjustedSensibleRecoveryEfficiency and AdjustedTotalRecoveryEfficiency
 In many situations, the rated flow rate should be the value derived from actual testing of the system.
 For a CFIS system, the rated flow rate should equal the amount of outdoor air provided to the distribution system.
 
+Whole House Fan
+***************
+
+A single whole house fan may be specified as a ``Systems/MechanicalVentilation/VentilationFans/VentilationFan`` with ``UsedForSeasonalCoolingLoadReduction='true'``.
+Required elements include ``RatedFlowRate`` and ``FanPower``.
+
+The whole house fan is assumed to operate during hours of favorable outdoor conditions.
+
 Water Heaters
 *************
 

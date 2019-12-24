@@ -80,6 +80,7 @@ The following building features/technologies are available for modeling:
   - Heat Recovery Ventilator
   - Central Fan Integrated Supply
   
+- Whole House Fan
 - Photovoltaics
 - Appliances
 

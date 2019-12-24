@@ -760,7 +760,7 @@ class Airflow
     if not whf_zone.nil?
       # Air from living to WHF zone (attic)
       # Currently disabled since there seems to be no way to disaggregate duct losses zone mixing from
-      # whole house fan zone mixing in the component load report. You can only report zone mixing energy
+      # whole house fan zone mixing in the component load report. E+ can only report zone mixing energy
       # transferred for the thermal zone, not individual ZoneMixing objects.
       # zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
       # zone_mixing.setName("#{Constants.ObjectNameWholeHouseFan} mix")
