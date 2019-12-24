@@ -757,18 +757,18 @@ class Airflow
     whf_flow_actuator.setName("#{whf_flow.name} act")
 
     whf_zone = nil
+    if not building.vented_attic.nil?
+      whf_zone = building.vented_attic.zone
+    elsif not building.unvented_attic.nil?
+      whf_zone = building.unvented_attic.zone
+    end
     if not whf_zone.nil?
       # Air from living to WHF zone (attic)
-      # Currently disabled since there seems to be no way to disaggregate duct losses zone mixing from
-      # whole house fan zone mixing in the component load report. E+ can only report zone mixing energy
-      # transferred for the thermal zone, not individual ZoneMixing objects.
-      # zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
-      # zone_mixing.setName("#{Constants.ObjectNameWholeHouseFan} mix")
-      # zone_mixing.setSourceZone(building.living.zone)
-      # liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
-      # liv_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
-    else
-      liv_to_zone_flow_rate_actuator = nil
+      zone_mixing = OpenStudio::Model::ZoneMixing.new(whf_zone)
+      zone_mixing.setName("#{Constants.ObjectNameWholeHouseFan} mix")
+      zone_mixing.setSourceZone(building.living.zone)
+      liv_to_zone_flow_rate_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(zone_mixing, "ZoneMixing", "Air Exchange Flow Rate")
+      liv_to_zone_flow_rate_actuator.setName("#{zone_mixing.name} act")
     end
 
     # Electric Equipment (for whole house fan electricity consumption)
