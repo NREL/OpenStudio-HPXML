@@ -66,19 +66,15 @@ class XMLHelper
   def self.get_child_name(parent, element_name)
     begin
       return parent.elements[element_name].elements[1].name
+    rescue
     end
     return nil
   end
 
   # Returns true if the element exists.
   def self.has_element(parent, element_name)
-    element_name.split("/").each do |name|
-      element = parent.elements[name]
-      return false if element.nil?
-
-      parent = element
-    end
-    return true
+    element = REXML::XPath.first(parent, element_name)
+    return !element.nil?
   end
 
   # Returns the attribute added

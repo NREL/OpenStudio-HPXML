@@ -5,16 +5,8 @@ class Constants
     return 73.5 # deg-F
   end
 
-  def self.DefaultCoolingSetpoint
-    return 76.0
-  end
-
   def self.DefaultFramingFactorInterior
     return 0.16
-  end
-
-  def self.DefaultHeatingSetpoint
-    return 71.0
   end
 
   def self.DefaultHumiditySetpoint
@@ -33,16 +25,8 @@ class Constants
     return 14.696 # standard atmospheric pressure (psia)
   end
 
-  def self.RimJoistHeight
-    return 1.0
-  end
-
   def self.small
     return 1e-9
-  end
-
-  def self.WallHeight
-    return 8.0
   end
 
   # Strings --------------------
@@ -147,7 +131,7 @@ class Constants
     return 'supply'
   end
 
-  def self.DuctedInfoMiniSplitHeatPump
+  def self.OptionallyDuctedSystemIsDucted
     return __method__.to_s
   end
 
@@ -259,6 +243,10 @@ class Constants
     return "ashp"
   end
 
+  def self.ObjectNameBackupHeatingCoil
+    return "backup htg coil"
+  end
+
   def self.ObjectNameBath
     return "res baths"
   end
@@ -311,6 +299,22 @@ class Constants
     return "baseboard"
   end
 
+  def self.ObjectNameEvaporativeCooler
+    return "evap cooler"
+  end
+
+  def self.ObjectNameFanPumpDisaggregateCool(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} clg disaggregate"
+  end
+
+  def self.ObjectNameFanPumpDisaggregatePrimaryHeat(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} htg primary disaggregate"
+  end
+
+  def self.ObjectNameFanPumpDisaggregateBackupHeat(fan_or_pump_name = "")
+    return "#{fan_or_pump_name} htg backup disaggregate"
+  end
+
   def self.ObjectNameFixtures
     return "dhw fixtures"
   end
@@ -347,8 +351,20 @@ class Constants
     return "infil"
   end
 
-  def self.ObjectNameLighting
-    return "lighting"
+  def self.ObjectNameERVHRV
+    return "erv or hrv"
+  end
+
+  def self.ObjectNameExteriorLighting
+    return "exterior lighting"
+  end
+
+  def self.ObjectNameGarageLighting
+    return "garage lighting"
+  end
+
+  def self.ObjectNameInteriorLighting
+    return "interior lighting"
   end
 
   def self.ObjectNameMechanicalVentilation
@@ -419,6 +435,18 @@ class Constants
     return "#{water_heater_name} EC adjustment"
   end
 
+  def self.ObjectNameDesuperheater(water_heater_name)
+    return "#{water_heater_name} Desuperheater"
+  end
+
+  def self.ObjectNameDesuperheaterEnergy(water_heater_name)
+    return "#{water_heater_name} Desuperheater energy"
+  end
+
+  def self.ObjectNameDesuperheaterLoad(water_heater_name)
+    return "#{water_heater_name} Desuperheater load"
+  end
+
   def self.ObjectNameTankHX
     return "dhw source hx"
   end
@@ -429,10 +457,6 @@ class Constants
 
   def self.PlantLoopSolarHotWater
     return "solar hot water loop"
-  end
-
-  def self.RADuctZone
-    return 'RA Duct Zone'
   end
 
   def self.RecircTypeTimer
@@ -503,16 +527,32 @@ class Constants
     return 'autosize'
   end
 
-  def self.SizingInfoSlabRvalue
-    return __method__.to_s
+  def self.SolarThermalCollectorTypeEvacuatedTube
+    return 'evacuated tube'
   end
 
-  def self.SizingInfoWindowOverhangDepth
-    return __method__.to_s
+  def self.SolarThermalCollectorTypeGlazedFlatPlateSingle
+    return 'single glazing black'
   end
 
-  def self.SizingInfoWindowOverhangOffset
-    return __method__.to_s
+  def self.SolarThermalCollectorTypeGlazedFlatPlateDouble
+    return 'double glazing black'
+  end
+
+  def self.SolarThermalCollectorTypeICS
+    return 'integrated collector storage'
+  end
+
+  def self.SolarThermalLoopTypeDirect
+    return 'liquid direct'
+  end
+
+  def self.SolarThermalLoopTypeIndirect
+    return 'liquid indirect'
+  end
+
+  def self.SolarThermalLoopTypeThermosyphon
+    return 'passive thermosyphon'
   end
 
   def self.SpaceTypeVentedCrawl

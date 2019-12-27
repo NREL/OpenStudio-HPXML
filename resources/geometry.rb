@@ -3,110 +3,7 @@ require_relative "unit_conversions"
 require_relative "util"
 
 class Geometry
-
-  def self.get_thermal_zones(building:)
-    thermal_zones = []
-    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)
-      thermal_zones << wall_values[:interior_adjacent_to]
-      thermal_zones << wall_values[:exterior_adjacent_to]
-    end
-    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
-      thermal_zones << foundation_wall_values[:interior_adjacent_to]
-      thermal_zones << foundation_wall_values[:exterior_adjacent_to]
-    end
-    building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-      roof_values = HPXML.get_roof_values(roof: roof)
-      thermal_zones << roof_values[:interior_adjacent_to]
-    end
-    building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
-      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
-      thermal_zones << rim_joist_values[:interior_adjacent_to]
-    end
-    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-      thermal_zones << framefloor_values[:interior_adjacent_to]
-      thermal_zones << framefloor_values[:exterior_adjacent_to]
-    end
-    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-      slab_values = HPXML.get_slab_values(slab: slab)
-      thermal_zones << slab_values[:interior_adjacent_to]
-    end
-    thermal_zones.delete("outside")
-    thermal_zones.delete("ground")
-    thermal_zones.delete("other")
-    thermal_zones.delete("other housing unit")
-    thermal_zones.delete("basement - conditioned")
-    return thermal_zones.uniq
-  end
-
-  def self.get_model_thermal_zone(model:,
-                                  thermal_zone:)
-    model.getThermalZones.each do |zone|
-      if (thermal_zone == "living space" and Geometry.is_living(zone)) or
-         (thermal_zone == "basement - conditioned" and Geometry.is_conditioned_basement(zone)) or
-         (thermal_zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(zone)) or
-         (thermal_zone == "crawlspace - vented" and Geometry.is_vented_crawl(zone)) or
-         (thermal_zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(zone)) or
-         (thermal_zone == "garage" and Geometry.is_garage(zone)) or
-         (thermal_zone == "attic - vented" and Geometry.is_vented_attic(zone)) or
-         (thermal_zone == "attic - unvented" and Geometry.is_unvented_attic(zone))
-        return zone
-      end
-    end
-  end
-
-  def self.get_hpxml_thermal_zone(building:,
-                                  thermal_zone:)
-    Geometry.get_thermal_zones(building: building).each do |zone|
-      if (zone == "living space" and Geometry.is_living(thermal_zone)) or
-         (zone == "basement - conditioned" and Geometry.is_conditioned_basement(thermal_zone)) or
-         (zone == "basement - unconditioned" and Geometry.is_unconditioned_basement(thermal_zone)) or
-         (zone == "crawlspace - vented" and Geometry.is_vented_crawl(thermal_zone)) or
-         (zone == "crawlspace - unvented" and Geometry.is_unvented_crawl(thermal_zone)) or
-         (zone == "garage" and Geometry.is_garage(thermal_zone)) or
-         (zone == "attic - vented" and Geometry.is_vented_attic(thermal_zone)) or
-         (zone == "attic - unvented" and Geometry.is_unvented_attic(thermal_zone))
-        return zone
-      end
-    end
-  end
-
-  def self.get_thermal_zone_floor_area(building:,
-                                       thermal_zone:)
-    construction_values = HPXML.get_building_construction_values(building_construction: building.elements["BuildingDetails/BuildingSummary/BuildingConstruction"])
-    cfa = construction_values[:conditioned_floor_area]
-    cfa_ag = cfa
-    enclosure = building.elements["BuildingDetails/Enclosure"]
-    enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='basement - conditioned']") do |slab|
-      slab_values = HPXML.get_slab_values(slab: slab)
-      cfa_ag -= slab_values[:area]
-    end
-
-    if thermal_zone == "living space"
-      return cfa_ag
-    elsif thermal_zone == "basement - conditioned"
-      return cfa - cfa_ag
-    else
-      floor_area = 0
-      building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-        next if framefloor_values[:exterior_adjacent_to] != thermal_zone
-
-        floor_area += framefloor_values[:area]
-      end
-      building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-        slab_values = HPXML.get_slab_values(slab: slab)
-        next if slab_values[:interior_adjacent_to] != thermal_zone
-
-        floor_area += slab_values[:area]
-      end
-      return floor_area
-    end
-  end
-
-  def self.get_zone_volume(zone, runner = nil)
+  def self.get_zone_volume(zone)
     if zone.isVolumeAutocalculated or not zone.volume.is_initialized
       # Calculate volume from spaces
       volume = 0
@@ -116,10 +13,10 @@ class Geometry
     else
       volume = UnitConversions.convert(zone.volume.get, "m^3", "ft^3")
     end
-    if volume <= 0 and not runner.nil?
-      runner.registerError("Could not find any volume.")
-      return nil
+    if volume <= 0
+      fail "Could not find any volume."
     end
+
     return volume
   end
 
@@ -135,34 +32,6 @@ class Geometry
     return maxzs.max - minzs.min
   end
 
-  def self.get_height_of_thermal_zone(building:,
-                                      thermal_zone:,
-                                      number_of_conditioned_floors_above_grade:)
-    heights = []
-    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
-      next if foundation_wall_values[:interior_adjacent_to] != thermal_zone
-
-      height = foundation_wall_values[:height]
-      if building.elements["BuildingDetails/Enclosure/RimJoists/RimJoist"]
-        height += Constants.RimJoistHeight
-      end
-      heights << height
-    end
-    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)
-      next if wall_values[:interior_adjacent_to] != thermal_zone
-
-      num_floors = 1
-      if thermal_zone == "living space"
-        num_floors = number_of_conditioned_floors_above_grade
-      end
-
-      heights << Constants.WallHeight * num_floors
-    end
-    return heights.max
-  end
-
   def self.get_max_z_of_spaces(spaces)
     maxzs = []
     spaces.each do |space|
@@ -170,164 +39,6 @@ class Geometry
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, "m", "ft")
     end
     return maxzs.max
-  end
-
-  # Calculates the surface height as the max z coordinate minus the min z coordinate
-  def self.surface_height(surface)
-    zvalues = self.getSurfaceZValues([surface])
-    minz = zvalues.min
-    maxz = zvalues.max
-    return maxz - minz
-  end
-
-  def self.zone_is_conditioned(zone)
-    zone.spaces.each do |space|
-      unless self.space_is_conditioned(space)
-        return false
-      end
-    end
-  end
-
-  def self.thermal_zone_is_conditioned(thermal_zone:)
-    return true if thermal_zone == "living space" or thermal_zone.include? "- conditioned" or thermal_zone == "other housing unit"
-
-    return false
-  end
-
-  def self.thermal_zone_is_above_grade(building:,
-                                       thermal_zone:)
-    return true if thermal_zone == "living space"
-    return true if thermal_zone.include? "attic"
-    return false if thermal_zone.include? "basement"
-    return false if thermal_zone.include? "crawlspace"
-
-    if thermal_zone.include? "garage"
-      building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-        slab_values = HPXML.get_slab_values(slab: slab)
-
-        next if slab_values[:interior_adjacent_to] != thermal_zone
-
-        return true if slab_values[:depth_below_grade] == 0
-
-        return false
-      end
-    end
-    return true
-  end
-
-  def self.thermal_zone_is_below_grade(building:,
-                                       thermal_zone:)
-    return !self.thermal_zone_is_above_grade(building: building, thermal_zone: thermal_zone)
-  end
-
-  def self.get_conditioned_above_and_below_grade_thermal_zones(building:,
-                                                               thermal_zones:)
-    conditioned_living_zones = []
-    conditioned_basement_zones = []
-    thermal_zones.each do |thermal_zone|
-      next unless Geometry.thermal_zone_is_conditioned(thermal_zone: thermal_zone)
-
-      if self.thermal_zone_is_above_grade(building: building, thermal_zone: thermal_zone)
-        conditioned_living_zones << thermal_zone
-      elsif self.thermal_zone_is_below_grade(building: building, thermal_zone: thermal_zone)
-        conditioned_basement_zones << thermal_zone
-      end
-    end
-    return conditioned_living_zones, conditioned_basement_zones
-  end
-
-  def self.get_thermal_zones_from_spaces(spaces)
-    thermal_zones = []
-    spaces.each do |space|
-      next unless space.thermalZone.is_initialized
-
-      unless thermal_zones.include? space.thermalZone.get
-        thermal_zones << space.thermalZone.get
-      end
-    end
-    return thermal_zones
-  end
-
-  def self.space_is_unconditioned(space)
-    return !self.space_is_conditioned(space)
-  end
-
-  def self.space_is_conditioned(space)
-    unless space.isPlenum
-      if space.spaceType.is_initialized
-        if space.spaceType.get.standardsSpaceType.is_initialized
-          return self.is_conditioned_space_type(space.spaceType.get.standardsSpaceType.get)
-        end
-      end
-    end
-    return false
-  end
-
-  def self.is_conditioned_space_type(space_type)
-    if [Constants.SpaceTypeLiving].include? space_type
-      return true
-    end
-
-    return false
-  end
-
-  # Returns true if space is fully above grade
-  def self.space_is_above_grade(space)
-    return !self.space_is_below_grade(space)
-  end
-
-  # Returns true if space is either fully or partially below grade
-  def self.space_is_below_grade(space)
-    space.surfaces.each do |surface|
-      next if surface.surfaceType.downcase != "wall"
-      if surface.outsideBoundaryCondition.downcase == "foundation"
-        return true
-      end
-    end
-    return false
-  end
-
-  def self.get_space_from_location(model, location, location_hierarchy)
-    if location == Constants.Auto
-      location_hierarchy.each do |space_type|
-        model.getSpaces.each do |space|
-          next if not self.space_is_of_type(space, space_type)
-
-          return space
-        end
-      end
-    else
-      model.getSpaces.each do |space|
-        next if not space.spaceType.is_initialized
-        next if not space.spaceType.get.standardsSpaceType.is_initialized
-        next if space.spaceType.get.standardsSpaceType.get != location
-
-        return space
-      end
-    end
-    return nil
-  end
-
-  # Return an array of x values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceXValues(surfaceArray)
-    xValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        xValueArray << UnitConversions.convert(vertex.x, "m", "ft")
-      end
-    end
-    return xValueArray
-  end
-
-  # Return an array of y values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
-  def self.getSurfaceYValues(surfaceArray)
-    yValueArray = []
-    surfaceArray.each do |surface|
-      surface.vertices.each do |vertex|
-        yValueArray << UnitConversions.convert(vertex.y, "m", "ft")
-      end
-    end
-    return yValueArray
   end
 
   # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
@@ -341,16 +52,8 @@ class Geometry
     return zValueArray
   end
 
-  def self.get_z_origin_for_zone(zone)
-    z_origins = []
-    zone.spaces.each do |space|
-      z_origins << UnitConversions.convert(space.zOrigin, "m", "ft")
-    end
-    return z_origins.min
-  end
-
   # Takes in a list of spaces and returns the total above grade wall area
-  def self.calculate_above_grade_wall_area(building:)
+  def self.calculate_above_grade_wall_area(building)
     wall_area = 0
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
@@ -375,7 +78,7 @@ class Geometry
     return wall_area
   end
 
-  def self.calculate_above_grade_exterior_wall_area(building:)
+  def self.calculate_above_grade_exterior_wall_area(building)
     wall_area = 0
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
@@ -412,452 +115,26 @@ class Geometry
     return wall_area
   end
 
-  def self.get_roof_pitch(surfaces)
-    tilts = []
-    surfaces.each do |surface|
-      next if surface.surfaceType.downcase != "roofceiling"
-      next if surface.outsideBoundaryCondition.downcase != "outdoors" and surface.outsideBoundaryCondition.downcase != "adiabatic"
-
-      tilts << surface.tilt
-    end
-    return UnitConversions.convert(tilts.max, "rad", "deg")
-  end
-
-  def self.get_thermal_zone_roof_pitch(building:,
-                                       thermal_zone:)
-    pitches = []
-    building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-      roof_values = HPXML.get_roof_values(roof: roof)
-      next if roof_values[:interior_adjacent_to] != thermal_zone
-
-      pitches << roof_values[:pitch]
-    end
-    return pitches.max
-  end
-
-  # Checks if the surface is between conditioned and unconditioned space
-  def self.is_interzonal_surface(surface)
-    if surface.outsideBoundaryCondition.downcase != "surface" or not surface.space.is_initialized or not surface.adjacentSurface.is_initialized
-      return false
-    end
-
-    adjacent_surface = surface.adjacentSurface.get
-    if not adjacent_surface.space.is_initialized
-      return false
-    end
-    if self.space_is_conditioned(surface.space.get) == self.space_is_conditioned(adjacent_surface.space.get)
-      return false
-    end
-
-    return true
-  end
-
-  def self.is_living(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeLiving)
-  end
-
-  def self.is_vented_crawl(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeVentedCrawl)
-  end
-
-  def self.is_unvented_crawl(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedCrawl)
-  end
-
-  def self.is_unconditioned_basement(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnconditionedBasement)
-  end
-
-  def self.is_vented_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeVentedAttic)
-  end
-
-  def self.is_unvented_attic(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeUnventedAttic)
-  end
-
-  def self.is_garage(space_or_zone)
-    return self.space_or_zone_is_of_type(space_or_zone, Constants.SpaceTypeGarage)
-  end
-
-  def self.space_or_zone_is_of_type(space_or_zone, space_type)
+  def self.get_space_type(space_or_zone)
     if space_or_zone.is_a? OpenStudio::Model::Space
-      return self.space_is_of_type(space_or_zone, space_type)
+      return space_or_zone.spaceType.get.standardsSpaceType.get
     elsif space_or_zone.is_a? OpenStudio::Model::ThermalZone
-      return self.zone_is_of_type(space_or_zone, space_type)
+      return space_or_zone.spaces[0].spaceType.get.standardsSpaceType.get
     end
   end
 
-  def self.space_is_of_type(space, space_type)
-    unless space.isPlenum
-      if space.spaceType.is_initialized
-        if space.spaceType.get.standardsSpaceType.is_initialized
-          return true if space.spaceType.get.standardsSpaceType.get == space_type
-        end
-      end
-    end
-    return false
-  end
-
-  def self.zone_is_of_type(zone, space_type)
-    zone.spaces.each do |space|
-      return self.space_is_of_type(space, space_type)
-    end
-  end
-
-  def self.get_conditioned_spaces(spaces)
-    conditioned_spaces = []
-    spaces.each do |space|
-      next if self.space_is_unconditioned(space)
-
-      conditioned_spaces << space
-    end
-    return conditioned_spaces
-  end
-
-  def self.get_unconditioned_basement_spaces(spaces)
-    unconditioned_basement_spaces = []
-    spaces.each do |space|
-      next if not self.is_unconditioned_basement(space)
-
-      unconditioned_basement_spaces << space
-    end
-    return unconditioned_basement_spaces
-  end
-
-  def self.get_garage_spaces(spaces)
-    garage_spaces = []
-    spaces.each do |space|
-      next if not self.is_garage(space)
-
-      garage_spaces << space
-    end
-    return garage_spaces
-  end
-
-  def self.get_facade_for_surface(surface)
-    tol = 0.001
-    n = surface.outwardNormal
-    facade = nil
-    if (n.z).abs < tol
-      if (n.x).abs < tol and (n.y + 1).abs < tol
-        facade = Constants.FacadeFront
-      elsif (n.x - 1).abs < tol and (n.y).abs < tol
-        facade = Constants.FacadeRight
-      elsif (n.x).abs < tol and (n.y - 1).abs < tol
-        facade = Constants.FacadeBack
-      elsif (n.x + 1).abs < tol and (n.y).abs < tol
-        facade = Constants.FacadeLeft
-      end
-    else
-      if (n.x).abs < tol and n.y < 0
-        facade = Constants.FacadeFront
-      elsif n.x > 0 and (n.y).abs < tol
-        facade = Constants.FacadeRight
-      elsif (n.x).abs < tol and n.y > 0
-        facade = Constants.FacadeBack
-      elsif n.x < 0 and (n.y).abs < tol
-        facade = Constants.FacadeLeft
-      end
-    end
-    return facade
-  end
-
-  def self.get_surface_length(surface)
-    xvalues = self.getSurfaceXValues([surface])
-    yvalues = self.getSurfaceYValues([surface])
-    xrange = xvalues.max - xvalues.min
-    yrange = yvalues.max - yvalues.min
-    if xrange > yrange
-      return xrange
-    end
-
-    return yrange
-  end
-
-  def self.get_surface_height(surface)
-    zvalues = self.getSurfaceZValues([surface])
-    zrange = zvalues.max - zvalues.min
-    return zrange
-  end
-
-  def self.get_spaces_above_grade_exterior_walls(spaces)
-    above_grade_exterior_walls = []
-    spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
-
-      space.surfaces.each do |surface|
-        next if above_grade_exterior_walls.include?(surface)
-        next if surface.surfaceType.downcase != "wall"
-        next if surface.outsideBoundaryCondition.downcase != "outdoors"
-
-        above_grade_exterior_walls << surface
-      end
-    end
-    return above_grade_exterior_walls
-  end
-
-  def self.get_thermal_zone_above_grade_exterior_walls(building:,
-                                                       thermal_zone:)
-    above_grade_exterior_walls = []
-    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)
-
-      next if wall_values[:interior_adjacent_to] != thermal_zone
-      next if wall_values[:exterior_adjacent_to] != "outside"
-
-      above_grade_exterior_walls << wall
-    end
-    return above_grade_exterior_walls
-  end
-
-  def self.get_thermal_zone_above_grade_exterior_rim_joists(building:,
-                                                            thermal_zone:)
-    above_grade_exterior_rim_joists = []
-    building.elements.each("BuildingDetails/Enclosure/RimJoists/RimJoist") do |rim_joist|
-      rim_joist_values = HPXML.get_rim_joist_values(rim_joist: rim_joist)
-
-      next if rim_joist_values[:interior_adjacent_to] != thermal_zone
-      next if rim_joist_values[:exterior_adjacent_to] != "outside"
-      next unless self.thermal_zone_is_above_grade(building: building, thermal_zone: thermal_zone)
-
-      above_grade_exterior_rim_joists << rim_joist
-    end
-    return above_grade_exterior_rim_joists
-  end
-
-  def self.get_spaces_above_grade_exterior_floors(spaces)
-    above_grade_exterior_floors = []
-    spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
-
-      space.surfaces.each do |surface|
-        next if above_grade_exterior_floors.include?(surface)
-        next if surface.surfaceType.downcase != "floor"
-        next if surface.outsideBoundaryCondition.downcase != "outdoors"
-
-        above_grade_exterior_floors << surface
-      end
-    end
-    return above_grade_exterior_floors
-  end
-
-  def self.get_thermal_zone_above_grade_exterior_floors(building:,
-                                                        thermal_zone:)
-    above_grade_exterior_floors = []
-    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-
-      next if framefloor_values[:interior_adjacent_to] != thermal_zone
-      next if framefloor_values[:exterior_adjacent_to] != "outside"
-
-      above_grade_exterior_floors << framefloor
-    end
-    return above_grade_exterior_floors
-  end
-
-  def self.get_spaces_above_grade_ground_floors(spaces)
-    above_grade_ground_floors = []
-    spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
-
-      space.surfaces.each do |surface|
-        next if above_grade_ground_floors.include?(surface)
-        next if surface.surfaceType.downcase != "floor"
-        next if surface.outsideBoundaryCondition.downcase != "foundation"
-
-        above_grade_ground_floors << surface
-      end
-    end
-    return above_grade_ground_floors
-  end
-
-  def self.get_thermal_zone_above_grade_ground_floors(building:,
-                                                      thermal_zone:)
-    above_grade_ground_floors = []
-    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-      slab_values = HPXML.get_slab_values(slab: slab)
-
-      next if slab_values[:interior_adjacent_to] != thermal_zone
-      next if slab_values[:depth_below_grade] != 0
-
-      above_grade_ground_floors << slab
-    end
-    return above_grade_ground_floors
-  end
-
-  def self.get_spaces_above_grade_exterior_roofs(spaces)
-    above_grade_exterior_roofs = []
-    spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_above_grade(space)
-
-      space.surfaces.each do |surface|
-        next if above_grade_exterior_roofs.include?(surface)
-        next if surface.surfaceType.downcase != "roofceiling"
-        next if surface.outsideBoundaryCondition.downcase != "outdoors"
-
-        above_grade_exterior_roofs << surface
-      end
-    end
-    return above_grade_exterior_roofs
-  end
-
-  def self.get_thermal_zone_above_grade_exterior_roofs(building:,
-                                                       thermal_zone:)
-    above_grade_exterior_roofs = []
-    building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-      roof_values = HPXML.get_roof_values(roof: roof)
-
-      next if roof_values[:interior_adjacent_to] != thermal_zone
-
-      above_grade_exterior_roofs << roof_values
-    end
-    return above_grade_exterior_roofs
-  end
-
-  def self.get_spaces_interzonal_walls(spaces)
-    interzonal_walls = []
-    spaces.each do |space|
-      space.surfaces.each do |surface|
-        next if interzonal_walls.include?(surface)
-        next if surface.surfaceType.downcase != "wall"
-        next if not self.is_interzonal_surface(surface)
-
-        interzonal_walls << surface
-      end
-    end
-    return interzonal_walls
-  end
-
-  def self.get_thermal_zone_interzonal_walls(building:,
-                                             thermal_zone:)
-    interzonal_walls = []
-    building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall)
-
-      next if wall_values[:interior_adjacent_to] != thermal_zone
-      next if wall_values[:exterior_adjacent_to] == "outside"
-      next if wall_values[:exterior_adjacent_to] == "ground"
-
-      if (self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to])) or (self.thermal_zone_is_conditioned(thermal_zone: wall_values[:exterior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: wall_values[:interior_adjacent_to]))
-        interzonal_walls << wall
-      end
-    end
-    return interzonal_walls
-  end
-
-  def self.get_spaces_interzonal_floors_and_ceilings(spaces)
-    interzonal_floors = []
-    spaces.each do |space|
-      space.surfaces.each do |surface|
-        next if interzonal_floors.include?(surface)
-        next if surface.surfaceType.downcase != "floor" and surface.surfaceType.downcase != "roofceiling"
-        next if not self.is_interzonal_surface(surface)
-
-        interzonal_floors << surface
-      end
-    end
-    return interzonal_floors
-  end
-
-  def self.get_thermal_zone_interzonal_floors_and_ceilings(building:,
-                                                           thermal_zone:)
-    interzonal_floors = []
-    building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
-
-      next if framefloor_values[:interior_adjacent_to] != thermal_zone
-      next if framefloor_values[:exterior_adjacent_to] == "outside"
-      next if framefloor_values[:exterior_adjacent_to] == "ground"
-
-      if (self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:interior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to])) or (self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:exterior_adjacent_to]) and !self.thermal_zone_is_conditioned(thermal_zone: framefloor_values[:interior_adjacent_to]))
-        interzonal_floors << framefloor
-      end
-    end
-    return interzonal_floors
-  end
-
-  def self.get_spaces_below_grade_exterior_walls(spaces)
-    below_grade_exterior_walls = []
-    spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
-
-      space.surfaces.each do |surface|
-        next if below_grade_exterior_walls.include?(surface)
-        next if surface.surfaceType.downcase != "wall"
-        next if surface.outsideBoundaryCondition.downcase != "foundation"
-
-        below_grade_exterior_walls << surface
-      end
-    end
-    return below_grade_exterior_walls
-  end
-
-  def self.get_thermal_zone_below_grade_exterior_walls(building:,
-                                                       thermal_zone:)
-    below_grade_exterior_walls = []
-    building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-      foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
-
-      next if foundation_wall_values[:interior_adjacent_to] != thermal_zone
-      next if foundation_wall_values[:depth_below_grade] == 0
-
-      below_grade_exterior_walls << foundation_wall
-    end
-    return below_grade_exterior_walls
-  end
-
-  def self.get_spaces_below_grade_exterior_floors(spaces)
-    below_grade_exterior_floors = []
-    spaces.each do |space|
-      next if not Geometry.space_is_conditioned(space)
-      next if not Geometry.space_is_below_grade(space)
-
-      space.surfaces.each do |surface|
-        next if below_grade_exterior_floors.include?(surface)
-        next if surface.surfaceType.downcase != "floor"
-        next if surface.outsideBoundaryCondition.downcase != "foundation"
-
-        below_grade_exterior_floors << surface
-      end
-    end
-    return below_grade_exterior_floors
-  end
-
-  def self.get_thermal_zone_below_grade_exterior_floors(building:,
-                                                        thermal_zone:)
-    below_grade_exterior_floors = []
-    building.elements.each("BuildingDetails/Enclosure/Slabs/Slab") do |slab|
-      slab_values = HPXML.get_slab_values(slab: slab)
-
-      next if slab_values[:interior_adjacent_to] != thermal_zone
-      next if slab_values[:depth_below_grade] == 0
-
-      below_grade_exterior_floors << slab
-    end
-    return below_grade_exterior_floors
-  end
-
-  def self.process_occupants(model, runner, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             cfa, nbeds)
+  def self.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
+                             cfa, nbeds, space)
 
     # Error checking
     if sens_frac < 0 or sens_frac > 1
-      runner.registerError("Sensible fraction must be greater than or equal to 0 and less than or equal to 1.")
-      return false
+      fail "Sensible fraction must be greater than or equal to 0 and less than or equal to 1."
     end
     if lat_frac < 0 or lat_frac > 1
-      runner.registerError("Latent fraction must be greater than or equal to 0 and less than or equal to 1.")
-      return false
+      fail "Latent fraction must be greater than or equal to 0 and less than or equal to 1."
     end
     if lat_frac + sens_frac > 1
-      runner.registerError("Sum of sensible and latent fractions must be less than or equal to 1.")
-      return false
+      fail "Sum of sensible and latent fractions must be less than or equal to 1."
     end
 
     activity_per_person = UnitConversions.convert(occ_gain, "Btu/hr", "W")
@@ -869,55 +146,30 @@ class Geometry
     occ_rad = 0.558 * occ_sens
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
-    # Update number of occupants
-    total_num_occ = 0
-    people_sch = nil
-    activity_sch = nil
+    space_obj_name = "#{Constants.ObjectNameOccupants}"
+    space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
 
-    # Get spaces
-    ffa_spaces = self.get_conditioned_spaces(model.getSpaces)
+    # Create schedule
+    people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
 
-    ffa_spaces.each do |space|
-      space_obj_name = "#{Constants.ObjectNameOccupants}|#{space.name.to_s}"
+    # Create schedule
+    activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
 
-      space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
-
-      if people_sch.nil?
-        # Create schedule
-        people_sch = MonthWeekdayWeekendSchedule.new(model, runner, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
-        if not people_sch.validated?
-          return false
-        end
-      end
-
-      if activity_sch.nil?
-        # Create schedule
-        activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)
-      end
-
-      # Add people definition for the occ
-      occ_def = OpenStudio::Model::PeopleDefinition.new(model)
-      occ = OpenStudio::Model::People.new(occ_def)
-      occ.setName(space_obj_name)
-      occ.setSpace(space)
-      occ_def.setName(space_obj_name)
-      occ_def.setNumberOfPeopleCalculationMethod("People", 1)
-      occ_def.setNumberofPeople(space_num_occ)
-      occ_def.setFractionRadiant(occ_rad)
-      occ_def.setSensibleHeatFraction(occ_sens)
-      occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
-      occ_def.setCarbonDioxideGenerationRate(0)
-      occ_def.setEnableASHRAE55ComfortWarnings(false)
-      occ.setActivityLevelSchedule(activity_sch)
-      occ.setNumberofPeopleSchedule(people_sch.schedule)
-
-      total_num_occ += space_num_occ
-
-      runner.registerInfo("Space '#{space.name}' been assigned #{space_num_occ.round(2)} occupant(s).")
-    end
-
-    runner.registerInfo("The building has been assigned #{total_num_occ.round(2)} total occupant(s).")
-    return true
+    # Add people definition for the occ
+    occ_def = OpenStudio::Model::PeopleDefinition.new(model)
+    occ = OpenStudio::Model::People.new(occ_def)
+    occ.setName(space_obj_name)
+    occ.setSpace(space)
+    occ_def.setName(space_obj_name)
+    occ_def.setNumberOfPeopleCalculationMethod("People", 1)
+    occ_def.setNumberofPeople(space_num_occ)
+    occ_def.setFractionRadiant(occ_rad)
+    occ_def.setSensibleHeatFraction(occ_sens)
+    occ_def.setMeanRadiantTemperatureCalculationType("ZoneAveraged")
+    occ_def.setCarbonDioxideGenerationRate(0)
+    occ_def.setEnableASHRAE55ComfortWarnings(false)
+    occ.setActivityLevelSchedule(activity_sch)
+    occ.setNumberofPeopleSchedule(people_sch.schedule)
   end
 
   def self.get_occupancy_default_num(nbeds)
