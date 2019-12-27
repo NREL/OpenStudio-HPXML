@@ -6,7 +6,7 @@ require_relative "geometry"
 class Constructions
   # Container class for walls, floors/ceilings, roofs, etc.
 
-  def self.apply_wood_stud_wall(model, surfaces, constr_name,
+  def self.apply_wood_stud_wall(model, surfaces, constr_name, hpxml_wall,
                                 cavity_r, install_grade, cavity_depth_in, cavity_filled,
                                 framing_factor, drywall_thick_in, osb_thick_in,
                                 rigid_r, mat_ext_finish)
@@ -64,9 +64,20 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_wall.nil?
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "cavity_r": cavity_r })
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_r": rigid_r })
+      if not mat_ext_finish.nil?
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": mat_ext_finish.rho })
+      else
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": 0 })
+      end
+    end
   end
 
-  def self.apply_double_stud_wall(model, surfaces, constr_name,
+  def self.apply_double_stud_wall(model, surfaces, constr_name, hpxml_wall,
                                   cavity_r, install_grade, stud_depth_in, gap_depth_in,
                                   framing_factor, framing_spacing, is_staggered,
                                   drywall_thick_in, osb_thick_in, rigid_r,
@@ -134,9 +145,19 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_wall.nil?
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_r": rigid_r })
+      if not mat_ext_finish.nil?
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": mat_ext_finish.rho })
+      else
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": 0 })
+      end
+    end
   end
 
-  def self.apply_cmu_wall(model, surfaces, constr_name,
+  def self.apply_cmu_wall(model, surfaces, constr_name, hpxml_wall,
                           thick_in, conductivity, density, framing_factor,
                           furring_r, furring_cavity_depth, furring_spacing,
                           drywall_thick_in, osb_thick_in, rigid_r,
@@ -203,9 +224,20 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_wall.nil?
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_r": rigid_r })
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "cmu_furring_ins_r": furring_r })
+      if not mat_ext_finish.nil?
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": mat_ext_finish.rho })
+      else
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": 0 })
+      end
+    end
   end
 
-  def self.apply_icf_wall(model, surfaces, constr_name,
+  def self.apply_icf_wall(model, surfaces, constr_name, hpxml_wall,
                           icf_r, ins_thick_in, concrete_thick_in, framing_factor,
                           drywall_thick_in, osb_thick_in, rigid_r,
                           mat_ext_finish)
@@ -254,9 +286,19 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_wall.nil?
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_r": rigid_r })
+      if not mat_ext_finish.nil?
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": mat_ext_finish.rho })
+      else
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": 0 })
+      end
+    end
   end
 
-  def self.apply_sip_wall(model, surfaces, constr_name,
+  def self.apply_sip_wall(model, surfaces, constr_name, hpxml_wall,
                           sip_r, sip_thick_in, framing_factor,
                           sheathing_type, sheathing_thick_in,
                           drywall_thick_in, osb_thick_in, rigid_r,
@@ -319,9 +361,21 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_wall.nil?
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_r": rigid_r })
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_thick_in": sheathing_thick_in })
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "sip_ins_thick_in": sip_thick_in })
+      if not mat_ext_finish.nil?
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": mat_ext_finish.rho })
+      else
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": 0 })
+      end
+    end
   end
 
-  def self.apply_steel_stud_wall(model, surfaces, constr_name,
+  def self.apply_steel_stud_wall(model, surfaces, constr_name, hpxml_wall,
                                  cavity_r, install_grade, cavity_depth,
                                  cavity_filled, framing_factor, correction_factor,
                                  drywall_thick_in, osb_thick_in, rigid_r,
@@ -380,9 +434,20 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_wall.nil?
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "cavity_r": cavity_r })
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_r": rigid_r })
+      if not mat_ext_finish.nil?
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": mat_ext_finish.rho })
+      else
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": 0 })
+      end
+    end
   end
 
-  def self.apply_generic_layered_wall(model, surfaces, constr_name,
+  def self.apply_generic_layered_wall(model, surfaces, constr_name, hpxml_wall,
                                       thick_ins, conds, denss, specheats,
                                       drywall_thick_in, osb_thick_in, rigid_r,
                                       mat_ext_finish)
@@ -448,6 +513,16 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_wall.nil?
+      HPXML.add_extension(parent: hpxml_wall, extensions: { "rigid_r": rigid_r })
+      if not mat_ext_finish.nil?
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": mat_ext_finish.rho })
+      else
+        HPXML.add_extension(parent: hpxml_wall, extensions: { "ext_finish_density": 0 })
+      end
+    end
   end
 
   def self.apply_rim_joist(model, surfaces, constr_name,
@@ -508,7 +583,7 @@ class Constructions
     constr.create_and_assign_constructions(surfaces, model)
   end
 
-  def self.apply_open_cavity_roof(model, surfaces, constr_name,
+  def self.apply_open_cavity_roof(model, surfaces, constr_name, hpxml_roof,
                                   cavity_r, install_grade, cavity_ins_thick_in,
                                   framing_factor, framing_thick_in,
                                   osb_thick_in, rigid_r, pitch,
@@ -576,9 +651,22 @@ class Constructions
 
     # Create and assign construction to roof surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_roof.nil?
+      if not mat_roofing.nil?
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "color": get_roofing_material_manual_j_color(mat_roofing.name) })
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "material": get_roofing_material_manual_j_material(mat_roofing.name) })
+      else
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "color": Constants.ColorMedium })
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "material": Constants.RoofMaterialAsphaltShingles })
+      end
+      HPXML.add_extension(parent: hpxml_roof, extensions: { "cavity_r": cavity_r })
+      HPXML.add_extension(parent: hpxml_roof, extensions: { "rigid_r": rigid_r })
+    end
   end
 
-  def self.apply_closed_cavity_roof(model, surfaces, constr_name,
+  def self.apply_closed_cavity_roof(model, surfaces, constr_name, hpxml_roof,
                                     cavity_r, install_grade, cavity_depth,
                                     filled_cavity, framing_factor, drywall_thick_in,
                                     osb_thick_in, rigid_r, pitch,
@@ -644,6 +732,19 @@ class Constructions
 
     # Create and assign construction to surfaces
     constr.create_and_assign_constructions(surfaces, model)
+
+    # Store info for HVAC Sizing
+    if not hpxml_roof.nil?
+      if not mat_roofing.nil?
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "color": get_roofing_material_manual_j_color(mat_roofing.name) })
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "material": get_roofing_material_manual_j_material(mat_roofing.name) })
+      else
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "color": Constants.ColorMedium })
+        HPXML.add_extension(parent: hpxml_roof, extensions: { "material": Constants.RoofMaterialAsphaltShingles })
+      end
+      HPXML.add_extension(parent: hpxml_roof, extensions: { "cavity_r": cavity_r })
+      HPXML.add_extension(parent: hpxml_roof, extensions: { "rigid_r": rigid_r })
+    end
   end
 
   def self.apply_ceiling(model, surfaces, constr_name,
@@ -858,17 +959,17 @@ class Constructions
     constr.create_and_assign_constructions(subsurfaces, model)
   end
 
-  def self.apply_window(model, subsurfaces, constr_name, weather,
+  def self.apply_window(model, subsurfaces, constr_name, hpxml_window, weather,
                         is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
-    apply_window_skylight(model, "Window", subsurfaces, constr_name, weather,
+    apply_window_skylight(model, "Window", subsurfaces, constr_name, hpxml_window, weather,
                           is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
-  def self.apply_skylight(model, subsurfaces, constr_name, weather,
+  def self.apply_skylight(model, subsurfaces, constr_name, hpxml_skylight, weather,
                           is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
-    apply_window_skylight(model, "Skylight", subsurfaces, constr_name, weather,
+    apply_window_skylight(model, "Skylight", subsurfaces, constr_name, hpxml_skylight, weather,
                           is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
   end
 
@@ -898,7 +999,7 @@ class Constructions
       imdefs << imdef
     end
 
-    Constructions.apply_wood_stud_wall(model, imdefs, constr_name,
+    Constructions.apply_wood_stud_wall(model, imdefs, constr_name, nil,
                                        0, 1, 3.5, false,
                                        Constants.DefaultFramingFactorInterior,
                                        drywall_thick_in, 0, 0, nil)
@@ -1325,7 +1426,7 @@ class Constructions
     return mat
   end
 
-  def self.apply_window_skylight(model, type, subsurfaces, constr_name, weather,
+  def self.apply_window_skylight(model, type, subsurfaces, constr_name, hpxml_obj, weather,
                                  is_sch, ufactor, shgc, heat_shade_mult, cool_shade_mult)
 
     return if subsurfaces.empty?
@@ -1388,6 +1489,10 @@ class Constructions
 
     # Create and assign construction to subsurfaces
     constr.create_and_assign_constructions(subsurfaces, model)
+
+    # Store info for HVAC Sizing
+    HPXML.add_extension(parent: hpxml_obj, extensions: { "shade_summer": cool_shade_mult })
+    HPXML.add_extension(parent: hpxml_obj, extensions: { "shade_winter": heat_shade_mult })
   end
 end
 

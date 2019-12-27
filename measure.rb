@@ -1124,12 +1124,7 @@ class OSModel
 
       install_grade = 1
 
-      HPXML.add_extension(parent: roof, extensions: { "color": Constructions.get_roofing_material_manual_j_color(mat_roofing.name) })
-      HPXML.add_extension(parent: roof, extensions: { "material": Constructions.get_roofing_material_manual_j_material(mat_roofing.name) })
-      HPXML.add_extension(parent: roof, extensions: { "cavity_r": cavity_r })
-      HPXML.add_extension(parent: roof, extensions: { "rigid_r": constr_set.rigid_r })
-
-      Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof_values[:id]} construction",
+      Constructions.apply_closed_cavity_roof(model, surfaces, "#{roof_values[:id]} construction", roof,
                                              cavity_r, install_grade,
                                              constr_set.stud.thick_in,
                                              true, constr_set.framing_factor,
@@ -1825,11 +1820,8 @@ class OSModel
         heat_shade_mult = window_values[:interior_shading_factor_winter]
       end
 
-      HPXML.add_extension(parent: window, extensions: { "shade_summer": cool_shade_mult })
-      HPXML.add_extension(parent: window, extensions: { "shade_winter": heat_shade_mult })
-
       Constructions.apply_window(model, [sub_surface],
-                                 "WindowConstruction",
+                                 "WindowConstruction", window,
                                  weather, is_sch, ufactor, shgc,
                                  heat_shade_mult, cool_shade_mult)
     end
@@ -1890,11 +1882,8 @@ class OSModel
       cool_shade_mult = 1.0
       heat_shade_mult = 1.0
 
-      HPXML.add_extension(parent: skylight, extensions: { "shade_summer": cool_shade_mult })
-      HPXML.add_extension(parent: skylight, extensions: { "shade_winter": heat_shade_mult })
-
       Constructions.apply_skylight(model, [sub_surface],
-                                   "SkylightConstruction",
+                                   "SkylightConstruction", skylight,
                                    weather, is_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
@@ -1950,7 +1939,7 @@ class OSModel
     # adiabatic or surface net area is near zero.
 
     if type == "wall"
-      Constructions.apply_wood_stud_wall(model, surfaces, "AdiabaticWallConstruction",
+      Constructions.apply_wood_stud_wall(model, surfaces, "AdiabaticWallConstruction", nil,
                                          0, 1, 3.5, true, 0.1, 0.5, 0, 999,
                                          Material.ExtFinishStuccoMedDark)
     elsif type == "floor"
@@ -1958,7 +1947,7 @@ class OSModel
                                 0, 1, 0.07, 5.5, 0.75, 999,
                                 Material.FloorWood, Material.CoveringBare)
     elsif type == "roof"
-      Constructions.apply_open_cavity_roof(model, surfaces, "AdiabaticRoofConstruction",
+      Constructions.apply_open_cavity_roof(model, surfaces, "AdiabaticRoofConstruction", nil,
                                            0, 1, 7.25, 0.07, 7.25, 0.75, 999, 5.0,
                                            Material.RoofingAsphaltShinglesMed, false)
     end
@@ -2374,14 +2363,6 @@ class OSModel
       elsif clg_type == "room air conditioner"
 
         eer = cooling_system_values[:cooling_efficiency_eer]
-        shr = 0.65
-        airflow_rate = 350.0
-        success = HVAC.apply_room_ac(model, runner, eer, shr,
-                                     airflow_rate, cool_capacity_btuh, load_frac,
-                                     sequential_load_frac, @living_zone,
-                                     @hvac_map, sys_id, clgsys)
-        return false if not success
-
         if cooling_system_values[:cooling_shr].nil?
           shr = 0.65
         else
@@ -2395,10 +2376,9 @@ class OSModel
                            @hvac_map, sys_id, clgsys)
       elsif clg_type == "evaporative cooler"
 
-        is_ducted = XMLHelper.has_element(clgsys, "DistributionSystem")
         HVAC.apply_evaporative_cooler(model, runner, load_frac,
                                       sequential_load_frac, @living_zone,
-                                      @hvac_map, sys_id, is_ducted)
+                                      @hvac_map, sys_id, clgsys)
       end
     end
   end
@@ -2691,7 +2671,6 @@ class OSModel
 
         pan_heater_power = 0.0
         fan_power = 0.07
-        is_ducted = XMLHelper.has_element(hp, "DistributionSystem")
         HVAC.apply_mshp(model, runner, seer, hspf, shr,
                         min_cooling_capacity, max_cooling_capacity,
                         min_cooling_airflow_rate, max_cooling_airflow_rate,
@@ -2699,7 +2678,7 @@ class OSModel
                         min_heating_airflow_rate, max_heating_airflow_rate,
                         heating_capacity_offset, cap_retention_frac,
                         cap_retention_temp, pan_heater_power, fan_power,
-                        is_ducted, cool_capacity_btuh, hp_compressor_min_temp,
+                        cool_capacity_btuh, hp_compressor_min_temp,
                         backup_heat_fuel, backup_heat_efficiency, backup_heat_capacity_btuh,
                         supp_htg_max_outdoor_temp, load_frac_heat, load_frac_cool,
                         sequential_load_frac_heat, sequential_load_frac_cool,
@@ -3254,7 +3233,7 @@ class OSModel
 
     Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
                   @cfa, @infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
-                  @min_neighbor_distance, infil_measurement, systems)
+                  @min_neighbor_distance, infil_measurement, mech_vent_fan)
   end
 
   def self.create_ducts(air_distribution, model, spaces, dist_id)
@@ -3344,9 +3323,9 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, building, weather)
-    HVACSizing.apply(model: model, runner: runner, cond_space: @living_space, building: building, weather: weather,
-                     cfa: @cfa, nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance,
-                     ncfl_ag: @ncfl_ag, infilvolume: @infilvolume, hvac_map: @hvac_map, show_debug_info: false)
+    HVACSizing.apply(runner: runner, building: building, weather: weather, cfa: @cfa,
+                     nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag,
+                     infilvolume: @infilvolume, hvac_map: @hvac_map, show_debug_info: false)
   end
 
   def self.add_fuel_heating_eae(runner, model, building)
@@ -4097,10 +4076,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_wood_stud_construction_set(assembly_r, constr_sets, film_r, wall_id)
 
-      HPXML.add_extension(parent: wall, extensions: { "cavity_r": cavity_r })
-      HPXML.add_extension(parent: wall, extensions: { "rigid_r": constr_set.rigid_r })
-
-      Constructions.apply_wood_stud_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_wood_stud_wall(model, surfaces, "#{wall_id} construction", wall,
                                          cavity_r, install_grade, constr_set.stud.thick_in,
                                          cavity_filled, constr_set.framing_factor,
                                          constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -4119,10 +4095,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_steel_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      HPXML.add_extension(parent: wall, extensions: { "cavity_r": cavity_r })
-      HPXML.add_extension(parent: wall, extensions: { "rigid_r": constr_set.rigid_r })
-
-      Constructions.apply_steel_stud_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_steel_stud_wall(model, surfaces, "#{wall_id} construction", wall,
                                           cavity_r, install_grade, constr_set.cavity_thick_in,
                                           cavity_filled, constr_set.framing_factor,
                                           constr_set.corr_factor, constr_set.drywall_thick_in,
@@ -4138,9 +4111,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_double_stud_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      HPXML.add_extension(parent: wall, extensions: { "rigid_r": constr_set.rigid_r })
-
-      Constructions.apply_double_stud_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_double_stud_wall(model, surfaces, "#{wall_id} construction", wall,
                                            cavity_r, install_grade, constr_set.stud.thick_in,
                                            constr_set.stud.thick_in, constr_set.framing_factor,
                                            constr_set.framing_spacing, is_staggered,
@@ -4158,10 +4129,7 @@ class OSModel
       ]
       match, constr_set, rigid_r = pick_cmu_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      HPXML.add_extension(parent: wall, extensions: { "rigid_r": rigid_r })
-      HPXML.add_extension(parent: wall, extensions: { "cmu_furring_ins_r": furring_r })
-
-      Constructions.apply_cmu_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_cmu_wall(model, surfaces, "#{wall_id} construction", wall,
                                    constr_set.thick_in, constr_set.cond_in, density,
                                    constr_set.framing_factor, furring_r,
                                    furring_cavity_depth_in, furring_spacing,
@@ -4178,11 +4146,7 @@ class OSModel
       ]
       match, constr_set, cavity_r = pick_sip_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      HPXML.add_extension(parent: wall, extensions: { "rigid_r": constr_set.rigid_r })
-      HPXML.add_extension(parent: wall, extensions: { "rigid_thick_in": constr_set.sheath_thick_in })
-      HPXML.add_extension(parent: wall, extensions: { "sip_ins_thick_in": constr_set.thick_in })
-
-      Constructions.apply_sip_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_sip_wall(model, surfaces, "#{wall_id} construction", wall,
                                    cavity_r, constr_set.thick_in, constr_set.framing_factor,
                                    sheathing_type, constr_set.sheath_thick_in,
                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -4194,9 +4158,7 @@ class OSModel
       ]
       match, constr_set, icf_r = pick_icf_construction_set(assembly_r, constr_sets, film_r, "wall #{wall_id}")
 
-      HPXML.add_extension(parent: wall, extensions: { "rigid_r": constr_set.rigid_r })
-
-      Constructions.apply_icf_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_icf_wall(model, surfaces, "#{wall_id} construction", wall,
                                    icf_r, constr_set.ins_thick_in,
                                    constr_set.concrete_thick_in, constr_set.framing_factor,
                                    constr_set.drywall_thick_in, constr_set.osb_thick_in,
@@ -4234,18 +4196,13 @@ class OSModel
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
-      HPXML.add_extension(parent: wall, extensions: { "rigid_r": constr_set.rigid_r })
-
-      Constructions.apply_generic_layered_wall(model, surfaces, "#{wall_id} construction",
+      Constructions.apply_generic_layered_wall(model, surfaces, "#{wall_id} construction", wall,
                                                thick_ins, conds, denss, specheats,
                                                constr_set.drywall_thick_in, constr_set.osb_thick_in,
                                                constr_set.rigid_r, constr_set.exterior_material)
     else
       fail "Unexpected wall type '#{wall_type}'."
     end
-
-    ext_finish_density = UnitConversions.convert(surfaces[0].construction.get.to_LayeredConstruction.get.getLayer(0).to_StandardOpaqueMaterial.get.density, "kg/m^3", "lbm/ft^3")
-    HPXML.add_extension(parent: wall, extensions: { "ext_finish_density": ext_finish_density })
 
     check_surface_assembly_rvalue(runner, surfaces, film_r, assembly_r, match)
   end

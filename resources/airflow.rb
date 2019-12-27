@@ -9,7 +9,7 @@ require_relative "hvac"
 class Airflow
   def self.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
                  cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance,
-                 infil_measurement, systems)
+                 hpxml_infil, hpxml_mech_vent_fan)
 
     @runner = runner
     @infMethodConstantCFM = 'CONSTANT_CFM'
@@ -86,7 +86,7 @@ class Airflow
 
     air_loop_objects = create_air_loop_objects(model, model.getAirLoopHVACs, mech_vent, building)
     process_infiltration_for_conditioned_zones(model, infil, wind_speed, building, weather)
-    process_mech_vent(model, mech_vent, building, weather, infil, systems)
+    process_mech_vent(model, mech_vent, building, weather, infil, hpxml_mech_vent_fan)
 
     if mech_vent.type == Constants.VentTypeCFIS
       cfis_program = create_cfis_objects(model, building, mech_vent)
@@ -97,7 +97,7 @@ class Airflow
     duct_programs = {}
     duct_lks = {}
     duct_systems.each do |ducts, air_loop|
-      process_ducts(model, ducts, systems)
+      process_ducts(model, ducts)
       create_ducts_objects(model, building, ducts, mech_vent, tin_sensor, pbar_sensor, adiabatic_const, air_loop, duct_programs, duct_lks, air_loop_objects)
     end
 
@@ -107,28 +107,28 @@ class Airflow
 
     # Store info for HVAC Sizing measure
     if not building.living.ELA.nil?
-      HPXML.add_extension(parent: infil_measurement, extensions: { "LivingSpaceELA": building.living.ELA })
-      HPXML.add_extension(parent: infil_measurement, extensions: { "LivingSpaceCFM": building.living.inf_flow })
-      HPXML.add_extension(parent: infil_measurement, extensions: { "LivingSpaceACH": building.living.ACH })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceELA": building.living.ELA })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceCFM": building.living.inf_flow })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceACH": building.living.ACH })
     else
-      HPXML.add_extension(parent: infil_measurement, extensions: { "LivingSpaceELA": 0 })
-      HPXML.add_extension(parent: infil_measurement, extensions: { "LivingSpaceCFM": 0 })
-      HPXML.add_extension(parent: infil_measurement, extensions: { "LivingSpaceACH": 0 })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceELA": 0 })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceCFM": 0 })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceACH": 0 })
     end
     unless building.vented_crawlspace.nil?
-      HPXML.add_extension(parent: infil_measurement, extensions: { "CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow })
     end
     unless building.unvented_crawlspace.nil?
-      HPXML.add_extension(parent: infil_measurement, extensions: { "CrawlspaceUnventedCFM": building.unvented_crawlspace.inf_flow })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "CrawlspaceUnventedCFM": building.unvented_crawlspace.inf_flow })
     end
     unless building.unconditioned_basement.nil?
-      HPXML.add_extension(parent: infil_measurement, extensions: { "BasementUnconditionedCFM": building.unconditioned_basement.inf_flow })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "BasementUnconditionedCFM": building.unconditioned_basement.inf_flow })
     end
     unless building.vented_attic.nil?
-      HPXML.add_extension(parent: infil_measurement, extensions: { "AtticVentedCFM": building.vented_attic.inf_flow })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "AtticVentedCFM": building.vented_attic.inf_flow })
     end
     unless building.unvented_attic.nil?
-      HPXML.add_extension(parent: infil_measurement, extensions: { "AtticUnventedCFM": building.unvented_attic.inf_flow })
+      HPXML.add_extension(parent: hpxml_infil, extensions: { "AtticUnventedCFM": building.unvented_attic.inf_flow })
     end
 
     terrain = { Constants.TerrainOcean => "Ocean",      # Ocean, Bayou flat country
@@ -522,13 +522,7 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent(model, mech_vent, building, weather, infil, systems)
-    if mech_vent.type == Constants.VentTypeCFIS
-      if not HVAC.has_ducted_equipment(model, systems)
-        fail "A CFIS ventilation system has been specified but the building does not have central, forced air equipment."
-      end
-    end
-
+  def self.process_mech_vent(model, mech_vent, building, weather, infil, hpxml_mech_vent_fan)
     # Spot Ventilation
     spot_fan_w_per_cfm = 0.3 # W/cfm/fan, per HSP
     bath_exhaust_sch_operation = 60.0 # min/day, per HSP
@@ -543,18 +537,6 @@ class Airflow
       frac_fan_heat = 0.5 # Assumes supply fan heat enters space
     else
       frac_fan_heat = 0.0
-    end
-
-    # Get the clothes washer so we can use the day shift for the clothes dryer
-    if mech_vent.dryer_exhaust > 0
-      cw_day_shift = 0.0
-      model.getElectricEquipments.each do |ee|
-        next if ee.name.to_s != Constants.ObjectNameClothesWasher
-
-        cw_day_shift = ee.additionalProperties.getFeatureAsDouble(Constants.ClothesWasherDayShift).get
-        break
-      end
-      dryer_exhaust_day_shift = cw_day_shift + 1.0 / 24.0
     end
 
     # Search for clothes dryer
@@ -660,13 +642,12 @@ class Airflow
     end
 
     # Store info for HVAC Sizing measure
-    ventilation_fan = systems.elements["MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
-    unless ventilation_fan.nil?
-      HPXML.add_extension(parent: ventilation_fan, extensions: { "Type": mech_vent.type })
-      HPXML.add_extension(parent: ventilation_fan, extensions: { "TotalEfficiency": mech_vent.total_efficiency })
-      HPXML.add_extension(parent: ventilation_fan, extensions: { "LatentEffectiveness": latent_effectiveness })
-      HPXML.add_extension(parent: ventilation_fan, extensions: { "ApparentSensibleEffectiveness": apparent_sensible_effectiveness })
-      HPXML.add_extension(parent: ventilation_fan, extensions: { "WholeHouseRate": mech_vent.whole_house_cfm })
+    if not hpxml_mech_vent_fan.nil?
+      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "Type": mech_vent.type })
+      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "TotalEfficiency": mech_vent.total_efficiency })
+      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "LatentEffectiveness": latent_effectiveness })
+      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "ApparentSensibleEffectiveness": apparent_sensible_effectiveness })
+      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "WholeHouseRate": mech_vent.whole_house_cfm })
     end
 
     mech_vent.frac_fan_heat = frac_fan_heat
@@ -675,11 +656,10 @@ class Airflow
     mech_vent.spot_fan_w_per_cfm = spot_fan_w_per_cfm
     mech_vent.latent_effectiveness = latent_effectiveness
     mech_vent.sensible_effectiveness = sensible_effectiveness
-    mech_vent.dryer_exhaust_day_shift = dryer_exhaust_day_shift
     mech_vent.has_dryer = has_dryer
   end
 
-  def self.process_ducts(model, ducts, systems)
+  def self.process_ducts(model, ducts)
     # Validate Inputs
     ducts.each do |duct|
       if duct.leakage_frac.nil? == duct.leakage_cfm25.nil?
@@ -699,22 +679,12 @@ class Airflow
       end
     end
 
-    has_ducted_hvac = HVAC.has_ducted_equipment(model, systems)
-    if ducts.size > 0 and not has_ducted_hvac
-      @runner.registerWarning("No ducted HVAC equipment was found but ducts were specified. Overriding duct specification.")
-      ducts.clear
-    elsif ducts.size == 0 and has_ducted_hvac
-      @runner.registerWarning("Ducted HVAC equipment was found but no ducts were specified. Proceeding without ducts.")
-    end
-
     ducts.each do |duct|
       duct.rvalue = get_duct_insulation_rvalue(duct.rvalue, duct.side) # Convert from nominal to actual R-value
       if duct.space.nil? # Outside
         duct.zone = nil
-        duct.zone_handle = "outside"
       else
         duct.zone = duct.space.thermalZone.get
-        duct.zone_handle = duct.zone.handle.to_s
       end
     end
   end
@@ -1902,7 +1872,7 @@ class Duct
     @area = area
     @rvalue = rvalue
   end
-  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :zone_handle)
+  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone)
 end
 
 class Infiltration
@@ -1974,7 +1944,7 @@ class MechanicalVentilation
                 :cfis_open_time, :cfis_airflow_frac, :cfis_air_loop, :cfis_t_sum_open_var, :cfis_on_for_hour_var,
                 :cfis_f_damper_open_var, :cfis_fan_mfr_max_var, :cfis_fan_rtf_sensor, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
                 :frac_fan_heat, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust,
-                :spot_fan_w_per_cfm, :latent_effectiveness, :sensible_effectiveness, :dryer_exhaust_day_shift, :has_dryer)
+                :spot_fan_w_per_cfm, :latent_effectiveness, :sensible_effectiveness, :has_dryer)
 end
 
 class ZoneInfo
