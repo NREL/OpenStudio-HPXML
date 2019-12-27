@@ -215,7 +215,6 @@ class HVACSizing
       building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
         framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor,
                                                         select: [:interior_adjacent_to, :exterior_adjacent_to, :area, :id])
-        next unless hpxml_framefloor_is_ceiling(framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to])
         next unless [framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to]].include? space
 
         area_total += framefloor_values[:area]
