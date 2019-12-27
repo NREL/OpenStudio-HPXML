@@ -144,7 +144,7 @@ class HVACSizing
       spaces << XMLHelper.get_value(surface, "ExteriorAdjacentTo")
     end
     spaces.uniq.each do |space|
-      next if space.nil? or space == "ground"
+      next if space.nil? or space == "ground" or space.include? "other housing unit"
 
       @cool_design_temps[space] = process_design_temp_cooling(building, weather, space)
       @heat_design_temps[space] = process_design_temp_heating(building, weather, space, weather.design.HeatingDrybulb)
