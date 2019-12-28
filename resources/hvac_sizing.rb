@@ -3025,19 +3025,20 @@ class HVACSizing
   def self.get_foundation_wall_insulation_props(fnd_wall_values)
     wall_height_ag = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
 
-    # Vertical interior/exterior insulation
-    wall_ins_rvalues = [fnd_wall_values[:insulation_interior_r_value],
-                        fnd_wall_values[:insulation_exterior_r_value]]
-    wall_ins_offsets = [fnd_wall_values[:insulation_interior_distance_to_top],
-                        fnd_wall_values[:insulation_exterior_distance_to_top]]
-    wall_ins_heights = [fnd_wall_values[:insulation_interior_distance_to_bottom] - fnd_wall_values[:insulation_interior_distance_to_top],
-                        fnd_wall_values[:insulation_exterior_distance_to_bottom] - fnd_wall_values[:insulation_exterior_distance_to_top]]
-
-    # Base wall construction
+    # Wall construction/insulation
     if not fnd_wall_values[:insulation_assembly_r_value].nil?
       wall_constr_rvalue = fnd_wall_values[:insulation_assembly_r_value] - Material.AirFilmVertical.rvalue
+      wall_ins_rvalues = []
+      wall_ins_offsets = []
+      wall_ins_heights = []
     else
       wall_constr_rvalue = Material.Concrete(fnd_wall_values[:thickness]).rvalue
+      wall_ins_rvalues = [fnd_wall_values[:insulation_interior_r_value],
+                          fnd_wall_values[:insulation_exterior_r_value]]
+      wall_ins_offsets = [fnd_wall_values[:insulation_interior_distance_to_top],
+                          fnd_wall_values[:insulation_exterior_distance_to_top]]
+      wall_ins_heights = [fnd_wall_values[:insulation_interior_distance_to_bottom] - fnd_wall_values[:insulation_interior_distance_to_top],
+                          fnd_wall_values[:insulation_exterior_distance_to_bottom] - fnd_wall_values[:insulation_exterior_distance_to_top]]
     end
 
     # Calculate effective U-factor
