@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:27:26-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-12-28T08:38:10-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -243,20 +243,32 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem'/>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>electricity</HeatingSystemFuel>
-              <HeatingCapacity>64000.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
+              <HeatPumpType>air-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>42000.0</HeatingCapacity>
+              <HeatingCapacity17F>26880.0</HeatingCapacity17F>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
                 <Value>1.0</Value>
-              </AnnualHeatingEfficiency>
+              </BackupAnnualHeatingEfficiency>
+              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
+              <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
+              <AnnualCoolingEfficiency>
+                <Units>SEER</Units>
+                <Value>22.0</Value>
+              </AnnualCoolingEfficiency>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>10.0</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
@@ -300,19 +312,6 @@
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
-        <MechanicalVentilation>
-          <VentilationFans>
-            <VentilationFan>
-              <SystemIdentifier id='MechanicalVentilation'/>
-              <FanType>central fan integrated supply</FanType>
-              <TestedFlowRate>330.0</TestedFlowRate>
-              <HoursInOperation>8.0</HoursInOperation>
-              <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
-              <FanPower>300.0</FanPower>
-              <AttachedToHVACDistributionSystem idref='HVACDistribution'/>
-            </VentilationFan>
-          </VentilationFans>
-        </MechanicalVentilation>
         <WaterHeating>
           <WaterHeatingSystem>
             <SystemIdentifier id='WaterHeater'/>

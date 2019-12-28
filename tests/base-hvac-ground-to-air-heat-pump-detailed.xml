@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-07-17T10:47:21-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-12-28T08:38:13-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -92,14 +92,14 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <InsulatedConcreteForms/>
+              <WoodStud/>
             </WallType>
             <Area>1200.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallInsulation'/>
-              <AssemblyEffectiveRValue>21.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -243,32 +243,31 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem'/>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump'/>
               <DistributionSystem idref='HVACDistribution'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>-1.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
+              <HeatPumpType>ground-to-air</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>42000.0</HeatingCapacity>
+              <CoolingCapacity>48000.0</CoolingCapacity>
+              <CoolingSensibleHeatFraction>0.7</CoolingSensibleHeatFraction>
+              <BackupSystemFuel>electricity</BackupSystemFuel>
+              <BackupAnnualHeatingEfficiency>
+                <Units>Percent</Units>
+                <Value>1.0</Value>
+              </BackupAnnualHeatingEfficiency>
+              <BackupHeatingCapacity>34121.0</BackupHeatingCapacity>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <CoolingSystemType>central air conditioner</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>-1.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
-                <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Units>EER</Units>
+                <Value>16.6</Value>
               </AnnualCoolingEfficiency>
-            </CoolingSystem>
+              <AnnualHeatingEfficiency>
+                <Units>COP</Units>
+                <Value>3.6</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl'/>
