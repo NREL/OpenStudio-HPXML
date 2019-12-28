@@ -8,8 +8,7 @@ require_relative "hvac"
 
 class Airflow
   def self.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
-                 cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance,
-                 hpxml_infil, hpxml_mech_vent_fan)
+                 cfa, infilvolume, nbeds, nbaths, ncfl, ncfl_ag, window_area, min_neighbor_distance)
 
     @runner = runner
     @infMethodConstantCFM = 'CONSTANT_CFM'
@@ -86,7 +85,7 @@ class Airflow
 
     air_loop_objects = create_air_loop_objects(model, model.getAirLoopHVACs, mech_vent, building)
     process_infiltration_for_conditioned_zones(model, infil, wind_speed, building, weather)
-    process_mech_vent(model, mech_vent, building, weather, infil, hpxml_mech_vent_fan)
+    process_mech_vent(model, mech_vent, building, weather, infil)
 
     if mech_vent.type == Constants.VentTypeCFIS
       cfis_program = create_cfis_objects(model, building, mech_vent)
@@ -107,28 +106,28 @@ class Airflow
 
     # Store info for HVAC Sizing measure
     if not building.living.ELA.nil?
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceELA": building.living.ELA })
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceCFM": building.living.inf_flow })
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceACH": building.living.ACH })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "LivingSpaceELA": building.living.ELA })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "LivingSpaceCFM": building.living.inf_flow })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "LivingSpaceACH": building.living.ACH })
     else
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceELA": 0 })
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceCFM": 0 })
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "LivingSpaceACH": 0 })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "LivingSpaceELA": 0 })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "LivingSpaceCFM": 0 })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "LivingSpaceACH": 0 })
     end
     unless building.vented_crawlspace.nil?
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "CrawlspaceVentedCFM": building.vented_crawlspace.inf_flow })
     end
     unless building.unvented_crawlspace.nil?
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "CrawlspaceUnventedCFM": building.unvented_crawlspace.inf_flow })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "CrawlspaceUnventedCFM": building.unvented_crawlspace.inf_flow })
     end
     unless building.unconditioned_basement.nil?
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "BasementUnconditionedCFM": building.unconditioned_basement.inf_flow })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "BasementUnconditionedCFM": building.unconditioned_basement.inf_flow })
     end
     unless building.vented_attic.nil?
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "AtticVentedCFM": building.vented_attic.inf_flow })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "AtticVentedCFM": building.vented_attic.inf_flow })
     end
     unless building.unvented_attic.nil?
-      HPXML.add_extension(parent: hpxml_infil, extensions: { "AtticUnventedCFM": building.unvented_attic.inf_flow })
+      HPXML.add_extension(parent: infil.hpxml_object, extensions: { "AtticUnventedCFM": building.unvented_attic.inf_flow })
     end
 
     terrain = { Constants.TerrainOcean => "Ocean",      # Ocean, Bayou flat country
@@ -522,7 +521,7 @@ class Airflow
     end
   end
 
-  def self.process_mech_vent(model, mech_vent, building, weather, infil, hpxml_mech_vent_fan)
+  def self.process_mech_vent(model, mech_vent, building, weather, infil)
     # Spot Ventilation
     spot_fan_w_per_cfm = 0.3 # W/cfm/fan, per HSP
     bath_exhaust_sch_operation = 60.0 # min/day, per HSP
@@ -561,7 +560,7 @@ class Airflow
     sensible_effectiveness = 0.0
     latent_effectiveness = 0.0
 
-    if mech_vent.type == Constants.VentTypeBalanced and (mech_vent.sensible_efficiency > 0 or mech_vent.sensible_efficiency_adjusted > 0) and mech_vent.whole_house_cfm > 0
+    if mech_vent.type == Constants.VentTypeBalanced and (mech_vent.sens_eff > 0 or mech_vent.sens_eff_adj > 0) and mech_vent.whole_house_cfm > 0
       # Must assume an operating condition (HVI seems to use CSA 439)
       t_sup_in = 0.0
       w_sup_in = 0.0028
@@ -572,19 +571,19 @@ class Airflow
 
       m_fan = UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s") * 16.02 * Psychrometrics.rhoD_fT_w_P(UnitConversions.convert(t_sup_in, "C", "F"), w_sup_in, 14.7) # kg/s
 
-      if mech_vent.sensible_efficiency > 0
+      if mech_vent.sens_eff > 0
         # The following is derived from CSA 439, Clause 9.3.3.1, Eq. 12:
         #    E_SHR = (m_sup,fan * Cp * (Tsup,out - Tsup,in) - P_sup,fan) / (m_exh,fan * Cp * (Texh,in - Tsup,in) + P_exh,fan)
-        t_sup_out = t_sup_in + (mech_vent.sensible_efficiency * (m_fan * cp_a * (t_exh_in - t_sup_in) + p_fan) + p_fan) / (m_fan * cp_a)
+        t_sup_out = t_sup_in + (mech_vent.sens_eff * (m_fan * cp_a * (t_exh_in - t_sup_in) + p_fan) + p_fan) / (m_fan * cp_a)
 
         # Calculate the apparent sensible effectiveness
         apparent_sensible_effectiveness = (t_sup_out - t_sup_in) / (t_exh_in - t_sup_in)
 
       else
         # The following is derived from (taken from CSA 439, Clause 9.2.1, Eq. 7):
-        t_sup_out = t_sup_in + (mech_vent.sensible_efficiency_adjusted * (t_exh_in - t_sup_in))
+        t_sup_out = t_sup_in + (mech_vent.sens_eff_adj * (t_exh_in - t_sup_in))
 
-        apparent_sensible_effectiveness = mech_vent.sensible_efficiency_adjusted
+        apparent_sensible_effectiveness = mech_vent.sens_eff_adj
 
       end
 
@@ -599,7 +598,7 @@ class Airflow
       end
 
       # Use summer test condition to determine the latent effectiveness since TRE is generally specified under the summer condition
-      if (mech_vent.total_efficiency > 0 or mech_vent.total_efficiency_adjusted > 0)
+      if (mech_vent.total_eff > 0 or mech_vent.total_eff_adj > 0)
 
         t_sup_in = 35.0
         w_sup_in = 0.0178
@@ -614,13 +613,13 @@ class Airflow
         h_sup_in = Psychrometrics.h_fT_w_SI(t_sup_in, w_sup_in)
         h_exh_in = Psychrometrics.h_fT_w_SI(t_exh_in, w_exh_in)
 
-        if mech_vent.total_efficiency > 0
+        if mech_vent.total_eff > 0
           # The following is derived from CSA 439, Clause 9.3.3.2, Eq. 13:
           #    E_THR = (m_sup,fan * Cp * (h_sup,out - h_sup,in) - P_sup,fan) / (m_exh,fan * Cp * (h_exh,in - h_sup,in) + P_exh,fan)
-          h_sup_out = h_sup_in - (mech_vent.total_efficiency * (m_fan * (h_sup_in - h_exh_in) + p_fan) + p_fan) / m_fan
+          h_sup_out = h_sup_in - (mech_vent.total_eff * (m_fan * (h_sup_in - h_exh_in) + p_fan) + p_fan) / m_fan
         else
           # The following is derived from (taken from CSA 439, Clause 9.2.1, Eq. 7):
-          h_sup_out = h_sup_in - (mech_vent.total_efficiency_adjusted * (h_sup_in - h_exh_in))
+          h_sup_out = h_sup_in - (mech_vent.total_eff_adj * (h_sup_in - h_exh_in))
         end
 
         w_sup_out = Psychrometrics.w_fT_h_SI(t_sup_out, h_sup_out)
@@ -634,20 +633,20 @@ class Airflow
         latent_effectiveness = 0.0
       end
     else
-      if mech_vent.total_efficiency > 0
-        apparent_sensible_effectiveness = mech_vent.total_efficiency
-        sensible_effectiveness = mech_vent.total_efficiency
-        latent_effectiveness = mech_vent.total_efficiency
+      if mech_vent.total_eff > 0
+        apparent_sensible_effectiveness = mech_vent.total_eff
+        sensible_effectiveness = mech_vent.total_eff
+        latent_effectiveness = mech_vent.total_eff
       end
     end
 
     # Store info for HVAC Sizing measure
-    if not hpxml_mech_vent_fan.nil?
-      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "Type": mech_vent.type })
-      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "TotalEfficiency": mech_vent.total_efficiency })
-      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "LatentEffectiveness": latent_effectiveness })
-      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "ApparentSensibleEffectiveness": apparent_sensible_effectiveness })
-      HPXML.add_extension(parent: hpxml_mech_vent_fan, extensions: { "WholeHouseRate": mech_vent.whole_house_cfm })
+    if not mech_vent.hpxml_object.nil?
+      HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "Type": mech_vent.type })
+      HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "TotalEfficiency": mech_vent.total_eff })
+      HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "LatentEffectiveness": latent_effectiveness })
+      HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "ApparentSensibleEffectiveness": apparent_sensible_effectiveness })
+      HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "WholeHouseRate": mech_vent.whole_house_cfm })
     end
 
     mech_vent.frac_fan_heat = frac_fan_heat
@@ -686,6 +685,39 @@ class Airflow
       else
         duct.zone = duct.space.thermalZone.get
       end
+    end
+
+    # Store info for HVAC Sizing
+    hpxml_objects = []
+    ducts.each do |duct|
+      next if hpxml_objects.include? duct.hpxml_object
+
+      hpxml_objects << duct.hpxml_object
+    end
+    hpxml_objects.each do |hpxml_object|
+      duct_sides = []
+      duct_locations = []
+      duct_leakage_fracs = []
+      duct_leakage_cfm25s = []
+      duct_areas = []
+      duct_rvalues = []
+      ducts.each do |duct|
+        next unless duct.hpxml_object == hpxml_object
+
+        duct_sides << duct.side
+        duct_locations << duct.location
+        duct_leakage_fracs << duct.leakage_frac
+        duct_leakage_cfm25s << duct.leakage_cfm25
+        duct_areas << duct.area
+        duct_rvalues << duct.rvalue
+      end
+
+      HPXML.add_extension(parent: hpxml_object, extensions: { "duct_sides": duct_sides.join(",") })
+      HPXML.add_extension(parent: hpxml_object, extensions: { "duct_locations": duct_locations.join(",") })
+      HPXML.add_extension(parent: hpxml_object, extensions: { "duct_leakage_fracs": duct_leakage_fracs.join(",") })
+      HPXML.add_extension(parent: hpxml_object, extensions: { "duct_leakage_cfm25s": duct_leakage_cfm25s.join(",") })
+      HPXML.add_extension(parent: hpxml_object, extensions: { "duct_areas": duct_areas.join(",") })
+      HPXML.add_extension(parent: hpxml_object, extensions: { "duct_rvalues": duct_rvalues.join(",") })
     end
   end
 
@@ -1864,20 +1896,22 @@ class Airflow
 end
 
 class Duct
-  def initialize(side, space, leakage_frac, leakage_cfm25, area, rvalue)
+  def initialize(side, space, location, leakage_frac, leakage_cfm25, area, rvalue, hpxml_object)
     @side = side
     @space = space
+    @location = location
     @leakage_frac = leakage_frac
     @leakage_cfm25 = leakage_cfm25
     @area = area
     @rvalue = rvalue
+    @hpxml_object = hpxml_object
   end
-  attr_accessor(:side, :space, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone)
+  attr_accessor(:side, :space, :location, :leakage_frac, :leakage_cfm25, :area, :rvalue, :zone, :hpxml_object)
 end
 
 class Infiltration
   def initialize(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla, vented_attic_sla, unvented_attic_sla,
-                 vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
+                 vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain, hpxml_object)
     @living_ach50 = living_ach50
     @living_constant_ach = living_constant_ach
     @shelter_coef = shelter_coef
@@ -1890,9 +1924,10 @@ class Infiltration
     @unconditioned_basement_ach = unconditioned_basement_ach
     @has_flue_chimney = has_flue_chimney
     @terrain = terrain
+    @hpxml_object = hpxml_object
   end
   attr_accessor(:living_ach50, :living_constant_ach, :shelter_coef, :garage_ach50, :vented_crawl_sla, :unvented_crawl_sla, :vented_attic_sla, :unvented_attic_sla, :vented_attic_const_ach,
-                :unconditioned_basement_ach, :has_flue_chimney, :terrain, :a_o, :c_i, :n_i, :stack_coef, :wind_coef, :y_i, :s_wflue)
+                :unconditioned_basement_ach, :has_flue_chimney, :terrain, :a_o, :c_i, :n_i, :stack_coef, :wind_coef, :y_i, :s_wflue, :hpxml_object)
 end
 
 class NaturalVentilation
@@ -1920,16 +1955,16 @@ class NaturalVentilation
 end
 
 class MechanicalVentilation
-  def initialize(type, total_efficiency, total_efficiency_adjusted, whole_house_cfm, fan_power_w, sensible_efficiency, sensible_efficiency_adjusted,
+  def initialize(type, total_eff, total_eff_adj, whole_house_cfm, fan_power_w, sens_eff, sens_eff_adj,
                  dryer_exhaust, range_exhaust, range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
-                 cfis_open_time, cfis_airflow_frac, cfis_air_loop)
+                 cfis_open_time, cfis_airflow_frac, cfis_air_loop, hpxml_object)
     @type = type
-    @total_efficiency = total_efficiency
-    @total_efficiency_adjusted = total_efficiency_adjusted
+    @total_eff = total_eff
+    @total_eff_adj = total_eff_adj
     @whole_house_cfm = whole_house_cfm
     @fan_power_w = fan_power_w
-    @sensible_efficiency = sensible_efficiency
-    @sensible_efficiency_adjusted = sensible_efficiency_adjusted
+    @sens_eff = sens_eff
+    @sens_eff_adj = sens_eff_adj
     @dryer_exhaust = dryer_exhaust
     @range_exhaust = range_exhaust
     @range_exhaust_hour = range_exhaust_hour
@@ -1938,13 +1973,14 @@ class MechanicalVentilation
     @cfis_open_time = cfis_open_time
     @cfis_airflow_frac = cfis_airflow_frac
     @cfis_air_loop = cfis_air_loop
+    @hpxml_object = hpxml_object
   end
-  attr_accessor(:type, :total_efficiency, :total_efficiency_adjusted, :whole_house_cfm, :fan_power_w, :sensible_efficiency, :sensible_efficiency_adjusted,
+  attr_accessor(:type, :total_eff, :total_eff_adj, :whole_house_cfm, :fan_power_w, :sens_eff, :sens_eff_adj,
                 :dryer_exhaust, :range_exhaust, :range_exhaust_hour, :bathroom_exhaust, :bathroom_exhaust_hour,
                 :cfis_open_time, :cfis_airflow_frac, :cfis_air_loop, :cfis_t_sum_open_var, :cfis_on_for_hour_var,
-                :cfis_f_damper_open_var, :cfis_fan_mfr_max_var, :cfis_fan_rtf_sensor, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
-                :frac_fan_heat, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust,
-                :spot_fan_w_per_cfm, :latent_effectiveness, :sensible_effectiveness, :has_dryer)
+                :cfis_f_damper_open_var, :cfis_fan_mfr_max_var, :cfis_fan_rtf_sensor, :cfis_fan_pressure_rise,
+                :cfis_fan_efficiency, :frac_fan_heat, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust,
+                :spot_fan_w_per_cfm, :latent_effectiveness, :sensible_effectiveness, :has_dryer, :hpxml_object)
 end
 
 class ZoneInfo

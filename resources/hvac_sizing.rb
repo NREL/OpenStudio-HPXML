@@ -1179,10 +1179,10 @@ class HVACSizing
 
     dse_Fregain = nil
 
-    if duct[:duct_location] == "outside" # Outside
+    if duct.Location == "outside" # Outside
       dse_Fregain = 0.0
 
-    elsif duct[:duct_location] == "basement - unconditioned"
+    elsif duct.Location == "basement - unconditioned"
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(building)
 
@@ -1196,11 +1196,11 @@ class HVACSizing
         dse_Fregain = 0.30 # Insulated ceiling
       end
 
-    elsif duct[:duct_location] == "crawlspace - vented" or duct[:duct_location] == "crawlspace - unvented"
+    elsif duct.Location == "crawlspace - vented" or duct.Location == "crawlspace - unvented"
 
       walls_insulated, ceiling_insulated = get_foundation_walls_ceilings_insulated(building)
 
-      if duct[:duct_location] == "crawlspace - vented"
+      if duct.Location == "crawlspace - vented"
         if ceiling_insulated and walls_insulated
           dse_Fregain = 0.17 # Insulated ceiling, insulated walls
         elsif ceiling_insulated and not walls_insulated
@@ -1222,17 +1222,17 @@ class HVACSizing
         end
       end
 
-    elsif duct[:duct_location] == "attic - vented" or duct[:duct_location] == "attic - unvented"
+    elsif duct.Location == "attic - vented" or duct.Location == "attic - unvented"
       dse_Fregain = 0.10 # This would likely be higher for unvented attics with roof insulation
 
-    elsif duct[:duct_location] == "garage"
+    elsif duct.Location == "garage"
       dse_Fregain = 0.05
 
-    elsif duct[:duct_location] == "living space" or duct[:duct_location] == "attic - conditioned"
+    elsif duct.Location == "living space" or duct.Location == "attic - conditioned"
       dse_Fregain = 1.0
 
     else
-      fail "Unexpected duct location: #{duct[:duct_location]}"
+      fail "Unexpected duct location: #{duct.Location}"
     end
 
     return dse_Fregain
@@ -1259,7 +1259,7 @@ class HVACSizing
       # in each space. Fregain shall be calculated separately for supply and return locations.
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
-        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(building, duct)
+        dse_Fregains[duct.Location] = get_duct_regain_factor(building, duct)
       end
       fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
       dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
@@ -1319,7 +1319,7 @@ class HVACSizing
       # in each space. Fregain shall be calculated separately for supply and return locations.
       dse_Fregains = {}
       hvac.Ducts.each do |duct|
-        dse_Fregains[duct[:duct_location]] = get_duct_regain_factor(building, duct)
+        dse_Fregains[duct.Location] = get_duct_regain_factor(building, duct)
       end
       fregain_values = { Constants.DuctSideSupply => dse_Fregains, Constants.DuctSideReturn => dse_Fregains }
       dse_Fregain_s, dse_Fregain_r = calc_ducts_area_weighted_average(hvac.Ducts, fregain_values)
@@ -2034,28 +2034,51 @@ class HVACSizing
   end
 
   def self.get_ducts_for_hvac(hvac_distribution)
-    all_ducts_values = []
+    ducts = []
+
     air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
-    air_distribution.elements.each("Ducts") do |ducts|
-      ducts_values = HPXML.get_ducts_values(ducts: ducts)
-      if ducts_values[:duct_location] == "basement - conditioned"
-        ducts_values[:duct_location] = "living space"
-      end
 
-      air_distribution.elements.each("DuctLeakageMeasurement") do |duct_leakage_measurement|
-        duct_leakage_measurement_values = HPXML.get_duct_leakage_measurement_values(duct_leakage_measurement: duct_leakage_measurement)
-        next if duct_leakage_measurement_values[:duct_type] != ducts_values[:duct_type]
+    # Leakage values
+    leakage_fracs = XMLHelper.get_value(air_distribution, "extension/duct_leakage_fracs")
+    leakage_cfm25s = XMLHelper.get_value(air_distribution, "extension/duct_leakage_cfm25s")
+    return ducts if leakage_fracs.nil? and leakage_cfm25s.nil?
 
-        ducts_values.merge! duct_leakage_measurement_values
-      end
-
-      if ducts_values[:duct_leakage_units] == "CFM25"
-        ducts_values[:leakage_cfm_25] = ducts_values[:duct_leakage_value]
-      end
-
-      all_ducts_values << ducts_values
+    leakage_fracs = leakage_fracs.split(",").map(&:to_f)
+    leakage_cfm25s = leakage_cfm25s.split(",").map(&:to_f)
+    if leakage_fracs.empty?
+      leakage_fracs = [nil] * leakage_fracs.size
+    else
+      leakage_cfm25s = [nil] * leakage_cfm25s.size
     end
-    return all_ducts_values
+
+    # Areas
+    areas = XMLHelper.get_value(air_distribution, "extension/duct_areas")
+    areas = areas.split(",").map(&:to_f)
+
+    # R-values
+    rvalues = XMLHelper.get_value(air_distribution, "extension/duct_rvalues")
+    rvalues = rvalues.split(",").map(&:to_f)
+
+    # Locations
+    locations = XMLHelper.get_value(air_distribution, "extension/duct_locations")
+    locations = locations.split(",")
+
+    # Sides
+    sides = XMLHelper.get_value(air_distribution, "extension/duct_sides")
+    sides = sides.split(",")
+
+    locations.each_with_index do |location, index|
+      d = DuctInfo.new
+      d.Location = location
+      d.LeakageFrac = leakage_fracs[index]
+      d.LeakageCFM25 = leakage_cfm25s[index]
+      d.Area = areas[index]
+      d.Rvalue = rvalues[index]
+      d.Side = sides[index]
+      ducts << d
+    end
+
+    return ducts
   end
 
   def self.calc_ducts_area_weighted_average(ducts, values)
@@ -2064,19 +2087,19 @@ class HVACSizing
     '''
     uncond_area = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
     ducts.each do |duct|
-      next if duct[:duct_location] == "living space"
+      next if duct.Location == "living space"
 
-      uncond_area[duct[:duct_type]] += duct[:duct_surface_area]
+      uncond_area[duct.Side] += duct.Area
     end
 
     value = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
     ducts.each do |duct|
-      next if duct[:duct_location] == "living space"
+      next if duct.Location == "living space"
 
-      if uncond_area[duct[:duct_type]] > 0
-        value[duct[:duct_type]] += values[duct[:duct_type]][duct[:duct_location]] * duct[:duct_surface_area] / uncond_area[duct[:duct_type]]
+      if uncond_area[duct.Side] > 0
+        value[duct.Side] += values[duct.Side][duct.Location] * duct.Area / uncond_area[duct.Side]
       else
-        value[duct[:duct_type]] += values[duct[:duct_type]][duct[:duct_location]]
+        value[duct.Side] += values[duct.Side][duct.Location]
       end
     end
 
@@ -2090,9 +2113,9 @@ class HVACSizing
 
     areas = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
     ducts.each do |duct|
-      next if duct[:duct_location] == "living space"
+      next if duct.Location == "living space"
 
-      areas[duct[:duct_type]] += duct[:duct_surface_area]
+      areas[duct.Side] += duct.Area
     end
 
     return areas[Constants.DuctSideSupply], areas[Constants.DuctSideReturn]
@@ -2105,12 +2128,12 @@ class HVACSizing
 
     cfms = { Constants.DuctSideSupply => 0.0, Constants.DuctSideReturn => 0.0 }
     ducts.each do |duct|
-      next if duct[:duct_location] == "living space"
+      next if duct.Location == "living space"
 
-      if not duct[:leakage_frac].nil? # TODO: is this always nil?
-        cfms[duct[:duct_type]] += duct[:leakage_frac] * system_cfm
-      elsif not duct[:leakage_cfm_25].nil?
-        cfms[duct[:duct_type]] += duct[:leakage_cfm_25]
+      if not duct.LeakageFrac.nil?
+        cfms[duct.Side] += duct.LeakageFrac * system_cfm
+      elsif not duct.LeakageCFM25.nil?
+        cfms[duct.Side] += duct.LeakageCFM25
       end
     end
 
@@ -2124,9 +2147,9 @@ class HVACSizing
 
     u_factors = { Constants.DuctSideSupply => {}, Constants.DuctSideReturn => {} }
     ducts.each do |duct|
-      next if duct[:duct_location] == "living space"
+      next if duct.Location == "living space"
 
-      u_factors[duct[:duct_type]][duct[:duct_location]] = 1.0 / Airflow.get_duct_insulation_rvalue(duct[:duct_insulation_r_value], duct[:duct_type])
+      u_factors[duct.Side][duct.Location] = 1.0 / duct.Rvalue
     end
 
     supply_u, return_u = calc_ducts_area_weighted_average(ducts, u_factors)
@@ -3521,8 +3544,7 @@ class HVACInfo
     return false
   end
 
-  attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :DuctLeakageMeasurements,
-                :NumSpeedsCooling, :NumSpeedsHeating,
+  attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
                 :FixedCoolingCapacity, :FixedHeatingCapacity, :FixedSuppHeatingCapacity,
                 :CoolingCFMs, :HeatingCFMs, :RatedCFMperTonCooling, :RatedCFMperTonHeating,
                 :COOL_CAP_FT_SPEC, :HEAT_CAP_FT_SPEC, :COOL_SH_FT_SPEC, :COIL_BF_FT_SPEC,
@@ -3533,6 +3555,12 @@ class HVACInfo
                 :GSHP_BoreSpacing, :GSHP_BoreHoles, :GSHP_BoreDepth, :GSHP_BoreConfig, :GSHP_SpacingType,
                 :HeatingLoadFraction, :CoolingLoadFraction, :SupplyAirTemp, :LeavingAirTemp,
                 :EvapCoolerEffectiveness)
+end
+
+class DuctInfo
+  def initial
+  end
+  attr_accessor(:LeakageFrac, :LeakageCFM25, :Area, :Rvalue, :Location, :Side)
 end
 
 class Numeric

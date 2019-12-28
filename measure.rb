@@ -3019,8 +3019,9 @@ class OSModel
     end
     has_flue_chimney = false
     terrain = Constants.TerrainSuburban
-    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla, unvented_crawl_sla,
-                             vented_attic_sla, unvented_attic_sla, vented_attic_const_ach, unconditioned_basement_ach, has_flue_chimney, terrain)
+    infil = Infiltration.new(living_ach50, living_constant_ach, shelter_coef, garage_ach50, vented_crawl_sla,
+                             unvented_crawl_sla, vented_attic_sla, unvented_attic_sla, vented_attic_const_ach,
+                             unconditioned_basement_ach, has_flue_chimney, terrain, infil_measurement)
 
     # Natural Ventilation
     if not disable_nat_vent.nil? and disable_nat_vent
@@ -3114,8 +3115,8 @@ class OSModel
     mech_vent_fan = systems.elements["MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     mech_vent_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: mech_vent_fan)
     mech_vent_type = Constants.VentTypeNone
-    mech_vent_total_efficiency = 0.0
-    mech_vent_sensible_efficiency = 0.0
+    mech_vent_total_eff = 0.0
+    mech_vent_sens_eff = 0.0
     mech_vent_fan_w = 0.0
     mech_vent_cfm = 0.0
     cfis_open_time = 0.0
@@ -3134,22 +3135,22 @@ class OSModel
         mech_vent_type = Constants.VentTypeBalanced
         num_fans = 2.0
       end
-      mech_vent_total_efficiency = 0.0
-      mech_vent_total_efficiency_adjusted = 0.0
-      mech_vent_sensible_efficiency = 0.0
-      mech_vent_sensible_efficiency_adjusted = 0.0
+      mech_vent_total_eff = 0.0
+      mech_vent_total_eff_adj = 0.0
+      mech_vent_sens_eff = 0.0
+      mech_vent_sens_eff_adj = 0.0
       if fan_type == "energy recovery ventilator" or fan_type == "heat recovery ventilator"
         if mech_vent_fan_values[:sensible_recovery_efficiency_adjusted].nil?
-          mech_vent_sensible_efficiency = mech_vent_fan_values[:sensible_recovery_efficiency]
+          mech_vent_sens_eff = mech_vent_fan_values[:sensible_recovery_efficiency]
         else
-          mech_vent_sensible_efficiency_adjusted = mech_vent_fan_values[:sensible_recovery_efficiency_adjusted]
+          mech_vent_sens_eff_adj = mech_vent_fan_values[:sensible_recovery_efficiency_adjusted]
         end
       end
       if fan_type == "energy recovery ventilator"
         if mech_vent_fan_values[:total_recovery_efficiency_adjusted].nil?
-          mech_vent_total_efficiency = mech_vent_fan_values[:total_recovery_efficiency]
+          mech_vent_total_eff = mech_vent_fan_values[:total_recovery_efficiency]
         else
-          mech_vent_total_efficiency_adjusted = mech_vent_fan_values[:total_recovery_efficiency_adjusted]
+          mech_vent_total_eff_adj = mech_vent_fan_values[:total_recovery_efficiency_adjusted]
         end
       end
       mech_vent_cfm = mech_vent_fan_values[:tested_flow_rate]
@@ -3218,11 +3219,11 @@ class OSModel
       end
     end
 
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_efficiency, mech_vent_total_efficiency_adjusted, mech_vent_cfm,
-                                          mech_vent_fan_w, mech_vent_sensible_efficiency, mech_vent_sensible_efficiency_adjusted,
+    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_eff, mech_vent_total_eff_adj, mech_vent_cfm,
+                                          mech_vent_fan_w, mech_vent_sens_eff, mech_vent_sens_eff_adj,
                                           clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
-                                          cfis_open_time, cfis_airflow_frac, cfis_airloop)
+                                          cfis_open_time, cfis_airflow_frac, cfis_airloop, mech_vent_fan)
 
     window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
@@ -3233,7 +3234,7 @@ class OSModel
 
     Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
                   @cfa, @infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
-                  @min_neighbor_distance, infil_measurement, mech_vent_fan)
+                  @min_neighbor_distance)
   end
 
   def self.create_ducts(air_distribution, model, spaces, dist_id)
@@ -3278,7 +3279,8 @@ class OSModel
       next if duct_side.nil?
 
       duct_area = ducts_values[:duct_surface_area]
-      duct_space = get_space_from_location(ducts_values[:duct_location], "Duct", model, spaces)
+      duct_location = ducts_values[:duct_location]
+      duct_space = get_space_from_location(duct_location, "Duct", model, spaces)
       # Apportion leakage to individual ducts by surface area
       duct_leakage_value = leakage_to_outside[duct_side][0] * duct_area / total_unconditioned_duct_area[duct_side]
       duct_leakage_units = leakage_to_outside[duct_side][1]
@@ -3293,7 +3295,7 @@ class OSModel
         fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
-      air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value])
+      air_ducts << Duct.new(duct_side, duct_space, duct_location, duct_leakage_frac, duct_leakage_cfm, duct_area, ducts_values[:duct_insulation_r_value], air_distribution)
     end
 
     # If all ducts are in conditioned space, model leakage as going to outside
@@ -3302,6 +3304,7 @@ class OSModel
 
       duct_area = 0.0
       duct_rvalue = 0.0
+      duct_location = "outside"
       duct_space = nil # outside
       duct_leakage_value = leakage_to_outside[duct_side][0]
       duct_leakage_units = leakage_to_outside[duct_side][1]
@@ -3316,7 +3319,7 @@ class OSModel
         fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{dist_id}'."
       end
 
-      air_ducts << Duct.new(duct_side, duct_space, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
+      air_ducts << Duct.new(duct_side, duct_space, duct_location, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue, air_distribution)
     end
 
     return air_ducts
