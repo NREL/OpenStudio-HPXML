@@ -3326,9 +3326,9 @@ class OSModel
   end
 
   def self.add_hvac_sizing(runner, model, building, weather)
-    HVACSizing.apply(runner: runner, building: building, weather: weather, cfa: @cfa,
-                     nbeds: @nbeds, min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag,
-                     infilvolume: @infilvolume, hvac_map: @hvac_map, show_debug_info: false)
+    HVACSizing.apply(runner: runner, building: building, weather: weather, cfa: @cfa, nbeds: @nbeds,
+                     min_neighbor_distance: @min_neighbor_distance, ncfl_ag: @ncfl_ag,
+                     infilvolume: @infilvolume, hvac_map: @hvac_map)
   end
 
   def self.add_fuel_heating_eae(runner, model, building)

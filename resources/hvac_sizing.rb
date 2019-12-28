@@ -14,8 +14,7 @@ class HVACSizing
                  min_neighbor_distance:,
                  ncfl_ag:,
                  infilvolume:,
-                 hvac_map:,
-                 show_debug_info: false)
+                 hvac_map:)
     @runner = runner
     @cfa = cfa
     @nbeds = nbeds
@@ -45,9 +44,7 @@ class HVACSizing
     zone_loads = process_zone_loads(building, weather)
 
     # Display debug info
-    if show_debug_info
-      display_zone_loads(zone_loads)
-    end
+    display_zone_loads(zone_loads)
 
     # Aggregate zone loads into initial loads
     init_loads = aggregate_zone_loads(zone_loads)
@@ -77,9 +74,7 @@ class HVACSizing
       set_object_values(building, hvac, hvac_final_values)
 
       # Display debug info
-      if show_debug_info
-        display_hvac_final_values_results(hvac_final_values, hvac)
-      end
+      display_hvac_final_values_results(hvac_final_values, hvac)
     end
   end
 
