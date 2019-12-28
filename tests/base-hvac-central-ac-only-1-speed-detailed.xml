@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-07-17T09:50:43-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-12-28T08:38:11-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -196,11 +196,6 @@
             <Azimuth>0</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Overhangs>
-              <Depth>2.5</Depth>
-              <DistanceToTopOfWindow>0.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -217,11 +212,6 @@
             <Azimuth>90</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>6.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -230,11 +220,6 @@
             <Azimuth>270</Azimuth>
             <UFactor>0.33</UFactor>
             <SHGC>0.45</SHGC>
-            <Overhangs>
-              <Depth>1.5</Depth>
-              <DistanceToTopOfWindow>2.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>7.0</DistanceToBottomOfWindow>
-            </Overhangs>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
@@ -258,31 +243,18 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>-1.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>-1.0</CoolingCapacity>
+              <CoolingCapacity>48000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>13.0</Value>
               </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.7</SensibleHeatFraction>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
