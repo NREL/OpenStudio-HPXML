@@ -548,7 +548,8 @@ class HPXMLTranslatorTest < MiniTest::Test
         vals = vals[1].split(" ")
         value = Float(vals[0].strip)
         prop += " [#{vals[1].strip}]" # add units
-        results[prop] = value
+        results[prop] = 0.0 if results[prop].nil?
+        results[prop] += value
       end
     end
     return results
