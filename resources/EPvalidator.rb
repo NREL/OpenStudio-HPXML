@@ -49,7 +49,7 @@ class EnergyPlusValidator
 
         "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => one, # See [WeatherStation]
 
-        "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement" => one, # see [AirInfiltration]
+        "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[HousePressure=50]/BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | /HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement/extension/ConstantACHnatural" => one, # see [AirInfiltration]
 
         "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof" => zero_or_more, # See [Roof]
         "/HPXML/Building/BuildingDetails/Enclosure/Walls/Wall" => one_or_more, # See [Wall]
@@ -107,9 +107,8 @@ class EnergyPlusValidator
       },
 
       # [AirInfiltration]
-      "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement" => {
+      "/HPXML/Building/BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[HousePressure=50 and BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | extension/ConstantACHnatural]" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "[HousePressure=50]BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage | extension/ConstantACHnatural" => one, # ACH50, CFM50, or constant nACH;
         "InfiltrationVolume" => zero_or_one, # Assumes InfiltrationVolume = ConditionedVolume if not provided
       },
 
@@ -128,8 +127,8 @@ class EnergyPlusValidator
       },
 
       ## [VentedAttic]
-      "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo='attic - vented']/../../Attics/Attic[AtticType/Attic[Vented='true']]" => {
-        "VentilationRate[UnitofMeasure='SLA']/Value | extension/ConstantACHnatural" => zero_or_one,
+      "/HPXML/Building/BuildingDetails/Enclosure/Roofs/Roof[InteriorAdjacentTo='attic - vented']" => {
+        "../../Attics/Attic[AtticType/Attic[Vented='true']]/VentilationRate[UnitofMeasure='SLA']/Value | ../../Attics/Attic[AtticType/Attic[Vented='true']]/extension/ConstantACHnatural" => zero_or_one,
       },
 
       # [Wall]
