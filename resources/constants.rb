@@ -5,14 +5,6 @@ class Constants
     return 73.5 # deg-F
   end
 
-  def self.DefaultFramingFactorInterior
-    return 0.16
-  end
-
-  def self.DefaultHumiditySetpoint
-    return 0.60
-  end
-
   def self.g
     return 32.174 # gravity (ft/s2)
   end
@@ -119,36 +111,12 @@ class Constants
     return 'ERI Index Adjustment Reference Home'
   end
 
-  def self.CalcTypeStandard
-    return 'Standard'
-  end
-
   def self.DuctSideReturn
     return 'return'
   end
 
   def self.DuctSideSupply
     return 'supply'
-  end
-
-  def self.OptionallyDuctedSystemIsDucted
-    return __method__.to_s
-  end
-
-  def self.FacadeFront
-    return 'front'
-  end
-
-  def self.FacadeBack
-    return 'back'
-  end
-
-  def self.FacadeLeft
-    return 'left'
-  end
-
-  def self.FacadeRight
-    return 'right'
   end
 
   def self.FluidWater
