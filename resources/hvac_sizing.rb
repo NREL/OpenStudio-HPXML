@@ -2471,6 +2471,14 @@ class HVACSizing
       end
     end
 
+    building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
+      roof_values = HPXML.get_roof_values(roof: roof)
+      if roof_values[:interior_adjacent_to] == space and roof_values[:exterior_adjacent_to] == "outside"
+        ufactor = 1.0 / roof_values[:insulation_assembly_r_value]
+        space_UAs["outdoors"] += ufactor * roof_values[:area]
+      end
+    end
+
     # Infiltration UA
     spaces = { "basement - unconditioned" => "BasementUnconditioned",
                "crawlspace - vented" => "CrawlspaceVented",

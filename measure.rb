@@ -1819,6 +1819,9 @@ class OSModel
       if not window_values[:interior_shading_factor_winter].nil?
         heat_shade_mult = window_values[:interior_shading_factor_winter]
       end
+      if cool_shade_mult > heat_shade_mult
+        fail "SummerShadingCoefficient (#{cool_shade_mult}) must be less than or equal to WinterShadingCoefficient (#{heat_shade_mult}) for window '#{window_values[:id]}'."
+      end
 
       Constructions.apply_window(model, [sub_surface],
                                  "WindowConstruction", window,
