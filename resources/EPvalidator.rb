@@ -272,7 +272,7 @@ class EnergyPlusValidator
 
       ## [HeatingType=Furnace]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Furnace]" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution[SystemIdentifier[@id=$DistributionSystem_idref]]/DistributionSystemType[AirDistribution or Other='DSE']" => one, # See [HVACDistribution]
         "DistributionSystem" => one,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity' or HeatingSystemFuel='wood']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='AFUE']/Value" => one,
@@ -287,7 +287,7 @@ class EnergyPlusValidator
 
       ## [HeatingType=Boiler]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Boiler]" => {
-        "../../HVACDistribution[DistributionSystemType/HydronicDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution[SystemIdentifier[@id=$DistributionSystem_idref]]/DistributionSystemType[HydronicDistribution or Other='DSE']" => one, # See [HVACDistribution]
         "DistributionSystem" => one,
         "[HeatingSystemFuel='natural gas' or HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='electricity' or HeatingSystemFuel='wood']" => one, # See [HeatingType=FuelEquipment] if not electricity
         "AnnualHeatingEfficiency[Units='AFUE']/Value" => one,
@@ -319,7 +319,7 @@ class EnergyPlusValidator
 
       ## [CoolingType=CentralAC]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType='central air conditioner']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution[SystemIdentifier[@id=$DistributionSystem_idref]]/DistributionSystemType[AirDistribution or Other='DSE']" => one, # See [HVACDistribution]
         "DistributionSystem" => one,
         "CoolingCapacity" => one, # Use -1 for autosizing
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
@@ -354,7 +354,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=ASHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='air-to-air']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution[SystemIdentifier[@id=$DistributionSystem_idref]]/DistributionSystemType[AirDistribution or Other='DSE']" => one, # See [HVACDistribution]
         "DistributionSystem" => one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
@@ -363,7 +363,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=MSHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='mini-split']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => zero_or_more, # See [HVACDistribution]
+        "../../HVACDistribution[SystemIdentifier[@id=$DistributionSystem_idref]]/DistributionSystemType[AirDistribution or Other='DSE']" => zero_or_one, # See [HVACDistribution]
         "DistributionSystem" => zero_or_one,
         "AnnualCoolingEfficiency[Units='SEER']/Value" => one,
         "AnnualHeatingEfficiency[Units='HSPF']/Value" => one,
@@ -372,7 +372,7 @@ class EnergyPlusValidator
 
       ## [HeatPumpType=GSHP]
       "/HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[HeatPumpType='ground-to-air']" => {
-        "../../HVACDistribution[DistributionSystemType/AirDistribution | DistributionSystemType[Other='DSE']]" => one_or_more, # See [HVACDistribution]
+        "../../HVACDistribution[SystemIdentifier[@id=$DistributionSystem_idref]]/DistributionSystemType[AirDistribution or Other='DSE']" => one, # See [HVACDistribution]
         "DistributionSystem" => one,
         "BackupHeatingSwitchoverTemperature" => zero,
         "AnnualCoolingEfficiency[Units='EER']/Value" => one,
@@ -693,7 +693,15 @@ class EnergyPlusValidator
             next if expected_sizes.nil?
 
             xpath = combine_into_xpath(parent, child)
-            actual_size = REXML::XPath.first(parent_element, "count(#{child})")
+            var = {}
+            # check referenced node by using parent's attribute(idref) value. Parameter name follows $ChildElementName_AttributeName
+            if child.include? "$"
+              var_name = child.split("$")[1].split(/\W+/)[0]
+              element_name = var_name.split("_")[0]
+              attribute_name =  var_name.split("_")[1]
+              var[var_name] = REXML::XPath.first(parent_element, element_name).attributes[attribute_name]
+            end
+            actual_size = REXML::XPath.first(parent_element, "count(#{child})",nil, var)
             check_number_of_elements(actual_size, expected_sizes, xpath, errors)
           end
         end
