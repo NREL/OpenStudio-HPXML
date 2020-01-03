@@ -2339,15 +2339,15 @@ class HVACSizing
 
       # Combined heating/cooling systems
       hvac = nil
-      all_heat_pump_values.each do |heat_pump, heat_pump_values|
-        next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
-
-        hvac = assign_heat_pump(hvac, heat_pump, heat_pump_values)
-      end
       all_heating_system_values.each do |heating_system, heating_system_values|
         next if heating_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         hvac = assign_heating_system(hvac, heating_system, heating_system_values)
+      end
+      all_cooling_system_values.each do |cooling_system, cooling_system_values|
+        next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
+
+        hvac = assign_cooling_system(hvac, cooling_system, cooling_system_values)
       end
       if not hvac.nil?
         hvac.Ducts = get_ducts_for_hvac(hvac_distribution, hvac_distribution_values)
@@ -2356,10 +2356,10 @@ class HVACSizing
 
       # Heat pumps
       hvac = nil
-      all_cooling_system_values.each do |cooling_system, cooling_system_values|
-        next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
+      all_heat_pump_values.each do |heat_pump, heat_pump_values|
+        next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
-        hvac = assign_cooling_system(hvac, cooling_system, cooling_system_values)
+        hvac = assign_heat_pump(hvac, heat_pump, heat_pump_values)
       end
       if not hvac.nil?
         hvac.Ducts = get_ducts_for_hvac(hvac_distribution, hvac_distribution_values)
