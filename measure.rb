@@ -2981,7 +2981,7 @@ class OSModel
       building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
         vented_attic_values = HPXML.get_attic_values(attic: vented_attic,
                                                      select: [:vented_attic_sla, :vented_attic_constant_ach])
-        next if vented_attic_values[:vented_attic_sla].nil? and vented_attic_values[:vented_attic_sla].nil? # skip additional attic elements
+        next if vented_attic_values[:vented_attic_sla].nil? and vented_attic_values[:vented_attic_constant_ach].nil? # skip additional attic elements
 
         vented_attic_sla = vented_attic_values[:vented_attic_sla]
         vented_attic_const_ach = vented_attic_values[:vented_attic_constant_ach]
