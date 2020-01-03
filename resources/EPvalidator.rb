@@ -698,10 +698,10 @@ class EnergyPlusValidator
             if child.include? "$"
               var_name = child.split("$")[1].split(/\W+/)[0]
               element_name = var_name.split("_")[0]
-              attribute_name =  var_name.split("_")[1]
-              var[var_name] = REXML::XPath.first(parent_element, element_name).attributes[attribute_name]
+              attribute_name = var_name.split("_")[1]
+              var[var_name] = REXML::XPath.first(parent_element, element_name).attributes[attribute_name] unless REXML::XPath.first(parent_element, element_name).nil?
             end
-            actual_size = REXML::XPath.first(parent_element, "count(#{child})",nil, var)
+            actual_size = REXML::XPath.first(parent_element, "count(#{child})", nil, var)
             check_number_of_elements(actual_size, expected_sizes, xpath, errors)
           end
         end
