@@ -150,7 +150,7 @@ class HVAC
     clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
     clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
     clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
-    clg_coil.setFuelType("Electricity")
+    clg_coil.setFuelType('electricity')
     clg_coil_stage_data.each do |stage|
       clg_coil.addStage(stage)
     end
@@ -267,7 +267,7 @@ class HVAC
     clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
     clg_coil.setCrankcaseHeaterCapacity(UnitConversions.convert(crankcase_kw, "kW", "W"))
     clg_coil.setMaximumOutdoorDryBulbTemperatureforCrankcaseHeaterOperation(UnitConversions.convert(crankcase_temp, "F", "C"))
-    clg_coil.setFuelType("Electricity")
+    clg_coil.setFuelType('electricity')
     clg_coil_stage_data.each do |stage|
       clg_coil.addStage(stage)
     end
@@ -625,7 +625,7 @@ class HVAC
     htg_coil.setDefrostStrategy("ReverseCycle")
     htg_coil.setDefrostControl("OnDemand")
     htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
-    htg_coil.setFuelType("Electricity")
+    htg_coil.setFuelType('electricity')
     htg_coil_stage_data.each do |stage|
       htg_coil.addStage(stage)
     end
@@ -639,7 +639,7 @@ class HVAC
     clg_coil.setCondenserType("AirCooled")
     clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
     clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-    clg_coil.setFuelType("Electricity")
+    clg_coil.setFuelType('electricity')
     clg_coil_stage_data.each do |stage|
       clg_coil.addStage(stage)
     end
@@ -782,7 +782,7 @@ class HVAC
     htg_coil.setDefrostStrategy("ReverseCycle")
     htg_coil.setDefrostControl("OnDemand")
     htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
-    htg_coil.setFuelType("Electricity")
+    htg_coil.setFuelType('electricity')
     htg_coil_stage_data.each do |stage|
       htg_coil.addStage(stage)
     end
@@ -796,7 +796,7 @@ class HVAC
     clg_coil.setCondenserType("AirCooled")
     clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
     clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
-    clg_coil.setFuelType("Electricity")
+    clg_coil.setFuelType('electricity')
     clg_coil_stage_data.each do |stage|
       clg_coil.addStage(stage)
     end
@@ -974,7 +974,7 @@ class HVAC
     htg_coil.setDefrostStrategy("ReverseCycle")
     htg_coil.setDefrostControl("OnDemand")
     htg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
-    htg_coil.setFuelType("Electricity")
+    htg_coil.setFuelType('electricity')
     htg_coil_stage_data.each do |stage|
       htg_coil.addStage(stage)
     end
@@ -989,7 +989,7 @@ class HVAC
     clg_coil.setApplyPartLoadFractiontoSpeedsGreaterthan1(false)
     clg_coil.setApplyLatentDegradationtoSpeedsGreaterthan1(false)
     clg_coil.setCrankcaseHeaterCapacity(0)
-    clg_coil.setFuelType("Electricity")
+    clg_coil.setFuelType('electricity')
     clg_coil_stage_data.each do |stage|
       clg_coil.addStage(stage)
     end
@@ -1462,7 +1462,7 @@ class HVAC
 
     # _processSystemHeatingCoil
 
-    if fuel_type == Constants.FuelTypeElectric
+    if fuel_type == 'electricity'
       htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
       htg_coil.setEfficiency(afue)
     else
@@ -1780,7 +1780,7 @@ class HVAC
 
     # _processSystemHeatingCoil
 
-    if fuel_type == Constants.FuelTypeElectric
+    if fuel_type == 'electricity'
       htg_coil = OpenStudio::Model::CoilHeatingElectric.new(model)
       htg_coil.setEfficiency(efficiency)
     else
@@ -2267,15 +2267,15 @@ class HVAC
   def self.get_default_eae(htg_type, fuel, load_frac, furnace_capacity_kbtuh)
     # From ANSI/RESNET/ICC 301 Standard
     if htg_type == 'Boiler'
-      if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
+      if fuel == 'natural gas' or fuel == 'propane'
         return 170.0 * load_frac # kWh/yr
-      elsif fuel == Constants.FuelTypeOil
+      elsif fuel == 'fuel oil'
         return 330.0 * load_frac # kWh/yr
       end
     elsif htg_type == 'Furnace'
-      if fuel == Constants.FuelTypeGas or fuel == Constants.FuelTypePropane
+      if fuel == 'natural gas' or fuel == 'propane'
         return (149.0 + 10.3 * furnace_capacity_kbtuh) * load_frac # kWh/yr
-      elsif fuel == Constants.FuelTypeOil
+      elsif fuel == 'fuel oil'
         return (439.0 + 5.5 * furnace_capacity_kbtuh) * load_frac # kWh/yr
       end
     end
@@ -2506,7 +2506,7 @@ class HVAC
   private
 
   def self.apply_supplemental_htg_coil(model, obj_name, fuel_type, supplemental_efficiency, supplemental_capacity)
-    if fuel_type == Constants.FuelTypeElectric
+    if fuel_type == 'electricity'
       htg_supp_coil = OpenStudio::Model::CoilHeatingElectric.new(model, model.alwaysOnDiscreteSchedule)
       htg_supp_coil.setEfficiency(supplemental_efficiency)
     else
