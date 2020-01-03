@@ -2773,8 +2773,6 @@ class HVAC
   end
 
   def self.calc_SEER_TwoSpeed(eers, c_d, capacity_ratios, fanspeed_ratios, fan_power_rated, coeff_eir, coeff_q)
-    # Two speed SEER calculation ported from BEopt v2.8 sim.py
-
     eir_A2 = calc_EIR_from_EER(eers[1], fan_power_rated)
     eir_B2 = eir_A2 * calc_biquad(coeff_eir[1], 67.0, 82.0)
 
@@ -2981,14 +2979,12 @@ class HVAC
   end
 
   def self.calc_HSPF_SingleSpeed(cop_47, c_d, fan_power_rated, coeff_eir, coeff_q)
-    # Single speed HSPF calculation ported from BEopt v2.8 sim.py
-
     eir_47 = calc_EIR_from_COP(cop_47, fan_power_rated)
     eir_35 = eir_47 * calc_biquad(coeff_eir[0], 70.0, 35.0)
     eir_17 = eir_47 * calc_biquad(coeff_eir[0], 70.0, 17.0)
 
     q_47 = 1.0
-    q_35 = 0.7519 # Hard code Q_35 from BEopt1
+    q_35 = 0.7519
     q_17 = q_47 * calc_biquad(coeff_q[0], 70.0, 17.0)
 
     cfm_Btu_h = 400.0 / 12000.0
@@ -4240,10 +4236,7 @@ class HVAC
   end
 
   def self.calc_mshp_heating_eirs(runner, heatingHSPF, supplyFanPower, min_hp_temp, c_d, cfms_cooling, num_speeds, capacity_ratios_heating, cfms_heating, hEAT_EIR_FT_SPEC, hEAT_CAP_FT_SPEC)
-    # COPs_Norm = [1.636, 1.757, 1.388, 1.240, 1.162, 1.119, 1.084, 1.062, 1.044, 1] #Report Avg
-    # COPs_Norm = [1.792, 1.502, 1.308, 1.207, 1.145, 1.105, 1.077, 1.056, 1.041, 1] #BEopt Default
-
-    cops_Norm = [1.792, 1.502, 1.308, 1.207, 1.145, 1.105, 1.077, 1.056, 1.041, 1] # BEopt Default
+    cops_Norm = [1.792, 1.502, 1.308, 1.207, 1.145, 1.105, 1.077, 1.056, 1.041, 1]
     fanPows_Norm = [0.577, 0.625, 0.673, 0.720, 0.768, 0.814, 0.861, 0.907, 0.954, 1]
 
     heating_eirs = [0.0] * num_speeds

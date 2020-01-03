@@ -1597,7 +1597,7 @@ class Waterheater
     loop.sizingPlant.setDesignLoopExitTemperature(UnitConversions.convert(t_set, "F", "C") + deadband(wh_type) / 2.0)
     loop.sizingPlant.setLoopDesignTemperatureDifference(UnitConversions.convert(10.0, "R", "K"))
     loop.setPlantLoopVolume(0.003) # ~1 gal
-    loop.setMaximumLoopFlowRate(0.01) # This size represents the physical limitations to flow due to losses in the piping system. For BEopt we assume that the pipes are always adequately sized
+    loop.setMaximumLoopFlowRate(0.01) # This size represents the physical limitations to flow due to losses in the piping system. We assume that the pipes are always adequately sized.
 
     bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
     out_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
