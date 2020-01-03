@@ -2299,8 +2299,6 @@ class OSModel
       end
       @total_frac_remaining_cool_load_served -= load_frac
 
-      check_distribution_system(building, cooling_system_values)
-
       sys_id = cooling_system_values[:id]
       @hvac_map[sys_id] = []
 
@@ -2396,8 +2394,6 @@ class OSModel
 
         htg_type = heating_system_values[:heating_system_type]
 
-        check_distribution_system(building, heating_system_values)
-
         attached_clg_system = get_attached_clg_system(heating_system_values, building)
 
         if only_furnaces_attached_to_cooling
@@ -2486,8 +2482,6 @@ class OSModel
 
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
       heat_pump_values = HPXML.get_heat_pump_values(heat_pump: hp)
-
-      check_distribution_system(building, heat_pump_values)
 
       hp_type = heat_pump_values[:heat_pump_type]
 
@@ -2833,25 +2827,6 @@ class OSModel
 
     HVAC.apply_ceiling_fans(model, runner, annual_kwh, weekday_sch, weekend_sch, monthly_sch,
                             @cfa, @living_space)
-  end
-
-  def self.check_distribution_system(building, system_values)
-    dist_id = system_values[:distribution_system_idref]
-    return if dist_id.nil?
-
-    # Get attached distribution system
-    found_attached_dist = false
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
-      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist,
-                                                                    select: [:id])
-      next if dist_id != hvac_distribution_values[:id]
-
-      found_attached_dist = true
-    end
-
-    if not found_attached_dist
-      fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_values[:id]}'."
-    end
   end
 
   def self.get_boiler_and_plant_loop(loop_hvacs, heating_source_id, sys_id)
