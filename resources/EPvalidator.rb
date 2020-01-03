@@ -103,7 +103,7 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "Name" => one, # Required by HPXML schema
-        "WMO | extension/EPWFileName" => one_or_more, # Reference weather/data.csv for the list of acceptable WMO station numbers
+        "WMO | extension/EPWFileName" => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
       },
 
       # [AirInfiltration]
@@ -204,7 +204,7 @@ class EnergyPlusValidator
         "Thickness" => one, # Use zero for dirt floor
         "ExposedPerimeter" => one,
         "PerimeterInsulationDepth" => one,
-        "UnderSlabInsulationWidth | UnderSlabInsulationSpansEntireSlab='true'" => one,
+        "UnderSlabInsulationWidth | [UnderSlabInsulationSpansEntireSlab='true']" => one,
         "DepthBelowGrade | [InteriorAdjacentTo!='living space' and InteriorAdjacentTo!='garage']" => one_or_more, # DepthBelowGrade only required when InteriorAdjacentTo is 'living space' or 'garage'
         "PerimeterInsulation/SystemIdentifier" => one, # Required by HPXML schema
         "PerimeterInsulation/Layer[InstallationType='continuous']/NominalRValue" => one,
