@@ -2028,8 +2028,12 @@ class HVACSizing
     return cool_Load_Lat, cool_Load_Sens
   end
 
-  def self.get_ducts_for_hvac(hvac_distribution)
+  def self.get_ducts_for_hvac(hvac_distribution, hvac_distribution_values)
     ducts = []
+
+    if hvac_distribution_values[:distribution_system_type] != "AirDistribution"
+      return ducts
+    end
 
     air_distribution = hvac_distribution.elements["DistributionSystemType/AirDistribution"]
 
@@ -2294,6 +2298,8 @@ class HVACSizing
       hvac.FixedSuppHeatingCapacity = Constants.small if hvac.FixedSuppHeatingCapacity == 0
       hvac.FixedSuppHeatingCapacity = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, "Btu/hr", "ton")
       hvac.FixedSuppHeatingCapacity = nil if hvac.FixedSuppHeatingCapacity < 0
+    else
+      hvac.FixedSuppHeatingCapacity = 0
     end
     hvac.HeatingCapacityOffset = to_float_or_nil(XMLHelper.get_value(heat_pump, "extension/HeatingCapacityOffset"))
     hvac.FixedCoolingCapacity = heat_pump_values[:cooling_capacity]
@@ -2331,8 +2337,8 @@ class HVACSizing
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
 
+      # Combined heating/cooling systems
       hvac = nil
-
       all_heat_pump_values.each do |heat_pump, heat_pump_values|
         next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
@@ -2343,18 +2349,22 @@ class HVACSizing
 
         hvac = assign_heating_system(hvac, heating_system, heating_system_values)
       end
+      if not hvac.nil?
+        hvac.Ducts = get_ducts_for_hvac(hvac_distribution, hvac_distribution_values)
+        hvacs << hvac
+      end
+
+      # Heat pumps
+      hvac = nil
       all_cooling_system_values.each do |cooling_system, cooling_system_values|
         next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         hvac = assign_cooling_system(hvac, cooling_system, cooling_system_values)
       end
-
-      next if hvac.nil?
-
-      if hvac_distribution_values[:distribution_system_type] == "AirDistribution"
-        hvac.Ducts = get_ducts_for_hvac(hvac_distribution)
+      if not hvac.nil?
+        hvac.Ducts = get_ducts_for_hvac(hvac_distribution, hvac_distribution_values)
+        hvacs << hvac
       end
-      hvacs << hvac
     end
 
     # HVAC w/o distribution system

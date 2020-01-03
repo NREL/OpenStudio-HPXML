@@ -230,8 +230,10 @@ class HVAC
 
     # Store info for HVAC Sizing
     curves = []
+    shrrated = []
     clg_coil.stages.each_with_index do |stage, speed|
       curves << stage.totalCoolingCapacityFunctionofTemperatureCurve
+      shrrated << stage.grossRatedSensibleHeatRatio.get
     end
     fanspeedRatioCooling = []
     perf.supplyAirflowRatioFields.each do |airflowRatioField|
@@ -247,7 +249,7 @@ class HVAC
     HPXML.add_extension(parent: hpxml_clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
     HPXML.add_extension(parent: hpxml_clgsys, extensions: { "NumSpeedsCooling": 2 })
     HPXML.add_extension(parent: hpxml_clgsys, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
-    HPXML.add_extension(parent: hpxml_clgsys, extensions: { "SHRRated": shrs_rated_gross.join(",") })
+    HPXML.add_extension(parent: hpxml_clgsys, extensions: { "SHRRated": shrrated.join(",") })
   end
 
   def self.apply_central_ac_4speed(model, runner, seer, shrs,
@@ -362,8 +364,10 @@ class HVAC
 
     # Store info for HVAC Sizing
     curves = []
+    shrrated = []
     clg_coil.stages.each_with_index do |stage, speed|
       curves << stage.totalCoolingCapacityFunctionofTemperatureCurve
+      shrrated << stage.grossRatedSensibleHeatRatio.get
     end
     fanspeedRatioCooling = []
     perf.supplyAirflowRatioFields.each do |airflowRatioField|
@@ -379,7 +383,7 @@ class HVAC
     HPXML.add_extension(parent: hpxml_clgsys, extensions: { "CoolType": Constants.ObjectNameCentralAirConditioner })
     HPXML.add_extension(parent: hpxml_clgsys, extensions: { "NumSpeedsCooling": 4 })
     HPXML.add_extension(parent: hpxml_clgsys, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
-    HPXML.add_extension(parent: hpxml_clgsys, extensions: { "SHRRated": shrs_rated_gross.join(",") })
+    HPXML.add_extension(parent: hpxml_clgsys, extensions: { "SHRRated": shrrated.join(",") })
   end
 
   def self.apply_evaporative_cooler(model, runner, frac_cool_load_served,
@@ -762,8 +766,10 @@ class HVAC
 
     # Store info for HVAC Sizing
     curves = []
+    shrrated = []
     clg_coil.stages.each_with_index do |stage, speed|
       curves << stage.totalCoolingCapacityFunctionofTemperatureCurve
+      shrrated << stage.grossRatedSensibleHeatRatio.get
     end
     fanspeedRatioCooling = []
     perf.supplyAirflowRatioFields.each do |airflowRatioField|
@@ -792,7 +798,7 @@ class HVAC
     HPXML.add_extension(parent: hpxml_hp, extensions: { "NumSpeedsHeating": 2 })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "NumSpeedsCooling": 2 })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
-    HPXML.add_extension(parent: hpxml_hp, extensions: { "SHRRated": shrs_rated_gross.join(",") })
+    HPXML.add_extension(parent: hpxml_hp, extensions: { "SHRRated": shrrated.join(",") })
   end
 
   def self.apply_central_ashp_4speed(model, runner, seer, hspf, shrs,
@@ -943,8 +949,10 @@ class HVAC
 
     # Store info for HVAC Sizing
     curves = []
+    shrrated = []
     clg_coil.stages.each_with_index do |stage, speed|
       curves << stage.totalCoolingCapacityFunctionofTemperatureCurve
+      shrrated << stage.grossRatedSensibleHeatRatio.get
     end
     fanspeedRatioCooling = []
     perf.supplyAirflowRatioFields.each do |airflowRatioField|
@@ -973,7 +981,7 @@ class HVAC
     HPXML.add_extension(parent: hpxml_hp, extensions: { "NumSpeedsHeating": 4 })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "NumSpeedsCooling": 4 })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
-    HPXML.add_extension(parent: hpxml_hp, extensions: { "SHRRated": shrs_rated_gross.join(",") })
+    HPXML.add_extension(parent: hpxml_hp, extensions: { "SHRRated": shrrated.join(",") })
   end
 
   def self.apply_mshp(model, runner, seer, hspf, shr,
@@ -1224,8 +1232,10 @@ class HVAC
     HPXML.add_extension(parent: hpxml_hp, extensions: { "HeatingCFMs": cfms_heating_4.join(",") })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "CoolingCFMs": cfms_cooling_4.join(",") })
     curves = []
+    shrrated = []
     clg_coil.stages.each_with_index do |stage, speed|
       curves << stage.totalCoolingCapacityFunctionofTemperatureCurve
+      shrrated << stage.grossRatedSensibleHeatRatio.get
     end
     fanspeedRatioCooling = []
     perf.supplyAirflowRatioFields.each do |airflowRatioField|
@@ -1247,7 +1257,7 @@ class HVAC
     HPXML.add_extension(parent: hpxml_hp, extensions: { "HEAT_CAP_FT_SPEC ": hEAT_CAP_FT_SPEC.join(";") })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "HeatingCapacityOffset": heating_capacity_offset })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "FanspeedRatioCooling": fanspeedRatioCooling.join(",") })
-    HPXML.add_extension(parent: hpxml_hp, extensions: { "SHRRated": shrs_rated.join(",") })
+    HPXML.add_extension(parent: hpxml_hp, extensions: { "SHRRated": shrrated.join(",") })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "HeatType": Constants.ObjectNameMiniSplitHeatPump })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "CoolType": Constants.ObjectNameMiniSplitHeatPump })
     HPXML.add_extension(parent: hpxml_hp, extensions: { "NumSpeedsHeating": 4 })
