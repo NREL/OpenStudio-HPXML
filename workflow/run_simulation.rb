@@ -28,15 +28,20 @@ def get_output_hpxml_path(resultsdir, designdir)
   return File.join(resultsdir, File.basename(designdir) + ".xml")
 end
 
-def run_design(basedir, designdir, design, resultsdir, hpxml, debug, validate)
+def run_design(basedir, designdir, design, resultsdir, hpxml, debug, validate, skip_simulation)
   puts "Creating input..."
-  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
+  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate, skip_simulation)
+
+  return if skip_simulation
 
   puts "Running simulation..."
   run_energyplus(design, designdir)
+
+  # Create output
+  create_output(designdir, resultsdir)
 end
 
-def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
+def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate, skip_simulation)
   Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -56,17 +61,19 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
   args['hpxml_output_path'] = output_hpxml_path
   update_args_hash(measures, measure_subdir, args)
 
-  # Add HPXML translator measure to workflow
-  measure_subdir = "HPXMLtoOpenStudio"
-  args = {}
-  args['hpxml_path'] = output_hpxml_path
-  args['weather_dir'] = File.absolute_path(File.join(basedir, "..", "weather"))
-  args['epw_output_path'] = File.join(designdir, "in.epw")
-  if debug
-    args['osm_output_path'] = File.join(designdir, "in.osm")
+  if not skip_simulation
+    # Add HPXML translator measure to workflow
+    measure_subdir = "HPXMLtoOpenStudio"
+    args = {}
+    args['hpxml_path'] = output_hpxml_path
+    args['weather_dir'] = File.absolute_path(File.join(basedir, "..", "weather"))
+    args['epw_output_path'] = File.join(designdir, "in.epw")
+    if debug
+      args['osm_output_path'] = File.join(designdir, "in.osm")
+    end
+    args['skip_validation'] = !validate
+    update_args_hash(measures, measure_subdir, args)
   end
-  args['skip_validation'] = !validate
-  update_args_hash(measures, measure_subdir, args)
 
   # Apply measures
   success = apply_measures(measures_dir, measures, runner, model)
@@ -85,6 +92,8 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
       f << "Error: #{s}\n"
     end
   end
+
+  return if skip_simulation
 
   if not success
     fail "Simulation unsuccessful for #{design}."
@@ -340,6 +349,11 @@ OptionParser.new do |opts|
     options[:validate] = true
   end
 
+  options[:skip_simulation] = false
+  opts.on('--skip-simulation', 'Skip the EnergyPlus simulation') do |t|
+    options[:skip_simulation] = true
+  end
+
   options[:debug] = false
   opts.on('-d', '--debug') do |t|
     options[:debug] = true
@@ -391,9 +405,6 @@ puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
 designdir = get_designdir(options[:output_dir], design)
 rm_path(designdir)
-rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:validate])
-
-# Create output
-create_output(designdir, resultsdir)
+rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:validate], options[:skip_simulation])
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."
