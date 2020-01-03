@@ -1568,10 +1568,10 @@ def get_hpxml_file_windows_values(hpxml_file, windows_values)
     windows_values[0][:interior_shading_factor_winter] = 0.85
     windows_values[1][:interior_shading_factor_summer] = 0.01
     windows_values[1][:interior_shading_factor_winter] = 0.99
-    windows_values[2][:interior_shading_factor_summer] = 0.99
-    windows_values[2][:interior_shading_factor_winter] = 0.01
-    windows_values[3][:interior_shading_factor_summer] = 0.85
-    windows_values[3][:interior_shading_factor_winter] = 0.7
+    windows_values[2][:interior_shading_factor_summer] = 0.0
+    windows_values[2][:interior_shading_factor_winter] = 0.5
+    windows_values[3][:interior_shading_factor_summer] = 1.0
+    windows_values[3][:interior_shading_factor_winter] = 1.0
   elsif ['base-enclosure-windows-none.xml'].include? hpxml_file
     windows_values = []
   elsif ['invalid_files/net-area-negative-wall.xml'].include? hpxml_file

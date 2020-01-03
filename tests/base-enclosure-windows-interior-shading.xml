@@ -224,8 +224,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEastInteriorShading'/>
-              <SummerShadingCoefficient>0.99</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.01</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.5</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
@@ -237,8 +237,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWestInteriorShading'/>
-              <SummerShadingCoefficient>0.85</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.7</WinterShadingCoefficient>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
