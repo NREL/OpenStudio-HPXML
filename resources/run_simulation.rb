@@ -82,7 +82,7 @@ end
 def run_energyplus(rundir)
   # getEnergyPlusDirectory can be unreliable, using getOpenStudioCLI instead
   ep_path = File.absolute_path(File.join(OpenStudio.getOpenStudioCLI.to_s, '..', '..', 'EnergyPlus', 'energyplus'))
-  command = "cd #{rundir} && #{ep_path} -w in.epw in.idf > stdout-energyplus"
+  command = "cd \"#{rundir}\" && \"#{ep_path}\" -w in.epw in.idf > stdout-energyplus"
   system(command, :err => File::NULL)
 end
 
