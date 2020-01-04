@@ -6,7 +6,7 @@ require_relative "schedules"
 require_relative "constructions"
 
 class HVACSizing
-  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, show_debug_info, living_space)
+  def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, living_space)
     @runner = runner
     @model_spaces = model.getSpaces
     @cond_space = living_space
@@ -39,9 +39,7 @@ class HVACSizing
     zone_loads = process_zone_loads(model, weather)
 
     # Display debug info
-    if show_debug_info
-      display_zone_loads(zone_loads)
-    end
+    display_zone_loads(zone_loads)
 
     # Aggregate zone loads into initial loads
     init_loads = aggregate_zone_loads(zone_loads)
@@ -71,9 +69,7 @@ class HVACSizing
       set_object_values(model, hvac, hvac_final_values)
 
       # Display debug info
-      if show_debug_info
-        display_hvac_final_values_results(hvac_final_values, hvac)
-      end
+      display_hvac_final_values_results(hvac_final_values, hvac)
     end
   end
 
@@ -846,29 +842,9 @@ class HVACSizing
 
     # Foundation walls
     Geometry.get_spaces_below_grade_exterior_walls(thermal_zone.spaces).each do |wall|
-      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(wall)
-      k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
-      ins_wall_ufactor = 1.0 / (wall_constr_rvalue + wall_ins_rvalue + Material.AirFilmVertical.rvalue)
-      unins_wall_ufactor = 1.0 / (wall_constr_rvalue + Material.AirFilmVertical.rvalue)
-      above_grade_height = Geometry.get_height_of_spaces([wall.space.get]) - Geometry.surface_height(wall)
+      u_wall_with_soil, u_wall_without_soil, is_insulated = get_foundation_wall_props(wall)
 
-      # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
-      u_value_mj8 = 0.0
-      wall_height_ft = Geometry.get_surface_height(wall).round
-      for d in 1..wall_height_ft
-        r_soil = (Math::PI * d / 2.0) / k_soil
-        if d <= above_grade_height
-          r_wall = 1.0 / ins_wall_ufactor + Material.AirFilmOutside.rvalue
-        elsif d <= wall_ins_height
-          r_wall = 1.0 / ins_wall_ufactor
-        else
-          r_wall = 1.0 / unins_wall_ufactor
-        end
-        u_value_mj8 += 1.0 / (r_soil + r_wall)
-      end
-      u_value_mj8 = (u_value_mj8 / wall_height_ft) * 0.85
-
-      zone_loads.Heat_Walls += u_value_mj8 * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
+      zone_loads.Heat_Walls += u_wall_with_soil * UnitConversions.convert(wall.netArea, "m^2", "ft^2") * @htd
       surfaces_processed << wall.name.to_s
     end
 
@@ -1903,20 +1879,16 @@ class HVACSizing
     q_bal_Sens = 0.0
     q_bal_Lat = 0.0
 
-    if mechVentType == Constants.VentTypeExhaust
+    if ['exhaust only', 'supply only', 'central fan integrated supply'].include? mechVentType
       q_unb = mechVentWholeHouseRate
-    elsif mechVentType == Constants.VentTypeSupply or mechVentType == Constants.VentTypeCFIS
-      q_unb = mechVentWholeHouseRate
-    elsif mechVentType == Constants.VentTypeBalanced
+    elsif ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mechVentType
       totalEfficiency = get_feature(model.getBuilding, Constants.SizingInfoMechVentTotalEfficiency, 'double')
       apparentSensibleEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentApparentSensibleEffectiveness, 'double')
       latentEffectiveness = get_feature(model.getBuilding, Constants.SizingInfoMechVentLatentEffectiveness, 'double')
 
       q_bal_Sens = mechVentWholeHouseRate * (1.0 - apparentSensibleEffectiveness)
       q_bal_Lat = mechVentWholeHouseRate * (1.0 - latentEffectiveness)
-    elsif mechVentType == Constants.VentTypeNone
-      # nop
-    else
+    elsif mechVentType.length > 0
       fail "Unexpected mechanical ventilation type: #{mechVentType}."
     end
 
@@ -2540,10 +2512,9 @@ class HVACSizing
       obc = surface.outsideBoundaryCondition.downcase
 
       if obc == "foundation"
-        # FIXME: Original approach used Winkelmann U-factors...
         if surface.surfaceType.downcase == "wall"
-          wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(surface)
-          ufactor = 1.0 / (wall_ins_rvalue + wall_constr_rvalue)
+          u_wall_with_soil, u_wall_without_soil, is_insulated = get_foundation_wall_props(surface)
+          ufactor = u_wall_without_soil
         elsif surface.surfaceType.downcase == "floor"
           next
         end
@@ -3089,12 +3060,7 @@ class HVACSizing
       next if surface.surfaceType.downcase != "wall"
       next if not surface.adjacentFoundation.is_initialized
 
-      wall_ins_rvalue, wall_ins_height, wall_constr_rvalue = get_foundation_wall_insulation_props(surface)
-
-      wall_rvalue = wall_ins_rvalue + wall_constr_rvalue
-      if wall_rvalue >= 3.0
-        walls_insulated = true
-      end
+      u_wall_with_soil, u_wall_without_soil, walls_insulated = get_foundation_wall_props(surface)
       break
     end
 
@@ -3118,7 +3084,7 @@ class HVACSizing
     return walls_insulated, ceilings_insulated
   end
 
-  def self.get_foundation_wall_insulation_props(surface)
+  def self.get_foundation_wall_props(surface)
     fail "Unexpected surface type." if surface.surfaceType.downcase != "wall"
 
     # Get wall insulation R-value/height from Kiva:Foundation object
@@ -3127,27 +3093,53 @@ class HVACSizing
     end
 
     foundation = surface.adjacentFoundation.get
+    wall_height_ag = Geometry.getSurfaceZValues([surface]).max
 
-    wall_ins_rvalue = 0.0
-    wall_ins_height = 0.0
-    if foundation.interiorVerticalInsulationMaterial.is_initialized
-      int_mat = foundation.interiorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
-      k = UnitConversions.convert(int_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
-      thick = UnitConversions.convert(int_mat.thickness, "m", "ft")
-      wall_ins_rvalue += thick / k
-      wall_ins_height = UnitConversions.convert(foundation.interiorVerticalInsulationDepth.get, "m", "ft").round
-    end
-    if foundation.exteriorVerticalInsulationMaterial.is_initialized
-      ext_mat = foundation.exteriorVerticalInsulationMaterial.get.to_StandardOpaqueMaterial.get
+    # Vertical insulation is defined in custom blocks
+    wall_ins_rvalues = []
+    wall_ins_offsets = []
+    wall_ins_heights = []
+    foundation.customBlocks.each do |custom_block|
+      ext_mat = custom_block.material.to_StandardOpaqueMaterial.get
       k = UnitConversions.convert(ext_mat.thermalConductivity, "W/(m*K)", "Btu/(hr*ft*R)")
       thick = UnitConversions.convert(ext_mat.thickness, "m", "ft")
-      wall_ins_rvalue += thick / k
-      wall_ins_height = UnitConversions.convert(foundation.exteriorVerticalInsulationDepth.get, "m", "ft").round
+      wall_ins_rvalues << (thick / k)
+      wall_ins_offsets << UnitConversions.convert(custom_block.zPosition, "m", "ft").round
+      wall_ins_heights << UnitConversions.convert(custom_block.depth, "m", "ft").round
     end
 
+    # Base wall construction
     wall_constr_rvalue = 1.0 / get_surface_ufactor(surface, surface.surfaceType)
 
-    return wall_ins_rvalue, wall_ins_height, wall_constr_rvalue
+    # Calculate effective U-factor
+
+    k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, "in", "ft")
+
+    # Calculated based on Manual J 8th Ed. procedure in section A12-4 (15% decrease due to soil thermal storage)
+    u_wall_with_soil = 0.0
+    u_wall_without_soil = 0.0
+    wall_height_ft = Geometry.get_surface_height(surface).round
+    for d in 1..wall_height_ft
+      r_soil = (Math::PI * d / 2.0) / k_soil
+
+      # Calculate R-wall at this depth
+      r_wall = wall_constr_rvalue + Material.AirFilmVertical.rvalue # Base wall construction + interior film
+      if d <= wall_height_ag
+        r_wall += Material.AirFilmOutside.rvalue # Above-grade, add exterior film
+      end
+      for i in 0..wall_ins_rvalues.size - 1
+        if d > wall_ins_offsets[i] and d <= wall_ins_offsets[i] + wall_ins_heights[i]
+          r_wall += wall_ins_rvalues[i] # Insulation at this depth, add R-value
+        end
+      end
+      u_wall_with_soil += 1.0 / (r_soil + r_wall)
+      u_wall_without_soil += 1.0 / r_wall
+    end
+    u_wall_with_soil = (u_wall_with_soil / wall_height_ft) * 0.85
+    u_wall_without_soil = (u_wall_without_soil / wall_height_ft)
+    is_insulated = (wall_ins_rvalues.size > 0)
+
+    return u_wall_with_soil, u_wall_without_soil, is_insulated
   end
 
   def self.get_feature(obj, feature, datatype, fail_on_error = true)
