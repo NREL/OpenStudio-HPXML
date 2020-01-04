@@ -217,10 +217,12 @@ class HPXML
     vals[:iecc2012] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2012]/ClimateZone") if is_selected(select, :iecc2012)
     vals[:iecc2015] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2015]/ClimateZone") if is_selected(select, :iecc2015)
     vals[:iecc2018] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2018]/ClimateZone") if is_selected(select, :iecc2018)
-    vals[:weather_station_id] = HPXML.get_id(weather_station) if is_selected(select, :weather_station_id)
-    vals[:weather_station_name] = XMLHelper.get_value(weather_station, "Name") if is_selected(select, :weather_station_name)
-    vals[:weather_station_wmo] = XMLHelper.get_value(weather_station, "WMO") if is_selected(select, :weather_station_wmo)
-    vals[:weather_station_epw_filename] = XMLHelper.get_value(weather_station, "extension/EPWFileName") if is_selected(select, :weather_station_epw_filename)
+    if not weather_station.nil?
+      vals[:weather_station_id] = HPXML.get_id(weather_station) if is_selected(select, :weather_station_id)
+      vals[:weather_station_name] = XMLHelper.get_value(weather_station, "Name") if is_selected(select, :weather_station_name)
+      vals[:weather_station_wmo] = XMLHelper.get_value(weather_station, "WMO") if is_selected(select, :weather_station_wmo)
+      vals[:weather_station_epw_filename] = XMLHelper.get_value(weather_station, "extension/EPWFileName") if is_selected(select, :weather_station_epw_filename)
+    end
     return vals
   end
 
@@ -571,10 +573,12 @@ class HPXML
     vals[:emittance] = to_float_or_nil(XMLHelper.get_value(roof, "Emittance")) if is_selected(select, :emittance)
     vals[:pitch] = to_float_or_nil(XMLHelper.get_value(roof, "Pitch")) if is_selected(select, :pitch)
     vals[:radiant_barrier] = to_bool_or_nil(XMLHelper.get_value(roof, "RadiantBarrier")) if is_selected(select, :radiant_barrier)
-    vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
-    vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
-    vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue")) if is_selected(select, :insulation_cavity_r_value)
-    vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :insulation_continuous_r_value)
+    if not insulation.nil?
+      vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
+      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
+      vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue")) if is_selected(select, :insulation_cavity_r_value)
+      vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :insulation_continuous_r_value)
+    end
     return vals
   end
 
@@ -624,8 +628,10 @@ class HPXML
     vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth")) if is_selected(select, :azimuth)
     vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance")) if is_selected(select, :solar_absorptance)
     vals[:emittance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance")) if is_selected(select, :emittance)
-    vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
-    vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
+    if not insulation.nil?
+      vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
+      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
+    end
     return vals
   end
 
@@ -682,10 +688,12 @@ class HPXML
     vals[:siding] = XMLHelper.get_value(wall, "Siding") if is_selected(select, :siding)
     vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance")) if is_selected(select, :solar_absorptance)
     vals[:emittance] = to_float_or_nil(XMLHelper.get_value(wall, "Emittance")) if is_selected(select, :emittance)
-    vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
-    vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
-    vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue")) if is_selected(select, :insulation_cavity_r_value)
-    vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :insulation_continuous_r_value)
+    if not insulation.nil?
+      vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
+      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
+      vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue")) if is_selected(select, :insulation_cavity_r_value)
+      vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :insulation_continuous_r_value)
+    end
     return vals
   end
 
@@ -760,14 +768,17 @@ class HPXML
     vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth")) if is_selected(select, :azimuth)
     vals[:thickness] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness")) if is_selected(select, :thickness)
     vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade")) if is_selected(select, :depth_below_grade)
-    vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
-    vals[:insulation_interior_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/NominalRValue")) if is_selected(select, :insulation_interior_r_value)
-    vals[:insulation_interior_distance_to_top] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToTopOfInsulation")) if is_selected(select, :insulation_interior_distance_to_top)
-    vals[:insulation_interior_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToBottomOfInsulation")) if is_selected(select, :insulation_interior_distance_to_bottom)
-    vals[:insulation_exterior_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/NominalRValue")) if is_selected(select, :insulation_exterior_r_value)
-    vals[:insulation_exterior_distance_to_top] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToTopOfInsulation")) if is_selected(select, :insulation_exterior_distance_to_top)
-    vals[:insulation_exterior_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation")) if is_selected(select, :insulation_exterior_distance_to_bottom)
-    vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
+    if not insulation.nil?
+      vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
+      vals[:insulation_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :insulation_r_value)
+      vals[:insulation_interior_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/NominalRValue")) if is_selected(select, :insulation_interior_r_value)
+      vals[:insulation_interior_distance_to_top] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToTopOfInsulation")) if is_selected(select, :insulation_interior_distance_to_top)
+      vals[:insulation_interior_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - interior']/extension/DistanceToBottomOfInsulation")) if is_selected(select, :insulation_interior_distance_to_bottom)
+      vals[:insulation_exterior_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/NominalRValue")) if is_selected(select, :insulation_exterior_r_value)
+      vals[:insulation_exterior_distance_to_top] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToTopOfInsulation")) if is_selected(select, :insulation_exterior_distance_to_top)
+      vals[:insulation_exterior_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation")) if is_selected(select, :insulation_exterior_distance_to_bottom)
+      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
+    end
     return vals
   end
 
@@ -808,10 +819,12 @@ class HPXML
     vals[:exterior_adjacent_to] = XMLHelper.get_value(framefloor, "ExteriorAdjacentTo") if is_selected(select, :exterior_adjacent_to)
     vals[:interior_adjacent_to] = XMLHelper.get_value(framefloor, "InteriorAdjacentTo") if is_selected(select, :interior_adjacent_to)
     vals[:area] = to_float_or_nil(XMLHelper.get_value(framefloor, "Area")) if is_selected(select, :area)
-    vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
-    vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
-    vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue")) if is_selected(select, :insulation_cavity_r_value)
-    vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :insulation_continuous_r_value)
+    if not insulation.nil?
+      vals[:insulation_id] = HPXML.get_id(insulation) if is_selected(select, :insulation_id)
+      vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue")) if is_selected(select, :insulation_assembly_r_value)
+      vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue")) if is_selected(select, :insulation_cavity_r_value)
+      vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :insulation_continuous_r_value)
+    end
     return vals
   end
 
@@ -890,10 +903,14 @@ class HPXML
     vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade")) if is_selected(select, :depth_below_grade)
     vals[:carpet_fraction] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction")) if is_selected(select, :carpet_fraction)
     vals[:carpet_r_value] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue")) if is_selected(select, :carpet_r_value)
-    vals[:perimeter_insulation_id] = HPXML.get_id(perimeter_insulation) if is_selected(select, :perimeter_insulation_id)
-    vals[:perimeter_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :perimeter_insulation_r_value)
-    vals[:under_slab_insulation_id] = HPXML.get_id(under_slab_insulation) if is_selected(select, :under_slab_insulation_id)
-    vals[:under_slab_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :under_slab_insulation_r_value)
+    if not perimeter_insulation.nil?
+      vals[:perimeter_insulation_id] = HPXML.get_id(perimeter_insulation) if is_selected(select, :perimeter_insulation_id)
+      vals[:perimeter_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :perimeter_insulation_r_value)
+    end
+    if not under_slab_insulation.nil?
+      vals[:under_slab_insulation_id] = HPXML.get_id(under_slab_insulation) if is_selected(select, :under_slab_insulation_id)
+      vals[:under_slab_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue")) if is_selected(select, :under_slab_insulation_r_value)
+    end
     return vals
   end
 
