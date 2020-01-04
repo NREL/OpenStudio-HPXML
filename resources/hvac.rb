@@ -3859,11 +3859,6 @@ class HVAC
       system = get_unitary_system_from_air_loop_hvac(air_loop)
       next if system.nil?
 
-      # skip evap cooler dummy unitary system
-      if system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).is_initialized
-        next if system.additionalProperties.getFeatureAsString(Constants.SizingInfoHVACCoolType).get == Constants.ObjectNameEvaporativeCooler
-      end
-
       clg_coil = nil
       htg_coil = nil
       if system.coolingCoil.is_initialized
