@@ -208,8 +208,7 @@ class HVACSizing
       area_total = 0.0
       area_conditioned = 0.0
       building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor,
-                                                        select: [:interior_adjacent_to, :exterior_adjacent_to, :area, :id])
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
         next unless [framefloor_values[:interior_adjacent_to], framefloor_values[:exterior_adjacent_to]].include? space
 
         area_total += framefloor_values[:area]
@@ -218,8 +217,7 @@ class HVACSizing
         end
       end
       building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-        roof_values = HPXML.get_roof_values(roof: roof,
-                                            select: [:interior_adjacent_to, :area])
+        roof_values = HPXML.get_roof_values(roof: roof)
         next unless roof_values[:interior_adjacent_to] == space
 
         area_total += roof_values[:area]
@@ -268,8 +266,7 @@ class HVACSizing
         cool_temp = 0.0
 
         building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-          roof_values = HPXML.get_roof_values(roof: roof,
-                                              select: [:interior_adjacent_to, :radiant_barrier])
+          roof_values = HPXML.get_roof_values(roof: roof)
           next if roof_values[:interior_adjacent_to] != space
 
           roof_net_area = Float(XMLHelper.get_value(roof, "extension/net_area"))
@@ -531,8 +528,7 @@ class HVACSizing
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall,
-                                          select: [:id, :interior_adjacent_to, :exterior_adjacent_to])
+      wall_values = HPXML.get_wall_values(wall: wall)
       next unless is_thermal_boundary(wall_values)
 
       building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
@@ -681,8 +677,7 @@ class HVACSizing
     afl_hr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Initialize Hourly Aggregate Fenestration Load (AFL)
 
     building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-      roof_values = HPXML.get_roof_values(roof: roof,
-                                          select: [:id, :interior_adjacent_to, :exterior_adjacent_to, :pitch])
+      roof_values = HPXML.get_roof_values(roof: roof)
 
       inclination_angle = UnitConversions.convert(Math.atan(roof_values[:pitch] / 12.0), "rad", "deg")
 
@@ -783,13 +778,11 @@ class HVACSizing
     zone_loads.Cool_Doors = 0.0
 
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall,
-                                          select: [:id, :interior_adjacent_to, :exterior_adjacent_to])
+      wall_values = HPXML.get_wall_values(wall: wall)
       next unless is_thermal_boundary(wall_values)
 
       building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
-        door_values = HPXML.get_door_values(door: door,
-                                            select: [:wall_idref, :r_value, :area])
+        door_values = HPXML.get_door_values(door: door)
         next if door_values[:wall_idref] != wall_values[:id]
 
         door_ufactor = 1.0 / door_values[:r_value]
@@ -994,8 +987,7 @@ class HVACSizing
         r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
         z_fs = []
         building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |foundation_wall|
-          foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall,
-                                                                    select: [:interior_adjacent_to, :exterior_adjacent_to, :depth_below_grade])
+          foundation_wall_values = HPXML.get_foundation_wall_values(foundation_wall: foundation_wall)
           next unless is_thermal_boundary(foundation_wall_values)
 
           z_fs << foundation_wall_values[:depth_below_grade]
@@ -2315,32 +2307,20 @@ class HVACSizing
     # Get unique set of HVAC equipment
     hvacs = []
 
-    # Retrieve all values
-    all_heating_system_values = {}
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-      all_heating_system_values[heating_system] = HPXML.get_heating_system_values(heating_system: heating_system)
-    end
-    all_cooling_system_values = {}
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
-      all_cooling_system_values[cooling_system] = HPXML.get_cooling_system_values(cooling_system: cooling_system)
-    end
-    all_heat_pump_values = {}
-    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
-      all_heat_pump_values[heat_pump] = HPXML.get_heat_pump_values(heat_pump: heat_pump)
-    end
-
     # HVAC w/ distribution system
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |hvac_distribution|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
 
       # Combined heating/cooling systems
       hvac = nil
-      all_heating_system_values.each do |heating_system, heating_system_values|
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+        heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
         next if heating_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         hvac = assign_heating_system(hvac, heating_system, heating_system_values)
       end
-      all_cooling_system_values.each do |cooling_system, cooling_system_values|
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+        cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
         next if cooling_system_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         hvac = assign_cooling_system(hvac, cooling_system, cooling_system_values)
@@ -2352,7 +2332,8 @@ class HVACSizing
 
       # Heat pumps
       hvac = nil
-      all_heat_pump_values.each do |heat_pump, heat_pump_values|
+      building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
+        heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
         next if heat_pump_values[:distribution_system_idref] != hvac_distribution_values[:id]
 
         hvac = assign_heat_pump(hvac, heat_pump, heat_pump_values)
@@ -2364,17 +2345,20 @@ class HVACSizing
     end
 
     # HVAC w/o distribution system
-    all_heating_system_values.each do |heating_system, heating_system_values|
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
+      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
       next unless heating_system_values[:distribution_system_idref].nil?
 
       hvacs << assign_heating_system(nil, heating_system, heating_system_values)
     end
-    all_cooling_system_values.each do |cooling_system, cooling_system_values|
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |cooling_system|
+      cooling_system_values = HPXML.get_cooling_system_values(cooling_system: cooling_system)
       next unless cooling_system_values[:distribution_system_idref].nil?
 
       hvacs << assign_cooling_system(nil, cooling_system, cooling_system_values)
     end
-    all_heat_pump_values.each do |heat_pump, heat_pump_values|
+    building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |heat_pump|
+      heat_pump_values = HPXML.get_heat_pump_values(heat_pump: heat_pump)
       next unless heat_pump_values[:distribution_system_idref].nil?
 
       hvacs << assign_heat_pump(nil, heat_pump, heat_pump_values)
@@ -3021,8 +3005,7 @@ class HVACSizing
     ceilings_insulated = false
     ceiling_ufactor = nil
     building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor,
-                                                      select: [:insulation_assembly_r_value])
+      framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
 
       ceiling_ufactor = 1.0 / framefloor_values[:insulation_assembly_r_value]
     end
@@ -3377,8 +3360,7 @@ class HVACSizing
     total_area = 0.0
     if surface_type == "floor"
       building.elements.each("BuildingDetails/Enclosure/FrameFloors/FrameFloor") do |framefloor|
-        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor,
-                                                        select: [:exterior_adjacent_to, :area, :insulation_assembly_r_value])
+        framefloor_values = HPXML.get_framefloor_values(framefloor: framefloor)
 
         next if framefloor_values[:exterior_adjacent_to] != space
 
@@ -3391,8 +3373,7 @@ class HVACSizing
       end
     elsif surface_type == "roofceiling"
       building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-        roof_values = HPXML.get_roof_values(roof: roof,
-                                            select: [:interior_adjacent_to, :area, :insulation_assembly_r_value])
+        roof_values = HPXML.get_roof_values(roof: roof)
 
         next if roof_values[:interior_adjacent_to] != space
 

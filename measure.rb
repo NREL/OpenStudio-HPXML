@@ -121,8 +121,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       unless (Pathname.new weather_dir).absolute?
         weather_dir = File.expand_path(File.join(File.dirname(__FILE__), weather_dir))
       end
-      climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones"],
-                                                                              select: [:weather_station_wmo, :weather_station_epw_filename])
+      climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones"])
       epw_path = climate_and_risk_zones_values[:weather_station_epw_filename]
       if not epw_path.nil?
         epw_path = File.join(weather_dir, epw_path)
@@ -221,8 +220,7 @@ class OSModel
   def self.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
     @hpxml_path = hpxml_path
     hpxml = hpxml_doc.elements["HPXML"]
-    hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml,
-                                          select: [:eri_calculation_version])
+    hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
     @eri_version = hpxml_values[:eri_calculation_version] # Hidden feature
     @eri_version = '2014AEG' if @eri_version.nil? # Use latest version/addenda implemented
 
@@ -235,14 +233,12 @@ class OSModel
     @cfa = construction_values[:conditioned_floor_area]
     @cfa_ag = @cfa
     enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='basement - conditioned']") do |slab|
-      slab_values = HPXML.get_slab_values(slab: slab,
-                                          select: [:area])
+      slab_values = HPXML.get_slab_values(slab: slab)
       @cfa_ag -= slab_values[:area]
     end
     @gfa = 0 # garage floor area
     enclosure.elements.each("Slabs/Slab[InteriorAdjacentTo='garage']") do |garage_slab|
-      slab_values = HPXML.get_slab_values(slab: garage_slab,
-                                          select: [:area])
+      slab_values = HPXML.get_slab_values(slab: garage_slab)
       @gfa += slab_values[:area]
     end
     @cvolume = construction_values[:conditioned_building_volume]
@@ -925,8 +921,7 @@ class OSModel
   end
 
   def self.add_num_occupants(model, building, runner)
-    building_occupancy_values = HPXML.get_building_occupancy_values(building_occupancy: building.elements["BuildingDetails/BuildingSummary/BuildingOccupancy"],
-                                                                    select: [:number_of_residents])
+    building_occupancy_values = HPXML.get_building_occupancy_values(building_occupancy: building.elements["BuildingDetails/BuildingSummary/BuildingOccupancy"])
 
     # Occupants
     num_occ = Geometry.get_occupancy_default_num(@nbeds)
@@ -957,8 +952,7 @@ class OSModel
 
     # Windows
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
-      window_values = HPXML.get_window_values(window: window,
-                                              select: [:area, :wall_idref])
+      window_values = HPXML.get_window_values(window: window)
       wall_id = window_values[:wall_idref]
       subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
       subsurface_areas[wall_id] += window_values[:area]
@@ -966,8 +960,7 @@ class OSModel
 
     # Skylights
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
-      skylight_values = HPXML.get_skylight_values(skylight: skylight,
-                                                  select: [:area, :roof_idref])
+      skylight_values = HPXML.get_skylight_values(skylight: skylight)
       roof_id = skylight_values[:roof_idref]
       subsurface_areas[roof_id] = 0 if subsurface_areas[roof_id].nil?
       subsurface_areas[roof_id] += skylight_values[:area]
@@ -975,8 +968,7 @@ class OSModel
 
     # Doors
     building.elements.each("BuildingDetails/Enclosure/Doors/Door") do |door|
-      door_values = HPXML.get_door_values(door: door,
-                                          select: [:area, :wall_idref])
+      door_values = HPXML.get_door_values(door: door)
       wall_id = door_values[:wall_idref]
       subsurface_areas[wall_id] = 0 if subsurface_areas[wall_id].nil?
       subsurface_areas[wall_id] += door_values[:area]
@@ -1340,8 +1332,7 @@ class OSModel
       # Obtain some wall/slab information
       fnd_wall_lengths = {}
       fnd_walls.each_with_index do |fnd_wall, fnd_wall_idx|
-        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall,
-                                                           select: [:exterior_adjacent_to, :area, :height])
+        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
         fnd_wall_lengths[fnd_wall] = fnd_wall_values[:area] / fnd_wall_values[:height]
@@ -1349,8 +1340,7 @@ class OSModel
       slab_exp_perims = {}
       slab_areas = {}
       slabs.each_with_index do |slab, slab_idx|
-        slab_values = HPXML.get_slab_values(slab: slab,
-                                            select: [:exposed_perimeter, :area])
+        slab_values = HPXML.get_slab_values(slab: slab)
         slab_exp_perims[slab] = slab_values[:exposed_perimeter]
         slab_areas[slab] = slab_values[:area]
       end
@@ -1359,16 +1349,6 @@ class OSModel
       total_fnd_wall_length = fnd_wall_lengths.values.inject(0, :+)
 
       no_wall_slab_exp_perim = {}
-
-      # Cache values
-      fnd_walls_values = {}
-      slabs_values = {}
-      fnd_walls.each do |fnd_wall|
-        fnd_walls_values[fnd_wall] = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
-      end
-      slabs.each do |slab|
-        slabs_values[slab] = HPXML.get_slab_values(slab: slab)
-      end
 
       kiva_instances.each do |fnd_wall, slab|
         # Apportion referenced walls/slabs for this Kiva instance
@@ -1382,13 +1362,13 @@ class OSModel
         kiva_foundation = nil
         if not fnd_wall.nil?
           # Add exterior foundation wall surface
-          fnd_wall_values = fnd_walls_values[fnd_wall]
+          fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
           kiva_foundation = add_foundation_wall(runner, model, spaces, fnd_wall, fnd_wall_values, slab_frac,
                                                 total_fnd_wall_length, total_slab_exp_perim)
         end
 
         # Add single combined foundation slab surface (for similar surfaces)
-        slab_values = slabs_values[slab]
+        slab_values = HPXML.get_slab_values(slab: slab)
         slab_exp_perim = slab_exp_perims[slab] * fnd_wall_frac
         slab_area = slab_areas[slab] * fnd_wall_frac
         no_wall_slab_exp_perim[slab] = 0.0 if no_wall_slab_exp_perim[slab].nil?
@@ -1417,7 +1397,7 @@ class OSModel
       slabs.each do |slab|
         next unless no_wall_slab_exp_perim[slab] > 0.1
 
-        slab_values = slabs_values[slab]
+        slab_values = HPXML.get_slab_values(slab: slab)
         z_origin = 0
         slab_area = total_slab_area * no_wall_slab_exp_perim[slab] / total_slab_exp_perim
         kiva_foundation = add_foundation_slab(runner, model, spaces, slab_values, no_wall_slab_exp_perim[slab],
@@ -1429,7 +1409,7 @@ class OSModel
       # The below-grade portion of these walls (in contact with ground) are not modeled, as Kiva does not
       # calculate heat flow between two zones through the ground.
       fnd_walls.each do |fnd_wall|
-        fnd_wall_values = fnd_walls_values[fnd_wall]
+        fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
         next unless fnd_wall_values[:exterior_adjacent_to] != "ground"
 
         ag_height = fnd_wall_values[:height] - fnd_wall_values[:depth_below_grade]
@@ -1820,8 +1800,7 @@ class OSModel
       # Obtain skylight tilt from attached roof
       skylight_tilt = nil
       building.elements.each("BuildingDetails/Enclosure/Roofs/Roof") do |roof|
-        roof_values = HPXML.get_roof_values(roof: roof,
-                                            select: [:id, :pitch])
+        roof_values = HPXML.get_roof_values(roof: roof)
         next unless roof_values[:id] == skylight_values[:roof_idref]
 
         skylight_tilt = roof_values[:pitch] / 12.0
@@ -2010,8 +1989,7 @@ class OSModel
     if not wh.nil?
       low_flow_fixtures_list = []
       wh.elements.each("WaterFixture[WaterFixtureType='shower head' or WaterFixtureType='faucet']") do |wf|
-        water_fixture_values = HPXML.get_water_fixture_values(water_fixture: wf,
-                                                              select: [:low_flow])
+        water_fixture_values = HPXML.get_water_fixture_values(water_fixture: wf)
         low_flow_fixtures_list << water_fixture_values[:low_flow]
       end
       low_flow_fixtures_list.uniq!
@@ -2099,8 +2077,7 @@ class OSModel
         # Solar fraction is used to adjust water heater's tank losses and hot water use, because it is
         # the portion of the total conventional hot water heating load (delivered energy + tank losses).
         solar_fraction = nil
-        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts,
-                                                                     select: [:solar_fraction, :water_heating_system_idref])
+        solar_thermal_values = HPXML.get_solar_thermal_system_values(solar_thermal_system: sts)
         if not solar_thermal_values.nil? and solar_thermal_values[:water_heating_system_idref] == sys_id
           solar_fraction = solar_thermal_values[:solar_fraction]
         end
@@ -2191,8 +2168,7 @@ class OSModel
       dhw_system_idref = solar_thermal_values[:water_heating_system_idref]
 
       wh.elements.each("WaterHeatingSystem") do |dhw|
-        water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw,
-                                                                            select: [:id, :water_heater_type, :uses_desuperheater])
+        water_heating_system_values = HPXML.get_water_heating_system_values(water_heating_system: dhw)
         next unless water_heating_system_values[:id] == dhw_system_idref
 
         if ['space-heating boiler with storage tank', 'space-heating boiler with tankless coil'].include? water_heating_system_values[:water_heater_type]
@@ -2819,8 +2795,7 @@ class OSModel
     # Get attached distribution system
     found_attached_dist = false
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
-      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist,
-                                                                    select: [:id])
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
       next if dist_id != hvac_distribution_values[:id]
 
       found_attached_dist = true
@@ -2887,8 +2862,7 @@ class OSModel
     end
 
     # Television
-    plug_load_values = HPXML.get_plug_load_values(plug_load: building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']"],
-                                                  select: [:kWh_per_year])
+    plug_load_values = HPXML.get_plug_load_values(plug_load: building.elements["BuildingDetails/MiscLoads/PlugLoad[PlugLoadType='TV other']"])
     if not plug_load_values.nil?
       tv_annual_kwh = plug_load_values[:kWh_per_year]
       if tv_annual_kwh.nil?
@@ -2934,8 +2908,7 @@ class OSModel
 
   def self.add_airflow(runner, model, building, weather, spaces)
     systems = building.elements["BuildingDetails/Systems"]
-    site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"],
-                                        select: [:shelter_coefficient, :disable_natural_ventilation])
+    site_values = HPXML.get_site_values(site: building.elements["BuildingDetails/BuildingSummary/Site"])
     shelter_coef = site_values[:shelter_coefficient]
     disable_nat_vent = site_values[:disable_natural_ventilation]
 
@@ -2961,8 +2934,7 @@ class OSModel
     vented_attic_const_ach = nil
     if @has_vented_attic
       building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
-        vented_attic_values = HPXML.get_attic_values(attic: vented_attic,
-                                                     select: [:vented_attic_sla, :vented_attic_constant_ach])
+        vented_attic_values = HPXML.get_attic_values(attic: vented_attic)
         next if vented_attic_values[:vented_attic_sla].nil? and vented_attic_values[:vented_attic_constant_ach].nil? # skip additional attic elements
 
         vented_attic_sla = vented_attic_values[:vented_attic_sla]
@@ -2978,8 +2950,7 @@ class OSModel
     vented_crawl_sla = nil
     if @has_vented_crawl
       building.elements.each("BuildingDetails/Enclosure/Foundations/Foundation[FoundationType/Crawlspace[Vented='true']]") do |vented_crawl|
-        vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl,
-                                                          select: [:vented_crawlspace_sla])
+        vented_crawl_values = HPXML.get_foundation_values(foundation: vented_crawl)
         vented_crawl_sla = vented_crawl_values[:vented_crawlspace_sla]
       end
       if vented_crawl_sla.nil?
@@ -3043,8 +3014,7 @@ class OSModel
     # Ducts
     duct_systems = {}
     systems.elements.each("HVAC/HVACDistribution") do |hvac_distribution|
-      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution,
-                                                                    select: [:id])
+      hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: hvac_distribution)
 
       # Check for errors
       dist_id = hvac_distribution_values[:id]
@@ -3165,8 +3135,7 @@ class OSModel
         fail "Attached HVAC distribution system '#{mech_vent_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' not found for mechanical ventilation '#{mech_vent_fan.elements["SystemIdentifier"].attributes["id"]}'."
       end
 
-      cfis_hvac_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: cfis_hvac_dist,
-                                                                 select: [:distribution_system_type])
+      cfis_hvac_dist_values = HPXML.get_hvac_distribution_values(hvac_distribution: cfis_hvac_dist)
       if cfis_hvac_dist_values[:distribution_system_type] == 'HydronicDistribution'
         fail "Attached HVAC distribution system '#{mech_vent_fan.elements['AttachedToHVACDistributionSystem'].attributes['idref']}' cannot be hydronic for mechanical ventilation '#{mech_vent_fan.elements["SystemIdentifier"].attributes["id"]}'."
       end
@@ -3204,8 +3173,7 @@ class OSModel
 
     window_area = 0.0
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
-      window_values = HPXML.get_window_values(window: window,
-                                              select: [:area])
+      window_values = HPXML.get_window_values(window: window)
       window_area += window_values[:area]
     end
 
@@ -4394,8 +4362,7 @@ class OSModel
     # distribution system) to the current heating system.
     hvac_objects = []
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem") do |clg_sys|
-      attached_system_values = HPXML.get_cooling_system_values(cooling_system: clg_sys,
-                                                               select: [:id, :distribution_system_idref])
+      attached_system_values = HPXML.get_cooling_system_values(cooling_system: clg_sys)
       next unless system_values[:distribution_system_idref] == attached_system_values[:distribution_system_idref]
 
       @hvac_map[attached_system_values[:id]].each do |hvac_object|
@@ -4479,8 +4446,7 @@ class OSModel
   def self.assign_space_to_subsurface(surface, subsurface_id, wall_idref, building, spaces, model, subsurface_type)
     # Check walls
     building.elements.each("BuildingDetails/Enclosure/Walls/Wall") do |wall|
-      wall_values = HPXML.get_wall_values(wall: wall,
-                                          select: [:id, :interior_adjacent_to])
+      wall_values = HPXML.get_wall_values(wall: wall)
       next unless wall_values[:id] == wall_idref
 
       set_surface_interior(model, spaces, surface, subsurface_id, wall_values[:interior_adjacent_to])
@@ -4489,8 +4455,7 @@ class OSModel
 
     # Check foundation walls
     building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
-      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall,
-                                                         select: [:id, :interior_adjacent_to])
+      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
       next unless fnd_wall_values[:id] == wall_idref
 
       set_surface_interior(model, spaces, surface, subsurface_id, fnd_wall_values[:interior_adjacent_to])
@@ -4505,8 +4470,7 @@ class OSModel
   def self.get_infiltration_volume(building)
     infilvolume = nil
     air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[(HousePressure=50 and BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage) | extension/ConstantACHnatural]"] # only one measurement element has useful inputs
-    air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement,
-                                                                                        select: [:infiltration_volume])
+    air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement)
     infilvolume = air_infiltration_measurement_values[:infiltration_volume]
     if infilvolume.nil?
       infilvolume = @cvolume
@@ -4517,8 +4481,7 @@ class OSModel
   def self.get_min_neighbor_distance(building)
     min_neighbor_distance = nil
     building.elements.each("BuildingDetails/BuildingSummary/Site/extension/Neighbors/NeighborBuilding") do |neighbor_building|
-      neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building,
-                                                                    select: [:distance])
+      neighbor_building_values = HPXML.get_neighbor_building_values(neighbor_building: neighbor_building)
       if min_neighbor_distance.nil?
         min_neighbor_distance = 9e99
       end
@@ -4533,8 +4496,7 @@ class OSModel
     # Identify unique Kiva foundations that are required.
     kiva_fnd_walls = []
     fnd_walls.each_with_index do |fnd_wall, fnd_wall_idx|
-      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall,
-                                                         select: [:exterior_adjacent_to])
+      fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
       next unless fnd_wall_values[:exterior_adjacent_to] == "ground"
 
       kiva_fnd_walls << fnd_wall
@@ -4669,8 +4631,7 @@ end
 def get_foundation_and_walls_top(building)
   foundation_top = 0
   building.elements.each("BuildingDetails/Enclosure/FoundationWalls/FoundationWall") do |fnd_wall|
-    fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall,
-                                                       select: [:depth_below_grade, :height])
+    fnd_wall_values = HPXML.get_foundation_wall_values(foundation_wall: fnd_wall)
     top = -1 * fnd_wall_values[:depth_below_grade] + fnd_wall_values[:height]
     foundation_top = top if top > foundation_top
   end
