@@ -344,8 +344,7 @@ class HPXML
       surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
     end
 
-    # Reset cache
-    @cache = { nil => nil }
+    reset_cache
   end
 
   def self.add_air_infiltration_measurement(hpxml:,
@@ -2086,6 +2085,10 @@ class HPXML
     vals[:monthly_multipliers] = XMLHelper.get_value(misc_loads, "extension/MonthlyScheduleMultipliers")
     @cache[misc_loads] = vals
     return vals
+  end
+
+  def self.reset_cache
+    @cache = { nil => nil }
   end
 
   private
