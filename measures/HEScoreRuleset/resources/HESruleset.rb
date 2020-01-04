@@ -310,8 +310,12 @@ class HEScoreRuleset
                                   area: fndwall_height * get_foundation_perimeter(orig_foundation),
                                   thickness: 10,
                                   depth_below_grade: fndwall_height - 1.0,
-                                  insulation_r_value: fndwall_values[:insulation_r_value],
-                                  insulation_distance_to_bottom: fndwall_height)
+                                  insulation_interior_r_value: 0,
+                                  insulation_interior_distance_to_top: 0,
+                                  insulation_interior_distance_to_bottom: 0,
+                                  insulation_exterior_r_value: fndwall_values[:insulation_r_value],
+                                  insulation_exterior_distance_to_top: 0,
+                                  insulation_exterior_distance_to_bottom: fndwall_height)
       end
     end
   end
@@ -945,7 +949,7 @@ class HEScoreRuleset
                             id: "ClothesDryer",
                             location: "living space",
                             fuel_type: "electricity",
-                            combined_energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_cef(Constants.FuelTypeElectric),
+                            combined_energy_factor: HotWaterAndAppliances.get_clothes_dryer_reference_cef('electricity'),
                             control_type: HotWaterAndAppliances.get_clothes_dryer_reference_control())
   end
 
