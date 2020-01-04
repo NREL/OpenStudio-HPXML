@@ -72,12 +72,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     arg.setDescription("Absolute/relative path of the output OSM file.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeBoolArgument("skip_validation", true)
-    arg.setDisplayName("Skip HPXML validation")
-    arg.setDescription("If true, only checks for and reports HPXML validation issues if an error occurs during processing. Used for faster runtime.")
-    arg.setDefaultValue(false)
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("map_tsv_dir", false)
     arg.setDisplayName("Map TSV Directory")
     arg.setDescription("Creates TSV files in the specified directory that map some HPXML object names to EnergyPlus object names. Required for ERI calculation.")
@@ -107,7 +101,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     schemas_dir = runner.getOptionalStringArgumentValue("schemas_dir", user_arguments)
     epw_output_path = runner.getOptionalStringArgumentValue("epw_output_path", user_arguments)
     osm_output_path = runner.getOptionalStringArgumentValue("osm_output_path", user_arguments)
-    skip_validation = runner.getBoolArgumentValue("skip_validation", user_arguments)
     map_tsv_dir = runner.getOptionalStringArgumentValue("map_tsv_dir", user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
@@ -119,11 +112,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
     hpxml_doc = XMLHelper.parse_file(hpxml_path)
 
-    # Check for invalid HPXML file up front?
-    if not skip_validation
-      if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-        return false
-      end
+    if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
+      return false
     end
 
     begin
@@ -176,14 +166,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       # Create OpenStudio model
       OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
     rescue Exception => e
-      if skip_validation
-        # Something went wrong, check for invalid HPXML file now. This was previously
-        # skipped to reduce runtime (see https://github.com/NREL/OpenStudio-ERI/issues/47).
-        if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-          return false
-        end
-      end
-
       # Report exception
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
       return false

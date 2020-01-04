@@ -439,7 +439,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     args['map_tsv_dir'] = rundir
-    args['skip_validation'] = false
     args['weather_dir'] = "weather"
 
     # Add measure to workflow
