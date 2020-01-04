@@ -1015,11 +1015,10 @@ class Constructions
       furnSpecHeat = mat.cp
       furnDensity = density_lb_per_cuft
       space_type = Geometry.get_space_type(space)
-      if [Constants.SpaceTypeLiving,
-          Constants.SpaceTypeUnconditionedBasement].include? space_type
+      if ['living space', 'basement - unconditioned'].include? space_type
         furnAreaFraction = 1.0
         furnMass = mass_lb_per_sqft
-      elsif [Constants.SpaceTypeGarage].include? space_type
+      elsif ['garage'].include? space_type
         furnAreaFraction = 0.1
         furnMass = 2.0
       end

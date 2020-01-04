@@ -1909,7 +1909,7 @@ class HVACSizing
 
   def self.get_ventilation_rates(building)
     whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
-    mechVentType = Constants.VentTypeNone
+    mechVentType = nil
     mechVentWholeHouseRate = 0.0
     unless whole_house_fan.nil?
       mechVentType = XMLHelper.get_value(whole_house_fan, "extension/Type")
@@ -1920,20 +1920,16 @@ class HVACSizing
     q_bal_Sens = 0.0
     q_bal_Lat = 0.0
 
-    if mechVentType == Constants.VentTypeExhaust
+    if ['exhaust only', 'supply only', 'central fan integrated supply'].include? mechVentType
       q_unb = mechVentWholeHouseRate
-    elsif mechVentType == Constants.VentTypeSupply or mechVentType == Constants.VentTypeCFIS
-      q_unb = mechVentWholeHouseRate
-    elsif mechVentType == Constants.VentTypeBalanced
+    elsif ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mechVentType
       totalEfficiency = Float(XMLHelper.get_value(whole_house_fan, "extension/TotalEfficiency"))
       apparentSensibleEffectiveness = Float(XMLHelper.get_value(whole_house_fan, "extension/ApparentSensibleEffectiveness"))
       latentEffectiveness = Float(XMLHelper.get_value(whole_house_fan, "extension/LatentEffectiveness"))
 
       q_bal_Sens = mechVentWholeHouseRate * (1.0 - apparentSensibleEffectiveness)
       q_bal_Lat = mechVentWholeHouseRate * (1.0 - latentEffectiveness)
-    elsif mechVentType == Constants.VentTypeNone
-      # nop
-    else
+    elsif not mechVentType.nil?
       fail "Unexpected mechanical ventilation type: #{mechVentType}."
     end
 

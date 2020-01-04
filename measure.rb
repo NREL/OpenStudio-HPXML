@@ -372,7 +372,7 @@ class OSModel
     add_conditioned_floor_area(runner, model, building, spaces)
 
     # update living space/zone global variable
-    @living_space = get_space_of_type(spaces, Constants.SpaceTypeLiving)
+    @living_space = get_space_of_type(spaces, 'living space')
     @living_zone = @living_space.thermalZone.get
 
     add_thermal_mass(runner, model, building)
@@ -393,10 +393,7 @@ class OSModel
 
     # Basements, crawl, garage
     thermal_zones.each do |thermal_zone|
-      if [Constants.SpaceTypeUnconditionedBasement,
-          Constants.SpaceTypeUnventedCrawl,
-          Constants.SpaceTypeVentedCrawl,
-          Constants.SpaceTypeGarage].include? Geometry.get_space_type(thermal_zone)
+      if ['basement - unconditioned', 'crawlspace - unvented', 'crawlspace - vented', 'garage'].include? Geometry.get_space_type(thermal_zone)
         zones_updated += 1
 
         zone_floor_area = 0.0
@@ -419,7 +416,7 @@ class OSModel
 
     # Conditioned living
     thermal_zones.each do |thermal_zone|
-      if [Constants.SpaceTypeLiving].include? Geometry.get_space_type(thermal_zone)
+      if ['living space'].include? Geometry.get_space_type(thermal_zone)
         zones_updated += 1
         thermal_zone.setVolume(UnitConversions.convert(@cvolume, "ft^3", "m^3"))
       end
@@ -427,8 +424,7 @@ class OSModel
 
     # Attic
     thermal_zones.each do |thermal_zone|
-      if [Constants.SpaceTypeVentedAttic,
-          Constants.SpaceTypeUnventedAttic].include? Geometry.get_space_type(thermal_zone)
+      if ['attic - vented', 'attic - unvented'].include? Geometry.get_space_type(thermal_zone)
         zones_updated += 1
 
         zone_surfaces = []
@@ -628,7 +624,7 @@ class OSModel
       if n_roofceilings == 0
         fail "'#{zone.name}' must have at least one roof/ceiling surface."
       end
-      if n_walls == 0 and not [Constants.SpaceTypeUnventedAttic, Constants.SpaceTypeVentedAttic].include? zone.name.to_s
+      if n_walls == 0 and not ['attic - unvented', 'attic - vented'].include? zone.name.to_s
         fail "'#{zone.name}' must have at least one wall surface."
       end
       if n_exteriors == 0
@@ -1654,7 +1650,7 @@ class OSModel
     # Calculate cfa already added to model
     model_cfa = 0.0
     model.getSpaces.each do |space|
-      next unless Geometry.get_space_type(space) == Constants.SpaceTypeLiving
+      next unless Geometry.get_space_type(space) == 'living space'
 
       space.surfaces.each do |surface|
         next unless surface.surfaceType.downcase.to_s == "floor"
@@ -1676,7 +1672,7 @@ class OSModel
     floor_surface.setWindExposure("NoWind")
     floor_surface.setName("inferred conditioned floor")
     floor_surface.setSurfaceType("Floor")
-    floor_surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    floor_surface.setSpace(create_or_get_space(model, spaces, 'living space'))
     floor_surface.setOutsideBoundaryCondition("Adiabatic")
     floor_surface.additionalProperties.setFeature("SurfaceType", "InferredFloor")
 
@@ -1687,7 +1683,7 @@ class OSModel
     ceiling_surface.setWindExposure("NoWind")
     ceiling_surface.setName("inferred conditioned ceiling")
     ceiling_surface.setSurfaceType("RoofCeiling")
-    ceiling_surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    ceiling_surface.setSpace(create_or_get_space(model, spaces, 'living space'))
     ceiling_surface.setOutsideBoundaryCondition("Adiabatic")
     ceiling_surface.additionalProperties.setFeature("SurfaceType", "InferredCeiling")
 
@@ -1869,7 +1865,7 @@ class OSModel
       surface.additionalProperties.setFeature("SurfaceType", "Skylight")
       surface.setName("surface #{skylight_id}")
       surface.setSurfaceType("RoofCeiling")
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving)) # Ensures it is included in Manual J sizing
+      surface.setSpace(create_or_get_space(model, spaces, 'living space')) # Ensures it is included in Manual J sizing
       surface.setOutsideBoundaryCondition("Outdoors") # cannot be adiabatic because subsurfaces won't be created
       surfaces << surface
 
@@ -1979,7 +1975,7 @@ class OSModel
     clothes_dryer_values = HPXML.get_clothes_dryer_values(clothes_dryer: building.elements["BuildingDetails/Appliances/ClothesDryer"])
     if not clothes_dryer_values.nil?
       cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
-      cd_fuel = to_beopt_fuel(clothes_dryer_values[:fuel_type])
+      cd_fuel = clothes_dryer_values[:fuel_type]
       cd_control = clothes_dryer_values[:control_type]
       cd_ef = clothes_dryer_values[:energy_factor]
       if cd_ef.nil?
@@ -2017,7 +2013,7 @@ class OSModel
     cooking_range_values = HPXML.get_cooking_range_values(cooking_range: building.elements["BuildingDetails/Appliances/CookingRange"])
     oven_values = HPXML.get_oven_values(oven: building.elements["BuildingDetails/Appliances/Oven"])
     if not cooking_range_values.nil? and not oven_values.nil?
-      cook_fuel_type = to_beopt_fuel(cooking_range_values[:fuel_type])
+      cook_fuel_type = cooking_range_values[:fuel_type]
       cook_is_induction = cooking_range_values[:is_induction]
       oven_is_convection = oven_values[:is_convection]
     else
@@ -2113,7 +2109,7 @@ class OSModel
           uef = water_heating_system_values[:uniform_energy_factor]
           # allow systems not requiring EF and not specifying fuel type, e.g., indirect water heater
           if not uef.nil?
-            ef = Waterheater.calc_ef_from_uef(uef, to_beopt_wh_type(wh_type), to_beopt_fuel(fuel))
+            ef = Waterheater.calc_ef_from_uef(uef, wh_type, fuel)
           end
         end
 
@@ -2144,7 +2140,7 @@ class OSModel
           re = water_heating_system_values[:recovery_efficiency]
           capacity_kbtuh = water_heating_system_values[:heating_capacity] / 1000.0
 
-          Waterheater.apply_tank(model, space, to_beopt_fuel(fuel), capacity_kbtuh, tank_vol,
+          Waterheater.apply_tank(model, space, fuel, capacity_kbtuh, tank_vol,
                                  ef, re, setpoint_temp, ec_adj, @nbeds, @dhw_map,
                                  sys_id, desuperheater_clg_coil, jacket_r, solar_fraction)
 
@@ -2152,7 +2148,7 @@ class OSModel
 
           cycling_derate = water_heating_system_values[:performance_adjustment]
 
-          Waterheater.apply_tankless(model, space, to_beopt_fuel(fuel), ef, cycling_derate,
+          Waterheater.apply_tankless(model, space, fuel, ef, cycling_derate,
                                      setpoint_temp, ec_adj, @nbeds, @dhw_map,
                                      sys_id, desuperheater_clg_coil, solar_fraction)
 
@@ -2172,7 +2168,7 @@ class OSModel
           if not related_hvac_list.include? heating_source_id
             related_hvac_list << heating_source_id
             boiler_sys = get_boiler_and_plant_loop(@hvac_map, heating_source_id, sys_id)
-            boiler_fuel_type = to_beopt_fuel(Waterheater.get_combi_system_fuel(heating_source_id, building.elements["BuildingDetails"]))
+            boiler_fuel_type = Waterheater.get_combi_system_fuel(heating_source_id, building.elements["BuildingDetails"])
           else
             fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end
@@ -2408,7 +2404,7 @@ class OSModel
           next if htg_type == "Furnace" and not attached_clg_system.nil?
         end
 
-        fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
+        fuel = heating_system_values[:heating_system_fuel]
 
         heat_capacity_btuh = heating_system_values[:heating_capacity]
         if heat_capacity_btuh < 0
@@ -2529,10 +2525,8 @@ class OSModel
       end
       @total_frac_remaining_cool_load_served -= load_frac_cool
 
-      backup_heat_fuel_xml = heat_pump_values[:backup_heating_fuel]
-      if not backup_heat_fuel_xml.nil?
-
-        backup_heat_fuel = to_beopt_fuel(backup_heat_fuel_xml)
+      backup_heat_fuel = heat_pump_values[:backup_heating_fuel]
+      if not backup_heat_fuel.nil?
 
         backup_heat_capacity_btuh = heat_pump_values[:backup_heating_capacity]
         if backup_heat_capacity_btuh < 0
@@ -2553,7 +2547,7 @@ class OSModel
         backup_switchover_temp = heat_pump_values[:backup_heating_switchover_temp]
 
       else
-        backup_heat_fuel = Constants.FuelTypeElectric
+        backup_heat_fuel = 'electricity'
         backup_heat_capacity_btuh = 0.0
         backup_heat_efficiency = 1.0
         backup_switchover_temp = nil
@@ -2951,7 +2945,7 @@ class OSModel
                                                               lighting_values[:fraction_tier_ii_exterior],
                                                               lighting_values[:fraction_tier_ii_garage])
 
-    garage_space = get_space_of_type(spaces, Constants.SpaceTypeGarage)
+    garage_space = get_space_of_type(spaces, 'garage')
     Lighting.apply(model, weather, int_kwh, grg_kwh, ext_kwh, @cfa, @gfa,
                    @living_space, garage_space)
   end
@@ -2987,6 +2981,8 @@ class OSModel
       building.elements.each("BuildingDetails/Enclosure/Attics/Attic[AtticType/Attic[Vented='true']]") do |vented_attic|
         vented_attic_values = HPXML.get_attic_values(attic: vented_attic,
                                                      select: [:vented_attic_sla, :vented_attic_constant_ach])
+        next if vented_attic_values[:vented_attic_sla].nil? and vented_attic_values[:vented_attic_constant_ach].nil? # skip additional attic elements
+
         vented_attic_sla = vented_attic_values[:vented_attic_sla]
         vented_attic_const_ach = vented_attic_values[:vented_attic_constant_ach]
       end
@@ -3117,39 +3113,35 @@ class OSModel
     # Mechanical Ventilation
     mech_vent_fan = systems.elements["MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     mech_vent_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: mech_vent_fan)
-    mech_vent_type = Constants.VentTypeNone
+    mech_vent_type = nil
     mech_vent_total_eff = 0.0
     mech_vent_sens_eff = 0.0
     mech_vent_fan_w = 0.0
     mech_vent_cfm = 0.0
     cfis_open_time = 0.0
     if not mech_vent_fan_values.nil?
-      fan_type = mech_vent_fan_values[:fan_type]
-      if fan_type == "supply only"
-        mech_vent_type = Constants.VentTypeSupply
+      mech_vent_type = mech_vent_fan_values[:fan_type]
+      if mech_vent_type == 'supply only'
         num_fans = 1.0
-      elsif fan_type == "exhaust only"
-        mech_vent_type = Constants.VentTypeExhaust
+      elsif mech_vent_type == 'exhaust only'
         num_fans = 1.0
-      elsif fan_type == "central fan integrated supply"
-        mech_vent_type = Constants.VentTypeCFIS
+      elsif mech_vent_type == 'central fan integrated supply'
         num_fans = 1.0
-      elsif ["balanced", "energy recovery ventilator", "heat recovery ventilator"].include? fan_type
-        mech_vent_type = Constants.VentTypeBalanced
+      elsif ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent_type
         num_fans = 2.0
       end
       mech_vent_total_eff = 0.0
       mech_vent_total_eff_adj = 0.0
       mech_vent_sens_eff = 0.0
       mech_vent_sens_eff_adj = 0.0
-      if fan_type == "energy recovery ventilator" or fan_type == "heat recovery ventilator"
+      if mech_vent_type == 'energy recovery ventilator' or mech_vent_type == 'heat recovery ventilator'
         if mech_vent_fan_values[:sensible_recovery_efficiency_adjusted].nil?
           mech_vent_sens_eff = mech_vent_fan_values[:sensible_recovery_efficiency]
         else
           mech_vent_sens_eff_adj = mech_vent_fan_values[:sensible_recovery_efficiency_adjusted]
         end
       end
-      if fan_type == "energy recovery ventilator"
+      if mech_vent_type == 'energy recovery ventilator'
         if mech_vent_fan_values[:total_recovery_efficiency_adjusted].nil?
           mech_vent_total_eff = mech_vent_fan_values[:total_recovery_efficiency]
         else
@@ -3161,7 +3153,7 @@ class OSModel
         mech_vent_cfm = mech_vent_fan_values[:rated_flow_rate]
       end
       mech_vent_fan_w = mech_vent_fan_values[:fan_power]
-      if mech_vent_type == Constants.VentTypeCFIS
+      if mech_vent_type == 'central fan integrated supply'
         # CFIS: Specify minimum open time in minutes
         cfis_open_time = [mech_vent_fan_values[:hours_in_operation] / 24.0 * 60.0, 59.999].min
       else
@@ -3179,7 +3171,7 @@ class OSModel
 
     # Get AirLoop associated with CFIS
     cfis_airloop = nil
-    if mech_vent_type == Constants.VentTypeCFIS
+    if mech_vent_type == 'central fan integrated supply'
       # Get HVAC distribution system CFIS is attached to
       cfis_hvac_dist = nil
       systems.elements.each("HVAC/HVACDistribution") do |hvac_dist|
@@ -3343,8 +3335,8 @@ class OSModel
       htg_type = heating_system_values[:heating_system_type]
       next unless ["Furnace", "WallFurnace", "Stove", "Boiler"].include? htg_type
 
-      fuel = to_beopt_fuel(heating_system_values[:heating_system_fuel])
-      next if fuel == Constants.FuelTypeElectric
+      fuel = heating_system_values[:heating_system_fuel]
+      next if fuel == 'electricity'
 
       fuel_eae = heating_system_values[:electric_auxiliary_energy]
       load_frac = heating_system_values[:fraction_heat_load_served]
@@ -3355,24 +3347,24 @@ class OSModel
   end
 
   def self.add_photovoltaics(runner, model, building)
-    modules_map = { "standard" => Constants.PVModuleTypeStandard,
-                    "premium" => Constants.PVModuleTypePremium,
-                    "thin film" => Constants.PVModuleTypeThinFilm }
+    modules_map = { "standard" => 'Standard',
+                    "premium" => 'Premium',
+                    "thin film" => 'ThinFilm' }
 
     building.elements.each("BuildingDetails/Systems/Photovoltaics/PVSystem") do |pvsys|
       pv_system_values = HPXML.get_pv_system_values(pv_system: pvsys)
       pv_id = pv_system_values[:id]
       module_type = modules_map[pv_system_values[:module_type]]
       if pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'roof'
-        array_type = Constants.PVArrayTypeFixedRoofMount
+        array_type = 'FixedRoofMounted'
       elsif pv_system_values[:tracking] == 'fixed' and pv_system_values[:location] == 'ground'
-        array_type = Constants.PVArrayTypeFixedOpenRack
+        array_type = 'FixedOpenRack'
       elsif pv_system_values[:tracking] == '1-axis'
-        array_type = Constants.PVArrayTypeFixed1Axis
+        array_type = 'OneAxis'
       elsif pv_system_values[:tracking] == '1-axis backtracked'
-        array_type = Constants.PVArrayTypeFixed1AxisBacktracked
+        array_type = 'OneAxisBacktracking'
       elsif pv_system_values[:tracking] == '2-axis'
-        array_type = Constants.PVArrayTypeFixed2Axis
+        array_type = 'TwoAxis'
       end
       az = pv_system_values[:array_azimuth]
       tilt = pv_system_values[:array_tilt]
@@ -4439,54 +4431,26 @@ class OSModel
   end
 
   def self.set_surface_interior(model, spaces, surface, surface_id, interior_adjacent_to)
-    if ["living space"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
-    elsif ["garage"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
-    elsif ["basement - unconditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
-    elsif ["basement - conditioned"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    if ['basement - conditioned'].include? interior_adjacent_to
+      surface.setSpace(create_or_get_space(model, spaces, 'living space'))
       @cond_bsmnt_surfaces << surface
-    elsif ["crawlspace - vented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
-    elsif ["crawlspace - unvented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl))
-    elsif ["attic - vented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic))
-    elsif ["attic - unvented"].include? interior_adjacent_to
-      surface.setSpace(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic))
     else
-      fail "Unhandled AdjacentTo value (#{interior_adjacent_to}) for surface '#{surface_id}'."
+      surface.setSpace(create_or_get_space(model, spaces, interior_adjacent_to))
     end
   end
 
   def self.set_surface_exterior(model, spaces, surface, surface_id, exterior_adjacent_to)
-    if ["outside"].include? exterior_adjacent_to
-      surface.setOutsideBoundaryCondition("Outdoors")
-    elsif ["ground"].include? exterior_adjacent_to
-      surface.setOutsideBoundaryCondition("Foundation")
-    elsif ["other housing unit", "other housing unit above", "other housing unit below"].include? exterior_adjacent_to
+    if ['outside'].include? exterior_adjacent_to
+      surface.setOutsideBoundaryCondition('Outdoors')
+    elsif ['ground'].include? exterior_adjacent_to
+      surface.setOutsideBoundaryCondition('Foundation')
+    elsif ['other housing unit', 'other housing unit above', 'other housing unit below'].include? exterior_adjacent_to
       surface.setOutsideBoundaryCondition("Adiabatic")
-    elsif ["living space"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
-    elsif ["garage"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeGarage))
-    elsif ["basement - unconditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement))
-    elsif ["basement - conditioned"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeLiving))
+    elsif ['basement - conditioned'].include? exterior_adjacent_to
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, 'living space'))
       @cond_bsmnt_surfaces << surface
-    elsif ["crawlspace - vented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl))
-    elsif ["crawlspace - unvented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl))
-    elsif ["attic - vented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic))
-    elsif ["attic - unvented"].include? exterior_adjacent_to
-      surface.createAdjacentSurface(create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic))
     else
-      fail "Unhandled AdjacentTo value (#{exterior_adjacent_to}) for surface '#{surface_id}'."
+      surface.createAdjacentSurface(create_or_get_space(model, spaces, exterior_adjacent_to))
     end
   end
 
@@ -4498,27 +4462,10 @@ class OSModel
 
     num_orig_spaces = spaces.size
 
-    space = nil
-    if location == 'living space'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-    elsif location == 'basement - conditioned'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeLiving)
-    elsif location == 'basement - unconditioned'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnconditionedBasement)
-    elsif location == 'garage'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeGarage)
-    elsif location == 'attic - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeVentedAttic)
-    elsif location == 'attic - unvented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnventedAttic)
-    elsif location == 'crawlspace - vented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeVentedCrawl)
-    elsif location == 'crawlspace - unvented'
-      space = create_or_get_space(model, spaces, Constants.SpaceTypeUnventedCrawl)
-    end
-
-    if space.nil?
-      fail "Unhandled #{object_name} location: #{location}."
+    if location == 'basement - conditioned'
+      space = create_or_get_space(model, spaces, 'living space')
+    else
+      space = create_or_get_space(model, spaces, location)
     end
 
     if spaces.size != num_orig_spaces
@@ -4575,11 +4522,10 @@ class OSModel
 
   def self.get_infiltration_volume(building)
     infilvolume = nil
-    building.elements.each("BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement") do |air_infiltration_measurement|
-      air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement,
-                                                                                          select: [:infiltration_volume])
-      infilvolume = air_infiltration_measurement_values[:infiltration_volume] unless air_infiltration_measurement_values[:infiltration_volume].nil?
-    end
+    air_infiltration_measurement = building.elements["BuildingDetails/Enclosure/AirInfiltration/AirInfiltrationMeasurement[(HousePressure=50 and BuildingAirLeakage[UnitofMeasure='ACH' or UnitofMeasure='CFM']/AirLeakage) | extension/ConstantACHnatural]"] # only one measurement element has useful inputs
+    air_infiltration_measurement_values = HPXML.get_air_infiltration_measurement_values(air_infiltration_measurement: air_infiltration_measurement,
+                                                                                        select: [:infiltration_volume])
+    infilvolume = air_infiltration_measurement_values[:infiltration_volume]
     if infilvolume.nil?
       infilvolume = @cvolume
     end
@@ -4708,21 +4654,6 @@ class GenericConstructionSet
     @exterior_material = exterior_material
   end
   attr_accessor(:rigid_r, :osb_thick_in, :drywall_thick_in, :exterior_material)
-end
-
-def to_beopt_fuel(fuel)
-  return { "natural gas" => Constants.FuelTypeGas,
-           "fuel oil" => Constants.FuelTypeOil,
-           "propane" => Constants.FuelTypePropane,
-           "electricity" => Constants.FuelTypeElectric,
-           "wood" => Constants.FuelTypeWood,
-           "wood pellets" => Constants.FuelTypeWoodPellets }[fuel]
-end
-
-def to_beopt_wh_type(type)
-  return { 'storage water heater' => Constants.WaterHeaterTypeTank,
-           'instantaneous water heater' => Constants.WaterHeaterTypeTankless,
-           'heat pump water heater' => Constants.WaterHeaterTypeHeatPump }[type]
 end
 
 def is_thermal_boundary(surface_values)

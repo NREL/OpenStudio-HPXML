@@ -22,19 +22,19 @@ class Airflow
     building.height = Geometry.get_max_z_of_spaces(model_spaces)
     model.getThermalZones.each do |thermal_zone|
       space_type = Geometry.get_space_type(thermal_zone)
-      if space_type == Constants.SpaceTypeLiving
+      if space_type == 'living space'
         building.living = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone), nil, nil)
-      elsif space_type == Constants.SpaceTypeGarage
+      elsif space_type == 'garage'
         building.garage = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone), nil, nil)
-      elsif space_type == Constants.SpaceTypeUnconditionedBasement
+      elsif space_type == 'basement - unconditioned'
         building.unconditioned_basement = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone), infil.unconditioned_basement_ach, nil)
-      elsif space_type == Constants.SpaceTypeVentedCrawl
+      elsif space_type == 'crawlspace - vented'
         building.vented_crawlspace = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone), nil, infil.vented_crawl_sla)
-      elsif space_type == Constants.SpaceTypeUnventedCrawl
+      elsif space_type == 'crawlspace - unvented'
         building.unvented_crawlspace = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone), nil, infil.unvented_crawl_sla)
-      elsif space_type == Constants.SpaceTypeVentedAttic
+      elsif space_type == 'attic - vented'
         building.vented_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone), infil.vented_attic_const_ach, infil.vented_attic_sla)
-      elsif space_type == Constants.SpaceTypeUnventedAttic
+      elsif space_type == 'attic - unvented'
         building.unvented_attic = ZoneInfo.new(thermal_zone, Geometry.get_height_of_spaces(thermal_zone.spaces), UnitConversions.convert(thermal_zone.floorArea, "m^2", "ft^2"), Geometry.get_zone_volume(thermal_zone), nil, infil.unvented_attic_sla)
       end
     end
@@ -87,7 +87,7 @@ class Airflow
     process_infiltration_for_conditioned_zones(model, infil, wind_speed, building, weather)
     process_mech_vent(model, mech_vent, building, weather, infil)
 
-    if mech_vent.type == Constants.VentTypeCFIS
+    if mech_vent.type == 'central fan integrated supply'
       cfis_program = create_cfis_objects(model, building, mech_vent)
     end
 
@@ -324,7 +324,7 @@ class Airflow
                                      :fan_mfr_max_var => fan_mfr_max_var,
                                      :fan_mfr_sensor => fan_mfr_sensor }
 
-      if mech_vent.type == Constants.VentTypeCFIS and air_loop == mech_vent.cfis_air_loop
+      if mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop
         mech_vent.cfis_fan_rtf_sensor = fan_rtf_sensor.name
         mech_vent.cfis_fan_mfr_max_var = fan_mfr_max_var.name
       end
@@ -493,7 +493,7 @@ class Airflow
       end
 
       space.zone.spaces.each do |s|
-        next if Geometry.get_space_type(s) == Constants.SpaceTypeLiving
+        next if Geometry.get_space_type(s) == 'living space'
 
         obj_name = "#{Constants.ObjectNameInfiltration}|#{s.name}"
         if space.inf_method == @infMethodConstantCFM and space.ACH.to_f > 0
@@ -528,11 +528,11 @@ class Airflow
     range_hood_exhaust_operation = 60.0 # min/day, per HSP
 
     # Fraction of fan heat that goes to the space
-    if mech_vent.type == Constants.VentTypeExhaust
+    if ['exhaust only'].include? mech_vent.type
       frac_fan_heat = 0.0 # Fan heat does not enter space
-    elsif mech_vent.type == Constants.VentTypeSupply or mech_vent.type == Constants.VentTypeCFIS
+    elsif ['supply only', 'central fan integrated supply'].include? mech_vent.type
       frac_fan_heat = 1.0 # Fan heat does enter space
-    elsif mech_vent.type == Constants.VentTypeBalanced
+    elsif ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type
       frac_fan_heat = 0.5 # Assumes supply fan heat enters space
     else
       frac_fan_heat = 0.0
@@ -560,7 +560,7 @@ class Airflow
     sensible_effectiveness = 0.0
     latent_effectiveness = 0.0
 
-    if mech_vent.type == Constants.VentTypeBalanced and (mech_vent.sens_eff > 0 or mech_vent.sens_eff_adj > 0) and mech_vent.whole_house_cfm > 0
+    if ['energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type and mech_vent.whole_house_cfm > 0
       # Must assume an operating condition (HVI seems to use CSA 439)
       t_sup_in = 0.0
       w_sup_in = 0.0028
@@ -642,7 +642,7 @@ class Airflow
 
     # Store info for HVAC Sizing measure
     if not mech_vent.hpxml_object.nil?
-      HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "Type": mech_vent.type })
+      HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "Type": mech_vent.type.to_s })
       HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "TotalEfficiency": mech_vent.total_eff })
       HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "LatentEffectiveness": latent_effectiveness })
       HPXML.add_extension(parent: mech_vent.hpxml_object, extensions: { "ApparentSensibleEffectiveness": apparent_sensible_effectiveness })
@@ -993,7 +993,7 @@ class Airflow
     # All duct zones are in living space?
     all_ducts_conditioned = true
     duct_zones.each do |duct_zone|
-      next if Geometry.get_space_type(duct_zone) == Constants.SpaceTypeLiving
+      next if Geometry.get_space_type(duct_zone) == 'living space'
 
       all_ducts_conditioned = false
     end
@@ -1171,7 +1171,7 @@ class Airflow
         duct_actuators = {}
         [false, true].each do |is_cfis|
           if is_cfis
-            next unless (mech_vent.type == Constants.VentTypeCFIS and air_loop == mech_vent.cfis_air_loop)
+            next unless (mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop)
 
             prefix = "cfis_"
           else
@@ -1214,7 +1214,7 @@ class Airflow
 
         [false, true].each do |is_cfis|
           if is_cfis
-            next unless (mech_vent.type == Constants.VentTypeCFIS and air_loop == mech_vent.cfis_air_loop)
+            next unless (mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop)
 
             prefix = "cfis_"
           else
@@ -1431,7 +1431,7 @@ class Airflow
           duct_program.addLine("Set #{duct_actuators["liv_to_dz_flow_rate"].name} = #{duct_vars["liv_to_dz_flow_rate"].name}")
         end
 
-        if mech_vent.type == Constants.VentTypeCFIS and air_loop == mech_vent.cfis_air_loop
+        if mech_vent.type == 'central fan integrated supply' and air_loop == mech_vent.cfis_air_loop
 
           # Calculate CFIS duct losses
 
@@ -1616,7 +1616,7 @@ class Airflow
       infil_program.addLine("Set Qn = #{building.living.ACH * UnitConversions.convert(building.infilvolume, "ft^3", "m^3") / UnitConversions.convert(1.0, "hr", "s")}")
     end
 
-    if mech_vent.type == Constants.VentTypeBalanced and mech_vent.whole_house_cfm > 0
+    if ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type and mech_vent.whole_house_cfm > 0
       # ERV/HRV/Balanced EMS load model
       # E+ ERV model is using standard density for MFR calculation, caused discrepancy with other system types.
       # E+ ERV model also does not meet setpoint perfectly.
@@ -1673,7 +1673,7 @@ class Airflow
 
     end
 
-    if mech_vent.type == Constants.VentTypeCFIS
+    if mech_vent.type == 'central fan integrated supply'
 
       infil_program.addLine("Set fan_rtf = #{mech_vent.cfis_fan_rtf_sensor}")
       if mech_vent.fan_power_w.nil?
@@ -1774,13 +1774,13 @@ class Airflow
     end
     infil_program.addLine("Set Qout = Qrange+Qbath+Qdryer+QhpwhOut+QductsOut")
     infil_program.addLine("Set Qin = QhpwhIn+QductsIn")
-    if mech_vent.type == Constants.VentTypeExhaust
+    if mech_vent.type == 'exhaust only'
       infil_program.addLine("Set Qout = Qout+QWHV")
-    elsif mech_vent.type == Constants.VentTypeSupply or mech_vent.type == Constants.VentTypeCFIS
+    elsif mech_vent.type == 'supply only' or mech_vent.type == 'central fan integrated supply'
       infil_program.addLine("Set Qin = Qin+QWHV")
     end
     infil_program.addLine("Set Qu = (@Abs (Qout-Qin))")
-    if mech_vent.type != Constants.VentTypeCFIS
+    if mech_vent.type != 'central fan integrated supply'
       if mech_vent.whole_house_cfm > 0
         infil_program.addLine("Set #{whole_house_fan_actuator.name} = QWHV * #{mech_vent.fan_power_w} / #{UnitConversions.convert(mech_vent.whole_house_cfm, "cfm", "m^3/s")}")
       else
@@ -1793,7 +1793,7 @@ class Airflow
     infil_program.addLine("Set Q_acctd_for_elsewhere = QhpwhOut+QhpwhIn+QductsOut+QductsIn")
     infil_program.addLine("Set Q_tot_flow = (((Qu^2)+(Qn^2))^0.5)-Q_acctd_for_elsewhere")
     infil_program.addLine("Set Q_tot_flow = (@Max Q_tot_flow 0)")
-    if mech_vent.type != Constants.VentTypeBalanced
+    if not ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent.type
       infil_program.addLine("Set #{infil_flow_actuator.name} = Q_tot_flow - QWHV")
       infil_program.addLine("Set #{imbal_mechvent_flow_actuator.name} = QWHV")
     else
