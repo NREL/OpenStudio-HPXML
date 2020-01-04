@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-07-17T10:47:21-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2019-12-28T08:38:11-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -92,14 +92,14 @@
             <ExteriorAdjacentTo>outside</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <WallType>
-              <InsulatedConcreteForms/>
+              <WoodStud/>
             </WallType>
             <Area>1200.0</Area>
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Insulation>
               <SystemIdentifier id='WallInsulation'/>
-              <AssemblyEffectiveRValue>21.0</AssemblyEffectiveRValue>
+              <AssemblyEffectiveRValue>23.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
           <Wall>
@@ -127,12 +127,23 @@
             <Area>1200.0</Area>
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
-            <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
             <Insulation>
               <SystemIdentifier id='FoundationWallInsulation'/>
               <Layer>
-                <InstallationType>continuous</InstallationType>
+                <InstallationType>continuous - exterior</InstallationType>
                 <NominalRValue>8.9</NominalRValue>
+                <extension>
+                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>8.0</DistanceToBottomOfInsulation>
+                </extension>
+              </Layer>
+              <Layer>
+                <InstallationType>continuous - interior</InstallationType>
+                <NominalRValue>0.0</NominalRValue>
+                <extension>
+                  <DistanceToTopOfInsulation>0.0</DistanceToTopOfInsulation>
+                  <DistanceToBottomOfInsulation>0.0</DistanceToBottomOfInsulation>
+                </extension>
               </Layer>
             </Insulation>
           </FoundationWall>
@@ -232,31 +243,18 @@
       <Systems>
         <HVAC>
           <HVACPlant>
-            <HeatingSystem>
-              <SystemIdentifier id='HeatingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
-              <HeatingSystemType>
-                <Furnace/>
-              </HeatingSystemType>
-              <HeatingSystemFuel>natural gas</HeatingSystemFuel>
-              <HeatingCapacity>-1.0</HeatingCapacity>
-              <AnnualHeatingEfficiency>
-                <Units>AFUE</Units>
-                <Value>0.92</Value>
-              </AnnualHeatingEfficiency>
-              <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
-            </HeatingSystem>
             <CoolingSystem>
               <SystemIdentifier id='CoolingSystem'/>
               <DistributionSystem idref='HVACDistribution'/>
               <CoolingSystemType>central air conditioner</CoolingSystemType>
               <CoolingSystemFuel>electricity</CoolingSystemFuel>
-              <CoolingCapacity>-1.0</CoolingCapacity>
+              <CoolingCapacity>48000.0</CoolingCapacity>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
-                <Value>13.0</Value>
+                <Value>18.0</Value>
               </AnnualCoolingEfficiency>
+              <SensibleHeatFraction>0.7</SensibleHeatFraction>
             </CoolingSystem>
           </HVACPlant>
           <HVACControl>
