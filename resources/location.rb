@@ -1,4 +1,3 @@
-require_relative "weather"
 require_relative "constants"
 require_relative "unit_conversions"
 
