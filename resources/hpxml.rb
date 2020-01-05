@@ -1886,12 +1886,12 @@ class HPXML
     return @cache[refrigerator] if @cache.key?(refrigerator)
 
     vals = {}
-    vals[:id] = HPXML.get_id(refrigerator) if is_selected(select, :id)
-    vals[:location] = XMLHelper.get_value(refrigerator, "Location") if is_selected(select, :location)
-    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh")) if is_selected(select, :rated_annual_kwh)
-    vals[:adjusted_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh")) if is_selected(select, :adjusted_annual_kwh)
-    vals[:schedules_output_path] = XMLHelper.get_value(refrigerator, "extension/SchedulesOutputPath") if is_selected(select, :schedules_output_path)
-    vals[:schedules_column_name] = XMLHelper.get_value(refrigerator, "extension/SchedulesColumnName") if is_selected(select, :schedules_column_name)
+    vals[:id] = HPXML.get_id(refrigerator)
+    vals[:location] = XMLHelper.get_value(refrigerator, "Location")
+    vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh"))
+    vals[:adjusted_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh"))
+    vals[:schedules_output_path] = XMLHelper.get_value(refrigerator, "extension/SchedulesOutputPath")
+    vals[:schedules_column_name] = XMLHelper.get_value(refrigerator, "extension/SchedulesColumnName")
     @cache[refrigerator] = vals
     return vals
   end
