@@ -41,6 +41,7 @@ def create_hpxmls
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-return-duct-leakage-missing.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -1905,6 +1906,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     end
   elsif ['invalid_files/unattached-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = "foobar"
+  elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
+    heating_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
   elsif ['invalid_files/hvac-dse-multiple-attached-heating.xml'].include? hpxml_file
     heating_systems_values[0][:fraction_heat_load_served] = 0.5
     heating_systems_values << heating_systems_values[0].dup
@@ -2279,6 +2282,9 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
     hvac_distributions_values << { :id => "HVACDistribution2",
                                    :distribution_system_type => "AirDistribution" }
+  elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
+    hvac_distributions_values << { :id => "HVACDistribution2",
+                                   :distribution_system_type => "HydronicDistribution" }
   elsif ['base-hvac-none.xml',
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-evap-cooler-only.xml',
