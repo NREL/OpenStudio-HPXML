@@ -352,6 +352,18 @@ class WeatherProcess
   end
 
   def calc_ashrae_622_wsf(rowdata)
+    require 'csv'
+    ashrae_csv = File.join(File.dirname(__FILE__), 'ASHRAE622WSF.csv')
+
+    wsf = nil
+    CSV.read(ashrae_csv, headers: false).each do |data|
+      next unless data[0] == @header.Station
+
+      wsf = Float(data[1]).round(2)
+    end
+    return wsf unless wsf.nil?
+
+    # If not available in ASHRAE622WSF.csv...
     # Calculates the wSF value per report LBNL-5795E "Infiltration as Ventilation: Weather-Induced Dilution"
 
     # Constants
