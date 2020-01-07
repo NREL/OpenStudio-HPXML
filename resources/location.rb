@@ -26,11 +26,11 @@ class Location
     OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
 
     # Obtain weather object
-    # Load from cache file if exists, as this is faster and doesn't require
+    # Load from cache .csv file if exists, as this is faster and doesn't require
     # parsing the weather file.
-    cache_file = weather_file_path.gsub('.epw', '.cache')
+    cache_file = weather_file_path.gsub('.epw', '.csv')
     if File.exists? cache_file
-      weather = Marshal.load(File.binread(cache_file))
+      weather = WeatherProcess.new(nil, nil, cache_file)
     else
       weather = WeatherProcess.new(model, runner)
     end
