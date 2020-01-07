@@ -71,7 +71,6 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simula
     if debug
       args['osm_output_path'] = File.join(designdir, "in.osm")
     end
-    args['skip_validation'] = !validate
     update_args_hash(measures, measure_subdir, args)
   end
 
