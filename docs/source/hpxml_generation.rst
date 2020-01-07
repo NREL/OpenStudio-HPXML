@@ -61,7 +61,7 @@ The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weat
 The weather file can be entered in one of two ways:
 
 #. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the `weather/data.csv <https://github.com/NREL/OpenStudio-HPXML/blob/master/weather/data.csv>`_ file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache.zip>`_.
+   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip>`_.
 #. Using the ``WeatherStation/extension/EPWFileName``.
 
 Enclosure
