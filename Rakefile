@@ -19,6 +19,29 @@ task :update_measures do
   puts "Done."
 end
 
+desc 'create epw cache .csv files'
+task :cache_weather do
+  require 'openstudio'
+  require_relative 'resources/weather'
+
+  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+  puts "Creating cache *.csv for weather files..."
+
+  Dir["weather/*.epw"].each do |epw|
+    next if File.exists? epw.gsub(".epw", ".cache")
+
+    puts "Processing #{epw}..."
+    model = OpenStudio::Model::Model.new
+    epw_file = OpenStudio::EpwFile.new(epw)
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
+    weather = WeatherProcess.new(model, runner)
+    File.open(epw.gsub(".epw", ".csv"), "wb") do |file|
+      weather.dump_to_csv(file)
+    end
+  end
+end
+
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   tests_dir = File.join(this_dir, "tests")
