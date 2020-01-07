@@ -144,15 +144,15 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
           fail "Weather station WMO '#{weather_wmo}' could not be found in weather/data.csv."
         end
       end
-      cache_path = epw_path.gsub('.epw', '.cache')
+      cache_path = epw_path.gsub('.epw', '.csv')
       if not File.exists?(cache_path)
-        # Process weather file to create .cache
+        # Process weather file to create cache .csv
         runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
         epw_file = OpenStudio::EpwFile.new(epw_path)
         OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file)
         weather = WeatherProcess.new(model, runner)
         File.open(cache_path, "wb") do |file|
-          Marshal.dump(weather, file)
+          weather.dump_to_csv(file)
         end
       end
       if epw_output_path.is_initialized
