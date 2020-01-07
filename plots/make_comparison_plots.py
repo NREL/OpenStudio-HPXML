@@ -32,39 +32,48 @@ def make_comparison_plots(df_doe2, df_os):
     df_os2 = df_os.rename(columns=rename_col)
     df_os2['address'] = df_os2['HPXML'].map(get_address_from_hpxml_file)
     df = df_doe2.merge(df_os2, on='address', suffixes=('_doe2', '_os'))
+    cols_to_diff_against_base = list(filter(re.compile(r'_(doe2|os)$').search, df.columns.values))
+    df_diff = df[cols_to_diff_against_base].subtract(df[df['HPXML'] == 'Base_hpxml.xml'][cols_to_diff_against_base].values, axis=1)
+    df2 = df.merge(df_diff, left_index=True, right_index=True, suffixes=('', '_basediff'))
 
     plots_dir = os.path.join(here, 'plots')
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
     bio.output_file(os.path.join(plots_dir, 'comparison_plots.html'))
-    data_source = ColumnDataSource(df)
+    data_source = ColumnDataSource(df2)
     figures = []
-    for doe2_colname in filter(lambda x: x.endswith('_doe2'), df.columns):
-        os_colname = doe2_colname.replace('_doe2', '_os')
-        p = bplt.figure(
-            tools='pan,wheel_zoom,box_zoom,reset,save,box_select,lasso_select',
-            width=350,
-            height=350,
-            title=doe2_colname[:-5]
-        )
-        p.xaxis.axis_label = 'DOE2'
-        p.yaxis.axis_label = 'EnergyPlus'
-        maxval = df[[doe2_colname, os_colname]].max().max()
-        p.line(x=(0, maxval), y=(0, maxval), color='firebrick')
-        c = p.circle(x=doe2_colname, y=os_colname, source=data_source)
-        hover = HoverTool(
-            tooltips=[
-                ('filename', '@HPXML'),
-                ('address', '@address'),
-                ('DOE2', f'@{doe2_colname}{{0,0.}}'),
-                ('E+', f'@{os_colname}{{0,0.}}')
-            ],
-            renderers=[c]
-        )
-        p.add_tools(hover)
-        figures.append(p)
+    for colname in map(lambda y: y[:-5], filter(lambda x: x.endswith('_doe2'), df.columns)):
+        row_figs = []
+        for basediff in ('', '_basediff'):
+            doe2_colname = colname + '_doe2' + basediff
+            os_colname = colname + '_os' + basediff
+            plot_title = colname + basediff
+            p = bplt.figure(
+                tools='pan,wheel_zoom,box_zoom,reset,save,box_select,lasso_select',
+                width=400,
+                height=400,
+                title=plot_title
+            )
+            p.xaxis.axis_label = 'DOE2'
+            p.yaxis.axis_label = 'EnergyPlus'
+            maxval = df2[[doe2_colname, os_colname]].max().max()
+            minval = df2[[doe2_colname, os_colname]].min().min()
+            p.line(x=(minval, maxval), y=(minval, maxval), color='firebrick')
+            c = p.circle(x=doe2_colname, y=os_colname, source=data_source)
+            hover = HoverTool(
+                tooltips=[
+                    ('filename', '@HPXML'),
+                    ('address', '@address'),
+                    ('DOE2', f'@{doe2_colname}{{0,0.}}'),
+                    ('E+', f'@{os_colname}{{0,0.}}')
+                ],
+                renderers=[c]
+            )
+            p.add_tools(hover)
+            row_figs.append(p)
+        figures.append(row_figs)
 
-    grid = gridplot(figures, ncols=3)
+    grid = gridplot(figures)
     bio.save(grid)
     
 
