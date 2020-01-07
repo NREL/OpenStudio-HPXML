@@ -28,15 +28,15 @@ def get_output_hpxml_path(resultsdir, designdir)
   return File.join(resultsdir, File.basename(designdir) + ".xml")
 end
 
-def run_design(basedir, designdir, design, resultsdir, hpxml, debug, validate)
+def run_design(basedir, designdir, design, resultsdir, hpxml, debug)
   puts "Creating input..."
-  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
+  create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
 
   puts "Running simulation..."
   run_energyplus(design, designdir)
 end
 
-def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
+def create_idf(design, basedir, designdir, resultsdir, hpxml, debug)
   Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -65,7 +65,6 @@ def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate)
   if debug
     args['osm_output_path'] = File.join(designdir, "in.osm")
   end
-  args['skip_validation'] = !validate
   update_args_hash(measures, measure_subdir, args)
 
   # Apply measures
@@ -335,11 +334,6 @@ OptionParser.new do |opts|
     options[:epws] = t
   end
 
-  options[:validate] = false
-  opts.on('--validate', 'Validate against HPXML EnergyPlus Use Case') do |t|
-    options[:validate] = true
-  end
-
   options[:debug] = false
   opts.on('-d', '--debug') do |t|
     options[:debug] = true
@@ -391,7 +385,7 @@ puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
 designdir = get_designdir(options[:output_dir], design)
 rm_path(designdir)
-rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:validate])
+rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug])
 
 # Create output
 create_output(designdir, resultsdir)

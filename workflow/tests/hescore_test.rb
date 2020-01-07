@@ -50,7 +50,7 @@ class HEScoreTest < Minitest::Unit::TestCase
 
     # Run workflow
     cli_path = OpenStudio.getOpenStudioCLI
-    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "../run_simulation.rb")}\" --validate -x #{xml}"
+    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "../run_simulation.rb")}\" -x #{xml}"
     start_time = Time.now
     system(command)
     runtime = Time.now - start_time
