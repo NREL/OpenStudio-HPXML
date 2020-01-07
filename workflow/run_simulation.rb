@@ -28,9 +28,9 @@ def get_output_hpxml_path(resultsdir, designdir)
   return File.join(resultsdir, File.basename(designdir) + ".xml")
 end
 
-def run_design(basedir, designdir, design, resultsdir, hpxml, debug, validate, skip_simulation)
+def run_design(basedir, designdir, design, resultsdir, hpxml, debug, skip_simulation)
   puts "Creating input..."
-  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate, skip_simulation)
+  create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simulation)
 
   return if skip_simulation
 
@@ -41,7 +41,7 @@ def run_design(basedir, designdir, design, resultsdir, hpxml, debug, validate, s
   create_output(designdir, resultsdir)
 end
 
-def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, validate, skip_simulation)
+def create_idf(design, basedir, designdir, resultsdir, hpxml, debug, skip_simulation)
   Dir.mkdir(designdir)
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -344,11 +344,6 @@ OptionParser.new do |opts|
     options[:epws] = t
   end
 
-  options[:validate] = false
-  opts.on('--validate', 'Validate against HPXML EnergyPlus Use Case') do |t|
-    options[:validate] = true
-  end
-
   options[:skip_simulation] = false
   opts.on('--skip-simulation', 'Skip the EnergyPlus simulation') do |t|
     options[:skip_simulation] = true
@@ -405,6 +400,6 @@ puts "HPXML: #{options[:hpxml]}"
 design = "HEScoreDesign"
 designdir = get_designdir(options[:output_dir], design)
 rm_path(designdir)
-rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:validate], options[:skip_simulation])
+rundir = run_design(basedir, designdir, design, resultsdir, options[:hpxml], options[:debug], options[:skip_simulation])
 
 puts "Completed in #{(Time.now - start_time).round(1)} seconds."
