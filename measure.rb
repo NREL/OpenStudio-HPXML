@@ -2812,6 +2812,7 @@ class OSModel
     hvac_distribution_type_map = { "Furnace" => ["AirDistribution", "DSE"],
                                    "Boiler" => ["HydronicDistribution", "DSE"],
                                    "central air conditioner" => ["AirDistribution", "DSE"],
+                                   "evaporative cooler" => ["AirDistribution", "DSE"],
                                    "air-to-air" => ["AirDistribution", "DSE"],
                                    "mini-split" => ["AirDistribution", "DSE"],
                                    "ground-to-air" => ["AirDistribution", "DSE"] }
@@ -2824,9 +2825,7 @@ class OSModel
       next if dist_id != hvac_distribution_values[:id]
 
       found_attached_dist = true
-      if not hvac_distribution_type_map[system_type].nil?
-        type_match = hvac_distribution_type_map[system_type].include? hvac_distribution_values[:distribution_system_type]
-      end
+      type_match = hvac_distribution_type_map[system_type].include? hvac_distribution_values[:distribution_system_type]
     end
 
     if not found_attached_dist
