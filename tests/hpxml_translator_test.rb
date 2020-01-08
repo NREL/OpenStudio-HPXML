@@ -105,7 +105,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def test_weather_cache
     this_dir = File.dirname(__FILE__)
-    cache_orig = File.join(this_dir, "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3.csv")
+    cache_orig = File.join(this_dir, "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
     cache_bak = cache_orig + ".bak"
     File.rename(cache_orig, cache_bak)
     _run_xml(File.absolute_path(File.join(this_dir, "base.xml")), this_dir)

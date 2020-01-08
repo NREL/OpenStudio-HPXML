@@ -144,7 +144,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
           fail "Weather station WMO '#{weather_wmo}' could not be found in weather/data.csv."
         end
       end
-      cache_path = epw_path.gsub('.epw', '.csv')
+      cache_path = epw_path.gsub('.epw', '-cache.csv')
       if not File.exists?(cache_path)
         # Process weather file to create cache .csv
         runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
@@ -160,7 +160,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       end
 
       # Apply Location to obtain weather data
-      weather = Location.apply(model, runner, epw_path, "NA", "NA")
+      weather = Location.apply(model, runner, epw_path, cache_path, "NA", "NA")
 
       # Create OpenStudio model
       OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
