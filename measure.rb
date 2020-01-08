@@ -2831,6 +2831,8 @@ class OSModel
     if not found_attached_dist
       fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_id}'."
     elsif not type_match
+      # EPvalidator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
+      # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
       fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
   end
