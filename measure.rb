@@ -144,7 +144,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
           fail "Weather station WMO '#{weather_wmo}' could not be found in weather/data.csv."
         end
       end
-      cache_path = epw_path.gsub('.epw', '.csv')
+      cache_path = epw_path.gsub('.epw', '-cache.csv')
       if not File.exists?(cache_path)
         # Process weather file to create cache .csv
         runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
@@ -160,7 +160,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       end
 
       # Apply Location to obtain weather data
-      weather = Location.apply(model, runner, epw_path, "NA", "NA")
+      weather = Location.apply(model, runner, epw_path, cache_path, "NA", "NA")
 
       # Create OpenStudio model
       OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
@@ -2271,9 +2271,10 @@ class OSModel
       end
       @total_frac_remaining_cool_load_served -= load_frac
 
-      check_distribution_system(building, cooling_system_values)
-
       sys_id = cooling_system_values[:id]
+
+      check_distribution_system(building, cooling_system_values[:distribution_system_idref], sys_id, clg_type)
+
       @hvac_map[sys_id] = []
 
       if clg_type == "central air conditioner"
@@ -2367,8 +2368,9 @@ class OSModel
         heating_system_values = HPXML.get_heating_system_values(heating_system: htgsys)
 
         htg_type = heating_system_values[:heating_system_type]
+        sys_id = heating_system_values[:id]
 
-        check_distribution_system(building, heating_system_values)
+        check_distribution_system(building, heating_system_values[:distribution_system_idref], sys_id, htg_type)
 
         attached_clg_system = get_attached_clg_system(heating_system_values, building)
 
@@ -2393,7 +2395,6 @@ class OSModel
         end
         @total_frac_remaining_heat_load_served -= load_frac
 
-        sys_id = heating_system_values[:id]
         @hvac_map[sys_id] = []
 
         if htg_type == "Furnace"
@@ -2459,9 +2460,10 @@ class OSModel
     building.elements.each("BuildingDetails/Systems/HVAC/HVACPlant/HeatPump") do |hp|
       heat_pump_values = HPXML.get_heat_pump_values(heat_pump: hp)
 
-      check_distribution_system(building, heat_pump_values)
-
       hp_type = heat_pump_values[:heat_pump_type]
+      sys_id = heat_pump_values[:id]
+
+      check_distribution_system(building, heat_pump_values[:distribution_system_idref], sys_id, hp_type)
 
       cool_capacity_btuh = heat_pump_values[:cooling_capacity]
       if cool_capacity_btuh < 0
@@ -2475,12 +2477,12 @@ class OSModel
 
       # Heating and cooling capacity must either both be Autosized or Fixed
       if (cool_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
-        fail "HeatPump '#{heat_pump_values[:id]}' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."
+        fail "HeatPump '#{sys_id}' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."
       end
 
       heat_capacity_btuh_17F = heat_pump_values[:heating_capacity_17F]
       if heat_capacity_btuh == Constants.SizingAuto and not heat_capacity_btuh_17F.nil?
-        fail "HeatPump '#{heat_pump_values[:id]}' has HeatingCapacity17F provided but heating capacity is auto-sized."
+        fail "HeatPump '#{sys_id}' has HeatingCapacity17F provided but heating capacity is auto-sized."
       end
 
       load_frac_heat = heat_pump_values[:fraction_heat_load_served]
@@ -2509,7 +2511,7 @@ class OSModel
 
         # Heating and backup heating capacity must either both be Autosized or Fixed
         if (backup_heat_capacity_btuh == Constants.SizingAuto) ^ (heat_capacity_btuh == Constants.SizingAuto)
-          fail "HeatPump '#{heat_pump_values[:id]}' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."
+          fail "HeatPump '#{sys_id}' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."
         end
 
         if not heat_pump_values[:backup_heating_efficiency_percent].nil?
@@ -2527,7 +2529,6 @@ class OSModel
         backup_switchover_temp = nil
       end
 
-      sys_id = heat_pump_values[:id]
       @hvac_map[sys_id] = []
 
       if not backup_switchover_temp.nil?
@@ -2805,21 +2806,34 @@ class OSModel
                             @cfa, @living_space)
   end
 
-  def self.check_distribution_system(building, system_values)
-    dist_id = system_values[:distribution_system_idref]
+  def self.check_distribution_system(building, dist_id, system_id, system_type)
     return if dist_id.nil?
+
+    hvac_distribution_type_map = { "Furnace" => ["AirDistribution", "DSE"],
+                                   "Boiler" => ["HydronicDistribution", "DSE"],
+                                   "central air conditioner" => ["AirDistribution", "DSE"],
+                                   "evaporative cooler" => ["AirDistribution", "DSE"],
+                                   "air-to-air" => ["AirDistribution", "DSE"],
+                                   "mini-split" => ["AirDistribution", "DSE"],
+                                   "ground-to-air" => ["AirDistribution", "DSE"] }
 
     # Get attached distribution system
     found_attached_dist = false
+    type_match = true
     building.elements.each("BuildingDetails/Systems/HVAC/HVACDistribution") do |dist|
       hvac_distribution_values = HPXML.get_hvac_distribution_values(hvac_distribution: dist)
       next if dist_id != hvac_distribution_values[:id]
 
       found_attached_dist = true
+      type_match = hvac_distribution_type_map[system_type].include? hvac_distribution_values[:distribution_system_type]
     end
 
     if not found_attached_dist
-      fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_values[:id]}'."
+      fail "Attached HVAC distribution system '#{dist_id}' cannot be found for HVAC system '#{system_id}'."
+    elsif not type_match
+      # EPvalidator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
+      # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
+      fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
   end
 
