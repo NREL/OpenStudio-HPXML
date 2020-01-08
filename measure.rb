@@ -21,6 +21,7 @@ require_relative "resources/pv"
 require_relative "resources/unit_conversions"
 require_relative "resources/util"
 require_relative "resources/waterheater"
+require_relative "resources/weather"
 require_relative "resources/xmlhelper"
 require_relative "resources/hpxml"
 
