@@ -1,6 +1,6 @@
-require_relative "weather"
 require_relative "constants"
 require_relative "unit_conversions"
+require_relative "weather"
 
 class Location
   def self.apply(model, runner, weather_file_path, weather_cache_path, dst_start_date, dst_end_date)
