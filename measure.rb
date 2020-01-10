@@ -620,12 +620,6 @@ class OSModel
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       const = cond_bsmnt_surface.construction.get
       layered_const = const.to_LayeredConstruction.get
-      if layered_const.numLayers() == 1
-        # split single layer into two to prevent influencing exterior solar radiation
-        layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
-        layer_mat.setThickness(layer_mat.thickness / 2)
-        layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
-      end
       innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       # check if target surface is sharing its interior material/construction object with other surfaces
       # if so, need to clone the material/construction and make changes there, then reassign it to target surface
@@ -635,13 +629,22 @@ class OSModel
         # create new construction + new material for these surfaces
         new_const = const.clone.to_Construction.get
         cond_bsmnt_surface.setConstruction(new_const)
-        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
-        new_const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
+        new_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        layered_const = new_const.to_LayeredConstruction.get
+        layered_const.setLayer(layered_const.numLayers() - 1, new_material)
       elsif mat_share
         # create new material for existing unique construction
-        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
-        const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
+        new_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        layered_const.setLayer(layered_const.numLayers() - 1, new_material)
       end
+      if layered_const.numLayers() == 1
+        # split single layer into two to only change its inside facing property
+        layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
+        layer_mat.setThickness(layer_mat.thickness / 2)
+        layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
+      end
+      # Re-read innermost material and assign properties after adjustment
+      innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       innermost_material.setSolarAbsorptance(0.0)
       innermost_material.setVisibleAbsorptance(0.0)
     end
