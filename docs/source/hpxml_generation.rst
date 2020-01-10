@@ -232,8 +232,9 @@ Systems
 
 This section describes elements specified in HPXML's ``Systems``.
 
-If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServeds``) values must be less than or equal to 1.
-For example, a room air conditioner might be specified with ``FractionCoolLoadServeds`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServed``) values must be less than or equal to 1.
+For example, a room air conditioner might be specified with ``FractionCoolLoadServed`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+
 If any water heating systems are entered, the sum of all their ``FractionDHWLoadServed`` values must be equal to 1.
 
 .. note:: 
