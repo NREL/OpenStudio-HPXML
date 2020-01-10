@@ -535,7 +535,7 @@ Plug Loads
 
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions are used.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions based on the plug load type are used.
 
 Validating & Debugging Errors
 -----------------------------
