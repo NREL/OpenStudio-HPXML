@@ -52,7 +52,6 @@ def get_measure_instance(measure_rb_path)
     measure_class = xml_line.gsub("<class_name>", "").gsub("</class_name>", "").strip
     break
   end
-  require 'rexml/document'
   # Create new instance
   require (File.absolute_path(measure_rb_path))
   measure = eval(measure_class).new
