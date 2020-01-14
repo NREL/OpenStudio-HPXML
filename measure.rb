@@ -2,8 +2,6 @@
 # http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require 'openstudio'
-require 'rexml/document'
-require 'rexml/xpath'
 require 'pathname'
 require 'csv'
 require_relative "resources/EPvalidator"
@@ -21,6 +19,7 @@ require_relative "resources/pv"
 require_relative "resources/unit_conversions"
 require_relative "resources/util"
 require_relative "resources/waterheater"
+require_relative "resources/weather"
 require_relative "resources/xmlhelper"
 require_relative "resources/hpxml"
 
@@ -619,12 +618,6 @@ class OSModel
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       const = cond_bsmnt_surface.construction.get
       layered_const = const.to_LayeredConstruction.get
-      if layered_const.numLayers() == 1
-        # split single layer into two to prevent influencing exterior solar radiation
-        layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
-        layer_mat.setThickness(layer_mat.thickness / 2)
-        layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
-      end
       innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       # check if target surface is sharing its interior material/construction object with other surfaces
       # if so, need to clone the material/construction and make changes there, then reassign it to target surface
@@ -634,13 +627,22 @@ class OSModel
         # create new construction + new material for these surfaces
         new_const = const.clone.to_Construction.get
         cond_bsmnt_surface.setConstruction(new_const)
-        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
-        new_const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
+        new_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        layered_const = new_const.to_LayeredConstruction.get
+        layered_const.setLayer(layered_const.numLayers() - 1, new_material)
       elsif mat_share
         # create new material for existing unique construction
-        innermost_material = innermost_material.clone.to_StandardOpaqueMaterial.get
-        const.to_LayeredConstruction.get.setLayer(layered_const.numLayers() - 1, innermost_material)
+        new_material = innermost_material.clone.to_StandardOpaqueMaterial.get
+        layered_const.setLayer(layered_const.numLayers() - 1, new_material)
       end
+      if layered_const.numLayers() == 1
+        # split single layer into two to only change its inside facing property
+        layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
+        layer_mat.setThickness(layer_mat.thickness / 2)
+        layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
+      end
+      # Re-read innermost material and assign properties after adjustment
+      innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
       innermost_material.setSolarAbsorptance(0.0)
       innermost_material.setVisibleAbsorptance(0.0)
     end
@@ -2913,6 +2915,7 @@ class OSModel
     return if lighting.nil?
 
     lighting_values = HPXML.get_lighting_values(lighting: lighting)
+    return if lighting_values[:fraction_tier_i_interior].nil? # Either all or none of the values are nil
 
     if lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior] > 1
       fail "Fraction of qualifying interior lighting fixtures #{lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior]} is greater than 1."
@@ -4661,106 +4664,6 @@ def get_fan_power_installed(seer)
     return 0.365 # W/cfm
   else
     return 0.14 # W/cfm
-  end
-end
-
-class OutputVars
-  def self.SpaceHeatingElectricity
-    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
-             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
-             'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
-             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Electric Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'] }
-  end
-
-  def self.SpaceHeatingNaturalGas
-    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy'] }
-  end
-
-  def self.SpaceHeatingFuelOil
-    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil FuelOil#1 Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard FuelOil#1 Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler FuelOil#1 Energy'] }
-  end
-
-  def self.SpaceHeatingPropane
-    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy'],
-             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy'],
-             'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
-  end
-
-  def self.SpaceHeatingDFHPPrimaryLoad
-    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Heating Energy'],
-             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Heating Energy'] }
-  end
-
-  def self.SpaceHeatingDFHPBackupLoad
-    return { 'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Heating Energy'],
-             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Heating Energy'] }
-  end
-
-  def self.SpaceCoolingElectricity
-    return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
-             'OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial' => ['Evaporative Cooler Electric Energy'] }
-  end
-
-  def self.WaterHeatingElectricity
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
-             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'] }
-  end
-
-  def self.WaterHeatingElectricitySolarThermalPump
-    return { 'OpenStudio::Model::PumpConstantSpeed' => ['Pump Electric Energy'] }
-  end
-
-  def self.WaterHeatingElectricityRecircPump
-    return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
-  end
-
-  def self.WaterHeatingCombiBoilerHeatExchanger
-    return { 'OpenStudio::Model::HeatExchangerFluidToFluid' => ['Fluid Heat Exchanger Heat Transfer Energy'] }
-  end
-
-  def self.WaterHeatingCombiBoiler
-    return { 'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
-  end
-
-  def self.WaterHeatingNaturalGas
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy'] }
-  end
-
-  def self.WaterHeatingFuelOil
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater FuelOil#1 Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater FuelOil#1 Energy'] }
-  end
-
-  def self.WaterHeatingPropane
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy'] }
-  end
-
-  def self.WaterHeatingLoad
-    return { 'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'] }
-  end
-
-  def self.WaterHeatingLoadTankLosses
-    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Heat Loss Energy'],
-             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Heat Loss Energy'] }
-  end
-
-  def self.WaterHeaterLoadDesuperheater
-    return { 'OpenStudio::Model::CoilWaterHeatingDesuperheater' => ['Water Heater Heating Energy'] }
-  end
-
-  def self.WaterHeaterLoadSolarThermal
-    return { 'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Use Side Heat Transfer Energy'] }
   end
 end
 

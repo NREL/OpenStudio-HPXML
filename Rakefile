@@ -537,13 +537,7 @@ def create_hpxmls
 
       hpxml_doc = HPXML.create_hpxml(**hpxml_values)
       hpxml = hpxml_doc.elements["HPXML"]
-
-      if File.exists? File.join(tests_dir, derivative)
-        old_hpxml_doc = XMLHelper.parse_file(File.join(tests_dir, derivative))
-        created_date_and_time = HPXML.get_hpxml_values(hpxml: old_hpxml_doc.elements["HPXML"])[:created_date_and_time]
-        hpxml.elements["XMLTransactionHeaderInformation/CreatedDateAndTime"].text = created_date_and_time
-      end
-
+      hpxml.elements["XMLTransactionHeaderInformation/CreatedDateAndTime"].text = Time.new(2000, 1, 1).strftime("%Y-%m-%dT%H:%M:%S%:z") # Hard-code to prevent diffs
       HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
       site_neighbors_values.each do |site_neighbor_values|
         HPXML.add_site_neighbor(hpxml: hpxml, **site_neighbor_values)

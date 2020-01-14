@@ -232,8 +232,9 @@ Systems
 
 This section describes elements specified in HPXML's ``Systems``.
 
-If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServeds``) values must be less than or equal to 1.
-For example, a room air conditioner might be specified with ``FractionCoolLoadServeds`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServed``) values must be less than or equal to 1.
+For example, a room air conditioner might be specified with ``FractionCoolLoadServed`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+
 If any water heating systems are entered, the sum of all their ``FractionDHWLoadServed`` values must be equal to 1.
 
 .. note:: 
@@ -517,9 +518,10 @@ The building's lighting is described by six ``Lighting/LightingGroup`` elements,
 
 The fraction of lamps of the given type in the given location are provided as the ``LightingGroup/FractionofUnitsInLocation``.
 The fractions for a given location cannot sum to greater than 1.
+If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-If the ``Lighting`` element is not provided, lighting will not be modeled.
+To model a building without any lighting, all six ``Lighting/LightingGroup`` elements must be excluded.
 
 Ceiling Fans
 ~~~~~~~~~~~~
@@ -535,7 +537,7 @@ Plug Loads
 
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions are used.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions based on the plug load type are used.
 
 Validating & Debugging Errors
 -----------------------------

@@ -1,8 +1,6 @@
 require_relative 'xmlhelper'
 
 class HPXML
-  @cache = { nil => nil }
-
   def self.create_hpxml(xml_type:,
                         xml_generated_by:,
                         transaction:,
@@ -40,7 +38,7 @@ class HPXML
   end
 
   def self.get_hpxml_values(hpxml:)
-    return @cache[hpxml] if @cache.key?(hpxml)
+    return nil if hpxml.nil?
 
     vals = {}
     vals[:schema_version] = hpxml.attributes["schemaVersion"]
@@ -53,7 +51,6 @@ class HPXML
     vals[:eri_calculation_version] = XMLHelper.get_value(hpxml, "SoftwareInfo/extension/ERICalculation/Version")
     vals[:building_id] = HPXML.get_id(hpxml, "Building/BuildingID")
     vals[:event_type] = XMLHelper.get_value(hpxml, "Building/ProjectStatus/EventType")
-    @cache[hpxml] = vals
     return vals
   end
 
@@ -76,7 +73,7 @@ class HPXML
   end
 
   def self.get_site_values(site:)
-    return @cache[site] if @cache.key?(site)
+    return nil if site.nil?
 
     vals = {}
     vals[:surroundings] = XMLHelper.get_value(site, "Surroundings")
@@ -84,7 +81,6 @@ class HPXML
     vals[:fuels] = XMLHelper.get_values(site, "FuelTypesAvailable/Fuel")
     vals[:shelter_coefficient] = to_float_or_nil(XMLHelper.get_value(site, "extension/ShelterCoefficient"))
     vals[:disable_natural_ventilation] = to_bool_or_nil(XMLHelper.get_value(site, "extension/DisableNaturalVentilation"))
-    @cache[site] = vals
     return vals
   end
 
@@ -102,13 +98,12 @@ class HPXML
   end
 
   def self.get_neighbor_building_values(neighbor_building:)
-    return @cache[neighbor_building] if @cache.key?(neighbor_building)
+    return nil if neighbor_building.nil?
 
     vals = {}
     vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(neighbor_building, "Azimuth"))
     vals[:distance] = to_float_or_nil(XMLHelper.get_value(neighbor_building, "Distance"))
     vals[:height] = to_float_or_nil(XMLHelper.get_value(neighbor_building, "Height"))
-    @cache[neighbor_building] = vals
     return vals
   end
 
@@ -121,11 +116,10 @@ class HPXML
   end
 
   def self.get_building_occupancy_values(building_occupancy:)
-    return @cache[building_occupancy] if @cache.key?(building_occupancy)
+    return nil if building_occupancy.nil?
 
     vals = {}
     vals[:number_of_residents] = to_float_or_nil(XMLHelper.get_value(building_occupancy, "NumberofResidents"))
-    @cache[building_occupancy] = vals
     return vals
   end
 
@@ -151,7 +145,7 @@ class HPXML
   end
 
   def self.get_building_construction_values(building_construction:)
-    return @cache[building_construction] if @cache.key?(building_construction)
+    return nil if building_construction.nil?
 
     vals = {}
     vals[:year_built] = to_integer_or_nil(XMLHelper.get_value(building_construction, "YearBuilt"))
@@ -164,7 +158,6 @@ class HPXML
     vals[:conditioned_building_volume] = to_float_or_nil(XMLHelper.get_value(building_construction, "ConditionedBuildingVolume"))
     vals[:use_only_ideal_air_system] = to_bool_or_nil(XMLHelper.get_value(building_construction, "extension/UseOnlyIdealAirSystem"))
     vals[:residential_facility_type] = XMLHelper.get_value(building_construction, "ResidentialFacilityType")
-    @cache[building_construction] = vals
     return vals
   end
 
@@ -199,20 +192,18 @@ class HPXML
   end
 
   def self.get_climate_and_risk_zones_values(climate_and_risk_zones:)
-    return @cache[climate_and_risk_zones] if @cache.key?(climate_and_risk_zones)
-
-    weather_station = climate_and_risk_zones.elements["WeatherStation"]
+    return nil if climate_and_risk_zones.nil?
 
     vals = {}
     vals[:iecc2006] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2006]/ClimateZone")
     vals[:iecc2012] = XMLHelper.get_value(climate_and_risk_zones, "ClimateZoneIECC[Year=2012]/ClimateZone")
+    weather_station = climate_and_risk_zones.elements["WeatherStation"]
     if not weather_station.nil?
       vals[:weather_station_id] = HPXML.get_id(weather_station)
       vals[:weather_station_name] = XMLHelper.get_value(weather_station, "Name")
       vals[:weather_station_wmo] = XMLHelper.get_value(weather_station, "WMO")
       vals[:weather_station_epw_filename] = XMLHelper.get_value(weather_station, "extension/EPWFileName")
     end
-    @cache[climate_and_risk_zones] = vals
     return vals
   end
 
@@ -343,8 +334,6 @@ class HPXML
       surf = surfs[surf_id]
       surf.elements["ExposedPerimeter"].text = Float(surf.elements["ExposedPerimeter"].text) + exposed_perimeter_adjustment
     end
-
-    reset_cache
   end
 
   def self.add_air_infiltration_measurement(hpxml:,
@@ -374,7 +363,7 @@ class HPXML
   end
 
   def self.get_air_infiltration_measurement_values(air_infiltration_measurement:)
-    return @cache[air_infiltration_measurement] if @cache.key?(air_infiltration_measurement)
+    return nil if air_infiltration_measurement.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(air_infiltration_measurement)
@@ -385,7 +374,6 @@ class HPXML
     vals[:infiltration_volume] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "InfiltrationVolume"))
     vals[:constant_ach_natural] = to_float_or_nil(XMLHelper.get_value(air_infiltration_measurement, "extension/ConstantACHnatural"))
     vals[:leakiness_description] = XMLHelper.get_value(air_infiltration_measurement, "LeakinessDescription")
-    @cache[air_infiltration_measurement] = vals
     return vals
   end
 
@@ -424,7 +412,7 @@ class HPXML
   end
 
   def self.get_attic_values(attic:)
-    return @cache[attic] if @cache.key?(attic)
+    return nil if attic.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(attic)
@@ -441,7 +429,6 @@ class HPXML
     end
     vals[:vented_attic_sla] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
     vals[:vented_attic_constant_ach] = to_float_or_nil(XMLHelper.get_value(attic, "[AtticType/Attic[Vented='true']]extension/ConstantACHnatural"))
-    @cache[attic] = vals
     return vals
   end
 
@@ -485,7 +472,7 @@ class HPXML
   end
 
   def self.get_foundation_values(foundation:)
-    return @cache[foundation] if @cache.key?(foundation)
+    return nil if foundation.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(foundation)
@@ -504,7 +491,6 @@ class HPXML
     end
     vals[:vented_crawlspace_sla] = to_float_or_nil(XMLHelper.get_value(foundation, "[FoundationType/Crawlspace[Vented='true']]VentilationRate[UnitofMeasure='SLA']/Value"))
     vals[:unconditioned_basement_thermal_boundary] = XMLHelper.get_value(foundation, "[FoundationType/Basement[Conditioned='false']]ThermalBoundary")
-    @cache[foundation] = vals
     return vals
   end
 
@@ -543,9 +529,7 @@ class HPXML
   end
 
   def self.get_roof_values(roof:)
-    return @cache[roof] if @cache.key?(roof)
-
-    insulation = roof.elements["Insulation"]
+    return nil if roof.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(roof)
@@ -559,13 +543,13 @@ class HPXML
     vals[:emittance] = to_float_or_nil(XMLHelper.get_value(roof, "Emittance"))
     vals[:pitch] = to_float_or_nil(XMLHelper.get_value(roof, "Pitch"))
     vals[:radiant_barrier] = to_bool_or_nil(XMLHelper.get_value(roof, "RadiantBarrier"))
+    insulation = roof.elements["Insulation"]
     if not insulation.nil?
       vals[:insulation_id] = HPXML.get_id(insulation)
       vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
       vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
       vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
     end
-    @cache[roof] = vals
     return vals
   end
 
@@ -602,9 +586,7 @@ class HPXML
   end
 
   def self.get_rim_joist_values(rim_joist:)
-    return @cache[rim_joist] if @cache.key?(rim_joist)
-
-    insulation = rim_joist.elements["Insulation"]
+    return nil if rim_joist.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(rim_joist)
@@ -614,11 +596,11 @@ class HPXML
     vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(rim_joist, "Azimuth"))
     vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "SolarAbsorptance"))
     vals[:emittance] = to_float_or_nil(XMLHelper.get_value(rim_joist, "Emittance"))
+    insulation = rim_joist.elements["Insulation"]
     if not insulation.nil?
       vals[:insulation_id] = HPXML.get_id(insulation)
       vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
     end
-    @cache[rim_joist] = vals
     return vals
   end
 
@@ -658,9 +640,7 @@ class HPXML
   end
 
   def self.get_wall_values(wall:)
-    return @cache[wall] if @cache.key?(wall)
-
-    insulation = wall.elements["Insulation"]
+    return nil if wall.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(wall)
@@ -674,13 +654,13 @@ class HPXML
     vals[:siding] = XMLHelper.get_value(wall, "Siding")
     vals[:solar_absorptance] = to_float_or_nil(XMLHelper.get_value(wall, "SolarAbsorptance"))
     vals[:emittance] = to_float_or_nil(XMLHelper.get_value(wall, "Emittance"))
+    insulation = wall.elements["Insulation"]
     if not insulation.nil?
       vals[:insulation_id] = HPXML.get_id(insulation)
       vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
       vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
       vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
     end
-    @cache[wall] = vals
     return vals
   end
 
@@ -741,9 +721,7 @@ class HPXML
   end
 
   def self.get_foundation_wall_values(foundation_wall:)
-    return @cache[foundation_wall] if @cache.key?(foundation_wall)
-
-    insulation = foundation_wall.elements["Insulation"]
+    return nil if foundation_wall.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(foundation_wall)
@@ -754,6 +732,7 @@ class HPXML
     vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(foundation_wall, "Azimuth"))
     vals[:thickness] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "Thickness"))
     vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(foundation_wall, "DepthBelowGrade"))
+    insulation = foundation_wall.elements["Insulation"]
     if not insulation.nil?
       vals[:insulation_id] = HPXML.get_id(insulation)
       vals[:insulation_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
@@ -765,7 +744,6 @@ class HPXML
       vals[:insulation_exterior_distance_to_bottom] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous - exterior']/extension/DistanceToBottomOfInsulation"))
       vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
     end
-    @cache[foundation_wall] = vals
     return vals
   end
 
@@ -796,22 +774,20 @@ class HPXML
   end
 
   def self.get_framefloor_values(framefloor:)
-    return @cache[framefloor] if @cache.key?(framefloor)
-
-    insulation = framefloor.elements["Insulation"]
+    return nil if framefloor.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(framefloor)
     vals[:exterior_adjacent_to] = XMLHelper.get_value(framefloor, "ExteriorAdjacentTo")
     vals[:interior_adjacent_to] = XMLHelper.get_value(framefloor, "InteriorAdjacentTo")
     vals[:area] = to_float_or_nil(XMLHelper.get_value(framefloor, "Area"))
+    insulation = framefloor.elements["Insulation"]
     if not insulation.nil?
       vals[:insulation_id] = HPXML.get_id(insulation)
       vals[:insulation_assembly_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "AssemblyEffectiveRValue"))
       vals[:insulation_cavity_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='cavity']/NominalRValue"))
       vals[:insulation_continuous_r_value] = to_float_or_nil(XMLHelper.get_value(insulation, "Layer[InstallationType='continuous']/NominalRValue"))
     end
-    @cache[framefloor] = vals
     return vals
   end
 
@@ -871,10 +847,7 @@ class HPXML
   end
 
   def self.get_slab_values(slab:)
-    return @cache[slab] if @cache.key?(slab)
-
-    perimeter_insulation = slab.elements["PerimeterInsulation"]
-    under_slab_insulation = slab.elements["UnderSlabInsulation"]
+    return nil if slab.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(slab)
@@ -889,15 +862,16 @@ class HPXML
     vals[:depth_below_grade] = to_float_or_nil(XMLHelper.get_value(slab, "DepthBelowGrade"))
     vals[:carpet_fraction] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetFraction"))
     vals[:carpet_r_value] = to_float_or_nil(XMLHelper.get_value(slab, "extension/CarpetRValue"))
+    perimeter_insulation = slab.elements["PerimeterInsulation"]
     if not perimeter_insulation.nil?
       vals[:perimeter_insulation_id] = HPXML.get_id(perimeter_insulation)
       vals[:perimeter_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(perimeter_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
     end
+    under_slab_insulation = slab.elements["UnderSlabInsulation"]
     if not under_slab_insulation.nil?
       vals[:under_slab_insulation_id] = HPXML.get_id(under_slab_insulation)
       vals[:under_slab_insulation_r_value] = to_float_or_nil(XMLHelper.get_value(under_slab_insulation, "Layer[InstallationType='continuous']/NominalRValue"))
     end
-    @cache[slab] = vals
     return vals
   end
 
@@ -941,7 +915,7 @@ class HPXML
   end
 
   def self.get_window_values(window:)
-    return @cache[window] if @cache.key?(window)
+    return nil if window.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(window)
@@ -962,7 +936,6 @@ class HPXML
     vals[:overhangs_distance_to_top_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToTopOfWindow"))
     vals[:overhangs_distance_to_bottom_of_window] = to_float_or_nil(XMLHelper.get_value(window, "Overhangs/DistanceToBottomOfWindow"))
     vals[:wall_idref] = HPXML.get_idref(window, "AttachedToWall")
-    @cache[window] = vals
     return vals
   end
 
@@ -988,7 +961,7 @@ class HPXML
   end
 
   def self.get_skylight_values(skylight:)
-    return @cache[skylight] if @cache.key?(skylight)
+    return nil if skylight.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(skylight)
@@ -1004,7 +977,6 @@ class HPXML
     vals[:shgc] = to_float_or_nil(XMLHelper.get_value(skylight, "SHGC"))
     vals[:exterior_shading] = XMLHelper.get_value(skylight, "ExteriorShading/Type")
     vals[:roof_idref] = HPXML.get_idref(skylight, "AttachedToRoof")
-    @cache[skylight] = vals
     return vals
   end
 
@@ -1028,7 +1000,7 @@ class HPXML
   end
 
   def self.get_door_values(door:)
-    return @cache[door] if @cache.key?(door)
+    return nil if door.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(door)
@@ -1036,7 +1008,6 @@ class HPXML
     vals[:area] = to_float_or_nil(XMLHelper.get_value(door, "Area"))
     vals[:azimuth] = to_integer_or_nil(XMLHelper.get_value(door, "Azimuth"))
     vals[:r_value] = to_float_or_nil(XMLHelper.get_value(door, "RValue"))
-    @cache[door] = vals
     return vals
   end
 
@@ -1088,7 +1059,7 @@ class HPXML
   end
 
   def self.get_heating_system_values(heating_system:)
-    return @cache[heating_system] if @cache.key?(heating_system)
+    return nil if heating_system.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(heating_system)
@@ -1103,7 +1074,6 @@ class HPXML
     vals[:electric_auxiliary_energy] = to_float_or_nil(XMLHelper.get_value(heating_system, "ElectricAuxiliaryEnergy"))
     vals[:heating_cfm] = to_float_or_nil(XMLHelper.get_value(heating_system, "extension/HeatingFlowRate"))
     vals[:energy_star] = XMLHelper.get_values(heating_system, "ThirdPartyCertification").include?("Energy Star")
-    @cache[heating_system] = vals
     return vals
   end
 
@@ -1154,7 +1124,7 @@ class HPXML
   end
 
   def self.get_cooling_system_values(cooling_system:)
-    return @cache[cooling_system] if @cache.key?(cooling_system)
+    return nil if cooling_system.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(cooling_system)
@@ -1169,7 +1139,6 @@ class HPXML
     vals[:cooling_shr] = to_float_or_nil(XMLHelper.get_value(cooling_system, "SensibleHeatFraction"))
     vals[:cooling_cfm] = to_float_or_nil(XMLHelper.get_value(cooling_system, "extension/CoolingFlowRate"))
     vals[:energy_star] = XMLHelper.get_values(cooling_system, "ThirdPartyCertification").include?("Energy Star")
-    @cache[cooling_system] = vals
     return vals
   end
 
@@ -1254,7 +1223,7 @@ class HPXML
   end
 
   def self.get_heat_pump_values(heat_pump:)
-    return @cache[heat_pump] if @cache.key?(heat_pump)
+    return nil if heat_pump.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(heat_pump)
@@ -1278,7 +1247,6 @@ class HPXML
     vals[:heating_efficiency_hspf] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='air-to-air' or HeatPumpType='mini-split']AnnualHeatingEfficiency[Units='HSPF']/Value"))
     vals[:heating_efficiency_cop] = to_float_or_nil(XMLHelper.get_value(heat_pump, "[HeatPumpType='ground-to-air']AnnualHeatingEfficiency[Units='COP']/Value"))
     vals[:energy_star] = XMLHelper.get_values(heat_pump, "ThirdPartyCertification").include?("Energy Star")
-    @cache[heat_pump] = vals
     return vals
   end
 
@@ -1314,7 +1282,7 @@ class HPXML
   end
 
   def self.get_hvac_control_values(hvac_control:)
-    return @cache[hvac_control] if @cache.key?(hvac_control)
+    return nil if hvac_control.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(hvac_control)
@@ -1328,7 +1296,6 @@ class HPXML
     vals[:cooling_setup_hours_per_week] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "TotalSetupHoursperWeekCooling"))
     vals[:cooling_setup_start_hour] = to_integer_or_nil(XMLHelper.get_value(hvac_control, "extension/SetupStartHourCooling"))
     vals[:ceiling_fan_cooling_setpoint_temp_offset] = to_float_or_nil(XMLHelper.get_value(hvac_control, "extension/CeilingFanSetpointTempCoolingSeasonOffset"))
-    @cache[hvac_control] = vals
     return vals
   end
 
@@ -1356,7 +1323,7 @@ class HPXML
   end
 
   def self.get_hvac_distribution_values(hvac_distribution:)
-    return @cache[hvac_distribution] if @cache.key?(hvac_distribution)
+    return nil if hvac_distribution.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(hvac_distribution)
@@ -1367,7 +1334,6 @@ class HPXML
     vals[:annual_heating_dse] = to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualHeatingDistributionSystemEfficiency"))
     vals[:annual_cooling_dse] = to_float_or_nil(XMLHelper.get_value(hvac_distribution, "AnnualCoolingDistributionSystemEfficiency"))
     vals[:duct_system_sealed] = to_bool_or_nil(XMLHelper.get_value(hvac_distribution, "HVACDistributionImprovement/DuctSystemSealed"))
-    @cache[hvac_distribution] = vals
     return vals
   end
 
@@ -1386,7 +1352,7 @@ class HPXML
   end
 
   def self.get_duct_leakage_measurement_values(duct_leakage_measurement:)
-    return @cache[duct_leakage_measurement] if @cache.key?(duct_leakage_measurement)
+    return nil if duct_leakage_measurement.nil?
 
     vals = {}
     vals[:duct_type] = XMLHelper.get_value(duct_leakage_measurement, "DuctType")
@@ -1394,7 +1360,6 @@ class HPXML
     vals[:duct_leakage_units] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Units")
     vals[:duct_leakage_value] = to_float_or_nil(XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/Value"))
     vals[:duct_leakage_total_or_to_outside] = XMLHelper.get_value(duct_leakage_measurement, "DuctLeakage/TotalOrToOutside")
-    @cache[duct_leakage_measurement] = vals
     return vals
   end
 
@@ -1413,7 +1378,7 @@ class HPXML
   end
 
   def self.get_ducts_values(ducts:)
-    return @cache[ducts] if @cache.key?(ducts)
+    return nil if ducts.nil?
 
     vals = {}
     vals[:duct_type] = XMLHelper.get_value(ducts, "DuctType")
@@ -1422,7 +1387,6 @@ class HPXML
     vals[:duct_location] = XMLHelper.get_value(ducts, "DuctLocation")
     vals[:duct_fraction_area] = to_float_or_nil(XMLHelper.get_value(ducts, "FractionDuctArea"))
     vals[:duct_surface_area] = to_float_or_nil(XMLHelper.get_value(ducts, "DuctSurfaceArea"))
-    @cache[ducts] = vals
     return vals
   end
 
@@ -1461,7 +1425,7 @@ class HPXML
   end
 
   def self.get_ventilation_fan_values(ventilation_fan:)
-    return @cache[ventilation_fan] if @cache.key?(ventilation_fan)
+    return nil if ventilation_fan.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(ventilation_fan)
@@ -1475,7 +1439,6 @@ class HPXML
     vals[:sensible_recovery_efficiency_adjusted] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "AdjustedSensibleRecoveryEfficiency"))
     vals[:fan_power] = to_float_or_nil(XMLHelper.get_value(ventilation_fan, "FanPower"))
     vals[:distribution_system_idref] = HPXML.get_idref(ventilation_fan, "AttachedToHVACDistributionSystem")
-    @cache[ventilation_fan] = vals
     return vals
   end
 
@@ -1525,7 +1488,7 @@ class HPXML
   end
 
   def self.get_water_heating_system_values(water_heating_system:)
-    return @cache[water_heating_system] if @cache.key?(water_heating_system)
+    return nil if water_heating_system.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(water_heating_system)
@@ -1545,7 +1508,6 @@ class HPXML
     vals[:related_hvac] = HPXML.get_idref(water_heating_system, "RelatedHVACSystem")
     vals[:energy_star] = XMLHelper.get_values(water_heating_system, "ThirdPartyCertification").include?("Energy Star")
     vals[:standby_loss] = to_float_or_nil(XMLHelper.get_value(water_heating_system, "extension/StandbyLoss"))
-    @cache[water_heating_system] = vals
     return vals
   end
 
@@ -1591,7 +1553,7 @@ class HPXML
   end
 
   def self.get_hot_water_distribution_values(hot_water_distribution:)
-    return @cache[hot_water_distribution] if @cache.key?(hot_water_distribution)
+    return nil if hot_water_distribution.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(hot_water_distribution)
@@ -1605,7 +1567,6 @@ class HPXML
     vals[:dwhr_facilities_connected] = XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/FacilitiesConnected")
     vals[:dwhr_equal_flow] = to_bool_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/EqualFlow"))
     vals[:dwhr_efficiency] = to_float_or_nil(XMLHelper.get_value(hot_water_distribution, "DrainWaterHeatRecovery/Efficiency"))
-    @cache[hot_water_distribution] = vals
     return vals
   end
 
@@ -1624,13 +1585,12 @@ class HPXML
   end
 
   def self.get_water_fixture_values(water_fixture:)
-    return @cache[water_fixture] if @cache.key?(water_fixture)
+    return nil if water_fixture.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(water_fixture)
     vals[:water_fixture_type] = XMLHelper.get_value(water_fixture, "WaterFixtureType")
     vals[:low_flow] = to_bool_or_nil(XMLHelper.get_value(water_fixture, "LowFlow"))
-    @cache[water_fixture] = vals
     return vals
   end
 
@@ -1669,7 +1629,7 @@ class HPXML
   end
 
   def self.get_solar_thermal_system_values(solar_thermal_system:)
-    return @cache[solar_thermal_system] if @cache.key?(solar_thermal_system)
+    return nil if solar_thermal_system.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(solar_thermal_system)
@@ -1684,7 +1644,6 @@ class HPXML
     vals[:storage_volume] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "StorageVolume"))
     vals[:water_heating_system_idref] = HPXML.get_idref(solar_thermal_system, "ConnectedTo")
     vals[:solar_fraction] = to_float_or_nil(XMLHelper.get_value(solar_thermal_system, "SolarFraction"))
-    @cache[solar_thermal_system] = vals
     return vals
   end
 
@@ -1715,7 +1674,7 @@ class HPXML
   end
 
   def self.get_pv_system_values(pv_system:)
-    return @cache[pv_system] if @cache.key?(pv_system)
+    return nil if pv_system.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(pv_system)
@@ -1730,7 +1689,6 @@ class HPXML
     vals[:system_losses_fraction] = to_float_or_nil(XMLHelper.get_value(pv_system, "SystemLossesFraction"))
     vals[:number_of_panels] = to_integer_or_nil(XMLHelper.get_value(pv_system, "NumberOfPanels"))
     vals[:year_modules_manufactured] = to_integer_or_nil(XMLHelper.get_value(pv_system, "YearModulesManufactured"))
-    @cache[pv_system] = vals
     return vals
   end
 
@@ -1766,7 +1724,7 @@ class HPXML
   end
 
   def self.get_clothes_washer_values(clothes_washer:)
-    return @cache[clothes_washer] if @cache.key?(clothes_washer)
+    return nil if clothes_washer.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(clothes_washer)
@@ -1778,7 +1736,6 @@ class HPXML
     vals[:label_gas_rate] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelGasRate"))
     vals[:label_annual_gas_cost] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "LabelAnnualGasCost"))
     vals[:capacity] = to_float_or_nil(XMLHelper.get_value(clothes_washer, "Capacity"))
-    @cache[clothes_washer] = vals
     return vals
   end
 
@@ -1808,7 +1765,7 @@ class HPXML
   end
 
   def self.get_clothes_dryer_values(clothes_dryer:)
-    return @cache[clothes_dryer] if @cache.key?(clothes_dryer)
+    return nil if clothes_dryer.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(clothes_dryer)
@@ -1817,7 +1774,6 @@ class HPXML
     vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_dryer, "EnergyFactor"))
     vals[:combined_energy_factor] = to_float_or_nil(XMLHelper.get_value(clothes_dryer, "CombinedEnergyFactor"))
     vals[:control_type] = XMLHelper.get_value(clothes_dryer, "ControlType")
-    @cache[clothes_dryer] = vals
     return vals
   end
 
@@ -1843,14 +1799,13 @@ class HPXML
   end
 
   def self.get_dishwasher_values(dishwasher:)
-    return @cache[dishwasher] if @cache.key?(dishwasher)
+    return nil if dishwasher.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(dishwasher)
     vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dishwasher, "EnergyFactor"))
     vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(dishwasher, "RatedAnnualkWh"))
     vals[:place_setting_capacity] = to_integer_or_nil(XMLHelper.get_value(dishwasher, "PlaceSettingCapacity"))
-    @cache[dishwasher] = vals
     return vals
   end
 
@@ -1872,14 +1827,13 @@ class HPXML
   end
 
   def self.get_refrigerator_values(refrigerator:)
-    return @cache[refrigerator] if @cache.key?(refrigerator)
+    return nil if refrigerator.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(refrigerator)
     vals[:location] = XMLHelper.get_value(refrigerator, "Location")
     vals[:rated_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "RatedAnnualkWh"))
     vals[:adjusted_annual_kwh] = to_float_or_nil(XMLHelper.get_value(refrigerator, "extension/AdjustedAnnualkWh"))
-    @cache[refrigerator] = vals
     return vals
   end
 
@@ -1898,13 +1852,12 @@ class HPXML
   end
 
   def self.get_cooking_range_values(cooking_range:)
-    return @cache[cooking_range] if @cache.key?(cooking_range)
+    return nil if cooking_range.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(cooking_range)
     vals[:fuel_type] = XMLHelper.get_value(cooking_range, "FuelType")
     vals[:is_induction] = to_bool_or_nil(XMLHelper.get_value(cooking_range, "IsInduction"))
-    @cache[cooking_range] = vals
     return vals
   end
 
@@ -1921,12 +1874,11 @@ class HPXML
   end
 
   def self.get_oven_values(oven:)
-    return @cache[oven] if @cache.key?(oven)
+    return nil if oven.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(oven)
     vals[:is_convection] = to_bool_or_nil(XMLHelper.get_value(oven, "IsConvection"))
-    @cache[oven] = vals
     return vals
   end
 
@@ -1985,7 +1937,7 @@ class HPXML
   end
 
   def self.get_lighting_values(lighting:)
-    return @cache[lighting] if @cache.key?(lighting)
+    return nil if lighting.nil?
 
     vals = {}
     vals[:fraction_tier_i_interior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier I' and Location='interior']/FractionofUnitsInLocation"))
@@ -1994,7 +1946,6 @@ class HPXML
     vals[:fraction_tier_ii_interior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='interior']/FractionofUnitsInLocation"))
     vals[:fraction_tier_ii_exterior] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='exterior']/FractionofUnitsInLocation"))
     vals[:fraction_tier_ii_garage] = to_float_or_nil(XMLHelper.get_value(lighting, "LightingGroup[ThirdPartyCertification='ERI Tier II' and Location='garage']/FractionofUnitsInLocation"))
-    @cache[lighting] = vals
     return vals
   end
 
@@ -2017,13 +1968,12 @@ class HPXML
   end
 
   def self.get_ceiling_fan_values(ceiling_fan:)
-    return @cache[ceiling_fan] if @cache.key?(ceiling_fan)
+    return nil if ceiling_fan.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(ceiling_fan)
     vals[:efficiency] = to_float_or_nil(XMLHelper.get_value(ceiling_fan, "Airflow[FanSpeed='medium']/Efficiency"))
     vals[:quantity] = to_integer_or_nil(XMLHelper.get_value(ceiling_fan, "Quantity"))
-    @cache[ceiling_fan] = vals
     return vals
   end
 
@@ -2051,7 +2001,7 @@ class HPXML
   end
 
   def self.get_plug_load_values(plug_load:)
-    return @cache[plug_load] if @cache.key?(plug_load)
+    return nil if plug_load.nil?
 
     vals = {}
     vals[:id] = HPXML.get_id(plug_load)
@@ -2059,7 +2009,6 @@ class HPXML
     vals[:kWh_per_year] = to_float_or_nil(XMLHelper.get_value(plug_load, "Load[Units='kWh/year']/Value"))
     vals[:frac_sensible] = to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracSensible"))
     vals[:frac_latent] = to_float_or_nil(XMLHelper.get_value(plug_load, "extension/FracLatent"))
-    @cache[plug_load] = vals
     return vals
   end
 
@@ -2077,18 +2026,13 @@ class HPXML
   end
 
   def self.get_misc_loads_schedule_values(misc_loads:)
-    return @cache[misc_loads] if @cache.key?(misc_loads)
+    return nil if misc_loads.nil?
 
     vals = {}
     vals[:weekday_fractions] = XMLHelper.get_value(misc_loads, "extension/WeekdayScheduleFractions")
     vals[:weekend_fractions] = XMLHelper.get_value(misc_loads, "extension/WeekendScheduleFractions")
     vals[:monthly_multipliers] = XMLHelper.get_value(misc_loads, "extension/MonthlyScheduleMultipliers")
-    @cache[misc_loads] = vals
     return vals
-  end
-
-  def self.reset_cache
-    @cache = { nil => nil }
   end
 
   private
