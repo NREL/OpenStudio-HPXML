@@ -733,10 +733,47 @@ class Airflow
   end
 
   def self.process_nat_vent(model, nat_vent, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
-    # Sensor
+    # Schedule
+    avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
+    avail_sch.setName(Constants.ObjectNameNaturalVentilation + " avail schedule")
+    Schedule.set_schedule_type_limits(model, avail_sch, Constants.ScheduleTypeLimitsOnOff)
+    on_rule = OpenStudio::Model::ScheduleRule.new(avail_sch)
+    on_rule.setName(Constants.ObjectNameNaturalVentilation + " avail schedule rule")
+    on_rule_day = on_rule.daySchedule
+    on_rule_day.setName(Constants.ObjectNameNaturalVentilation + " avail schedule day")
+    on_rule_day.addValue(OpenStudio::Time.new(0, 24, 0, 0), 1)
+    if nat_vent.nv_num_days_per_week >= 1
+      on_rule.setApplyMonday(true)
+    end
+    if nat_vent.nv_num_days_per_week >= 2
+      on_rule.setApplyWednesday(true)
+    end
+    if nat_vent.nv_num_days_per_week >= 3
+      on_rule.setApplyFriday(true)
+    end
+    if nat_vent.nv_num_days_per_week >= 4
+      on_rule.setApplySaturday(true)
+    end
+    if nat_vent.nv_num_days_per_week >= 5
+      on_rule.setApplyTuesday(true)
+    end
+    if nat_vent.nv_num_days_per_week >= 6
+      on_rule.setApplyThursday(true)
+    end
+    if nat_vent.nv_num_days_per_week >= 7
+      on_rule.setApplySunday(true)
+    end
+    on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
+    on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
+
+    # Sensors
     zone_load = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
     zone_load.setName("#{Constants.ObjectNameNaturalVentilation} load s")
     zone_load.setKeyName(building.living.zone.name.to_s)
+
+    nvavail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    nvavail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
+    nvavail_sensor.setKeyName(avail_sch.name.to_s)
 
     # Actuator
     natvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
@@ -772,8 +809,9 @@ class Airflow
     nv_program.addLine("Set MaxNV = #{UnitConversions.convert(max_flow_rate, "cfm", "m^3/s")}")
     nv_program.addLine("Set MaxHR = #{nat_vent.max_oa_hr}")
     nv_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
+    nv_program.addLine("Set NVAvail = #{nvavail_sensor.name}")
     nv_program.addLine("Set Vwind = #{vwind_sensor.name}")
-    nv_program.addLine("Set SGNV = NVArea*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
+    nv_program.addLine("Set SGNV = (NVAvail*NVArea)*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
     nv_program.addLine("Set ZoneLoad = #{zone_load.name}")
     nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>Tout) && (ZoneLoad < 0)")
     nv_program.addLine("  Set #{natvent_flow_actuator.name} = (@Min SGNV MaxNV)")
@@ -1775,13 +1813,14 @@ class Infiltration
 end
 
 class NaturalVentilation
-  def initialize(frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh)
+  def initialize(frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh, nv_num_days_per_week)
     @frac_windows_open = frac_windows_open
     @frac_window_area_openable = frac_window_area_openable
     @max_oa_hr = max_oa_hr
     @max_oa_rh = max_oa_rh
+    @nv_num_days_per_week = nv_num_days_per_week
   end
-  attr_accessor(:frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh)
+  attr_accessor(:frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh, :nv_num_days_per_week)
 end
 
 class MechanicalVentilation

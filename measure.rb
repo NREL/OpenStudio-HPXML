@@ -3007,13 +3007,15 @@ class OSModel
     if not disable_nat_vent.nil? and disable_nat_vent
       nv_frac_windows_open = 0.0
       nv_frac_window_area_openable = 0.0
+      nv_num_days_per_week = 0
     else
       nv_frac_windows_open = 0.33
       nv_frac_window_area_openable = 0.2
+      nv_num_days_per_week = 7
     end
     nv_max_oa_hr = 0.0115
     nv_max_oa_rh = 0.7
-    nat_vent = NaturalVentilation.new(nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh)
+    nat_vent = NaturalVentilation.new(nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week)
 
     # Ducts
     duct_systems = {}
