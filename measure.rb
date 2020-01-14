@@ -2915,6 +2915,7 @@ class OSModel
     return if lighting.nil?
 
     lighting_values = HPXML.get_lighting_values(lighting: lighting)
+    return if lighting_values[:fraction_tier_i_interior].nil? # Either all or none of the values are nil
 
     if lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior] > 1
       fail "Fraction of qualifying interior lighting fixtures #{lighting_values[:fraction_tier_i_interior] + lighting_values[:fraction_tier_ii_interior]} is greater than 1."
