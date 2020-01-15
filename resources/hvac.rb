@@ -2097,17 +2097,6 @@ class HVAC
 
     obj_name = Constants.ObjectNameDehumidifier
 
-    if energy_factor.nil?
-      # Convert using Slide 19 from https://www.energystar.gov/sites/default/files/Dehumidifier%20Draft%201%20Version%205.0%20Webinar%20Slides_8%2030%2018_final.pdf
-      if water_removal_rate <= 25.0
-        energy_factor = integrated_energy_factor * 1.30 / 1.88
-      elsif water_removal_rate <= 50.0
-        energy_factor = integrated_energy_factor * 1.60 / 1.96
-      else
-        energy_factor = integrated_energy_factor * 2.80 / 3.53
-      end
-    end
-
     avg_rh_setpoint = humidity_setpoint * 100.0 # (EnergyPlus uses 60 for 60% RH)
     relative_humidity_setpoint_sch = OpenStudio::Model::ScheduleConstant.new(model)
     relative_humidity_setpoint_sch.setName(Constants.ObjectNameRelativeHumiditySetpoint)
@@ -2115,9 +2104,18 @@ class HVAC
 
     # Dehumidifier coefficients
     # Generic model coefficients from Winkler, Christensen, and Tomerlin (2011)
-    water_removal_curve = create_curve_biquadratic(model, [-1.162525707, 0.02271469, -0.000113208, 0.021110538, -0.0000693034, 0.000378843], "DXDH-WaterRemove-Cap-fT", -100, 100, -100, 100)
-    energy_factor_curve = create_curve_biquadratic(model, [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722], "DXDH-EnergyFactor-fT", -100, 100, -100, 100)
-    part_load_frac_curve = create_curve_quadratic(model, [0.90, 0.10, 0.0], "DXDH-PLF-fPLR", 0, 1, 0.7, 1)
+    w_coeff = [-1.162525707, 0.02271469, -0.000113208, 0.021110538, -0.0000693034, 0.000378843]
+    ef_coeff = [-1.902154518, 0.063466565, -0.000622839, 0.039540407, -0.000125637, -0.000176722]
+    pl_coeff = [0.90, 0.10, 0.0]
+    water_removal_curve = create_curve_biquadratic(model, w_coeff, "DXDH-WaterRemove-Cap-fT", -100, 100, -100, 100)
+    energy_factor_curve = create_curve_biquadratic(model, ef_coeff, "DXDH-EnergyFactor-fT", -100, 100, -100, 100)
+    part_load_frac_curve = create_curve_quadratic(model, pl_coeff, "DXDH-PLF-fPLR", 0, 1, 0.7, 1)
+
+    if energy_factor.nil?
+      # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
+      water_removal_rate_l = UnitConversions.convert(water_removal_rate, "pint", "L")
+      energy_factor, water_removal_rate = dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, integrated_energy_factor, water_removal_rate_l)
+    end
 
     humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
     humidistat.setName(obj_name + " #{control_zone.name} humidistat")
@@ -2128,13 +2126,35 @@ class HVAC
     zone_hvac = OpenStudio::Model::ZoneHVACDehumidifierDX.new(model, water_removal_curve, energy_factor_curve, part_load_frac_curve)
     zone_hvac.setName(obj_name + " #{control_zone.name} dx")
     zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-    zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate, "pint", "L"))
+    zone_hvac.setRatedWaterRemoval(water_removal_rate)
     zone_hvac.setRatedEnergyFactor(energy_factor)
     zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate, "cfm", "m^3/s"))
     zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
     zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
 
     zone_hvac.addToThermalZone(control_zone)
+  end
+
+  def self.dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, ief, water_removal_rate)
+    # Shift inputs under IEF test conditions to E+ supported EF test conditions
+    # test conditions
+    ief_db = UnitConversions.convert(65.0, "F", "C") # degree C
+    rh = 60.0 # for both EF and IEF test conditions, %
+
+    # Independent ariables applied to curve equations
+    var_array_ief = [1, ief_db, ief_db * ief_db, rh, rh * rh, ief_db * rh]
+
+    # Curved values under EF test conditions
+    curve_value_ef = 1 # Curves are nomalized to 1.0 under EF test conditions, 80F, 60%
+    # Curve values under IEF test conditions
+    ef_curve_value_ief = var_array_ief.zip(ef_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
+    water_removal_curve_value_ief = var_array_ief.zip(w_coeff).map { |var, coeff| var * coeff }.inject(0, :+)
+
+    # E+ inputs under EF test conditions
+    ef_input = ief / ef_curve_value_ief * curve_value_ef
+    water_removal_rate_input = water_removal_rate / water_removal_curve_value_ief * curve_value_ef
+
+    return ef_input, water_removal_rate_input
   end
 
   def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, monthly_sch,
