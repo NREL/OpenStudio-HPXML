@@ -2135,7 +2135,6 @@ class HVAC
     zone_hvac.setMaximumDryBulbTemperatureforDehumidifierOperation(40)
 
     zone_hvac.addToThermalZone(control_zone)
-
   end
 
   def self.apply_ceiling_fans(model, runner, annual_kWh, weekday_sch, weekend_sch, monthly_sch,
