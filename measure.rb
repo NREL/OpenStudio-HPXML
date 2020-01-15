@@ -3927,7 +3927,13 @@ class OSModel
         sign = "-"
       end
       program.addLine("Set #{mode}_mode = 0")
-      program.addLine("If #{liv_load_sensors[mode].name} > 0")
+      if mode == :htg
+        program.addLine("If #{liv_load_sensors[mode].name} > 0")
+      else
+        # If natural ventilation fully meets the cooling load, then the cooling load is zero. Since we
+        # want to calculate offsetting loads when natural ventilation occurs, we need to check for it here.
+        program.addLine("If (#{liv_load_sensors[mode].name} > 0) || (hr_natvent <> 0)")
+      end
       program.addLine("  Set #{mode}_mode = 1")
       program.addLine("EndIf")
       surfaces_sensors.keys.each do |k|
@@ -3937,11 +3943,14 @@ class OSModel
         program.addLine("Set #{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
       end
 
-      # If setpoint change or partial load hour, ratio the loads to equal the total for this hour.
+      # If setpoint change or partial load hour or natural ventilation, ratio the loads to equal the total for this hour.
+      # The total for this hour is the residual load seen by the HVAC system plus any initial load already met by natural ventilation.
       program.addLine("Set #{mode}_ratio = 0")
       program.addLine("If (#{setpoint_sensors[mode].name} <> #{prev_hr_setpoint_vars[mode].name}) && (#{mode}_mode > 0)")
       program.addLine("  Set #{mode}_ratio = 1")
       program.addLine("ElseIf (#{liv_load_sensors[mode].name} * #{prev_hr_load_vars[mode].name} == 0) && (#{mode}_mode > 0)")
+      program.addLine("  Set #{mode}_ratio = 1")
+      program.addLine("ElseIf #{mode}_natvent <> 0")
       program.addLine("  Set #{mode}_ratio = 1")
       program.addLine("EndIf")
       program.addLine("If #{mode}_ratio > 0")
@@ -3950,10 +3959,12 @@ class OSModel
         program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{k.to_s}")
       end
       nonsurf_names.each do |nonsurf_name|
+        next if nonsurf_name == "natvent"
+
         program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{nonsurf_name}")
       end
       program.addLine("  If #{mode}_sum <> 0")
-      program.addLine("    Set #{mode}_load_ratio = #{liv_load_sensors[mode].name} / #{mode}_sum")
+      program.addLine("    Set #{mode}_load_ratio = (#{liv_load_sensors[mode].name} - #{mode}_natvent) / #{mode}_sum")
       program.addLine("Else")
       program.addLine("    Set #{mode}_load_ratio = 1")
       program.addLine("EndIf")
@@ -3961,9 +3972,20 @@ class OSModel
         program.addLine("  Set #{mode}_#{k.to_s} = #{mode}_#{k.to_s} * #{mode}_load_ratio")
       end
       nonsurf_names.each do |nonsurf_name|
+        next if nonsurf_name == "natvent"
+
         program.addLine("  Set #{mode}_#{nonsurf_name} = #{mode}_#{nonsurf_name} * #{mode}_load_ratio")
       end
       program.addLine("EndIf")
+
+      # DEBUG: Calculate residual
+      # program.addLine("  Set #{mode}_residual = #{liv_load_sensors[mode].name}")
+      # surfaces_sensors.keys.each do |k|
+      #  program.addLine("  Set #{mode}_residual = #{mode}_residual - #{mode}_#{k.to_s}")
+      # end
+      # nonsurf_names.each do |nonsurf_name|
+      #  program.addLine("  Set #{mode}_residual = #{mode}_residual - #{mode}_#{nonsurf_name}")
+      # end
 
       program.addLine("Set #{prev_hr_load_vars[mode].name} = #{liv_load_sensors[mode].name}")
       program.addLine("Set #{prev_hr_setpoint_vars[mode].name} = #{setpoint_sensors[mode].name}")
