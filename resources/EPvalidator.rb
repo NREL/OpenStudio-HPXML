@@ -630,7 +630,7 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         # TODO: "[Location='living space' or Location='basement']" => one,
         "extension/Capacity" => one, # pints/day
-        "[extension/EnergyFactor | extension/IntegratedEnergyFactor]" => one, # liters/kWh
+        "extension/EnergyFactor | extension/IntegratedEnergyFactor" => one, # liters/kWh
         "extension/DehumidistatSetpoint" => one, # RH, fraction
       },
 
