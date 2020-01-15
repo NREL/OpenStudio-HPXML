@@ -1854,16 +1854,15 @@ class HPXML
                                       "DehumidistatSetpoint": to_float_or_nil(rh_setpoint) })
   end
 
-  def self.get_dehumidifier_values(dehumidifier:,
-                                   select: [])
+  def self.get_dehumidifier_values(dehumidifier:)
     return nil if dehumidifier.nil?
 
     vals = {}
-    vals[:id] = HPXML.get_id(dehumidifier) if is_selected(select, :id)
-    vals[:capacity] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/Capacity")) if is_selected(select, :capacity)
-    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/EnergyFactor")) if is_selected(select, :energy_factor)
-    vals[:integrated_energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/IntegratedEnergyFactor")) if is_selected(select, :integrated_energy_factor)
-    vals[:rh_setpoint] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/DehumidistatSetpoint")) if is_selected(select, :rh_setpoint)
+    vals[:id] = HPXML.get_id(dehumidifier)
+    vals[:capacity] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/Capacity"))
+    vals[:energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/EnergyFactor"))
+    vals[:integrated_energy_factor] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/IntegratedEnergyFactor"))
+    vals[:rh_setpoint] = to_float_or_nil(XMLHelper.get_value(dehumidifier, "extension/DehumidistatSetpoint"))
     return vals
   end
 
