@@ -14,8 +14,8 @@ The `HPXML Toolbox website <https://hpxml.nrel.gov/>`_ provides several resource
 EnergyPlus Use Case for HPXML
 -----------------------------
 
-HPXML is an flexible and extensible format, where nearly all fields in the schema are optional and custom fields can be included.
-Because of this, an EnergyPlus Use Case for HPXML has been developed that specifies the HPXML fields or enumeration choices required to run the measure.
+HPXML is an flexible and extensible format, where nearly all elements in the schema are optional and custom elements can be included.
+Because of this, an EnergyPlus Use Case for HPXML has been developed that specifies the HPXML elements or enumeration choices required to run the measure.
 
 Software developers should use the `EnergyPlus Use Case <https://github.com/NREL/OpenStudio-HPXML/blob/master/resources/EPvalidator.rb>`_ (defined as a set of conditional XPath expressions) as well as the `HPXML schema <https://github.com/NREL/OpenStudio-HPXML/tree/master/hpxml_schemas>`_ to construct valid HPXML files for EnergyPlus simulations.
 
@@ -27,7 +27,7 @@ The building description is entered in HPXML's ``/HPXML/Building/BuildingDetails
 Building Summary
 ~~~~~~~~~~~~~~~~
 
-This section describes fields specified in HPXML's ``BuildingSummary``. 
+This section describes elements specified in HPXML's ``BuildingSummary``. 
 It is used for high-level building information including conditioned floor area, number of bedrooms, number of residents, number of conditioned floors, etc.
 Most occupancy assumptions are based on the number of bedrooms, while the number of residents is solely used to determine heat gains from the occupants themselves.
 
@@ -61,13 +61,13 @@ The ``ClimateandRiskZones/WeatherStation`` element specifies the EnergyPlus weat
 The weather file can be entered in one of two ways:
 
 #. Using the ``WeatherStation/WMO``, which must be one of the acceptable TMY3 WMO station numbers found in the `weather/data.csv <https://github.com/NREL/OpenStudio-HPXML/blob/master/weather/data.csv>`_ file.
-   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache.zip>`_.
+   The full set of U.S. TMY3 weather files can be `downloaded here <http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip>`_.
 #. Using the ``WeatherStation/extension/EPWFileName``.
 
 Enclosure
 ~~~~~~~~~
 
-This section describes fields specified in HPXML's ``Enclosure``.
+This section describes elements specified in HPXML's ``Enclosure``.
 
 All surfaces that bound different space types in the building (i.e., not just thermal boundary surfaces) must be specified in the HPXML file.
 For example, an attached garage would generally be defined by walls adjacent to conditioned space, walls adjacent to outdoors, a slab, and a roof or ceiling.
@@ -157,12 +157,13 @@ Alternatively, an interior foundation wall between an 8 ft conditioned basement 
 
 Foundation wall insulation can be described in two ways: 
 
-Option 1. A continuous insulation layer with ``NominalRValue`` and ``DistanceToBottomOfInsulation``. 
-An insulation layer is useful for describing foundation wall insulation that doesn't span the entire height (e.g., 4 ft of insulation for an 8 ft conditioned basement). 
-When an insulation layer R-value is specified, it is modeled with a concrete wall (whose ``Thickness`` is provided) as well as air film resistances as appropriate.
+Option 1. Both interior and exterior continuous insulation layers with ``NominalRValue``, ``extension/DistanceToTopOfInsulation``, and ``extension/DistanceToBottomOfInsulation``. 
+Insulation layers are particularly useful for describing foundation wall insulation that doesn't span the entire height (e.g., 4 ft of insulation for an 8 ft conditioned basement). 
+If there is not insulation on the interior and/or exterior of the foundation wall, the continuous insulation layer must still be provided -- with the nominal R-value, etc., set to zero.
+When insulation is specified with option 1, it is modeled with a concrete wall (whose ``Thickness`` is provided) as well as air film resistances as appropriate.
 
 Option 2. An ``AssemblyEffectiveRValue``. 
-When instead providing an assembly effective R-value, the R-value should include the concrete wall and an interior air film resistance. 
+The assembly effective R-value should include the concrete wall and an interior air film resistance. 
 The exterior air film resistance (for any above-grade exposure) or any soil thermal resistance should **not** be included.
 
 Frame Floors
@@ -185,10 +186,10 @@ So, a basement slab edge adjacent to a garage or crawlspace, for example, should
 Vertical insulation adjacent to the slab can be described by a ``PerimeterInsulation/Layer/NominalRValue`` and a ``PerimeterInsulationDepth``.
 
 Horizontal insulation under the slab can be described by a ``UnderSlabInsulation/Layer/NominalRValue``. 
-The insulation can either have a depth (``UnderSlabInsulationWidth``) or can span the entire slab (``UnderSlabInsulationSpansEntireSlab``).
+The insulation can either have a fixed width (``UnderSlabInsulationWidth``) or can span the entire slab (``UnderSlabInsulationSpansEntireSlab``).
 
-For foundation types without walls, the ``DepthBelowGrade`` field must be provided.
-For foundation types with walls, the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` values.
+For foundation types without walls, the ``DepthBelowGrade`` element must be provided.
+For foundation types with walls, the ``DepthBelowGrade`` element is not used; instead the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` values.
 
 Windows
 *******
@@ -200,6 +201,7 @@ Windows must reference a HPXML ``Enclosures/Walls/Wall`` element via the ``Attac
 Windows must also have an ``Azimuth`` specified, even if the attached wall does not.
 
 In addition, the summer/winter interior shading coefficients can be optionally entered as ``InteriorShading/SummerShadingCoefficient`` and ``InteriorShading/WinterShadingCoefficient``.
+The summer interior shading coefficient must be less than or equal to the winter interior shading coefficient.
 Note that a value of 0.7 indicates a 30% reduction in solar gains (i.e., 30% shading).
 If not provided, default values will be assumed.
 
@@ -228,10 +230,11 @@ Doors must also have an ``Azimuth`` specified, even if the attached wall does no
 Systems
 ~~~~~~~
 
-This section describes fields specified in HPXML's ``Systems``.
+This section describes elements specified in HPXML's ``Systems``.
 
-If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServeds``) values must be less than or equal to 1.
-For example, a room air conditioner might be specified with ``FractionCoolLoadServeds`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServed``) values must be less than or equal to 1.
+For example, a room air conditioner might be specified with ``FractionCoolLoadServed`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+
 If any water heating systems are entered, the sum of all their ``FractionDHWLoadServed`` values must be equal to 1.
 
 .. note:: 
@@ -303,7 +306,7 @@ Thermostat
 **********
 
 A ``Systems/HVAC/HVACControl`` must be provided if any HVAC systems are specified.
-The heating setpoint (``SetpointTempHeatingSeason``) and cooling setpoint (``SetpointTempCoolingSeason``) are required fields.
+The heating setpoint (``SetpointTempHeatingSeason``) and cooling setpoint (``SetpointTempCoolingSeason``) are required elements.
 
 If there is a heating setback, it is defined with:
 
@@ -400,11 +403,11 @@ Hot Water Distribution
 A ``Systems/WaterHeating/HotWaterDistribution`` must be provided if any water heating systems are specified.
 Inputs including ``SystemType`` and ``PipeInsulation/PipeRValue`` must be provided.
 
-For a ``SystemType/Standard`` (non-recirculating) system, the following field is required:
+For a ``SystemType/Standard`` (non-recirculating) system, the following element is required:
 
 - ``PipingLength``: Measured length of hot water piping from the hot water heater to the farthest hot water fixture, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 10 feet of piping for each floor level, plus 5 feet of piping for unconditioned basements (if any)
 
-For a ``SystemType/Recirculation`` system, the following fields are required:
+For a ``SystemType/Recirculation`` system, the following elements are required:
 
 - ``ControlType``
 - ``RecirculationPipingLoopLength``: Measured recirculation loop length including both supply and return sides, measured longitudinally from plans, assuming the hot water piping does not run diagonally, plus 20 feet of piping for each floor level greater than one plus 10 feet of piping for unconditioned basements
@@ -425,11 +428,34 @@ Water fixtures should be entered as ``Systems/WaterHeating/WaterFixture`` elemen
 Each fixture must have ``WaterFixtureType`` and ``LowFlow`` elements provided.
 Fixtures should be specified as low flow if they are <= 2.0 gpm.
 
+Solar Thermal
+*************
+
+A solar hot water system can be entered as a ``Systems/SolarThermal/SolarThermalSystem``.
+The ``SystemType`` element must be 'hot water' and the ``ConnectedTo`` element is required and must point to a ``WaterHeatingSystem``.
+Note that the connected water heater cannot be of type space-heating boiler or attached to a desuperheater.
+
+Solar hot water systems can be described with either simple or detailed inputs.
+
+If using simple inputs, the following element is required:
+
+- ``SolarFraction``
+
+If using detailed inputs, the following elements are required:
+
+- ``CollectorLoopType``: 'liquid indirect' or 'liquid direct' or 'passive thermosyphon'
+- ``CollectorType``: 'single glazing black' or 'double glazing black' or 'evacuated tube' or 'integrated collector storage'
+- ``CollectorAzimuth``
+- ``CollectorTilt``
+- ``CollectorRatedOpticalEfficiency``: FRTA (y-intercept); see Directory of SRCC Certified Solar Collector Ratings
+- ``CollectorRatedThermalLosses``: FRUL (slope, in units of Btu/hr-ft^2-R); see Directory of SRCC Certified Solar Collector Ratings
+- ``StorageVolume``
+
 Photovoltaics
 *************
 
 Each solar electric (photovoltaic) system should be entered as a ``Systems/Photovoltaics/PVSystem``.
-The following fields, some adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_, are required for each PV system:
+The following elements, some adopted from the `PVWatts model <https://pvwatts.nrel.gov>`_, are required for each PV system:
 
 - ``Location``: 'ground' or 'roof' mounted
 - ``ModuleType``: 'standard', 'premium', or 'thin film'
@@ -443,7 +469,7 @@ The following fields, some adopted from the `PVWatts model <https://pvwatts.nrel
 Appliances
 ~~~~~~~~~~
 
-This section describes fields specified in HPXML's ``Appliances``.
+This section describes elements specified in HPXML's ``Appliances``.
 Many of the appliances' inputs are derived from EnergyGuide labels.
 
 The ``Location`` for clothes washers, clothes dryers, and refrigerators can be provided, while dishwashers and cooking ranges are assumed to be in the living space.
@@ -492,9 +518,10 @@ The building's lighting is described by six ``Lighting/LightingGroup`` elements,
 
 The fraction of lamps of the given type in the given location are provided as the ``LightingGroup/FractionofUnitsInLocation``.
 The fractions for a given location cannot sum to greater than 1.
+If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-If the ``Lighting`` element is not provided, lighting will not be modeled.
+To model a building without any lighting, all six ``Lighting/LightingGroup`` elements must be excluded.
 
 Ceiling Fans
 ~~~~~~~~~~~~
@@ -510,7 +537,7 @@ Plug Loads
 
 Plug loads can be provided by entering ``MiscLoads/PlugLoad`` elements; if not provided, plug loads will not be modeled.
 Currently only plug loads specified with ``PlugLoadType='other'`` and ``PlugLoadType='TV other'`` are recognized.
-The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions are used.
+The annual energy consumption (``Load[Units='kWh/year']/Value``) can be provided, otherwise default assumptions based on the plug load type are used.
 
 Validating & Debugging Errors
 -----------------------------

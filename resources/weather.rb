@@ -24,104 +24,91 @@ class WeatherDesign
 end
 
 class WeatherProcess
-  def initialize(model, runner)
-    @error = false
-
-    @model = model
-    @runner = runner
-
+  def initialize(model, runner, csv_path = nil)
     @header = WeatherHeader.new
     @data = WeatherData.new
     @design = WeatherDesign.new
 
-    @epw_path = WeatherProcess.get_epw_path(@model, @runner)
-    if @epw_path.nil?
-      @error = true
+    if not csv_path.nil?
+      load_from_csv(csv_path)
       return
     end
 
+    @model = model
+    @runner = runner
+
+    @epw_path = WeatherProcess.get_epw_path(@model)
+
     if not File.exist?(@epw_path)
-      @runner.registerError("Cannot find weather file at #{epw_path}.")
-      @error = true
-      return
+      fail "Cannot find weather file at #{epw_path}."
     end
 
     @epw_file = OpenStudio::EpwFile.new(@epw_path, true)
 
-    cached = get_cached_weather(@model)
-    return if cached or @error
-
     process_epw
-
-    cache_weather(@model)
   end
 
   def epw_path
     return @epw_path
   end
 
-  def error?
-    return @error
-  end
+  def dump_to_csv(csv_path)
+    require 'csv'
 
-  def cache_weather(model)
-    wf_ap = model.weatherFile.get.additionalProperties
+    def to_columns(data)
+      if not data.is_a? Array
+        return [data.class, data]
+      end
 
-    # Header
+      return [data.class] + data
+    end
+
+    results_out = []
     WeatherHeader::ATTRS.each do |k|
-      k = k.to_s
-      # string
-      if ['City', 'State', 'Country', 'DataSource', 'Station'].include? k
-        wf_ap.setFeature("EPWHeader#{k}", @header.send(k).to_s)
-      # double
-      elsif ['Latitude', 'Longitude', 'Timezone', 'Altitude', 'LocalPressure', 'RecordsPerHour'].include? k
-        wf_ap.setFeature("EPWHeader#{k}", @header.send(k).to_f)
-      else
-        @runner.registerError("Weather header key #{k} not handled.")
-        @error = true
-        return false
-      end
+      results_out << ["WeatherHeader.#{k}"] + to_columns(@header.send(k))
     end
-
-    # Data
     WeatherData::ATTRS.each do |k|
-      k = k.to_s
-      # double
-      if ['AnnualAvgDrybulb', 'AnnualMinDrybulb', 'AnnualMaxDrybulb', 'CDD50F', 'CDD65F',
-          'HDD50F', 'HDD65F', 'AnnualAvgWindspeed', 'WSF'].include? k
-        wf_ap.setFeature("EPWData#{k}", @data.send(k).to_f)
-      # array
-      elsif ['MonthlyAvgDrybulbs', 'GroundMonthlyTemps',
-             'MonthlyAvgDailyHighDrybulbs', 'MonthlyAvgDailyLowDrybulbs'].include? k
-        wf_ap.setFeature("EPWData#{k}", @data.send(k).join(","))
-      else
-        @runner.registerError("Weather data key #{k} not handled.")
-        @error = true
-        return false
+      results_out << ["WeatherData.#{k}"] + to_columns(@data.send(k))
+    end
+    WeatherDesign::ATTRS.each do |k|
+      results_out << ["WeatherDesign.#{k}"] + to_columns(@design.send(k))
+    end
+
+    CSV.open(csv_path, "wb") { |csv| results_out.to_a.each { |elem| csv << elem } }
+  end
+
+  def load_from_csv(csv_path)
+    csv_data = CSV.read(csv_path, headers: false)
+
+    def to_datatype(data, dataclass)
+      if dataclass == "String"
+        return data[0].to_s
+      elsif dataclass == "Float"
+        return data[0].to_f
+      elsif dataclass == "Fixnum"
+        return data[0].to_i
+      elsif dataclass == "Array"
+        return data.map(&:to_f)
       end
     end
 
-    # Design
-    WeatherDesign::ATTRS.each do |k|
-      k = k.to_s
-      # double
-      wf_ap.setFeature("EPWDesign#{k}", @design.send(k).to_f)
+    csv_data.each do |data|
+      dataname = data[0].split(".")[1]
+      if data[0].start_with? "WeatherHeader"
+        @header.send(dataname + "=", to_datatype(data[2..-1], data[1]))
+      elsif data[0].start_with? "WeatherData"
+        @data.send(dataname + "=", to_datatype(data[2..-1], data[1]))
+      elsif data[0].start_with? "WeatherDesign"
+        @design.send(dataname + "=", to_datatype(data[2..-1], data[1]))
+      end
     end
-  end
-
-  def marshal_dump
-    return [@header, @data, @design]
-  end
-
-  def marshal_load(array)
-    @header, @data, @design = array
   end
 
   attr_accessor(:header, :data, :design)
 
   private
 
-  def self.get_epw_path(model, runner)
+  def self.get_epw_path(model)
     if model.weatherFile.is_initialized
 
       wf = model.weatherFile.get
@@ -137,70 +124,7 @@ class WeatherProcess
       return epw_path
     end
 
-    runner.registerError("Model has not been assigned a weather file.")
-    return nil
-  end
-
-  def get_cached_weather(model)
-    wf_ap = model.weatherFile.get.additionalProperties
-
-    # Header
-    WeatherHeader::ATTRS.each do |k|
-      k = k.to_s
-      # string
-      if ['City', 'State', 'Country', 'DataSource', 'Station'].include? k
-        @header.send(k + "=", wf_ap.getFeatureAsString("EPWHeader#{k}"))
-        return false if !@header.send(k).is_initialized
-
-        @header.send(k + "=", @header.send(k).get)
-      # double
-      elsif ['Latitude', 'Longitude', 'Timezone', 'Altitude', 'LocalPressure', 'RecordsPerHour'].include? k
-        @header.send(k + "=", wf_ap.getFeatureAsDouble("EPWHeader#{k}"))
-        return false if !@header.send(k).is_initialized
-
-        @header.send(k + "=", @header.send(k).get)
-      else
-        @runner.registerError("Weather header key #{k} not handled.")
-        @error = true
-        return false
-      end
-    end
-
-    # Data
-    WeatherData::ATTRS.each do |k|
-      k = k.to_s
-      # double
-      if ['AnnualAvgDrybulb', 'AnnualMinDrybulb', 'AnnualMaxDrybulb', 'CDD50F', 'CDD65F',
-          'HDD50F', 'HDD65F', 'AnnualAvgWindspeed', 'WSF'].include? k
-        @data.send(k + "=", wf_ap.getFeatureAsDouble("EPWData#{k}"))
-        return false if !@data.send(k).is_initialized
-
-        @data.send(k + "=", @data.send(k).get)
-      # array
-      elsif ['MonthlyAvgDrybulbs', 'GroundMonthlyTemps',
-             'MonthlyAvgDailyHighDrybulbs', 'MonthlyAvgDailyLowDrybulbs'].include? k
-        @data.send(k + "=", wf_ap.getFeatureAsString("EPWData#{k}"))
-        return false if !@data.send(k).is_initialized
-
-        @data.send(k + "=", @data.send(k).get.split(",").map(&:to_f))
-      else
-        @runner.registerError("Weather data key #{k} not handled.")
-        @error = true
-        return false
-      end
-    end
-
-    # Design
-    WeatherDesign::ATTRS.each do |k|
-      k = k.to_s
-      # double
-      @design.send(k + "=", wf_ap.getFeatureAsDouble("EPWDesign#{k}"))
-      return false if !@design.send(k).is_initialized
-
-      @design.send(k + "=", @design.send(k).get)
-    end
-
-    return true
+    fail "Model has not been assigned a weather file."
   end
 
   def process_epw
@@ -234,41 +158,32 @@ class WeatherProcess
       if epwdata.dryBulbTemperature.is_initialized
         rowdict['db'] = epwdata.dryBulbTemperature.get
       else
-        @runner.registerError("Cannot retrieve dryBulbTemperature from the EPW for hour #{rownum + 1}.")
-        @error = true
+        fail "Cannot retrieve dryBulbTemperature from the EPW for hour #{rownum + 1}."
       end
       if epwdata.dewPointTemperature.is_initialized
         rowdict['dp'] = epwdata.dewPointTemperature.get
       else
-        @runner.registerError("Cannot retrieve dewPointTemperature from the EPW for hour #{rownum + 1}.")
-        @error = true
+        fail "Cannot retrieve dewPointTemperature from the EPW for hour #{rownum + 1}."
       end
       if epwdata.relativeHumidity.is_initialized
         rowdict['rh'] = epwdata.relativeHumidity.get / 100.0
       else
-        @runner.registerError("Cannot retrieve relativeHumidity from the EPW for hour #{rownum + 1}.")
-        @error = true
+        fail "Cannot retrieve relativeHumidity from the EPW for hour #{rownum + 1}."
       end
       if epwdata.directNormalRadiation.is_initialized
         rowdict['dirnormal'] = epwdata.directNormalRadiation.get # W/m^2
       else
-        @runner.registerError("Cannot retrieve directNormalRadiation from the EPW for hour #{rownum + 1}.")
-        @error = true
+        fail "Cannot retrieve directNormalRadiation from the EPW for hour #{rownum + 1}."
       end
       if epwdata.diffuseHorizontalRadiation.is_initialized
         rowdict['diffhoriz'] = epwdata.diffuseHorizontalRadiation.get # W/m^2
       else
-        @runner.registerError("Cannot retrieve diffuseHorizontalRadiation from the EPW for hour #{rownum + 1}.")
-        @error = true
+        fail "Cannot retrieve diffuseHorizontalRadiation from the EPW for hour #{rownum + 1}."
       end
       if epwdata.windSpeed.is_initialized
         rowdict['ws'] = epwdata.windSpeed.get
       else
-        @runner.registerError("Cannot retrieve windSpeed from the EPW for hour #{rownum + 1}.")
-        @error = true
-      end
-      if @error
-        return
+        fail "Cannot retrieve windSpeed from the EPW for hour #{rownum + 1}."
       end
 
       rowdata << rowdict
@@ -437,6 +352,18 @@ class WeatherProcess
   end
 
   def calc_ashrae_622_wsf(rowdata)
+    require 'csv'
+    ashrae_csv = File.join(File.dirname(__FILE__), 'ASHRAE622WSF.csv')
+
+    wsf = nil
+    CSV.read(ashrae_csv, headers: false).each do |data|
+      next unless data[0] == @header.Station
+
+      wsf = Float(data[1]).round(2)
+    end
+    return wsf unless wsf.nil?
+
+    # If not available in ASHRAE622WSF.csv...
     # Calculates the wSF value per report LBNL-5795E "Infiltration as Ventilation: Weather-Induced Dilution"
 
     # Constants
