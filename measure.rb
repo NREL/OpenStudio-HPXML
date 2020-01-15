@@ -2811,7 +2811,7 @@ class OSModel
 
   def self.add_dehumidifier(runner, model, building)
     dehumidifier_values = HPXML.get_dehumidifier_values(dehumidifier: building.elements["BuildingDetails/Appliances/Dehumidifier"])
-    return true if dehumidifier_values.nil?
+    return if dehumidifier_values.nil?
 
     water_removal_rate = dehumidifier_values[:capacity]
     energy_factor = dehumidifier_values[:energy_factor]
