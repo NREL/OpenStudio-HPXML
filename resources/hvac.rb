@@ -2110,11 +2110,11 @@ class HVAC
     water_removal_curve = create_curve_biquadratic(model, w_coeff, "DXDH-WaterRemove-Cap-fT", -100, 100, -100, 100)
     energy_factor_curve = create_curve_biquadratic(model, ef_coeff, "DXDH-EnergyFactor-fT", -100, 100, -100, 100)
     part_load_frac_curve = create_curve_quadratic(model, pl_coeff, "DXDH-PLF-fPLR", 0, 1, 0.7, 1)
+    water_removal_rate = UnitConversions.convert(water_removal_rate, "pint", "L")
 
     if energy_factor.nil?
       # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
-      water_removal_rate_l = UnitConversions.convert(water_removal_rate, "pint", "L")
-      energy_factor, water_removal_rate = dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, integrated_energy_factor, water_removal_rate_l)
+      energy_factor, water_removal_rate = dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, integrated_energy_factor, water_removal_rate)
     end
 
     humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
