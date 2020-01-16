@@ -186,10 +186,10 @@ So, a basement slab edge adjacent to a garage or crawlspace, for example, should
 Vertical insulation adjacent to the slab can be described by a ``PerimeterInsulation/Layer/NominalRValue`` and a ``PerimeterInsulationDepth``.
 
 Horizontal insulation under the slab can be described by a ``UnderSlabInsulation/Layer/NominalRValue``. 
-The insulation can either have a depth (``UnderSlabInsulationWidth``) or can span the entire slab (``UnderSlabInsulationSpansEntireSlab``).
+The insulation can either have a fixed width (``UnderSlabInsulationWidth``) or can span the entire slab (``UnderSlabInsulationSpansEntireSlab``).
 
 For foundation types without walls, the ``DepthBelowGrade`` element must be provided.
-For foundation types with walls, the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` values.
+For foundation types with walls, the ``DepthBelowGrade`` element is not used; instead the slab's position relative to grade is determined by the ``FoundationWall/DepthBelowGrade`` values.
 
 Windows
 *******
@@ -232,8 +232,9 @@ Systems
 
 This section describes elements specified in HPXML's ``Systems``.
 
-If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServeds``) values must be less than or equal to 1.
-For example, a room air conditioner might be specified with ``FractionCoolLoadServeds`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+If any HVAC systems are entered that provide heating (or cooling), the sum of all their ``FractionHeatLoadServed`` (or ``FractionCoolLoadServed``) values must be less than or equal to 1.
+For example, a room air conditioner might be specified with ``FractionCoolLoadServed`` equal to 0.3 if it serves 30% of the home's conditioned floor area.
+
 If any water heating systems are entered, the sum of all their ``FractionDHWLoadServed`` values must be equal to 1.
 
 .. note:: 
@@ -517,9 +518,10 @@ The building's lighting is described by six ``Lighting/LightingGroup`` elements,
 
 The fraction of lamps of the given type in the given location are provided as the ``LightingGroup/FractionofUnitsInLocation``.
 The fractions for a given location cannot sum to greater than 1.
+If the fractions sum to less than 1, the remainder is assumed to be incandescent lighting.
 Garage lighting values are ignored if the building has no garage.
 
-If the ``Lighting`` element is not provided, lighting will not be modeled.
+To model a building without any lighting, all six ``Lighting/LightingGroup`` elements must be excluded.
 
 Ceiling Fans
 ~~~~~~~~~~~~
