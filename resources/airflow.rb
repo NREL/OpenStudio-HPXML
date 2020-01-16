@@ -1446,7 +1446,7 @@ class Airflow
 
           # Calculate CFIS duct losses
 
-          duct_program.addLine("If #{mech_vent.cfis_on_for_hour_var.name}")
+          duct_program.addLine("If #{mech_vent.cfis_f_damper_extra_open_var.name} > 0")
           duct_program.addLine("  Set cfis_m3s = (#{mech_vent.cfis_fan_mfr_max_var} / 1.16097654) * #{mech_vent.cfis_airflow_frac}") # Density of 1.16097654 was back calculated using E+ results
           duct_program.addLine("  Set #{fan_rtf_var.name} = #{mech_vent.cfis_f_damper_extra_open_var.name}") # Need to use global vars to sync duct_program and infiltration program of different calling points
           duct_program.addLine("  Set #{ah_vfr_var.name} = #{fan_rtf_var.name}*cfis_m3s")
@@ -1488,7 +1488,6 @@ class Airflow
     end
 
     mech_vent.cfis_t_sum_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_t_sum_open") # Sums the time during an hour the CFIS damper has been open
-    mech_vent.cfis_on_for_hour_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_on_for_hour") # Flag to open the CFIS damper for the remainder of the hour
     mech_vent.cfis_f_damper_extra_open_var = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "#{Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")}_cfis_f_extra_damper_open") # Fraction of timestep the CFIS blower is running while hvac is not operating. Used by infiltration and duct leakage programs
 
     if mech_vent.fan_power_w.nil?
@@ -1507,7 +1506,6 @@ class Airflow
     cfis_program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     cfis_program.setName(Constants.ObjectNameMechanicalVentilation + " cfis init program")
     cfis_program.addLine("Set #{mech_vent.cfis_t_sum_open_var.name} = 0")
-    cfis_program.addLine("Set #{mech_vent.cfis_on_for_hour_var.name} = 0")
     cfis_program.addLine("Set #{mech_vent.cfis_f_damper_extra_open_var.name} = 0")
 
     return cfis_program
@@ -1699,7 +1697,6 @@ class Airflow
 
       infil_program.addLine("If @ABS(Minute - ZoneTimeStep*60) < 0.1")
       infil_program.addLine("  Set #{mech_vent.cfis_t_sum_open_var.name} = 0") # New hour, time on summation re-initializes to 0
-      infil_program.addLine("  Set #{mech_vent.cfis_on_for_hour_var.name} = 0")
       infil_program.addLine("EndIf")
 
       infil_program.addLine("Set CFIS_t_min_hr_open = #{mech_vent.cfis_open_time}") # minutes per hour the CFIS damper is open
@@ -1711,7 +1708,6 @@ class Airflow
       infil_program.addLine("  Set CFIS_t_fan_on = 60 - (CFIS_t_min_hr_open - #{mech_vent.cfis_t_sum_open_var.name})") # minute at which the blower needs to turn on to meet the ventilation requirements
       # Evaluate condition of if supply fan have to run to achieve target minutes per hour of operation
       infil_program.addLine("  If (Minute+0.00001) >= CFIS_t_fan_on")
-      infil_program.addLine("    Set #{mech_vent.cfis_on_for_hour_var.name} = 1") # on flag for duct program
       # Consider fan rtf read in current calling point (results of previous time step) + CFIS_t_fan_on based on min/hr requirement and previous EMS results.
       infil_program.addLine("    Set cfis_fan_runtime = @Max (@ABS(Minute - CFIS_t_fan_on)) (fan_rtf_hvac * ZoneTimeStep * 60)")
       # If fan_rtf_hvac, make sure it's not exceeding ventilation requirements
@@ -1983,8 +1979,8 @@ class MechanicalVentilation
   end
   attr_accessor(:type, :total_efficiency, :total_efficiency_adjusted, :whole_house_cfm, :fan_power_w, :sensible_efficiency, :sensible_efficiency_adjusted,
                 :dryer_exhaust, :range_exhaust, :range_exhaust_hour, :bathroom_exhaust, :bathroom_exhaust_hour,
-                :cfis_open_time, :cfis_airflow_frac, :cfis_air_loop, :cfis_t_sum_open_var, :cfis_on_for_hour_var,
-                :cfis_f_damper_extra_open_var, :cfis_fan_mfr_max_var, :cfis_fan_rtf_sensor, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
+                :cfis_open_time, :cfis_airflow_frac, :cfis_air_loop, :cfis_t_sum_open_var, :cfis_f_damper_extra_open_var,
+                :cfis_fan_mfr_max_var, :cfis_fan_rtf_sensor, :cfis_fan_pressure_rise, :cfis_fan_efficiency,
                 :frac_fan_heat, :bathroom_hour_avg_exhaust, :range_hood_hour_avg_exhaust,
                 :spot_fan_w_per_cfm, :latent_effectiveness, :sensible_effectiveness, :dryer_exhaust_day_shift, :has_dryer)
 end
