@@ -103,22 +103,6 @@ class Constants
     return 'Building America'
   end
 
-  def self.CalcTypeERIRatedHome
-    return 'ERI Rated Home'
-  end
-
-  def self.CalcTypeERIReferenceHome
-    return 'ERI Reference Home'
-  end
-
-  def self.CalcTypeERIIndexAdjustmentDesign
-    return 'ERI Index Adjustment Design'
-  end
-
-  def self.CalcTypeERIIndexAdjustmentReferenceHome
-    return 'ERI Index Adjustment Reference Home'
-  end
-
   def self.DuctSideReturn
     return 'return'
   end
@@ -127,8 +111,8 @@ class Constants
     return 'supply'
   end
 
-  def self.OptionallyDuctedSystemIsDucted
-    return __method__.to_s
+  def self.ERIVersions
+    return ['2014', '2014A', '2014AE', '2014AEG']
   end
 
   def self.FacadeFront
@@ -389,6 +373,10 @@ class Constants
 
   def self.ObjectNameTankHX
     return "dhw source hx"
+  end
+
+  def self.OptionallyDuctedSystemIsDucted
+    return __method__.to_s
   end
 
   def self.PlantLoopDomesticWater
