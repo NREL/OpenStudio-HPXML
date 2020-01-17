@@ -342,10 +342,10 @@ class OSModel
     add_rim_joists(runner, model, building, spaces)
     add_framefloors(runner, model, building, spaces)
     add_foundation_walls_slabs(runner, model, building, spaces)
-    is_sch = add_interior_shading_schedule(runner, model, weather)
-    add_windows(runner, model, building, spaces, weather, is_sch)
+    add_interior_shading_schedule(runner, model, weather)
+    add_windows(runner, model, building, spaces, weather)
     add_doors(runner, model, building, spaces)
-    add_skylights(runner, model, building, spaces, weather, is_sch)
+    add_skylights(runner, model, building, spaces, weather)
     add_conditioned_floor_area(runner, model, building, spaces)
 
     # update living space/zone global variable
@@ -1729,11 +1729,10 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
-    sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
-    return sch
+    @cool_season_sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
   end
 
-  def self.add_windows(runner, model, building, spaces, weather, is_sch)
+  def self.add_windows(runner, model, building, spaces, weather)
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
@@ -1800,14 +1799,14 @@ class OSModel
 
       Constructions.apply_window(model, [sub_surface],
                                  "WindowConstruction",
-                                 weather, is_sch, ufactor, shgc,
+                                 weather, @cool_season_sch, ufactor, shgc,
                                  heat_shade_mult, cool_shade_mult)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, "wall")
   end
 
-  def self.add_skylights(runner, model, building, spaces, weather, is_sch)
+  def self.add_skylights(runner, model, building, spaces, weather)
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_values = HPXML.get_skylight_values(skylight: skylight)
@@ -1860,7 +1859,7 @@ class OSModel
       heat_shade_mult = 1.0
       Constructions.apply_skylight(model, [sub_surface],
                                    "SkylightConstruction",
-                                   weather, is_sch, ufactor, shgc,
+                                   weather, @cool_season_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
 
@@ -3525,26 +3524,6 @@ class OSModel
     liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
     liv_load_sensors[:clg].setName("clg_load_liv")
 
-    setpoint_sensors = {}
-
-    setpoint_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Thermostat Heating Setpoint Temperature")
-    setpoint_sensors[:htg].setName("htg_setpoint_temp")
-    setpoint_sensors[:htg].setKeyName(@living_zone.name.to_s)
-
-    setpoint_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Thermostat Cooling Setpoint Temperature")
-    setpoint_sensors[:clg].setName("clg_setpoint_temp")
-    setpoint_sensors[:clg].setKeyName(@living_zone.name.to_s)
-
-    prev_hr_load_vars = {}
-
-    prev_hr_load_vars[:htg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_htg_load_liv")
-    prev_hr_load_vars[:clg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_clg_load_liv")
-
-    prev_hr_setpoint_vars = {}
-
-    prev_hr_setpoint_vars[:htg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_htg_setpoint")
-    prev_hr_setpoint_vars[:clg] = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "prev_hr_clg_setpoint")
-
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
 
     surfaces_sensors = { :walls => [],
@@ -3852,6 +3831,11 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
+    # EMS Sensors: Cooling season
+    cool_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    cool_ssn_sensor.setName("cool_season")
+    cool_ssn_sensor.setKeyName(@cool_season_sch.schedule.name.to_s)
+
     nonsurf_names = ["intgains", "infil", "mechvent", "natvent", "ducts"]
 
     # EMS program
@@ -3920,63 +3904,30 @@ class OSModel
     end
 
     # EMS program: Heating vs Cooling logic
+    program.addLine("Set htg_mode = 0")
+    program.addLine("Set clg_mode = 0")
+    program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
+    program.addLine("  Set htg_mode = 1")
+    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (hr_natvent <> 0)") # Assign hour to cooling if cooling load or cooling need met by natural ventilation
+    program.addLine("  Set clg_mode = 1")
+    program.addLine("ElseIf (#{cool_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition
+    program.addLine("  Set clg_mode = 1")
+    program.addLine("Else") # No load, assign hour to heating if not in cooling season definition
+    program.addLine("  Set htg_mode = 1")
+    program.addLine("EndIf")
+
     [:htg, :clg].each do |mode|
       if mode == :htg
         sign = ""
       else
         sign = "-"
       end
-      program.addLine("Set #{mode}_mode = 0")
-      if mode == :htg
-        program.addLine("If #{liv_load_sensors[mode].name} > 0")
-      else
-        # If natural ventilation fully meets the cooling load, then the cooling load is zero. Since we
-        # want to calculate offsetting loads when natural ventilation occurs, we need to check for it here.
-        program.addLine("If (#{liv_load_sensors[mode].name} > 0) || (hr_natvent <> 0)")
-      end
-      program.addLine("  Set #{mode}_mode = 1")
-      program.addLine("EndIf")
       surfaces_sensors.keys.each do |k|
         program.addLine("Set #{mode}_#{k.to_s} = #{sign}hr_#{k.to_s} * #{mode}_mode")
       end
       nonsurf_names.each do |nonsurf_name|
         program.addLine("Set #{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
       end
-
-      # If setpoint change or partial load hour or natural ventilation, ratio the loads to equal the total for this hour.
-      # The total for this hour is the residual load seen by the HVAC system plus any initial load already met by natural ventilation.
-      program.addLine("Set #{mode}_ratio = 0")
-      program.addLine("If (#{setpoint_sensors[mode].name} <> #{prev_hr_setpoint_vars[mode].name}) && (#{mode}_mode > 0)")
-      program.addLine("  Set #{mode}_ratio = 1")
-      program.addLine("ElseIf (#{liv_load_sensors[mode].name} * #{prev_hr_load_vars[mode].name} == 0) && (#{mode}_mode > 0)")
-      program.addLine("  Set #{mode}_ratio = 1")
-      program.addLine("ElseIf #{mode}_natvent <> 0")
-      program.addLine("  Set #{mode}_ratio = 1")
-      program.addLine("EndIf")
-      program.addLine("If #{mode}_ratio > 0")
-      program.addLine("  Set #{mode}_sum = 0")
-      surfaces_sensors.keys.each do |k|
-        program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{k.to_s}")
-      end
-      nonsurf_names.each do |nonsurf_name|
-        next if nonsurf_name == "natvent"
-
-        program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{nonsurf_name}")
-      end
-      program.addLine("  If #{mode}_sum <> 0")
-      program.addLine("    Set #{mode}_load_ratio = (#{liv_load_sensors[mode].name} - #{mode}_natvent) / #{mode}_sum")
-      program.addLine("Else")
-      program.addLine("    Set #{mode}_load_ratio = 1")
-      program.addLine("EndIf")
-      surfaces_sensors.keys.each do |k|
-        program.addLine("  Set #{mode}_#{k.to_s} = #{mode}_#{k.to_s} * #{mode}_load_ratio")
-      end
-      nonsurf_names.each do |nonsurf_name|
-        next if nonsurf_name == "natvent"
-
-        program.addLine("  Set #{mode}_#{nonsurf_name} = #{mode}_#{nonsurf_name} * #{mode}_load_ratio")
-      end
-      program.addLine("EndIf")
 
       # DEBUG: Calculate residual
       # program.addLine("  Set #{mode}_residual = #{liv_load_sensors[mode].name}")
@@ -3986,9 +3937,6 @@ class OSModel
       # nonsurf_names.each do |nonsurf_name|
       #  program.addLine("  Set #{mode}_residual = #{mode}_residual - #{mode}_#{nonsurf_name}")
       # end
-
-      program.addLine("Set #{prev_hr_load_vars[mode].name} = #{liv_load_sensors[mode].name}")
-      program.addLine("Set #{prev_hr_setpoint_vars[mode].name} = #{setpoint_sensors[mode].name}")
     end
 
     # EMS output variables
