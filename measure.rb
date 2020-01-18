@@ -344,10 +344,10 @@ class OSModel
     add_rim_joists(runner, model, building, spaces)
     add_framefloors(runner, model, building, spaces)
     add_foundation_walls_slabs(runner, model, building, spaces)
-    add_interior_shading_schedule(runner, model, weather)
-    add_windows(runner, model, building, spaces, weather)
+    is_sch = add_interior_shading_schedule(runner, model, weather)
+    add_windows(runner, model, building, spaces, weather, is_sch)
     add_doors(runner, model, building, spaces)
-    add_skylights(runner, model, building, spaces, weather)
+    add_skylights(runner, model, building, spaces, weather, is_sch)
     add_conditioned_floor_area(runner, model, building, spaces)
 
     # update living space/zone global variable
@@ -1731,10 +1731,11 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
-    @cool_season_sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    is_sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    return is_sch
   end
 
-  def self.add_windows(runner, model, building, spaces, weather)
+  def self.add_windows(runner, model, building, spaces, weather, is_sch)
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Windows/Window") do |window|
       window_values = HPXML.get_window_values(window: window)
@@ -1801,14 +1802,14 @@ class OSModel
 
       Constructions.apply_window(model, [sub_surface],
                                  "WindowConstruction",
-                                 weather, @cool_season_sch, ufactor, shgc,
+                                 weather, is_sch, ufactor, shgc,
                                  heat_shade_mult, cool_shade_mult)
     end
 
     apply_adiabatic_construction(runner, model, surfaces, "wall")
   end
 
-  def self.add_skylights(runner, model, building, spaces, weather)
+  def self.add_skylights(runner, model, building, spaces, weather, is_sch)
     surfaces = []
     building.elements.each("BuildingDetails/Enclosure/Skylights/Skylight") do |skylight|
       skylight_values = HPXML.get_skylight_values(skylight: skylight)
@@ -1861,7 +1862,7 @@ class OSModel
       heat_shade_mult = 1.0
       Constructions.apply_skylight(model, [sub_surface],
                                    "SkylightConstruction",
-                                   weather, @cool_season_sch, ufactor, shgc,
+                                   weather, is_sch, ufactor, shgc,
                                    heat_shade_mult, cool_shade_mult)
     end
 
@@ -3518,13 +3519,9 @@ class OSModel
 
     # EMS Sensors: Global
 
-    liv_load_sensors = {}
-
-    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
-    liv_load_sensors[:htg].setName("htg_load_liv")
-
-    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
-    liv_load_sensors[:clg].setName("clg_load_liv")
+    t_living = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
+    t_living.setName("t_living")
+    t_living.setKeyName(@living_zone.name.to_s)
 
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
 
@@ -3833,11 +3830,6 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
-    # EMS Sensors: Cooling season
-    cool_ssn_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    cool_ssn_sensor.setName("cool_season")
-    cool_ssn_sensor.setKeyName(@cool_season_sch.schedule.name.to_s)
-
     nonsurf_names = ["intgains", "infil", "mechvent", "natvent", "ducts"]
 
     # EMS program
@@ -3905,17 +3897,20 @@ class OSModel
       program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
     end
 
+    avg_setpoint = @htg_weekday_setpoints.flatten.inject(:+)
+    avg_setpoint += @htg_weekend_setpoints.flatten.inject(:+)
+    avg_setpoint += @clg_weekday_setpoints.flatten.inject(:+)
+    avg_setpoint += @clg_weekend_setpoints.flatten.inject(:+)
+    num_elements = (@htg_weekday_setpoints.flatten.length * 4)
+    avg_setpoint /= num_elements.to_f
+
     # EMS program: Heating vs Cooling logic
     program.addLine("Set htg_mode = 0")
     program.addLine("Set clg_mode = 0")
-    program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
+    program.addLine("If #{t_living.name} < #{UnitConversions.convert(avg_setpoint, "F", "C").round(2)}")
     program.addLine("  Set htg_mode = 1")
-    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (hr_natvent <> 0)") # Assign hour to cooling if cooling load or cooling need met by natural ventilation
+    program.addLine("Else")
     program.addLine("  Set clg_mode = 1")
-    program.addLine("ElseIf (#{cool_ssn_sensor.name} > 0)") # No load, assign hour to cooling if in cooling season definition
-    program.addLine("  Set clg_mode = 1")
-    program.addLine("Else") # No load, assign hour to heating if not in cooling season definition
-    program.addLine("  Set htg_mode = 1")
     program.addLine("EndIf")
 
     [:htg, :clg].each do |mode|
