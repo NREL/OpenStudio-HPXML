@@ -1,6 +1,7 @@
 # OpenStudio-HPXML
 
 [![CircleCI](https://circleci.com/gh/NREL/OpenStudio-HPXML.svg?style=shield)](https://circleci.com/gh/NREL/OpenStudio-HPXML)
+[![Documentation Status](https://readthedocs.org/projects/openstudio-hpxml/badge/?version=latest)](https://openstudio-hpxml.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/NREL/OpenStudio-HPXML/branch/master/graph/badge.svg)](https://codecov.io/gh/NREL/OpenStudio-HPXML)
 
 

@@ -95,9 +95,6 @@ def create_hpxmls
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
 
-    'base-addenda-exclude-g.xml' => 'base.xml',
-    'base-addenda-exclude-g-e.xml' => 'base.xml',
-    'base-addenda-exclude-g-e-a.xml' => 'base.xml',
     'base-appliances-dehumidifier.xml' => 'base-location-dallas-tx.xml',
     'base-appliances-dehumidifier-ief.xml' => 'base-appliances-dehumidifier.xml',
     'base-appliances-dishwasher-ef.xml' => 'base.xml',
@@ -304,6 +301,11 @@ def create_hpxmls
     'base-pv-module-thinfilm.xml' => 'base.xml',
     'base-pv-multiple.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
+    'base-version-2014.xml' => 'base.xml',
+    'base-version-2014A.xml' => 'base.xml',
+    'base-version-2014AE.xml' => 'base.xml',
+    'base-version-2014AEG.xml' => 'base.xml',
+    'base-version-latest.xml' => 'base.xml',
 
     'cfis/base-cfis.xml' => 'base.xml',
     'cfis/base-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -680,15 +682,19 @@ def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
                      :transaction => "create",
                      :software_program_used => nil,
                      :software_program_version => nil,
-                     :eri_calculation_version => "2014AEG",
+                     :eri_calculation_version => nil,
                      :building_id => "MyBuilding",
                      :event_type => "proposed workscope" }
-  elsif ['base-addenda-exclude-g.xml'].include? hpxml_file
-    hpxml_values[:eri_calculation_version] = "2014AE"
-  elsif ['base-addenda-exclude-g-e.xml'].include? hpxml_file
-    hpxml_values[:eri_calculation_version] = "2014A"
-  elsif ['base-addenda-exclude-g-e-a.xml'].include? hpxml_file
+  elsif ['base-version-2014.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = "2014"
+  elsif ['base-version-2014A.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014A"
+  elsif ['base-version-2014AE.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014AE"
+  elsif ['base-version-2014AEG.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014AEG"
+  elsif ['base-version-latest.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = 'latest'
   end
   return hpxml_values
 end

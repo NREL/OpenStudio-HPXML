@@ -25,8 +25,8 @@ class HPXML
     software_info = XMLHelper.add_element(hpxml, "SoftwareInfo")
     XMLHelper.add_element(software_info, "SoftwareProgramUsed", software_program_used) unless software_program_used.nil?
     XMLHelper.add_element(software_info, "SoftwareProgramVersion", software_program_version) unless software_program_version.nil?
-    eri_calculation = XMLHelper.add_element(software_info, "extension/ERICalculation")
-    XMLHelper.add_element(eri_calculation, "Version", eri_calculation_version) unless eri_calculation_version.nil?
+    HPXML.add_extension(parent: software_info,
+                        extensions: { "ERICalculation/Version": eri_calculation_version })
 
     building = XMLHelper.add_element(hpxml, "Building")
     building_building_id = XMLHelper.add_element(building, "BuildingID")
