@@ -3519,6 +3519,14 @@ class OSModel
 
     # EMS Sensors: Global
 
+    liv_load_sensors = {}
+
+    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
+    liv_load_sensors[:htg].setName("htg_load_liv")
+
+    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
+    liv_load_sensors[:clg].setName("clg_load_liv")
+
     t_living = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Air Temperature")
     t_living.setName("t_living")
     t_living.setKeyName(@living_zone.name.to_s)
@@ -3907,7 +3915,11 @@ class OSModel
     # EMS program: Heating vs Cooling logic
     program.addLine("Set htg_mode = 0")
     program.addLine("Set clg_mode = 0")
-    program.addLine("If #{t_living.name} < #{UnitConversions.convert(avg_setpoint, "F", "C").round(2)}")
+    program.addLine("If (#{liv_load_sensors[:htg].name} > 0)") # Assign hour to heating if heating load
+    program.addLine("  Set htg_mode = 1")
+    program.addLine("ElseIf (#{liv_load_sensors[:clg].name} > 0) || (hr_natvent <> 0)") # Assign hour to cooling if cooling load or cooling need met by natural ventilation
+    program.addLine("  Set clg_mode = 1")
+    program.addLine("ElseIf #{t_living.name} < #{UnitConversions.convert(avg_setpoint, "F", "C").round(2)}")
     program.addLine("  Set htg_mode = 1")
     program.addLine("Else")
     program.addLine("  Set clg_mode = 1")
