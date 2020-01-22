@@ -1938,13 +1938,29 @@ class OSModel
     if not clothes_washer_values.nil?
       cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
       cw_ler = clothes_washer_values[:rated_annual_kwh]
+      if cw_ler.nil?
+        cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
+      end
       cw_elec_rate = clothes_washer_values[:label_electric_rate]
       cw_gas_rate = clothes_washer_values[:label_gas_rate]
       cw_agc = clothes_washer_values[:label_annual_gas_cost]
+      if cw_elec_rate.nil? or cw_gas_rate.nil? or cw_agc.nil?
+        cw_elec_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
+        cw_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
+        cw_agc = HotWaterAndAppliances.get_clothes_washer_reference_agc()
+        # FIXME: add an error to ask users to enter all rates above. Otherwise, default rates will be used.  
+      end
       cw_cap = clothes_washer_values[:capacity]
+      if cw_cap.nil?
+        cw_cap = HotWaterAndAppliances.get_clothes_washer_reference_cap()
+      end
       cw_mef = clothes_washer_values[:modified_energy_factor]
       if cw_mef.nil?
-        cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
+        if clothes_washer_values[:integrated_modified_energy_factor].nil?
+          cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(HotWaterAndAppliances.get_clothes_washer_reference_imef())
+        else
+          cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(clothes_washer_values[:integrated_modified_energy_factor])
+        end
       end
     else
       cw_mef = cw_ler = cw_elec_rate = cw_gas_rate = cw_agc = cw_cap = cw_space = nil
@@ -1956,9 +1972,16 @@ class OSModel
       cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
       cd_fuel = clothes_dryer_values[:fuel_type]
       cd_control = clothes_dryer_values[:control_type]
+      if cd_control.nil?
+        cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
+      end
       cd_ef = clothes_dryer_values[:energy_factor]
       if cd_ef.nil?
-        cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
+        if clothes_dryer_values[:combined_energy_factor].nil?
+          cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(cd_fuel))
+        else 
+          cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(clothes_dryer_values[:combined_energy_factor])
+        end
       end
     else
       cd_ef = cd_control = cd_fuel = cd_space = nil
@@ -1968,9 +1991,16 @@ class OSModel
     dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
     if not dishwasher_values.nil?
       dw_cap = dishwasher_values[:place_setting_capacity]
+      if dw_cap.nil?
+        dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
+      end
       dw_ef = dishwasher_values[:energy_factor]
       if dw_ef.nil?
-        dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
+        if dishwasher_values[:rated_annual_kwh].nil?
+          dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
+        else
+          dw_ef = HotWaterAndAppliances.calc_dishwasher_ef_from_annual_kwh(dishwasher_values[:rated_annual_kwh])
+        end
       end
     else
       dw_ef = dw_cap = nil
@@ -1982,7 +2012,11 @@ class OSModel
       fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
       fridge_annual_kwh = refrigerator_values[:adjusted_annual_kwh]
       if fridge_annual_kwh.nil?
-        fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+        if refrigerator_values[:rated_annual_kwh].nil?
+          fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
+        else
+          fridge_annual_kwh = refrigerator_values[:rated_annual_kwh]
+        end
       end
     else
       fridge_annual_kwh = fridge_space = nil
@@ -1994,7 +2028,13 @@ class OSModel
     if not cooking_range_values.nil? and not oven_values.nil?
       cook_fuel_type = cooking_range_values[:fuel_type]
       cook_is_induction = cooking_range_values[:is_induction]
+      if cook_is_induction.nil?
+        cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
+      end
       oven_is_convection = oven_values[:is_convection]
+      if oven_is_convection.nil?
+        oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
+      end
     else
       cook_fuel_type = cook_is_induction = oven_is_convection = nil
     end

@@ -597,12 +597,12 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Appliances/ClothesWasher" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
-        "ModifiedEnergyFactor | IntegratedModifiedEnergyFactor" => one,
-        "RatedAnnualkWh" => one,
-        "LabelElectricRate" => one,
-        "LabelGasRate" => one,
-        "LabelAnnualGasCost" => one,
-        "Capacity" => one,
+        "ModifiedEnergyFactor | IntegratedModifiedEnergyFactor" => zero_or_one,
+        "RatedAnnualkWh" => zero_or_one,
+        "LabelElectricRate" => zero_or_one,
+        "LabelGasRate" => zero_or_one,
+        "LabelAnnualGasCost" => zero_or_one,
+        "Capacity" => zero_or_one,
       },
 
       # [ClothesDryer]
@@ -610,30 +610,30 @@ class EnergyPlusValidator
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity' or FuelType='wood']" => one,
-        "EnergyFactor | CombinedEnergyFactor" => one,
-        "[ControlType='timer' or ControlType='moisture']" => one,
+        "EnergyFactor | CombinedEnergyFactor" => zero_or_one,
+        "[ControlType='timer' or ControlType='moisture']" => zero_or_one,
       },
 
       # [Dishwasher]
       "/HPXML/Building/BuildingDetails/Appliances/Dishwasher" => {
         "SystemIdentifier" => one, # Required by HPXML schema
-        "EnergyFactor | RatedAnnualkWh" => one,
-        "PlaceSettingCapacity" => one,
+        "EnergyFactor | RatedAnnualkWh" => zero_or_one,
+        "PlaceSettingCapacity" => zero_or_one,
       },
 
       # [Refrigerator]
       "/HPXML/Building/BuildingDetails/Appliances/Refrigerator" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[Location='living space' or Location='basement - conditioned' or Location='basement - unconditioned' or Location='garage']" => one,
-        "RatedAnnualkWh | extension/AdjustedAnnualkWh" => one_or_more,
+        "RatedAnnualkWh | extension/AdjustedAnnualkWh" => zero_or_one,
       },
 
       # [CookingRange]
       "/HPXML/Building/BuildingDetails/Appliances/CookingRange" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "[FuelType='natural gas' or FuelType='fuel oil' or FuelType='propane' or FuelType='electricity' or FuelType='wood']" => one,
-        "IsInduction" => one,
-        "../Oven/IsConvection" => one,
+        "IsInduction" => zero_or_one,
+        "../Oven/IsConvection" => zero_or_one,
       },
 
       # [Lighting]
