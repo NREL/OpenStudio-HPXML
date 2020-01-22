@@ -3,16 +3,10 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-12-16T15:23:36-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
-  <SoftwareInfo>
-    <extension>
-      <ERICalculation>
-        <Version>2014AEG</Version>
-      </ERICalculation>
-    </extension>
-  </SoftwareInfo>
+  <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
     <ProjectStatus>
