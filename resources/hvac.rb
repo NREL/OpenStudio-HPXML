@@ -2149,23 +2149,30 @@ class HVAC
     dehumidifier_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Dehumidifier Sensible Heating Energy")
     dehumidifier_sensor.setName("dehumidifier_sens_htg")
     dehumidifier_sensor.setKeyName("#{dehumidifier.name.to_s}")
+
+    # Global variables, also used for component load program
+    dh_htg_load = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "dehumidified_htg_load")
+    dh_clg_load = OpenStudio::Model::EnergyManagementSystemGlobalVariable.new(model, "dehumidified_clg_load")
+
     # program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
     program.setName("Dehumidified load program")
-    program.addLine("Set dehumidified_htg_load = 0")
-    program.addLine("Set dehumidified_clg_load = 0")
+    program.addLine("Set #{dh_htg_load.name} = 0")
+    program.addLine("Set #{dh_clg_load.name} = 0")
     program.addLine("Set htg_load = #{liv_to_htg_load_sensor.name} * ZoneTimeStep * 3600 - #{dehumidifier_sensor.name}")
     program.addLine("Set clg_load = #{liv_to_clg_load_sensor.name} * ZoneTimeStep * 3600 - #{dehumidifier_sensor.name}")
     program.addLine("If htg_load > 0 && clg_load > 0")
-    program.addLine("  Set dehumidified_htg_load = htg_load")
+    program.addLine("  Set #{dh_htg_load.name} = htg_load")
     program.addLine("ElseIf htg_load < 0 && clg_load < 0")
-    program.addLine("  Set dehumidified_clg_load = - clg_load")
+    program.addLine("  Set #{dh_clg_load.name} = - clg_load")
     program.addLine("EndIf")
+
     # calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("Dehumidified load program calling manager")
     program_calling_manager.setCallingPoint("EndOfSystemTimestepBeforeHVACReporting")
     program_calling_manager.addProgram(program)
+
     # output vars
     ems_outvars = []
     ["htg", "clg"].each do |mode|
