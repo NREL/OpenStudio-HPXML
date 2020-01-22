@@ -1,6 +1,5 @@
 require_relative "constants"
 require_relative "util"
-require_relative "weather"
 require_relative "geometry"
 require_relative "schedules"
 require_relative "unit_conversions"
@@ -1355,8 +1354,7 @@ class Waterheater
 
   def self.get_combi_system_fuel(idref, orig_details)
     orig_details.elements.each("Systems/HVAC/HVACPlant/HeatingSystem") do |heating_system|
-      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system,
-                                                              select: [:id, :heating_system_fuel])
+      heating_system_values = HPXML.get_heating_system_values(heating_system: heating_system)
       next unless heating_system_values[:id] == idref
 
       return heating_system_values[:heating_system_fuel]

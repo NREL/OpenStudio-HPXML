@@ -481,10 +481,10 @@ class HVACSizing
           @runner.registerWarning('Latitude of 20 was assumed for Manual J solar load calculations.')
           psf_lat_horiz = psf_horiz[0]
         end
-      elsif latitude > 64.0
+      elsif latitude >= 64.0
         psf_lat << psf[cnt][11]
         if cnt == 0
-          @runner.registerWarning('Latitude of 64 was assumed for Manual J solar load calculations.')
+          @runner.registerWarning('Latitude of 64 was assumed for Manual J solar load calculations.') if latitude > 64.0
           psf_lat_horiz = psf_horiz[11]
         end
       else
