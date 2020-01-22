@@ -2110,12 +2110,13 @@ class HVAC
     water_removal_curve = create_curve_biquadratic(model, w_coeff, "DXDH-WaterRemove-Cap-fT", -100, 100, -100, 100)
     energy_factor_curve = create_curve_biquadratic(model, ef_coeff, "DXDH-EnergyFactor-fT", -100, 100, -100, 100)
     part_load_frac_curve = create_curve_quadratic(model, pl_coeff, "DXDH-PLF-fPLR", 0, 1, 0.7, 1)
-    water_removal_rate = UnitConversions.convert(water_removal_rate, "pint", "L")
-
     if energy_factor.nil?
       # shift inputs tested under IEF test conditions to those under EF test conditions with performance curves
       energy_factor, water_removal_rate = dehumidifier_ief_to_ef_inputs(w_coeff, ef_coeff, integrated_energy_factor, water_removal_rate)
     end
+
+    # Calculate air flow rate by assuming 2.75 cfm/pint/day (based on experimental test data)
+    air_flow_rate = 2.75 * water_removal_rate
 
     humidistat = OpenStudio::Model::ZoneControlHumidistat.new(model)
     humidistat.setName(obj_name + " #{control_zone.name} humidistat")
@@ -2126,7 +2127,7 @@ class HVAC
     zone_hvac = OpenStudio::Model::ZoneHVACDehumidifierDX.new(model, water_removal_curve, energy_factor_curve, part_load_frac_curve)
     zone_hvac.setName(obj_name + " #{control_zone.name} dx")
     zone_hvac.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
-    zone_hvac.setRatedWaterRemoval(water_removal_rate)
+    zone_hvac.setRatedWaterRemoval(UnitConversions.convert(water_removal_rate, "pint", "L"))
     zone_hvac.setRatedEnergyFactor(energy_factor)
     zone_hvac.setRatedAirFlowRate(UnitConversions.convert(air_flow_rate, "cfm", "m^3/s"))
     zone_hvac.setMinimumDryBulbTemperatureforDehumidifierOperation(10)
