@@ -245,7 +245,6 @@ class OSModel
     @cvolume = construction_values[:conditioned_building_volume]
     if @cvolume.nil?
       @cvolume = @cfa * construction_values[:average_ceiling_height]
-      puts "**Conditioned Total Volume: #{@cvolume}"
     end
     @infilvolume = get_infiltration_volume(building)
     @ncfl = construction_values[:number_of_conditioned_floors]
