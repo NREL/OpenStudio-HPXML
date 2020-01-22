@@ -20,7 +20,7 @@ class HEScoreTest < Minitest::Unit::TestCase
     assert_equal(num_epws_expected, num_epws_actual)
 
     num_cache_expected = File.readlines(File.join(this_dir, "..", "weather", "data.csv")).size - 1
-    num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*.cache")].count
+    num_cache_actual = Dir[File.join(this_dir, "..", "weather", "*-cache.csv")].count
     assert_equal(num_cache_expected, num_cache_actual)
 
     # Prepare results dir for CI storage
