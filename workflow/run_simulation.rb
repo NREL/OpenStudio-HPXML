@@ -267,7 +267,7 @@ def download_epws
   num_epws_expected = File.readlines(File.join(weather_dir, "data.csv")).size - 1
   num_epws_actual = Dir[File.join(weather_dir, "*.epw")].count
   num_cache_expcted = num_epws_expected
-  num_cache_actual = Dir[File.join(weather_dir, "*.cache")].count
+  num_cache_actual = Dir[File.join(weather_dir, "*-cache.csv")].count
   if num_epws_actual == num_epws_expected and num_cache_actual == num_cache_expcted
     puts "Weather directory is already up-to-date."
     puts "#{num_epws_actual} weather files are available in the weather directory."
@@ -280,7 +280,7 @@ def download_epws
 
   tmpfile = Tempfile.new("epw")
 
-  url = URI.parse("http://s3.amazonaws.com/epwweatherfiles/openstudio-eri-tmy3s-cache.zip")
+  url = URI.parse("http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip")
   http = Net::HTTP.new(url.host, url.port)
 
   params = { 'User-Agent' => 'curl/7.43.0', 'Accept-Encoding' => 'identity' }

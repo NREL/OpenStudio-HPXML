@@ -19,6 +19,29 @@ task :update_measures do
   puts "Done."
 end
 
+desc 'create epw cache .csv files'
+task :cache_weather do
+  require 'openstudio'
+  require_relative 'resources/weather'
+
+  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+  puts "Creating cache *.csv for weather files..."
+
+  Dir["weather/*.epw"].each do |epw|
+    next if File.exists? epw.gsub(".epw", ".cache")
+
+    puts "Processing #{epw}..."
+    model = OpenStudio::Model::Model.new
+    epw_file = OpenStudio::EpwFile.new(epw)
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
+    weather = WeatherProcess.new(model, runner)
+    File.open(epw.gsub(".epw", "-cache.csv"), "wb") do |file|
+      weather.dump_to_csv(file)
+    end
+  end
+end
+
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   tests_dir = File.join(this_dir, "tests")
@@ -41,6 +64,7 @@ def create_hpxmls
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities2.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities3.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
     'invalid_files/heat-pump-mixed-fixed-and-autosize-capacities4.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
+    'invalid_files/hvac-invalid-distribution-system-type.xml' => 'base.xml',
     'invalid_files/hvac-distribution-multiple-attached-cooling.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-multiple-attached-heating.xml' => 'base-hvac-multiple.xml',
     'invalid_files/hvac-distribution-return-duct-leakage-missing.xml' => 'base-hvac-evap-cooler-only-ducted.xml',
@@ -71,9 +95,6 @@ def create_hpxmls
     'invalid_files/water-heater-location.xml' => 'base.xml',
     'invalid_files/water-heater-location-other.xml' => 'base.xml',
 
-    'base-addenda-exclude-g.xml' => 'base.xml',
-    'base-addenda-exclude-g-e.xml' => 'base.xml',
-    'base-addenda-exclude-g-e-a.xml' => 'base.xml',
     'base-appliances-dishwasher-ef.xml' => 'base.xml',
     'base-appliances-dryer-cef.xml' => 'base.xml',
     'base-appliances-gas.xml' => 'base.xml',
@@ -278,6 +299,11 @@ def create_hpxmls
     'base-pv-module-thinfilm.xml' => 'base.xml',
     'base-pv-multiple.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
+    'base-version-2014.xml' => 'base.xml',
+    'base-version-2014A.xml' => 'base.xml',
+    'base-version-2014AE.xml' => 'base.xml',
+    'base-version-2014AEG.xml' => 'base.xml',
+    'base-version-latest.xml' => 'base.xml',
 
     'cfis/base-cfis.xml' => 'base.xml',
     'cfis/base-hvac-air-to-air-heat-pump-1-speed-cfis.xml' => 'base-hvac-air-to-air-heat-pump-1-speed.xml',
@@ -513,13 +539,7 @@ def create_hpxmls
 
       hpxml_doc = HPXML.create_hpxml(**hpxml_values)
       hpxml = hpxml_doc.elements["HPXML"]
-
-      if File.exists? File.join(tests_dir, derivative)
-        old_hpxml_doc = XMLHelper.parse_file(File.join(tests_dir, derivative))
-        created_date_and_time = HPXML.get_hpxml_values(hpxml: old_hpxml_doc.elements["HPXML"])[:created_date_and_time]
-        hpxml.elements["XMLTransactionHeaderInformation/CreatedDateAndTime"].text = created_date_and_time
-      end
-
+      hpxml.elements["XMLTransactionHeaderInformation/CreatedDateAndTime"].text = Time.new(2000, 1, 1).strftime("%Y-%m-%dT%H:%M:%S%:z") # Hard-code to prevent diffs
       HPXML.add_site(hpxml: hpxml, **site_values) unless site_values.nil?
       site_neighbors_values.each do |site_neighbor_values|
         HPXML.add_site_neighbor(hpxml: hpxml, **site_neighbor_values)
@@ -657,15 +677,19 @@ def get_hpxml_file_hpxml_values(hpxml_file, hpxml_values)
                      :transaction => "create",
                      :software_program_used => nil,
                      :software_program_version => nil,
-                     :eri_calculation_version => "2014AEG",
+                     :eri_calculation_version => nil,
                      :building_id => "MyBuilding",
                      :event_type => "proposed workscope" }
-  elsif ['base-addenda-exclude-g.xml'].include? hpxml_file
-    hpxml_values[:eri_calculation_version] = "2014AE"
-  elsif ['base-addenda-exclude-g-e.xml'].include? hpxml_file
-    hpxml_values[:eri_calculation_version] = "2014A"
-  elsif ['base-addenda-exclude-g-e-a.xml'].include? hpxml_file
+  elsif ['base-version-2014.xml'].include? hpxml_file
     hpxml_values[:eri_calculation_version] = "2014"
+  elsif ['base-version-2014A.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014A"
+  elsif ['base-version-2014AE.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014AE"
+  elsif ['base-version-2014AEG.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = "2014AEG"
+  elsif ['base-version-latest.xml'].include? hpxml_file
+    hpxml_values[:eri_calculation_version] = 'latest'
   end
   return hpxml_values
 end
@@ -1905,6 +1929,8 @@ def get_hpxml_file_heating_systems_values(hpxml_file, heating_systems_values)
     end
   elsif ['invalid_files/unattached-hvac-distribution.xml'].include? hpxml_file
     heating_systems_values[0][:distribution_system_idref] = "foobar"
+  elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
+    heating_systems_values[0][:distribution_system_idref] = "HVACDistribution2"
   elsif ['invalid_files/hvac-dse-multiple-attached-heating.xml'].include? hpxml_file
     heating_systems_values[0][:fraction_heat_load_served] = 0.5
     heating_systems_values << heating_systems_values[0].dup
@@ -2279,6 +2305,9 @@ def get_hpxml_file_hvac_distributions_values(hpxml_file, hvac_distributions_valu
     hvac_distributions_values[0][:distribution_system_type] = "HydronicDistribution"
     hvac_distributions_values << { :id => "HVACDistribution2",
                                    :distribution_system_type => "AirDistribution" }
+  elsif ['invalid_files/hvac-invalid-distribution-system-type.xml'].include? hpxml_file
+    hvac_distributions_values << { :id => "HVACDistribution2",
+                                   :distribution_system_type => "HydronicDistribution" }
   elsif ['base-hvac-none.xml',
          'base-hvac-elec-resistance-only.xml',
          'base-hvac-evap-cooler-only.xml',
