@@ -380,6 +380,15 @@ class HPXMLTranslatorTest < MiniTest::Test
       query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       compload_results["#{mode} - Total"] = sqlFile.execAndReturnFirstDouble(query).get
 
+      query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableName='dehumidified #{mode_var} load' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      load_dehumidified = sqlFile.execAndReturnFirstDouble(query).get if sqlFile.execAndReturnFirstDouble(query).is_initialized
+
+      if not load_dehumidified.nil?
+        query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer:Zone:LIVING SPACE' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        load_lv = sqlFile.execAndReturnFirstDouble(query).get
+        compload_results["#{mode} - Total"] = compload_results["#{mode} - Total"] - load_lv + load_dehumidified
+      end
+
       query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:District#{mode}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       compload_results["#{mode} - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
     end
@@ -415,9 +424,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
-    # Skip comparison until new component load approach is merged
-    # assert_operator(compload_results["Heating - Residual"], :<, 0.2)
-    # assert_operator(compload_results["Cooling - Residual"], :<, 0.2)
+    assert_operator(compload_results["Heating - Residual"], :<, 0.2)
+    assert_operator(compload_results["Cooling - Residual"], :<, 0.2)
 
     results[@@simulation_runtime_key] = sim_time
     results[@@workflow_runtime_key] = workflow_time

@@ -2815,6 +2815,8 @@ class OSModel
     dehumidifier_values = HPXML.get_dehumidifier_values(dehumidifier: building.elements["BuildingDetails/Appliances/Dehumidifier"])
     return if dehumidifier_values.nil?
 
+    sys_id = dehumidifier_values[:id]
+    @hvac_map[sys_id] = []
     water_removal_rate = dehumidifier_values[:capacity]
     energy_factor = dehumidifier_values[:energy_factor]
     integrated_energy_factor = dehumidifier_values[:integrated_energy_factor]
@@ -2824,7 +2826,7 @@ class OSModel
     air_flow_rate = 2.75 * water_removal_rate
 
     HVAC.apply_dehumidifier(model, runner, energy_factor, integrated_energy_factor, water_removal_rate,
-                            air_flow_rate, humidity_setpoint, @living_zone)
+                            air_flow_rate, humidity_setpoint, @living_zone, @hvac_map, sys_id)
   end
 
   def self.check_distribution_system(building, dist_id, system_id, system_type)
@@ -3497,6 +3499,8 @@ class OSModel
                    "Propane:Facility",
                    "Heating:EnergyTransfer",
                    "Cooling:EnergyTransfer",
+                   "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
+                   "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}",
                    "Heating:DistrictHeating",
                    "Cooling:DistrictCooling",
                    "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity",
@@ -3535,14 +3539,10 @@ class OSModel
     objects_already_processed = []
 
     # EMS Sensors: Global
-
-    liv_load_sensors = {}
-
-    liv_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
-    liv_load_sensors[:htg].setName("htg_load_liv")
-
-    liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
-    liv_load_sensors[:clg].setName("clg_load_liv")
+    # Need to resolve conflict after new component load approach is merged
+    liv_load_sensors = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
+    liv_load_sensors.setName("load_liv")
+    liv_load_sensors.setKeyName("#{@living_zone.name.to_s}")
 
     setpoint_sensors = {}
 
@@ -3846,6 +3846,18 @@ class OSModel
       end
     end
 
+    model.getZoneHVACDehumidifierDXs.each do |e|
+      next unless e.thermalZone.get.name.to_s == @living_zone.name.to_s
+
+      intgains_sensors << []
+      { "Zone Dehumidifier Sensible Heating Energy" => "ig_dehumidifier" }.each do |var, name|
+        intgain_dehumidifier = OpenStudio::Model::EnergyManagementSystemSensor.new(model, var)
+        intgain_dehumidifier.setName(name)
+        intgain_dehumidifier.setKeyName(e.name.to_s)
+        intgains_sensors[-1] << intgain_dehumidifier
+      end
+    end
+
     intgains_dhw_sensors = {}
 
     (model.getWaterHeaterMixeds + model.getWaterHeaterStratifieds).sort.each do |wh|
@@ -3939,16 +3951,19 @@ class OSModel
     end
 
     # EMS program: Heating vs Cooling logic
+    program.addLine("Set htg_mode = 0")
+    program.addLine("Set clg_mode = 0")
+    program.addLine("If #{liv_load_sensors.name} > 0")
+    program.addLine("  Set htg_mode = 1")
+    program.addLine("ElseIf #{liv_load_sensors.name} < 0")
+    program.addLine("  Set clg_mode = 1")
+    program.addLine("EndIf")
     [:htg, :clg].each do |mode|
       if mode == :htg
         sign = ""
       else
         sign = "-"
       end
-      program.addLine("Set #{mode}_mode = 0")
-      program.addLine("If #{liv_load_sensors[mode].name} > 0")
-      program.addLine("  Set #{mode}_mode = 1")
-      program.addLine("EndIf")
       surfaces_sensors.keys.each do |k|
         program.addLine("Set #{mode}_#{k.to_s} = #{sign}hr_#{k.to_s} * #{mode}_mode")
       end
@@ -3960,7 +3975,7 @@ class OSModel
       program.addLine("Set #{mode}_ratio = 0")
       program.addLine("If (#{setpoint_sensors[mode].name} <> #{prev_hr_setpoint_vars[mode].name}) && (#{mode}_mode > 0)")
       program.addLine("  Set #{mode}_ratio = 1")
-      program.addLine("ElseIf (#{liv_load_sensors[mode].name} * #{prev_hr_load_vars[mode].name} == 0) && (#{mode}_mode > 0)")
+      program.addLine("ElseIf (#{liv_load_sensors.name} * #{prev_hr_load_vars[mode].name} == 0) && (#{mode}_mode > 0)")
       program.addLine("  Set #{mode}_ratio = 1")
       program.addLine("EndIf")
       program.addLine("If #{mode}_ratio > 0")
@@ -3972,7 +3987,7 @@ class OSModel
         program.addLine("  Set #{mode}_sum = #{mode}_sum + #{mode}_#{nonsurf_name}")
       end
       program.addLine("  If #{mode}_sum <> 0")
-      program.addLine("    Set #{mode}_load_ratio = #{liv_load_sensors[mode].name} / #{mode}_sum")
+      program.addLine("    Set #{mode}_load_ratio = (@ABS #{liv_load_sensors.name} * 3600) / #{mode}_sum")
       program.addLine("Else")
       program.addLine("    Set #{mode}_load_ratio = 1")
       program.addLine("EndIf")
@@ -3984,7 +3999,7 @@ class OSModel
       end
       program.addLine("EndIf")
 
-      program.addLine("Set #{prev_hr_load_vars[mode].name} = #{liv_load_sensors[mode].name}")
+      program.addLine("Set #{prev_hr_load_vars[mode].name} = (@ABS #{liv_load_sensors.name} * 3600) * #{mode}_mode")
       program.addLine("Set #{prev_hr_setpoint_vars[mode].name} = #{setpoint_sensors[mode].name}")
     end
 
