@@ -3,16 +3,10 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:26:35-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
-  <SoftwareInfo>
-    <extension>
-      <ERICalculation>
-        <Version>2014AE</Version>
-      </ERICalculation>
-    </extension>
-  </SoftwareInfo>
+  <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
     <ProjectStatus>
@@ -245,7 +239,7 @@
           <HVACPlant>
             <HeatingSystem>
               <SystemIdentifier id='HeatingSystem'/>
-              <DistributionSystem idref='HVACDistribution'/>
+              <DistributionSystem idref='HVACDistribution2'/>
               <HeatingSystemType>
                 <Furnace/>
               </HeatingSystemType>
@@ -309,6 +303,12 @@
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
               </AirDistribution>
+            </DistributionSystemType>
+          </HVACDistribution>
+          <HVACDistribution>
+            <SystemIdentifier id='HVACDistribution2'/>
+            <DistributionSystemType>
+              <HydronicDistribution/>
             </DistributionSystemType>
           </HVACDistribution>
         </HVAC>
