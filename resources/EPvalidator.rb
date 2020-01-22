@@ -584,8 +584,8 @@ class EnergyPlusValidator
         "ArrayAzimuth" => one,
         "ArrayTilt" => one,
         "MaxPowerOutput" => one,
-        "InverterEfficiency" => one, # PVWatts default is 0.96
-        "SystemLossesFraction" => one, # PVWatts default is 0.14
+        "InverterEfficiency" => zero_or_one,
+        "SystemLossesFraction" => zero_or_one,
       },
 
       # [ClothesWasher]

@@ -3341,8 +3341,21 @@ class OSModel
       az = pv_system_values[:array_azimuth]
       tilt = pv_system_values[:array_tilt]
       power_w = pv_system_values[:max_power_output]
-      inv_eff = pv_system_values[:inverter_efficiency]
-      system_losses = pv_system_values[:system_losses_fraction]
+
+      # Inverter efficiency
+      if pv_system_values[:inverter_efficiency].nil?
+        inv_eff = PV.get_default_inv_eff()
+      else
+        inv_eff = pv_system_values[:inverter_efficiency]
+      end
+      
+      # System loss fraction
+      year_modules_manufactured = pv_system_values[:year_modules_manufactured]
+      if pv_system_values[:system_losses_fraction].nil?
+        system_losses = PV.get_default_system_losses(year_modules_manufactured)
+      else
+        system_losses = pv_system_values[:system_losses_fraction]
+      end
 
       PV.apply(model, pv_id, power_w, module_type,
                system_losses, inv_eff, tilt, az, array_type)
