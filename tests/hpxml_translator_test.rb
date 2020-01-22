@@ -367,17 +367,17 @@ class HPXMLTranslatorTest < MiniTest::Test
     results[["Capacity", "Cooling", "General", "W"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Obtain Heating/Cooling loads
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Heating:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='loads_htg_tot_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
     results[["Load", "Heating", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
-    query = "SELECT Value FROM TabularDataWithStrings WHERE ReportName='EnergyMeters' AND ReportForString='Entire Facility' AND TableName='Annual and Peak Values - Other' AND RowName='Cooling:EnergyTransfer' AND ColumnName='Annual Value' AND Units='GJ'"
+    query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='loads_clg_tot_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
     results[["Load", "Cooling", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Obtain component loads
     compload_results = {}
 
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
-      query = "SELECT VariableValue/1000000000 FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:EnergyTransfer' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='loads_#{mode_var}_tot_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       compload_results["#{mode} - Total"] = sqlFile.execAndReturnFirstDouble(query).get
 
       query = "SELECT SUM(VariableValue/1000000000) FROM ReportMeterData WHERE ReportMeterDataDictionaryIndex = (SELECT ReportMeterDataDictionaryIndex FROM ReportMeterDataDictionary WHERE VariableName='#{mode}:District#{mode}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
@@ -403,20 +403,20 @@ class HPXMLTranslatorTest < MiniTest::Test
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       compload_results["#{mode} - Sum"] = 0
       components.each do |component, component_var|
-        query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+        query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='loads_#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         compload_results["#{mode} - #{component}"] = sqlFile.execAndReturnFirstDouble(query).get
         compload_results["#{mode} - Sum"] += compload_results["#{mode} - #{component}"]
       end
     end
 
     # Discrepancy between total and sum of components
-    compload_results["Heating - Residual"] = (compload_results["Heating - Total"] - compload_results["Heating - Sum"]).abs
-    compload_results["Cooling - Residual"] = (compload_results["Cooling - Total"] - compload_results["Cooling - Sum"]).abs
+    compload_results["Heating - Residual"] = compload_results["Heating - Total"] - compload_results["Heating - Sum"]
+    compload_results["Cooling - Residual"] = compload_results["Cooling - Total"] - compload_results["Cooling - Sum"]
 
     sqlFile.close
 
-    assert_operator(compload_results["Heating - Residual"], :<, 0.35)
-    assert_operator(compload_results["Cooling - Residual"], :<, 0.35)
+    assert_operator(compload_results["Heating - Residual"].abs, :<, 0.35)
+    assert_operator(compload_results["Cooling - Residual"].abs, :<, 0.35)
 
     results[@@simulation_runtime_key] = sim_time
     results[@@workflow_runtime_key] = workflow_time

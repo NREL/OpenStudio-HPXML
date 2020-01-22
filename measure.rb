@@ -3526,6 +3526,14 @@ class OSModel
     liv_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer:Zone:#{@living_zone.name.to_s.upcase}")
     liv_load_sensors[:clg].setName("clg_load_liv")
 
+    tot_load_sensors = {}
+
+    tot_load_sensors[:htg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Heating:EnergyTransfer")
+    tot_load_sensors[:htg].setName("htg_load_tot")
+
+    tot_load_sensors[:clg] = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Cooling:EnergyTransfer")
+    tot_load_sensors[:clg].setName("clg_load_tot")
+
     # EMS Sensors: Surfaces, SubSurfaces, InternalMass
 
     surfaces_sensors = { :walls => [],
@@ -3925,40 +3933,27 @@ class OSModel
         sign = "-"
       end
       surfaces_sensors.keys.each do |k|
-        program.addLine("Set #{mode}_#{k.to_s} = #{sign}hr_#{k.to_s} * #{mode}_mode")
+        program.addLine("Set loads_#{mode}_#{k.to_s} = #{sign}hr_#{k.to_s} * #{mode}_mode")
       end
       nonsurf_names.each do |nonsurf_name|
-        program.addLine("Set #{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
+        program.addLine("Set loads_#{mode}_#{nonsurf_name} = #{sign}hr_#{nonsurf_name} * #{mode}_mode")
       end
-
-      # DEBUG: Calculate residual
-      # program.addLine("  Set #{mode}_residual = #{liv_load_sensors[mode].name}")
-      # surfaces_sensors.keys.each do |k|
-      #  program.addLine("  Set #{mode}_residual = #{mode}_residual - #{mode}_#{k.to_s}")
-      # end
-      # nonsurf_names.each do |nonsurf_name|
-      #  program.addLine("  Set #{mode}_residual = #{mode}_residual - #{mode}_#{nonsurf_name}")
-      # end
     end
+
+    # EMS program: Total loads
+    program.addLine("Set loads_htg_tot = 0")
+    program.addLine("Set loads_clg_tot = 0")
+    program.addLine("If #{liv_load_sensors[:htg].name} > 0")
+    program.addLine("  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}")
+    program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
+    program.addLine("  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}")
+    program.addLine("EndIf")
 
     # EMS output variables
     [:htg, :clg].each do |mode|
-      surfaces_sensors.keys.each do |k|
-        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k.to_s}")
-        ems_output_var.setName("#{mode}_#{k.to_s}_outvar")
-        ems_output_var.setTypeOfDataInVariable("Summed")
-        ems_output_var.setUpdateFrequency("ZoneTimestep")
-        ems_output_var.setEMSProgramOrSubroutineName(program)
-        ems_output_var.setUnits("J")
-
-        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-        output_var.setReportingFrequency('runperiod')
-        output_var.setKeyValue('*')
-      end
-
-      nonsurf_names.each do |k|
-        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k}")
-        ems_output_var.setName("#{mode}_#{k}_outvar")
+      (surfaces_sensors.keys + nonsurf_names + ["tot"]).each do |k|
+        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "loads_#{mode}_#{k.to_s}")
+        ems_output_var.setName("loads_#{mode}_#{k.to_s}_outvar")
         ems_output_var.setTypeOfDataInVariable("Summed")
         ems_output_var.setUpdateFrequency("ZoneTimestep")
         ems_output_var.setEMSProgramOrSubroutineName(program)
