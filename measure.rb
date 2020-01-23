@@ -220,8 +220,10 @@ class OSModel
     @hpxml_path = hpxml_path
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
+
     @eri_version = hpxml_values[:eri_calculation_version] # Hidden feature
-    @eri_version = '2014AEG' if @eri_version.nil? # Use latest version/addenda implemented
+    @eri_version = 'latest' if @eri_version.nil?
+    @eri_version = Constants.ERIVersions[-1] if @eri_version == 'latest'
 
     building = hpxml_doc.elements["/HPXML/Building"]
     enclosure = building.elements["BuildingDetails/Enclosure"]
