@@ -12,6 +12,9 @@ require_relative '../resources/unit_conversions'
 require_relative '../resources/xmlhelper'
 
 class HPXMLTranslatorTest < MiniTest::Test
+  @@simulation_runtime_key = "Simulation Runtime"
+  @@workflow_runtime_key = "Workflow Runtime"
+
   def test_simulations
     OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Error)
     # OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
@@ -19,9 +22,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     this_dir = File.dirname(__FILE__)
     results_dir = File.join(this_dir, "results")
     _rm_path(results_dir)
-
-    @simulation_runtime_key = "Simulation Runtime"
-    @workflow_runtime_key = "Workflow Runtime"
 
     cfis_dir = File.absolute_path(File.join(this_dir, "cfis"))
     hvac_base_dir = File.absolute_path(File.join(this_dir, "hvac_base"))
@@ -51,13 +51,15 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Running #{xmls.size} HPXML files..."
     all_results = {}
     all_compload_results = {}
+    all_sizing_results = {}
     xmls.each do |xml|
-      all_results[xml], all_compload_results[xml] = _run_xml(xml, this_dir)
+      all_results[xml], all_compload_results[xml], all_sizing_results[xml] = _run_xml(xml, this_dir)
     end
 
     Dir.mkdir(results_dir)
     _write_summary_results(results_dir, all_results)
-    write_component_load_results(results_dir, all_compload_results)
+    _write_component_load_results(results_dir, all_compload_results)
+    _write_hvac_sizing_results(results_dir, all_sizing_results)
 
     # Cross simulation tests
     _test_multiple_hvac(xmls, hvac_multiple_dir, hvac_base_dir, all_results)
@@ -101,6 +103,15 @@ class HPXMLTranslatorTest < MiniTest::Test
     assert(File.exists? sql_path)
   end
 
+  def test_weather_cache
+    this_dir = File.dirname(__FILE__)
+    cache_orig = File.join(this_dir, "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
+    cache_bak = cache_orig + ".bak"
+    File.rename(cache_orig, cache_bak)
+    _run_xml(File.absolute_path(File.join(this_dir, "base.xml")), this_dir)
+    File.rename(cache_bak, cache_orig) # Put original file back
+  end
+
   def test_invalid
     this_dir = File.dirname(__FILE__)
 
@@ -118,6 +129,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'heat-pump-mixed-fixed-and-autosize-capacities2.xml' => ["HeatPump 'HeatPump' CoolingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
                             'heat-pump-mixed-fixed-and-autosize-capacities3.xml' => ["HeatPump 'HeatPump' has HeatingCapacity17F provided but heating capacity is auto-sized."],
                             'heat-pump-mixed-fixed-and-autosize-capacities4.xml' => ["HeatPump 'HeatPump' BackupHeatingCapacity and HeatingCapacity must either both be auto-sized or fixed-sized."],
+                            'hvac-invalid-distribution-system-type.xml' => ["Incorrect HVAC distribution system type for HVAC type: 'Furnace'. Should be one of: ["],
                             'hvac-distribution-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution4'."],
                             'hvac-distribution-multiple-attached-heating.xml' => ["Multiple heating systems found attached to distribution system 'HVACDistribution3'."],
                             'hvac-dse-multiple-attached-cooling.xml' => ["Multiple cooling systems found attached to distribution system 'HVACDistribution'."],
@@ -127,6 +139,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                             'hvac-distribution-return-duct-leakage-missing.xml' => ["Return ducts exist but leakage was not specified for distribution system 'HVACDistribution'."],
                             'invalid-relatedhvac-dhw-indirect.xml' => ["RelatedHVACSystem 'HeatingSystem_bad' not found for water heating system 'WaterHeater'"],
                             'invalid-relatedhvac-desuperheater.xml' => ["RelatedHVACSystem 'CoolingSystem_bad' not found for water heating system 'WaterHeater'."],
+                            'invalid-window-interior-shading.xml' => ["SummerShadingCoefficient (0.85) must be less than or equal to WinterShadingCoefficient (0.7) for window 'WindowNorth'."],
                             'missing-elements.xml' => ["Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors",
                                                        "Expected [1] element(s) but found 0 element(s) for xpath: /HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/ConditionedFloorArea"],
                             'missing-surfaces.xml' => ["'garage' must have at least one floor surface."],
@@ -251,8 +264,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     print "Testing #{File.basename(xml)}...\n"
     rundir = File.join(this_dir, "run")
     _test_schema_validation(this_dir, xml)
-    results, compload_results = _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
-    return results, compload_results
+    results, compload_results, sizing_results = _test_simulation(this_dir, xml, rundir, expect_error, expect_error_msgs)
+    return results, compload_results, sizing_results
   end
 
   def _get_results(rundir, sim_time, workflow_time)
@@ -406,8 +419,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     assert_operator(compload_results["Heating - Residual"], :<, 0.25)
     assert_operator(compload_results["Cooling - Residual"], :<, 0.25)
 
-    results[@simulation_runtime_key] = sim_time
-    results[@workflow_runtime_key] = workflow_time
+    results[@@simulation_runtime_key] = sim_time
+    results[@@workflow_runtime_key] = workflow_time
 
     return results, compload_results
   end
@@ -428,7 +441,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
     args['map_tsv_dir'] = rundir
-    args['skip_validation'] = false
     args['weather_dir'] = "weather"
 
     # Add measure to workflow
@@ -529,7 +541,29 @@ class HPXMLTranslatorTest < MiniTest::Test
     # Verify simulation outputs
     _verify_simulation_outputs(runner, rundir, args['hpxml_path'], results)
 
-    return results, compload_results
+    # Get HVAC sizing outputs
+    sizing_results = _get_sizing_results(runner)
+
+    return results, compload_results, sizing_results
+  end
+
+  def _get_sizing_results(runner)
+    results = {}
+    runner.result.stepInfo.each do |s_info|
+      s_info.split("\n").each do |s|
+        next unless s.start_with? "Heat " or s.start_with? "Cool "
+        next unless s.include? "="
+
+        vals = s.split("=")
+        prop = vals[0].strip
+        vals = vals[1].split(" ")
+        value = Float(vals[0].strip)
+        prop += " [#{vals[1].strip}]" # add units
+        results[prop] = 0.0 if results[prop].nil?
+        results[prop] += value
+      end
+    end
+    return results
   end
 
   def _verify_simulation_outputs(runner, rundir, hpxml_path, results)
@@ -622,11 +656,9 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     num_expected_kiva_instances = { 'base-foundation-ambient.xml' => 0,               # no foundation in contact w/ ground
-                                    'base-foundation-ambient-autosize.xml' => 0,      # no foundation in contact w/ ground
                                     'base-foundation-multiple.xml' => 2,              # additional instance for 2nd foundation type
                                     'base-enclosure-2stories-garage.xml' => 2,        # additional instance for garage
                                     'base-enclosure-garage.xml' => 2,                 # additional instance for garage
-                                    'base-enclosure-garage-autosize.xml' => 2,        # additional instance for garage
                                     'base-enclosure-adiabatic-surfaces.xml' => 0,     # no foundation in contact w/ ground
                                     'base-foundation-walkout-basement.xml' => 4,      # 3 foundation walls plus a no-wall exposed perimeter
                                     'base-foundation-complex.xml' => 10 }
@@ -797,14 +829,14 @@ class HPXMLTranslatorTest < MiniTest::Test
     num_htg_sys = bldg_details.elements['count(Systems/HVAC/HVACPlant/HeatingSystem)']
     bldg_details.elements.each('Systems/HVAC/HVACPlant/HeatingSystem') do |htg_sys|
       htg_sys_type = XMLHelper.get_child_name(htg_sys, 'HeatingSystemType')
-      htg_sys_fuel = to_beopt_fuel(XMLHelper.get_value(htg_sys, 'HeatingSystemFuel'))
+      htg_sys_fuel = XMLHelper.get_value(htg_sys, 'HeatingSystemFuel')
       htg_load_frac = Float(XMLHelper.get_value(htg_sys, "FractionHeatLoadServed"))
 
       if htg_load_frac > 0
 
         # Electric Auxiliary Energy
         # For now, skip if multiple equipment
-        if num_htg_sys == 1 and ['Furnace', 'Boiler', 'WallFurnace', 'Stove'].include? htg_sys_type and htg_sys_fuel != Constants.FuelTypeElectric
+        if num_htg_sys == 1 and ['Furnace', 'Boiler', 'WallFurnace', 'Stove'].include? htg_sys_type and htg_sys_fuel != 'electricity'
           if XMLHelper.has_element(htg_sys, 'ElectricAuxiliaryEnergy')
             hpxml_value = Float(XMLHelper.get_value(htg_sys, 'ElectricAuxiliaryEnergy')) / 2.08
           else
@@ -1025,7 +1057,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       # CFIS
-      if XMLHelper.get_value(mv, "FanType") == "central fan integrated supply"
+      if XMLHelper.get_value(mv, "FanType") == 'central fan integrated supply'
         # Fan power
         hpxml_value = Float(XMLHelper.get_value(mv, "FanPower"))
         query = "SELECT Value FROM ReportData WHERE ReportDataDictionaryIndex IN (SELECT ReportDataDictionaryIndex FROM ReportDataDictionary WHERE Name= '#{@cfis_fan_power_output_var.variableName}')"
@@ -1045,12 +1077,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     cw = bldg_details.elements["Appliances/ClothesWasher"]
     if not cw.nil? and not wh.nil?
       # Location
-      location = XMLHelper.get_value(cw, "Location")
-      hpxml_value = { nil => Constants.SpaceTypeLiving,
-                      'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeLiving,
-                      'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
-                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      hpxml_value = XMLHelper.get_value(cw, "Location")
+      if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
+        hpxml_value = 'living space'
+      end
+      hpxml_value.upcase!
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesWasher.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
       assert_equal(hpxml_value, sql_value)
@@ -1060,12 +1091,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     cd = bldg_details.elements["Appliances/ClothesDryer"]
     if not cd.nil? and not wh.nil?
       # Location
-      location = XMLHelper.get_value(cd, "Location")
-      hpxml_value = { nil => Constants.SpaceTypeLiving,
-                      'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeLiving,
-                      'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
-                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      hpxml_value = XMLHelper.get_value(cd, "Location")
+      if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
+        hpxml_value = 'living space'
+      end
+      hpxml_value.upcase!
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameClothesDryer.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
       assert_equal(hpxml_value, sql_value)
@@ -1075,12 +1105,11 @@ class HPXMLTranslatorTest < MiniTest::Test
     refr = bldg_details.elements["Appliances/Refrigerator"]
     if not refr.nil?
       # Location
-      location = XMLHelper.get_value(refr, "Location")
-      hpxml_value = { nil => Constants.SpaceTypeLiving,
-                      'living space' => Constants.SpaceTypeLiving,
-                      'basement - conditioned' => Constants.SpaceTypeLiving,
-                      'basement - unconditioned' => Constants.SpaceTypeUnconditionedBasement,
-                      'garage' => Constants.SpaceTypeGarage }[location].upcase
+      hpxml_value = XMLHelper.get_value(refr, "Location")
+      if hpxml_value.nil? or hpxml_value == 'basement - conditioned'
+        hpxml_value = 'living space'
+      end
+      hpxml_value.upcase!
       query = "SELECT Value FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Zone Name' AND RowName=(SELECT RowName FROM TabularDataWithStrings WHERE TableName='ElectricEquipment Internal Gains Nominal' AND ColumnName='Name' AND Value='#{Constants.ObjectNameRefrigerator.upcase}')"
       sql_value = sqlFile.execAndReturnFirstString(query).get
       assert_equal(hpxml_value, sql_value)
@@ -1171,8 +1200,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_keys.sort!
 
     # Append runtimes at the end
-    output_keys << @simulation_runtime_key
-    output_keys << @workflow_runtime_key
+    output_keys << @@simulation_runtime_key
+    output_keys << @@workflow_runtime_key
 
     column_headers = ['HPXML']
     output_keys.each do |key|
@@ -1201,7 +1230,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     puts "Wrote summary results to #{csv_out}."
   end
 
-  def write_component_load_results(results_dir, all_compload_results)
+  def _write_component_load_results(results_dir, all_compload_results)
     require 'csv'
     csv_out = File.join(results_dir, 'results_component_loads.csv')
 
@@ -1224,6 +1253,31 @@ class HPXMLTranslatorTest < MiniTest::Test
     end
 
     puts "Wrote component load results to #{csv_out}."
+  end
+
+  def _write_hvac_sizing_results(results_dir, all_sizing_results)
+    require 'csv'
+    csv_out = File.join(results_dir, 'results_hvac_sizing.csv')
+
+    output_keys = nil
+    all_sizing_results.each do |xml, xml_results|
+      output_keys = xml_results.keys
+      break
+    end
+    return if output_keys.nil?
+
+    CSV.open(csv_out, 'w') do |csv|
+      csv << ['HPXML'] + output_keys
+      all_sizing_results.sort.each do |xml, xml_results|
+        csv_row = [xml]
+        output_keys.each do |key|
+          csv_row << xml_results[key]
+        end
+        csv << csv_row
+      end
+    end
+
+    puts "Wrote HVAC sizing results to #{csv_out}."
   end
 
   def _test_schema_validation(this_dir, xml)
@@ -1252,7 +1306,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
         # Compare results
         results_base.keys.each do |k|
-          next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+          next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
 
           result_base = results_base[k].to_f
           result = results[k].to_f
@@ -1343,7 +1397,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       # Compare results
       results_x3.keys.each do |k|
-        next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+        next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
 
         result_x1 = results_x1[k].to_f
         result_x3 = results_x3[k].to_f
@@ -1404,7 +1458,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Compare results
     results_base.keys.each do |k|
-      next if [@simulation_runtime_key, @workflow_runtime_key].include? k
+      next if [@@simulation_runtime_key, @@workflow_runtime_key].include? k
 
       assert_equal(results_base[k].to_f, results_collapsed[k].to_f)
     end

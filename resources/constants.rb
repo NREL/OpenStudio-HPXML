@@ -91,26 +91,6 @@ class Constants
     return 'Building America'
   end
 
-  def self.CalcTypeERIRatedHome
-    return 'ERI Rated Home'
-  end
-
-  def self.CalcTypeERIReferenceHome
-    return 'ERI Reference Home'
-  end
-
-  def self.CalcTypeERIIndexAdjustmentDesign
-    return 'ERI Index Adjustment Design'
-  end
-
-  def self.CalcTypeERIIndexAdjustmentReferenceHome
-    return 'ERI Index Adjustment Reference Home'
-  end
-
-  def self.CalcTypeStandard
-    return 'Standard'
-  end
-
   def self.DuctSideReturn
     return 'return'
   end
@@ -119,8 +99,8 @@ class Constants
     return 'supply'
   end
 
-  def self.OptionallyDuctedSystemIsDucted
-    return __method__.to_s
+  def self.ERIVersions
+    return ['2014', '2014A', '2014AE', '2014AEG']
   end
 
   def self.FacadeFront
@@ -151,30 +131,6 @@ class Constants
     return 'ethylene-glycol'
   end
 
-  def self.FuelTypeElectric
-    return 'electric'
-  end
-
-  def self.FuelTypeGas
-    return 'gas'
-  end
-
-  def self.FuelTypePropane
-    return 'propane'
-  end
-
-  def self.FuelTypeOil
-    return 'oil'
-  end
-
-  def self.FuelTypeWood
-    return 'wood'
-  end
-
-  def self.FuelTypeWoodPellets
-    return 'pellets'
-  end
-
   def self.MaterialGypcrete
     return 'crete'
   end
@@ -189,38 +145,6 @@ class Constants
 
   def self.MonthNames
     return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  end
-
-  def self.PVArrayTypeFixedOpenRack
-    return 'FixedOpenRack'
-  end
-
-  def self.PVArrayTypeFixedRoofMount
-    return 'FixedRoofMounted'
-  end
-
-  def self.PVArrayTypeFixed1Axis
-    return 'OneAxis'
-  end
-
-  def self.PVArrayTypeFixed1AxisBacktracked
-    return 'OneAxisBacktracking'
-  end
-
-  def self.PVArrayTypeFixed2Axis
-    return 'TwoAxis'
-  end
-
-  def self.PVModuleTypeStandard
-    return 'Standard'
-  end
-
-  def self.PVModuleTypePremium
-    return 'Premium'
-  end
-
-  def self.PVModuleTypeThinFilm
-    return 'ThinFilm'
   end
 
   def self.ObjectNameAirflow
@@ -443,24 +367,16 @@ class Constants
     return 'whole house fan'
   end
 
+  def self.OptionallyDuctedSystemIsDucted
+    return __method__.to_s
+  end
+
   def self.PlantLoopDomesticWater
     return "dhw loop"
   end
 
   def self.PlantLoopSolarHotWater
     return "solar hot water loop"
-  end
-
-  def self.RecircTypeTimer
-    return 'timer'
-  end
-
-  def self.RecircTypeDemand
-    return 'demand'
-  end
-
-  def self.RecircTypeNone
-    return 'none'
   end
 
   def self.RoofMaterialAsphaltShingles
@@ -711,62 +627,6 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SolarThermalCollectorTypeEvacuatedTube
-    return 'evacuated tube'
-  end
-
-  def self.SolarThermalCollectorTypeGlazedFlatPlateSingle
-    return 'single glazing black'
-  end
-
-  def self.SolarThermalCollectorTypeGlazedFlatPlateDouble
-    return 'double glazing black'
-  end
-
-  def self.SolarThermalCollectorTypeICS
-    return 'integrated collector storage'
-  end
-
-  def self.SolarThermalLoopTypeDirect
-    return 'liquid direct'
-  end
-
-  def self.SolarThermalLoopTypeIndirect
-    return 'liquid indirect'
-  end
-
-  def self.SolarThermalLoopTypeThermosyphon
-    return 'passive thermosyphon'
-  end
-
-  def self.SpaceTypeVentedCrawl
-    return 'vented crawlspace'
-  end
-
-  def self.SpaceTypeUnventedCrawl
-    return 'unvented crawlspace'
-  end
-
-  def self.SpaceTypeGarage
-    return 'garage'
-  end
-
-  def self.SpaceTypeLiving
-    return 'living'
-  end
-
-  def self.SpaceTypeVentedAttic
-    return 'vented attic'
-  end
-
-  def self.SpaceTypeUnventedAttic
-    return 'unvented attic'
-  end
-
-  def self.SpaceTypeUnconditionedBasement
-    return 'unconditioned basement'
-  end
-
   def self.TerrainOcean
     return 'ocean'
   end
@@ -786,36 +646,104 @@ class Constants
   def self.TerrainCity
     return 'city'
   end
+end
 
-  def self.VentTypeExhaust
-    return 'exhaust'
+class OutputVars
+  def self.SpaceHeatingElectricity
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::CoilHeatingWaterToAirHeatPumpEquationFit' => ['Heating Coil Electric Energy', 'Heating Coil Crankcase Heater Electric Energy', 'Heating Coil Defrost Electric Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Electric Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Electric Energy'] }
   end
 
-  def self.VentTypeNone
-    return 'none'
+  def self.SpaceHeatingNaturalGas
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Gas Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Gas Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Gas Energy'] }
   end
 
-  def self.VentTypeSupply
-    return 'supply'
+  def self.SpaceHeatingFuelOil
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil FuelOil#1 Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard FuelOil#1 Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler FuelOil#1 Energy'] }
   end
 
-  def self.VentTypeBalanced
-    return 'balanced'
+  def self.SpaceHeatingPropane
+    return { 'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Propane Energy'],
+             'OpenStudio::Model::ZoneHVACBaseboardConvectiveElectric' => ['Baseboard Propane Energy'],
+             'OpenStudio::Model::BoilerHotWater' => ['Boiler Propane Energy'] }
   end
 
-  def self.VentTypeCFIS
-    return 'central fan integrated supply'
+  def self.SpaceHeatingDFHPPrimaryLoad
+    return { 'OpenStudio::Model::CoilHeatingDXSingleSpeed' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingDXMultiSpeed' => ['Heating Coil Heating Energy'] }
   end
 
-  def self.WaterHeaterTypeTankless
-    return 'tankless'
+  def self.SpaceHeatingDFHPBackupLoad
+    return { 'OpenStudio::Model::CoilHeatingElectric' => ['Heating Coil Heating Energy'],
+             'OpenStudio::Model::CoilHeatingGas' => ['Heating Coil Heating Energy'] }
   end
 
-  def self.WaterHeaterTypeTank
-    return 'tank'
+  def self.SpaceCoolingElectricity
+    return { 'OpenStudio::Model::CoilCoolingDXSingleSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::CoilCoolingDXMultiSpeed' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::CoilCoolingWaterToAirHeatPumpEquationFit' => ['Cooling Coil Electric Energy', 'Cooling Coil Crankcase Heater Electric Energy'],
+             'OpenStudio::Model::EvaporativeCoolerDirectResearchSpecial' => ['Evaporative Cooler Electric Energy'] }
   end
 
-  def self.WaterHeaterTypeHeatPump
-    return 'heatpump'
+  def self.WaterHeatingElectricity
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Electric Energy', 'Water Heater Off Cycle Parasitic Electric Energy', 'Water Heater On Cycle Parasitic Electric Energy'],
+             'OpenStudio::Model::CoilWaterHeatingAirToWaterHeatPumpWrapped' => ['Cooling Coil Water Heating Electric Energy'] }
+  end
+
+  def self.WaterHeatingElectricitySolarThermalPump
+    return { 'OpenStudio::Model::PumpConstantSpeed' => ['Pump Electric Energy'] }
+  end
+
+  def self.WaterHeatingElectricityRecircPump
+    return { 'OpenStudio::Model::ElectricEquipment' => ['Electric Equipment Electric Energy'] }
+  end
+
+  def self.WaterHeatingCombiBoilerHeatExchanger
+    return { 'OpenStudio::Model::HeatExchangerFluidToFluid' => ['Fluid Heat Exchanger Heat Transfer Energy'] }
+  end
+
+  def self.WaterHeatingCombiBoiler
+    return { 'OpenStudio::Model::BoilerHotWater' => ['Boiler Heating Energy'] }
+  end
+
+  def self.WaterHeatingNaturalGas
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Gas Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Gas Energy'] }
+  end
+
+  def self.WaterHeatingFuelOil
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater FuelOil#1 Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater FuelOil#1 Energy'] }
+  end
+
+  def self.WaterHeatingPropane
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Propane Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Propane Energy'] }
+  end
+
+  def self.WaterHeatingLoad
+    return { 'OpenStudio::Model::WaterUseConnections' => ['Water Use Connections Plant Hot Water Energy'] }
+  end
+
+  def self.WaterHeatingLoadTankLosses
+    return { 'OpenStudio::Model::WaterHeaterMixed' => ['Water Heater Heat Loss Energy'],
+             'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Heat Loss Energy'] }
+  end
+
+  def self.WaterHeaterLoadDesuperheater
+    return { 'OpenStudio::Model::CoilWaterHeatingDesuperheater' => ['Water Heater Heating Energy'] }
+  end
+
+  def self.WaterHeaterLoadSolarThermal
+    return { 'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Use Side Heat Transfer Energy'] }
   end
 end

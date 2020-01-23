@@ -3,16 +3,10 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>Rakefile</XMLGeneratedBy>
-    <CreatedDateAndTime>2019-05-03T09:26:38-06:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2000-01-01T00:00:00-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
-  <SoftwareInfo>
-    <extension>
-      <ERICalculation>
-        <Version>2014AEG</Version>
-      </ERICalculation>
-    </extension>
-  </SoftwareInfo>
+  <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
     <ProjectStatus>
@@ -224,8 +218,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowEastInteriorShading'/>
-              <SummerShadingCoefficient>0.99</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.01</WinterShadingCoefficient>
+              <SummerShadingCoefficient>0.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>0.5</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
@@ -237,8 +231,8 @@
             <SHGC>0.45</SHGC>
             <InteriorShading>
               <SystemIdentifier id='WindowWestInteriorShading'/>
-              <SummerShadingCoefficient>0.85</SummerShadingCoefficient>
-              <WinterShadingCoefficient>0.7</WinterShadingCoefficient>
+              <SummerShadingCoefficient>1.0</SummerShadingCoefficient>
+              <WinterShadingCoefficient>1.0</WinterShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='Wall'/>
           </Window>
