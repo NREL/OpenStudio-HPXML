@@ -1128,9 +1128,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     ng_dhw = results.fetch(["Natural Gas", "Water Systems", "General", "GJ"], 0)
     ng_cd = results.fetch(["Natural Gas", "Interior Equipment", "clothes dryer", "GJ"], 0)
     ng_cr = results.fetch(["Natural Gas", "Interior Equipment", "cooking range", "GJ"], 0)
-    if not hpxml_path.include? "location-miami" and
-       (not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? or
-       not bldg_details.elements["Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel='natural gas']"].nil?)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='natural gas']"].nil? or
+       not bldg_details.elements["Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel='natural gas']"].nil?
       assert_operator(ng_htg, :>, 0)
     else
       assert_equal(ng_htg, 0)
@@ -1156,9 +1155,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     af_dhw = results.fetch(["Additional Fuel", "Water Systems", "General", "GJ"], 0)
     af_cd = results.fetch(["Additional Fuel", "Interior Equipment", "clothes dryer", "GJ"], 0)
     af_cr = results.fetch(["Additional Fuel", "Interior Equipment", "cooking range", "GJ"], 0)
-    if not hpxml_path.include? "location-miami" and
-       (not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil? or
-       not bldg_details.elements["Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel='fuel oil' or BackupSystemFuel='propane' or BackupSystemFuel='wood']"].nil?)
+    if not bldg_details.elements["Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemFuel='fuel oil' or HeatingSystemFuel='propane' or HeatingSystemFuel='wood']"].nil? or
+       not bldg_details.elements["Systems/HVAC/HVACPlant/HeatPump[BackupSystemFuel='fuel oil' or BackupSystemFuel='propane' or BackupSystemFuel='wood']"].nil?
       assert_operator(af_htg, :>, 0)
     else
       assert_equal(af_htg, 0)
