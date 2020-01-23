@@ -54,6 +54,10 @@ class HEScoreTest < Minitest::Unit::TestCase
     # Check for output
     hes_hpxml = File.join(parent_dir, "results", "HEScoreDesign.xml")
     assert(File.exists?(hes_hpxml))
+
+    # Check that IDF wasn't generated
+    idf = File.join(parent_dir, "HEScoreDesign", "in.idf")
+    assert(!File.exists?(idf))
   end
 
   private
