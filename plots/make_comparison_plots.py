@@ -1,9 +1,11 @@
 import os
 import argparse
+import numpy as np
 import pandas as pd
 import bokeh.io as bio
 import bokeh.plotting as bplt
 from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models.annotations import Label, Slope
 from bokeh.layouts import gridplot
 from lxml import etree
 import re
@@ -47,18 +49,23 @@ def make_comparison_plots(df_doe2, df_os):
         for basediff in ('', '_basediff'):
             doe2_colname = colname + '_doe2' + basediff
             os_colname = colname + '_os' + basediff
+            maxval = df2[[doe2_colname, os_colname]].max().max()
+            minval = df2[[doe2_colname, os_colname]].min().min()
+            minmaxrange = maxval - minval
+            maxval += minmaxrange * 0.05
+            minval -= minmaxrange * 0.05
             plot_title = colname + basediff
             p = bplt.figure(
                 tools='pan,wheel_zoom,box_zoom,reset,save,box_select,lasso_select',
                 width=400,
                 height=400,
-                title=plot_title
+                title=plot_title,
+                x_range=(minval, maxval),
+                y_range=(minval, maxval)
             )
             p.xaxis.axis_label = 'DOE2'
             p.yaxis.axis_label = 'EnergyPlus'
-            maxval = df2[[doe2_colname, os_colname]].max().max()
-            minval = df2[[doe2_colname, os_colname]].min().min()
-            p.line(x=(minval, maxval), y=(minval, maxval), color='firebrick')
+            p.add_layout(Slope(gradient=1, y_intercept=0, line_color='firebrick'))
             c = p.circle(x=doe2_colname, y=os_colname, source=data_source)
             hover = HoverTool(
                 tooltips=[
@@ -70,6 +77,10 @@ def make_comparison_plots(df_doe2, df_os):
                 renderers=[c]
             )
             p.add_tools(hover)
+            if not basediff:
+                rmse = np.sqrt(np.mean((df[os_colname] - df[doe2_colname]).values**2))
+                rmse_label = Label(x=maxval, y=minval, text=f'RMSE: {rmse:,.1f}', text_align='right')
+                p.add_layout(rmse_label)
             row_figs.append(p)
         figures.append(row_figs)
 
