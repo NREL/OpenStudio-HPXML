@@ -42,6 +42,24 @@ class HEScoreTest < Minitest::Unit::TestCase
     _write_summary_results(results)
   end
 
+  def test_skip_simulation
+    parent_dir = File.absolute_path(File.join(File.dirname(__FILE__), ".."))
+
+    cli_path = OpenStudio.getOpenStudioCLI
+    xml = File.absolute_path(File.join(parent_dir, "sample_files", "Base_hpxml.xml"))
+    command = "\"#{cli_path}\" --no-ssl \"#{File.join(File.dirname(__FILE__), "../run_simulation.rb")}\" --skip-simulation -x #{xml}"
+    start_time = Time.now
+    system(command)
+
+    # Check for output
+    hes_hpxml = File.join(parent_dir, "results", "HEScoreDesign.xml")
+    assert(File.exists?(hes_hpxml))
+
+    # Check that IDF wasn't generated
+    idf = File.join(parent_dir, "HEScoreDesign", "in.idf")
+    assert(!File.exists?(idf))
+  end
+
   private
 
   def run_and_check(xml, parent_dir, expect_error, zipfile)
