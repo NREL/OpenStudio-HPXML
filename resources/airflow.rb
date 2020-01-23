@@ -733,7 +733,7 @@ class Airflow
   end
 
   def self.process_nat_vent(model, nat_vent, tin_sensor, tout_sensor, pbar_sensor, vwind_sensor, wind_speed, infil, building, weather, wout_sensor)
-    # Schedule
+    # Availability Schedule
     avail_sch = OpenStudio::Model::ScheduleRuleset.new(model)
     avail_sch.setName(Constants.ObjectNameNaturalVentilation + " avail schedule")
     Schedule.set_schedule_type_limits(model, avail_sch, Constants.ScheduleTypeLimitsOnOff)
@@ -766,11 +766,23 @@ class Airflow
     on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
     on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
 
-    # Sensors
-    zone_load = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Predicted Sensible Load to Setpoint Heat Transfer Rate")
-    zone_load.setName("#{Constants.ObjectNameNaturalVentilation} load s")
-    zone_load.setKeyName(building.living.zone.name.to_s)
+    # Setpoint schedule (average of heating/cooling setpoints)
 
+    nv_weekday_setpoints = [[nil] * 24] * 12
+    nv_weekend_setpoints = [[nil] * 24] * 12
+    for month in 1..12
+      for hr in 1..24
+        nv_weekday_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekday_setpoints[month - 1][hr - 1] + nat_vent.clg_weekday_setpoints[month - 1][hr - 1]) / 2.0, "F", "C")
+        nv_weekend_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekend_setpoints[month - 1][hr - 1] + nat_vent.clg_weekend_setpoints[month - 1][hr - 1]) / 2.0, "F", "C")
+      end
+    end
+    temp_sch = HourlyByMonthSchedule.new(model, Constants.ObjectNameNaturalVentilation + " temp schedule", nv_weekday_setpoints, nv_weekend_setpoints, false, true, Constants.ScheduleTypeLimitsTemperature)
+
+    nvsp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    nvsp_sensor.setName("#{Constants.ObjectNameNaturalVentilation} sp s")
+    nvsp_sensor.setKeyName(temp_sch.schedule.name.to_s)
+
+    # Sensors
     nvavail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
     nvavail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
     nvavail_sensor.setKeyName(avail_sch.name.to_s)
@@ -811,9 +823,9 @@ class Airflow
     nv_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
     nv_program.addLine("Set NVAvail = #{nvavail_sensor.name}")
     nv_program.addLine("Set Vwind = #{vwind_sensor.name}")
+    nv_program.addLine("Set Tnvsp = #{nvsp_sensor.name}")
     nv_program.addLine("Set SGNV = (NVAvail*NVArea)*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
-    nv_program.addLine("Set ZoneLoad = #{zone_load.name}")
-    nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>Tout) && (ZoneLoad < 0)")
+    nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>Tout) && (Tin>Tnvsp)")
     nv_program.addLine("  Set #{natvent_flow_actuator.name} = (@Min SGNV MaxNV)")
     nv_program.addLine("Else")
     nv_program.addLine("  Set #{natvent_flow_actuator.name} = 0")
@@ -1808,14 +1820,20 @@ class Infiltration
 end
 
 class NaturalVentilation
-  def initialize(frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh, nv_num_days_per_week)
+  def initialize(frac_windows_open, frac_window_area_openable, max_oa_hr, max_oa_rh, nv_num_days_per_week,
+                 htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints)
     @frac_windows_open = frac_windows_open
     @frac_window_area_openable = frac_window_area_openable
     @max_oa_hr = max_oa_hr
     @max_oa_rh = max_oa_rh
     @nv_num_days_per_week = nv_num_days_per_week
+    @htg_weekday_setpoints = htg_weekday_setpoints
+    @htg_weekend_setpoints = htg_weekend_setpoints
+    @clg_weekday_setpoints = clg_weekday_setpoints
+    @clg_weekend_setpoints = clg_weekend_setpoints
   end
-  attr_accessor(:frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh, :nv_num_days_per_week)
+  attr_accessor(:frac_windows_open, :frac_window_area_openable, :max_oa_hr, :max_oa_rh, :nv_num_days_per_week,
+                :htg_weekday_setpoints, :htg_weekend_setpoints, :clg_weekday_setpoints, :clg_weekend_setpoints)
 end
 
 class MechanicalVentilation
