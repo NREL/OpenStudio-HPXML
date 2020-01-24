@@ -290,6 +290,7 @@ def create_hpxmls
     'base-misc-lighting-none.xml' => 'base.xml',
     'base-misc-loads-detailed.xml' => 'base.xml',
     'base-misc-number-of-occupants.xml' => 'base.xml',
+    'base-misc-whole-house-fan.xml' => 'base.xml',
     'base-pv-array-1axis.xml' => 'base.xml',
     'base-pv-array-1axis-backtracked.xml' => 'base.xml',
     'base-pv-array-2axis.xml' => 'base.xml',
@@ -2588,7 +2589,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :fan_type => "balanced",
                                  :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
-                                 :fan_power => 60 }
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['invalid_files/unattached-cfis.xml',
          'invalid_files/cfis-with-hydronic-distribution.xml',
          'base-mechvent-cfis.xml',
@@ -2613,6 +2615,7 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :tested_flow_rate => 330,
                                  :hours_in_operation => 8,
                                  :fan_power => 300,
+                                 :used_for_whole_building_ventilation => true,
                                  :distribution_system_idref => "HVACDistribution" }
     if ['invalid_files/unattached-cfis.xml'].include? hpxml_file
       ventilation_fans_values[0][:distribution_system_idref] = "foobar"
@@ -2626,7 +2629,8 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency => 0.48,
                                  :sensible_recovery_efficiency => 0.72,
-                                 :fan_power => 60 }
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['base-mechvent-erv-atre-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "energy recovery ventilator",
@@ -2634,46 +2638,58 @@ def get_hpxml_file_ventilation_fan_values(hpxml_file, ventilation_fans_values)
                                  :hours_in_operation => 24,
                                  :total_recovery_efficiency_adjusted => 0.526,
                                  :sensible_recovery_efficiency_adjusted => 0.79,
-                                 :fan_power => 60 }
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['base-mechvent-exhaust.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "exhaust only",
                                  :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
-                                 :fan_power => 30 }
+                                 :fan_power => 30,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['base-mechvent-exhaust-rated-flow-rate.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "exhaust only",
                                  :rated_flow_rate => 110,
                                  :hours_in_operation => 24,
-                                 :fan_power => 30 }
+                                 :fan_power => 30,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['base-mechvent-hrv.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "heat recovery ventilator",
                                  :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :sensible_recovery_efficiency => 0.72,
-                                 :fan_power => 60 }
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['base-mechvent-hrv-asre.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "heat recovery ventilator",
                                  :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
                                  :sensible_recovery_efficiency_adjusted => 0.790,
-                                 :fan_power => 60 }
+                                 :fan_power => 60,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['base-mechvent-supply.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "supply only",
                                  :tested_flow_rate => 110,
                                  :hours_in_operation => 24,
-                                 :fan_power => 30 }
+                                 :fan_power => 30,
+                                 :used_for_whole_building_ventilation => true }
   elsif ['cfis/base-hvac-boiler-gas-central-ac-1-speed-cfis.xml'].include? hpxml_file
     ventilation_fans_values << { :id => "MechanicalVentilation",
                                  :fan_type => "central fan integrated supply",
                                  :tested_flow_rate => 330,
                                  :hours_in_operation => 8,
                                  :fan_power => 300,
+                                 :used_for_whole_building_ventilation => true,
                                  :distribution_system_idref => "HVACDistribution2" }
+  elsif ['base-misc-whole-house-fan.xml'].include? hpxml_file
+    ventilation_fans_values << { :id => "WholeHouseFan",
+                                 :rated_flow_rate => 4500,
+                                 :fan_power => 300,
+                                 :used_for_seasonal_cooling_load_reduction => true }
   end
   return ventilation_fans_values
 end
