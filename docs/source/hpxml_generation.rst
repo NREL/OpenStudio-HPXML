@@ -378,6 +378,7 @@ A single whole house fan may be specified as a ``Systems/MechanicalVentilation/V
 Required elements include ``RatedFlowRate`` and ``FanPower``.
 
 The whole house fan is assumed to operate during hours of favorable outdoor conditions.
+If available, it will take priority over natural ventilation.
 
 Water Heaters
 *************
