@@ -766,26 +766,32 @@ class Airflow
     on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
     on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
 
-    # Setpoint schedule (average of heating/cooling setpoints)
+    # Setpoint schedule
+    # Based on heating/cooling setpoints with bias towards cooling setpoint in order to minimize
+    # potential for increased heating.
+
+    clg_to_htg_ratio = 3.0 # 3:1
+    clg_frac = clg_to_htg_ratio / (clg_to_htg_ratio + 1.0)
+    htg_frac = 1.0 / (clg_to_htg_ratio + 1.0)
 
     nv_weekday_setpoints = [[nil] * 24] * 12
     nv_weekend_setpoints = [[nil] * 24] * 12
     for month in 1..12
       for hr in 1..24
-        nv_weekday_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekday_setpoints[month - 1][hr - 1] + nat_vent.clg_weekday_setpoints[month - 1][hr - 1]) / 2.0, "F", "C")
-        nv_weekend_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekend_setpoints[month - 1][hr - 1] + nat_vent.clg_weekend_setpoints[month - 1][hr - 1]) / 2.0, "F", "C")
+        nv_weekday_setpoints[month - 1][hr - 1] = UnitConversions.convert(nat_vent.htg_weekday_setpoints[month - 1][hr - 1] * htg_frac + nat_vent.clg_weekday_setpoints[month - 1][hr - 1] * clg_frac, "F", "C")
+        nv_weekend_setpoints[month - 1][hr - 1] = UnitConversions.convert(nat_vent.htg_weekend_setpoints[month - 1][hr - 1] * htg_frac + nat_vent.clg_weekend_setpoints[month - 1][hr - 1] * clg_frac, "F", "C")
       end
     end
     temp_sch = HourlyByMonthSchedule.new(model, Constants.ObjectNameNaturalVentilation + " temp schedule", nv_weekday_setpoints, nv_weekend_setpoints, false, true, Constants.ScheduleTypeLimitsTemperature)
 
     # Sensors
-    nvsp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    nvsp_sensor.setName("#{Constants.ObjectNameNaturalVentilation} sp s")
-    nvsp_sensor.setKeyName(temp_sch.schedule.name.to_s)
+    nv_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    nv_sp_sensor.setName("#{Constants.ObjectNameNaturalVentilation} sp s")
+    nv_sp_sensor.setKeyName(temp_sch.schedule.name.to_s)
 
-    nvavail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    nvavail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
-    nvavail_sensor.setKeyName(avail_sch.name.to_s)
+    nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    nv_avail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
+    nv_avail_sensor.setKeyName(avail_sch.name.to_s)
 
     # Actuators
     living_space = building.living.zone.spaces[0]
@@ -854,8 +860,9 @@ class Airflow
     nv_and_whf_program.addLine("Set Phiout = (@RhFnTdbWPb Tout Wout Pbar)")
     nv_and_whf_program.addLine("Set MaxHR = #{nat_vent.max_oa_hr}")
     nv_and_whf_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
-    nv_and_whf_program.addLine("Set Tnvsp = #{nvsp_sensor.name}")
-    nv_and_whf_program.addLine("If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp)")
+    nv_and_whf_program.addLine("Set Tnvsp = #{nv_sp_sensor.name}")
+    nv_and_whf_program.addLine("Set NVAvail = #{nv_avail_sensor.name}")
+    nv_and_whf_program.addLine("If (Wout < MaxHR) && (Phiout < MaxRH) && (Tin > Tout) && (Tin > Tnvsp) && (NVAvail > 0)")
     nv_and_whf_program.addLine("  Set WHF_Flow = #{UnitConversions.convert(whf.cfm, "cfm", "m^3/s")}")
     nv_and_whf_program.addLine("  If WHF_Flow > 0") # If available, prioritize whole house fan
     nv_and_whf_program.addLine("    Set #{nv_flow_actuator.name} = 0")
