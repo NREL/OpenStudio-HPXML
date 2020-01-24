@@ -1938,24 +1938,19 @@ class OSModel
     if not clothes_washer_values.nil?
       cw_space = get_space_from_location(clothes_washer_values[:location], "ClothesWasher", model, spaces)
       cw_ler = clothes_washer_values[:rated_annual_kwh]
-      if cw_ler.nil?
-        cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
-      end
       cw_elec_rate = clothes_washer_values[:label_electric_rate]
       cw_gas_rate = clothes_washer_values[:label_gas_rate]
       cw_agc = clothes_washer_values[:label_annual_gas_cost]
-      if cw_elec_rate.nil? or cw_gas_rate.nil? or cw_agc.nil?
+      cw_cap = clothes_washer_values[:capacity]
+      cw_mef = clothes_washer_values[:modified_energy_factor]
+      
+      # use default values for all optional variables if any of the optional variables are not provided
+      if cw_ler.nil? or cw_elec_rate.nil? or cw_gas_rate.nil? or cw_agc.nil? or cw_cap.nil? or cw_mef.nil?
+        cw_ler = HotWaterAndAppliances.get_clothes_washer_reference_ler()
         cw_elec_rate = HotWaterAndAppliances.get_clothes_washer_reference_elec_rate()
         cw_gas_rate = HotWaterAndAppliances.get_clothes_washer_reference_gas_rate()
         cw_agc = HotWaterAndAppliances.get_clothes_washer_reference_agc()
-        # FIXME: add an error to ask users to enter all rates above. Otherwise, default rates will be used.  
-      end
-      cw_cap = clothes_washer_values[:capacity]
-      if cw_cap.nil?
         cw_cap = HotWaterAndAppliances.get_clothes_washer_reference_cap()
-      end
-      cw_mef = clothes_washer_values[:modified_energy_factor]
-      if cw_mef.nil?
         if clothes_washer_values[:integrated_modified_energy_factor].nil?
           cw_mef = HotWaterAndAppliances.calc_clothes_washer_mef_from_imef(HotWaterAndAppliances.get_clothes_washer_reference_imef())
         else
@@ -1972,11 +1967,11 @@ class OSModel
       cd_space = get_space_from_location(clothes_dryer_values[:location], "ClothesDryer", model, spaces)
       cd_fuel = clothes_dryer_values[:fuel_type]
       cd_control = clothes_dryer_values[:control_type]
-      if cd_control.nil?
-        cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
-      end
       cd_ef = clothes_dryer_values[:energy_factor]
-      if cd_ef.nil?
+
+      # use default values for all optional variables if any of the optional variables are not provided
+      if cd_control.nil? or cd_ef.nil?
+        cd_control = HotWaterAndAppliances.get_clothes_dryer_reference_control()
         if clothes_dryer_values[:combined_energy_factor].nil?
           cd_ef = HotWaterAndAppliances.calc_clothes_dryer_ef_from_cef(HotWaterAndAppliances.get_clothes_dryer_reference_cef(cd_fuel))
         else 
@@ -1991,11 +1986,11 @@ class OSModel
     dishwasher_values = HPXML.get_dishwasher_values(dishwasher: building.elements["BuildingDetails/Appliances/Dishwasher"])
     if not dishwasher_values.nil?
       dw_cap = dishwasher_values[:place_setting_capacity]
-      if dw_cap.nil?
-        dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
-      end
       dw_ef = dishwasher_values[:energy_factor]
-      if dw_ef.nil?
+
+      # use default values for all optional variables if any of the optional variables are not provided
+      if dw_cap.nil? or dw_ef.nil?
+        dw_cap = HotWaterAndAppliances.get_dishwasher_reference_cap()
         if dishwasher_values[:rated_annual_kwh].nil?
           dw_ef = HotWaterAndAppliances.get_dishwasher_reference_ef()
         else
@@ -2011,6 +2006,8 @@ class OSModel
     if not refrigerator_values.nil?
       fridge_space = get_space_from_location(refrigerator_values[:location], "Refrigerator", model, spaces)
       fridge_annual_kwh = refrigerator_values[:adjusted_annual_kwh]
+
+      # use default values for all optional variables if any of the optional variables are not provided
       if fridge_annual_kwh.nil?
         if refrigerator_values[:rated_annual_kwh].nil?
           fridge_annual_kwh = HotWaterAndAppliances.get_refrigerator_reference_annual_kwh(@nbeds)
@@ -2028,11 +2025,11 @@ class OSModel
     if not cooking_range_values.nil? and not oven_values.nil?
       cook_fuel_type = cooking_range_values[:fuel_type]
       cook_is_induction = cooking_range_values[:is_induction]
-      if cook_is_induction.nil?
-        cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
-      end
       oven_is_convection = oven_values[:is_convection]
-      if oven_is_convection.nil?
+
+      # use default values for all optional variables if any of the optional variables are not provided
+      if cook_is_induction.nil? or oven_is_convection.nil?
+        cook_is_induction = HotWaterAndAppliances.get_range_oven_reference_is_induction()
         oven_is_convection = HotWaterAndAppliances.get_range_oven_reference_is_convection()
       end
     else

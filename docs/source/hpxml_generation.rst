@@ -462,8 +462,17 @@ The following elements, some adopted from the `PVWatts model <https://pvwatts.nr
 - ``ArrayAzimuth``
 - ``ArrayTilt``
 - ``MaxPowerOutput``
-- ``InverterEfficiency``: Default is 0.96.
-- ``SystemLossesFraction``: Default is 0.14. System losses include soiling, shading, snow, mismatch, wiring, degradation, etc.
+
+In addition, ``InverterEfficiency`` and ``SystemLossesFraction`` can be optionally entered.
+Note that system losses include soiling, shading, snow, mismatch, wiring, degradation, etc.
+If not provided, default values will be assumed as follows:
+
+=======================  ==============
+Element Name             Default Value
+=======================  ==============
+Inverter Efficiency      0.96
+System Losses Fraction   0.14
+=======================  ==============
 
 Appliances
 ~~~~~~~~~~
@@ -477,35 +486,101 @@ Clothes Washer
 **************
 
 An ``Appliances/ClothesWasher`` element can be specified; if not provided, a clothes washer will not be modeled.
+The washer's ``Location`` must be provided.
+Inputs including the efficiency of the clothes washer, ``RatedAnnualkWh``, ``LabelElectricRate``, ``LabelGasRate``, ``LabelAnnualGasCost``, and ``Capacity`` can be optionally provided.
 The efficiency of the clothes washer can either be entered as a ``ModifiedEnergyFactor`` or an ``IntegratedModifiedEnergyFactor``.
-Several other inputs from the EnergyGuide label must be provided as well.
+If ``IntegratedModifiedEnergyFactor`` is provided, ``IntegratedModifiedEnergyFactor`` will be converted into ``ModifiedEnergyFactor`` using the equation :eq:`cw_mef`.  
+This equation is based on ANSI/RESNET 301-2004.
+
+.. math:: Modified Energy Factor = 0.503 + 0.95 * Integrated Modified EnergyFactor
+  :label: cw_mef
+
+If neither ``ModifiedEnergyFactor`` nor ``IntegratedModifiedEnergyFactor`` are provided, the default value of ``IntegratedModifiedEnergyFactor`` will be used in the equation :eq:`cw_mef` to calculate the default ``ModifiedEnergyFactor``.  
+The following default values will be assumed unless a complete set of the optional variables is provided. 
+
+==================================  ==================
+Element Name                        Default Value
+==================================  ==================
+Integrated Modified Energy Factor   0.331  [unitless]
+Rated Annual kWh                    704.0  [kWh/yr]
+Label Electric Rate                 0.0803  [$/kWh]
+Label Gas Rate                      0.58  [$/therm]
+Label Annual Gas Cost               23.0  [$]
+Capacity                            2.874  [ft³]
+==================================  ==================
 
 Clothes Dryer
 *************
 
 An ``Appliances/ClothesDryer`` element can be specified; if not provided, a clothes dryer will not be modeled.
-The dryer's ``FuelType`` and ``ControlType`` ("timer" or "moisture") must be provided.
+The dryer's ``FuelType`` must be provided.
+Inputs including the efficiency of the clothes dryer and ``ControlType`` ("timer" or "moisture") can be optionally provided.
 The efficiency of the clothes dryer can either be entered as an ``EnergyFactor`` or ``CombinedEnergyFactor``.
+If ``CombinedEnergyFactor`` is provided, ``CombinedEnergyFactor`` will be converted into ``EnergyFactor`` using the equation :eq:`cd_ef`.  
+This equation is based on ANSI/RESNET 301-2004.
 
+.. math:: Energy Factor = 1.15 * Combined Energy Factor
+  :label: cd_ef 
+
+If neither ``EnergyFactor`` nor ``CombinedEnergyFactor`` are provided, the default value of ``CombinedEnergyFactor`` will be used in the equation :eq:`cd_ef` to calculate the default ``EnergyFactor``.
+Depending on the fuel type, two different default values may be used.  
+The following default values will be assumed unless a complete set of the optional variables is provided.
+
+=======================  ===============================================
+Element Name             Default Value
+=======================  ===============================================
+Combined Energy Factor   2.62, if fuel type is electricity;  2.32, else
+Control Type             timer
+=======================  ===============================================
 
 Dishwasher
 **********
 
 An ``Appliances/Dishwasher`` element can be specified; if not provided, a dishwasher will not be modeled.
-The dishwasher's ``PlaceSettingCapacity`` must be provided.
+Inputs including the efficiency of the dishwasher and ``PlaceSettingCapacity`` can be optionally provided.
 The efficiency of the dishwasher can either be entered as an ``EnergyFactor`` or ``RatedAnnualkWh``.
+If ``RatedAnnualkWh`` is provided, ``RatedAnnualkWh`` will be converted into ``EnergyFactor`` using the equation :eq:`dw_ef`.  
+This equation is based on ANSI/RESNET 301-2004.
+
+.. math:: Energy Factor = 215.0 / Rated Annual kWh
+  :label: dw_ef 
+
+If neither ``EnergyFactor`` nor ``RatedAnnualkWh`` are provided, the default value of ``EnergyFactor`` will be used.
+The following default values will be assumed unless a complete set of the optional variables is provided.
+
+=======================  =================
+Element Name             Default Value
+=======================  =================
+Energy Factor            0.46  [unitless]
+Place Setting Capacity   12.0  [unitless]
+=======================  =================
+
 
 Refrigerator
 ************
 
 An ``Appliances/Refrigerator`` element can be specified; if not provided, a refrigerator will not be modeled.
-The efficiency of the refrigerator must be entered as ``RatedAnnualkWh``.
+The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh``.
+If ``RatedAnnualkWh`` is not provided, ``RatedAnnualkWh`` will be calculated based on the number of bedrooms using the equation :eq:`refrig_kwh`.  
+This equation is based on ANSI/RESNET 301-2004.
+
+.. math:: Rated Annual kWh = 637.0 + 18.0 * Number of bedrooms
+  :label: refrig_kwh 
 
 Cooking Range/Oven
 ******************
 
 ``Appliances/CookingRange`` and ``Appliances/Oven`` elements can be specified; if not provided, a range/oven will not be modeled.
-The ``FuelType`` of the range and whether it ``IsInduction``, as well as whether the oven ``IsConvection``, must be provided.
+The ``FuelType`` of the range must be provided.
+Inputs including ``IsInduction`` (for the cooking range) and ``IsConvection`` (for the oven) can be optionally provided.
+The following default values will be assumed unless a complete set of the optional variables is provided.
+
+=============  ==============
+Element Name   Default Value
+=============  ==============
+IsInduction    false
+IsConvection   false
+=============  ==============
 
 Lighting
 ~~~~~~~~
