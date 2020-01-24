@@ -463,9 +463,9 @@ The following elements, some adopted from the `PVWatts model <https://pvwatts.nr
 - ``ArrayTilt``
 - ``MaxPowerOutput``
 
-In addition, ``InverterEfficiency`` and ``SystemLossesFraction`` can be optionally entered.
+Inputs including ``InverterEfficiency``, ``SystemLossesFraction``, and ``YearModulesManufactured`` can be optionally entered.
 Note that system losses include soiling, shading, snow, mismatch, wiring, degradation, etc.
-If not provided, default values will be assumed as follows:
+If ``InverterEfficiency`` is not provided and neither ``SystemLossesFraction`` nor ``YearModulesManufactured`` is provided, default values will be assumed as follows:
 
 =======================  ==============
 Element Name             Default Value
@@ -473,6 +473,12 @@ Element Name             Default Value
 Inverter Efficiency      0.96
 System Losses Fraction   0.14
 =======================  ==============
+
+If ``YearModulesManufactured`` is provided, ``SystemLossesFraction`` will be calculated based on ``YearModulesManufactured`` using the equation :eq:`pv_loss`.  
+In this case, the user entered ``SystemLossesFraction`` will be ignored.
+
+.. math:: System Losses Fraction = 1.0 - (1.0 - 0.14) \cdot (1.0 - (1.0 - 0.995^{(current year - year modules manufactured)}))
+  :label: pv_loss
 
 Appliances
 ~~~~~~~~~~
@@ -492,7 +498,7 @@ The efficiency of the clothes washer can either be entered as a ``ModifiedEnergy
 If ``IntegratedModifiedEnergyFactor`` is provided, ``IntegratedModifiedEnergyFactor`` will be converted into ``ModifiedEnergyFactor`` using the equation :eq:`cw_mef`.  
 This equation is based on ANSI/RESNET 301-2004.
 
-.. math:: Modified Energy Factor = 0.503 + 0.95 * Integrated Modified EnergyFactor
+.. math:: Modified Energy Factor = 0.503 + 0.95 \cdot Integrated Modified EnergyFactor
   :label: cw_mef
 
 If neither ``ModifiedEnergyFactor`` nor ``IntegratedModifiedEnergyFactor`` are provided, the default value of ``IntegratedModifiedEnergyFactor`` will be used in the equation :eq:`cw_mef` to calculate the default ``ModifiedEnergyFactor``.  
@@ -519,7 +525,7 @@ The efficiency of the clothes dryer can either be entered as an ``EnergyFactor``
 If ``CombinedEnergyFactor`` is provided, ``CombinedEnergyFactor`` will be converted into ``EnergyFactor`` using the equation :eq:`cd_ef`.  
 This equation is based on ANSI/RESNET 301-2004.
 
-.. math:: Energy Factor = 1.15 * Combined Energy Factor
+.. math:: Energy Factor = 1.15 \cdot Combined Energy Factor
   :label: cd_ef 
 
 If neither ``EnergyFactor`` nor ``CombinedEnergyFactor`` are provided, the default value of ``CombinedEnergyFactor`` will be used in the equation :eq:`cd_ef` to calculate the default ``EnergyFactor``.
@@ -542,7 +548,7 @@ The efficiency of the dishwasher can either be entered as an ``EnergyFactor`` or
 If ``RatedAnnualkWh`` is provided, ``RatedAnnualkWh`` will be converted into ``EnergyFactor`` using the equation :eq:`dw_ef`.  
 This equation is based on ANSI/RESNET 301-2004.
 
-.. math:: Energy Factor = 215.0 / Rated Annual kWh
+.. math:: Energy Factor = \frac{215.0}{Rated Annual kWh}
   :label: dw_ef 
 
 If neither ``EnergyFactor`` nor ``RatedAnnualkWh`` are provided, the default value of ``EnergyFactor`` will be used.
@@ -564,7 +570,7 @@ The efficiency of the refrigerator can be optionally entered as ``RatedAnnualkWh
 If ``RatedAnnualkWh`` is not provided, ``RatedAnnualkWh`` will be calculated based on the number of bedrooms using the equation :eq:`refrig_kwh`.  
 This equation is based on ANSI/RESNET 301-2004.
 
-.. math:: Rated Annual kWh = 637.0 + 18.0 * Number of bedrooms
+.. math:: Rated Annual kWh = 637.0 + 18.0 \cdot Number of bedrooms
   :label: refrig_kwh 
 
 Cooking Range/Oven
