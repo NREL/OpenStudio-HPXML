@@ -10,7 +10,6 @@ class Location
     apply_climate_zones(model, epw_file)
     apply_mains_temp(model, weather)
     apply_dst(model, dst_start_date, dst_end_date)
-    apply_ground_temp(model, weather)
     return weather
   end
 
@@ -94,14 +93,6 @@ class Location
         fail "Invalid daylight saving date specified."
       end
     end
-  end
-
-  def self.apply_ground_temp(model, weather)
-    annual_temps = Array.new(12, weather.data.AnnualAvgDrybulb)
-    annual_temps = annual_temps.map { |i| UnitConversions.convert(i, "F", "C") }
-    s_gt_d = model.getSiteGroundTemperatureDeep
-    s_gt_d.resetAllMonths
-    s_gt_d.setAllMonthlyTemperatures(annual_temps)
   end
 
   def self.get_climate_zone_ba(wmo)

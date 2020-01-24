@@ -5,24 +5,12 @@ class Constants
     return 73.5 # deg-F
   end
 
-  def self.DefaultFramingFactorInterior
-    return 0.16
-  end
-
-  def self.DefaultHumiditySetpoint
-    return 0.60
-  end
-
   def self.g
     return 32.174 # gravity (ft/s2)
   end
 
   def self.MonthNumDays
     return [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-  end
-
-  def self.Patm
-    return 14.696 # standard atmospheric pressure (psia)
   end
 
   def self.small
@@ -373,6 +361,10 @@ class Constants
 
   def self.ObjectNameTankHX
     return "dhw source hx"
+  end
+
+  def self.ObjectNameWholeHouseFan
+    return 'whole house fan'
   end
 
   def self.OptionallyDuctedSystemIsDucted
