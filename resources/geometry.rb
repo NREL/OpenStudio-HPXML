@@ -462,7 +462,7 @@ class Geometry
     space_num_occ = num_occ * UnitConversions.convert(space.floorArea, "m^2", "ft^2") / cfa
 
     # Create schedule
-    people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + " schedule", weekday_sch, weekend_sch, monthly_sch, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
     # Create schedule
     activity_sch = OpenStudio::Model::ScheduleRuleset.new(model, activity_per_person)

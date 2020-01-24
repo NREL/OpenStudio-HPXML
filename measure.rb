@@ -1731,7 +1731,7 @@ class OSModel
 
   def self.add_interior_shading_schedule(runner, model, weather)
     heating_season, cooling_season = HVAC.calc_heating_and_cooling_seasons(model, weather)
-    sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, mult_weekday = 1.0, mult_weekend = 1.0, normalize_values = true, create_sch_object = true, schedule_type_limits_name = Constants.ScheduleTypeLimitsFraction)
+    sch = MonthWeekdayWeekendSchedule.new(model, "interior shading schedule", Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     return sch
   end
 
@@ -3007,39 +3007,18 @@ class OSModel
 
     # Natural Ventilation
     if not disable_nat_vent.nil? and disable_nat_vent
-      nat_vent_htg_offset = 0
-      nat_vent_clg_offset = 0
-      nat_vent_ovlp_offset = 0
-      nat_vent_htg_season = false
-      nat_vent_clg_season = false
-      nat_vent_ovlp_season = false
-      nat_vent_num_weekdays = 0
-      nat_vent_num_weekends = 0
-      nat_vent_frac_windows_open = 0
-      nat_vent_frac_window_area_openable = 0
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
+      nv_frac_windows_open = 0.0
+      nv_frac_window_area_openable = 0.0
+      nv_num_days_per_week = 0
     else
-      nat_vent_htg_offset = 1.0
-      nat_vent_clg_offset = 1.0
-      nat_vent_ovlp_offset = 1.0
-      nat_vent_htg_season = true
-      nat_vent_clg_season = true
-      nat_vent_ovlp_season = true
-      nat_vent_num_weekdays = 5
-      nat_vent_num_weekends = 2
-      # According to 2010 BA Benchmark, 33% of the windows will be open
-      # at any given time and can only be opened to 20% of their area.
-      nat_vent_frac_windows_open = 0.33
-      nat_vent_frac_window_area_openable = 0.2
-      nat_vent_max_oa_hr = 0.0115
-      nat_vent_max_oa_rh = 0.7
+      nv_frac_windows_open = 0.33
+      nv_frac_window_area_openable = 0.2
+      nv_num_days_per_week = 7
     end
-    nat_vent = NaturalVentilation.new(nat_vent_htg_offset, nat_vent_clg_offset, nat_vent_ovlp_offset, nat_vent_htg_season,
-                                      nat_vent_clg_season, nat_vent_ovlp_season, nat_vent_num_weekdays,
-                                      nat_vent_num_weekends, nat_vent_frac_windows_open, nat_vent_frac_window_area_openable,
-                                      nat_vent_max_oa_hr, nat_vent_max_oa_rh, @htg_weekday_setpoints, @htg_weekend_setpoints,
-                                      @clg_weekday_setpoints, @clg_weekend_setpoints)
+    nv_max_oa_hr = 0.0115
+    nv_max_oa_rh = 0.7
+    nat_vent = NaturalVentilation.new(nv_frac_windows_open, nv_frac_window_area_openable, nv_max_oa_hr, nv_max_oa_rh, nv_num_days_per_week,
+                                      @htg_weekday_setpoints, @htg_weekend_setpoints, @clg_weekday_setpoints, @clg_weekend_setpoints)
 
     # Ducts
     duct_systems = {}
@@ -3096,8 +3075,8 @@ class OSModel
     mech_vent_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation='true']"]
     mech_vent_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: mech_vent_fan)
     mech_vent_type = nil
-    mech_vent_total_efficiency = 0.0
-    mech_vent_sensible_efficiency = 0.0
+    mech_vent_total_eff = 0.0
+    mech_vent_sens_eff = 0.0
     mech_vent_fan_w = 0.0
     mech_vent_cfm = 0.0
     cfis_open_time = 0.0
@@ -3112,22 +3091,22 @@ class OSModel
       elsif ['balanced', 'energy recovery ventilator', 'heat recovery ventilator'].include? mech_vent_type
         num_fans = 2.0
       end
-      mech_vent_total_efficiency = 0.0
-      mech_vent_total_efficiency_adjusted = 0.0
-      mech_vent_sensible_efficiency = 0.0
-      mech_vent_sensible_efficiency_adjusted = 0.0
+      mech_vent_total_eff = 0.0
+      mech_vent_total_eff_adj = 0.0
+      mech_vent_sens_eff = 0.0
+      mech_vent_sens_eff_adj = 0.0
       if mech_vent_type == 'energy recovery ventilator' or mech_vent_type == 'heat recovery ventilator'
         if mech_vent_fan_values[:sensible_recovery_efficiency_adjusted].nil?
-          mech_vent_sensible_efficiency = mech_vent_fan_values[:sensible_recovery_efficiency]
+          mech_vent_sens_eff = mech_vent_fan_values[:sensible_recovery_efficiency]
         else
-          mech_vent_sensible_efficiency_adjusted = mech_vent_fan_values[:sensible_recovery_efficiency_adjusted]
+          mech_vent_sens_eff_adj = mech_vent_fan_values[:sensible_recovery_efficiency_adjusted]
         end
       end
       if mech_vent_type == 'energy recovery ventilator'
         if mech_vent_fan_values[:total_recovery_efficiency_adjusted].nil?
-          mech_vent_total_efficiency = mech_vent_fan_values[:total_recovery_efficiency]
+          mech_vent_total_eff = mech_vent_fan_values[:total_recovery_efficiency]
         else
-          mech_vent_total_efficiency_adjusted = mech_vent_fan_values[:total_recovery_efficiency_adjusted]
+          mech_vent_total_eff_adj = mech_vent_fan_values[:total_recovery_efficiency_adjusted]
         end
       end
       mech_vent_cfm = mech_vent_fan_values[:tested_flow_rate]
@@ -3150,6 +3129,20 @@ class OSModel
     range_exhaust_hour = 16
     bathroom_exhaust = 0.0
     bathroom_exhaust_hour = 5
+
+    # Whole house fan
+    whole_house_fan = building.elements["BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction='true']"]
+    whole_house_fan_values = HPXML.get_ventilation_fan_values(ventilation_fan: whole_house_fan)
+    if not whole_house_fan_values.nil?
+      whole_house_fan_w = whole_house_fan_values[:fan_power]
+      whole_house_fan_cfm = whole_house_fan_values[:rated_flow_rate]
+      whf_num_days_per_week = 7
+    else
+      whole_house_fan_w = 0.0
+      whole_house_fan_cfm = 0.0
+      whf_num_days_per_week = 0
+    end
+    whf = WholeHouseFan.new(whole_house_fan_cfm, whole_house_fan_w, whf_num_days_per_week)
 
     # Get AirLoop associated with CFIS
     cfis_airloop = nil
@@ -3195,8 +3188,8 @@ class OSModel
       end
     end
 
-    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_efficiency, mech_vent_total_efficiency_adjusted, mech_vent_cfm,
-                                          mech_vent_fan_w, mech_vent_sensible_efficiency, mech_vent_sensible_efficiency_adjusted,
+    mech_vent = MechanicalVentilation.new(mech_vent_type, mech_vent_total_eff, mech_vent_total_eff_adj, mech_vent_cfm,
+                                          mech_vent_fan_w, mech_vent_sens_eff, mech_vent_sens_eff_adj,
                                           clothes_dryer_exhaust, range_exhaust,
                                           range_exhaust_hour, bathroom_exhaust, bathroom_exhaust_hour,
                                           cfis_open_time, cfis_airflow_frac, cfis_airloop)
@@ -3207,7 +3200,7 @@ class OSModel
       window_area += window_values[:area]
     end
 
-    Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, duct_systems,
+    Airflow.apply(model, runner, weather, infil, mech_vent, nat_vent, whf, duct_systems,
                   @cfa, @infilvolume, @nbeds, @nbaths, @ncfl, @ncfl_ag, window_area,
                   @min_neighbor_distance)
   end
@@ -3636,7 +3629,7 @@ class OSModel
       end
     end
 
-    # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation
+    # EMS Sensors: Infiltration, Mechanical Ventilation, Natural Ventilation, Whole House Fan
 
     air_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Infiltration Sensible Heat Gain Energy")
     air_gain_sensor.setName("airflow_gain")
@@ -3675,6 +3668,7 @@ class OSModel
     infil_flow_actuators = []
     natvent_flow_actuators = []
     imbal_mechvent_flow_actuators = []
+    whf_flow_actuators = []
 
     model.getEnergyManagementSystemActuators.each do |actuator|
       next unless actuator.actuatedComponentType == "Zone Infiltration" and actuator.actuatedComponentControlType == "Air Exchange Flow Rate"
@@ -3685,15 +3679,18 @@ class OSModel
         natvent_flow_actuators << actuator
       elsif actuator.name.to_s.start_with? Constants.ObjectNameMechanicalVentilation.gsub(" ", "_")
         imbal_mechvent_flow_actuators << actuator
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(" ", "_")
+        whf_flow_actuators << actuator
       end
     end
-    if infil_flow_actuators.size != 1 or natvent_flow_actuators.size != 1 or imbal_mechvent_flow_actuators.size != 1
+    if infil_flow_actuators.size != 1 or natvent_flow_actuators.size != 1 or imbal_mechvent_flow_actuators.size != 1 or whf_flow_actuators.size != 1
       fail "Could not find actuator for component loads."
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
     natvent_flow_actuator = natvent_flow_actuators[0]
     imbal_mechvent_flow_actuator = imbal_mechvent_flow_actuators[0]
+    whf_flow_actuator = whf_flow_actuators[0]
 
     # EMS Sensors: Ducts
 
@@ -3710,7 +3707,16 @@ class OSModel
 
     if not plenum_zones.empty?
 
-      if @living_zone.zoneMixing.size > 0
+      has_duct_zone_mixing = false
+      @living_zone.airLoopHVACs.sort.each do |airloop|
+        @living_zone.zoneMixing.each do |zone_mix|
+          next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(" ", "_")
+
+          has_duct_zone_mixing = true
+        end
+      end
+
+      if has_duct_zone_mixing
         ducts_mix_gain_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Zone Mixing Sensible Heat Gain Energy")
         ducts_mix_gain_sensor.setName("duct_mix_gain")
         ducts_mix_gain_sensor.setKeyName(@living_zone.name.to_s)
@@ -3854,7 +3860,7 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
-    nonsurf_names = ["intgains", "infil", "mechvent", "natvent", "ducts"]
+    nonsurf_names = ["intgains", "infil", "mechvent", "natvent", "whf", "ducts"]
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -3891,17 +3897,11 @@ class OSModel
     end
 
     # EMS program: Infiltration, Natural Ventilation, Mechanical Ventilation
-    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name}")
+    program.addLine("Set hr_airflow_rate = #{infil_flow_actuator.name} + #{imbal_mechvent_flow_actuator.name} + #{natvent_flow_actuator.name} + #{whf_flow_actuator.name}")
     program.addLine("Set hr_infil = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{infil_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to infiltration
-    if not natvent_flow_actuator.nil?
-      program.addLine("Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
-    else
-      program.addLine("Set hr_natvent = 0")
-    end
-    program.addLine("Set hr_mechvent = 0")
-    if not imbal_mechvent_flow_actuator.nil?
-      program.addLine("Set hr_mechvent = hr_mechvent + ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
-    end
+    program.addLine("Set hr_natvent = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{natvent_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to natural ventilation
+    program.addLine("Set hr_whf = (#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{whf_flow_actuator.name} / hr_airflow_rate") # Airflow heat attributed to whole house fan
+    program.addLine("Set hr_mechvent = ((#{air_loss_sensor.name} - #{air_gain_sensor.name}) * #{imbal_mechvent_flow_actuator.name} / hr_airflow_rate)") # Airflow heat attributed to imbalanced mech vent
     s = "Set hr_mechvent = hr_mechvent"
     mechvent_sensors.each do |sensor|
       s += " - #{sensor.name}" # Balanced mech vent load + imbalanced mech vent fan heat

@@ -970,8 +970,7 @@ class Constructions
     end
 
     Constructions.apply_wood_stud_wall(model, imdefs, constr_name,
-                                       0, 1, 3.5, false,
-                                       Constants.DefaultFramingFactorInterior,
+                                       0, 1, 3.5, false, 0.16,
                                        drywall_thick_in, 0, 0, nil)
   end
 
