@@ -590,7 +590,7 @@ class EnergyPlusValidator
         "ArrayTilt" => one,
         "MaxPowerOutput" => one,
         "InverterEfficiency" => zero_or_one,
-        "SystemLossesFraction" => zero_or_one,
+        "SystemLossesFraction | YearModulesManufactured" => zero_or_more,
       },
 
       # [ClothesWasher]
