@@ -3136,11 +3136,13 @@ class OSModel
     if not whole_house_fan_values.nil?
       whole_house_fan_w = whole_house_fan_values[:fan_power]
       whole_house_fan_cfm = whole_house_fan_values[:rated_flow_rate]
+      whf_num_days_per_week = 7
     else
       whole_house_fan_w = 0.0
       whole_house_fan_cfm = 0.0
+      whf_num_days_per_week = 0
     end
-    whf = WholeHouseFan.new(whole_house_fan_cfm, whole_house_fan_w)
+    whf = WholeHouseFan.new(whole_house_fan_cfm, whole_house_fan_w, whf_num_days_per_week)
 
     # Get AirLoop associated with CFIS
     cfis_airloop = nil
