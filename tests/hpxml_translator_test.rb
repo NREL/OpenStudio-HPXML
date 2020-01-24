@@ -398,6 +398,7 @@ class HPXMLTranslatorTest < MiniTest::Test
                    "Infiltration" => "infil",
                    "Natural Ventilation" => "natvent",
                    "Mechanical Ventilation" => "mechvent",
+                   "Whole House Fan" => "whf",
                    "Ducts" => "ducts",
                    "Internal Gains" => "intgains" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
@@ -415,8 +416,8 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
-    assert_operator(compload_results["Heating - Residual"].abs, :<, 0.35)
-    assert_operator(compload_results["Cooling - Residual"].abs, :<, 0.35)
+    assert_operator(compload_results["Heating - Residual"].abs, :<, 0.55)
+    assert_operator(compload_results["Cooling - Residual"].abs, :<, 0.55)
 
     results[@@simulation_runtime_key] = sim_time
     results[@@workflow_runtime_key] = workflow_time
