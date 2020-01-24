@@ -3497,6 +3497,7 @@ class OSModel
                    "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Propane",
                    "#{Constants.ObjectNameCeilingFan}:InteriorEquipment:Electricity",
                    "#{Constants.ObjectNameMechanicalVentilation} house fan:InteriorEquipment:Electricity",
+                   "#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:Electricity",
                    "ElectricityProduced:Facility"]
 
     meter_names.each do |meter_name|

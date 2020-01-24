@@ -831,9 +831,9 @@ class Airflow
     # Electric Equipment (for whole house fan electricity consumption)
 
     whf_equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
-    whf_equip_def.setName(Constants.ObjectNameWholeHouseFan + " energy")
+    whf_equip_def.setName(Constants.ObjectNameWholeHouseFan)
     whf_equip = OpenStudio::Model::ElectricEquipment.new(whf_equip_def)
-    whf_equip.setName(Constants.ObjectNameWholeHouseFan + " energy")
+    whf_equip.setName(Constants.ObjectNameWholeHouseFan)
     whf_equip.setSpace(living_space)
     whf_equip_def.setFractionRadiant(0)
     whf_equip_def.setFractionLatent(0)
