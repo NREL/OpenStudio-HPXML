@@ -444,7 +444,6 @@ class EnergyPlusValidator
         "[FanType='energy recovery ventilator' or FanType='heat recovery ventilator' or FanType='exhaust only' or FanType='supply only' or FanType='balanced' or FanType='central fan integrated supply']" => one, # See [MechVentType=HRV] or [MechVentType=ERV] or [MechVentType=CFIS]
         "TestedFlowRate | RatedFlowRate" => one_or_more,
         "HoursInOperation" => one,
-        "UsedForWholeBuildingVentilation" => one,
         "FanPower" => one,
       },
 
@@ -468,7 +467,6 @@ class EnergyPlusValidator
       "/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction='true']" => {
         "SystemIdentifier" => one, # Required by HPXML schema
         "RatedFlowRate" => one,
-        "UsedForSeasonalCoolingLoadReduction" => one,
         "FanPower" => one,
       },
 
