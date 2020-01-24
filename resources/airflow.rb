@@ -766,34 +766,40 @@ class Airflow
     on_rule.setStartDate(OpenStudio::Date::fromDayOfYear(1))
     on_rule.setEndDate(OpenStudio::Date::fromDayOfYear(365))
 
-    # Setpoint schedule (average of heating/cooling setpoints)
+    # Setpoint schedule
+    # Based on heating/cooling setpoints with bias towards cooling setpoint in order to minimize
+    # potential for increased heating.
+
+    clg_to_htg_ratio = 3.0 # 3:1
+    clg_frac = clg_to_htg_ratio / (clg_to_htg_ratio + 1.0)
+    htg_frac = 1.0 / (clg_to_htg_ratio + 1.0)
 
     nv_weekday_setpoints = [[nil] * 24] * 12
     nv_weekend_setpoints = [[nil] * 24] * 12
     for month in 1..12
       for hr in 1..24
-        nv_weekday_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekday_setpoints[month - 1][hr - 1] + nat_vent.clg_weekday_setpoints[month - 1][hr - 1]) / 2.0, "F", "C")
-        nv_weekend_setpoints[month - 1][hr - 1] = UnitConversions.convert((nat_vent.htg_weekend_setpoints[month - 1][hr - 1] + nat_vent.clg_weekend_setpoints[month - 1][hr - 1]) / 2.0, "F", "C")
+        nv_weekday_setpoints[month - 1][hr - 1] = UnitConversions.convert(nat_vent.htg_weekday_setpoints[month - 1][hr - 1] * htg_frac + nat_vent.clg_weekday_setpoints[month - 1][hr - 1] * clg_frac, "F", "C")
+        nv_weekend_setpoints[month - 1][hr - 1] = UnitConversions.convert(nat_vent.htg_weekend_setpoints[month - 1][hr - 1] * htg_frac + nat_vent.clg_weekend_setpoints[month - 1][hr - 1] * clg_frac, "F", "C")
       end
     end
     temp_sch = HourlyByMonthSchedule.new(model, Constants.ObjectNameNaturalVentilation + " temp schedule", nv_weekday_setpoints, nv_weekend_setpoints, false, true, Constants.ScheduleTypeLimitsTemperature)
 
-    nvsp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    nvsp_sensor.setName("#{Constants.ObjectNameNaturalVentilation} sp s")
-    nvsp_sensor.setKeyName(temp_sch.schedule.name.to_s)
+    nv_sp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    nv_sp_sensor.setName("#{Constants.ObjectNameNaturalVentilation} sp s")
+    nv_sp_sensor.setKeyName(temp_sch.schedule.name.to_s)
 
     # Sensors
-    nvavail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
-    nvavail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
-    nvavail_sensor.setKeyName(avail_sch.name.to_s)
+    nv_avail_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Schedule Value")
+    nv_avail_sensor.setName("#{Constants.ObjectNameNaturalVentilation} nva s")
+    nv_avail_sensor.setKeyName(avail_sch.name.to_s)
 
     # Actuator
-    natvent_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
-    natvent_flow.setName(Constants.ObjectNameNaturalVentilation + " flow")
-    natvent_flow.setSchedule(model.alwaysOnDiscreteSchedule)
-    natvent_flow.setSpace(building.living.zone.spaces[0])
-    natvent_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(natvent_flow, "Zone Infiltration", "Air Exchange Flow Rate")
-    natvent_flow_actuator.setName("#{natvent_flow.name} act")
+    nv_flow = OpenStudio::Model::SpaceInfiltrationDesignFlowRate.new(model)
+    nv_flow.setName(Constants.ObjectNameNaturalVentilation + " flow")
+    nv_flow.setSchedule(model.alwaysOnDiscreteSchedule)
+    nv_flow.setSpace(building.living.zone.spaces[0])
+    nv_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(nv_flow, "Zone Infiltration", "Air Exchange Flow Rate")
+    nv_flow_actuator.setName("#{nv_flow.name} act")
 
     area = 0.6 * building.window_area * nat_vent.frac_windows_open * nat_vent.frac_window_area_openable # ft^2 (For S-G, this is 0.6*(open window area))
     max_rate = 20.0 # Air Changes per hour
@@ -821,14 +827,14 @@ class Airflow
     nv_program.addLine("Set MaxNV = #{UnitConversions.convert(max_flow_rate, "cfm", "m^3/s")}")
     nv_program.addLine("Set MaxHR = #{nat_vent.max_oa_hr}")
     nv_program.addLine("Set MaxRH = #{nat_vent.max_oa_rh}")
-    nv_program.addLine("Set NVAvail = #{nvavail_sensor.name}")
+    nv_program.addLine("Set NVAvail = #{nv_avail_sensor.name}")
     nv_program.addLine("Set Vwind = #{vwind_sensor.name}")
-    nv_program.addLine("Set Tnvsp = #{nvsp_sensor.name}")
+    nv_program.addLine("Set Tnvsp = #{nv_sp_sensor.name}")
     nv_program.addLine("Set SGNV = (NVAvail*NVArea)*((((Cs*dT)+(Cw*(Vwind^2)))^0.5)/1000)")
     nv_program.addLine("If (Wout<MaxHR) && (Phiout<MaxRH) && (Tin>Tout) && (Tin>Tnvsp)")
-    nv_program.addLine("  Set #{natvent_flow_actuator.name} = (@Min SGNV MaxNV)")
+    nv_program.addLine("  Set #{nv_flow_actuator.name} = (@Min SGNV MaxNV)")
     nv_program.addLine("Else")
-    nv_program.addLine("  Set #{natvent_flow_actuator.name} = 0")
+    nv_program.addLine("  Set #{nv_flow_actuator.name} = 0")
     nv_program.addLine("EndIf")
 
     return nv_program
