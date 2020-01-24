@@ -812,6 +812,7 @@ class Airflow
     whf_flow_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(whf_flow, "Zone Infiltration", "Air Exchange Flow Rate")
     whf_flow_actuator.setName("#{whf_flow.name} act")
 
+    # Assume located in attic floor if attic zone exists; otherwise assume it's through roof/wall.
     whf_zone = nil
     if not building.vented_attic.nil?
       whf_zone = building.vented_attic.zone
