@@ -283,6 +283,18 @@ class Constants
     return "mech vent"
   end
 
+  def self.ObjectNameMechanicalVentilationHouseFan
+    return "mech vent house fan"
+  end
+
+  def self.ObjectNameMechanicalVentilationBathFan
+    return "mech vent bath fan"
+  end
+
+  def self.ObjectNameMechanicalVentilationRangeFan
+    return "mech vent range fan"
+  end
+
   def self.ObjectNameMiniSplitHeatPump
     return "mshp"
   end
@@ -745,5 +757,25 @@ class OutputVars
 
   def self.WaterHeaterLoadSolarThermal
     return { 'OpenStudio::Model::WaterHeaterStratified' => ['Water Heater Use Side Heat Transfer Energy'] }
+  end
+
+  def self.ComponentLoadsMap
+    return { "Roofs" => "roofs",
+             "Ceilings" => "ceilings",
+             "Walls" => "walls",
+             "Rim Joists" => "rim_joists",
+             "Foundation Walls" => "foundation_walls",
+             "Doors" => "doors",
+             "Windows" => "windows",
+             "Skylights" => "skylights",
+             "Floors" => "floors",
+             "Slabs" => "slabs",
+             "Internal Mass" => "internal_mass",
+             "Infiltration" => "infil",
+             "Natural Ventilation" => "natvent",
+             "Mechanical Ventilation" => "mechvent",
+             "Whole House Fan" => "whf",
+             "Ducts" => "ducts",
+             "Internal Gains" => "intgains" }
   end
 end

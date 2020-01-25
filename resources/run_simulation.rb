@@ -1,3 +1,5 @@
+# TODO: Add reporting measure and move to top-level directory
+
 start_time = Time.now
 
 require 'fileutils'

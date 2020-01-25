@@ -384,26 +384,9 @@ class HPXMLTranslatorTest < MiniTest::Test
       compload_results["#{mode} - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
     end
 
-    components = { "Roofs" => "roofs",
-                   "Ceilings" => "ceilings",
-                   "Walls" => "walls",
-                   "Rim Joists" => "rim_joists",
-                   "Foundation Walls" => "foundation_walls",
-                   "Doors" => "doors",
-                   "Windows" => "windows",
-                   "Skylights" => "skylights",
-                   "Floors" => "floors",
-                   "Slabs" => "slabs",
-                   "Internal Mass" => "internal_mass",
-                   "Infiltration" => "infil",
-                   "Natural Ventilation" => "natvent",
-                   "Mechanical Ventilation" => "mechvent",
-                   "Whole House Fan" => "whf",
-                   "Ducts" => "ducts",
-                   "Internal Gains" => "intgains" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       compload_results["#{mode} - Sum"] = 0
-      components.each do |component, component_var|
+      OutputVars.ComponentLoadsMap.each do |component, component_var|
         query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         compload_results["#{mode} - #{component}"] = sqlFile.execAndReturnFirstDouble(query).get
         compload_results["#{mode} - Sum"] += compload_results["#{mode} - #{component}"]

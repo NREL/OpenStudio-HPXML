@@ -158,6 +158,7 @@ def run_measure(model, measure, argument_map, runner)
     end
     if measure.class.superclass.name.to_s == "OpenStudio::Measure::ReportingMeasure"
       runner_child.setLastOpenStudioModel(model)
+      runner_child.setLastEnergyPlusSqlFilePath(runner.lastEnergyPlusSqlFile.get.path)
       measure.run(runner_child, argument_map)
     else
       measure.run(model, runner_child, argument_map)
@@ -192,7 +193,7 @@ def run_measure(model, measure, argument_map, runner)
       return false
     end
   rescue => e
-    runner.registerError("Measure Failed with Error: #{e.backtrace.join("\n")}")
+    runner.registerError("Measure Failed with Error: #{e}\n#{e.backtrace.join("\n")}")
     return false
   end
   return true

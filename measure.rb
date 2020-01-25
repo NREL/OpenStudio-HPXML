@@ -55,12 +55,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue("weather")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("schemas_dir", false)
-    arg.setDisplayName("HPXML Schemas Directory")
-    arg.setDescription("Absolute/relative path of the hpxml schemas directory.")
-    arg.setDefaultValue("hpxml_schemas")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("epw_output_path", false)
     arg.setDisplayName("EPW Output File Path")
     arg.setDescription("Absolute/relative path of the output EPW file.")
@@ -69,11 +63,6 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument.makeStringArgument("osm_output_path", false)
     arg.setDisplayName("OSM Output File Path")
     arg.setDescription("Absolute/relative path of the output OSM file.")
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument("map_tsv_dir", false)
-    arg.setDisplayName("Map TSV Directory")
-    arg.setDescription("Creates TSV files in the specified directory that map some HPXML object names to EnergyPlus object names. Required for ERI calculation.")
     args << arg
 
     return args
@@ -97,10 +86,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue("hpxml_path", user_arguments)
     weather_dir = runner.getStringArgumentValue("weather_dir", user_arguments)
-    schemas_dir = runner.getOptionalStringArgumentValue("schemas_dir", user_arguments)
     epw_output_path = runner.getOptionalStringArgumentValue("epw_output_path", user_arguments)
     osm_output_path = runner.getOptionalStringArgumentValue("osm_output_path", user_arguments)
-    map_tsv_dir = runner.getOptionalStringArgumentValue("map_tsv_dir", user_arguments)
 
     unless (Pathname.new hpxml_path).absolute?
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
@@ -111,7 +98,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 
     hpxml_doc = XMLHelper.parse_file(hpxml_path)
 
-    if not validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
+    if not validate_hpxml(runner, hpxml_path, hpxml_doc)
       return false
     end
 
@@ -162,7 +149,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       weather = Location.apply(model, runner, epw_path, cache_path, "NA", "NA")
 
       # Create OpenStudio model
-      OSModel.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
+      OSModel.create(hpxml_doc, runner, model, weather, hpxml_path)
     rescue Exception => e
       # Report exception
       runner.registerError("#{e.message}\n#{e.backtrace.join("\n")}")
@@ -177,31 +164,17 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     return true
   end
 
-  def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
-    if schemas_dir.is_initialized
-      schemas_dir = schemas_dir.get
-      unless (Pathname.new schemas_dir).absolute?
-        schemas_dir = File.expand_path(File.join(File.dirname(__FILE__), schemas_dir))
-      end
-      unless Dir.exists?(schemas_dir)
-        fail "'#{schemas_dir}' does not exist."
-      end
-    else
-      schemas_dir = nil
-    end
+  def validate_hpxml(runner, hpxml_path, hpxml_doc)
+    schemas_dir = File.join(File.dirname(__FILE__), "hpxml_schemas")
 
     is_valid = true
 
     # Validate input HPXML against schema
-    if not schemas_dir.nil?
-      XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
-        runner.registerError("#{hpxml_path}: #{error.to_s}")
-        is_valid = false
-      end
-      runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
-    else
-      runner.registerWarning("#{hpxml_path}: No schema dir provided, no HPXML validation performed.")
+    XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), runner).each do |error|
+      runner.registerError("#{hpxml_path}: #{error.to_s}")
+      is_valid = false
     end
+    runner.registerInfo("#{hpxml_path}: Validated against HPXML schema.")
 
     # Validate input HPXML against EnergyPlus Use Case
     errors = EnergyPlusValidator.run_validator(hpxml_doc)
@@ -216,7 +189,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
 end
 
 class OSModel
-  def self.create(hpxml_doc, runner, model, weather, map_tsv_dir, hpxml_path)
+  def self.create(hpxml_doc, runner, model, weather, hpxml_path)
     @hpxml_path = hpxml_path
     hpxml = hpxml_doc.elements["HPXML"]
     hpxml_values = HPXML.get_hpxml_values(hpxml: hpxml)
@@ -306,7 +279,7 @@ class OSModel
     add_hvac_sizing(runner, model, weather)
     add_fuel_heating_eae(runner, model, building)
     add_photovoltaics(runner, model, building)
-    add_outputs(runner, model, map_tsv_dir)
+    add_outputs(runner, model)
   end
 
   private
@@ -3346,13 +3319,12 @@ class OSModel
     end
   end
 
-  def self.add_outputs(runner, model, map_tsv_dir)
-    add_output_variables(runner, model, map_tsv_dir)
-    add_output_meters(runner, model)
+  def self.add_outputs(runner, model)
+    add_output_variables(runner, model)
     add_component_loads_output(runner, model)
   end
 
-  def self.add_output_variables(runner, model, map_tsv_dir)
+  def self.add_output_variables(runner, model)
     hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
                         OutputVars.SpaceHeatingNaturalGas,
                         OutputVars.SpaceHeatingFuelOil,
@@ -3423,12 +3395,9 @@ class OSModel
       add_output_variable(model, nil, ems_object)
     end
 
-    if map_tsv_dir.is_initialized
-      # Write maps to file
-      map_tsv_dir = map_tsv_dir.get
-      write_mapping(@hvac_map, File.join(map_tsv_dir, "map_hvac.tsv"))
-      write_mapping(@dhw_map, File.join(map_tsv_dir, "map_water_heating.tsv"))
-    end
+    # Register maps for use in reporting measure
+    model.getBuilding.additionalProperties.setFeature("hvac_map", map_to_string(@hvac_map))
+    model.getBuilding.additionalProperties.setFeature("dhw_map", map_to_string(@dhw_map))
   end
 
   def self.add_output_variable(model, vars, object)
@@ -3447,64 +3416,16 @@ class OSModel
     end
   end
 
-  def self.write_mapping(map, map_tsv_path)
-    # Write simple mapping TSV file for use by ERI calculation. Mapping file correlates
-    # EnergyPlus object name to a HPXML object name.
-
-    CSV.open(map_tsv_path, 'w', col_sep: "\t") do |tsv|
-      # Header
-      tsv << ["HPXML Name", "E+ Name(s)"]
-
-      map.each do |sys_id, objects|
-        out_data = [sys_id]
-        objects.uniq.each do |object|
-          out_data << object.name.to_s
-        end
-        tsv << out_data if out_data.size > 1
+  def self.map_to_string(map)
+    map_str = {}
+    map.each do |sys_id, objects|
+      map_str[sys_id] = []
+      objects.uniq.each do |object|
+        map_str[sys_id] << object.name.to_s
       end
+      map_str.delete(sys_id) if map_str[sys_id].size <= 1
     end
-  end
-
-  def self.add_output_meters(runner, model)
-    # Add annual output meters to increase precision of outputs relative to, e.g., ABUPS report
-    meter_names = ["Electricity:Facility",
-                   "Gas:Facility",
-                   "FuelOil#1:Facility",
-                   "Propane:Facility",
-                   "Heating:EnergyTransfer",
-                   "Cooling:EnergyTransfer",
-                   "Heating:DistrictHeating",
-                   "Cooling:DistrictCooling",
-                   "#{Constants.ObjectNameInteriorLighting}:InteriorLights:Electricity",
-                   "#{Constants.ObjectNameGarageLighting}:InteriorLights:Electricity",
-                   "ExteriorLights:Electricity",
-                   "InteriorEquipment:Electricity",
-                   "InteriorEquipment:Gas",
-                   "InteriorEquipment:FuelOil#1",
-                   "InteriorEquipment:Propane",
-                   "#{Constants.ObjectNameRefrigerator}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameDishwasher}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameClothesWasher}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Gas",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:FuelOil#1",
-                   "#{Constants.ObjectNameClothesDryer}:InteriorEquipment:Propane",
-                   "#{Constants.ObjectNameMiscPlugLoads}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameMiscTelevision}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Gas",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:FuelOil#1",
-                   "#{Constants.ObjectNameCookingRange}:InteriorEquipment:Propane",
-                   "#{Constants.ObjectNameCeilingFan}:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameMechanicalVentilation} house fan:InteriorEquipment:Electricity",
-                   "#{Constants.ObjectNameWholeHouseFan}:InteriorEquipment:Electricity",
-                   "ElectricityProduced:Facility"]
-
-    meter_names.each do |meter_name|
-      output_meter = OpenStudio::Model::OutputMeter.new(model)
-      output_meter.setName(meter_name)
-      output_meter.setReportingFrequency('runperiod')
-    end
+    return map_str.to_s
   end
 
   def self.add_component_loads_output(runner, model)
