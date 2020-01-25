@@ -309,6 +309,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     starting_index = sqlFile.execAndReturnFirstInt(query).get
 
     # TabularDataWithStrings table is positional, so we access results by position.
+    # TODO: When using E+ 9.3, update these queries based on https://github.com/NREL/EnergyPlus/pull/7584
     results = {}
     fueltypes.zip(full_categories, subcategories, units).each_with_index do |(fueltype, category, subcategory, fuel_units), index|
       next if ['District Cooling', 'District Heating'].include? fueltype # Exclude ideal loads results
@@ -423,7 +424,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
-    args['map_tsv_dir'] = rundir
     args['weather_dir'] = "weather"
 
     # Add measure to workflow
@@ -503,6 +503,13 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var = OpenStudio::Model::OutputVariable.new('Boiler Heating Energy', model) # This is needed for energy checking if there's boiler not connected to combi systems.
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('*')
+
+    # Add output meters for component loads check
+    ["Cooling:EnergyTransfer", "Heating:EnergyTransfer"].each do |meter_name|
+      output_meter = OpenStudio::Model::OutputMeter.new(model)
+      output_meter.setName(meter_name)
+      output_meter.setReportingFrequency('runperiod')
+    end
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new

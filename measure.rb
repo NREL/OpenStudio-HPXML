@@ -3896,6 +3896,7 @@ class OSModel
     end
 
     # EMS output variables
+    # TODO: Move to reporting measure
     [:htg, :clg].each do |mode|
       surfaces_sensors.keys.each do |k|
         ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k.to_s}")
