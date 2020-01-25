@@ -96,6 +96,8 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
       fail "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
+    model.getBuilding.additionalProperties.setFeature("hpxml_path", hpxml_path)
+
     hpxml_doc = XMLHelper.parse_file(hpxml_path)
 
     if not validate_hpxml(runner, hpxml_path, hpxml_doc)
@@ -3395,7 +3397,7 @@ class OSModel
       add_output_variable(model, nil, ems_object)
     end
 
-    # Register maps for use in reporting measure
+    # Store some data for use in reporting measure
     model.getBuilding.additionalProperties.setFeature("hvac_map", map_to_string(@hvac_map))
     model.getBuilding.additionalProperties.setFeature("dhw_map", map_to_string(@dhw_map))
   end
