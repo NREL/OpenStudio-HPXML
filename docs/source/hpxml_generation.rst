@@ -465,7 +465,7 @@ The following elements, some adopted from the `PVWatts model <https://pvwatts.nr
 
 Inputs including ``InverterEfficiency``, ``SystemLossesFraction``, and ``YearModulesManufactured`` can be optionally entered.
 Note that system losses include soiling, shading, snow, mismatch, wiring, degradation, etc.
-If ``InverterEfficiency`` is not provided and neither ``SystemLossesFraction`` nor ``YearModulesManufactured`` is provided, default values will be assumed as follows:
+If ``InverterEfficiency`` is not provided and ``SystemLossesFraction`` or ``YearModulesManufactured`` is not provided, default values will be assumed as follows:
 
 =======================  ==============
 Element Name             Default Value
@@ -501,7 +501,7 @@ This equation is based on ANSI/RESNET 301-2004.
 .. math:: Modified Energy Factor = 0.503 + 0.95 \cdot Integrated Modified EnergyFactor
   :label: cw_mef
 
-If neither ``ModifiedEnergyFactor`` nor ``IntegratedModifiedEnergyFactor`` are provided, the default value of ``IntegratedModifiedEnergyFactor`` will be used in the equation :eq:`cw_mef` to calculate the default ``ModifiedEnergyFactor``.  
+If ``ModifiedEnergyFactor`` and ``IntegratedModifiedEnergyFactor`` are not provided, the default value of ``IntegratedModifiedEnergyFactor`` will be used in the equation :eq:`cw_mef` to calculate the default ``ModifiedEnergyFactor``.  
 The following default values will be assumed unless a complete set of the optional variables is provided. 
 
 ==================================  ==================
@@ -528,7 +528,7 @@ This equation is based on ANSI/RESNET 301-2004.
 .. math:: Energy Factor = 1.15 \cdot Combined Energy Factor
   :label: cd_ef 
 
-If neither ``EnergyFactor`` nor ``CombinedEnergyFactor`` are provided, the default value of ``CombinedEnergyFactor`` will be used in the equation :eq:`cd_ef` to calculate the default ``EnergyFactor``.
+If ``EnergyFactor`` and ``CombinedEnergyFactor`` are not provided, the default value of ``CombinedEnergyFactor`` will be used in the equation :eq:`cd_ef` to calculate the default ``EnergyFactor``.
 Depending on the fuel type, two different default values may be used.  
 The following default values will be assumed unless a complete set of the optional variables is provided.
 
@@ -551,7 +551,7 @@ This equation is based on ANSI/RESNET 301-2004.
 .. math:: Energy Factor = \frac{215.0}{Rated Annual kWh}
   :label: dw_ef 
 
-If neither ``EnergyFactor`` nor ``RatedAnnualkWh`` are provided, the default value of ``EnergyFactor`` will be used.
+If ``EnergyFactor`` and ``RatedAnnualkWh`` are not provided, the default value of ``EnergyFactor`` will be used.
 The following default values will be assumed unless a complete set of the optional variables is provided.
 
 =======================  =================
