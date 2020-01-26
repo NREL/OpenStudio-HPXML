@@ -3421,11 +3421,11 @@ class OSModel
   def self.map_to_string(map)
     map_str = {}
     map.each do |sys_id, objects|
-      map_str[sys_id] = []
+      object_name_list = []
       objects.uniq.each do |object|
-        map_str[sys_id] << object.name.to_s
+        object_name_list << object.name.to_s
       end
-      map_str.delete(sys_id) if map_str[sys_id].size <= 1
+      map_str[sys_id] = object_name_list if object_name_list.size > 0
     end
     return map_str.to_s
   end
