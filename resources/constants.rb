@@ -187,6 +187,10 @@ class Constants
     return "clothes dryer"
   end
 
+  def self.ObjectNameComponentLoads
+    return 'component loads'
+  end
+
   def self.ObjectNameCookingRange
     return "cooking range"
   end

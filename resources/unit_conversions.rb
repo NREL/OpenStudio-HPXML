@@ -142,16 +142,16 @@ class UnitConversions
   }
 
   def self.convert(x, from, to, fuel_type = nil)
-    from.downcase!
-    to.downcase!
+    from_d = from.downcase
+    to_d = to.downcase
 
-    return x if from == to
+    return x if from_d == to_d
 
     # Try forward
     if fuel_type.nil?
-      key = [from, to]
+      key = [from_d, to_d]
     else
-      key = [from, to, fuel_type]
+      key = [from_d, to_d, fuel_type]
     end
     scalar = @Scalars[key]
     if not scalar.nil?
@@ -160,9 +160,9 @@ class UnitConversions
 
     # Try reverse
     if fuel_type.nil?
-      key = [to, from]
+      key = [to_d, from_d]
     else
-      key = [to, from, fuel_type]
+      key = [to_d, from_d, fuel_type]
     end
     scalar = @Scalars[key]
     if not scalar.nil?
@@ -170,7 +170,7 @@ class UnitConversions
     end
 
     # Non-scalar conversions
-    key = [from, to]
+    key = [from_d, to_d]
     if key == ['c', 'f']
       return 1.8 * x + 32.0
     elsif key == ['c', 'k']
@@ -186,9 +186,9 @@ class UnitConversions
     end
 
     if fuel_type.nil?
-      fail "Unhandled unit conversion from #{from} to #{to}."
+      fail "Unhandled unit conversion from #{from_d} to #{to_d}."
     else
-      fail "Unhandled unit conversion from #{from} to #{to} for fuel type #{fuel_type}."
+      fail "Unhandled unit conversion from #{from_d} to #{to_d} for fuel type #{fuel_type}."
     end
   end
 end

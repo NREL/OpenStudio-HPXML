@@ -3322,100 +3322,11 @@ class OSModel
   end
 
   def self.add_outputs(runner, model)
-    add_output_variables(runner, model)
-    add_component_loads_output(runner, model)
-  end
-
-  def self.add_output_variables(runner, model)
-    hvac_output_vars = [OutputVars.SpaceHeatingElectricity,
-                        OutputVars.SpaceHeatingNaturalGas,
-                        OutputVars.SpaceHeatingFuelOil,
-                        OutputVars.SpaceHeatingPropane,
-                        OutputVars.SpaceHeatingDFHPPrimaryLoad,
-                        OutputVars.SpaceHeatingDFHPBackupLoad,
-                        OutputVars.SpaceCoolingElectricity]
-
-    dhw_output_vars = [OutputVars.WaterHeatingElectricity,
-                       OutputVars.WaterHeatingElectricityRecircPump,
-                       OutputVars.WaterHeatingElectricitySolarThermalPump,
-                       OutputVars.WaterHeatingCombiBoilerHeatExchanger, # Needed to disaggregate hot water energy from heating energy
-                       OutputVars.WaterHeatingCombiBoiler,              # Needed to disaggregate hot water energy from heating energy
-                       OutputVars.WaterHeatingNaturalGas,
-                       OutputVars.WaterHeatingFuelOil,
-                       OutputVars.WaterHeatingPropane,
-                       OutputVars.WaterHeatingLoad,
-                       OutputVars.WaterHeatingLoadTankLosses,
-                       OutputVars.WaterHeaterLoadDesuperheater,
-                       OutputVars.WaterHeaterLoadSolarThermal]
-
-    # Remove objects that are not referenced by output vars and are not
-    # EMS output vars.
-    { @hvac_map => hvac_output_vars,
-      @dhw_map => dhw_output_vars }.each do |map, vars|
-      all_vars = vars.reduce({}, :merge)
-      map.each do |sys_id, objects|
-        objects_to_delete = []
-        objects.each do |object|
-          next if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-          next unless all_vars[object.class.to_s].nil? # Referenced?
-
-          objects_to_delete << object
-        end
-        objects_to_delete.uniq.each do |object|
-          map[sys_id].delete object
-        end
-      end
-    end
-
-    # Add output variables to model
-    ems_objects = []
-    @hvac_map.each do |sys_id, hvac_objects|
-      hvac_objects.each do |hvac_object|
-        if hvac_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-          ems_objects << hvac_object
-        else
-          hvac_output_vars.each do |hvac_output_var|
-            add_output_variable(model, hvac_output_var, hvac_object)
-          end
-        end
-      end
-    end
-    @dhw_map.each do |sys_id, dhw_objects|
-      dhw_objects.each do |dhw_object|
-        if dhw_object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-          ems_objects << dhw_object
-        else
-          dhw_output_vars.each do |dhw_output_var|
-            add_output_variable(model, dhw_output_var, dhw_object)
-          end
-        end
-      end
-    end
-
-    # Add EMS output variables to model
-    ems_objects.uniq.each do |ems_object|
-      add_output_variable(model, nil, ems_object)
-    end
-
     # Store some data for use in reporting measure
     model.getBuilding.additionalProperties.setFeature("hvac_map", map_to_string(@hvac_map))
     model.getBuilding.additionalProperties.setFeature("dhw_map", map_to_string(@dhw_map))
-  end
 
-  def self.add_output_variable(model, vars, object)
-    if object.is_a? OpenStudio::Model::EnergyManagementSystemOutputVariable
-      outputVariable = OpenStudio::Model::OutputVariable.new(object.name.to_s, model)
-      outputVariable.setReportingFrequency('runperiod')
-      outputVariable.setKeyValue('*')
-    else
-      return if vars[object.class.to_s].nil?
-
-      vars[object.class.to_s].each do |object_var|
-        outputVariable = OpenStudio::Model::OutputVariable.new(object_var, model)
-        outputVariable.setReportingFrequency('runperiod')
-        outputVariable.setKeyValue(object.name.to_s)
-      end
-    end
+    add_component_loads_output(runner, model)
   end
 
   def self.map_to_string(map)
@@ -3788,7 +3699,7 @@ class OSModel
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("component loads program")
+    program.setName("#{Constants.ObjectNameComponentLoads} program")
 
     # EMS program: Surfaces
     surfaces_sensors.each do |k, surface_sensors|
@@ -3895,39 +3806,9 @@ class OSModel
       program.addLine("Set #{prev_hr_setpoint_vars[mode].name} = #{setpoint_sensors[mode].name}")
     end
 
-    # EMS output variables
-    # TODO: Move to reporting measure
-    [:htg, :clg].each do |mode|
-      surfaces_sensors.keys.each do |k|
-        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k.to_s}")
-        ems_output_var.setName("#{mode}_#{k.to_s}_outvar")
-        ems_output_var.setTypeOfDataInVariable("Summed")
-        ems_output_var.setUpdateFrequency("ZoneTimestep")
-        ems_output_var.setEMSProgramOrSubroutineName(program)
-        ems_output_var.setUnits("J")
-
-        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-        output_var.setReportingFrequency('runperiod')
-        output_var.setKeyValue('*')
-      end
-
-      nonsurf_names.each do |k|
-        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode}_#{k}")
-        ems_output_var.setName("#{mode}_#{k}_outvar")
-        ems_output_var.setTypeOfDataInVariable("Summed")
-        ems_output_var.setUpdateFrequency("ZoneTimestep")
-        ems_output_var.setEMSProgramOrSubroutineName(program)
-        ems_output_var.setUnits("J")
-
-        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-        output_var.setReportingFrequency('runperiod')
-        output_var.setKeyValue('*')
-      end
-    end
-
     # EMS calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
-    program_calling_manager.setName("component loads program calling manager")
+    program_calling_manager.setName("#{program.name.to_s} calling manager")
     program_calling_manager.setCallingPoint("EndOfZoneTimestepAfterZoneReporting")
     program_calling_manager.addProgram(program)
   end

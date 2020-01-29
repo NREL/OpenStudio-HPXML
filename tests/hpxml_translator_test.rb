@@ -400,6 +400,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
+    # TODO: Move these checks to reporting measure tests or workflow tests
     assert_operator(compload_results["Heating - Residual"], :<, 0.25)
     assert_operator(compload_results["Cooling - Residual"], :<, 0.25)
 
