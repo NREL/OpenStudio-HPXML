@@ -2121,14 +2121,15 @@ class OSModel
             related_hvac_list << heating_source_id
             boiler_sys = get_boiler_and_plant_loop(@hvac_map, heating_source_id, sys_id)
             boiler_fuel_type = Waterheater.get_combi_system_fuel(heating_source_id, building.elements["BuildingDetails"])
+            boiler_afue = Waterheater.get_combi_system_afue(heating_source_id, building.elements["BuildingDetails"])
           else
             fail "RelatedHVACSystem '#{heating_source_id}' for water heating system '#{sys_id}' is already attached to another water heating system."
           end
           @dhw_map[sys_id] << boiler_sys['boiler']
 
-          Waterheater.apply_indirect(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
-                                     boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
-                                     @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
+          Waterheater.apply_combi(model, runner, space, vol, setpoint_temp, ec_adj, @nbeds,
+                                  boiler_sys['boiler'], boiler_sys['plant_loop'], boiler_fuel_type,
+                                  boiler_afue, @dhw_map, sys_id, wh_type, jacket_r, standby_loss)
 
         else
 
@@ -3699,7 +3700,7 @@ class OSModel
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{Constants.ObjectNameComponentLoads} program")
+    program.setName(Constants.ObjectNameComponentLoadsProgram)
 
     # EMS program: Surfaces
     surfaces_sensors.each do |k, surface_sensors|
