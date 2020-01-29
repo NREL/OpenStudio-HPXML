@@ -3558,12 +3558,17 @@ class OSModel
                 "Skylight" => :skylights }[surface_type]
         fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
-        vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
-                 "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
-                 "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf" }
-
+        vars = {}
         if surface_type == "Window" or surface_type == "Skylight"
-          vars["Surface Window Transmitted Solar Radiation Energy"] = "ss_sol"
+          vars["Surface Window Net Heat Transfer Energy"] = "ss_net"
+          vars["Surface Inside Face Internal Gains Radiation Heat Gain Energy"] = "ss_ig"
+          vars["Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate"] = "ss_sw_abs"
+          vars["Surface Window Total Glazing Layers Absorbed Solar Radiation Energy"] = "ss_sol_abs"
+          vars["Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate"] = "ss_sol_out"
+        else
+          vars = { "Surface Inside Face Convection Heat Gain Energy" => "ss_conv",
+                   "Surface Inside Face Internal Gains Radiation Heat Gain Energy" => "ss_ig",
+                   "Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy" => "ss_surf" }
         end
 
         surfaces_sensors[key] << []
@@ -3865,8 +3870,10 @@ class OSModel
       surface_sensors.each do |sensors|
         s = "Set hr_#{k.to_s} = hr_#{k.to_s}"
         sensors.each do |sensor|
-          if sensor.name.to_s.start_with? "ss_sol"
+          if sensor.name.to_s.start_with? "ss_net" or sensor.name.to_s.start_with? "ss_sol_abs"
             s += " - #{sensor.name}"
+          elsif sensor.name.to_s.start_with? "ss_sw_abs" or sensor.name.to_s.start_with? "ss_sol_out"
+            s += " + #{sensor.name} * ZoneTimestep * 3600"
           else
             s += " + #{sensor.name}"
           end
