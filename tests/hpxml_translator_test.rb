@@ -375,6 +375,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     results[["Load", "Cooling", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Obtain component loads
+    # TODO: Move to reporting measure tests or workflow tests (and remove temporary components() method)
+
     compload_results = {}
 
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
@@ -387,7 +389,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       compload_results["#{mode} - Sum"] = 0
-      OutputVars.ComponentLoadsMap.each do |component, component_var|
+      components.each do |component, component_var|
         query = "SELECT VariableValue/1000000000 FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex = (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND KeyValue='EMS' AND VariableName='#{mode_var}_#{component_var}_outvar' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
         compload_results["#{mode} - #{component}"] = sqlFile.execAndReturnFirstDouble(query).get
         compload_results["#{mode} - Sum"] += compload_results["#{mode} - #{component}"]
@@ -400,7 +402,6 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     sqlFile.close
 
-    # TODO: Move these checks to reporting measure tests or workflow tests
     assert_operator(compload_results["Heating - Residual"], :<, 0.25)
     assert_operator(compload_results["Cooling - Residual"], :<, 0.25)
 
@@ -495,6 +496,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var.setKeyValue('*')
 
     # Add output variables for combi system energy check
+    # TODO: Move to reporting measure tests or workflow tests
     output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('*')
@@ -506,10 +508,36 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var.setKeyValue('*')
 
     # Add output meters for component loads check
+    # TODO: Move to reporting measure tests or workflow tests
     ["Cooling:EnergyTransfer", "Heating:EnergyTransfer"].each do |meter_name|
       output_meter = OpenStudio::Model::OutputMeter.new(model)
       output_meter.setName(meter_name)
       output_meter.setReportingFrequency('runperiod')
+    end
+    loads_program = model.getModelObjectByName(Constants.ObjectNameComponentLoadsProgram.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
+    { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
+      components.each do |component, component_var|
+        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode_var}_#{component_var}")
+        ems_output_var.setName("#{mode_var}_#{component_var}_outvar")
+        ems_output_var.setTypeOfDataInVariable("Summed")
+        ems_output_var.setUpdateFrequency("ZoneTimestep")
+        ems_output_var.setEMSProgramOrSubroutineName(loads_program)
+        ems_output_var.setUnits("J")
+
+        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+        output_var.setReportingFrequency('runperiod')
+        output_var.setKeyValue('*')
+      end
+    end
+
+    # Add output variable for EC_adj test
+    # TODO: Move to reporting measure tests or workflow tests
+    model.getEnergyManagementSystemOutputVariables.each do |emsov|
+      next unless emsov.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
+
+      output_var = OpenStudio::Model::OutputVariable.new(emsov.name.to_s, model)
+      output_var.setReportingFrequency('runperiod')
+      output_var.setKeyValue('*')
     end
 
     # Write model to IDF
@@ -991,33 +1019,32 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       # Add any combi water heating energy use
-      # FIXME: Uncomment
-      # query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoilerHeatExchanger.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      # combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-      # query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoiler.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
-      # combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-      # if combi_htg_load > 0 and combi_hx_load > 0
-      #  results.keys.each do |k|
-      #    next unless k[0] != "Load" and k[1] == "Heating" and k[3] == "GJ"
-      #
-      #    water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
-      #  end
-      # end
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Fluid Heat Exchanger Heat Transfer Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Boiler Heating Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+      if combi_htg_load > 0 and combi_hx_load > 0
+        results.keys.each do |k|
+          next unless k[0] != "Load" and k[1] == "Heating" and k[3] == "GJ"
+
+          water_heater_energy += (results[k] * combi_hx_load / combi_htg_load)
+        end
+      end
 
       simulated_ec_adj = (water_heater_energy + water_heater_adj_energy) / water_heater_energy
       assert_in_epsilon(calculated_ec_adj, simulated_ec_adj, 0.02)
 
       # check_combi_system_energy_balance
-      # if combi_htg_load > 0 and combi_hx_load > 0
-      #  query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
-      #  combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-      #  assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
-      #
-      #  # Check boiler, hx, pump, heating coil energy balance
-      #  query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
-      #  boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-      #  assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
-      # end
+      if combi_htg_load > 0 and combi_hx_load > 0
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Water Heater Source Side Heat Transfer Energy' AND VariableUnits='J')"
+        combi_tank_source_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+        assert_in_epsilon(combi_hx_load, combi_tank_source_load, 0.02)
+
+        # Check boiler, hx, pump, heating coil energy balance
+        query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Baseboard Total Heating Energy' AND VariableUnits='J')"
+        boiler_space_heating_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
+        assert_in_epsilon(combi_hx_load + boiler_space_heating_load, combi_htg_load, 0.02)
+      end
     end
 
     # Mechanical Ventilation
@@ -1476,4 +1503,23 @@ class HPXMLTranslatorTest < MiniTest::Test
       sleep(0.01)
     end
   end
+end
+
+def components
+  return { "Roofs" => "roofs",
+           "Ceilings" => "ceilings",
+           "Walls" => "walls",
+           "Rim Joists" => "rim_joists",
+           "Foundation Walls" => "foundation_walls",
+           "Doors" => "doors",
+           "Windows" => "windows",
+           "Skylights" => "skylights",
+           "Floors" => "floors",
+           "Slabs" => "slabs",
+           "Internal Mass" => "internal_mass",
+           "Infiltration" => "infil",
+           "Natural Ventilation" => "natvent",
+           "Mechanical Ventilation" => "mechvent",
+           "Ducts" => "ducts",
+           "Internal Gains" => "intgains" }
 end

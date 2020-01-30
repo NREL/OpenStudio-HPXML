@@ -31,7 +31,9 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    dhw_map[sys_id] << add_ec_adj(model, new_heater, ec_adj, space, fuel_type, 'storage water heater')
+    add_ec_adj(model, new_heater, ec_adj, space, fuel_type, 'storage water heater').each do |obj|
+      dhw_map[sys_id] << obj unless obj.nil?
+    end
 
     if not desuperheater_clg_coil.nil?
       add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, 'storage water heater', fuel_type, space, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
@@ -64,7 +66,9 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    dhw_map[sys_id] << add_ec_adj(model, new_heater, ec_adj, space, fuel_type, 'instantaneous water heater')
+    add_ec_adj(model, new_heater, ec_adj, space, fuel_type, 'instantaneous water heater').each do |obj|
+      dhw_map[sys_id] << obj unless obj.nil?
+    end
 
     if not desuperheater_clg_coil.nil?
       add_desuperheater(model, t_set, new_heater, desuperheater_clg_coil, 'storage water heater', fuel_type, space, loop, ec_adj).each { |e| dhw_map[sys_id] << e }
@@ -546,7 +550,9 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(tank)
 
-    dhw_map[sys_id] << add_ec_adj(model, hpwh, ec_adj, space, 'electricity', "heat pump water heater")
+    add_ec_adj(model, hpwh, ec_adj, space, 'electricity', "heat pump water heater").each do |obj|
+      dhw_map[sys_id] << obj unless obj.nil?
+    end
   end
 
   def self.apply_solar_thermal(model, space, collector_area, frta, frul, storage_vol,
@@ -918,7 +924,9 @@ class Waterheater
 
     loop.addSupplyBranchForComponent(new_heater)
 
-    dhw_map[sys_id] << add_ec_adj(model, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, combi_hx)
+    add_ec_adj(model, new_heater, ec_adj, space, boiler_fuel_type, "boiler", boiler, combi_hx).each do |obj|
+      dhw_map[sys_id] << obj unless obj.nil?
+    end
   end
 
   def self.apply_combi_system_EMS(model, combi_sys_id, dhw_map)
@@ -1062,13 +1070,13 @@ class Waterheater
       dsh_program.addLine("Set #{dsh_actuator.name} = #{tank_name}_dsh_load_saving * #{ec_adj.round(5)} / (SystemTimeStep * 3600) / #{tank_name}_eta_c") # convert to water heater power savings
 
       # Sensor for EMS reporting
-      ep_consumption_name = { 'electricity' => "Electric Power",
-                              'propane' => "Propane Rate",
-                              'fuel oil' => "FuelOil#1 Rate",
-                              'natural gas' => "Gas Rate",
-                              'wood' => "OtherFuel1 Rate",
-                              'wood pellets' => "OtherFuel2 Rate" }[fuel_type]
-      dsh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{ep_consumption_name.gsub('Rate', 'Energy').gsub('Power', 'Energy')}")
+      ep_consumption_name = { 'electricity' => "Electric",
+                              'propane' => "Propane",
+                              'fuel oil' => "FuelOil#1",
+                              'natural gas' => "Gas",
+                              'wood' => "OtherFuel1",
+                              'wood pellets' => "OtherFuel2" }[fuel_type]
+      dsh_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Other Equipment #{ep_consumption_name} Energy")
       dsh_sensor.setName("#{dsh_object.name} energy consumption")
       dsh_sensor.setKeyName(dsh_object.name.to_s)
 
@@ -1319,6 +1327,7 @@ class Waterheater
       ec_adj_program.addLine("If #{ec_adj_sensor_boiler_heating.name} > 0")
       ec_adj_program.addLine("  Set wh_e_cons = wh_e_cons + (@Abs #{ec_adj_sensor_hx.name}) / #{ec_adj_sensor_boiler_heating.name} * #{ec_adj_sensor_boiler.name}")
       ec_adj_program.addLine("EndIf")
+      ec_adj_program.addLine("Set boiler_hw_energy = wh_e_cons * 3600 * SystemTimeStep")
     elsif wh_type == "heat pump water heater"
       ec_adj_program.addLine("Set wh_e_cons = #{ec_adj_sensor.name} + #{ec_adj_oncyc_sensor.name} + #{ec_adj_offcyc_sensor.name} + #{ec_adj_hp_sensor.name} + #{ec_adj_fan_sensor.name}")
     else
@@ -1337,7 +1346,7 @@ class Waterheater
     ec_adj_object_sensor.setName("#{ec_adj_object.name} energy consumption")
     ec_adj_object_sensor.setKeyName(ec_adj_object.name.to_s)
 
-    # EMS Output Variable for reporting
+    # EMS Output Variable for EC_adj reporting
     ec_adj_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, ec_adj_object_sensor)
     ec_adj_output_var.setName("#{Constants.ObjectNameWaterHeaterAdjustment(heater.name)} outvar")
     ec_adj_output_var.setTypeOfDataInVariable("Summed")
@@ -1345,7 +1354,19 @@ class Waterheater
     ec_adj_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
     ec_adj_output_var.setUnits("J")
 
-    return ec_adj_output_var
+    if wh_type.include? "boiler"
+      # EMS Output Variable for combi dhw energy reporting (before EC_adj is applied)
+      boiler_hw_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "boiler_hw_energy")
+      boiler_hw_output_var.setName("#{Constants.ObjectNameCombiWaterHeatingEnergy(heater.name)} outvar")
+      boiler_hw_output_var.setTypeOfDataInVariable("Summed")
+      boiler_hw_output_var.setUpdateFrequency("SystemTimestep")
+      boiler_hw_output_var.setEMSProgramOrSubroutineName(ec_adj_program)
+      boiler_hw_output_var.setUnits("J")
+    else
+      boiler_hw_output_var = nil
+    end
+
+    return ec_adj_output_var, boiler_hw_output_var
   end
 
   def self.get_default_hot_water_temperature(eri_version)

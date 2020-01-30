@@ -187,6 +187,10 @@ class Constants
     return "clothes dryer"
   end
 
+  def self.ObjectNameCombiWaterHeatingEnergy(water_heater_name)
+    return "#{water_heater_name} dhw energy"
+  end
+
   def self.ObjectNameComponentLoadsProgram
     return 'component loads program'
   end
