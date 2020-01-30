@@ -530,7 +530,7 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
     end
 
-    # Add output variable for EC_adj test
+    # Add output variables for EC_adj test
     # TODO: Move to reporting measure tests or workflow tests
     model.getEnergyManagementSystemOutputVariables.each do |emsov|
       next unless emsov.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
@@ -538,6 +538,11 @@ class HPXMLTranslatorTest < MiniTest::Test
       output_var = OpenStudio::Model::OutputVariable.new(emsov.name.to_s, model)
       output_var.setReportingFrequency('runperiod')
       output_var.setKeyValue('*')
+    end
+    model.getHeatExchangerFluidToFluids.each do |hx|
+      output_var = OpenStudio::Model::OutputVariable.new('Fluid Heat Exchanger Heat Transfer Energy', model)
+      output_var.setReportingFrequency('runperiod')
+      output_var.setKeyValue(hx.name.to_s)
     end
 
     # Write model to IDF
