@@ -1525,6 +1525,7 @@ def components
            "Infiltration" => "infil",
            "Natural Ventilation" => "natvent",
            "Mechanical Ventilation" => "mechvent",
+           "Whole House Fan" => "whf",
            "Ducts" => "ducts",
            "Internal Gains" => "intgains" }
 end
