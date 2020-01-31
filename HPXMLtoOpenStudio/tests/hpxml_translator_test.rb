@@ -11,7 +11,7 @@ require_relative '../resources/meta_measure'
 require_relative '../resources/unit_conversions'
 require_relative '../resources/xmlhelper'
 
-class HPXMLTranslatorTest < MiniTest::Test
+class HPXMLtoOpenStudioTest < MiniTest::Test
   @@simulation_runtime_key = "Simulation Runtime"
   @@workflow_runtime_key = "Workflow Runtime"
 

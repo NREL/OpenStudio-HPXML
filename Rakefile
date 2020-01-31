@@ -1,7 +1,7 @@
 require 'rake'
 require 'rake/testtask'
 require 'ci/reporter/rake/minitest'
-require_relative "resources/hpxml"
+require_relative "HPXMLtoOpenStudio/resources/hpxml"
 
 desc 'update all measures'
 task :update_measures do
@@ -22,7 +22,7 @@ end
 desc 'create epw cache .csv files'
 task :cache_weather do
   require 'openstudio'
-  require_relative 'resources/weather'
+  require_relative 'HPXMLtoOpenStudio/resources/weather'
 
   OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
   runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
@@ -44,7 +44,7 @@ end
 
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
-  tests_dir = File.join(this_dir, "tests")
+  tests_dir = File.join(this_dir, "HPXMLtoOpenStudio/tests")
 
   # Hash of HPXML -> Parent HPXML
   hpxmls_files = {
@@ -630,7 +630,7 @@ def create_hpxmls
       hpxml_path = File.join(tests_dir, derivative)
 
       # Validate file against HPXML schema
-      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "hpxml_schemas"))
+      schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), "HPXMLtoOpenStudio/resources"))
       errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
       if errors.size > 0
         fail errors.to_s
