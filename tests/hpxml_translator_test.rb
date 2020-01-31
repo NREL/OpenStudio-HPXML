@@ -509,7 +509,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
     # Add output meters for component loads check
     # TODO: Move to reporting measure tests or workflow tests
-    ["Cooling:EnergyTransfer", "Heating:EnergyTransfer"].each do |meter_name|
+    ["Cooling:EnergyTransfer", "Heating:EnergyTransfer", "Cooling:DistrictCooling", "Heating:DistrictHeating"].each do |meter_name|
       output_meter = OpenStudio::Model::OutputMeter.new(model)
       output_meter.setName(meter_name)
       output_meter.setReportingFrequency('runperiod')
