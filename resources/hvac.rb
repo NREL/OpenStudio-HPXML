@@ -1985,6 +1985,7 @@ class HVAC
       hvac_objects << fan_or_pump_ems_output_var
 
       # Used by HEScore
+      # TODO: Move to HEScore project or reporting measure
       outputVariable = OpenStudio::Model::OutputVariable.new(fan_or_pump_ems_output_var.name.to_s, model)
       outputVariable.setReportingFrequency('monthly')
       outputVariable.setKeyValue('*')
