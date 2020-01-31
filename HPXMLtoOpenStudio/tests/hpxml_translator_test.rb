@@ -73,7 +73,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
   def test_run_simulation_rb
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
-    rb_path = File.join(File.dirname(__FILE__), "..", "resources", "run_simulation.rb")
+    rb_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "run_simulation.rb")
     xml = File.join(File.dirname(__FILE__), "base.xml")
     command = "#{os_cli} #{rb_path} -x #{xml}"
     system(command, :err => File::NULL)
@@ -84,7 +84,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
   def test_template_osw
     # Check that simulation works using template.osw
     os_cli = OpenStudio.getOpenStudioCLI
-    osw_path = File.join(File.dirname(__FILE__), "..", "resources", "template.osw")
+    osw_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "template.osw")
     if Dir.exists? File.join(File.dirname(__FILE__), "..", "..", "project")
       # CI checks out the repo as "project", so need to update the OSW
       osw_path_ci = osw_path.gsub('.osw', '2.osw')
@@ -105,7 +105,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
   def test_weather_cache
     this_dir = File.dirname(__FILE__)
-    cache_orig = File.join(this_dir, "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
+    cache_orig = File.join(this_dir, "..", "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
     cache_bak = cache_orig + ".bak"
     File.rename(cache_orig, cache_bak)
     _run_xml(File.absolute_path(File.join(this_dir, "base.xml")), this_dir)

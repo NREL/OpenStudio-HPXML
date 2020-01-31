@@ -5,15 +5,15 @@
 [![codecov](https://codecov.io/gh/NREL/OpenStudio-HPXML/branch/master/graph/badge.svg)](https://codecov.io/gh/NREL/OpenStudio-HPXML)
 
 
-This repository contains [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/) that deal with residential [HPXML files](https://hpxml.nrel.gov/).
+This repository contains residential [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/) that handle [HPXML files](https://hpxml.nrel.gov/).
 
 For more information, please visit the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest).
 
 ## Measures
 
 This repository contains two OpenStudio measures:
-- HPXMLtoOpenStudio: A measure that translates an HPXML file to an OpenStudio model.
-- SimulationOutputReport: A measure that generates a variety of annual/timeseries outputs for a residential HPXML-based model.
+- `HPXMLtoOpenStudio`: A measure that translates an HPXML file to an OpenStudio model.
+- `SimulationOutputReport`: A reporting measure that generates a variety of annual/timeseries outputs for a residential HPXML-based model.
 
 ## Projects
 

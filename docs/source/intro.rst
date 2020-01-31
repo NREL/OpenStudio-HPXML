@@ -1,11 +1,15 @@
 Introduction
 ============
 
-The OpenStudio-HPXML project consists of an `OpenStudio measure <http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/>`_ that converts a residential `HPXML file <https://hpxml.nrel.gov>`_ to an OpenStudio/EnergyPlus model.
+The OpenStudio-HPXML repository consists of residential `OpenStudio measures <http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/>`_ that handle `HPXML files <https://hpxml.nrel.gov>`_.
 
-The EnergyPlus simulation engine is like a Swiss army knife.
-There are often multiple models available for the same building technology with varying trade-offs between accuracy and speed.
-This OpenStudio measure standardizes the use of EnergyPlus (e.g., the choice of models appropriate for residential buildings) to provide a fast and easy to use solution.
+Measures
+--------
+
+This repository contains two OpenStudio measures:
+
+#. ``HPXMLtoOpenStudio``: A measure that translates an HPXML file to an OpenStudio model.
+#. ``SimulationOutputReport``: A reporting measure that generates a variety of annual/timeseries outputs for a residential HPXML-based model.
 
 License
 -------
