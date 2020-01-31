@@ -291,14 +291,7 @@ def create_hpxmls
     'base-misc-loads-detailed.xml' => 'base.xml',
     'base-misc-number-of-occupants.xml' => 'base.xml',
     'base-misc-whole-house-fan.xml' => 'base.xml',
-    'base-pv-array-1axis.xml' => 'base.xml',
-    'base-pv-array-1axis-backtracked.xml' => 'base.xml',
-    'base-pv-array-2axis.xml' => 'base.xml',
-    'base-pv-array-fixed-open-rack.xml' => 'base.xml',
-    'base-pv-module-premium.xml' => 'base.xml',
-    'base-pv-module-standard.xml' => 'base.xml',
-    'base-pv-module-thinfilm.xml' => 'base.xml',
-    'base-pv-multiple.xml' => 'base.xml',
+    'base-pv.xml' => 'base.xml',
     'base-site-neighbors.xml' => 'base.xml',
     'base-version-2014.xml' => 'base.xml',
     'base-version-2014A.xml' => 'base.xml',
@@ -3058,77 +3051,7 @@ def get_hpxml_file_solar_thermal_system_values(hpxml_file, solar_thermal_system_
 end
 
 def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
-  if ['base-pv-array-1axis.xml'].include? hpxml_file
-    pv_systems_values << { :id => "PVSystem",
-                           :module_type => "standard",
-                           :location => "ground",
-                           :tracking => "1-axis",
-                           :array_azimuth => 180,
-                           :array_tilt => 20,
-                           :max_power_output => 4000,
-                           :inverter_efficiency => 0.96,
-                           :system_losses_fraction => 0.14 }
-  elsif ['base-pv-array-1axis-backtracked.xml'].include? hpxml_file
-    pv_systems_values << { :id => "PVSystem",
-                           :module_type => "standard",
-                           :location => "ground",
-                           :tracking => "1-axis backtracked",
-                           :array_azimuth => 180,
-                           :array_tilt => 20,
-                           :max_power_output => 4000,
-                           :inverter_efficiency => 0.96,
-                           :system_losses_fraction => 0.14 }
-  elsif ['base-pv-array-2axis.xml'].include? hpxml_file
-    pv_systems_values << { :id => "PVSystem",
-                           :module_type => "standard",
-                           :location => "ground",
-                           :tracking => "2-axis",
-                           :array_azimuth => 180,
-                           :array_tilt => 20,
-                           :max_power_output => 4000,
-                           :inverter_efficiency => 0.96,
-                           :system_losses_fraction => 0.14 }
-  elsif ['base-pv-array-fixed-open-rack.xml'].include? hpxml_file
-    pv_systems_values << { :id => "PVSystem",
-                           :module_type => "standard",
-                           :location => "ground",
-                           :tracking => "fixed",
-                           :array_azimuth => 180,
-                           :array_tilt => 20,
-                           :max_power_output => 4000,
-                           :inverter_efficiency => 0.96,
-                           :system_losses_fraction => 0.14 }
-  elsif ['base-pv-module-premium.xml'].include? hpxml_file
-    pv_systems_values << { :id => "PVSystem",
-                           :module_type => "premium",
-                           :location => "roof",
-                           :tracking => "fixed",
-                           :array_azimuth => 180,
-                           :array_tilt => 20,
-                           :max_power_output => 4000,
-                           :inverter_efficiency => 0.96,
-                           :system_losses_fraction => 0.14 }
-  elsif ['base-pv-module-standard.xml'].include? hpxml_file
-    pv_systems_values << { :id => "PVSystem",
-                           :module_type => "standard",
-                           :location => "roof",
-                           :tracking => "fixed",
-                           :array_azimuth => 180,
-                           :array_tilt => 20,
-                           :max_power_output => 4000,
-                           :inverter_efficiency => 0.96,
-                           :system_losses_fraction => 0.14 }
-  elsif ['base-pv-module-thinfilm.xml'].include? hpxml_file
-    pv_systems_values << { :id => "PVSystem",
-                           :module_type => "thin film",
-                           :location => "roof",
-                           :tracking => "fixed",
-                           :array_azimuth => 180,
-                           :array_tilt => 20,
-                           :max_power_output => 4000,
-                           :inverter_efficiency => 0.96,
-                           :system_losses_fraction => 0.14 }
-  elsif ['base-pv-multiple.xml'].include? hpxml_file
+  if ['base-pv.xml'].include? hpxml_file
     pv_systems_values << { :id => "PVSystem",
                            :module_type => "standard",
                            :location => "roof",
@@ -3139,7 +3062,7 @@ def get_hpxml_file_pv_system_values(hpxml_file, pv_systems_values)
                            :inverter_efficiency => 0.96,
                            :system_losses_fraction => 0.14 }
     pv_systems_values << { :id => "PVSystem2",
-                           :module_type => "standard",
+                           :module_type => "premium",
                            :location => "roof",
                            :tracking => "fixed",
                            :array_azimuth => 90,
