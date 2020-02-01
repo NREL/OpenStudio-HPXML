@@ -1899,7 +1899,7 @@ class HVAC
       var = 'Heating Coil Electric Energy'
       if htg_object.is_a? OpenStudio::Model::CoilHeatingGas
         var = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'PropaneGas' => 'Heating Coil Propane Energy',
+                'Propane' => 'Heating Coil Propane Energy',
                 'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
                 'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
                 'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[htg_object.fuelType]
@@ -1920,7 +1920,7 @@ class HVAC
       var = 'Heating Coil Electric Energy'
       if backup_htg_object.is_a? OpenStudio::Model::CoilHeatingGas
         var = { 'NaturalGas' => 'Heating Coil Gas Energy',
-                'PropaneGas' => 'Heating Coil Propane Energy',
+                'Propane' => 'Heating Coil Propane Energy',
                 'FuelOil#1' => 'Heating Coil FuelOil#1 Energy',
                 'OtherFuel1' => 'Heating Coil OtherFuel1 Energy',
                 'OtherFuel2' => 'Heating Coil OtherFuel2 Energy' }[backup_htg_object.fuelType]

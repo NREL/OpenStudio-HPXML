@@ -5,6 +5,7 @@ start_time = Time.now
 require 'fileutils'
 require 'optparse'
 require 'pathname'
+require 'openstudio'
 require_relative "../HPXMLtoOpenStudio/resources/meta_measure"
 
 basedir = File.expand_path(File.dirname(__FILE__))
