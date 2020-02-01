@@ -1,47 +1,3 @@
-require 'rake'
-require 'rake/testtask'
-require 'ci/reporter/rake/minitest'
-require_relative "HPXMLtoOpenStudio/resources/hpxml"
-
-desc 'update all measures'
-task :update_measures do
-  # Prevent NREL error regarding U: drive when not VPNed in
-  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? and ENV['HOME'].start_with? 'U:'
-  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? and ENV['HOMEDRIVE'].start_with? 'U:'
-
-  # Apply rubocop
-  command = "rubocop --auto-correct --format simple --only Layout"
-  puts "Applying rubocop style to measures..."
-  system(command)
-
-  create_hpxmls
-
-  puts "Done."
-end
-
-desc 'create epw cache .csv files'
-task :cache_weather do
-  require 'openstudio'
-  require_relative 'HPXMLtoOpenStudio/resources/weather'
-
-  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
-  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
-  puts "Creating cache *.csv for weather files..."
-
-  Dir["weather/*.epw"].each do |epw|
-    next if File.exists? epw.gsub(".epw", ".cache")
-
-    puts "Processing #{epw}..."
-    model = OpenStudio::Model::Model.new
-    epw_file = OpenStudio::EpwFile.new(epw)
-    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
-    weather = WeatherProcess.new(model, runner)
-    File.open(epw.gsub(".epw", "-cache.csv"), "wb") do |file|
-      weather.dump_to_csv(file)
-    end
-  end
-end
-
 def create_hpxmls
   this_dir = File.dirname(__FILE__)
   tests_dir = File.join(this_dir, "HPXMLtoOpenStudio/tests")
@@ -3268,4 +3224,63 @@ def get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_valu
                                   :monthly_multipliers => "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0" }
   end
   return misc_load_schedule_values
+end
+
+command_list = [:update_measures, :cache_weather]
+
+def display_usage(command_list)
+  puts "Usage: openstudio rake.rb [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
+end
+
+if ARGV.size == 0
+  puts "ERROR: Missing command."
+  display_usage(command_list)
+  exit!
+elsif ARGV.size > 1
+  puts "ERROR: Too many commands."
+  display_usage(command_list)
+  exit!
+elsif not command_list.include? ARGV[0].to_sym
+  puts "ERROR: Invalid command '#{ARGV[0]}'."
+  display_usage(command_list)
+  exit!
+end
+
+if ARGV[0].to_sym == :update_measures
+  require_relative "HPXMLtoOpenStudio/resources/hpxml"
+
+  # Prevent NREL error regarding U: drive when not VPNed in
+  ENV['HOME'] = 'C:' if !ENV['HOME'].nil? and ENV['HOME'].start_with? 'U:'
+  ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? and ENV['HOMEDRIVE'].start_with? 'U:'
+
+  # Apply rubocop
+  command = "rubocop --auto-correct --format simple --only Layout"
+  puts "Applying rubocop style to measures..."
+  system(command)
+
+  create_hpxmls
+
+  puts "Done."
+end
+
+if ARGV[0].to_sym == :cache_weather
+  require 'openstudio'
+  require_relative 'HPXMLtoOpenStudio/resources/weather'
+
+  OpenStudio::Logger.instance.standardOutLogger.setLogLevel(OpenStudio::Fatal)
+  runner = OpenStudio::Measure::OSRunner.new(OpenStudio::WorkflowJSON.new)
+  puts "Creating cache *.csv for weather files..."
+
+  Dir["weather/*.epw"].each do |epw|
+    next if File.exists? epw.gsub(".epw", ".cache")
+
+    puts "Processing #{epw}..."
+    model = OpenStudio::Model::Model.new
+    epw_file = OpenStudio::EpwFile.new(epw)
+    OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
+    weather = WeatherProcess.new(model, runner)
+    File.open(epw.gsub(".epw", "-cache.csv"), "wb") do |file|
+      weather.dump_to_csv(file)
+    end
+  end
 end

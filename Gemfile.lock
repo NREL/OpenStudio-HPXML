@@ -32,7 +32,6 @@ GEM
       ast (~> 2.4.0)
     powerpack (0.1.2)
     rainbow (3.0.0)
-    rake (12.3.2)
     rubocop (0.60.0)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
@@ -62,7 +61,6 @@ DEPENDENCIES
   minitest-ci
   minitest-reporters
   nokogiri (~> 1.6, <= 1.6.8.1)
-  rake
   rubocop (~> 0.60.0)
   rubocop-checkstyle_formatter (~> 0.4.0)
   simplecov
