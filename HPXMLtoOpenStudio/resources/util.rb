@@ -10,7 +10,7 @@ class HelperMethods
     elsif fuel == 'fuel oil'
       return "FuelOil#1"
     elsif fuel == 'propane'
-      return "Propane"
+      return "PropaneGas"
     elsif fuel == 'wood'
       return "OtherFuel1"
     elsif fuel == 'wood pellets'
