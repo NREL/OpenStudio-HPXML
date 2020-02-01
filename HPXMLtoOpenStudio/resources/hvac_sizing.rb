@@ -7,6 +7,7 @@ require_relative "constructions"
 
 class HVACSizing
   def self.apply(model, runner, weather, cfa, infilvolume, nbeds, min_neighbor_distance, living_space)
+    print_debug = false
     @runner = runner
     @model_spaces = model.getSpaces
     @cond_space = living_space
@@ -39,7 +40,7 @@ class HVACSizing
     zone_loads = process_zone_loads(model, weather)
 
     # Display debug info
-    display_zone_loads(zone_loads)
+    display_zone_loads(zone_loads) if print_debug
 
     # Aggregate zone loads into initial loads
     init_loads = aggregate_zone_loads(zone_loads)
@@ -69,7 +70,7 @@ class HVACSizing
       set_object_values(model, hvac, hvac_final_values)
 
       # Display debug info
-      display_hvac_final_values_results(hvac_final_values, hvac)
+      display_hvac_final_values_results(hvac_final_values, hvac) if print_debug
     end
   end
 

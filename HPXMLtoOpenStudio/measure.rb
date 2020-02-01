@@ -167,7 +167,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc)
-    schemas_dir = File.join(File.dirname(__FILE__), "hpxml_schemas")
+    schemas_dir = File.join(File.dirname(__FILE__), "resources")
 
     is_valid = true
 

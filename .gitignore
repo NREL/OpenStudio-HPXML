@@ -1,4 +1,5 @@
 /.rubocop.yml
+/coverage
 /docs/_build
 /HPXMLtoOpenStudio/coverage
 /HPXMLtoOpenStudio/tests/coverage

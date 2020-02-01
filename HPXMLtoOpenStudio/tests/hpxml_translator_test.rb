@@ -468,6 +468,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
       return
     else
+      # show_output(runner.result)
       assert_equal(true, success)
     end
 
