@@ -1306,7 +1306,7 @@ class HPXMLtoOpenStudioTest < MiniTest::Test
 
   def _test_schema_validation(this_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(this_dir, "..", "hpxml_schemas"))
+    schemas_dir = File.absolute_path(File.join(this_dir, "..", "resources", "hpxml_schemas"))
     hpxml_doc = REXML::Document.new(File.read(xml))
     errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
     if errors.size > 0
