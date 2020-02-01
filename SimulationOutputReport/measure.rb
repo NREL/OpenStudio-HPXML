@@ -253,7 +253,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       design_name = @eri_design.gsub(' ', '')
       annual_output_csv_path = File.join(output_dir, "#{design_name}.csv")
       eri_output_csv_path = File.join(output_dir, "#{design_name}_ERI.csv")
-      timeseries_output_csv_path = File.join(output_dir, "#{design_name}_#{timeseries_frequency}.csv")
+      timeseries_output_csv_path = File.join(output_dir, "#{design_name}_#{timeseries_frequency.capitalize}.csv")
     else
       output_dir = File.dirname(@sqlFile.path.to_s)
       annual_output_csv_path = File.join(output_dir, "results_annual.csv")
