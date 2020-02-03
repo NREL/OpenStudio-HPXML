@@ -3226,7 +3226,53 @@ def get_hpxml_file_misc_load_schedule_values(hpxml_file, misc_load_schedule_valu
   return misc_load_schedule_values
 end
 
-command_list = [:update_measures, :cache_weather]
+def download_epws
+  weather_dir = File.join(File.dirname(__FILE__), "weather")
+
+  require 'net/http'
+  require 'tempfile'
+
+  tmpfile = Tempfile.new("epw")
+
+  url = URI.parse("http://s3.amazonaws.com/epwweatherfiles/tmy3s-cache-csv.zip")
+  http = Net::HTTP.new(url.host, url.port)
+
+  params = { 'User-Agent' => 'curl/7.43.0', 'Accept-Encoding' => 'identity' }
+  request = Net::HTTP::Get.new(url.path, params)
+  request.content_type = 'application/zip, application/octet-stream'
+
+  http.request request do |response|
+    total = response.header["Content-Length"].to_i
+    if total == 0
+      fail "Did not successfully download zip file."
+    end
+
+    size = 0
+    progress = 0
+    open tmpfile, 'wb' do |io|
+      response.read_body do |chunk|
+        io.write chunk
+        size += chunk.size
+        new_progress = (size * 100) / total
+        unless new_progress == progress
+          puts "Downloading %s (%3d%%) " % [url.path, new_progress]
+        end
+        progress = new_progress
+      end
+    end
+  end
+
+  puts "Extracting weather files..."
+  unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
+  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
+
+  num_epws_actual = Dir[File.join(weather_dir, "*.epw")].count
+  puts "#{num_epws_actual} weather files are available in the weather directory."
+  puts "Completed."
+  exit!
+end
+
+command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
 
 def display_usage(command_list)
   puts "Usage: openstudio rake.rb [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -3283,4 +3329,77 @@ if ARGV[0].to_sym == :cache_weather
       weather.dump_to_csv(file)
     end
   end
+end
+
+if ARGV[0].to_sym == :download_weather
+  download_epws
+end
+
+if ARGV[0].to_sym == :create_release_zips
+  require 'openstudio'
+
+  files = ["HPXMLtoOpenStudio/measure.*",
+           "HPXMLtoOpenStudio/resources/*.*",
+           "SimulationOutputReport/measure.*",
+           "SimulationOutputReport/resources/*.*",
+           "weather/*.*",
+           "workflow/*.*"]
+
+  # Only include files under git version control
+  command = "git ls-files"
+  begin
+    git_files = `#{command}`
+  rescue
+    puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
+    exit!
+  end
+
+  release_map = { File.join(File.dirname(__FILE__), "release-minimal.zip") => false,
+                  File.join(File.dirname(__FILE__), "release-full.zip") => true }
+
+  release_map.keys.each do |zip_path|
+    File.delete(zip_path) if File.exists? zip_path
+  end
+
+  # Check if we need to download weather files for the full release zip
+  num_epws_expected = File.readlines(File.join("weather", "data.csv")).size - 1
+  num_epws_local = 0
+  files.each do |f|
+    Dir[f].each do |file|
+      next unless file.end_with? ".epw"
+
+      num_epws_local += 1
+    end
+  end
+
+  # Make sure we have the full set of weather files
+  if num_epws_local < num_epws_expected
+    puts "Fetching all weather files..."
+    command = "openstudio #{__FILE__} download_weather"
+    log = `#{command}`
+  end
+
+  # Create zip files
+  release_map.each do |zip_path, include_all_epws|
+    puts "Creating #{zip_path}..."
+    zip = OpenStudio::ZipFile.new(zip_path, false)
+    files.each do |f|
+      Dir[f].each do |file|
+        if include_all_epws
+          if not git_files.include? file and not file.start_with? "weather"
+            next
+          end
+        else
+          if not git_files.include? file
+            next
+          end
+        end
+
+        zip.addFile(file, File.join("OpenStudio-HPXML", file))
+      end
+    end
+    puts "Wrote file at #{zip_path}."
+  end
+
+  puts "Done."
 end
