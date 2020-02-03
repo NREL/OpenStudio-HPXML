@@ -11,7 +11,7 @@ require_relative '../resources/meta_measure'
 require_relative '../resources/unit_conversions'
 require_relative '../resources/xmlhelper'
 
-class HPXMLTranslatorTest < MiniTest::Test
+class HPXMLtoOpenStudioTest < MiniTest::Test
   @@simulation_runtime_key = "Simulation Runtime"
   @@workflow_runtime_key = "Workflow Runtime"
 
@@ -73,7 +73,7 @@ class HPXMLTranslatorTest < MiniTest::Test
   def test_run_simulation_rb
     # Check that simulation works using run_simulation.rb script
     os_cli = OpenStudio.getOpenStudioCLI
-    rb_path = File.join(File.dirname(__FILE__), "..", "resources", "run_simulation.rb")
+    rb_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "run_simulation.rb")
     xml = File.join(File.dirname(__FILE__), "base.xml")
     command = "#{os_cli} #{rb_path} -x #{xml}"
     system(command, :err => File::NULL)
@@ -84,7 +84,7 @@ class HPXMLTranslatorTest < MiniTest::Test
   def test_template_osw
     # Check that simulation works using template.osw
     os_cli = OpenStudio.getOpenStudioCLI
-    osw_path = File.join(File.dirname(__FILE__), "..", "resources", "template.osw")
+    osw_path = File.join(File.dirname(__FILE__), "..", "..", "workflow", "template.osw")
     if Dir.exists? File.join(File.dirname(__FILE__), "..", "..", "project")
       # CI checks out the repo as "project", so need to update the OSW
       osw_path_ci = osw_path.gsub('.osw', '2.osw')
@@ -105,7 +105,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def test_weather_cache
     this_dir = File.dirname(__FILE__)
-    cache_orig = File.join(this_dir, "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
+    cache_orig = File.join(this_dir, "..", "..", "weather", "USA_CO_Denver.Intl.AP.725650_TMY3-cache.csv")
     cache_bak = cache_orig + ".bak"
     File.rename(cache_orig, cache_bak)
     _run_xml(File.absolute_path(File.join(this_dir, "base.xml")), this_dir)
@@ -309,6 +309,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     starting_index = sqlFile.execAndReturnFirstInt(query).get
 
     # TabularDataWithStrings table is positional, so we access results by position.
+    # TODO: When using E+ 9.3, update these queries based on https://github.com/NREL/EnergyPlus/pull/7584
     results = {}
     fueltypes.zip(full_categories, subcategories, units).each_with_index do |(fueltype, category, subcategory, fuel_units), index|
       next if ['District Cooling', 'District Heating'].include? fueltype # Exclude ideal loads results
@@ -374,6 +375,8 @@ class HPXMLTranslatorTest < MiniTest::Test
     results[["Load", "Cooling", "General", "GJ"]] = sqlFile.execAndReturnFirstDouble(query).get.round(2)
 
     # Obtain component loads
+    # TODO: Move to reporting measure tests or workflow tests (and remove temporary components() method)
+
     compload_results = {}
 
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
@@ -384,23 +387,6 @@ class HPXMLTranslatorTest < MiniTest::Test
       compload_results["#{mode} - Unmet"] = sqlFile.execAndReturnFirstDouble(query).get
     end
 
-    components = { "Roofs" => "roofs",
-                   "Ceilings" => "ceilings",
-                   "Walls" => "walls",
-                   "Rim Joists" => "rim_joists",
-                   "Foundation Walls" => "foundation_walls",
-                   "Doors" => "doors",
-                   "Windows" => "windows",
-                   "Skylights" => "skylights",
-                   "Floors" => "floors",
-                   "Slabs" => "slabs",
-                   "Internal Mass" => "internal_mass",
-                   "Infiltration" => "infil",
-                   "Natural Ventilation" => "natvent",
-                   "Mechanical Ventilation" => "mechvent",
-                   "Whole House Fan" => "whf",
-                   "Ducts" => "ducts",
-                   "Internal Gains" => "intgains" }
     { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
       compload_results["#{mode} - Sum"] = 0
       components.each do |component, component_var|
@@ -440,7 +426,6 @@ class HPXMLTranslatorTest < MiniTest::Test
     args['epw_output_path'] = File.absolute_path(File.join(rundir, "in.epw"))
     args['osm_output_path'] = File.absolute_path(File.join(rundir, "in.osm"))
     args['hpxml_path'] = xml
-    args['map_tsv_dir'] = rundir
     args['weather_dir'] = "weather"
 
     # Add measure to workflow
@@ -483,6 +468,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
       return
     else
+      # show_output(runner.result)
       assert_equal(true, success)
     end
 
@@ -511,6 +497,7 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var.setKeyValue('*')
 
     # Add output variables for combi system energy check
+    # TODO: Move to reporting measure tests or workflow tests
     output_var = OpenStudio::Model::OutputVariable.new('Water Heater Source Side Heat Transfer Energy', model)
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('*')
@@ -520,6 +507,44 @@ class HPXMLTranslatorTest < MiniTest::Test
     output_var = OpenStudio::Model::OutputVariable.new('Boiler Heating Energy', model) # This is needed for energy checking if there's boiler not connected to combi systems.
     output_var.setReportingFrequency('runperiod')
     output_var.setKeyValue('*')
+
+    # Add output meters for component loads check
+    # TODO: Move to reporting measure tests or workflow tests
+    ["Cooling:EnergyTransfer", "Heating:EnergyTransfer", "Cooling:DistrictCooling", "Heating:DistrictHeating"].each do |meter_name|
+      output_meter = OpenStudio::Model::OutputMeter.new(model)
+      output_meter.setName(meter_name)
+      output_meter.setReportingFrequency('runperiod')
+    end
+    loads_program = model.getModelObjectByName(Constants.ObjectNameComponentLoadsProgram.gsub(' ', '_')).get.to_EnergyManagementSystemProgram.get
+    { "Heating" => "htg", "Cooling" => "clg" }.each do |mode, mode_var|
+      components.each do |component, component_var|
+        ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "#{mode_var}_#{component_var}")
+        ems_output_var.setName("#{mode_var}_#{component_var}_outvar")
+        ems_output_var.setTypeOfDataInVariable("Summed")
+        ems_output_var.setUpdateFrequency("ZoneTimestep")
+        ems_output_var.setEMSProgramOrSubroutineName(loads_program)
+        ems_output_var.setUnits("J")
+
+        output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
+        output_var.setReportingFrequency('runperiod')
+        output_var.setKeyValue('*')
+      end
+    end
+
+    # Add output variables for EC_adj test
+    # TODO: Move to reporting measure tests or workflow tests
+    model.getEnergyManagementSystemOutputVariables.each do |emsov|
+      next unless emsov.name.to_s.include? Constants.ObjectNameWaterHeaterAdjustment(nil)
+
+      output_var = OpenStudio::Model::OutputVariable.new(emsov.name.to_s, model)
+      output_var.setReportingFrequency('runperiod')
+      output_var.setKeyValue('*')
+    end
+    model.getHeatExchangerFluidToFluids.each do |hx|
+      output_var = OpenStudio::Model::OutputVariable.new('Fluid Heat Exchanger Heat Transfer Energy', model)
+      output_var.setReportingFrequency('runperiod')
+      output_var.setKeyValue(hx.name.to_s)
+    end
 
     # Write model to IDF
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
@@ -1000,9 +1025,9 @@ class HPXMLTranslatorTest < MiniTest::Test
       end
 
       # Add any combi water heating energy use
-      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoilerHeatExchanger.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Fluid Heat Exchanger Heat Transfer Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       combi_hx_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
-      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='#{OutputVars.WaterHeatingCombiBoiler.values[0][0]}' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
+      query = "SELECT SUM(ABS(VariableValue)/1000000000) FROM ReportVariableData WHERE ReportVariableDataDictionaryIndex IN (SELECT ReportVariableDataDictionaryIndex FROM ReportVariableDataDictionary WHERE VariableType='Sum' AND VariableName='Boiler Heating Energy' AND ReportingFrequency='Run Period' AND VariableUnits='J')"
       combi_htg_load = sqlFile.execAndReturnFirstDouble(query).get.round(2)
       if combi_htg_load > 0 and combi_hx_load > 0
         results.keys.each do |k|
@@ -1282,7 +1307,7 @@ class HPXMLTranslatorTest < MiniTest::Test
 
   def _test_schema_validation(this_dir, xml)
     # TODO: Remove this when schema validation is included with CLI calls
-    schemas_dir = File.absolute_path(File.join(this_dir, "..", "hpxml_schemas"))
+    schemas_dir = File.absolute_path(File.join(this_dir, "..", "resources"))
     hpxml_doc = REXML::Document.new(File.read(xml))
     errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, "HPXML.xsd"), nil)
     if errors.size > 0
@@ -1484,4 +1509,24 @@ class HPXMLTranslatorTest < MiniTest::Test
       sleep(0.01)
     end
   end
+end
+
+def components
+  return { "Roofs" => "roofs",
+           "Ceilings" => "ceilings",
+           "Walls" => "walls",
+           "Rim Joists" => "rim_joists",
+           "Foundation Walls" => "foundation_walls",
+           "Doors" => "doors",
+           "Windows" => "windows",
+           "Skylights" => "skylights",
+           "Floors" => "floors",
+           "Slabs" => "slabs",
+           "Internal Mass" => "internal_mass",
+           "Infiltration" => "infil",
+           "Natural Ventilation" => "natvent",
+           "Mechanical Ventilation" => "mechvent",
+           "Whole House Fan" => "whf",
+           "Ducts" => "ducts",
+           "Internal Gains" => "intgains" }
 end

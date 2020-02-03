@@ -10,6 +10,7 @@ class UnitConversions
     ['btu', 'j'] => 1055.05585262,
     ['j', 'btu'] => 3412.141633127942 / 1000.0 / 3600.0,
     ['j', 'kbtu'] => 3412.141633127942 / 1000.0 / 3600.0 / 1000.0,
+    ['j', 'mbtu'] => 3412.141633127942 / 1000.0 / 3600.0 / 1000000.0,
     ['j', 'therm'] => 3412.141633127942 / 1000.0 / 3600.0 / 1000.0 / 100.0,
     ['kj', 'btu'] => 0.9478171203133172,
     ['gj', 'mbtu'] => 0.9478171203133172,
@@ -19,6 +20,8 @@ class UnitConversions
     ['kwh', 'j'] => 3600000.0,
     ['wh', 'gj'] => 0.0000036,
     ['kwh', 'wh'] => 1000.0,
+    ['mbtu', 'kwh'] => 293.0710701722222,
+    ['mbtu', 'therm'] => 10.0,
     ['mbtu', 'wh'] => 293071.0701722222,
     ['therm', 'btu'] => 100000.0,
     ['therm', 'kbtu'] => 100.0,
@@ -27,6 +30,7 @@ class UnitConversions
     ['wh', 'btu'] => 3.412141633127942,
     ['wh', 'kbtu'] => 0.003412141633127942,
     ['kbtu', 'btu'] => 1000.0,
+    ['kbtu', 'mbtu'] => 0.001,
     ['gal', 'btu', 'propane'] => 91600.0,
     ['gal', 'btu', 'fuel oil'] => 139000.0,
     ['j', 'gal', 'propane'] => 3412.141633127942 / 1000.0 / 3600.0 / 91600.0,
@@ -140,16 +144,16 @@ class UnitConversions
   }
 
   def self.convert(x, from, to, fuel_type = nil)
-    from.downcase!
-    to.downcase!
+    from_d = from.downcase
+    to_d = to.downcase
 
-    return x if from == to
+    return x if from_d == to_d
 
     # Try forward
     if fuel_type.nil?
-      key = [from, to]
+      key = [from_d, to_d]
     else
-      key = [from, to, fuel_type]
+      key = [from_d, to_d, fuel_type]
     end
     scalar = @Scalars[key]
     if not scalar.nil?
@@ -158,9 +162,9 @@ class UnitConversions
 
     # Try reverse
     if fuel_type.nil?
-      key = [to, from]
+      key = [to_d, from_d]
     else
-      key = [to, from, fuel_type]
+      key = [to_d, from_d, fuel_type]
     end
     scalar = @Scalars[key]
     if not scalar.nil?
@@ -168,7 +172,7 @@ class UnitConversions
     end
 
     # Non-scalar conversions
-    key = [from, to]
+    key = [from_d, to_d]
     if key == ['c', 'f']
       return 1.8 * x + 32.0
     elsif key == ['c', 'k']
@@ -184,9 +188,9 @@ class UnitConversions
     end
 
     if fuel_type.nil?
-      fail "Unhandled unit conversion from #{from} to #{to}."
+      fail "Unhandled unit conversion from #{from_d} to #{to_d}."
     else
-      fail "Unhandled unit conversion from #{from} to #{to} for fuel type #{fuel_type}."
+      fail "Unhandled unit conversion from #{from_d} to #{to_d} for fuel type #{fuel_type}."
     end
   end
 end

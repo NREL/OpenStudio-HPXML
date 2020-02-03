@@ -11,9 +11,9 @@ OpenStudio-HPXML documentation
    :caption: Contents:
 
    intro
-   capabilities
    getting_started
-   hpxml_generation
+   hpxml_to_openstudio
+   simulation_output_report
 
 Indices and tables
 ==================

@@ -1,27 +1,46 @@
 # Helper methods related to having a meta-measure
 
-def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true)
+def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true, measure_type = "OpenStudio::Measure::ModelMeasure")
   require 'openstudio'
 
-  workflow_order = []
-  measures.keys.each do |measure_subdir|
-    workflow_order << measure_subdir
-  end
-
   # Call each measure in the specified order
-  workflow_order.each do |measure_subdir|
+  measures.keys.each do |measure_subdir|
     # Gather measure arguments and call measure
     full_measure_path = File.join(measures_dir, measure_subdir, "measure.rb")
     check_file_exists(full_measure_path, runner)
-    measure_instance = get_measure_instance(full_measure_path)
+    measure = get_measure_instance(full_measure_path)
     measures[measure_subdir].each do |args|
-      argument_map = get_argument_map(model, measure_instance, args, nil, measure_subdir, runner)
+      next unless measure_type == measure.class.superclass.name.to_s
+
+      argument_map = get_argument_map(model, measure, args, nil, measure_subdir, runner)
       if show_measure_calls
         print_measure_call(args, measure_subdir, runner)
       end
 
-      if not run_measure(model, measure_instance, argument_map, runner)
+      if not run_measure(model, measure, argument_map, runner)
         return false
+      end
+    end
+  end
+
+  return true
+end
+
+def apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
+  # Call each measure in the specified order
+  measures.keys.each do |measure_subdir|
+    # Gather measure arguments and call measure
+    full_measure_path = File.join(measures_dir, measure_subdir, "measure.rb")
+    check_file_exists(full_measure_path, runner)
+    measure = get_measure_instance(full_measure_path)
+    measures[measure_subdir].each do |args|
+      next unless measure.class.superclass.name.to_s == "OpenStudio::Measure::ReportingMeasure"
+
+      argument_map = get_argument_map(model, measure, args, nil, measure_subdir, runner)
+      runner.setLastOpenStudioModel(model)
+      idf_objects = measure.energyPlusOutputRequests(runner, argument_map)
+      idf_objects.each do |idf_object|
+        model_idf.addObject(idf_object)
       end
     end
   end
@@ -137,7 +156,13 @@ def run_measure(model, measure, argument_map, runner)
     if model.instance_of? OpenStudio::Workspace
       runner_child.setLastOpenStudioModel(runner.lastOpenStudioModel.get)
     end
-    measure.run(model, runner_child, argument_map)
+    if measure.class.superclass.name.to_s == "OpenStudio::Measure::ReportingMeasure"
+      runner_child.setLastOpenStudioModel(model)
+      runner_child.setLastEnergyPlusSqlFilePath(runner.lastEnergyPlusSqlFile.get.path)
+      measure.run(runner_child, argument_map)
+    else
+      measure.run(model, runner_child, argument_map)
+    end
     result_child = runner_child.result
 
     # get initial and final condition
@@ -168,7 +193,7 @@ def run_measure(model, measure, argument_map, runner)
       return false
     end
   rescue => e
-    runner.registerError("Measure Failed with Error: #{e.backtrace.join("\n")}")
+    runner.registerError("Measure Failed with Error: #{e}\n#{e.backtrace.join("\n")}")
     return false
   end
   return true
