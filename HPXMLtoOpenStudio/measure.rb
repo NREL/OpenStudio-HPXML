@@ -24,10 +24,10 @@ require_relative "resources/xmlhelper"
 require_relative "resources/hpxml"
 
 # start the measure
-class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
+class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
-    return "HPXML Translator"
+    return "HPXML to OpenStudio Translator"
   end
 
   # human readable description
@@ -107,7 +107,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
     begin
       # Weather file
       unless (Pathname.new weather_dir).absolute?
-        weather_dir = File.expand_path(File.join(File.dirname(__FILE__), weather_dir))
+        weather_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", weather_dir))
       end
       climate_and_risk_zones_values = HPXML.get_climate_and_risk_zones_values(climate_and_risk_zones: hpxml_doc.elements["/HPXML/Building/BuildingDetails/ClimateandRiskZones"])
       epw_path = climate_and_risk_zones_values[:weather_station_epw_filename]
@@ -167,7 +167,7 @@ class HPXMLTranslator < OpenStudio::Measure::ModelMeasure
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc)
-    schemas_dir = File.join(File.dirname(__FILE__), "hpxml_schemas")
+    schemas_dir = File.join(File.dirname(__FILE__), "resources")
 
     is_valid = true
 
@@ -4501,4 +4501,4 @@ def get_fan_power_installed(seer)
 end
 
 # register the measure to be used by the application
-HPXMLTranslator.new.registerWithApplication
+HPXMLtoOpenStudio.new.registerWithApplication
