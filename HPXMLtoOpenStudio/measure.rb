@@ -3792,20 +3792,6 @@ class OSModel
     program.addLine("  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}")
     program.addLine("EndIf")
 
-    # EMS output variables
-    [:htg, :clg].each do |mode|
-      ems_output_var = OpenStudio::Model::EnergyManagementSystemOutputVariable.new(model, "loads_#{mode}_tot")
-      ems_output_var.setName("loads_#{mode}_tot_outvar")
-      ems_output_var.setTypeOfDataInVariable("Summed")
-      ems_output_var.setUpdateFrequency("ZoneTimestep")
-      ems_output_var.setEMSProgramOrSubroutineName(program)
-      ems_output_var.setUnits("J")
-
-      output_var = OpenStudio::Model::OutputVariable.new(ems_output_var.name.to_s, model)
-      output_var.setReportingFrequency('runperiod')
-      output_var.setKeyValue('*')
-    end
-
     # EMS calling manager
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{program.name.to_s} calling manager")
