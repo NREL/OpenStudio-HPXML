@@ -78,10 +78,10 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     output_names = []
     @fuels.each do |fuel_type, fuel|
-      output_names << fuel.annual_name
+      output_names << get_runner_output_name(fuel)
     end
     @end_uses.each do |key, end_use|
-      output_names << end_use.annual_name
+      output_names << get_runner_output_name(end_use)
     end
 
     output_names.each do |output_name|
@@ -606,7 +606,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
       end
       zone_names.sort.each do |zone_name|
         @zone_temps[zone_name] = ZoneTemp.new
-        @zone_temps[zone_name].timeseries_name = "Temperature: #{zone_name.split.map(&:capitalize).join(' ')} (F)"
+        @zone_temps[zone_name].name = "Temperature: #{zone_name.split.map(&:capitalize).join(' ')}"
+        @zone_temps[zone_name].timeseries_units = "F"
         @zone_temps[zone_name].timeseries_output = get_report_variable_data_timeseries([zone_name], ["Zone Mean Air Temperature"], 9.0 / 5.0, 32.0, timeseries_frequency)
       end
     end
@@ -658,34 +659,34 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     results_out = []
     @fuels.each do |fuel_type, fuel|
-      results_out << [fuel.annual_name, fuel.annual_output.round(2)]
+      results_out << ["#{fuel.name} (#{fuel.annual_units})", fuel.annual_output.round(2)]
       if fuel_type == FT::Elec
         results_out << ["Electricity: Net (MBtu)", (fuel.annual_output + pv_end_use.annual_output).round(2)]
       end
     end
     results_out << [line_break]
     @end_uses.each do |key, end_use|
-      results_out << [end_use.annual_name, end_use.annual_output.round(2)]
+      results_out << ["#{end_use.name} (#{end_use.annual_units})", end_use.annual_output.round(2)]
     end
     results_out << [line_break]
     @loads.each do |load_type, load|
-      results_out << [load.annual_name, load.annual_output.round(2)]
+      results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.round(2)]
     end
     results_out << [line_break]
     @unmet_loads.each do |load_type, unmet_load|
-      results_out << [unmet_load.annual_name, unmet_load.annual_output.round(2)]
+      results_out << ["#{unmet_load.name} (#{unmet_load.annual_units})", unmet_load.annual_output.round(2)]
     end
     results_out << [line_break]
     @peak_fuels.each do |key, peak_fuel|
-      results_out << [peak_fuel.annual_name, peak_fuel.annual_output.round(2)]
+      results_out << ["#{peak_fuel.name} (#{peak_fuel.annual_units})", peak_fuel.annual_output.round(2)]
     end
     results_out << [line_break]
     @peak_loads.each do |load_type, peak_load|
-      results_out << [peak_load.annual_name, peak_load.annual_output.round(2)]
+      results_out << ["#{peak_load.name} (#{peak_load.annual_units})", peak_load.annual_output.round(2)]
     end
     results_out << [line_break]
     @component_loads.each do |load_type, load|
-      results_out << [load.annual_name, load.annual_output.round(2)]
+      results_out << ["#{load.name} (#{load.annual_units})", load.annual_output.round(2)]
     end
 
     CSV.open(csv_path, "wb") { |csv| results_out.to_a.each { |elem| csv << elem } }
@@ -694,13 +695,19 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
   def report_sim_outputs(outputs, runner)
     @fuels.each do |fuel_type, fuel|
-      runner.registerValue(fuel.annual_name, fuel.annual_output.round(2))
-      runner.registerInfo("Registering #{fuel.annual_output.round(2)} for #{fuel.annual_name}.")
+      output_name = get_runner_output_name(fuel)
+      runner.registerValue(output_name, fuel.annual_output.round(2))
+      runner.registerInfo("Registering #{fuel.annual_output.round(2)} for #{output_name}.")
     end
     @end_uses.each do |key, end_use|
-      runner.registerValue(end_use.annual_name, end_use.annual_output.round(2))
-      runner.registerInfo("Registering #{end_use.annual_output.round(2)} for #{end_use.annual_name}.")
+      output_name = get_runner_output_name(end_use)
+      runner.registerValue(output_name, end_use.annual_output.round(2))
+      runner.registerInfo("Registering #{end_use.annual_output.round(2)} for #{output_name}.")
     end
+  end
+
+  def get_runner_output_name(obj)
+    return "#{obj.name} #{obj.annual_units}"
   end
 
   def write_eri_output_results(outputs, csv_path)
@@ -772,11 +779,11 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
                                       include_timeseries_component_loads)
     # Time column
     if timeseries_frequency == 'hourly'
-      data = ["Hour"]
+      data = ["Hour", "#"]
     elsif timeseries_frequency == 'daily'
-      data = ["Day"]
+      data = ["Day", "#"]
     elsif timeseries_frequency == 'timestep'
-      data = ["Timestep"]
+      data = ["Timestep", "#"]
     else
       fail "Unexpected timeseries_frequency: #{timeseries_frequency}."
     end
@@ -785,27 +792,27 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     end
 
     if include_timeseries_fuel_consumptions
-      fuel_data = @fuels.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.timeseries_name] + x.timeseries_output.map { |v| v.round(2) } }
+      fuel_data = @fuels.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
     else
       fuel_data = []
     end
     if include_timeseries_end_use_consumptions
-      end_use_data = @end_uses.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.timeseries_name] + x.timeseries_output.map { |v| v.round(2) } }
+      end_use_data = @end_uses.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
     else
       end_use_data = []
     end
     if include_timeseries_zone_temperatures
-      zone_temps_data = @zone_temps.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.timeseries_name] + x.timeseries_output.map { |v| v.round(2) } }
+      zone_temps_data = @zone_temps.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
     else
       zone_temps_data = []
     end
     if include_timeseries_total_loads
-      total_loads_data = @loads.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.timeseries_name] + x.timeseries_output.map { |v| v.round(2) } }
+      total_loads_data = @loads.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
     else
       total_loads_data = {}
     end
     if include_timeseries_component_loads
-      comp_loads_data = @component_loads.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.timeseries_name] + x.timeseries_output.map { |v| v.round(2) } }
+      comp_loads_data = @component_loads.values.select { |x| !x.timeseries_output.empty? }.map { |x| [x.name, x.timeseries_units] + x.timeseries_output.map { |v| v.round(2) } }
     else
       comp_loads_data = []
     end
@@ -1431,7 +1438,7 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     def initialize()
       @timeseries_output = []
     end
-    attr_accessor(:annual_name, :timeseries_name, :annual_output, :timeseries_output, :annual_units, :timeseries_units)
+    attr_accessor(:name, :annual_output, :timeseries_output, :annual_units, :timeseries_units)
   end
 
   class Fuel < BaseOutput
@@ -1524,10 +1531,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     }
 
     @fuels.each do |fuel_type, fuel|
+      fuel.name = "#{fuel_type}: Total"
       fuel.annual_units = 'MBtu'
-      fuel.annual_name = "#{fuel_type}: Total (#{fuel.annual_units})"
       fuel.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
-      fuel.timeseries_name = "#{fuel_type}: Total (#{fuel.timeseries_units})"
     end
 
     # End Uses
@@ -1570,10 +1576,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @end_uses.each do |key, end_use|
       fuel_type, end_use_type = key
+      end_use.name = "#{fuel_type}: #{end_use_type}"
       end_use.annual_units = 'MBtu'
-      end_use.annual_name = "#{fuel_type}: #{end_use_type} (#{end_use.annual_units})"
       end_use.timeseries_units = get_timeseries_units_from_fuel_type(fuel_type)
-      end_use.timeseries_name = "#{fuel_type}: #{end_use_type} (#{end_use.timeseries_units})"
     end
 
     # Peak Fuels
@@ -1584,8 +1589,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @peak_fuels.each do |key, peak_fuel|
       fuel_type, peak_fuel_type = key
+      peak_fuel.name = "Peak #{fuel_type}: #{peak_fuel_type} Total"
       peak_fuel.annual_units = 'W'
-      peak_fuel.annual_name = "Peak #{fuel_type}: #{peak_fuel_type} Total (#{peak_fuel.annual_units})"
     end
 
     # Loads
@@ -1600,10 +1605,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     }
 
     @loads.each do |load_type, load|
+      load.name = "Load: #{load_type}"
       load.annual_units = 'MBtu'
-      load.annual_name = "Load: #{load_type} (#{load.annual_units})"
       load.timeseries_units = 'kBtu'
-      load.timeseries_name = "Load: #{load_type} (#{load.timeseries_name})"
     end
 
     # Component Loads
@@ -1647,10 +1651,9 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
 
     @component_loads.each do |key, comp_load|
       load_type, comp_load_type = key
+      comp_load.name = "Component Load: #{load_type}: #{comp_load_type}"
       comp_load.annual_units = 'MBtu'
-      comp_load.annual_name = "Component Load: #{load_type}: #{comp_load_type} (#{comp_load.annual_units})"
       comp_load.timeseries_units = 'kBtu'
-      comp_load.timeseries_name = "Component Load: #{load_type}: #{comp_load_type} (#{comp_load.timeseries_units})"
     end
 
     # Unmet Loads
@@ -1660,8 +1663,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     }
 
     @unmet_loads.each do |load_type, unmet_load|
+      unmet_load.name = "Unmet Load: #{load_type}"
       unmet_load.annual_units = 'MBtu'
-      unmet_load.annual_name = "Unmet Load: #{load_type} (#{unmet_load.annual_units})"
     end
 
     # Peak Loads
@@ -1671,8 +1674,8 @@ class SimulationOutputReport < OpenStudio::Measure::ReportingMeasure
     }
 
     @peak_loads.each do |load_type, peak_load|
+      peak_load.name = "Peak Load: #{load_type}"
       peak_load.annual_units = 'kBtu'
-      peak_load.annual_name = "Peak Load: #{load_type} (#{peak_load.annual_units})"
     end
 
     # Zone Temperatures

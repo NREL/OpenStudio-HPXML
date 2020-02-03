@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>hpxm_lto_openstudio</name>
   <uid>b1543b30-9465-45ff-ba04-1d1f85e763bc</uid>
-  <version_id>ade25ff4-3e9e-4d64-86c9-0eab0b79724e</version_id>
-  <version_modified>20200131T210440Z</version_modified>
+  <version_id>8eef8eae-4508-42fd-a893-85e7a7c21a5e</version_id>
+  <version_modified>20200203T191207Z</version_modified>
   <xml_checksum>D8922A73</xml_checksum>
   <class_name>HPXMLtoOpenStudio</class_name>
   <display_name>HPXML to OpenStudio Translator</display_name>
@@ -335,12 +335,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>EC0A4557</checksum>
-    </file>
-    <file>
-      <filename>hvac_sizing.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>8D43F04D</checksum>
     </file>
     <file>
       <filename>minitest_helper.rb</filename>
@@ -1633,12 +1627,6 @@
       <checksum>1A0446EE</checksum>
     </file>
     <file>
-      <filename>template.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>00F32407</checksum>
-    </file>
-    <file>
       <filename>unit_conversions.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
@@ -1655,18 +1643,6 @@
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>746B81DB</checksum>
-    </file>
-    <file>
-      <filename>constants.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>4B484FF6</checksum>
-    </file>
-    <file>
-      <filename>run_simulation.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>75C7876B</checksum>
     </file>
     <file>
       <filename>base-pv.xml</filename>
@@ -1693,10 +1669,22 @@
       <checksum>1932812A</checksum>
     </file>
     <file>
+      <filename>hvac_sizing.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>53F871A0</checksum>
+    </file>
+    <file>
+      <filename>constants.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>5BC1705E</checksum>
+    </file>
+    <file>
       <filename>hpxml_translator_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>A830B6A0</checksum>
+      <checksum>61869CED</checksum>
     </file>
     <file>
       <version>
@@ -1707,7 +1695,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>18DF7FE6</checksum>
+      <checksum>B44BB991</checksum>
     </file>
   </files>
 </measure>

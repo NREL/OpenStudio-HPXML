@@ -3275,7 +3275,7 @@ end
 command_list = [:update_measures, :cache_weather, :create_release_zips, :download_weather]
 
 def display_usage(command_list)
-  puts "Usage: openstudio rake.rb [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
+  puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
 end
 
 if ARGV.size == 0
@@ -3293,6 +3293,7 @@ elsif not command_list.include? ARGV[0].to_sym
 end
 
 if ARGV[0].to_sym == :update_measures
+  require 'openstudio'
   require_relative "HPXMLtoOpenStudio/resources/hpxml"
 
   # Prevent NREL error regarding U: drive when not VPNed in
@@ -3303,6 +3304,11 @@ if ARGV[0].to_sym == :update_measures
   command = "rubocop --auto-correct --format simple --only Layout"
   puts "Applying rubocop style to measures..."
   system(command)
+
+  # Update measures XMLs
+  command = "#{OpenStudio.getOpenStudioCLI} measure -t '#{File.dirname(__FILE__)}'"
+  puts "Updating measure.xmls..."
+  log = `#{command}`
 
   create_hpxmls
 
@@ -3375,7 +3381,7 @@ if ARGV[0].to_sym == :create_release_zips
   # Make sure we have the full set of weather files
   if num_epws_local < num_epws_expected
     puts "Fetching all weather files..."
-    command = "openstudio #{__FILE__} download_weather"
+    command = "#{OpenStudio.getOpenStudioCLI} #{__FILE__} download_weather"
     log = `#{command}`
   end
 
