@@ -866,7 +866,6 @@ class Waterheater
     alternate_stp_sch.setName("#{obj_name_indirect} Alt Spt")
     alt_temp = UnitConversions.convert(t_set, "F", "C") + deadband(tank_type) / 2.0
     alternate_stp_sch.setValue(alt_temp)
-    new_heater.setSourceSideFlowControlMode("IndirectHeatAlternateSetpoint")
     new_heater.setIndirectAlternateSetpointTemperatureSchedule(alternate_stp_sch)
 
     # Create hx setpoint schedule to specify source side temperature
