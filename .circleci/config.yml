@@ -12,7 +12,7 @@ jobs:
       - run: 
           name: Run tests
           command: |
-            rake test:all
+            rake test_all
       - store_artifacts:
           path: workflow/test_results
           destination: results
